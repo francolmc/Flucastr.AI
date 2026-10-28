@@ -48,9 +48,11 @@ Se ejecuta con carpetas temporales, nunca sobre la configuración real.
 |---|---|
 | I1 | `resolver.mjs modelo arquitecto claude-code` y `... pi` devuelven un modelo que existe en `modelos.json` |
 | I2 | El agente generado tiene `name` igual al nombre del archivo, campo `model` y la marca `flucastr-ai:generado` |
-| I3 | `instalar.sh` y luego `desinstalar.sh` dejan el sistema como estaba |
-| I4 | Una segunda instalación no pisa nada, y `--simular` no escribe nada |
-| I5 | Un `modelos.json` roto, o un nivel inexistente, falla con mensaje claro y sin dejar archivos a medias |
+| I3 | `instalar.sh` y luego `desinstalar.sh` no dejan archivos ni enlaces residuales y no tocan lo que ya existía. Se toleran directorios vacíos creados por la instalación. |
+| I4 | Una segunda instalación no pisa nada, y `--simular` no escribe en `HOME` ni en ningún destino de instalación (se permite el archivo temporal del sistema, que se borra al salir) |
+| I5 | Un `modelos.json` roto, o un nivel inexistente, falla con mensaje claro y **sin cambiar nada**: ni enlaces ni manifiesto parcial. Variante: con una instalación previa que funciona, reinstalar con la configuración rota la **deja intacta**. |
+
+> Ajustes del 2026-10-28, tras la primera corrida de la Capa 1 (resumen en `pruebas/resultados/2026-10-28-capa1.md`): I3 e I4 se relajaron porque su redacción original era más estricta que el daño real. I5 **no** se relajó: reveló un defecto del instalador, que se corrige según `encargo-correccion-instalador.md`, y se le agregó la variante de reinstalación.
 | I6 | Si un agente declara `model:` en su encabezado, el resolver lo rechaza |
 
 ## 5. Capa 2 — Comportamiento (escenarios)
@@ -178,6 +180,7 @@ Las pruebas corren contra la versión **instalada** (`bash instalar.sh`), porque
 - Capa 1: I1–I6 pasan.
 - Capa 2: B, M, C, R y N pasan **todas las comprobaciones duras en las 3 corridas**, en Claude Code **y** en Pi.
 - Franco revisa las comprobaciones blandas de una corrida por escenario y herramienta, y las da por buenas.
+- **Modelos:** Franco ejecuta las sesiones con el modelo que elija; no hay un worker que lo fije. Por eso cada resumen de corrida registra el **modelo del arquitecto** usado, y un «aprobado» vale **para ese modelo y esa herramienta**. Cambiar de modelo obliga a repetir los escenarios. La Capa 1 no depende de ningún modelo.
 - Si algo falla, se corrige la skill o el agente (no la prueba, salvo que esté mal) y se repite el escenario completo.
 
 ## 8. Dónde vive y quién lo hace

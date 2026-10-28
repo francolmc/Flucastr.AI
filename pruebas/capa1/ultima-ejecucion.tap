@@ -1,0 +1,164 @@
+Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n
+✔ I1: comprobación real (58.111167ms)
+✔ I2: comprobación real (212.910916ms)
+✖ I3: comprobación real (500.722708ms)
+✖ I4: comprobación real (543.571917ms)
+✖ I5: comprobación real (244.219333ms)
+✔ I6: comprobación real (54.889875ms)
+✔ I1: control negativo rechaza salida falsa (0.520291ms)
+✔ I2: control negativo rechaza salida falsa (0.482916ms)
+✔ I3: control negativo rechaza salida falsa (0.347208ms)
+✔ I4: control negativo rechaza salida falsa (0.162792ms)
+✔ I5: control negativo rechaza salida falsa (0.287875ms)
+✔ I6: control negativo rechaza salida falsa (0.103208ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 9
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1661.852333
+
+✖ failing tests:
+
+test at pruebas/capa1/instalacion.test.mjs:55:3
+✖ I3: comprobación real (500.722708ms)
+  AssertionError [ERR_ASSERTION]: instalar/desinstalar no restauró el árbol inicial (incluye directorios)
+  + actual - expected
+  
+    {
+      '.claude': {
+        modo: 16877,
+        tipo: 'directorio'
+      },
+  +   '.claude/agents': {
+  +     modo: 16877,
+  +     tipo: 'directorio'
+  +   },
+      '.claude/personal.txt': {
+        contenido: 'Tm8gbW9kaWZpY2FyCg==',
+        modo: 33188,
+        tipo: 'archivo'
+      },
+  +   '.claude/skills': {
+  +     modo: 16877,
+  +     tipo: 'directorio'
+  +   },
+  +   '.local': {
+  +     modo: 16877,
+  +     tipo: 'directorio'
+  +   },
+  +   '.local/bin': {
+  +     modo: 16877,
+  +     tipo: 'directorio'
+  +   },
+      'pi-aislado': {
+        modo: 16877,
+        tipo: 'directorio'
+      },
+  +   'pi-aislado/agents': {
+  +     modo: 16877,
+  +     tipo: 'directorio'
+  +   },
+  +   'pi-aislado/skills': {
+  +     modo: 16877,
+  +     tipo: 'directorio'
+  +   }
+    }
+  
+      at comprobar (file:///Users/franco/Codes/flucastr/Flucastr.AI/pruebas/comprobaciones/capa1.mjs:22:16)
+      at TestContext.<anonymous> (file:///Users/franco/Codes/flucastr/Flucastr.AI/pruebas/capa1/instalacion.test.mjs:58:5)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { '.claude': { tipo: 'directorio', modo: 16877 }, '.claude/agents': { tipo: 'directorio', modo: 16877 }, '.claude/personal.txt': { tipo: 'archivo', modo: 33188, contenido: 'Tm8gbW9kaWZpY2FyCg==' }, '.claude/skills': { tipo: 'directorio', modo: 16877 }, '.local': { tipo: 'directorio', modo: 16877 }, '.local/bin': { tipo: 'directorio', modo: 16877 }, 'pi-aislado': { tipo: 'directorio', modo: 16877 }, 'pi-aislado/agents': { tipo: 'directorio', modo: 16877 }, 'pi-aislado/skills': { tipo: 'directorio', modo: 16877 } },
+    expected: { '.claude': { tipo: 'directorio', modo: 16877 }, '.claude/personal.txt': { tipo: 'archivo', modo: 33188, contenido: 'Tm8gbW9kaWZpY2FyCg==' }, 'pi-aislado': { tipo: 'directorio', modo: 16877 } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at pruebas/capa1/instalacion.test.mjs:55:3
+✖ I4: comprobación real (543.571917ms)
+  AssertionError [ERR_ASSERTION]: la simulación ejecutó mktemp y creó un archivo temporal
+      at comprobar (file:///Users/franco/Codes/flucastr/Flucastr.AI/pruebas/comprobaciones/capa1.mjs:23:16)
+      at TestContext.<anonymous> (file:///Users/franco/Codes/flucastr/Flucastr.AI/pruebas/capa1/instalacion.test.mjs:58:5)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at pruebas/capa1/instalacion.test.mjs:55:3
+✖ I5: comprobación real (244.219333ms)
+  AssertionError [ERR_ASSERTION]: json-roto/instalar: dejó archivos o directorios parciales
+  + actual - expected
+  
+    {
+      '.claude': {
+        modo: 16877,
+        tipo: 'directorio'
+      },
+  +   '.claude/skills': {
+  +     modo: 16877,
+  +     tipo: 'directorio'
+  +   },
+  +   '.claude/skills/definir-proyecto': {
+  +     destino: '/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n/I5-json-roto/repo/skills/definir-proyecto',
+  +     tipo: 'enlace'
+  +   },
+  +   '.claude/skills/disenar-arquitectura': {
+  +     destino: '/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n/I5-json-roto/repo/skills/disenar-arquitectura',
+  +     tipo: 'enlace'
+  +   },
+  +   '.claude/skills/generar-clonar': {
+  +     destino: '/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n/I5-json-roto/repo/skills/generar-clonar',
+  +     tipo: 'enlace'
+  +   },
+  +   '.claude/skills/revisar-proyecto-existente': {
+  +     destino: '/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n/I5-json-roto/repo/skills/revisar-proyecto-existente',
+  +     tipo: 'enlace'
+  +   },
+  +   '.flucastr-ai': {
+  +     modo: 16877,
+  +     tipo: 'directorio'
+  +   },
+  +   '.flucastr-ai/manifiesto.txt': {
+  +     contenido: 'ZW5sYWNlCS9Vc2Vycy9mcmFuY28vQ29kZXMvZmx1Y2FzdHIvRmx1Y2FzdHIuQUkvcHJ1ZWJhcy8udGVtcG9yYWxlcy9jYXBhMS1EekIxMG4vSTUtanNvbi1yb3RvL2hvbWUvLmNsYXVkZS9za2lsbHMvZGVmaW5pci1wcm95ZWN0bwkKZW5sYWNlCS9Vc2Vycy9mcmFuY28vQ29kZXMvZmx1Y2FzdHIvRmx1Y2FzdHIuQUkvcHJ1ZWJhcy8udGVtcG9yYWxlcy9jYXBhMS1EekIxMG4vSTUtanNvbi1yb3RvL2hvbWUvLmNsYXVkZS9za2lsbHMvZGlzZW5hci1hcnF1aXRlY3R1cmEJCmVubGFjZQkvVXNlcnMvZnJhbmNvL0NvZGVzL2ZsdWNhc3RyL0ZsdWNhc3RyLkFJL3BydWViYXMvLnRlbXBvcmFsZXMvY2FwYTEtRHpCMTBuL0k1LWpzb24tcm90by9ob21lLy5jbGF1ZGUvc2tpbGxzL2dlbmVyYXItY2xvbmFyCQplbmxhY2UJL1VzZXJzL2ZyYW5jby9Db2Rlcy9mbHVjYXN0ci9GbHVjYXN0ci5BSS9wcnVlYmFzLy50ZW1wb3JhbGVzL2NhcGExLUR6QjEwbi9JNS1qc29uLXJvdG8vaG9tZS8uY2xhdWRlL3NraWxscy9yZXZpc2FyLXByb3llY3RvLWV4aXN0ZW50ZQkK',
+  +     modo: 33152,
+  +     tipo: 'archivo'
+  +   },
+      'pi-aislado': {
+        modo: 16877,
+        tipo: 'directorio'
+      }
+    }
+  
+      at comprobar (file:///Users/franco/Codes/flucastr/Flucastr.AI/pruebas/comprobaciones/capa1.mjs:30:16)
+      at TestContext.<anonymous> (file:///Users/franco/Codes/flucastr/Flucastr.AI/pruebas/capa1/instalacion.test.mjs:58:5)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { '.claude': { tipo: 'directorio', modo: 16877 }, '.claude/skills': { tipo: 'directorio', modo: 16877 }, '.claude/skills/definir-proyecto': { tipo: 'enlace', destino: '/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n/I5-json-roto/repo/skills/definir-proyecto' }, '.claude/skills/disenar-arquitectura': { tipo: 'enlace', destino: '/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n/I5-json-roto/repo/skills/disenar-arquitectura' }, '.claude/skills/generar-clonar': { tipo: 'enlace', destino: '/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n/I5-json-roto/repo/skills/generar-clonar' }, '.claude/skills/revisar-proyecto-existente': { tipo: 'enlace', destino: '/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-DzB10n/I5-json-roto/repo/skills/revisar-proyecto-existente' }, '.flucastr-ai': { tipo: 'directorio', modo: 16877 }, '.flucastr-ai/manifiesto.txt': { tipo: 'archivo', modo: 33152, contenido: 'ZW5sYWNlCS9Vc2Vycy9mcmFuY28vQ29kZXMvZmx1Y2FzdHIvRmx1Y2FzdHIuQUkvcHJ1ZWJhcy8udGVtcG9yYWxlcy9jYXBhMS1EekIxMG4vSTUtanNvbi1yb3RvL2hvbWUvLmNsYXVkZS9za2lsbHMvZGVmaW5pci1wcm95ZWN0bwkKZW5sYWNlCS9Vc2Vycy9mcmFuY28vQ29kZXMvZmx1Y2FzdHIvRmx1Y2FzdHIuQUkvcHJ1ZWJhcy8udGVtcG9yYWxlcy9jYXBhMS1EekIxMG4vSTUtanNvbi1yb3RvL2hvbWUvLmNsYXVkZS9za2lsbHMvZGlzZW5hci1hcnF1aXRlY3R1cmEJCmVubGFjZQkvVXNlcnMvZnJhbmNvL0NvZGVzL2ZsdWNhc3RyL0ZsdWNhc3RyLkFJL3BydWViYXMvLnRlbXBvcmFsZXMvY2FwYTEtRHpCMTBuL0k1LWpzb24tcm90by9ob21lLy5jbGF1ZGUvc2tpbGxzL2dlbmVyYXItY2xvbmFyCQplbmxhY2UJL1VzZXJzL2ZyYW5jby9Db2Rlcy9mbHVjYXN0ci9GbHVjYXN0ci5BSS9wcnVlYmFzLy50ZW1wb3JhbGVzL2NhcGExLUR6QjEwbi9JNS1qc29uLXJvdG8vaG9tZS8uY2xhdWRlL3NraWxscy9yZXZpc2FyLXByb3llY3RvLWV4aXN0ZW50ZQkK' }, 'pi-aislado': { tipo: 'directorio', modo: 16877 } },
+    expected: { '.claude': { tipo: 'directorio', modo: 16877 }, 'pi-aislado': { tipo: 'directorio', modo: 16877 } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
