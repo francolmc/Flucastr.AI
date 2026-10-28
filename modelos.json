@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "_leeme": "Fuente única de verdad de los modelos. Los agentes declaran un NIVEL (alto, medio, bajo), nunca un modelo. Resolución: nivel = agentes[agente].nivel o nivel_por_defecto; perfil = agentes[agente].perfil o perfil_por_defecto[herramienta]; modelo = perfiles[perfil].modelos[nivel]; si falta, se prueba el orden de 'respaldo'. Para cambiar de modelo o proveedor se edita solo este archivo.",
+
+  "niveles": ["alto", "medio", "bajo"],
+  "nivel_por_defecto": "medio",
+
+  "respaldo": {
+    "alto": ["medio", "bajo"],
+    "medio": ["alto", "bajo"],
+    "bajo": ["medio", "alto"]
+  },
+
+  "perfiles": {
+    "pi-openai": {
+      "herramienta": "pi",
+      "proveedor": "openai",
+      "modelos": {
+        "alto": "openai/gpt-6-astra",
+        "medio": "openai/gpt-6.1-sol",
+        "bajo": "openai/gpt-6-sol"
+      }
+    },
+    "claude-code": {
+      "herramienta": "claude-code",
+      "proveedor": "anthropic",
+      "modelos": {
+        "alto": "claude-opus-5-5",
+        "medio": "claude-sonnet-5-5",
+        "bajo": "claude-haiku-5-5"
+      }
+    }
+  },
+
+  "perfil_por_defecto": {
+    "pi": "pi-openai",
+    "claude-code": "claude-code"
+  },
+
+  "agentes": {}
+}
