@@ -16,7 +16,8 @@ Ejecutar `node --test pruebas/comprobaciones/escenario-m.test.mjs`. La referenci
 | Quitar nodo front | Repositorio front aparece en flowchart | `M: front falta en diagrama` |
 | Quitar etiqueta de la flecha | Flecha front → api etiquetada | `M: flecha front → api sin etiqueta` |
 | Omitir la conexión en la sección correspondiente | Conexión documentada con evidencia | `M: falta conexión front/API con evidencia en repos.md` |
-| Suprimir el clonado de api | Script incluye ambos clones | `M: api falta en clonar.sh` |
-| Suprimir el clonado de front | Script incluye ambos clones | `M: front falta en clonar.sh` |
+| Suprimir la llamada `clonar "api" ...` | Comportamiento: reconstrucción de ambos repos | `no reconstruyó api` |
+| Suprimir la llamada `clonar "front" ...` | Comportamiento: reconstrucción de ambos repos | `no reconstruyó front` |
+| Clonar `orphan`, ausente de repos.md | Comportamiento inverso: ningún repo reconstruido puede quedar sin listar | `reconstruyó repos no listados: orphan` |
 
-Cada variante se clona del fixture de referencia sin tocar la referencia, modifica un único aspecto y compara la lista exacta de motivos. La prueba no ejecuta modelos.
+Cada variante se clona del fixture de referencia sin tocar la referencia, modifica un único aspecto y compara la lista exacta de motivos. También hay una variante válida con identificadores `FE` y `API_NODE`, etiquetas de nodo ampliadas y etiqueta de arista entre comillas. La referencia de `clonar.sh` sigue el esqueleto de la skill; las inclusiones se evalúan exclusivamente ejecutándolo. La prueba no ejecuta modelos.

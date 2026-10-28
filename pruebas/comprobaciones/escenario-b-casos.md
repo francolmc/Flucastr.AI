@@ -15,7 +15,8 @@ La referencia debe pasar todas las comprobaciones, incluida la ejecución del `c
 | Sustituir URL remota y rama calculadas desde el fixture | Correspondencia URL/rama de `git remote` y `git branch` | `B: remoto/rama incorrectos` |
 | Añadir una fila para `api` | Exactamente un repo | `B: estructura no lista exactamente un repo` |
 | Sustituir el nodo app del flowchart | Diagrama Mermaid flowchart incluye el repo | `B: flowchart sin app` |
-| Suprimir `git clone` y checkout | Arnés reconstruye repo con commits iguales | `no reconstruyó app` |
+| Quitar la llamada `clonar "app" ...` | Comportamiento: el arnés reconstruye el repo | `no reconstruyó app` |
+| Clonar un repo extra `rogue` ausente de repos.md | Comportamiento inverso: ningún repo reconstruido puede quedar sin listar | `reconstruyó repos no listados: rogue` |
 | Quitar «omitido» en la rama de segunda ejecución | Idempotencia y aviso de omisión | `segunda ejecución no avisó omitido` |
 
-El orden de las preguntas respecto de la revisión no se valida desde los documentos: requiere registro de interacción y queda pendiente de esa integración. No se usa un encabezado inventado como sustituto.
+La prueba incluye una variante válida con identificador Mermaid `APPNODE` y etiqueta `app (React Router)`. La referencia de `clonar.sh` sigue el esqueleto de `generar-clonar/SKILL.md`; la presencia de clones se determina solo por ejecución y resultado. El orden de preguntas respecto de revisión depende del registro de interacción y sigue pendiente.

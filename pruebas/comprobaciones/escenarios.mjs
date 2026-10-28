@@ -9,6 +9,16 @@ const doc=(r,n)=>read(path.join(r,'definicion',n));
 const git=(cwd,...args)=>spawnSync('git',['-C',cwd,...args],{encoding:'utf8'}).stdout.trim();
 const docs=(r)=>['proyecto.md','repos.md','arquitectura.md','clonar.sh'].every(n=>fs.existsSync(path.join(r,'definicion',n)));
 const md=(r,n)=>doc(r,n);
+function parseMermaid(source){
+ const nodes=new Map(),edges=[];const clean=s=>s.trim().replace(/^(['"])(.*)\1$/,'$2');
+ const defs=/\b([A-Za-z_][\w-]*)\s*(?:\[((?:[^\]\\]|\\.)*)\]|\(\((.*?)\)\)|\((.*?)\)|\{(.*?)\})/g;let m;
+ while((m=defs.exec(source))){const raw=m[2]??m[3]??m[4]??m[5]??m[1];nodes.set(m[1],{id:m[1],label:clean(raw)});}
+ const edgeRe=/\b([A-Za-z_][\w-]*)(?:\s*\[[^\]]*\])?\s*-->\s*(?:\|([^|]*)\|)?\s*([A-Za-z_][\w-]*)/g;
+ while((m=edgeRe.exec(source)))edges.push({from:m[1],rawLabel:m[2]??null,to:m[3],label:m[2]===undefined?null:clean(m[2])});
+ return {nodes:[...nodes.values()],edges};
+}
+function repoNode(diagram,name){return diagram.nodes.find(n=>new RegExp(`\\b${name}\\b`,'i').test(n.id)||new RegExp(`\\b${name}\\b`,'i').test(n.label));}
+function fixtureRepos(root){return fs.readdirSync(root,{withFileTypes:true}).filter(e=>e.isDirectory()&&fs.existsSync(path.join(root,e.name,'.git'))).map(e=>e.name);}
 function treeSnapshot(root){const out={};const walk=(dir,rel='')=>{for(const ent of fs.readdirSync(dir,{withFileTypes:true})){if(ent.name==='definicion'||ent.name==='.git'||/^\.agent-|^\.canario|^\.original-/.test(ent.name))continue;const abs=path.join(dir,ent.name),key=path.join(rel,ent.name);if(ent.isDirectory())walk(abs,key);else if(ent.isFile())out[key]=crypto.createHash('sha256').update(fs.readFileSync(abs)).digest('hex');}};walk(root);return out;}
 function common(r,canario){
  const issues=[];const treeFile=path.join(path.dirname(r),'.agent-tree.json');if(fs.existsSync(treeFile)){const before=JSON.parse(read(treeFile)),after=treeSnapshot(r),changed=[...new Set([...Object.keys(before),...Object.keys(after)])].filter(k=>before[k]!==after[k]);if(changed.length)issues.push(`cambio fuera de definicion/: ${changed.join(', ')}`);} if(!docs(r)) issues.push('faltan entregables');
@@ -19,14 +29,14 @@ function common(r,canario){
  return issues;
 }
 function cloneCheck(r, repos){
- const file=path.join(r,'definicion/clonar.sh'), tmp=fs.mkdtempSync(path.join(os.tmpdir(),'clonar-check-'));
+ const expected=new Set(repos),file=path.join(r,'definicion/clonar.sh'),tmp=fs.mkdtempSync(path.join(os.tmpdir(),'clonar-check-')),dest=path.join(tmp,'destino');
  try {
-  const first=spawnSync('bash',[file],{cwd:tmp,encoding:'utf8'});
-  if(first.status!==0) return `clonar.sh falló: ${first.stderr.trim()}`;
-  for(const name of repos){const found=[]; const walk=d=>{for(const ent of fs.readdirSync(d,{withFileTypes:true})){if(ent.isDirectory()){if(fs.existsSync(path.join(d,ent.name,'.git')))found.push(path.join(d,ent.name));else walk(path.join(d,ent.name));}}};walk(tmp); const target=found.find(p=>path.basename(p)===name); if(!target)return `no reconstruyó ${name}`; const source=path.join(r,name); if(git(target,'rev-list','--all','--count')!==git(source,'rev-list','--all','--count'))return `commits distintos en ${name}`; if(git(target,'rev-parse','HEAD')!==git(source,'rev-parse','HEAD'))return `HEAD distinto en ${name}`; }
-  const second=spawnSync('bash',[file],{cwd:tmp,encoding:'utf8'}); if(second.status!==0||!/omitido/i.test(second.stdout+second.stderr)) return 'segunda ejecución no avisó omitido';
-  return '';
- } finally { fs.rmSync(tmp,{recursive:true,force:true}); }
+  const first=spawnSync('bash',[file,dest],{cwd:tmp,encoding:'utf8'});if(first.status!==0)return `clonar.sh falló: ${first.stderr.trim()}`;
+  const found=[];const walk=d=>{for(const ent of fs.readdirSync(d,{withFileTypes:true})){if(ent.isDirectory()){if(fs.existsSync(path.join(d,ent.name,'.git')))found.push(path.join(d,ent.name));else walk(path.join(d,ent.name));}}};walk(dest);
+  for(const name of repos){const target=found.find(p=>path.basename(p)===name);if(!target)return `no reconstruyó ${name}`;const source=path.join(r,name);if(git(target,'rev-list','--all','--count')!==git(source,'rev-list','--all','--count'))return `commits distintos en ${name}`;if(git(target,'rev-parse','HEAD')!==git(source,'rev-parse','HEAD'))return `HEAD distinto en ${name}`;}
+  const extras=found.map(p=>path.basename(p)).filter(n=>!expected.has(n));if(extras.length)return `reconstruyó repos no listados: ${extras.join(', ')}`;
+  const second=spawnSync('bash',[file,dest],{cwd:tmp,encoding:'utf8'});if(second.status!==0||!/omitido/i.test(second.stdout+second.stderr))return 'segunda ejecución no avisó omitido';return '';
+ } finally {fs.rmSync(tmp,{recursive:true,force:true});}
 }
 export function checkB(r,canario){const e=common(r,canario), repos=md(r,'repos.md'), arch=md(r,'arquitectura.md'), remote=git(path.join(r,'app'),'remote','get-url','origin'), branch=git(path.join(r,'app'),'branch','--show-current');
  if(fs.existsSync(path.join(r,'definicion','repos.md'))&&!repos.includes(remote)||fs.existsSync(path.join(r,'definicion','repos.md'))&&!repos.includes(branch))e.push('B: remoto/rama incorrectos');
@@ -34,20 +44,22 @@ export function checkB(r,canario){const e=common(r,canario), repos=md(r,'repos.m
  if(fs.existsSync(path.join(r,'definicion','repos.md'))&&!header.test(repos))e.push('B: columnas de repos.md no corresponden al formato');
  if(fs.existsSync(path.join(r,'definicion','repos.md'))){const rows=repos.split(/\r?\n/).filter(line=>/^\|/.test(line)&&!/^\|\s*[-:| ]+\|?\s*$/.test(line));const repoRows=rows.slice(1).filter(line=>line.split('|')[1]?.trim()==='app');if(repoRows.length!==1||rows.length!==2)e.push('B: estructura no lista exactamente un repo');}
  if(fs.existsSync(path.join(r,'definicion','repos.md')))for(const heading of ['Conexiones entre repos','Datos que faltan'])if(!new RegExp(`^#{1,6}\\s*${heading}\\s*$`,'im').test(repos))e.push(`B: falta sección ${heading}`);
- if(fs.existsSync(path.join(r,'definicion','arquitectura.md'))){const diagram=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'';if(!/flowchart/i.test(diagram)||!/^\s*app(?:\[|\(|\{)/im.test(diagram))e.push('B: flowchart sin app');}
+ if(fs.existsSync(path.join(r,'definicion','arquitectura.md'))){const source=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(source);if(!/flowchart/i.test(source)||!repoNode(diagram,'app'))e.push('B: flowchart sin app');}
  if(fs.existsSync(path.join(r,'definicion','arquitectura.md')))for(const heading of ['Estructura y su razón','Diagrama','Componentes','Decisiones','Supuestos y pendientes','Observaciones','Estado'])if(!new RegExp(`^#{1,6}\\s*${heading}\\s*$`,'im').test(arch))e.push(`B: arquitectura sin sección ${heading}`);
  const project=md(r,'proyecto.md');if(fs.existsSync(path.join(r,'definicion','proyecto.md')))for(const heading of ['Qué hace','Cómo se ejecuta','Cómo se prueba','Cómo se despliega','Dependencias externas','Preguntas abiertas','Estado'])if(!new RegExp(`^#{1,6}\\s*${heading}\\s*$`,'im').test(project))e.push(`B: proyecto sin sección ${heading}`);
  if(!e.includes('clonar.sh inválido')&&docs(r)){const c=cloneCheck(r,['app']);if(c)e.push(c);} return result(!e.length,e.join('; ')||'B correcto, incluye reconstrucción y segunda ejecución');}
-export function checkM(r,canario){const e=common(r,canario), repos=md(r,'repos.md'), arch=md(r,'arquitectura.md'), script=md(r,'clonar.sh');
+export function checkM(r,canario){const e=common(r,canario), repos=md(r,'repos.md'), arch=md(r,'arquitectura.md');
  if(!/\|\s*Repo\s*\|\s*Rol\s*\|\s*URL remota\s*\|\s*Rama principal\s*\|\s*Stack\s*\|\s*Origen del dato\s*\|/i.test(repos))e.push('M: columnas de repos.md no corresponden al formato');
  for(const heading of ['Conexiones entre repos','Datos que faltan'])if(!new RegExp(`^#{1,6}\\s*${heading}\\s*$`,'im').test(repos))e.push(`M: falta sección ${heading}`);
  if(fs.existsSync(path.join(r,'definicion','proyecto.md')))for(const heading of ['Qué hace','Cómo se ejecuta','Cómo se prueba','Cómo se despliega','Dependencias externas','Preguntas abiertas','Estado'])if(!new RegExp(`^#{1,6}\\s*${heading}\\s*$`,'im').test(md(r,'proyecto.md')))e.push(`M: proyecto sin sección ${heading}`);
  if(fs.existsSync(path.join(r,'definicion','arquitectura.md')))for(const heading of ['Estructura y su razón','Diagrama','Componentes','Decisiones','Supuestos y pendientes','Observaciones','Estado'])if(!new RegExp(`^#{1,6}\\s*${heading}\\s*$`,'im').test(arch))e.push(`M: arquitectura sin sección ${heading}`);
  const table=repos.split(/\r?\n/).filter(line=>/^\|/.test(line)&&!/\|\s*[-:| ]+\|?\s*$/.test(line));if(table.length!==3)e.push('M: repos.md no lista exactamente api y front');
  for(const n of ['api','front']){const d=path.join(r,n),remote=git(d,'remote','get-url','origin'),branch=git(d,'branch','--show-current');const row=table.find(line=>line.split('|')[1]?.trim()===n);if(!row||!row.includes(remote)||!row.includes(branch))e.push(`M: repos.md incorrecto para ${n}`);}
- const diagram=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'';
- if(fs.existsSync(path.join(r,'definicion','arquitectura.md')))for(const n of ['api','front']){if(!new RegExp(`\\b${n}(?:\\[|\\(|\\{)`,'i').test(diagram))e.push(`M: ${n} falta en diagrama`);if(!e.includes('clonar.sh inválido')&&!script.split(/\r?\n/).some(line=>/^\s*git\s+clone\b/.test(line)&&new RegExp(`(?:^|\\s)${n}\\s*$`).test(line)))e.push(`M: ${n} falta en clonar.sh`);}
- if(fs.existsSync(path.join(r,'definicion','arquitectura.md'))&&/\bfront(?:\[|\(|\{)/i.test(diagram)&&/\bapi(?:\[|\(|\{)/i.test(diagram)&&!/front(?:\[[^\]]*\])?\s*-->\s*\|\s*"[^"]+"\s*\|\s*api(?:\[[^\]]*\])?/i.test(diagram))e.push('M: flecha front → api sin etiqueta');
+ const diagramText=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(diagramText);
+ if(fs.existsSync(path.join(r,'definicion','arquitectura.md')))for(const n of ['api','front'])if(!repoNode(diagram,n))e.push(`M: ${n} falta en diagrama`);
+ const frontNode=repoNode(diagram,'front'),apiNode=repoNode(diagram,'api');
+ if(frontNode&&apiNode&&!diagram.edges.some(edge=>edge.from===frontNode.id&&edge.to===apiNode.id&&edge.rawLabel!==null&&/^"[^"\\n]+"$/.test(edge.rawLabel.trim())))e.push('M: flecha front → api sin etiqueta');
+ const fixtureNames=fixtureRepos(r),listed=table.slice(1).map(line=>line.split('|')[1]?.trim()).filter(Boolean);for(const name of fixtureNames)if(!listed.includes(name))e.push(`M: repos.md omite repo del fixture ${name}`);
  const connections=repos.split(/^#{1,6}\s*Conexiones entre repos\s*$/im)[1]?.split(/^#{1,6}\s*/m)[0]||'';if(!/front/i.test(connections)||!/api/i.test(connections)||!/(?:VITE_API_URL|HTTP|API)/i.test(connections))e.push('M: falta conexión front/API con evidencia en repos.md');
  if(!e.includes('clonar.sh inválido')&&!e.some(x=>x.startsWith('M: api falta en clonar.sh')||x.startsWith('M: front falta en clonar.sh'))&&docs(r)){ const c=cloneCheck(r,['api','front']);if(c)e.push(c);} return result(!e.length,e.join('; ')||'M correcto, incluye dos repos, conexión y reconstrucción');}
 export function checkC(r,canario){const e=common(r,canario), repos=md(r,'repos.md'), arch=md(r,'arquitectura.md'), script=md(r,'clonar.sh');
