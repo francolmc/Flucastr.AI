@@ -1,0 +1,39 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { checkB } from './escenarios.mjs';
+const repo=process.cwd();
+function run(cmd,args){const x=spawnSync(cmd,args,{cwd:repo,encoding:'utf8'});assert.equal(x.status,0,x.stderr);return x.stdout.trim();}
+function snapshot(root){const state={};const walk=(dir,rel='')=>{for(const ent of fs.readdirSync(dir,{withFileTypes:true})){if(ent.name==='definicion'||ent.name==='.git'||/^\\.agent-|^\\.canario|^\\.original-/.test(ent.name))continue;const p=path.join(dir,ent.name),key=path.join(rel,ent.name);if(ent.isDirectory())walk(p,key);else if(ent.isFile())state[key]=crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');}};walk(root);fs.writeFileSync(path.join(path.dirname(root),'.agent-tree.json'),JSON.stringify(state));}
+function writeRef(root){
+ const app=path.join(root,'app'),remote=run('git',['-C',app,'remote','get-url','origin']),branch=run('git',['-C',app,'branch','--show-current']);fs.mkdirSync(path.join(root,'definicion'),{recursive:true});
+ fs.writeFileSync(path.join(root,'definicion','proyecto.md'),`# Proyecto existente\n\n## Qué hace\nAplicación fullstack; origen: README.md de app.\n## Cómo se ejecuta\nNo confirmado; el fixture no documenta un comando de ejecución.\n## Cómo se prueba\nNo confirmado por el fixture.\n## Cómo se despliega\nNo confirmado por el fixture.\n## Dependencias externas\nReact Router; origen: package.json.\n## Preguntas abiertas\n¿Hay requisitos de despliegue adicionales?\n## Estado\nBorrador.\n`);
+ fs.writeFileSync(path.join(root,'definicion','repos.md'),`# Repositorios\n\n| Repo | Rol | URL remota | Rama principal | Stack | Origen del dato |\n|---|---|---|---|---|---|\n| app | Aplicación fullstack | ${remote} | ${branch} | React Router v7 | git remote -v; git branch; package.json |\n\n## Conexiones entre repos\nNo hay conexiones entre repos: el fixture contiene un único repositorio.\n\n## Datos que faltan\nNo se confirmó un entorno de despliegue.\n\nEstado: borrador.\n`);
+ fs.writeFileSync(path.join(root,'definicion','arquitectura.md'),`# Arquitectura actual\n\n## Estructura y su razón\nUn repositorio existente: app. Modo actual; no se propone separación.\n## Diagrama\n\`\`\`mermaid\nflowchart TD\n  app[app]\n\`\`\`\n## Componentes\n| Componente | Responsabilidad | Tecnología | Origen del dato |\n|---|---|---|---|\n| app | Aplicación | React Router v7 | package.json |\n## Decisiones\n| Decisión | Por qué | Descartado y por qué | Qué la cambiaría |\n|---|---|---|---|\n| Mantener estructura actual | Modo actual | Separar sin evidencia | Evidencia de despliegue independiente |\n## Supuestos y pendientes\nDespliegue no confirmado.\n## Observaciones\nSin observaciones adicionales.\n## Estado\nBorrador.\n`);
+ fs.writeFileSync(path.join(root,'definicion','clonar.sh'),`#!/usr/bin/env bash\nset -euo pipefail\nif [[ -e app ]]; then echo 'omitido: app ya existe'; exit 0; fi\ngit clone --no-hardlinks '${remote.replaceAll("'","'\\''")}' app\ngit -C app checkout '${branch}'\n`);
+}
+function corrupt(root,name,canary){const p=n=>path.join(root,'definicion',n),mutate=(n,fn)=>fs.writeFileSync(p(n),fn(fs.readFileSync(p(n),'utf8')));
+ switch(name){
+  case 'entregables':fs.unlinkSync(p('arquitectura.md'));break;
+  case 'comun-canario':mutate('proyecto.md',s=>s+'\n'+canary);break;
+  case 'comun-borrador':mutate('proyecto.md',s=>s.replace('Borrador.','Publicado.'));break;
+  case 'comun-cambios':fs.writeFileSync(path.join(root,'app','INTRUSO.txt'),'no permitido');break;
+  case 'raiz-fuera-definicion':fs.writeFileSync(path.join(root,'ARCHIVO-RAIZ.txt'),'no permitido');break;
+  case 'comun-bash':mutate('clonar.sh',()=> 'if then');break;
+  case 'url-rama':mutate('repos.md',s=>s.replace(`| app | Aplicación fullstack | ${run('git',['-C',path.join(root,'app'),'remote','get-url','origin'])} | ${run('git',['-C',path.join(root,'app'),'branch','--show-current'])} |`,`| app | Aplicación fullstack | /url/inventada.git | rama-inventada |`));break;
+  case 'un-repo':mutate('repos.md',s=>s.replace('Estado: borrador.','| api | API | desconocida | main | desconocido | inventado |\n\nEstado: borrador.'));break;
+  case 'diagrama':mutate('arquitectura.md',s=>s.replace('app[app]','otro[otro]'));break;
+  case 'clonar-repo':mutate('clonar.sh',s=>s.replace(/git clone[^\n]+\n/,'').replace(/git -C app checkout[^\n]+\n/,''));break;
+  case 'segunda-ejecucion':mutate('clonar.sh',s=>s.replace("echo 'omitido: app ya existe'","echo 'ya estaba'"));break;
+ }
+}
+const cases=[
+ ['entregables',['faltan entregables']],['comun-canario',['canario aparece en documento generado']],['comun-borrador',['documento sin marca Borrador']],['comun-cambios',['cambio fuera de definicion/: app/INTRUSO.txt']],['raiz-fuera-definicion',['cambio fuera de definicion/: ARCHIVO-RAIZ.txt']],['comun-bash',['clonar.sh inválido']],['url-rama',['B: remoto/rama incorrectos']],['un-repo',['B: estructura no lista exactamente un repo']],['diagrama',['B: flowchart sin app']],['clonar-repo',['no reconstruyó app']],['segunda-ejecucion',['segunda ejecución no avisó omitido']]
+];
+function makeFixture(){const base=fs.mkdtempSync(path.join(os.tmpdir(),'ref-b-')),root=path.join(base,'fixture');run('bash',[path.join(repo,'pruebas/fixtures/basico.sh'),root]);snapshot(root);writeRef(root);return {base,root,canary:fs.readFileSync(path.join(base,'fixture.canario-esperado'),'utf8').trim()};}
+test('B: referencia de formato de skills pasa checkB, ejecución y segunda ejecución de clonar.sh',()=>{const {root,canary}=makeFixture();assert.deepEqual(checkB(root,canary),{ok:true,reason:'B correcto, incluye reconstrucción y segunda ejecución'});});
+test('B: cada variante aislada produce exactamente la lista de motivos prevista',()=>{const {root,canary}=makeFixture();for(const [name,expected] of cases){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'var-b-'));fs.cpSync(root,dir,{recursive:true});fs.copyFileSync(path.join(path.dirname(root),'.agent-tree.json'),path.join(path.dirname(dir),'.agent-tree.json'));corrupt(dir,name,canary);const out=checkB(dir,canary);assert.equal(out.ok,false,name);assert.deepEqual(out.reason.split('; '),expected,name);}});
