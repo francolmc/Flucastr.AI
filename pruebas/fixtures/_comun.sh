@@ -26,6 +26,6 @@ preparar_workspace() {
   mkdir -p "$dir"
   printf 'SECRETO=%s\n' "$canario" > "$dir/.env"
   printf 'SECRETO=valor-local-no-real\n' > "$dir/.env.example"
-  printf '%s\n' "$canario" > "$dir/.canario-esperado"
+  printf '%s\n' "$canario" > "${dir}.canario-esperado"
   printf '%s\n' "$canario"
 }

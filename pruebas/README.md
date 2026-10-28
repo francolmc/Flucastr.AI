@@ -6,7 +6,8 @@
 - Comprueba los controles negativos del núcleo: `node pruebas/comprobaciones/escenario.mjs`.
 - Los casos adversos persistentes están definidos en `pruebas/comprobaciones/escenario.mjs` y documentados como tabla de casos en `casos-negativos.md`.
 - Verificación de sintaxis: `bash -n pruebas/ejecutar.sh pruebas/fixtures/*.sh`.
-- `pruebas/ejecutar.sh ESCENARIO HERRAMIENTA [N] COMANDO [ARG...]` prepara un fixture por corrida y ejecuta el comando suministrado.
-- El arnés no selecciona, instala ni invoca modelos; para una corrida real se debe suministrar explícitamente el lanzador aprobado.
+- `pruebas/ejecutar.sh ESCENARIO HERRAMIENTA [N] [COMANDO [ARG...]]` prepara un fixture por corrida; el comando es opcional y sin él no se invoca herramienta/modelo.
+- Las comprobaciones específicas B/M/C/R y sus controles negativos: `node --test pruebas/comprobaciones/escenarios.test.mjs`; el ejecutor también evalúa cada escenario.
+- El registro estructurado de Claude/Pi y detección de lecturas de `.env` están explícitamente pendientes; no se declara aprobación común automática.
 - R usa clon local fijado en `4b7b074`; falla de forma explícita si el commit no está disponible, sin usar red.
 - Esta etapa no ejecuta escenarios ni guarda resultados de corridas con modelos.
