@@ -188,6 +188,7 @@ Las pruebas corren contra la versión **instalada** (`bash instalar.sh`), porque
 - Código y fixtures: `pruebas/`. Los construye una sesión de implementación; **el arquitecto no escribe código**.
 - Resultados: un **resumen por corrida** en el repo (escenario, herramienta, corrida, qué comprobaciones pasaron y fallaron, notas), no los registros completos.
 - Orden: Capa 1 → B → M → C → R → N.
+- **Avance (2026-10-28):** Capa 1 cerrada, 6 de 6, con control negativo. Reveló y corrigió un defecto real de `instalar.sh`: con `modelos.json` roto, reinstalar destruía la instalación previa (confirmado contra la versión anterior). Resúmenes: `pruebas/resultados/2026-10-28-capa1.md` y `...-capa1-correccion.md`. Sigue la etapa 2.
 
 ## 9. Preguntas abiertas
 

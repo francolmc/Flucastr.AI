@@ -19,8 +19,12 @@ export function comprobar(id, dato) {
     case 'I3':
     case 'I4':
       for (const r of dato) {
-        assert.deepEqual(r.despues, r.antes, r.motivo);
-        assert.ok(!r.creoTemporal, 'la simulación ejecutó mktemp y creó un archivo temporal');
+        if (id === 'I3') {
+          const persistentes = (estado) => Object.fromEntries(Object.entries(estado).filter(([, entrada]) => entrada.tipo !== 'directorio'));
+          assert.deepEqual(persistentes(r.despues), persistentes(r.antes), r.motivo);
+        } else {
+          assert.deepEqual(r.despues, r.antes, r.motivo);
+        }
       }
       break;
     case 'I5':

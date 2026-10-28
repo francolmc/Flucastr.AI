@@ -50,6 +50,24 @@ command -v node >/dev/null 2>&1 || { echo "Falta node: se usa para leer modelos.
 [ -f "$RAIZ/modelos.json" ] || { echo "No encuentro modelos.json en $RAIZ" >&2; exit 1; }
 [ -f "$RAIZ/agentes/$AGENTE.md" ] || { echo "No existe el agente '$AGENTE' en agentes/" >&2; exit 1; }
 
+# Decide primero qué herramientas se instalarán y valida todo antes de tocar
+# la instalación anterior o cualquier destino.
+INSTALAR_CLAUDE=0
+INSTALAR_PI=0
+if [ "$SOLO" != "pi" ] && { [ -d "$CLAUDE_DIR" ] || command -v claude >/dev/null 2>&1; }; then INSTALAR_CLAUDE=1; fi
+if [ "$SOLO" != "claude" ] && { [ -d "$PI_DIR" ] || command -v pi >/dev/null 2>&1; }; then INSTALAR_PI=1; fi
+
+for f in "$RAIZ"/agentes/*.md; do
+  [ -f "$f" ] || continue
+  nombre="$(basename "$f" .md)"
+  if [ "$INSTALAR_CLAUDE" = 1 ]; then
+    node "$RESOLVER" agente-claude "$f" >/dev/null
+  fi
+  if [ "$INSTALAR_PI" = 1 ]; then
+    node "$RESOLVER" agente-pi "$f" >/dev/null
+  fi
+done
+
 # Registro de lo que se crea, para que desinstalar.sh borre exactamente eso.
 # Formato por línea: tipo <TAB> ruta <TAB> dato extra (opcional)
 NUEVO="$(mktemp)"
@@ -202,11 +220,6 @@ if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
 fi
 
 if [ "$SIMULAR" = 1 ]; then echo "SIMULACIÓN: no se escribe nada."; fi
-
-INSTALAR_CLAUDE=0
-INSTALAR_PI=0
-if [ "$SOLO" != "pi" ] && { [ -d "$CLAUDE_DIR" ] || command -v claude >/dev/null 2>&1; }; then INSTALAR_CLAUDE=1; fi
-if [ "$SOLO" != "claude" ] && { [ -d "$PI_DIR" ] || command -v pi >/dev/null 2>&1; }; then INSTALAR_PI=1; fi
 
 if [ "$INSTALAR_CLAUDE" = 1 ]; then
   echo "Claude Code ($CLAUDE_DIR)"

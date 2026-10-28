@@ -122,7 +122,14 @@ caso('I5', () => ['json-roto', 'nivel-inexistente'].flatMap(caso => {
   const resoluciones = ['claude-code', 'pi'].map(h => ({ caso: `${caso}/resolver/${h}`, mensaje, ...e.resolver('modelo', 'arquitecto', h), antes, despues: snapshot(e.home) }));
   const instalacion = e.instalar();
   return [...resoluciones, { caso: `${caso}/instalar`, mensaje, ...instalacion, antes, despues: snapshot(e.home) }];
-}));
+}).concat((() => {
+  const e = entorno('I5-reinstalacion');
+  exito(e.instalar());
+  const previa = snapshot(e.home);
+  writeFileSync(join(e.repo, 'modelos.json'), '{ roto');
+  const fallo = e.instalar();
+  return [{ caso: 'reinstalacion/json-roto', mensaje: /error: no pude leer modelos\.json/, ...fallo, antes: previa, despues: snapshot(e.home) }];
+})()));
 caso('I6', () => {
   const e = entorno('I6');
   const archivo = join(e.repo, 'agentes/arquitecto.md');
