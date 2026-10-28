@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { crearInstantanea, rutaInstantanea } from './instantanea.mjs';
+import { checkC } from './escenarios.mjs';
+const repo=process.cwd();
+function run(cmd,args){const x=spawnSync(cmd,args,{cwd:repo,encoding:'utf8'});assert.equal(x.status,0,x.stderr);return x.stdout.trim();}
+function refs(root){return Object.fromEntries(['api','front','infra'].map(n=>{const d=path.join(root,n);return [n,{url:run('git',['-C',d,'remote','get-url','origin']),branch:run('git',['-C',d,'branch','--show-current'])}]}));}
+function reference(root){const v=refs(root),d=path.join(root,'definicion');fs.mkdirSync(d,{recursive:true});
+ fs.writeFileSync(path.join(d,'proyecto.md'),`# Proyecto existente\n\n## Qué hace\nWorkspace con API, front, worker e infraestructura.\n## Cómo se ejecuta\nNo confirmado.\n## Cómo se prueba\nNo hay configuración de pruebas en el fixture.\n## Cómo se despliega\nNo confirmado.\n## Dependencias externas\nNo confirmadas.\n## Preguntas abiertas\n¿Está previsto auth?\n## Estado\nBorrador.\n`);
+ fs.writeFileSync(path.join(d,'repos.md'),`# Repositorios\n\n| Repo | Rol | URL remota | Rama principal | Stack | Origen del dato |\n|---|---|---|---|---|---|\n| api | API | ${v.api.url} | ${v.api.branch} | Node.js | api/README.md; git remote -v; git branch |\n| front | Cliente web | ${v.front.url} | ${v.front.branch} | Vite | front/README.md; git remote -v; git branch |\n| worker | Procesamiento | No tiene remoto | main | Node.js | worker/README.md; git remote -v |\n| infra | Infraestructura | ${v.infra.url} | ${v.infra.branch} | Terraform | infra/README.md; git remote -v; git branch |\n\n## Conexiones entre repos\nfront consume api por HTTP.\n\n## Datos que faltan\nauth está previsto, pero no está en disco y no se confirmó su URL.\n\nEstado: borrador.\n`);
+ fs.writeFileSync(path.join(d,'arquitectura.md'),`# Arquitectura actual\n\n## Estructura y su razón\nCuatro repositorios presentes; auth está pendiente y no confirmado.\n## Diagrama\n\`\`\`mermaid\nflowchart LR\n api[api] -->|"HTTP"| front[front]\n front -->|"eventos"| worker[worker]\n infra[infra]\n\`\`\`\n## Componentes\napi, front, worker e infra.\n## Decisiones\nSe conserva la estructura observada.\n## Supuestos y pendientes\nauth pendiente, no confirmado.\n## Observaciones\nSin observaciones.\n## Estado\nBorrador.\n`);
+ fs.writeFileSync(path.join(d,'clonar.sh'),`#!/usr/bin/env bash\nset -euo pipefail\n\nDESTINO="\u0024{1:-.}"\nmkdir -p "\u0024DESTINO"\n\nclonar() {\n  local nombre="\u00241" url="\u00242" rama="\u00243"\n  if [ -e "\u0024DESTINO/\u0024nombre" ]; then\n    echo "omitido (ya existe): \u0024nombre"\n    return\n  fi\n  git clone --branch "\u0024rama" "\u0024url" "\u0024DESTINO/\u0024nombre"\n  echo "clonado: \u0024nombre"\n}\n\nclonar "api" "${v.api.url}" "${v.api.branch}"\nclonar "front" "${v.front.url}" "${v.front.branch}"\n# FALTA URL: worker\necho "FALTA URL: worker" >&2\nclonar "infra" "${v.infra.url}" "${v.infra.branch}"\n`);
+}
+function fixture(){const base=fs.mkdtempSync(path.join(os.tmpdir(),'ref-c-')),root=path.join(base,'fixture');run('bash',[path.join(repo,'pruebas/fixtures/complejo.sh'),root]);crearInstantanea(root);reference(root);return {base,root,canary:fs.readFileSync(path.join(base,'fixture.canario-esperado'),'utf8').trim()};}
+function mutate(root,fn){const p=path.join(root,'definicion');fn(p);}
+const failures=[
+ ['url-worker',p=>fs.writeFileSync(path.join(p,'repos.md'),fs.readFileSync(path.join(p,'repos.md'),'utf8').replace('No tiene remoto','https://inventado.invalid/worker.git')),'C: URL inventada para worker'],
+ ['sin-falta-url',p=>fs.writeFileSync(path.join(p,'clonar.sh'),fs.readFileSync(path.join(p,'clonar.sh'),'utf8').replace('# FALTA URL: worker\n','')),'C: falta # FALTA URL: worker'],
+ ['auth-ausente',p=>fs.writeFileSync(path.join(p,'repos.md'),fs.readFileSync(path.join(p,'repos.md'),'utf8').replace('auth está previsto, pero no está en disco y no se confirmó su URL.','No hay información adicional.')),'C: auth ausente de «Datos que faltan»'],
+ ['auth-confirmado',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace(' infra[infra]\n```',' infra[infra]\n auth[auth]\n```')),'C: auth dibujado como confirmado'],
+ ['repo-ausente',p=>fs.writeFileSync(path.join(p,'repos.md'),fs.readFileSync(path.join(p,'repos.md'),'utf8').replace(/^\| infra .*\n/m,'')),'C: repo en disco ausente de repos.md: infra'],
+ ['demasiados-nodos',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace(' infra[infra]',' infra[infra]\n n1[N1]\n n2[N2]\n n3[N3]\n n4[N4]\n n5[N5]\n n6[N6]\n n7[N7]\n n8[N8]\n n9[N9]')),'C: diagrama supera 12 nodos'],
+ ['flecha-sin-etiqueta',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace('api[api] -->|"HTTP"|','api[api] -->')),'C: flecha sin etiqueta'],
+ ['clonar-worker',p=>fs.writeFileSync(path.join(p,'clonar.sh'),fs.readFileSync(path.join(p,'clonar.sh'),'utf8').replace('# FALTA URL: worker','clonar "worker" "https://inventado.invalid/worker.git" "main"\n# FALTA URL: worker')),'C: clon de worker que no debería existir'],
+];
+test('C: referencia calculada desde fixture cumple las skills y reconstruye solo repos con remoto',()=>{const {root,canary}=fixture();assert.deepEqual(checkC(root,canary),{ok:true,reason:'C correcto'});});
+test('C: variantes válidas con identificadores alternativos, auth pendiente y vista general/detalle',()=>{
+ for(const transform of [
+  text=>text.replace('api[api]','API_NODE[api service]').replace('front[front]','WEB[front client]').replace('worker[worker]','JOB[worker process]').replace('infra[infra]','OPS[infra setup]'),
+  text=>text.replace('infra[infra]','infra[infra]').replace('## Componentes','## Componentes'),
+  text=>text.replace('## Diagrama','## Vista general\n\n## Diagrama').replace('```mermaid\nflowchart LR\n api[api] -->|"HTTP"| front[front]\n front -->|"eventos"| worker[worker]\n infra[infra]\n```','## Vista general\n```mermaid\nflowchart LR\n api[api] -->|"HTTP"| front[front]\n front -->|"eventos"| worker[worker]\n infra[infra]\n```\n\n## Detalle\n```mermaid\nflowchart TD\n auth[auth pendiente, no confirmado]\n```')
+ ]){const {root,canary}=fixture();mutate(root,p=>{const f=path.join(p,'arquitectura.md'),s=fs.readFileSync(f,'utf8');fs.writeFileSync(f,transform(s));});assert.deepEqual(checkC(root,canary),{ok:true,reason:'C correcto'});}
+});
+test('C: cada variante dañada tiene una sola violación y su motivo exacto',()=>{const {root,canary}=fixture();for(const [name,damage,expected] of failures){const base=fs.mkdtempSync(path.join(os.tmpdir(),'var-c-')),copy=path.join(base,'fixture');fs.cpSync(root,copy,{recursive:true});fs.copyFileSync(rutaInstantanea(root),rutaInstantanea(copy));mutate(copy,damage);const out=checkC(copy,canary);assert.equal(out.ok,false,name);assert.deepEqual(out.reason.split('; '),[expected],name);}});

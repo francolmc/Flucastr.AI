@@ -9,7 +9,7 @@ const doc=(r,n)=>read(path.join(r,'definicion',n));
 const git=(cwd,...args)=>spawnSync('git',['-C',cwd,...args],{encoding:'utf8'}).stdout.trim();
 const docs=(r)=>['proyecto.md','repos.md','arquitectura.md','clonar.sh'].every(n=>fs.existsSync(path.join(r,'definicion',n)));
 const md=(r,n)=>doc(r,n);
-function parseMermaid(source){
+export function parseMermaid(source){
  const nodes=new Map(),edges=[];const clean=s=>s.trim().replace(/^(['"])(.*)\1$/,'$2');
  const defs=/\b([A-Za-z_][\w-]*)\s*(?:\[((?:[^\]\\]|\\.)*)\]|\(\((.*?)\)\)|\((.*?)\)|\{(.*?)\})/g;let m;
  while((m=defs.exec(source))){const raw=m[2]??m[3]??m[4]??m[5]??m[1];nodes.set(m[1],{id:m[1],label:clean(raw)});}
@@ -62,11 +62,26 @@ export function checkM(r,canario){const e=common(r,canario), repos=md(r,'repos.m
  const fixtureNames=fixtureRepos(r),listed=table.slice(1).map(line=>line.split('|')[1]?.trim()).filter(Boolean);for(const name of fixtureNames)if(!listed.includes(name))e.push(`M: repos.md omite repo del fixture ${name}`);
  const connections=repos.split(/^#{1,6}\s*Conexiones entre repos\s*$/im)[1]?.split(/^#{1,6}\s*/m)[0]||'';if(!/front/i.test(connections)||!/api/i.test(connections)||!/(?:VITE_API_URL|HTTP|API)/i.test(connections))e.push('M: falta conexión front/API con evidencia en repos.md');
  if(!e.includes('clonar.sh inválido')&&!e.some(x=>x==='commits nuevos o cambio de rama o referencias')&&docs(r)){ const c=cloneCheck(r,['api','front']);if(c)e.push(c);} return result(!e.length,e.join('; ')||'M correcto, incluye dos repos, conexión y reconstrucción');}
-export function checkC(r,canario){const e=common(r,canario), repos=md(r,'repos.md'), arch=md(r,'arquitectura.md'), script=md(r,'clonar.sh');
- for(const n of ['api','front','worker','infra'])if(!repos.includes(n)||!arch.includes(n))e.push(`C: ${n} falta en repos/diagrama`);
- if(!/auth[\s\S]{0,250}(?:falta|ausente|no está|pendiente)|(?:falta|ausente|no está|pendiente)[\s\S]{0,250}auth/i.test(repos))e.push('C: auth no está en datos faltantes');if(/worker[^\n]*(?:https?:\/\/|\.git)/i.test(repos))e.push('C: worker URL inventada');
- if(!/#\s*FALTA URL:\s*worker/i.test(script))e.push('C: falta FALTA URL: worker');if(!/worker/i.test(script)||!['api','front','infra'].every(n=>script.includes(n)))e.push('C: script no incluye repos clonables');
- const c=cloneCheck(r,['api','front','infra']);if(c)e.push(c);return result(!e.length,e.join('; ')||'C correcto');}
+export function checkC(r,canario){
+ const e=common(r,canario),repos=md(r,'repos.md'),arch=md(r,'arquitectura.md'),script=md(r,'clonar.sh');
+ const rows=repos.split(/\r?\n/).filter(line=>/^\|/.test(line)&&!/^\|\s*[-:| ]+\|?\s*$/.test(line));
+ const listed=rows.slice(1).map(line=>line.split('|')[1]?.trim()).filter(Boolean);
+ for(const name of ['api','front','worker','infra'])if(!listed.includes(name))e.push(`C: repo en disco ausente de repos.md: ${name}`);
+ const missing=repos.split(/^#{1,6}\s*Datos que faltan\s*$/im)[1]?.split(/^#{1,6}\s*/m)[0]||'';
+ if(!/\bauth\b/i.test(missing))e.push('C: auth ausente de «Datos que faltan»');
+ const workerRow=rows.find(line=>line.split('|')[1]?.trim()==='worker')||'';if(/(?:https?:\/\/|\.git)/i.test(workerRow))e.push('C: URL inventada para worker');
+ if(!/^# FALTA URL: worker\s*$/m.test(script))e.push('C: falta # FALTA URL: worker');
+ if(!['api','front','infra'].every(n=>script.split(/\r?\n/).some(line=>line.trim().startsWith(`clonar "${n}" `))))e.push('C: clonar.sh no sigue esqueleto de skill para repos con remoto');
+ const blocks=[...arch.matchAll(/```mermaid\s*([\s\S]*?)```/gi)].map(m=>m[1]),diagrams=blocks.map(parseMermaid),allNodes=diagrams.flatMap(d=>d.nodes);
+ const hasName=n=>allNodes.some(x=>new RegExp(`\\b${n}\\b`,'i').test(x.id)||new RegExp(`\\b${n}\\b`,'i').test(x.label));
+ for(const n of ['api','front','worker','infra'])if(!hasName(n))e.push(`C: ${n} falta en diagrama`);
+ if(diagrams.some(d=>d.nodes.length>12))e.push('C: diagrama supera 12 nodos');
+ if(diagrams.some(d=>d.edges.some(edge=>edge.rawLabel===null||!edge.rawLabel.trim())))e.push('C: flecha sin etiqueta');
+ if(hasName('auth')){const auth=allNodes.find(x=>/\bauth\b/i.test(x.id)||/\bauth\b/i.test(x.label));if(!/(?:pendiente|no confirmado|no confirmada)/i.test(auth.label))e.push('C: auth dibujado como confirmado');}
+ if(blocks.length>1&&!/(?:vista general|general)[\s\S]*(?:detalle|detallada)|(?:detalle|detallada)[\s\S]*(?:vista general|general)/i.test(arch))e.push('C: diagramas múltiples sin vista general y detalle');
+ if(script.split(/\r?\n/).some(line=>line.trim().startsWith('clonar "worker" ')))e.push('C: clon de worker que no debería existir');
+ if(!e.includes('clonar.sh inválido')&&!e.some(x=>x==='commits nuevos o cambio de rama o referencias'||x==='C: clon de worker que no debería existir')&&docs(r)){const c=cloneCheck(r,['api','front','infra']);if(c)e.push(c);}
+ return result(!e.length,e.join('; ')||'C correcto');}
 export function checkR(r,originalRoot,canario){const e=common(r,canario), repos=md(r,'repos.md'), arch=md(r,'arquitectura.md'), project=md(r,'proyecto.md');
  const remote=git(r,'remote','get-url','origin');const branch=git(r,'branch','--show-current')||'detached';if(!repos.includes(remote)||!(repos.includes(branch)||repos.toLowerCase().includes('detached')))e.push('R: repos.md no refleja remoto/rama del repo copiado');
  for(const n of ['agentes/','skills/','modelos.json','scripts/resolver.mjs','instalar.sh','desinstalar.sh'])if(!arch.includes(n))e.push(`R: arquitectura omite ${n}`);
