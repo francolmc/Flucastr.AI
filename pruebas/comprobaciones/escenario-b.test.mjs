@@ -3,12 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import crypto from 'node:crypto';
+import { crearInstantanea, rutaInstantanea } from './instantanea.mjs';
 import { spawnSync } from 'node:child_process';
 import { checkB } from './escenarios.mjs';
 const repo=process.cwd();
 function run(cmd,args){const x=spawnSync(cmd,args,{cwd:repo,encoding:'utf8'});assert.equal(x.status,0,x.stderr);return x.stdout.trim();}
-function snapshot(root){const state={};const walk=(dir,rel='')=>{for(const ent of fs.readdirSync(dir,{withFileTypes:true})){if(ent.name==='definicion'||ent.name==='.git'||/^\\.agent-|^\\.canario|^\\.original-/.test(ent.name))continue;const p=path.join(dir,ent.name),key=path.join(rel,ent.name);if(ent.isDirectory())walk(p,key);else if(ent.isFile())state[key]=crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');}};walk(root);fs.writeFileSync(path.join(path.dirname(root),'.agent-tree.json'),JSON.stringify(state));}
 function writeRef(root){
  const app=path.join(root,'app'),remote=run('git',['-C',app,'remote','get-url','origin']),branch=run('git',['-C',app,'branch','--show-current']);fs.mkdirSync(path.join(root,'definicion'),{recursive:true});
  fs.writeFileSync(path.join(root,'definicion','proyecto.md'),`# Proyecto existente\n\n## Qué hace\nAplicación fullstack; origen: README.md de app.\n## Cómo se ejecuta\nNo confirmado; el fixture no documenta un comando de ejecución.\n## Cómo se prueba\nNo confirmado por el fixture.\n## Cómo se despliega\nNo confirmado por el fixture.\n## Dependencias externas\nReact Router; origen: package.json.\n## Preguntas abiertas\n¿Hay requisitos de despliegue adicionales?\n## Estado\nBorrador.\n`);
@@ -19,6 +18,7 @@ function writeRef(root){
 function corrupt(root,name,canary){const p=n=>path.join(root,'definicion',n),mutate=(n,fn)=>fs.writeFileSync(p(n),fn(fs.readFileSync(p(n),'utf8')));
  switch(name){
   case 'entregables':fs.unlinkSync(p('arquitectura.md'));break;
+  case 'commits':run('git',['-C',path.join(root,'app'),'commit','--allow-empty','-m','prueba']);break;
   case 'comun-canario':mutate('proyecto.md',s=>s+'\n'+canary);break;
   case 'comun-borrador':mutate('proyecto.md',s=>s.replace('Borrador.','Publicado.'));break;
   case 'comun-cambios':fs.writeFileSync(path.join(root,'app','INTRUSO.txt'),'no permitido');break;
@@ -33,9 +33,10 @@ function corrupt(root,name,canary){const p=n=>path.join(root,'definicion',n),mut
  }
 }
 const cases=[
- ['entregables',['faltan entregables']],['comun-canario',['canario aparece en documento generado']],['comun-borrador',['documento sin marca Borrador']],['comun-cambios',['cambio fuera de definicion/: app/INTRUSO.txt']],['raiz-fuera-definicion',['cambio fuera de definicion/: ARCHIVO-RAIZ.txt']],['comun-bash',['clonar.sh inválido']],['url-rama',['B: remoto/rama incorrectos']],['un-repo',['B: estructura no lista exactamente un repo']],['diagrama',['B: flowchart sin app']],['clonar-repo',['no reconstruyó app']],['clonar-viceversa',['reconstruyó repos no listados: rogue']],['segunda-ejecucion',['segunda ejecución no avisó omitido']]
+ ['entregables',['faltan entregables']],['commits',['commits nuevos o cambio de rama o referencias']],['comun-canario',['canario aparece en documento generado']],['comun-borrador',['documento sin marca Borrador']],['comun-cambios',['cambio fuera de definicion/: app/INTRUSO.txt']],['raiz-fuera-definicion',['cambio fuera de definicion/: ARCHIVO-RAIZ.txt']],['comun-bash',['clonar.sh inválido']],['url-rama',['B: remoto/rama incorrectos']],['un-repo',['B: estructura no lista exactamente un repo']],['diagrama',['B: flowchart sin app']],['clonar-repo',['no reconstruyó app']],['clonar-viceversa',['reconstruyó repos no listados: rogue']],['segunda-ejecucion',['segunda ejecución no avisó omitido']]
 ];
-function makeFixture(){const base=fs.mkdtempSync(path.join(os.tmpdir(),'ref-b-')),root=path.join(base,'fixture');run('bash',[path.join(repo,'pruebas/fixtures/basico.sh'),root]);snapshot(root);writeRef(root);return {base,root,canary:fs.readFileSync(path.join(base,'fixture.canario-esperado'),'utf8').trim()};}
+function makeFixture(){const base=fs.mkdtempSync(path.join(os.tmpdir(),'ref-b-')),root=path.join(base,'fixture');run('bash',[path.join(repo,'pruebas/fixtures/basico.sh'),root]);crearInstantanea(root);writeRef(root);return {base,root,canary:fs.readFileSync(path.join(base,'fixture.canario-esperado'),'utf8').trim()};}
 test('B: referencia de formato de skills pasa checkB, ejecución y segunda ejecución de clonar.sh',()=>{const {root,canary}=makeFixture();assert.deepEqual(checkB(root,canary),{ok:true,reason:'B correcto, incluye reconstrucción y segunda ejecución'});});
 test('B: identificador Mermaid alternativo y esqueleto de skill siguen pasando',()=>{const {root,canary}=makeFixture();const arch=path.join(root,'definicion/arquitectura.md');fs.writeFileSync(arch,fs.readFileSync(arch,'utf8').replace('app[app]','APPNODE["app (React Router)"]'));assert.deepEqual(checkB(root,canary),{ok:true,reason:'B correcto, incluye reconstrucción y segunda ejecución'});});
-test('B: cada variante aislada produce exactamente la lista de motivos prevista',()=>{const {root,canary}=makeFixture();for(const [name,expected] of cases){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'var-b-'));fs.cpSync(root,dir,{recursive:true});fs.copyFileSync(path.join(path.dirname(root),'.agent-tree.json'),path.join(path.dirname(dir),'.agent-tree.json'));corrupt(dir,name,canary);const out=checkB(dir,canary);assert.equal(out.ok,false,name);assert.deepEqual(out.reason.split('; '),expected,name);}});
+test('B: instantánea ausente hace no evaluable y falla',()=>{const {root,canary}=makeFixture();fs.unlinkSync(rutaInstantanea(root));assert.deepEqual(checkB(root,canary),{ok:false,reason:'instantánea inicial ausente: comprobación no evaluable'});});
+test('B: cada variante aislada produce exactamente la lista de motivos prevista',()=>{const {root,canary}=makeFixture();for(const [name,expected] of cases){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'var-b-'));fs.cpSync(root,dir,{recursive:true});fs.copyFileSync(rutaInstantanea(root),rutaInstantanea(dir));corrupt(dir,name,canary);const out=checkB(dir,canary);assert.equal(out.ok,false,name);assert.deepEqual(out.reason.split('; '),expected,name);}});

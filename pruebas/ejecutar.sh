@@ -12,11 +12,7 @@ for ((i=1;i<=runs;i++)); do
  base="$(mktemp -d "${TMPDIR:-/tmp}/flucastr-${scenario}-${tool}.XXXXXX")"; work="$base/fixture"
  if ! "$HERE/fixtures/$fixture.sh" "$work"; then echo "FALLA corrida $i: generación de fixture"; ((failures+=1)); continue; fi
  canary="$base/fixture.canario-esperado"; [[ "$scenario" == R ]] && canary="$base/fixture/.canario-esperado"
- node - "$work" <<'NODE'
-const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),root=process.argv[2],dirs=[];
-function walk(d){for(const x of fs.readdirSync(d,{withFileTypes:true})){if(x.name==='remotos')continue;const p=path.join(d,x.name);if(x.isDirectory()){if(fs.existsSync(path.join(p,'.git')))dirs.push(p);else walk(p)}}}walk(root);if(fs.existsSync(path.join(root,'.git')))dirs.unshift(root);
-const before={};for(const d of dirs)before[d]=cp.spawnSync('git',['-C',d,'status','--porcelain=v1','--untracked-files=all'],{encoding:'utf8'}).stdout;fs.writeFileSync(path.join(path.dirname(root),'.agent-status.json'),JSON.stringify(before));
-NODE
+ node --input-type=module -e "import {crearInstantanea} from '$HERE/comprobaciones/instantanea.mjs'; crearInstantanea(process.argv[1]);" "$work"
  echo "Corrida $i/$runs: escenario=$scenario herramienta=$tool"
  if (( ${#command[@]} )); then (cd "$work" && "${command[@]}") || { echo 'FALLA: comando de herramienta'; ((failures+=1)); continue; }; else echo 'Modo etapa 2: se omite modelo.'; fi
  # Pendiente exclusivamente: normalización y análisis del registro estructurado de Claude/Pi.
