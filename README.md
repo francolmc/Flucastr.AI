@@ -22,8 +22,40 @@ Para producir funcionalidad real en mis proyectos (Don Financio, Andes y otros) 
 ```
 Flucastr.AI/
 ├── README.md        # este archivo
+├── modelos.json     # niveles y modelos por herramienta; los agentes declaran nivel, no modelo
+├── agentes/         # un archivo por agente
+│   └── arquitecto.md   # agente principal: razona, define proyecto, estructura y arquitectura
+├── skills/          # procedimientos que los agentes cargan solo cuando los necesitan
+│   ├── definir-proyecto/
+│   ├── revisar-proyecto-existente/
+│   ├── disenar-arquitectura/
+│   └── generar-clonar/
+├── scripts/
+│   └── resolver.mjs    # resuelve el modelo de cada agente y genera los archivos por herramienta
+├── instalar.sh      # instala agentes y skills en Claude Code y Pi
+├── desinstalar.sh   # quita exactamente lo que instaló
 └── tareas/          # una tarea por archivo (se crea con la primera)
 ```
+
+## Instalación
+
+```bash
+bash instalar.sh --simular   # muestra qué haría, sin escribir nada
+bash instalar.sh             # instala (Claude Code y Pi, los que encuentre)
+bash desinstalar.sh          # quita lo instalado
+
+# Dejar al arquitecto como agente predeterminado de un proyecto (cada sesión ahí arranca con él):
+bash instalar.sh --proyecto /ruta/al/proyecto
+
+# Quitar solo ese ajuste de un proyecto, sin desinstalar lo demás:
+bash desinstalar.sh --proyecto /ruta/al/proyecto
+```
+
+- Las skills se **enlazan** desde `skills/`; el agente de Claude Code se **genera** con el `model` tomado de `modelos.json`; para Pi se genera el agente en `~/.pi/agent/agents/` (lo lee el paquete de subagentes) y un lanzador `pi-<agente>` para abrir una sesión completa con él.
+- Nunca pisa archivos que ya existan: los omite y lo avisa.
+- Si cambias `modelos.json`, vuelve a correr `bash instalar.sh` (el lanzador de Pi lo lee en vivo; el agente de Claude Code no).
+- `--proyecto` escribe `{"agent": "arquitecto"}` en `<proyecto>/.claude/settings.local.json` (ajustes personales, normalmente fuera de git). No pisa un agente que el proyecto ya tenga definido, y `desinstalar.sh` lo deshace (todo junto, o solo el de un proyecto con `--proyecto`).
+- Uso: `claude --agent arquitecto` o `pi-arquitecto`, desde la carpeta del proyecto.
 
 ## Primera tarea
 
@@ -35,4 +67,4 @@ El trabajo anterior (`project-flow`, `project-lite`, kit v1) vive en `claude-ski
 
 ## Bitácora
 
-- 2026-10-28: reinicio del proyecto y nombre `Flucastr.AI`.
+- 2026-10-28: reinicio del proyecto y nombre `Flucastr.AI`. Se crean `modelos.json`, el primer agente (`arquitecto`), sus cuatro skills y el instalador/desinstalador.

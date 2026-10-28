@@ -37,5 +37,7 @@
     "claude-code": "claude-code"
   },
 
-  "agentes": {}
+  "agentes": {
+    "arquitecto": { "nivel": "medio" }
+  }
 }
