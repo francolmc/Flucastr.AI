@@ -1,5 +1,5 @@
 # task-04 — El planificador en modo yolo: sin ronda de refinado ni supuestos
-repo: Flucastr.AI   depende_de: —   estado: aprobada
+repo: Flucastr.AI   depende_de: —   estado: lista para revisión
 
 ## Descripción
 En el modo yolo (`definitions/WORKFLOW.md` §9.3) no hay ventana de refinado con Franco ni se inventan supuestos: ante una feature ambigua el `planificador` devuelve `REFINAR:` y el coordinador lo trata como escalación. Además, las tareas que redacta en yolo no pueden depender de ramas ni de commits. Esta tarea deja ambas reglas en `agentes/planificador.md` y en `skills/descomponer-feature/SKILL.md`.
@@ -44,4 +44,36 @@ Esperado: cada `grep -c` muestra un número mayor que 0 para cada archivo; las p
 
 ## Evidencia
 
+Comando: `git branch --show-current` (antes de empezar). Salida: `feature/F06-modo-yolo`. Coincide con `Rama:`; no hubo `git switch`.
+
+Comando: `for f in 'Modo yolo: activo' 'no hay ronda de refinado ni supuestos'; do grep -c -F -- "$f" agentes/planificador.md skills/descomponer-feature/SKILL.md; done` (más `grep -c -F 'En yolo, ninguna tarea pide crear rama' skills/descomponer-feature/SKILL.md`, y `git status --short agentes skills`). Salida:
+```
+agentes/planificador.md:1
+skills/descomponer-feature/SKILL.md:1
+agentes/planificador.md:1
+skills/descomponer-feature/SKILL.md:1
+1
+ M agentes/planificador.md
+ M skills/descomponer-feature/SKILL.md
+```
+
+Comando: `node --test pruebas/comprobaciones/contrato-roles.test.mjs`. Salida (resumen final):
+```
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+```
+
+Criterios: 1 (la skill contiene `Modo yolo: activo`, `no hay ronda de refinado ni supuestos` y `En yolo, ninguna tarea pide crear rama`, cada uno con `grep -c` = 1): cumple. 2 (el planificador contiene `Modo yolo: activo` y `no hay ronda de refinado ni supuestos`, cada uno con `grep -c` = 1): cumple. 3 (`fail 0`): cumple. 4 (`git status --short agentes skills` solo lista `agentes/planificador.md` y `skills/descomponer-feature/SKILL.md`): cumple.
+
 ## Notas
+
+- Hueco menor: la tarea no indica si el sub-bullet de yolo va antes o después del último sub-bullet de paso 0. Se añadió al final, como pide *Decisiones ya tomadas» («añadir al final»).
+- Hueco menor: en el paso 2 de la skill, la frase se añadió al final de la misma línea del paso 2, sin salto de línea nuevo.
+- Hueco menor: en `agentes/planificador.md` el párrafo se añadió tras el de `## Refinado` con una línea en blanco, dentro de la misma sección.
+- Ninguna otra frase de los dos archivos se modificó. No se tocó `definitions/`, `STATUS.md`, el coordinador, el validador ni `README.md`.
+- Estado de la tarea: `en curso` al empezar, `lista para revisión` al final. No se escribió `hecha`.

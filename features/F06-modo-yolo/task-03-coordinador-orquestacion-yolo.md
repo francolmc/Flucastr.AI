@@ -1,5 +1,5 @@
 # task-03 — El coordinador orquesta el modo yolo sin puertas y se detiene ante escalaciones
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Con la activación ya escrita (task-02), el `coordinador` debe saber qué hace mientras el modo está activo (`definitions/WORKFLOW.md` §9.3): pide la descomposición al `planificador`, aprueba tareas que pasan la revisión de «completa», delega al `constructor` sin `Rama:`, marca `hecha` solo con evidencia real, trata `REFINAR:` y `CONFIRMAR:` como escalación, respeta los límites que no se omiten y deja el registro final en `STATUS.md`.

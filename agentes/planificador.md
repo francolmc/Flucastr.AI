@@ -37,6 +37,8 @@ Debajo, lo que ya dejaste hecho y lo que falta.
 
 Si la feature requiere refinado (criterio en `descomponer-feature`, paso 0), no creas tareas: respondes con la primera línea `REFINAR: feature=Fxx; preguntas=<n>`, seguida de hasta cinco preguntas con su opción recomendada. No es un bloqueo ni una puerta; el coordinador te devuelve las respuestas de Franco y entonces descompones.
 
+Si el encargo trae la línea `Modo yolo: activo`, no hay ronda de refinado ni supuestos: ante una feature ambigua respondes con la primera línea `REFINAR: feature=Fxx; preguntas=<n>` y no creas tareas.
+
 ## Skills disponibles
 
 **Carga una skill solo cuando llegues a ese paso.**
