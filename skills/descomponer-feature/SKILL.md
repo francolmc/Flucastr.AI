@@ -13,7 +13,7 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
 2. Define tareas: un solo repo y un solo objetivo verificable cada una. Con varios repos, fija el orden con `depende_de:` (la API antes que el front).
 3. Escribe cada tarea en `features/Fxx-nombre/task-NN-nombre.md` con la plantilla de abajo, estado `borrador`.
 4. Pasa la lista «completa» y la «acotada» a cada tarea. Si falla, corrígela o pártela.
-5. No cambies `BACKLOG.md` ni muevas nada a `completed/`.
+5. En `BACKLOG.md` solo puedes mover la marca `→`: si está en una feature `hecha`, pásala a la primera feature que no esté `hecha` (deja vacía la celda de la anterior). No cambies ningún otro campo ni fila. No muevas nada a `completed/`.
 
 ## Plantilla
 

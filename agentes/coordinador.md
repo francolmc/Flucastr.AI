@@ -32,7 +32,12 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 | No hay `definitions/` | Delega al `arquitecto`; **puerta 1** (definición) |
 | Definición aprobada, sin backlog | Delega al `planificador` pidiéndole `crear-backlog`; **puerta 2** (backlog) |
 | Backlog aprobado, la feature siguiente no tiene tareas | Delega al `planificador` pidiéndole `descomponer-feature`; **puerta 3**, una por tarea |
-| Tarea `aprobada` | Delega al `constructor`; **puerta 4** (revisión y commit, de Franco) |
+| Tarea `aprobada` | Delega al `constructor`; **puerta 4** (revisión y commit, de Franco). Una a la vez, en orden de número, y solo si cada tarea de su `depende_de:` está `hecha`. |
+| Tareas de la feature siguiente en `borrador` | **Puerta 3**: no delegas. Escribe en `STATUS.md` la ruta de cada tarea en `borrador` y espera la aprobación de Franco, una por una. |
+| Tarea `lista para revisión` | **Puerta 4**: no delegas. Escribe en `STATUS.md` la ruta de la tarea y que Franco revise la evidencia y haga el commit. Solo Franco la pasa a `hecha`. |
+| Tarea `en curso` sin sesión del constructor activa | Escalación: tarea interrumpida. No la vuelvas a delegar sin que Franco lo decida. |
+| Tarea `bloqueada` | Registra el bloqueo en `STATUS.md` (*Bloqueos abiertos*) con el motivo de la sección *Notas* de la tarea y enrútalo según la fila de bloqueos; si es un cambio de alcance, es escalación. |
+| Todas las tareas de la feature `hecha` | Pide a Franco que confirme la feature como `hecha`. Con su aprobación explícita, escribe `hecha` en `BACKLOG.md` y delega al `planificador` con `descomponer-feature` para la siguiente (mueve la marca `→`). |
 | Bloqueo abierto que pide otro rol | Delega a ese rol; si toca la definición, vuelve a la puerta 1 |
 | Escalación | Te detienes y la escribes al inicio de `STATUS.md` |
 
