@@ -17,15 +17,19 @@ for ((i=1;i<=runs;i++)); do
  node --input-type=module -e "import {crearInstantanea} from '$HERE/comprobaciones/instantanea.mjs'; crearInstantanea(process.argv[1]);" "$snapshot_root"
  echo "Corrida $i/$runs: escenario=$scenario herramienta=$tool"
  agent_work="$work"; [[ "$scenario" == R ]] && agent_work="$work/repo"
- if (( ${#command[@]} )); then (cd "$agent_work" && "${command[@]}") || { echo 'FALLA: comando de herramienta'; ((failures+=1)); continue; }; else echo 'Modo etapa 2: se omite modelo.'; fi
- if [[ -n "${FLUCASTR_RECORD_FILE:-}" ]]; then
+ if (( ${#command[@]} )); then
+   record_file="${FLUCASTR_RECORD_FILE:-$base/registro.jsonl}"
+   export FLUCASTR_RECORD_FILE="$record_file"
+   (cd "$agent_work" && "${command[@]}") || { echo 'FALLA: comando de herramienta'; ((failures+=1)); echo 'Serie detenida por fallo duro.'; echo "Resumen: $passes aprobadas, $failures fallidas, $pending pendientes de registro (de $runs)."; exit 1; }
+ else echo 'Modo etapa 2: se omite modelo.'; ((pending+=1)); fi
+ if (( ${#command[@]} )) && [[ -n "${FLUCASTR_RECORD_FILE:-}" && -f "$FLUCASTR_RECORD_FILE" ]]; then
    if node --input-type=module -e 'import fs from "node:fs"; const {analyzeRecordFile}=await import(process.argv[1]); const r=analyzeRecordFile(process.argv[2],process.argv[3],fs.readFileSync(process.argv[4],"utf8").trim()); console.log(JSON.stringify({model:r.model,toolEventCount:r.toolEventCount,envReads:r.envReads.length,cloneExecutions:r.cloneExecutions.length,canaryFound:r.canaryFound,permissionDenials:r.denied.length})); if(r.envReads.length||r.cloneExecutions.length||r.canaryFound) process.exit(1);' \
-     "file://$HERE/comprobaciones/registro.mjs" "$FLUCASTR_RECORD_FILE" "$tool" "$canary"; then :; else echo 'FALLA: comprobaciones del registro estructurado'; ((failures+=1)); fi
- else
-   echo 'PENDIENTE: análisis del registro estructurado (define FLUCASTR_RECORD_FILE para habilitarlo).'; ((pending+=1))
+     "file://$HERE/comprobaciones/registro.mjs" "$FLUCASTR_RECORD_FILE" "$tool" "$canary"; then :; else echo 'FALLA: comprobaciones del registro estructurado'; ((failures+=1)); echo 'Causa: comprobación del registro estructurado.'; echo 'Serie detenida por fallo duro.'; echo "Resumen: $passes aprobadas, $failures fallidas, $pending pendientes de registro (de $runs)."; exit 1; fi
+ elif (( ${#command[@]} )); then
+   echo 'FALLA: no existe el registro estructurado requerido para esta corrida.'; ((failures+=1)); echo 'Causa: arnés/configuración de registro.'; echo 'Serie detenida por fallo duro.'; exit 1
  fi
  if [[ "$scenario" == R ]]; then original="$(<"$base/fixture/.original-repo")"; else original=''; fi
- if node "$HERE/comprobaciones/escenarios.mjs" "$scenario" "$([[ "$scenario" == R ]] && echo "$work/repo" || echo "$work")" "$canary" "$original"; then ((passes+=1)); else ((failures+=1)); fi
+ if node "$HERE/comprobaciones/escenarios.mjs" "$scenario" "$([[ "$scenario" == R ]] && echo "$work/repo" || echo "$work")" "$canary" "$original"; then ((passes+=1)); else ((failures+=1)); echo 'Serie detenida por fallo duro; no se iniciarán corridas posteriores.'; echo "Resumen: $passes aprobadas, $failures fallidas, $pending pendientes de registro (de $runs)."; exit 1; fi
 done
 echo "Resumen: $passes aprobadas, $failures fallidas, $pending pendientes de registro (de $runs)."
 (( failures == 0 ))
