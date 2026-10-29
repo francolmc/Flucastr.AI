@@ -4,6 +4,7 @@ Kit personal de agentes, skills e instaladores para trabajar con IA en Claude Co
 
 - Qué es y cómo se prueba: [`definitions/PROJECT.md`](definitions/PROJECT.md)
 - Repos: [`definitions/REPOS.md`](definitions/REPOS.md)
+- Flujo de trabajo y tareas: [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md)
 - Estructura y diagrama: [`definitions/ARCHITECTURE.md`](definitions/ARCHITECTURE.md)
 
 Reglas: no hay commit, push, PR, merge ni despliegue por parte de agentes; no se leen `.env`, llaves ni credenciales; una tarea, un archivo.

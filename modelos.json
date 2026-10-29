@@ -38,6 +38,9 @@
   },
 
   "agentes": {
-    "arquitecto": { "nivel": "medio" }
+    "arquitecto": { "nivel": "medio" },
+    "planificador": { "nivel": "medio" },
+    "coordinador": { "nivel": "medio" },
+    "constructor": { "nivel": "bajo" }
   }
 }

@@ -68,6 +68,8 @@ No se despliega: se instala en local. Remoto en GitHub (`git remote -v`), sin CI
 
 ## Flujo de trabajo (decidido por Franco en líneas generales; roles por construir)
 
+> Diseño detallado, plantilla de tarea y encargo de implementación: [`WORKFLOW.md`](WORKFLOW.md) (aprobado).
+
 Cuatro roles. Franco abre **siempre el `coordinador`**; los demás roles los invoca este. Cada rol **empieza leyendo archivos, no la conversación** del anterior.
 
 | Etapa | Rol | Entra | Sale |
@@ -81,13 +83,14 @@ Cuatro roles. Franco abre **siempre el `coordinador`**; los demás roles los inv
 
 **Cuatro puertas de aprobación** (decidido por Franco): el `coordinador` solo se detiene para (1) aprobar la definición, (2) aprobar el backlog y su prioridad, (3) aprobar cada tarea antes de construir, (4) revisar el resultado y hacer el commit. Entre puertas el trabajo avanza solo.
 
-**Bloqueos entre roles:** un rol nunca llama a otro. Si necesita algo de otro (por ejemplo el `planificador` necesita una decisión del `arquitecto`), escribe el bloqueo en `definitions/STATUS.md`, indica qué rol hace falta y se detiene; el `coordinador` lo enruta. Si el cambio toca la definición, vuelve a pasar por la puerta 1.
+**Bloqueos entre roles:** un rol nunca llama a otro. Si necesita algo de otro (por ejemplo el `planificador` necesita una decisión del `arquitecto`), lo informa en su respuesta final (`BLOQUEO: rol=…; motivo=…`) y se detiene; el `coordinador` lo registra en `definitions/STATUS.md` y lo enruta. Si el cambio toca la definición, vuelve a pasar por la puerta 1.
 
 **Archivo de estado (propuesta):** `definitions/STATUS.md`, que el `coordinador` mantiene: paso actual, qué espera de Franco, bloqueos abiertos. Franco lo mira cuando quiere; **no hay aviso** salvo una **escalación**: algo que requiere revisión de alcance o que no estaba previsto en lo definido. En ese caso el `coordinador` se detiene y lo dice de forma explícita al inicio del archivo.
 
 Reglas:
 - **El `planificador` redacta todo:** el backlog, las features y cada tarea (decidido por Franco). Franco aprueba en las puertas.
 - **Prioridad por valor/esfuerzo, con habilitantes primero:** antes de ordenar por aporte, el `planificador` revisa qué falta para poder construir y *verificar*. Si falta, eso va primero como feature «habilitante», según el contexto: en un proyecto nuevo, el andamiaje; en uno existente sin despliegue local para pruebas e2e, ese despliegue. Sin habilitantes no hay criterio de «hecha» comprobable. Cada feature del backlog lleva su tipo (habilitante o de producto) y la razón de su posición.
+- **Tareas completas y acotadas** (Franco): suficientemente detalladas para que el ejecutor termine sin detenerse, y lo bastante pequeñas para caber en una sesión. Reglas en `WORKFLOW.md`, §6.
 - **Planificar justo a tiempo:** solo la feature en curso se descompone en tareas.
 - **Una fuente de verdad del estado de las features:** `BACKLOG.md`; `completed/` es solo archivo. `STATUS.md` es del flujo, no de las features.
 - **Estructura igual para uno o varios repos:** el campo `repo:` reemplaza subcarpetas por repo.

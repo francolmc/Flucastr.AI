@@ -1,0 +1,49 @@
+# task-05 — Capa 1: comprobar que se instalan todos los agentes y skills
+repo: Flucastr.AI   depende_de: task-04   estado: borrador
+
+## Descripción
+La Capa 1 comprueba que lo instalado es correcto (I2: encabezado y modelo) pero no que esté todo lo que debe: si `instalar.sh` dejara de instalar `coordinador`, `planificador`, `constructor` o una skill nueva, nada fallaría. Esta tarea añade el caso I7, con su control negativo, que compara las fuentes (`agentes/`, `skills/`) con lo instalado para Claude Code y Pi, incluidos los lanzadores `pi-<agente>`. Sigue siendo determinista y corre dentro de la verificación rápida.
+
+## Contexto
+- Repo: este, único repo. Sin modelo ni red. Todo ocurre en un `HOME` aislado dentro de `pruebas/.temporales/` (función `entorno()` de `pruebas/capa1/instalacion.test.mjs`).
+- Instalación real en un `HOME` aislado (ejecutada por el planificador): `.claude/agents/{arquitecto,constructor,coordinador,planificador}.md`; `.claude/skills/<7 skills>` (`crear-backlog`, `definir-proyecto`, `descomponer-feature`, `disenar-arquitectura`, `ejecutar-tarea`, `generar-clonar`, `revisar-proyecto-existente`); `.local/bin/pi-<agente>` (4); `pi/agents/<agente>.md` (4) y `pi/skills/<skill>` (7), donde `pi` es `PI_CODING_AGENT_DIR` (`e.pi` en la prueba).
+- `pruebas/comprobaciones/capa1.mjs`: función `comprobar(id, dato)` con un `switch` por caso (`I1`…`I6`) y `default: throw`.
+- `pruebas/capa1/instalacion.test.mjs`: función `caso(id, obtener)` que registra «`<id>`: comprobación real»; después, un objeto `falsos` con un dato falso por caso que genera «`<id>`: control negativo rechaza salida falsa». `entorno(nombre)` devuelve `{ repo, home, pi, instalar, … }`; `exito(r)` exige estado 0.
+- Archivos a tocar: `pruebas/comprobaciones/capa1.mjs` y `pruebas/capa1/instalacion.test.mjs`.
+
+## Decisiones ya tomadas
+- El caso se llama `I7`. Dato que devuelve `obtener`: un arreglo de un elemento `{ esperados, instalados }`, donde ambos son `{ agentes: string[], skills: string[] }` y `instalados` agrupa por herramienta: `instalados.claude = { agentes, skills }` y `instalados.pi = { agentes, skills, lanzadores }`.
+- Cómo se obtienen: `esperados.agentes` = nombres (sin `.md`) de `agentes/*.md` en `e.repo`; `esperados.skills` = nombres de subdirectorios de `skills/` en `e.repo`. Instalados: nombres de `.md` en `join(e.home, '.claude/agents')` y `join(e.pi, 'agents')`; entradas de `join(e.home, '.claude/skills')` y `join(e.pi, 'skills')`; `lanzadores` = entradas de `join(e.home, '.local/bin')` que empiezan por `pi-`, sin el prefijo. Todas las listas ordenadas.
+- `comprobar('I7', dato)`: para cada elemento, exige `esperados.agentes.length > 0` y `esperados.skills.length > 0` (evita pasar en vacío) y `assert.deepEqual` entre lo esperado y cada lista instalada (agentes de Claude, skills de Claude, agentes de Pi, skills de Pi, lanzadores de Pi), con mensaje que nombre la lista que difiere.
+- Dato falso para el control negativo: `esperados` con 2 agentes y 2 skills, e `instalados.pi.skills` con una sola; `comprobar` debe lanzar `AssertionError`.
+- No se hace nada con `instalar.sh`, `desinstalar.sh` ni `scripts/resolver.mjs`.
+
+## Alcance / Fuera de alcance
+Alcance: el caso I7 y su control negativo en los dos archivos indicados.
+Fuera de alcance: modificar `instalar.sh`, `desinstalar.sh`, `scripts/resolver.mjs`, agentes o skills; comprobar el contenido de las skills o el modelo resuelto de cada agente (ya lo hace I2); comprobar `--proyecto`; limpiar `pruebas/.temporales/`; hacer commit.
+
+## Pasos
+1. Antes de cambiar nada, correr `bash pruebas/rapida.sh` y anotar en *Evidencia* el número de `ℹ pass` (llamado P).
+2. En `pruebas/comprobaciones/capa1.mjs`, añadir `case 'I7':` antes del `default`, con la lógica de *Decisiones ya tomadas*.
+3. En `pruebas/capa1/instalacion.test.mjs`, añadir `caso('I7', …)` después de `caso('I6', …)`: crea `entorno('I7')`, llama `exito(e.instalar())`, arma el dato y lo devuelve.
+4. En el mismo archivo, añadir la entrada `I7` al objeto `falsos`.
+5. Correr la Capa 1 y confirmar 14 pruebas pasando (las 12 de hoy más I7 real y su control negativo).
+6. Correr `bash pruebas/rapida.sh` y confirmar 0, `ℹ pass` igual a P + 2 y bajo 30 s.
+
+## Criterios de aceptación
+1. La Capa 1 pasa con 14 pruebas, 0 fallos, e incluye «I7: comprobación real» y «I7: control negativo rechaza salida falsa». Se comprueba con la primera orden.
+2. En la instalación real aislada, I7 compara 4 agentes y 7 skills esperados contra lo instalado en Claude Code y Pi. Se comprueba con la segunda orden (lee el JSON que la prueba guarda).
+3. `bash pruebas/rapida.sh` sale con 0, reporta `ℹ pass` igual a P + 2 (P = valor anotado en el paso 1) y `rapida: 9 archivos en N s (tope 30 s)` con N ≤ 30. Se comprueba con la tercera orden.
+
+## Verificación
+```
+cd /Users/franco/Codes/flucastr/Flucastr.AI
+node --test --test-concurrency=1 pruebas/capa1/instalacion.test.mjs 2>&1 | grep -E "^(✔ I7|✖ I7|ℹ (tests|pass|fail))"
+d=$(ls -dt pruebas/.temporales/capa1-* | head -1); node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1]+"/I7.json","utf8"))[0]; console.log(j.esperados.agentes.length, j.esperados.skills.length)' "$d"
+bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ (pass|fail)|rapida:)"
+```
+Salida esperada: `✔ I7: comprobación real`, `✔ I7: control negativo rechaza salida falsa`, `ℹ tests 14`, `ℹ pass 14`, `ℹ fail 0`; luego `4 7`; luego `ℹ pass` igual a P + 2, `ℹ fail 0` y `rapida: 9 archivos en N s (tope 30 s)` con N ≤ 30.
+
+## Evidencia
+
+## Notas
