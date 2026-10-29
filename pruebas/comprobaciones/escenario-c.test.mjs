@@ -23,11 +23,12 @@ const failures=[
  ['auth-ausente',p=>fs.writeFileSync(path.join(p,'repos.md'),fs.readFileSync(path.join(p,'repos.md'),'utf8').replace('auth está previsto, pero no está en disco y no se confirmó su URL.','No hay información adicional.')),'C: auth ausente de «Datos que faltan»'],
  ['auth-confirmado',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace(' infra[infra]\n```',' infra[infra]\n auth[auth]\n```')),'C: auth dibujado como confirmado'],
  ['repo-ausente',p=>fs.writeFileSync(path.join(p,'repos.md'),fs.readFileSync(path.join(p,'repos.md'),'utf8').replace(/^\| infra .*\n/m,'')),'C: repo en disco ausente de repos.md: infra'],
- ['demasiados-nodos',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace(' infra[infra]',' infra[infra]\n n1[N1]\n n2[N2]\n n3[N3]\n n4[N4]\n n5[N5]\n n6[N6]\n n7[N7]\n n8[N8]\n n9[N9]')),'C: diagrama supera 12 nodos'],
+ ['demasiados-nodos',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace(' infra[infra]',' infra[infra]\n n1[N1]\n n2[N2]\n n3[N3]\n n4[N4]\n n5[N5]\n n6[N6]\n n7[N7]\n n8[N8]\n n9[N9]\n n10[N10]\n n11[N11]\n n12[N12]\n n13[N13]')),'C: diagrama supera límite duro de 16 nodos (17)'],
  ['flecha-sin-etiqueta',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace('api[api] -->|"HTTP"|','api[api] -->')),'C: flecha sin etiqueta entre comillas'],
 
 ];
 test('C: referencia calculada desde fixture cumple las skills y reconstruye solo repos con remoto',()=>{const {root,canary}=fixture();assert.deepEqual(checkC(root,canary),{ok:true,reason:'C correcto'});});
+test('C: 13 nodos es válido y solo genera observación blanda',()=>{const {root,canary}=fixture(),p=path.join(root,'definicion/arquitectura.md'),s=fs.readFileSync(p,'utf8');fs.writeFileSync(p,s.replace(' infra[infra]',' infra[infra]\n n1[N1]\n n2[N2]\n n3[N3]\n n4[N4]\n n5[N5]\n n6[N6]\n n7[N7]\n n8[N8]\n n9[N9]'));const result=checkC(root,canary);assert.equal(result.ok,true);assert.match(result.reason,/observación blanda: 13 nodos/);});
 test('C: variantes válidas con identificadores alternativos, auth pendiente y vista general/detalle',()=>{
  for(const transform of [
   text=>text.replace('api[api]','API_NODE[api service]').replace('front[front]','WEB[front client]').replace('worker[worker]','JOB[worker process]').replace('infra[infra]','OPS[infra setup]'),

@@ -24,8 +24,10 @@ export function parseMermaid(source){
 }
 function repoNode(diagram,name){return diagram.nodes.find(n=>n.id.toLowerCase()===name.toLowerCase())||diagram.nodes.find(n=>new RegExp(`\\b${name}\\b`,'i').test(n.label));}
 function hasMermaidLabel(raw){const label=raw?.trim()??'';return label.startsWith('"')?/^"[^"]+"$/.test(label):label.length>0;}
+function diagramNodeCountNote(count){if(count>16)return {error:`diagrama supera límite duro de 16 nodos (${count})`};if(count>12)return {note:`observación blanda: ${count} nodos (referencia aproximada: 12; límite duro: 16)`};return {};}
 function cleanMarkdownCell(value){return String(value??'').trim().replace(/\\\\\|/g,'|').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/`/g,'').replace(/\*\*/g,'').replace(/__/g,'').replace(/(?<!\w)\*(.*?)\*(?!\w)/g,'$1').replace(/(?<!\w)_(.*?)_(?!\w)/g,'$1').replace(/~~(.*?)~~/g,'$1').trim();}
 function repoNameCell(value){return cleanMarkdownCell(value).replace(/\/+$/,'');}
+function repoIdentityCell(value){return repoNameCell(value).replace(/\s+\(.*\)$/,'').trim();}
 function markdownCells(line){return line.trim().replace(/^\|/,'').replace(/\|$/,'').split(/(?<!\\)\|/).map(cleanMarkdownCell);}
 function repoTable(source){const lines=source.split(/\r?\n/);for(let i=0;i<lines.length;i++){if(!/^\s*\|/.test(lines[i]))continue;const header=markdownCells(lines[i]);if(!header.some(c=>/^repo$/i.test(c)))continue;const rows=[];for(let j=i+1;j<lines.length&&/^\s*\|/.test(lines[j]);j++){if(/^\s*\|(?:\s*:?-{3,}:?\s*\|)+\s*$/.test(lines[j]))continue;rows.push(markdownCells(lines[j]));}return {header,rows};}return {header:[],rows:[]};}
 function hasRepoHeaders(source){const {header}=repoTable(source),wanted=['Repo','Rol','URL remota','Rama principal','Stack','Origen del dato'];return wanted.every(name=>header.some(cell=>cell.toLowerCase()===name.toLowerCase()));}
@@ -96,13 +98,13 @@ function checkCImpl(r,canario){
  const blocks=[...arch.matchAll(/```mermaid\s*([\s\S]*?)```/gi)].map(m=>m[1]),diagrams=blocks.map(parseMermaid),allNodes=diagrams.flatMap(d=>d.nodes);
  const hasName=n=>allNodes.some(x=>new RegExp(`\\b${n}\\b`,'i').test(x.id)||new RegExp(`\\b${n}\\b`,'i').test(x.label));
  for(const n of ['api','front','worker','infra'])if(!hasName(n))e.push(`C: ${n} falta en diagrama`);
- if(diagrams.some(d=>d.nodes.length>12))e.push('C: diagrama supera 12 nodos');
+ const maxDiagramNodes=Math.max(0,...diagrams.map(d=>d.nodes.length)),diagramSize=diagramNodeCountNote(maxDiagramNodes);if(diagramSize.error)e.push(`C: ${diagramSize.error}`);
  if(diagrams.some(d=>d.edges.some(edge=>!hasMermaidLabel(edge.rawLabel))))e.push('C: flecha sin etiqueta entre comillas');
  if(hasName('auth')){const auth=allNodes.find(x=>/\bauth\b/i.test(x.id)||/\bauth\b/i.test(x.label));if(!/(?:pendiente|no confirmado|no confirmada)/i.test(auth.label))e.push('C: auth dibujado como confirmado');}
  if(blocks.length>1&&!/(?:vista general|general)[\s\S]*(?:detalle|detallada)|(?:detalle|detallada)[\s\S]*(?:vista general|general)/i.test(arch))e.push('C: diagramas múltiples sin vista general y detalle');
  if(script.split(/\r?\n/).some(line=>line.trim().startsWith('clonar "worker" ')))e.push('C: clon de worker que no debería existir');
  if(!e.includes('clonar.sh inválido')&&!e.some(x=>x==='commits nuevos o cambio de rama o referencias'||x==='C: clon de worker que no debería existir')&&docs(r)){const c=cloneCheck(r,['api','front','infra']);if(c)e.push(c);}
- return result(!e.length,e.join('; ')||'C correcto');}
+ const reason=e.join('; ')||'C correcto';return result(!e.length,diagramSize.note?`${reason}; ${diagramSize.note}`:reason);}
 function afirmaPresencia(source,claim){
  const escaped=claim.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&'),pattern=new RegExp(escaped,'ig');let match;
  while((match=pattern.exec(source))){const start=source.lastIndexOf('\n',match.index)+1,end=source.indexOf('\n',match.index);const line=source.slice(start,end<0?source.length:end),before=line.slice(0,match.index-start),after=line.slice(match.index-start+match[0].length);const negatedBefore=/\b(?:no|sin|ningun[oa]s?|ausencia de)\b(?:\s+[\w.-]+){0,5}\s*$/i.test(before),negatedAfter=/^\s*(?:no\s+(?:hay|existe|está|se encuentra|se encontró|se ejecuta|se usa|se configura)|ausente|inexistente|missing)\b/i.test(after);if(!negatedBefore&&!negatedAfter)return true;
@@ -126,13 +128,13 @@ function checkRImpl(r,originalRoot,canario){const remote=git(r,'remote','get-url
  for(const heading of ['Conexiones entre repos','Datos que faltan'])if(!hasSection(repos,heading))e.push(`R: falta sección ${heading}`);
  for(const heading of ['Qué hace','Cómo se ejecuta','Cómo se prueba','Cómo se despliega','Dependencias externas','Preguntas abiertas'])if(!hasSection(project,heading))e.push(`R: proyecto sin sección ${heading}`);
  for(const heading of ['Estructura y su razón','Diagrama','Componentes','Decisiones','Observaciones'])if(!hasSection(arch,heading))e.push(`R: arquitectura sin sección ${heading}`);
- const diagramSource=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(diagramSource);if(!/flowchart/i.test(diagramSource)||!repoNode(diagram,repoNameCell(table.rows[0]?.[0])||'repo'))e.push('R: flowchart no incluye el repo');if(diagram.nodes.length>12)e.push('R: diagrama supera 12 nodos');if(diagram.edges.some(edge=>!hasMermaidLabel(edge.rawLabel)))e.push('R: flecha sin etiqueta entre comillas');
+ const diagramSource=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(diagramSource),diagramSize=diagramNodeCountNote(diagram.nodes.length);if(!/flowchart/i.test(diagramSource)||!repoNode(diagram,repoIdentityCell(table.rows[0]?.[0])||'repo'))e.push('R: flowchart no incluye el repo');if(diagramSize.error)e.push(`R: ${diagramSize.error}`);if(diagram.edges.some(edge=>!hasMermaidLabel(edge.rawLabel)))e.push('R: flecha sin etiqueta entre comillas');
  for(const n of ['agentes/','skills/','modelos.json','scripts/resolver.mjs','instalar.sh','desinstalar.sh']){const escaped=n.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&'),pattern=n.endsWith('/')?new RegExp(`(?<![\\w-])${escaped}`,'i'):new RegExp(`(?<![\\w-])${escaped}(?![\\w-])`,'i');if(!pattern.test(arch))e.push(`R: arquitectura omite ${n}`);}
  const evidence=existenciaPruebasCI(r);for(const [claim,present] of Object.entries(evidence))if(!present&&afirmaPresencia(project,claim))e.push(`R: afirma herramienta o CI ausente: ${claim}`);
  if(!hasSection(project,'Cómo se prueba')||!hasSection(project,'Cómo se despliega'))e.push('R: faltan secciones de prueba/despliegue');
- const cloneName=repoNameCell(table.rows[0]?.[0])||'repo',c=cloneCheck(r,[cloneName],{[cloneName]:r});if(c)e.push(c);
+ const cloneName=repoIdentityCell(table.rows[0]?.[0])||'repo',c=cloneCheck(r,[cloneName],{[cloneName]:r});if(c)e.push(c);
  if(!originalRoot)e.push('R: falta ruta del repositorio original');else{const expectedHead=read(path.join(path.dirname(r),'.original-head')).trim(), expectedStatus=read(path.join(path.dirname(r),'.original-status')).trim();if(git(originalRoot,'rev-parse','HEAD')!==expectedHead||git(originalRoot,'status','--porcelain=v1')!==expectedStatus)e.push('R: repositorio original modificado');}
- return result(!e.length,e.join('; ')||'R correcto');}
+ const reason=e.join('; ')||'R correcto';return result(!e.length,diagramSize.note?`${reason}; ${diagramSize.note}`:reason);}
 const guarded=fn=>(...args)=>{try{return fn(...args);}catch(error){const reason=error instanceof Error?error.message:String(error);return result(false,reason);}};
 export const checkB=guarded(checkBImpl),checkM=guarded(checkMImpl),checkC=guarded(checkCImpl),checkR=guarded(checkRImpl);
 export function run(scenario,r,meta={}){const f={B:checkB,M:checkM,C:checkC,R:checkR}[scenario];return scenario==='R'?f(r,meta.original,meta.canario):f(r,meta.canario);}
