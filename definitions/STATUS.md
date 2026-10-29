@@ -5,15 +5,16 @@
 ## Paso actual
 
 Rol: coordinador.
-F03 `hecha` (confirmada por Franco); sus 6 tareas `hecha`. F02 y F01 `hecha`.
-Siguiente en orden: F04 (completar una feature real mediante las cuatro puertas). Sin tareas todavía.
-Pendiente de forma: la marca `→` del backlog sigue en F03 (`hecha`); mientras no se mueva, la verificación rápida del backlog fallará. La mueve el planificador al descomponer F04.
+F01, F02, F03 y F04 `hecha` (F04 confirmada por Franco; sus 3 tareas `hecha`).
+Siguiente en orden: F05 (ramas por feature y refinado previo). Sin tareas.
+Pendiente de forma: la marca `→` del backlog sigue en F04 (`hecha`); mientras no se mueva, la verificación rápida del backlog fallará. La mueve el planificador al descomponer la siguiente feature.
 
 ## Espera a Franco
 
-- Decidir si se descompone F04 (puerta 3). F04 pide elegir una feature real para probar el flujo; el planificador lo planteará al descomponer.
-- Commit de los cambios de F02 y F03: lo haces tú.
-- Decisiones abiertas que dejó F03: estado que debe dejar el constructor ante una escalación (varió entre `en curso` y `bloqueada`), cobertura de comandos compuestos en la allowlist del lanzador y rol correcto en el bloqueo.
+- F05 y F06 contradicen la definición aprobada (`WORKFLOW.md` y `AGENTS.md` prohíben commit, PR y despliegue por agentes). Antes de descomponerlas, el `arquitecto` debe actualizar `definitions/` (puerta 1) y tú reaprobar el backlog, que agregó alcance. Decide si empezamos por ahí.
+- Commit de los cambios de F02, F03 y F04: lo haces tú.
+- Decisión abierta: tarea aparte para ajustar `descomponer-feature` según la calibración de «acotada» (bajar «~5 archivos» a «~3»; agregar a «Completa» que la verificación no fije conteos ni estados de otros documentos).
+- Decisiones abiertas de F03: estado del constructor ante una escalación, comandos compuestos en la allowlist y rol del bloqueo.
 
 ## Bloqueos abiertos
 
