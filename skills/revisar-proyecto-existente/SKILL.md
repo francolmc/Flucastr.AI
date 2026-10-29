@@ -27,7 +27,7 @@ De cada repo lee:
 - README y documentación.
 - Manifiestos (`package.json`, `requirements.txt`, `pom.xml`, `go.mod`, etc.) y configuración.
 - Docker, compose y CI.
-- Git: `git remote -v`, rama actual y principal, `git log --oneline -20`.
+- Git: consulta el remoto, la rama actual y principal, y `git log --oneline -20`. Ejecuta cada consulta en una llamada independiente con `git -C <ruta>` (por ejemplo, `git -C <ruta> remote -v`); no encadenes `cd <ruta> && git ...` ni varias órdenes Git en una sola llamada.
 
 ### 3. Contexto
 
@@ -48,6 +48,7 @@ Tabla con las columnas *Repo*, *Rol*, *URL remota*, *Rama principal*, *Stack*, *
 
 - **Conexiones entre repos**: qué llama a qué y por qué medio.
 - **Datos que faltan**: lo que no se pudo confirmar.
+- **Estado**: borrador.
 
 ## Formato de `proyecto.md` (proyecto existente)
 
