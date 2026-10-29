@@ -1,5 +1,5 @@
 # task-03 — Comprobación del formato de las tareas
-repo: Flucastr.AI   depende_de: task-02   estado: borrador
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Una tarea mal formada (sin «Fuera de alcance», con 12 pasos, con un marcador de pendiente) obliga al constructor a detenerse o adivinar. Esta tarea añade un validador determinista de la plantilla de `definitions/WORKFLOW.md` §6 y una prueba que lo aplica a todas las tareas de `features/`. Entra en la verificación rápida sin tocar `rapida.sh`, porque esta recoge por glob los `*.test.mjs` de `pruebas/comprobaciones/`.
@@ -53,4 +53,49 @@ Salida esperada: `ℹ fail 0` con `ℹ pass` igual a `ℹ tests` (al menos 11); 
 
 ## Evidencia
 
+Corridas desde `/Users/franco/Codes/flucastr/Flucastr.AI`, Node v25.8.1, zsh.
+
+Paso 4 (solo el archivo nuevo), `node --test pruebas/comprobaciones/formato-tarea.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"`:
+```
+ℹ tests 13
+ℹ pass 13
+ℹ fail 0
+```
+Código de salida de esa misma prueba (corrida aparte): `0`.
+
+Criterio 3, `node --input-type=module -e '...validarTarea...' ` sobre `task-01-limpieza-pruebas.md` con `Fuera de alcance:` cambiado por `Sin límites:`:
+```
+RECHAZADA
+```
+
+Paso 5, `bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ fail|rapida:)"`:
+```
+ℹ fail 0
+rapida: 8 archivos en 13 s (tope 30 s)
+```
+Código de salida de `bash pruebas/rapida.sh` (corrida aparte, `echo "codigo_salida_rapida=$?"`): `codigo_salida_rapida=0`.
+
+Estado del árbol tras el trabajo (`git status --short`), sin tocar nada ajeno:
+```
+ M features/F01-base-verificacion-rapida/task-03-formato-tarea.md
+?? pruebas/comprobaciones/formato-tarea.mjs
+?? pruebas/comprobaciones/formato-tarea.test.mjs
+```
+
+Criterios de aceptación:
+1. `validarTarea` acepta la muestra y rechaza las nueve variantes: sí, pruebas «la muestra válida no produce errores» y «rechaza una tarea con violación de …» pasan (13/13).
+2. Las tareas reales de `features/` pasan y existen: sí, prueba «las tareas reales de features/ cumplen el formato» pasa (incluye `task-01` a `task-05` y esta).
+3. Tarea real con defecto introducido en memoria se rechaza: sí, `RECHAZADA`.
+4. `rapida.sh` sale con 0, `rapida: 8 archivos`, 13 s ≤ 30 s: sí.
+
 ## Notas
+Decisiones menores tomadas (huecos no cubiertos por la tarea):
+- Bloques de código: se reconocen por líneas que empiezan por tres comillas invertidas, con alternancia abierto/cerrado; dentro de ellos no se buscan encabezados `## ` ni marcadores.
+- Regla 3: además del mensaje de orden exacto, cada sección ausente genera «Falta la sección «## …»», para que el error sea concreto.
+- Regla 4: la exigencia de `Evidencia` no vacía se aplica solo con estado `lista para revisión` o `hecha`, tal como pide la tarea.
+- Regla 8: se quitan bloques de código y fragmentos entre comillas invertidas (en una línea) antes de buscar `TBD`, `a definir` o `según corresponda`.
+- Prueba extra no pedida: «exige Evidencia no vacía con estado «lista para revisión»», porque la regla 4 tiene esa parte y las nueve variantes no la cubren.
+- La prueba de `depende_de` recorre las tareas reales y busca `<ID>-*.md` en la misma carpeta; se usa `.startsWith`/`.endsWith` sobre los nombres de los hermanos.
+- `rapida.sh` no se modificó: el glob de `pruebas/comprobaciones/*.test.mjs` recogió el archivo nuevo; la corrida final cuenta 8 archivos, incluido el nuevo.
+
+Huecos menores: los listados arriba, todos resueltos con la opción más conservadora. Son pocos, así que no aplica la señal de tarea incompleta.
