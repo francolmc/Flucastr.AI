@@ -11,14 +11,18 @@ const docs=(r)=>['proyecto.md','repos.md','arquitectura.md','clonar.sh'].every(n
 const md=(r,n)=>doc(r,n);
 export function parseMermaid(source){
  const nodes=new Map(),edges=[];const clean=s=>s.trim().replace(/^(['"])(.*)\1$/,'$2');
- const defs=/\b([A-Za-z_][\w-]*)\s*(?:\[((?:[^\]\\]|\\.)*)\]|\(\((.*?)\)\)|\((.*?)\)|\{(.*?)\})/g;let m;
+ const defs=/\b([A-Za-z_][\w-]*)(?:\[((?:[^\]\\]|\\.)*)\]|\(\((.*?)\)\)|\((.*?)\)|\{(.*?)\})/g;let m;
  while((m=defs.exec(source))){const raw=m[2]??m[3]??m[4]??m[5]??m[1];nodes.set(m[1],{id:m[1],label:clean(raw)});}
- source=source.replace(/\b([A-Za-z_][\w-]*)\s*\[[^\]]*\]/g,'$1').replace(/--\s*([^|\n]*?)\s*-->/g,(_,label)=>label.trim()?`-->|${label.trim()}|`:'-->');
- const edgeRe=/\b([A-Za-z_][\w-]*)\s*(?:--\s*(?:\|([^|]*)\|\s*)?-->\s*|-->\s*(?:\|([^|]*)\|\s*)?)([A-Za-z_][\w-]*)/g;
- while((m=edgeRe.exec(source))){const label=m[2]??m[3];edges.push({from:m[1],rawLabel:label??null,to:m[4],label:label===undefined?null:clean(label)});}
+ source=source.replace(/\b([A-Za-z_][\w-]*)\s*\[[^\]]*\]/g,'$1');
+ const id='([A-Za-z_][\\w-]*)';
+ source=source
+  .replace(new RegExp(`\\b${id}\\s+-\\.\\s+("[^"\\n]*"|[^|\\n]+?)\\s+\\.->\\s*${id}`,'g'),(_,from,label,to)=>`${from} -.->|${label.trim()}| ${to}`)
+  .replace(new RegExp(`\\b${id}\\s+--\\s+("[^"\\n]*"|[^|\\n]+?)\\s+-->\\s*${id}`,'g'),(_,from,label,to)=>`${from} -->|${label.trim()}| ${to}`);
+ const edgeRe=/\b([A-Za-z_][\w-]*)\s*(<-->|-\.->|-->|---|-\.-|==>|===|--o|--x)\s*(?:\|([^|\n]*)\|\s*)?(?=([A-Za-z_][\w-]*))/g;
+ while((m=edgeRe.exec(source))){const label=m[3];edges.push({from:m[1],operator:m[2],rawLabel:label??null,to:m[4],label:label===undefined?null:clean(label)});}
  return {nodes:[...nodes.values()],edges};
 }
-function repoNode(diagram,name){return diagram.nodes.find(n=>new RegExp(`\\b${name}\\b`,'i').test(n.id)||new RegExp(`\\b${name}\\b`,'i').test(n.label));}
+function repoNode(diagram,name){return diagram.nodes.find(n=>n.id.toLowerCase()===name.toLowerCase())||diagram.nodes.find(n=>new RegExp(`\\b${name}\\b`,'i').test(n.label));}
 function hasMermaidLabel(raw){const label=raw?.trim()??'';return label.startsWith('"')?/^"[^"]+"$/.test(label):label.length>0;}
 function cleanMarkdownCell(value){return String(value??'').trim().replace(/\\\\\|/g,'|').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/`/g,'').replace(/\*\*/g,'').replace(/__/g,'').replace(/(?<!\w)\*(.*?)\*(?!\w)/g,'$1').replace(/(?<!\w)_(.*?)_(?!\w)/g,'$1').replace(/~~(.*?)~~/g,'$1').trim();}
 function repoNameCell(value){return cleanMarkdownCell(value).replace(/\/+$/,'');}
@@ -123,10 +127,10 @@ function checkRImpl(r,originalRoot,canario){const remote=git(r,'remote','get-url
  for(const heading of ['Qué hace','Cómo se ejecuta','Cómo se prueba','Cómo se despliega','Dependencias externas','Preguntas abiertas'])if(!hasSection(project,heading))e.push(`R: proyecto sin sección ${heading}`);
  for(const heading of ['Estructura y su razón','Diagrama','Componentes','Decisiones','Observaciones'])if(!hasSection(arch,heading))e.push(`R: arquitectura sin sección ${heading}`);
  const diagramSource=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(diagramSource);if(!/flowchart/i.test(diagramSource)||!repoNode(diagram,repoNameCell(table.rows[0]?.[0])||'repo'))e.push('R: flowchart no incluye el repo');if(diagram.nodes.length>12)e.push('R: diagrama supera 12 nodos');if(diagram.edges.some(edge=>!hasMermaidLabel(edge.rawLabel)))e.push('R: flecha sin etiqueta entre comillas');
- for(const n of ['agentes/','skills/','modelos.json','scripts/resolver.mjs','instalar.sh','desinstalar.sh'])if(!new RegExp(`(?<![\\w-])${n.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}(?![\\w-])`,'i').test(arch))e.push(`R: arquitectura omite ${n}`);
+ for(const n of ['agentes/','skills/','modelos.json','scripts/resolver.mjs','instalar.sh','desinstalar.sh']){const escaped=n.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&'),pattern=n.endsWith('/')?new RegExp(`(?<![\\w-])${escaped}`,'i'):new RegExp(`(?<![\\w-])${escaped}(?![\\w-])`,'i');if(!pattern.test(arch))e.push(`R: arquitectura omite ${n}`);}
  const evidence=existenciaPruebasCI(r);for(const [claim,present] of Object.entries(evidence))if(!present&&afirmaPresencia(project,claim))e.push(`R: afirma herramienta o CI ausente: ${claim}`);
  if(!hasSection(project,'Cómo se prueba')||!hasSection(project,'Cómo se despliega'))e.push('R: faltan secciones de prueba/despliegue');
- const c=cloneCheck(r,['repo'],{repo:r});if(c)e.push(c);
+ const cloneName=repoNameCell(table.rows[0]?.[0])||'repo',c=cloneCheck(r,[cloneName],{[cloneName]:r});if(c)e.push(c);
  if(!originalRoot)e.push('R: falta ruta del repositorio original');else{const expectedHead=read(path.join(path.dirname(r),'.original-head')).trim(), expectedStatus=read(path.join(path.dirname(r),'.original-status')).trim();if(git(originalRoot,'rev-parse','HEAD')!==expectedHead||git(originalRoot,'status','--porcelain=v1')!==expectedStatus)e.push('R: repositorio original modificado');}
  return result(!e.length,e.join('; ')||'R correcto');}
 const guarded=fn=>(...args)=>{try{return fn(...args);}catch(error){const reason=error instanceof Error?error.message:String(error);return result(false,reason);}};
