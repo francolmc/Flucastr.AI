@@ -1,5 +1,5 @@
 # task-05 — Capa 1: comprobar que se instalan todos los agentes y skills
-repo: Flucastr.AI   depende_de: task-04   estado: borrador
+repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
 ## Descripción
 La Capa 1 comprueba que lo instalado es correcto (I2: encabezado y modelo) pero no que esté todo lo que debe: si `instalar.sh` dejara de instalar `coordinador`, `planificador`, `constructor` o una skill nueva, nada fallaría. Esta tarea añade el caso I7, con su control negativo, que compara las fuentes (`agentes/`, `skills/`) con lo instalado para Claude Code y Pi, incluidos los lanzadores `pi-<agente>`. Sigue siendo determinista y corre dentro de la verificación rápida.
@@ -46,4 +46,50 @@ Salida esperada: `✔ I7: comprobación real`, `✔ I7: control negativo rechaza
 
 ## Evidencia
 
+**Paso 1 (P medido antes de cambiar nada)**: `bash pruebas/rapida.sh`, salida de la corrida inicial (código 0):
+```
+ℹ pass 60
+ℹ fail 0
+rapida: 9 archivos en 13 s (tope 30 s)
+```
+P = 60, por tanto la meta del paso 6 es `ℹ pass 62`.
+
+**Verificación 1** (`node --test --test-concurrency=1 pruebas/capa1/instalacion.test.mjs 2>&1 | grep -E "^(✔ I7|✖ I7|ℹ (tests|pass|fail))"`):
+```
+✔ I7: comprobación real (1050.353584ms)
+✔ I7: control negativo rechaza salida falsa (0.198375ms)
+ℹ tests 14
+ℹ pass 14
+ℹ fail 0
+```
+Código de salida de la Capa 1, medido en una corrida aparte (`node --test ... >/dev/null 2>&1; echo $?`): 0. En la primera orden no se usó `PIPESTATUS` para el código: en zsh esa variable no existe y el `echo` salió vacío, así que se midió por separado.
+
+**Verificación 2** (lee `I7.json` de la última corrida):
+```
+d=pruebas/.temporales/capa1-GRvqJY
+4 7
+```
+
+**Verificación 3** (`bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ (pass|fail)|rapida:)"`):
+```
+ℹ pass 62
+ℹ fail 0
+rapida: 9 archivos en 14 s (tope 30 s)
+```
+Código de salida de `rapida.sh`, en corrida aparte (`bash pruebas/rapida.sh >/dev/null 2>&1; echo $?`): 0. El `exit=$?` de la línea combinada midió el código de `grep`, no el de `rapida.sh`; por eso el código válido es el de la corrida aparte.
+
+**Criterios de aceptación**
+1. Capa 1 con 14 pruebas, 0 fallos, con «I7: comprobación real» y «I7: control negativo rechaza salida falsa»: cumple (verificación 1).
+2. Instalación real aislada: I7 compara 4 agentes y 7 skills esperados: cumple (verificación 2, `4 7`).
+3. `rapida.sh` sale con 0, `ℹ pass` = 62 = P + 2 (P = 60), `ℹ fail 0`, `9 archivos en 14 s` (≤ 30 s): cumple (verificación 3).
+
 ## Notas
+- Cambios realizados: `pruebas/comprobaciones/capa1.mjs` (caso `I7` antes de `default`) y `pruebas/capa1/instalacion.test.mjs` (`caso('I7', …)` después de I6, y entrada `I7` en `falsos`). No se tocó `instalar.sh`, `desinstalar.sh`, `scripts/resolver.mjs`, agentes ni skills. No se escribió en `STATUS.md` ni `BACKLOG.md`. No hubo commit, push, PR, merge ni despliegue.
+- Huecos menores resueltos (la tarea no lo fijaba):
+  1. `esperados.skills` solo cuenta subdirectorios de `skills/` (`isDirectory`), que es lo que dice la tarea; los nombres instalados se listan sin filtrar por tipo, por si una skill se instala como enlace.
+  2. Los lanzadores `pi-<agente>` se comparan contra `esperados.agentes`, porque hay un lanzador por agente. Es la lectura más directa de la tarea.
+  3. El control negativo cambia solo `instalados.pi.skills` (una sola entrada); el resto coincide, así que la aserción que falla es la de Pi/skills.
+- No fue necesario ajustar conteos: la rápida corre 9 archivos, como dice la tarea.
+- No hubo «Señal: la tarea estaba incompleta»: los huecos fueron dos o tres y se resolvieron sin escalar.
+- Archivos sin relación con la tarea que ya estaban modificados en el árbol (`definitions/BACKLOG.md`, `definitions/STATUS.md`, `task-04`, `pruebas/comprobaciones/formato-flujo*.mjs`) no se tocaron.
+- Artefactos conservados por la prueba en `pruebas/.temporales/` (no se limpiaron, según *Fuera de alcance*).

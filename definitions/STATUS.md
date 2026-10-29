@@ -5,12 +5,14 @@
 ## Paso actual
 
 Rol: coordinador.
-Feature: F01. task-01, task-02 y task-03 `hecha`. task-04 y task-05 en `borrador`.
-El backlog sigue en `borrador` (F05–F07 y el máximo de 6 se retoman al terminar F01, decisión de Franco).
+Feature: F01 con sus 5 tareas `hecha`. Falta que Franco la cierre como feature en el backlog y haga el commit.
+Backlog aprobado (6 features). Siguiente en orden: F02.
 
 ## Espera a Franco
 
-Puerta 3 — aprobar task-04 (`/Users/franco/Codes/flucastr/Flucastr.AI/features/F01-base-verificacion-rapida/task-04-formato-backlog-status.md`). Task-05 se aprueba después.
+- Cerrar F01 en `/Users/franco/Codes/flucastr/Flucastr.AI/definitions/BACKLOG.md` (estado de la feature y marca de siguiente), con tu aprobación explícita.
+- Commit de los cambios de F01 (los hace Franco).
+- Después, decidir si se descompone F02 (puerta 3).
 
 ## Bloqueos abiertos
 

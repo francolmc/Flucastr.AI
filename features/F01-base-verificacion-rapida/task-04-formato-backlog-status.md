@@ -1,5 +1,5 @@
 # task-04 — Comprobación del formato de BACKLOG.md y STATUS.md
-repo: Flucastr.AI   depende_de: task-03   estado: borrador
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
 `BACKLOG.md` y `STATUS.md` son los archivos con los que el coordinador decide el paso siguiente; si cambian de forma, el flujo se desorienta sin avisar. Esta tarea (tras task-03, que ya añadió un archivo de prueba) añade validadores deterministas de su estructura (`definitions/WORKFLOW.md` §3 y §4) y una prueba que los aplica a los archivos reales si existen. Entra en la verificación rápida por el glob de `rapida.sh`.
@@ -55,4 +55,58 @@ Salida esperada: `ℹ fail 0` con `ℹ pass` igual a `ℹ tests`; `OK OK`; `RECH
 
 ## Evidencia
 
+Corrida nueva desde `/Users/franco/Codes/flucastr/Flucastr.AI` (zsh). Se pega la salida real de cada orden de *Verificación* tal cual. No se usa `PIPESTATUS`: los códigos de salida se midieron en una corrida aparte con `>/dev/null` y `$?`.
+
+Verificación 1, `node --test pruebas/comprobaciones/formato-flujo.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"`:
+```
+ℹ tests 13
+ℹ pass 13
+ℹ fail 0
+```
+
+Verificación 2, `node --input-type=module -e '...validarBacklog... validarStatus...'` (sobre los archivos reales):
+```
+OK OK
+```
+
+Verificación 3, `node --input-type=module -e '...replace("| pendiente | |\n| F03","| pendiente | → |\n| F03")...'`:
+```
+RECHAZADO
+```
+
+Verificación 4, `bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ fail|rapida:)"`:
+```
+ℹ fail 0
+rapida: 9 archivos en 15 s (tope 30 s)
+```
+
+Códigos de salida (corridas aparte con `>/dev/null`):
+```
+exit test=0
+exit rapida=0
+```
+
+Estado del árbol (`git status --short`), sin commit:
+```
+ M definitions/BACKLOG.md
+ M definitions/STATUS.md
+ M features/F01-base-verificacion-rapida/task-04-formato-backlog-status.md
+?? pruebas/comprobaciones/formato-flujo.mjs
+?? pruebas/comprobaciones/formato-flujo.test.mjs
+```
+`BACKLOG.md` y `STATUS.md` ya estaban modificados al empezar esta ejecución; no los toqué. Tampoco toqué los demás cambios sin commitear.
+
+Criterios:
+1. Cumplido: las muestras válidas y las 9 variantes negativas pasan en `formato-flujo.test.mjs` (13 de 13).
+2. Cumplido: `OK OK` sobre `definitions/BACKLOG.md` (6 features, `Estado del documento: aprobado`) y `definitions/STATUS.md`.
+3. Cumplido: el backlog real aprobado es válido (`OK` antes de alterarlo) y la alteración con dos `→` da `RECHAZADO`.
+4. Cumplido: `rapida.sh` sale con 0, `ℹ fail 0` y `rapida: 9 archivos en 15 s (tope 30 s)`, con 15 ≤ 30.
+
 ## Notas
+- Reabierta por Franco: estado `aprobada`, pasó a `en curso` y luego a `lista para revisión`.
+- Bloqueo previo, resuelto (resumen): la ejecución anterior quedó `bloqueada` porque `definitions/BACKLOG.md` estaba en borrador con 7 features y con texto tras «borrador», y la regla 2 (1 a 6 features) y la regla 5 (`Estado del documento`) lo rechazaban. Franco corrigió el backlog a 6 features y lo aprobó (`Estado del documento: aprobado`). Esta corrida pasa; no edité `BACKLOG.md` ni `STATUS.md`.
+- Revisión contra la tarea: `formato-flujo.mjs` y `formato-flujo.test.mjs` ya cubrían las reglas 1 a 5 de `validarBacklog`, las reglas 1 a 4 de `validarStatus`, las muestras válidas, las 9 variantes negativas y las dos pruebas sobre los archivos reales con `t.skip()`. No cambié código.
+- Hueco menor: la tarea no decía si `aprobado` vale como estado de documento. El validador ya lo acepta (`/^Estado del documento: (borrador|aprobado)\s*$/m`), así que lo dejé como está; la prueba real pasa con esa línea.
+- La verificación 3 ahora rechaza por la regla de dos `→` sobre un backlog real válido. Antes había un error previo, así que el rechazo no probaba esa regla.
+- Códigos de salida medidos en corridas aparte, sin `PIPESTATUS`, como indica la tarea.
+- Sin commit, push, PR, merge ni despliegue. En la tarea solo toqué *Evidencia*, *Notas* y `estado`.

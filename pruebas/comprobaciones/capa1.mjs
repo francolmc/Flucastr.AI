@@ -41,6 +41,17 @@ export function comprobar(id, dato) {
         assert.equal(r.stdout, '', 'produjo salida parcial');
       }
       break;
+    case 'I7':
+      for (const r of dato) {
+        assert.ok(r.esperados.agentes.length > 0, 'no hay agentes esperados (fuente vacía)');
+        assert.ok(r.esperados.skills.length > 0, 'no hay skills esperadas (fuente vacía)');
+        assert.deepEqual(r.instalados.claude.agentes, r.esperados.agentes, 'agentes de Claude Code no coinciden con agentes/');
+        assert.deepEqual(r.instalados.claude.skills, r.esperados.skills, 'skills de Claude Code no coinciden con skills/');
+        assert.deepEqual(r.instalados.pi.agentes, r.esperados.agentes, 'agentes de Pi no coinciden con agentes/');
+        assert.deepEqual(r.instalados.pi.skills, r.esperados.skills, 'skills de Pi no coinciden con skills/');
+        assert.deepEqual(r.instalados.pi.lanzadores, r.esperados.agentes, 'lanzadores pi-<agente> no coinciden con agentes/');
+      }
+      break;
     default: throw new Error(`Comprobación desconocida: ${id}`);
   }
 }

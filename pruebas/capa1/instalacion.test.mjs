@@ -137,6 +137,20 @@ caso('I6', () => {
   writeFileSync(archivo, original.replace(/^---\r?\n/, '---\nmodel: modelo-prohibido\n'));
   return ['agente-claude', 'agente-pi'].map(orden => e.resolver(orden, archivo));
 });
+caso('I7', () => {
+  const e = entorno('I7');
+  exito(e.instalar());
+  const nombres = (dir, filtro = () => true) => readdirSync(dir, { withFileTypes: true }).filter(filtro).map(d => d.name).sort();
+  const md = dir => nombres(dir, d => d.name.endsWith('.md')).map(n => n.slice(0, -3));
+  const esperados = {
+    agentes: md(join(e.repo, 'agentes')),
+    skills: nombres(join(e.repo, 'skills'), d => d.isDirectory())
+  };
+  const lanzadores = nombres(join(e.home, '.local/bin')).filter(n => n.startsWith('pi-')).map(n => n.slice(3));
+  return [{ esperados, instalados: {
+    claude: { agentes: md(join(e.home, '.claude/agents')), skills: nombres(join(e.home, '.claude/skills')) },
+    pi: { agentes: md(join(e.pi, 'agents')), skills: nombres(join(e.pi, 'skills')), lanzadores } } }];
+});
 
 // Salidas falsas: la MISMA comprobación debe rechazarlas. No se altera el producto.
 const falsos = {
@@ -145,7 +159,14 @@ const falsos = {
   I3: [{ antes: {}, despues: { resto: 'archivo' }, motivo: 'quedó un archivo' }],
   I4: [{ antes: { personal: 'original' }, despues: { personal: 'pisado' }, motivo: 'pisó archivo' }],
   I5: [{ caso: 'falso-exito', status: 0, stderr: '', mensaje: /error:/, antes: {}, despues: {} }],
-  I6: [{ status: 0, stdout: 'agente aceptado', stderr: '' }]
+  I6: [{ status: 0, stdout: 'agente aceptado', stderr: '' }],
+  I7: [{
+    esperados: { agentes: ['arquitecto', 'constructor'], skills: ['crear-backlog', 'ejecutar-tarea'] },
+    instalados: {
+      claude: { agentes: ['arquitecto', 'constructor'], skills: ['crear-backlog', 'ejecutar-tarea'] },
+      pi: { agentes: ['arquitecto', 'constructor'], skills: ['ejecutar-tarea'], lanzadores: ['arquitecto', 'constructor'] }
+    }
+  }]
 };
 for (const [id, dato] of Object.entries(falsos)) {
   test(`${id}: control negativo rechaza salida falsa`, () => {
