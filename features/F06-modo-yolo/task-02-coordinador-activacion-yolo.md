@@ -1,5 +1,5 @@
 # task-02 — El coordinador: activación, rechazo y registro del modo yolo
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 `agentes/coordinador.md` no conoce el modo yolo. Esta tarea añade la parte de entrada de `definitions/WORKFLOW.md` §9.3: cuándo se activa (solo por pedido explícito de Franco en la conversación, con alcance nombrado, definición aprobada y un único repo), cuándo se niega, cómo se registra en `STATUS.md` y la advertencia cuando la rama actual es `main`. La orquestación del modo queda para task-03.

@@ -1,5 +1,5 @@
 # task-03 — El coordinador orquesta el modo yolo sin puertas y se detiene ante escalaciones
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
 
 ## Descripción
 Con la activación ya escrita (task-02), el `coordinador` debe saber qué hace mientras el modo está activo (`definitions/WORKFLOW.md` §9.3): pide la descomposición al `planificador`, aprueba tareas que pasan la revisión de «completa», delega al `constructor` sin `Rama:`, marca `hecha` solo con evidencia real, trata `REFINAR:` y `CONFIRMAR:` como escalación, respeta los límites que no se omiten y deja el registro final en `STATUS.md`.
@@ -52,4 +52,51 @@ Esperado: el primer `grep` muestra 1; los demás, un número mayor que 0; las pr
 
 ## Evidencia
 
+Rama al inicio: `git branch --show-current` → `feature/F06-modo-yolo` (igual al encargo; no se hizo `git switch`). Prerrequisito task-02: `grep -c '^## Modo yolo' agentes/coordinador.md` → `1`.
+
+Verificación (salida real):
+
+```
+$ grep -c '^### Mientras está activo' agentes/coordinador.md
+1
+$ for f in 'Modo yolo: terminado' 'Modo yolo: detenido (feature Fxx requiere refinado)' 'REFINAR: feature=Fxx; preguntas=<n>' 'Excepción: en el modo yolo' 'no le pasas la línea' 'no hay push, PR, merge ni despliegue'; do grep -c -F -- "$f" agentes/coordinador.md; done
+2
+1
+2
+1
+1
+1
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/formato-flujo.test.mjs
+(últimas 12 líneas de la salida)
+✔ status: orden de secciones cambiado se rechaza (0.103791ms)
+✔ status: fecha inválida se rechaza (0.051584ms)
+✔ definitions/BACKLOG.md real cumple el formato (0.354916ms)
+✔ definitions/STATUS.md real cumple el formato (0.192583ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 78.722625
+$ git status --short agentes
+ M agentes/coordinador.md
+```
+
+Criterios de aceptación:
+1. `Modo yolo: terminado` (2), `Modo yolo: detenido (feature Fxx requiere refinado)` (1), `REFINAR: feature=Fxx; preguntas=<n>` (2): cumple.
+2. `no le pasas la línea` (1), `es escalación` (6), `Evidencia` (1): cumple.
+3. `Excepción: en el modo yolo` (1) en `## Límites`; `no hay push, PR, merge ni despliegue` (1): cumple.
+4. Pruebas de contrato y formato: `fail 0` (27 pasan): cumple.
+5. `git status --short agentes` solo muestra `agentes/coordinador.md`: cumple.
+
+Cambio en `agentes/coordinador.md`: subsección `### Mientras está activo` (nueve reglas) dentro de `## Modo yolo`, antes de `## Bloqueos`; frase de excepción añadida al segundo bullet de `## Límites`. No se tocó ningún otro bullet ni otro archivo de agente.
+
 ## Notas
+
+- Huecos menores resueltos: la sección «Mientras está activo» se colocó entre la regla 5 de `## Modo yolo` (task-02) y `## Bloqueos`, que es el lugar que indica la tarea («a continuación de las cinco reglas de task-02»). La frase de excepción se añadió a continuación del texto existente del segundo bullet, sin reescribirlo.
+- Las nueve reglas se copiaron del texto de *Decisiones ya tomadas* sin cambios de redacción.
+- Única línea de `STATUS.md` ni `definitions/` tocadas: ninguna.
+- Sin señal de tarea incompleta: no faltó ninguna decisión necesaria.
+- Pendiente de Franco: task-03 no se marca `hecha`; la revisión de la evidencia es suya.
