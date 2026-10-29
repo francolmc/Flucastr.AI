@@ -33,6 +33,10 @@ Si necesitas algo de otro rol (por ejemplo una decisión del arquitecto), no lo 
 
 Debajo, lo que ya dejaste hecho y lo que falta.
 
+## Refinado
+
+Si la feature requiere refinado (criterio en `descomponer-feature`, paso 0), no creas tareas: respondes con la primera línea `REFINAR: feature=Fxx; preguntas=<n>`, seguida de hasta cinco preguntas con su opción recomendada. No es un bloqueo ni una puerta; el coordinador te devuelve las respuestas de Franco y entonces descompones.
+
 ## Skills disponibles
 
 **Carga una skill solo cuando llegues a ese paso.**

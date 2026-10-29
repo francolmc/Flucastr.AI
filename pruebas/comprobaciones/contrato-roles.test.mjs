@@ -37,21 +37,28 @@ function muestra() {
       planificador: FM('planificador', 'Ordena el backlog y descompone features.') +
         'Eres el planificador. Usa `crear-backlog` o `descomponer-feature`.\n' +
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n' +
-        'Si te bloqueas, primera línea: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n',
+        'Si te bloqueas, primera línea: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n' +
+        'Si la feature requiere refinado, respondes `REFINAR: feature=Fxx; preguntas=<n>`.\n',
       constructor: FM('constructor', 'Ejecuta una tarea aprobada.') +
         'Eres el constructor. Usa `ejecutar-tarea`.\n' +
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n',
       coordinador: FM('coordinador', 'Decide el paso siguiente.',
         'Agent(arquitecto, planificador, constructor), Read, Grep') +
         'Eres el coordinador. Usa `crear-backlog` y `descomponer-feature`.\n' +
-        'Si un subagente responde `BLOQUEO: rol=<rol>; motivo=<motivo>`, lo registras.\n\n' +
+        'Si un subagente responde `BLOQUEO: rol=<rol>; motivo=<motivo>`, lo registras.\n' +
+        'Escribes `Rama: <prefijo>/Fxx-nombre` en el encargo.\n' +
+        'Si el constructor responde `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`, preguntas a Franco.\n' +
+        'Con su sí explícito, delegas con «Franco confirmó `git switch <rama>`».\n' +
+        'Con la feature completa, indicas a Franco: cierra la rama, haz el PR y despliega.\n' +
+        'Si el planificador responde `REFINAR: feature=Fxx; preguntas=<n>`, registras las preguntas.\n\n' +
         ESTADOS_TABLA.join('\n') + '\n',
     },
     skills: {
       'ejecutar-tarea': FM('ejecutar-tarea', 'Ejecuta una tarea aprobada.') +
         'Si te bloqueas: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n',
       'descomponer-feature': FM('descomponer-feature', 'Descompone la feature siguiente.') +
-        '5. En `BACKLOG.md` solo puedes mover la marca `→`.\n',
+        '5. En `BACKLOG.md` solo puedes mover la marca `→`.\n' +
+        'Si falta refinado, responde `REFINAR: feature=Fxx; preguntas=<n>` y cita `features/Fxx-nombre/refinado.md`.\n',
       'crear-backlog': FM('crear-backlog', 'Crea el backlog de features.') +
         'Lista ordenada de features.\n',
     },
@@ -117,6 +124,38 @@ for (const [nombre, alterar] of variantes) {
     assert.ok(validarRoles(m).length > 0, 'se esperaba al menos un error');
   });
 }
+
+// Controles negativos de las reglas 9, 10 y 11: el error debe mencionar la frase quitada.
+const variantesF05 = [
+  ['regla 9: el coordinador pierde la frase CONFIRMAR', 'CONFIRMAR: accion=git switch <rama>; motivo=<motivo>', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'una pregunta de confirmación');
+  }],
+  ['regla 10: el coordinador pierde la frase de cierre de la rama', 'cierra la rama, haz el PR y despliega', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'cierra algo');
+  }],
+  ['regla 11: el coordinador pierde la frase REFINAR', 'REFINAR: feature=Fxx; preguntas=<n>', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'preguntas pendientes');
+  }],
+];
+
+for (const [nombre, frase, alterar] of variantesF05) {
+  test(`rechaza ${nombre}`, () => {
+    const m = muestra();
+    alterar(m, frase);
+    const errores = validarRoles(m);
+    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
+  });
+}
+
+test('rechaza regla 11: el planificador pierde REFINAR y el error nombra al planificador', () => {
+  const m = muestra();
+  m.agentes.planificador = m.agentes.planificador.replace(
+    'REFINAR: feature=Fxx; preguntas=<n>',
+    'preguntas pendientes',
+  );
+  const errores = validarRoles(m);
+  assert.ok(errores.some((e) => e.includes('«planificador»')), 'se esperaba un error que nombre «planificador»');
+});
 
 test('los archivos reales de agentes, skills y modelos.json cumplen el contrato', () => {
   const agentes = Object.fromEntries(

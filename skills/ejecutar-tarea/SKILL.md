@@ -10,8 +10,11 @@ Entrada: la ruta del archivo de la tarea.
 ## Antes de empezar
 
 1. Lee la tarea completa. Si `estado` no es `aprobada`, **detente** y dilo; no cambies nada.
-2. Cambia `estado` a `en curso`.
-3. Lee las rutas de *Contexto*. Trabaja solo en el repo del campo `repo:`.
+2. **Rama de la feature.** Solo si el encargo trae la línea `Rama: <prefijo>/Fxx-nombre`. Si no la trae, no ejecutes ningún comando git de rama y sigue con el paso 3.
+   - Si el encargo contiene la frase ``Franco confirmó `git switch <rama>` ``: corre `git switch <rama>` (sin `-c`, solo esa rama), verifica con `git branch --show-current` y sigue la tarea. Sin esa frase, no ejecutas `git switch <rama>`. La confirmación vale solo para esa rama y esa tarea. Si el switch falla (por ejemplo, cambios sin commit que chocan), `BLOQUEO: rol=arquitecto; motivo=<salida del comando>` y no reintentes.
+   - Si no hay confirmación: (a) corre `git branch --show-current`; si ya es la rama del encargo, no hagas nada más. (b) Si no, corre `git switch -c <rama>`. (c) Si falla porque la rama ya existe, no hagas nada más y tu respuesta final empieza con la línea exacta `CONFIRMAR: accion=git switch <rama>; motivo=la rama ya existe y la actual es <actual>`. (d) Si falla por otra causa, `BLOQUEO: rol=arquitecto; motivo=<salida del comando>`.
+3. Cambia `estado` a `en curso`.
+4. Lee las rutas de *Contexto*. Trabaja solo en el repo del campo `repo:`.
 
 ## Ejecución
 
@@ -25,6 +28,7 @@ Entrada: la ruta del archivo de la tarea.
 - **Falta de credenciales o acceso.**
 - **Una decisión que cambia el alcance:** es una escalación; infórmala, no la resuelvas.
 - **La misma verificación falla dos veces por la misma causa:** pon `estado: bloqueada`.
+- **La rama de la feature ya existe y no es la actual:** pide confirmación (`CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`), no es un bloqueo ni una escalación; su primera línea es `CONFIRMAR:`, no `BLOQUEO:`. Al emitirla no tocas código, ni la tarea, ni la rama.
 
 En cualquiera: anota el motivo en *Notas* y termina tu respuesta final con la **primera línea exacta**:
 

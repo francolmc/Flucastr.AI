@@ -1,6 +1,6 @@
 # Flucastr.AI — proyecto existente
 
-> Estado: **aprobado por Franco** (2026-10-29).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06).
 > Documento definitivo: consolida `definicion/{proyecto,mvp,plan-pruebas-arquitecto,diseno-primera-herramienta}.md` y los dos encargos (ver «Documentos reemplazados»).
 > Origen de los datos: *confirmado* = leído en archivo o dicho por Franco; *inferido* = deducido; entre paréntesis, la fuente.
 
@@ -16,7 +16,7 @@ Kit personal para trabajar con agentes de IA en productos propios (Don Financio,
 
 **Contrato del arquitecto** (confirmado, `definicion/mvp.md` en el historial de Git; informe `pruebas/resultados/2026-11-02-cambio-contrato-alcance-a.md`): solo define. Entrega `AGENTS.md` e `initialize.sh` en la raíz y `definitions/{PROJECT,REPOS,ARCHITECTURE}.md`. Nombres en inglés, contenido en español, todo borrador hasta que Franco apruebe. Nunca ejecuta `initialize.sh`.
 
-**Reglas vigentes** (confirmado, `README.md`): producto primero; una tarea, un archivo; Franco hace los commits; los secretos no se tocan; nada nuevo sin dolor real; corte duro de 2–3 días sin algo funcionando.
+**Reglas vigentes** (confirmado, `README.md`): producto primero; una tarea, un archivo; Franco hace los commits y el PR (también en las ramas por feature de F05); el `constructor` solo crea la rama de la feature (`git switch -c`, sin commit) o, con confirmación de Franco, hace `git switch <rama>` a una existente; el modo «yolo» de F06 omite las puertas 2, 3 y 4 pero no autoriza commits (`WORKFLOW.md` §9); los secretos no se tocan; nada nuevo sin dolor real; corte duro de 2–3 días sin algo funcionando.
 
 **Dolor y objetivo** (confirmado, Franco): cuatro versiones anteriores (`project-flow`, `project-lite`, kit v1…) no entregaron ninguna feature terminada. El **criterio de éxito del MVP es una feature real de Franco, terminada y verificada**; las pruebas sirven para confiar en la herramienta, no son el objetivo. Tamaños de producto: básico = un repo fullstack; medio = API y front; robusto = más componentes.
 
@@ -64,11 +64,13 @@ No se despliega: se instala en local. Remoto en GitHub (`git remote -v`), sin CI
 | Recortar pruebas formales a B, M, R | El esfuerzo iba al arnés y no al dolor de Franco | Los 5 escenarios × 3 corridas × 2 herramientas (30 corridas) | Un fallo grave del arquitecto en uso real |
 | Éxito = una feature terminada | Es el dolor declarado | Medirlo por pruebas pasadas | Que Franco redefina el objetivo |
 | `coordinador` delgado con cuatro puertas | Franco no debe esperar en pantalla ni enrutar entre roles | Franco invoca cada rol a mano (no quita el problema); el arquitecto coordina (vuelve a crecer) | Que el traspaso resulte pesado o que Pi no soporte subagentes |
+| Rama por feature: la crea el `constructor`, commits y PR de Franco (F05, decidido 2026-10-29) | Quita a Franco un paso manual sin tocar «los agentes no hacen commit»; el PR y el despliegue siguen siendo suyos | Que Franco cree la rama (más fricción); commit local por tarea por el constructor (permiso mayor, no autorizado) | Que Franco autorice commit local a los agentes |
+| Modo «yolo» como excepción por conversación (F06) | Franco lo pidió; acotarlo a un pedido explícito, un repo y especificación completa limita el riesgo; trabaja en la rama actual (advierte si es `main`) y puede descomponer sin preguntar | Modo persistente en archivo (un archivo no es Franco); aplicarlo a varios repos (el orden y las ramas cruzadas no están definidos) | Que Franco lo quiera permanente o multi-repo |
 | Arquitecto con 5 entregables en inglés | Había acumulado demasiada responsabilidad | Mantener los 4 archivos en español | Que `AGENTS.md` termine duplicando `PROJECT.md` |
 
 ## Flujo de trabajo (decidido por Franco en líneas generales; roles por construir)
 
-> Diseño detallado, plantilla de tarea y encargo de implementación: [`WORKFLOW.md`](WORKFLOW.md) (aprobado).
+> Diseño detallado, plantilla de tarea y encargo de implementación: [`WORKFLOW.md`](WORKFLOW.md) (§9: ramas, refinado y yolo, en borrador).
 
 Cuatro roles. Franco abre **siempre el `coordinador`**; los demás roles los invoca este. Cada rol **empieza leyendo archivos, no la conversación** del anterior.
 
@@ -82,6 +84,11 @@ Cuatro roles. Franco abre **siempre el `coordinador`**; los demás roles los inv
 | 5. Cerrar | Franco | Tarea revisada | Aprueba, hace el commit; la feature pasa a `features/completed/` solo cuando él la da por hecha |
 
 **Cuatro puertas de aprobación** (decidido por Franco): el `coordinador` solo se detiene para (1) aprobar la definición, (2) aprobar el backlog y su prioridad, (3) aprobar cada tarea antes de construir, (4) revisar el resultado y hacer el commit. Entre puertas el trabajo avanza solo.
+
+**Ramas, refinado y yolo (borrador, F05 y F06; detalle en `WORKFLOW.md` §9):**
+- **Rama por feature:** cada feature se trabaja en su propia rama, `feature/`, `fix/` o `chore/` + `Fxx-nombre` según el tipo de trabajo. La crea el `constructor` desde la rama actual al empezar la primera tarea (git de escritura permitido: `git switch -c`; si la rama ya existe, el `constructor` pide confirmación a Franco con `CONFIRMAR:` y solo entonces hace `git switch <rama>`); cada tarea cerrada es un commit de Franco en ella (puerta 4). Al quedar `hecha` la última tarea, `STATUS.md` avisa a Franco, que cierra la rama, hace el PR y despliega. Los agentes no hacen commit, PR ni despliegue.
+- **Refinado:** solo si la feature lo requiere (el `planificador` puede formular una pregunta de alcance con respuestas que cambiarían las tareas), antes de descomponerla (puerta 3) pide a Franco hasta 5 preguntas con recomendación (`features/Fxx/refinado.md`); si no, se omite. No es una puerta nueva.
+- **Modo «yolo»:** excepción explícita, a pedido de Franco en la conversación, con especificación completa y un solo repo: se omiten las puertas 2, 3 y 4 para descomponer e implementar una o todas las features, sin preguntar, directo en la rama actual, sin rama por feature y sin commits (advierte si es `main`; el `constructor` no crea rama). Una feature ambigua escala por falta de especificación. Siguen vigentes credenciales, push/PR/despliegue, la escalación por cambio de alcance, `bloqueada` tras dos fallos y no tocar `definitions/`.
 
 **Bloqueos entre roles:** un rol nunca llama a otro. Si necesita algo de otro (por ejemplo el `planificador` necesita una decisión del `arquitecto`), lo informa en su respuesta final (`BLOQUEO: rol=…; motivo=…`) y se detiene; el `coordinador` lo registra en `definitions/STATUS.md` y lo enruta. Si el cambio toca la definición, vuelve a pasar por la puerta 1.
 
@@ -125,4 +132,4 @@ Resueltas (Franco, 2026-10-29): los tests se recortan por exceso para el alcance
 
 ## Estado
 
-Aprobado por Franco el 2026-10-29.
+Aprobado por Franco el 2026-10-29, incluidos los cambios de F05 y F06 y sus respuestas a `WORKFLOW.md` §9.5.

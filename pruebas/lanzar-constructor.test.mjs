@@ -12,6 +12,26 @@ const dir = path.dirname(fileURLToPath(import.meta.url));
 const script = path.join(dir, 'lanzar-constructor-claude.sh');
 const tarea = 'features/F99-demo/task-01-crear-salida.md';
 const prompt = `Ejecuta la tarea ${tarea}. En esta sesión no se pueden responder preguntas.`;
+const MUTANTES = ['commit', 'push', 'merge', 'reset', 'rebase', 'checkout'];
+
+// Divide el registro en las autorizadas (líneas entre --allowedTools y --disallowedTools)
+// y las denegadas (líneas entre --disallowedTools y --).
+function partes(output) {
+  const lineas = output.split(/\r?\n/);
+  const iAut = lineas.indexOf('--allowedTools');
+  const iDen = lineas.indexOf('--disallowedTools');
+  assert.ok(iAut >= 0 && iDen > iAut, `falta --allowedTools o --disallowedTools\n${output}`);
+  const fin = lineas.indexOf('--', iDen + 1);
+  return {
+    autorizadas: lineas.slice(iAut + 1, iDen),
+    denegadas: lineas.slice(iDen + 1, fin === -1 ? lineas.length : fin),
+  };
+}
+
+// Devuelve las autorizadas que son una acción git mutante (ninguna debe aparecer).
+function mutantesAutorizados(autorizadas) {
+  return autorizadas.filter(a => MUTANTES.some(m => a.startsWith(`Bash(git ${m}`)));
+}
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'flucastr-lanzar-constructor-'));
 const fake = path.join(tmp, 'fake-model.sh');
@@ -54,8 +74,8 @@ test('lanzar-constructor-claude.sh: ningún permiso concede Git mutante ni Bash 
     cwd: tmp, encoding: 'utf8', env: { ...process.env, FLUCASTR_CLAUDE_BIN: fake, FLUCASTR_RECORD_FILE: record },
   });
   const output = fs.readFileSync(record, 'utf8');
-  assert.equal(output.includes('Bash(git commit'), false, 'no debe permitir git commit');
-  assert.equal(output.includes('Bash(git push'), false, 'no debe permitir git push');
+  const { autorizadas } = partes(output);
+  assert.deepEqual(mutantesAutorizados(autorizadas), [], 'no debe autorizar git mutante');
   assert.equal(output.split(/\r?\n/).includes('Bash(*)'), false, 'no debe permitir Bash genérico');
 });
 
@@ -71,8 +91,38 @@ test('lanzar-constructor-claude.sh: .env sigue denegado y no hay Bash genérico 
     assert.ok(lineas.includes(linea), `falta denegación exacta: ${linea}\n${output}`);
   }
   assert.equal(lineas.includes('Bash(*)'), false, 'no debe permitir Bash genérico');
-  assert.equal(output.includes('Bash(git commit'), false, 'no debe permitir git commit');
-  assert.equal(output.includes('Bash(git push'), false, 'no debe permitir git push');
+  assert.deepEqual(mutantesAutorizados(partes(output).autorizadas), [], 'no debe autorizar git mutante');
   assert.equal(lineas.includes('Bash(bash *)'), false, 'no debe permitir bash *');
   assert.equal(lineas.includes('Bash(sh *)'), false, 'no debe permitir sh *');
+});
+
+test('lanzar-constructor-claude.sh: permite solo los tres comandos git de rama y deniega los mutantes', () => {
+  const record = path.join(tmp, 'git-ramas.record');
+  const result = spawnSync('/bin/bash', [script, tarea], {
+    cwd: tmp, encoding: 'utf8', env: { ...process.env, FLUCASTR_CLAUDE_BIN: fake, FLUCASTR_RECORD_FILE: record },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const { autorizadas, denegadas } = partes(fs.readFileSync(record, 'utf8'));
+  assert.deepEqual(
+    autorizadas.filter(a => a.startsWith('Bash(git')).sort(),
+    ['Bash(git branch --show-current)', 'Bash(git status --short)', 'Bash(git switch *)', 'Bash(git switch -c *)'].sort(),
+    'las autorizadas git deben ser las tres de rama más git status --short',
+  );
+  assert.deepEqual(
+    denegadas.filter(d => d.startsWith('Bash(git')).sort(),
+    ['Bash(git checkout *)', 'Bash(git commit *)', 'Bash(git merge *)', 'Bash(git push *)', 'Bash(git rebase *)', 'Bash(git reset *)'].sort(),
+    'las denegadas git deben ser las seis mutantes',
+  );
+  assert.deepEqual(mutantesAutorizados(autorizadas), []);
+});
+
+test('lanzar-constructor-claude.sh: el control negativo rechaza una lista autorizada con git commit', () => {
+  const record = path.join(tmp, 'control-negativo.record');
+  spawnSync('/bin/bash', [script, tarea], {
+    cwd: tmp, encoding: 'utf8', env: { ...process.env, FLUCASTR_CLAUDE_BIN: fake, FLUCASTR_RECORD_FILE: record },
+  });
+  const { autorizadas } = partes(fs.readFileSync(record, 'utf8'));
+  assert.deepEqual(mutantesAutorizados(autorizadas), [], 'la lista real no debe tener mutantes');
+  const alterada = [...autorizadas, 'Bash(git commit *)'];
+  assert.deepEqual(mutantesAutorizados(alterada), ['Bash(git commit *)'], 'la función debe rechazar la lista alterada');
 });

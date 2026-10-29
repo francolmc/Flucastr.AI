@@ -9,6 +9,11 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
 
 ## Pasos
 
+0. **Refinado (solo si se requiere).** Aplica el criterio: el refinado se requiere si puedes formular al menos una pregunta de alcance con dos o más respuestas razonables que producirían listas de tareas distintas y esa pregunta no está resuelta en `BACKLOG.md`, `PROJECT.md` ni en un `refinado.md` existente; si no puedes formularla, se omite y descompones directamente.
+   - Si no se requiere, sigue al paso 1.
+   - Si se requiere y no hay `features/Fxx-nombre/refinado.md` con las respuestas, no crees tareas y responde con la primera línea exacta `REFINAR: feature=Fxx; preguntas=<n>`, seguida de hasta 5 preguntas numeradas, de más a menos importante, cada una con su opción recomendada.
+   - Si el encargo trae las respuestas de Franco, escríbelas en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea; una sección por pregunta con su respuesta) y descompón. Cada tarea cita `features/Fxx-nombre/refinado.md` en *Decisiones ya tomadas*.
+
 1. Lee la feature y el código real de cada repo que toca. Ejecuta únicamente comandos sin efectos sobre archivos versionados (pruebas, lint, `--help`) para confirmar que los comandos de *Verificación* existen. Los que no puedas ejecutar así se marcan «no ejecutado, inferido» en el *Contexto* de la tarea.
 2. Define tareas: un solo repo y un solo objetivo verificable cada una. Con varios repos, fija el orden con `depende_de:` (la API antes que el front).
 3. Escribe cada tarea en `features/Fxx-nombre/task-NN-nombre.md` con la plantilla de abajo, estado `borrador`.

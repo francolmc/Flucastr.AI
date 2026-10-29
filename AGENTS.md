@@ -7,4 +7,4 @@ Kit personal de agentes, skills e instaladores para trabajar con IA en Claude Co
 - Flujo de trabajo y tareas: [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md)
 - Estructura y diagrama: [`definitions/ARCHITECTURE.md`](definitions/ARCHITECTURE.md)
 
-Reglas: no hay commit, push, PR, merge ni despliegue por parte de agentes; no se leen `.env`, llaves ni credenciales; una tarea, un archivo.
+Reglas: no hay commit, push, PR, merge ni despliegue por parte de agentes (los commits y el PR los hace Franco); no se leen `.env`, llaves ni credenciales; una tarea, un archivo. Git de escritura permitido al `constructor`: crear la rama de la feature (`git switch -c`) y, solo con confirmación expresa de Franco (línea `CONFIRMAR:`), `git switch <rama>` a una rama existente; sin commit, push ni merge (`definitions/WORKFLOW.md` §9.1). En yolo no crea rama ni hace switch. Excepción acotada: el modo «yolo» (§9.3), solo a pedido explícito de Franco en la conversación; omite las puertas 2, 3 y 4 y no levanta ninguna otra regla de esta línea.

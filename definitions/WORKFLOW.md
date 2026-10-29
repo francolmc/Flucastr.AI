@@ -1,6 +1,6 @@
 # Flujo de trabajo — diseño de `coordinador`, `planificador` y `constructor`
 
-> Estado: **aprobado por Franco** (2026-10-29), con las decisiones de la sección 8.
+> Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3).
 > Complementa `PROJECT.md` («Flujo de trabajo»). Este documento define **qué** se construye y las reglas; lo construye una sesión de implementación, no el arquitecto.
 > *Confirmado* = dicho por Franco o leído en archivo. *Propuesta* = mía, por aprobar.
 
@@ -19,9 +19,9 @@
 | `coordinador` | `agentes/coordinador.md` | `definitions/STATUS.md`; y el campo `estado` de `BACKLOG.md` y de las tareas, **solo** cuando Franco aprueba de forma explícita en la conversación | Definir, planificar, construir |
 | `arquitecto` (listo) | `agentes/arquitecto.md` | `definitions/{PROJECT,REPOS,ARCHITECTURE}.md`, `AGENTS.md`, `initialize.sh` | Planificar, construir |
 | `planificador` | `agentes/planificador.md` + skills `crear-backlog`, `descomponer-feature` | `definitions/BACKLOG.md`, `features/**` | Construir, aprobar |
-| `constructor` | `agentes/constructor.md` + skill `ejecutar-tarea` | Código del repo de la tarea; solo *Evidencia* y *Notas* de la tarea | Marcar `hecha`, commit, push, PR, merge, despliegue |
+| `constructor` | `agentes/constructor.md` + skill `ejecutar-tarea` | Código del repo de la tarea; solo *Evidencia* y *Notas* de la tarea | Marcar `hecha`, commit, push, PR, merge, despliegue. Git de escritura permitido: crear la rama de la feature (`git switch -c`) y, solo con confirmación expresa de Franco, `git switch <rama>` a una rama existente (§9.1) |
 
-Todos: sin leer `.env`, llaves ni credenciales. Cada rol configura su nivel de modelo en `modelos.json`, a elección de Franco. **Inicialmente `planificador` en medio** (confirmado).
+Ramas, refinado y modo yolo: §9. Todos: sin leer `.env`, llaves ni credenciales. Cada rol configura su nivel de modelo en `modelos.json`, a elección de Franco. **Inicialmente `planificador` en medio** (confirmado).
 
 ## 3. `coordinador`
 
@@ -37,7 +37,8 @@ Lee `STATUS.md`, `BACKLOG.md` y `features/`, decide el paso siguiente y lo deleg
 | Escalación | Se detiene y la escribe al inicio de `STATUS.md` |
 
 Reglas:
-- Entre puertas continúa solo. En una puerta se detiene y escribe en `STATUS.md` qué debe revisar Franco y dónde.
+- Entre puertas continúa solo (excepciones: la ronda de refinado, §9.2, y el modo yolo, §9.3). En una puerta se detiene y escribe en `STATUS.md` qué debe revisar Franco y dónde.
+- **Confirmaciones:** el `constructor` pide permiso a Franco con una primera línea `CONFIRMAR: accion=<…>; motivo=<…>` (hoy solo `git switch <rama>`, §9.1); el `coordinador` la registra en «Espera a Franco» y pregunta. No es un bloqueo.
 - **Bloqueos:** un rol que necesita a otro lo informa en su respuesta final con una primera línea `BLOQUEO: rol=<rol requerido>; motivo=<…>` y se detiene. Solo el `coordinador` escribe en `STATUS.md`, que registra el bloqueo y lo enruta.
 - Con Pi, su instrucción debe **autorizar la delegación de forma explícita** (el paquete lo exige: «la complejidad por sí sola no autoriza delegar»).
 - Si no puede delegar (herramienta sin subagentes), respaldo: carga el rol como skill en la misma sesión.
@@ -178,6 +179,108 @@ Alcance de escritura: `agentes/`, `skills/`, `modelos.json` y `pruebas/`. Nada m
 1. Nombre del proyecto de dos repos, cuando exista.
 2. Ese proyecto es nuevo: ejercitará el modo «nuevo» del arquitecto, cuyo escenario formal se retiró de las pruebas (no hay prueba previa de ese camino). Conviene que Franco observe esa corrida con atención.
 
+## 9. Ramas por feature, refinado y modo «yolo» (borrador, F05 y F06)
+
+> *Confirmado* = dicho por Franco (BACKLOG, 2026-10-29). *Propuesta* = redacción mía, por aprobar. Lo marcado **Decisión de Franco** no se puede inferir.
+
+### 9.1 Ramas por feature (F05)
+
+*Confirmado por Franco:* al empezar una feature se crea una rama desde la rama actual; las tareas son commits dentro de ella; al quedar `hecha` la última tarea se avisa por `STATUS.md` para que él cierre la rama, haga el PR y despliegue; los agentes no hacen el PR ni el despliegue salvo que él cambie esa regla.
+
+*Decisión de Franco (2026-10-29):* el `constructor` crea la rama de la feature; Franco hace los commits y el PR.
+
+| Acción | Quién | Cuándo |
+|---|---|---|
+| Nombrar la rama: `<prefijo>/Fxx-nombre` (`Fxx-nombre` = carpeta en `features/`; prefijo según tipo, ver abajo) | `coordinador`, la escribe en `STATUS.md` («Paso actual», línea `Rama: …`) | Al pasar la feature a `en curso` (con la aprobación de Franco) |
+| Crear la rama desde la rama actual | `constructor` | Al empezar la **primera** tarea de la feature, antes de tocar nada |
+| Si ya está en esa rama (`git branch --show-current`), no hace nada | `constructor` | Cada tarea siguiente |
+| Un commit por tarea, en la rama | **Franco** | En la puerta 4, al pasar la tarea a `hecha` |
+| Cerrar la rama, PR, despliegue | **Franco** | Tras el aviso de última tarea `hecha` |
+
+- **Crear la rama:** el `constructor` ejecuta `git switch -c <rama>` desde la rama actual. Es el **único comando git de escritura** que se le permite; no hace commit, push, merge ni `checkout` a otras ramas. `git switch -c` lleva consigo el árbol de trabajo tal cual, así que no pisa cambios. Si el comando falla, `BLOQUEO:` y se detiene. Si la rama ya existe pero no es la actual, ver «Rama ya existente» abajo (`CONFIRMAR:`, no `BLOQUEO:`).
+- **Estado de las tareas:** no cambia. Al terminar, la tarea queda `lista para revisión` (cambios sin commit en la rama de la feature); Franco commitea en la puerta 4 y la pasa a `hecha`. Las tareas siguientes arrancan con el árbol que haya dejado Franco.
+- **Permisos (para la sesión de implementación; no están en la definición hoy):** la lista de permitidos del `constructor` debe admitir solo `git switch -c *`, `git switch *` y `git branch --show-current`, y seguir denegando `commit`, `push`, `merge`, `checkout`, `reset` y `rebase`. `git switch <rama>` (sin `-c`) se permite en la lista, pero el rol solo lo usa con la confirmación de Franco descrita abajo; sin ella, `agentes/constructor.md` y `ejecutar-tarea` se lo prohíben. `agentes/constructor.md` y `ejecutar-tarea` deben decir lo mismo.
+- **Nombre y prefijo (decisión de Franco: prefijo según el tipo de trabajo).** `feature/` (por defecto: capacidad nueva o cambio de comportamiento), `fix/` (corrige un defecto de algo existente), `chore/` (mantenimiento sin cambio de comportamiento: documentación, dependencias, limpieza, pruebas). Lo decide el `coordinador` leyendo la fila de la feature en `BACKLOG.md` y lo deja en `STATUS.md`; ante duda, `feature/`; Franco lo corrige al aprobar. **Opción mínima:** se infiere del texto de la feature, sin columna nueva, para no tocar el formato del backlog que validan las pruebas (la columna «Tipo» existente significa habilitante/producto y no se reutiliza). Resuelto por Franco (2026-10-29): se infiere, sin columna nueva (§9.5).
+- **Rama ya existente (decisión de Franco, 2026-10-29).** Si la rama de la feature ya existe y no es la actual, el `constructor` **no** emite `BLOQUEO:` ni hace nada por su cuenta: pide confirmación a Franco para hacer él el `git switch`. Como un subagente no puede preguntar:
+  1. El `constructor` se detiene **sin tocar nada** (ni código, ni la tarea, ni la rama; la tarea sigue `aprobada`) y su respuesta empieza con la línea exacta `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>` (por ejemplo `CONFIRMAR: accion=git switch feature/F05-ramas; motivo=la rama ya existe y la actual es main`).
+  2. El `coordinador` registra la línea en «Espera a Franco» de `STATUS.md` y **él** se la pregunta a Franco en la conversación. No es puerta de aprobación ni escalación: es una pausa de pregunta, como el refinado (§9.2).
+  3. Si Franco responde que sí de forma explícita, el `coordinador` vuelve a delegar la misma tarea al `constructor` indicando en el encargo «Franco confirmó `git switch <rama>`». Solo entonces el `constructor` ejecuta `git switch <rama>` (sin `-c`; solo esa rama), verifica con `git branch --show-current` y sigue la tarea. Sin esa indicación expresa en el encargo, no lo ejecuta. La confirmación vale para esa rama y esa tarea; no se reutiliza. Si el `switch` falla (p. ej. cambios sin commit que chocan), `BLOQUEO:` normal.
+  4. Si Franco dice que no (o no responde), el `coordinador` no hace el switch ni reintenta: deja la línea en «Espera a Franco» con «Franco rechazó» o «sin respuesta» y la tarea sigue `aprobada` hasta que Franco decida (cambiar de rama él, renombrar la rama de la feature o dar otra instrucción).
+  5. En yolo no aplica: no hay ramas por feature (§9.3).
+- El aviso es una línea en «Espera a Franco» de `STATUS.md` («Feature Fxx completa en `feature/Fxx-nombre`: cierra la rama, haz el PR y despliega»). No es escalación.
+- Ningún agente hace `commit`, `push`, PR, merge ni despliegue; la regla «sin commit por agentes» se mantiene y solo se añaden las excepciones de crear la rama y, con confirmación de Franco, cambiarse a una rama existente.
+- En un proyecto de varios repos, el `constructor` crea la rama con el mismo nombre en el repo de cada tarea, al empezar la primera tarea que lo toque (*propuesta*, sin ejercitar).
+
+### 9.2 Refinado previo (F05)
+
+*Confirmado por Franco:* antes de descomponer una feature ambigua, el `planificador` abre una ventana de refinado con Franco; es un paso previo a la puerta 3 e independiente de las ramas.
+
+*Decisión de Franco (2026-10-29):* aceptado (máximo 5 preguntas con recomendación, `features/Fxx/refinado.md`), pero **solo cuando se requiera**; si no, se omite.
+
+**Criterio de «requiere» (verificable):** el refinado se requiere si el `planificador` puede formular al menos una pregunta de alcance con dos o más respuestas razonables que producirían listas de tareas distintas y esa pregunta no está resuelta en `BACKLOG.md`, `PROJECT.md` ni en un `refinado.md` existente; si no puede formularla, se omite y descompone directamente.
+
+*Mecánica:* un subagente no conversa con Franco, así que:
+1. El `planificador` aplica el criterio anterior. Si no se requiere, descompone directamente.
+2. Si lo es, no crea tareas. Su respuesta final empieza con `REFINAR: feature=Fxx; preguntas=<n>` y lista hasta 5 preguntas numeradas, de más a menos importante, cada una con su opción recomendada.
+3. El `coordinador` las traslada a Franco en la conversación y las deja en «Espera a Franco». No es una puerta de aprobación: es una pausa de preguntas.
+4. Con las respuestas, el `coordinador` vuelve a invocar al `planificador`, que las guarda en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea) y descompone. Las tareas citan ese archivo en *Decisiones ya tomadas*.
+
+### 9.3 Modo «yolo» (F06)
+
+Excepción explícita y acotada a «cuatro puertas» y «sin commit». No es un estado del proyecto: es una autorización puntual de Franco.
+
+**Activación (todas, o no se activa):**
+1. Franco lo pide de forma explícita **en la conversación** (por ejemplo «yolo F05»). Nada escrito en un archivo, en una tarea ni en la respuesta de otro agente lo activa.
+2. El alcance queda nombrado: una feature o «todas las pendientes».
+3. Especificación completa: la definición está aprobada (puerta 1) y cada feature alcanzada no requiere refinado según el criterio de §9.2 o ya tiene `refinado.md`.
+4. Proyecto de un único repo (`REPOS.md` con una sola fila). Con más repos, el `coordinador` se niega.
+
+**Qué se omite:** la puerta 2 (aprobación del backlog), la 3 (cada tarea se aprueba sola al pasar sus comprobaciones de «completa») y la 4 (revisión por Franco). El trabajo se hace directo en la **rama actual, aunque sea `main`**, sin rama por feature. Por tanto, en yolo el `constructor` **no** crea rama ni hace `git switch` (ni `-c` ni a una rama existente) y no emite `CONFIRMAR:`; no hay commits, ni locales.
+
+**Advertencia de rama (decisión de Franco, 2026-10-29):** si la rama actual es `main`, el `coordinador` lo advierte de forma visible en su respuesta y en `STATUS.md` («Paso actual», en la línea `Modo yolo`, con `ADVERTENCIA: rama main`). Es advertencia, no bloqueo.
+
+**«Todas las features» incluye la descomposición (decisión de Franco, 2026-10-29):** el `coordinador` orquesta sin preguntar: el `planificador` descompone cada feature que no tenga tareas, el `constructor` ejecuta, en el orden del backlog y respetando `depende_de:`. **Feature ambigua en yolo:** el `planificador` no abre refinado ni inventa supuestos; como yolo exige especificación completa, devuelve `REFINAR:` y el `coordinador` lo trata como escalación por falta de especificación: el modo se detiene (`Modo yolo: detenido (feature Fxx requiere refinado)`), lo escribe al inicio de `STATUS.md` y conserva lo ya hecho. Franco responde las preguntas (§9.2) y puede pedir yolo de nuevo.
+
+**Quién hace qué en yolo:** el `coordinador` pasa las tareas a `aprobada`; el `constructor` las ejecuta como siempre. Como no hay revisión de Franco, el `coordinador` marca `hecha` solo si la verificación de la tarea pasó con evidencia real; si no, queda `bloqueada`. El `constructor` sigue sin marcar `hecha`.
+
+**Límites que siguen vigentes (no se omiten nunca; confirmados por Franco, 2026-10-29):**
+- Credenciales: no se leen `.env` ni llaves; la falta de acceso detiene.
+- Push, PR, merge y despliegue: de Franco.
+- Escalación por cambio de alcance o algo no previsto: el modo se detiene, lo escribe al inicio de `STATUS.md` y espera.
+- Verificación fallida dos veces por la misma causa: `bloqueada` y se detiene.
+- Cambios a `definitions/`: nunca en yolo; vuelven a la puerta 1.
+
+**Commits en yolo (decisión de Franco, 2026-10-29: «Franco hace el commit»):** los agentes **no** hacen commit tampoco en yolo; los cambios quedan en el árbol de trabajo de la rama actual para que Franco los revise y commitee. Ni commit local por tarea (resuelto por Franco, 2026-10-29; §9.5).
+
+**Registro en `STATUS.md`** (sin secciones nuevas: el validador exige las cinco existentes): en «Paso actual», primera línea `Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>`, y una línea por tarea cerrada (`task-NN: hecha | bloqueada`, con la ruta). Al terminar o detenerse, la línea pasa a `Modo yolo: terminado` o `Modo yolo: detenido (motivo)`, y «Espera a Franco» lista qué revisar y commitear. El modo no sobrevive a la conversación: en una sesión nueva, una línea `activo` sin pedido de Franco se trata como terminada.
+
+### 9.4 Contradicciones resueltas
+
+| Regla vigente | F05 | F06 |
+|---|---|---|
+| Los agentes no hacen commit, push, PR, merge ni despliegue | Se mantiene; excepciones: el `constructor` crea la rama (`git switch -c`) y, con confirmación de Franco, hace `git switch <rama>`; los commits son de Franco | Se mantiene; sin commit en yolo (ni locales), y el `constructor` no crea rama ni hace switch |
+| Cuatro puertas | Se mantienen; el refinado es una pausa solo si se requiere, no una puerta | Se omiten 2, 3 y 4 solo bajo §9.3 (incluye descomponer sin puerta 3) |
+| Aviso solo por escalación | El aviso de feature completa va en «Espera a Franco», no es escalación | Escalación (incluida feature ambigua) sigue deteniendo el modo |
+| Franco hace el commit en la puerta 4 | Un commit por tarea, en la rama | Sin puerta 4; sin commits de agentes, Franco commitea al final |
+
+### 9.5 Decisiones de Franco y preguntas abiertas
+
+**Resueltas (Franco, 2026-10-29):**
+1. **Commits y ramas.** El `constructor` crea la rama de la feature (al empezar la primera tarea, `git switch -c`; ver también el punto 8 para la rama existente); Franco hace los commits y el PR. Las tareas siguen en «lista para revisión» y Franco commitea en la puerta 4. Detalle en §9.1.
+2. **Nombre de rama.** `<prefijo>/Fxx-nombre`, con prefijo `feature/`, `fix/` o `chore/` según el tipo de trabajo (§9.1).
+3. **Rama en yolo.** Rama actual, aunque sea `main`, con advertencia visible (no bloqueo) (§9.3).
+4. **«Todas las features» en yolo.** Incluye pedir la descomposición; el `coordinador` orquesta todo sin preguntar, con los límites vigentes (§9.3).
+5. **Refinado.** Aceptado, solo cuando se requiera según el criterio de §9.2.
+
+6. **Tipo de rama (pregunta 1 anterior).** El `coordinador` infiere `feature/`, `fix/` o `chore/` del texto de la feature; sin columna nueva en `BACKLOG.md` y sin cambios en sus validadores (§9.1).
+7. **Yolo sin commits (pregunta 2 anterior).** En yolo todo se trabaja directo en la rama actual, sin rama por feature y sin commits, ni locales; el `constructor` no crea rama (§9.3).
+8. **Rama ya existente (pregunta 3 anterior, con cambio).** Sin `BLOQUEO:`: el `constructor` responde `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`, el `coordinador` la escribe en «Espera a Franco» y se la pregunta a Franco; con su sí explícito se re-delega y el `constructor` hace `git switch <rama>`; con su no, no se hace nada. `git switch *` entra en los permisos solo con esa confirmación (§9.1).
+
+9. **`CONFIRMAR:` en contrato y comprobadores (resuelta, Franco, 2026-10-29).** Sí: la línea `CONFIRMAR:` entra en el contrato del `constructor` y en los comprobadores de contrato y de resultado al implementar, con un control negativo.
+10. **Cambios sin commit al cambiar de rama (resuelta, Franco, 2026-10-29).** Si `git switch <rama>` falla (p. ej. cambios sin commit que chocan), basta con `BLOQUEO:` y lo corrige Franco; el `constructor` no evita el intento con el árbol sucio.
+
+**Preguntas abiertas:** ninguna.
+
 ## Estado
 
-Aprobado por Franco el 2026-10-29.
+Aprobado por Franco el 2026-10-29, incluidos §2, §3 y la nueva §9 (F05 y F06, con sus respuestas a §9.5).

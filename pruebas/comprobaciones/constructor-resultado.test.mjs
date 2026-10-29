@@ -73,6 +73,10 @@ const CORRECTOS = {
     cambiar: bloqueadaOk,
     respuesta: 'BLOQUEO: rol=planificador; motivo=verificar.sh falla siempre\nNo pude terminar la verificación.',
   },
+  confirmar: {
+    cambiar: () => {},
+    respuesta: 'CONFIRMAR: accion=git switch feature/F99-demo; motivo=la rama ya existe y la actual es main',
+  },
 };
 
 test('extraerRespuesta devuelve el result del evento result e ignora líneas no JSON', () => {
@@ -125,6 +129,24 @@ const INCORRECTOS = [
     bloqueadaOk,
     'No pude terminar la verificación.',
   ],
+  [
+    'confirmar sin línea CONFIRMAR',
+    'confirmar',
+    () => {},
+    'Hay una rama feature/F99-demo, no sé qué hacer.',
+  ],
+  [
+    'confirmar respondido con BLOQUEO',
+    'confirmar',
+    () => {},
+    'BLOQUEO: rol=arquitecto; motivo=la rama ya existe',
+  ],
+  [
+    'confirmar con la tarea en curso',
+    'confirmar',
+    (dir) => escribir(dir, T1, leer(dir, T1).replace('estado: aprobada', 'estado: en curso')),
+    CORRECTOS.confirmar.respuesta,
+  ],
 ];
 
 for (const [nombre, caso, cambiar, respuesta] of INCORRECTOS) {
@@ -134,3 +156,11 @@ for (const [nombre, caso, cambiar, respuesta] of INCORRECTOS) {
     assert.ok(errores.length > 0, 'debe haber al menos un error');
   });
 }
+
+test('confirmar da error si la rama cambia durante la corrida', () => {
+  const { antes, despues } = escenario((dir) => {
+    execFileSync('git', ['-C', dir, 'switch', '-c', 'otra'], { stdio: 'pipe' });
+  });
+  const errores = evaluarCaso('confirmar', { antes, despues, respuesta: CORRECTOS.confirmar.respuesta });
+  assert.ok(errores.some((e) => /rama/.test(e)), `debe reportar el cambio de rama: ${JSON.stringify(errores)}`);
+});

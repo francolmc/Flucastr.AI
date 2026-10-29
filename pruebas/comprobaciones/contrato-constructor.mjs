@@ -18,6 +18,9 @@ const REGLAS = [
   { n: 7, sobre: 'skill', frases: ['estado: bloqueada'] },
   { n: 8, sobre: 'skill', frases: ['rol=planificador', 'rol=arquitecto'], regex: /BLOQUEO: rol=<[^>]+>; motivo=<[^>]+>/ },
   { n: 9, sobre: 'skill', frases: ['Nunca `hecha`', 'Sin commit, push, PR, merge ni despliegue'] },
+  { n: 10, sobre: 'constructor', frases: ['git switch -c', 'git branch --show-current', 'Nunca `commit`, `push`, `merge`, `reset`, `rebase` ni `checkout`'] },
+  { n: 11, sobre: 'skill', frases: ['git switch -c', 'git branch --show-current', 'Rama:', 'Franco confirmó `git switch <rama>`', 'Cambia `estado` a `en curso`'], despuesDe: ['git switch -c', 'Cambia `estado` a `en curso`'] },
+  { n: 12, sobre: 'skill', frases: ['CONFIRMAR: accion=git switch <rama>; motivo=<motivo>'], regex: /CONFIRMAR: accion=git switch <[^>]+>; motivo=[^\n]+/, mensajeRegex: 'falta la línea «CONFIRMAR: accion=git switch <rama>; motivo=<motivo>»' },
 ];
 
 export function validarConstructor({ constructor, skill } = {}) {
@@ -37,7 +40,7 @@ export function validarConstructor({ constructor, skill } = {}) {
     }
 
     if (regla.regex && !regla.regex.test(texto)) {
-      problemas.push('falta la línea «BLOQUEO: rol=<rol requerido>; motivo=<motivo>»');
+      problemas.push(regla.mensajeRegex ?? 'falta la línea «BLOQUEO: rol=<rol requerido>; motivo=<motivo>»');
     }
 
     if (regla.despuesDe) {

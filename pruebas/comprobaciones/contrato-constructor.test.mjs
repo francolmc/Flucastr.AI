@@ -13,7 +13,7 @@ const real = () => ({
   skill: leer('skills/ejecutar-tarea/SKILL.md'),
 });
 
-test('los textos reales del constructor y de ejecutar-tarea cumplen las nueve reglas', () => {
+test('los textos reales del constructor y de ejecutar-tarea cumplen todas las reglas', () => {
   assert.deepEqual(validarConstructor(real()), []);
 });
 
@@ -28,6 +28,9 @@ const variantes = [
   ['regla 7: falta «estado: bloqueada» en la skill', 'skill', ['estado: bloqueada']],
   ['regla 8: falta la línea BLOQUEO o «rol=planificador» / «rol=arquitecto» en la skill', 'skill', ['rol=planificador', 'rol=arquitecto', 'BLOQUEO: rol=<rol requerido>; motivo=<motivo>']],
   ['regla 9: falta «Nunca `hecha`» o «Sin commit, push, PR, merge ni despliegue» en la skill', 'skill', ['Nunca `hecha`', 'Sin commit, push, PR, merge ni despliegue']],
+  ['regla 10: falta «git switch -c», «git branch --show-current» o la prohibición de `commit`, `push`, `merge`, `reset`, `rebase` ni `checkout` en el constructor', 'constructor', ['git switch -c', 'git branch --show-current', 'Nunca `commit`, `push`, `merge`, `reset`, `rebase` ni `checkout`']],
+  ['regla 11: falta «git switch -c», «git branch --show-current», «Rama:», «Franco confirmó `git switch <rama>`» o «Cambia `estado` a `en curso`» en la skill', 'skill', ['git switch -c', 'git branch --show-current', 'Rama:', 'Franco confirmó `git switch <rama>`', 'Cambia `estado` a `en curso`']],
+  ['regla 12: falta la línea «CONFIRMAR: accion=git switch <rama>; motivo=<motivo>» en la skill', 'skill', ['CONFIRMAR: accion=git switch <rama>; motivo=<motivo>']],
 ];
 
 for (const [nombre, sobre, frases] of variantes) {
@@ -39,3 +42,10 @@ for (const [nombre, sobre, frases] of variantes) {
     assert.ok(validarConstructor(textos).length > 0, 'se esperaba al menos un error');
   });
 }
+
+test('rechaza la regla 11 si la rama se resuelve después del paso a «en curso»', () => {
+  const textos = real();
+  textos.skill = textos.skill.replace('git switch -c', 'X') + '\ngit switch -c';
+  const errores = validarConstructor(textos);
+  assert.ok(errores.some((e) => e.startsWith('Regla 11 ')), `se esperaba error de la regla 11, llegó: ${JSON.stringify(errores)}`);
+});

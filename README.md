@@ -12,7 +12,7 @@ Para producir funcionalidad real en mis proyectos (Don Financio, Andes y otros) 
 
 1. **Producto primero.** Lo primero que se construye es algo que me sirva, no una herramienta.
 2. **Una tarea, un archivo.** Cada trabajo se describe en un archivo de tarea; yo lo apruebo antes de que se escriba código.
-3. **Yo hago el commit.** Los agentes no hacen commit, push, PR, merge ni despliegue.
+3. **Yo hago el commit.** Los agentes no hacen commit, push, PR, merge ni despliegue. El `constructor` solo crea la rama de la feature (`git switch -c`) y, con mi confirmación, se cambia a una rama existente (`git switch`); el commit, el PR, el merge y el despliegue son míos.
 4. **Los secretos no se tocan.** Nadie lee ni imprime `.env`, llaves ni credenciales.
 5. **Nada nuevo sin dolor real.** Una herramienta, regla o automatización se agrega solo cuando su ausencia ya me costó tiempo.
 6. **Corte duro.** Si en 2 o 3 días no hay algo funcionando, paro y reviso qué me frena.
@@ -88,7 +88,7 @@ Detalle de escenarios y permisos en [`pruebas/README.md`](pruebas/README.md).
 
 ## Flujo
 
-El `coordinador` (el único agente que abro) invoca al `arquitecto`, al `planificador` y al `constructor`, y se detiene en cuatro puertas de aprobación: definición, backlog, cada tarea y revisión del resultado. Detalle en [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md). F04 dejó este README al día y una comprobación que falla si el árbol de `## Estructura` no coincide con `agentes/` y `skills/` (`pruebas/comprobaciones/readme-estructura.mjs`); su cierre en `definitions/BACKLOG.md` lo hago yo.
+El `coordinador` (el único agente que abro) invoca al `arquitecto`, al `planificador` y al `constructor`, y se detiene en cuatro puertas de aprobación: definición, backlog, cada tarea y revisión del resultado. Detalle en [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md). F04 dejó este README al día y una comprobación que falla si el árbol de `## Estructura` no coincide con `agentes/` y `skills/` (`pruebas/comprobaciones/readme-estructura.mjs`); su cierre en `definitions/BACKLOG.md` lo hago yo. Cada feature trabaja en una rama `feature/`, `fix/` o `chore/` + `Fxx-nombre`; al quedar `hecha` su última tarea, el aviso llega por `STATUS.md` para que yo cierre la rama. Antes de descomponer una feature ambigua puede haber un refinado previo (hasta 5 preguntas con recomendación en `features/Fxx/refinado.md`), solo cuando se requiere.
 
 ## Archivo y rescate
 

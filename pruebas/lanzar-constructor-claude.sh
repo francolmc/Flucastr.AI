@@ -12,7 +12,10 @@ prompt="Ejecuta la tarea $1. En esta sesión no se pueden responder preguntas."
   --allowedTools \
   'Read(./**)' 'Write(./**)' 'Edit(./**)' 'Skill' \
   'Bash(cat *)' 'Bash(ls *)' 'Bash(echo *)' 'Bash(printf *)' 'Bash(bash verificar.sh)' 'Bash(git status --short)' \
+  'Bash(git switch -c *)' 'Bash(git switch *)' 'Bash(git branch --show-current)' \
   --disallowedTools \
   'Read(./.env)' 'Read(.env)' \
   'Bash(cat ./.env)' 'Bash(cat .env)' \
+  'Bash(git commit *)' 'Bash(git push *)' 'Bash(git merge *)' \
+  'Bash(git reset *)' 'Bash(git rebase *)' 'Bash(git checkout *)' \
   -- "$prompt" > "$FLUCASTR_RECORD_FILE"

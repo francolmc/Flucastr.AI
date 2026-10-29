@@ -122,5 +122,36 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     errores.push('La skill «descomponer-feature» contiene «No cambies `BACKLOG.md`», que contradice la marca «→».');
   }
 
+  // Regla 9: el coordinador traza la rama de la feature y pide CONFIRMAR antes de cambiar de rama.
+  const frasesRama = [
+    'Rama: <prefijo>/Fxx-nombre',
+    'CONFIRMAR: accion=git switch <rama>; motivo=<motivo>',
+    'Franco confirmó `git switch <rama>`',
+  ];
+  for (const frase of frasesRama) {
+    if (!(agentes.coordinador ?? '').includes(frase)) {
+      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
+    }
+  }
+
+  // Regla 10: el coordinador indica a Franco el cierre de la rama de la feature (sin ejecutarlo).
+  if (!(agentes.coordinador ?? '').includes('cierra la rama, haz el PR y despliega')) {
+    errores.push('El agente «coordinador» debe contener la frase «cierra la rama, haz el PR y despliega».');
+  }
+
+  // Regla 11: REFINAR en coordinador, planificador y descomponer-feature; la skill cita refinado.md.
+  const FRASE_REFINAR = 'REFINAR: feature=Fxx; preguntas=<n>';
+  for (const nombre of ['coordinador', 'planificador']) {
+    if (!(agentes[nombre] ?? '').includes(FRASE_REFINAR)) {
+      errores.push(`El agente «${nombre}» debe contener la frase «${FRASE_REFINAR}».`);
+    }
+  }
+  if (!descomponer.includes(FRASE_REFINAR)) {
+    errores.push(`La skill «descomponer-feature» debe contener la frase «${FRASE_REFINAR}».`);
+  }
+  if (!descomponer.includes('features/Fxx-nombre/refinado.md')) {
+    errores.push('La skill «descomponer-feature» debe citar «features/Fxx-nombre/refinado.md».');
+  }
+
   return errores;
 }

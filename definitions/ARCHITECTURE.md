@@ -1,6 +1,6 @@
 # Arquitectura — Flucastr.AI (modo: actual)
 
-> Estado: **aprobado por Franco** (2026-10-29).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06).
 
 ## Estructura y su razón
 
@@ -76,7 +76,49 @@ flowchart LR
 
 ## Evolución prevista (no existe hoy)
 
-Tres roles más y un coordinador: `coordinador` (agente principal, delgado), `planificador` (backlog y tareas) y `constructor` (ejecuta una tarea). Franco abre solo el `coordinador`, que invoca a los demás como subagentes y se detiene en cuatro puertas de aprobación. Los roles se traspasan trabajo por archivos: `definitions/` → `definitions/BACKLOG.md` → `features/F01-nombre/task-NN-nombre.md` → `features/completed/`, con `definitions/STATUS.md` para el estado del flujo y los bloqueos. Ningún rol llama a otro: los bloqueos pasan por `STATUS.md`. Detalle en `PROJECT.md`, «Flujo de trabajo». No se dibuja en el diagrama porque no está construido. El arquitecto deja de ser el agente principal (cambio de una frase en `agentes/arquitecto.md`, de Franco).
+Tres roles más y un coordinador: `coordinador` (agente principal, delgado), `planificador` (backlog y tareas) y `constructor` (ejecuta una tarea). Franco abre solo el `coordinador`, que invoca a los demás como subagentes y se detiene en cuatro puertas de aprobación. Los roles se traspasan trabajo por archivos: `definitions/` → `definitions/BACKLOG.md` → `features/F01-nombre/task-NN-nombre.md` → `features/completed/`, con `definitions/STATUS.md` para el estado del flujo y los bloqueos. Ningún rol llama a otro: los bloqueos pasan por `STATUS.md`. Detalle en `PROJECT.md`, «Flujo de trabajo». El diagrama de arriba muestra la instalación del kit; el flujo de trabajo se dibuja aparte, en la sección siguiente. El arquitecto deja de ser el agente principal (cambio de una frase en `agentes/arquitecto.md`, de Franco).
+
+## Flujo de trabajo con ramas, refinado y yolo (propuesta, F05 y F06)
+
+Detalle y reglas en `WORKFLOW.md` §9. Es el flujo de los roles sobre archivos, no un componente instalado.
+
+```mermaid
+flowchart TD
+  F["Franco"]
+  CO["coordinador"]
+  PL["planificador"]
+  CN["constructor"]
+  ST[("definitions/STATUS.md")]
+  BK[("definitions/BACKLOG.md")]
+  RF[("features/Fxx/refinado.md")]
+  TK[("features/Fxx/task-NN.md")]
+  BR["rama prefijo/Fxx-nombre (feature, fix o chore)"]
+
+  F -->|"abre"| CO
+  CO -->|"descomponer"| PL
+  PL -.->|"REFINAR: preguntas si es ambigua"| CO
+  CO -->|"traslada preguntas"| F
+  F -->|"respuestas"| CO
+  CO -->|"re-invoca con respuestas"| PL
+  PL -->|"guarda"| RF
+  PL -->|"crea tareas (puerta 3)"| TK
+  PL -->|"lee y propone"| BK
+  CO -->|"tarea aprobada + nombre de rama"| CN
+  CN -->|"git switch -c, 1.ª tarea"| BR
+  CN -.->|"rama existente: CONFIRMAR"| CO
+  CO -.->|"escribe y pregunta"| F
+  F -.->|"sí: re-delega; el constructor hace git switch"| CO
+  CN -->|"cambios sin commit"| BR
+  F -->|"puerta 4: revisa y commit por tarea"| BR
+  CO -->|"última tarea hecha: avisa"| ST
+  ST -->|"Franco lee"| F
+  F -->|"cierra rama, PR y despliegue"| BR
+  F -.->|"yolo: pedido explícito, un repo"| CO
+  CO -.->|"yolo: sin puertas 2, 3 y 4; descompone y construye"| CN
+  CN -.->|"yolo: rama actual, aviso si es main"| ST
+```
+
+Las flechas punteadas son opcionales: el refinado solo si la feature lo requiere (criterio en `WORKFLOW.md` §9.2); yolo solo a pedido de Franco, sin crear rama (trabaja en la actual, con advertencia en `STATUS.md` si es `main`). El git de escritura de un agente es `git switch -c` del `constructor` en la primera tarea y, si la rama ya existe, `git switch <rama>` solo tras la confirmación de Franco (línea `CONFIRMAR:` vía `coordinador` y `STATUS.md`, `WORKFLOW.md` §9.1); Franco hace los commits, el PR y el despliegue (decidido 2026-10-29).
 
 ## Supuestos y pendientes
 
@@ -88,4 +130,4 @@ Tres roles más y un coordinador: `coordinador` (agente principal, delgado), `pl
 
 ## Estado
 
-Aprobado por Franco el 2026-10-29.
+Aprobado por Franco el 2026-10-29, incluidos los ajustes por sus respuestas a `WORKFLOW.md` §9.5.
