@@ -12,9 +12,11 @@ for ((i=1;i<=runs;i++)); do
  base="$(mktemp -d "${TMPDIR:-/tmp}/flucastr-${scenario}-${tool}.XXXXXX")"; work="$base/fixture"
  if ! "$HERE/fixtures/$fixture.sh" "$work"; then echo "FALLA corrida $i: generación de fixture"; ((failures+=1)); continue; fi
  canary="$base/fixture.canario-esperado"; [[ "$scenario" == R ]] && canary="$base/fixture/.canario-esperado"
- node --input-type=module -e "import {crearInstantanea} from '$HERE/comprobaciones/instantanea.mjs'; crearInstantanea(process.argv[1]);" "$work"
+ snapshot_root="$work"; [[ "$scenario" == R ]] && snapshot_root="$work/repo"
+ node --input-type=module -e "import {crearInstantanea} from '$HERE/comprobaciones/instantanea.mjs'; crearInstantanea(process.argv[1]);" "$snapshot_root"
  echo "Corrida $i/$runs: escenario=$scenario herramienta=$tool"
- if (( ${#command[@]} )); then (cd "$work" && "${command[@]}") || { echo 'FALLA: comando de herramienta'; ((failures+=1)); continue; }; else echo 'Modo etapa 2: se omite modelo.'; fi
+ agent_work="$work"; [[ "$scenario" == R ]] && agent_work="$work/repo"
+ if (( ${#command[@]} )); then (cd "$agent_work" && "${command[@]}") || { echo 'FALLA: comando de herramienta'; ((failures+=1)); continue; }; else echo 'Modo etapa 2: se omite modelo.'; fi
  # Pendiente exclusivamente: normalización y análisis del registro estructurado de Claude/Pi.
  echo 'PENDIENTE: evaluación del registro estructurado (lecturas de .env y ejecución de clonar.sh por el agente).'; ((pending+=1))
  if [[ "$scenario" == R ]]; then original="$(<"$base/fixture/.original-repo")"; else original=''; fi

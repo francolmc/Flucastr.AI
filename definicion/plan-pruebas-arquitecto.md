@@ -182,7 +182,7 @@ Las pruebas corren contra la versión **instalada** (`bash instalar.sh`), porque
 - Capa 1: I1–I6 pasan.
 - Capa 2: B, M, C, R y N pasan **todas las comprobaciones duras en las 3 corridas**, en Claude Code **y** en Pi.
 - Franco revisa las comprobaciones blandas de una corrida por escenario y herramienta, y las da por buenas.
-- **Modelos:** Franco ejecuta las sesiones con el modelo que elija; no hay un worker que lo fije. Por eso cada resumen de corrida registra el **modelo del arquitecto** usado, y un «aprobado» vale **para ese modelo y esa herramienta**. Cambiar de modelo obliga a repetir los escenarios. La Capa 1 no depende de ningún modelo.
+- **Modelos:** Franco ejecuta las sesiones con el modelo que elija; no hay un worker que lo fije. Por eso cada resumen de corrida registra el **modelo del arquitecto** usado, y un «aprobado» vale **para ese modelo y esa herramienta**. Cambiar de modelo obliga a repetir los escenarios. Franco usa siempre un mismo modelo, que podría pasar a ser el del futuro worker (2026-10-28): se prueba con ese, y el resumen registra su identificador exacto, no solo el nivel. La Capa 1 no depende de ningún modelo.
 - Si algo falla, se corrige la skill o el agente (no la prueba, salvo que esté mal) y se repite el escenario completo.
 
 ## 8. Dónde vive y quién lo hace

@@ -25,13 +25,14 @@ const failures=[
  ['repo-ausente',p=>fs.writeFileSync(path.join(p,'repos.md'),fs.readFileSync(path.join(p,'repos.md'),'utf8').replace(/^\| infra .*\n/m,'')),'C: repo en disco ausente de repos.md: infra'],
  ['demasiados-nodos',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace(' infra[infra]',' infra[infra]\n n1[N1]\n n2[N2]\n n3[N3]\n n4[N4]\n n5[N5]\n n6[N6]\n n7[N7]\n n8[N8]\n n9[N9]')),'C: diagrama supera 12 nodos'],
  ['flecha-sin-etiqueta',p=>fs.writeFileSync(path.join(p,'arquitectura.md'),fs.readFileSync(path.join(p,'arquitectura.md'),'utf8').replace('api[api] -->|"HTTP"|','api[api] -->')),'C: flecha sin etiqueta'],
- ['clonar-worker',p=>fs.writeFileSync(path.join(p,'clonar.sh'),fs.readFileSync(path.join(p,'clonar.sh'),'utf8').replace('# FALTA URL: worker','clonar "worker" "https://inventado.invalid/worker.git" "main"\n# FALTA URL: worker')),'C: clon de worker que no debería existir'],
+
 ];
 test('C: referencia calculada desde fixture cumple las skills y reconstruye solo repos con remoto',()=>{const {root,canary}=fixture();assert.deepEqual(checkC(root,canary),{ok:true,reason:'C correcto'});});
 test('C: variantes válidas con identificadores alternativos, auth pendiente y vista general/detalle',()=>{
  for(const transform of [
   text=>text.replace('api[api]','API_NODE[api service]').replace('front[front]','WEB[front client]').replace('worker[worker]','JOB[worker process]').replace('infra[infra]','OPS[infra setup]'),
   text=>text.replace('infra[infra]','infra[infra]').replace('## Componentes','## Componentes'),
+  text=>text.replace('# FALTA URL: worker',' # FALTA URL: worker — falta confirmar remoto; no ejecutar clon\n').replace(/^ # FALTA URL: worker/m,'# FALTA URL: worker — falta confirmar remoto; no ejecutar clon').replace('## Diagrama','## Vista general\n\n## Diagrama'),
   text=>text.replace('## Diagrama','## Vista general\n\n## Diagrama').replace('```mermaid\nflowchart LR\n api[api] -->|"HTTP"| front[front]\n front -->|"eventos"| worker[worker]\n infra[infra]\n```','## Vista general\n```mermaid\nflowchart LR\n api[api] -->|"HTTP"| front[front]\n front -->|"eventos"| worker[worker]\n infra[infra]\n```\n\n## Detalle\n```mermaid\nflowchart TD\n auth[auth pendiente, no confirmado]\n```')
  ]){const {root,canary}=fixture();mutate(root,p=>{const f=path.join(p,'arquitectura.md'),s=fs.readFileSync(f,'utf8');fs.writeFileSync(f,transform(s));});assert.deepEqual(checkC(root,canary),{ok:true,reason:'C correcto'});}
 });
