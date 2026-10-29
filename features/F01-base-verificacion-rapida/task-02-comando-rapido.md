@@ -1,5 +1,5 @@
 # task-02 — Comando de verificación rápida (`pruebas/rapida.sh`)
-repo: Flucastr.AI   depende_de: task-01   estado: borrador
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Hoy no hay una sola orden que Franco corra para confiar en un cambio: la suite completa tarda ~46 s, de los cuales ~32 s son `contrato.test.mjs` (fixtures Git de B/M/R que solo importan al tocar el contrato del arquitecto). Esta tarea crea `pruebas/rapida.sh`, que corre todo lo determinista salvo ese archivo y falla si pasa de 30 s, y la documenta en el README. Es la base sobre la que se añaden las demás comprobaciones de F01.
@@ -70,4 +70,80 @@ Salida esperada: `ℹ tests 34`, `ℹ pass 34`, `ℹ fail 0`, `rapida: 7 archivo
 
 ## Evidencia
 
+Paso 4 y verificación 1 (salida real):
+```
+$ bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ (tests|pass|fail)|rapida:)"; echo "rc=${PIPESTATUS[0]}"
+ℹ tests 34
+ℹ pass 34
+ℹ fail 0
+rapida: 7 archivos en 16 s (tope 30 s)
+rc=                       (vacío: el shell es zsh, no define PIPESTATUS; el código real está abajo)
+
+$ bash pruebas/rapida.sh 2>&1 | tail -n 12
+✔ lanzar-pi.sh: sintaxis Bash válida (5.726958ms)
+✔ lanzar-pi.sh: modelo simulado recibe argumentos y registro va a FLUCASTR_RECORD_FILE (47.187333ms)
+✔ Claude Code y Pi reciben exactamente la misma definición compartida del prompt (0.259292ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15286.290542
+rapida: 7 archivos en 15 s (tope 30 s)
+```
+
+Códigos de salida medidos con `$?` (salida en archivo en el scratchpad):
+```
+$ bash pruebas/rapida.sh > rc-ok.txt 2>&1; echo "rc_normal=$?"
+rc_normal=0
+ℹ tests 34
+ℹ pass 34
+ℹ fail 0
+rapida: 7 archivos en 14 s (tope 30 s)
+
+$ FLUCASTR_TOPE_RAPIDA=1 bash pruebas/rapida.sh > rc-tope.txt 2>&1; echo "rc_tope1=$?"
+rc_tope1=1
+FALLA: la verificación rápida superó el tope de 1 s
+
+$ bash pruebas/rapida.sh > /dev/null 2>&1; echo "rc_segunda_corrida=$?"
+rc_segunda_corrida=0
+```
+
+Verificación 2 (control negativo del tope, con `grep` como en la tarea):
+```
+$ FLUCASTR_TOPE_RAPIDA=1 bash pruebas/rapida.sh 2>&1 | grep -E "^FALLA"
+FALLA: la verificación rápida superó el tope de 1 s
+rc=1 (medido con $?)
+```
+
+Verificación 3 (ninguna prueba «contrato duro» en la rápida):
+```
+$ bash pruebas/rapida.sh 2>&1 | grep -c "contrato duro"
+0
+```
+
+Verificación 4 (desde otro directorio):
+```
+$ (cd /tmp && bash /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/rapida.sh 2>&1 | grep -E "^rapida:")
+rapida: 7 archivos en 14 s (tope 30 s)
+```
+
+Verificación 5 (README conserva la orden completa y añade la rápida):
+```
+$ grep -c "bash pruebas/rapida.sh\|pruebas/comprobaciones/\*.test.mjs pruebas/\*.test.mjs" pruebas/README.md
+2
+```
+
+Criterios de aceptación: 1 OK (rc 0, pass 34, fail 0, 7 archivos en 14–16 s ≤ 30). 2 OK (rc 1 y mensaje FALLA). 3 OK (0 coincidencias). 4 OK (desde /tmp). 5 OK (2 coincidencias: línea de la rápida y línea de la completa).
+
 ## Notas
+- Hueco menor: la tarea no decía permisos. Di `chmod +x pruebas/rapida.sh` por la convención de `pruebas/ejecutar.sh`; la orden documentada `bash pruebas/rapida.sh` no lo necesita.
+- Hueco menor: la tarea usa `PIPESTATUS`, que zsh no define. El código de salida se midió con `$?` en una corrida aparte; la primera verificación imprime `rc=` vacío por eso. No cambié el comando de la tarea.
+- La verificación 4 escribe en `/tmp` solo porque así lo indica la tarea (`cd /tmp` es un directorio de prueba, no un archivo de trabajo).
+- `pruebas/capa1/instalacion.test.mjs` deja un directorio nuevo en `pruebas/.temporales/` en cada corrida (ignorado por Git). Es comportamiento existente y no se tocó.
+- Tiempo medido: 14 a 16 s por corrida, dentro del tope de 30 s.
+- `contrato.test.mjs` queda fuera; no se modificó ninguna prueba existente.
+- Los cambios sin commitear de otros archivos (`definitions/BACKLOG.md`, `definitions/STATUS.md`, `task-01-limpieza-pruebas.md`) no se tocaron. Solo hay cambios nuevos en `pruebas/rapida.sh` (nuevo) y `pruebas/README.md`, además de esta tarea.
+- Sin commit, push, PR, merge ni despliegue. `STATUS.md` no se editó.

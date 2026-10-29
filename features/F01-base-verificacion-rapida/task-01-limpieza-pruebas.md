@@ -1,5 +1,5 @@
 # task-01 — Retirar restos obsoletos de pruebas/
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Cierra la limpieza de pruebas que quedó a medias tras retirar el escenario C. Hay tres restos que no usa nadie: un informe TAP viejo y versionado que muestra I3–I5 fallando (hoy pasan 12/12), un script de comprobaciones sin ningún importador y un directorio vacío. Quitarlos deja una base más corta y sin señales engañosas antes de añadir comprobaciones nuevas.

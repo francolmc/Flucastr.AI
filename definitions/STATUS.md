@@ -4,17 +4,13 @@
 
 ## Paso actual
 
-Rol: coordinador, tras la entrega del constructor.
-Feature: F01 (base de verificación rápida).
-Tarea: task-01 en `lista para revisión`. Tareas 2–5 en `borrador`, sin aprobar.
-Flujo detenido en la puerta 4.
+Rol: coordinador.
+Feature: F01. task-01 y task-02 `hecha`. task-03 a task-05 en `borrador`.
+El backlog sigue en `borrador` (F05–F07 y el máximo de 6 se retoman al terminar F01, decisión de Franco).
 
 ## Espera a Franco
 
-Puerta 4 — revisar el resultado de task-01 y decidir si la cierras como `hecha` (y el commit, que es tuyo):
-- Tarea y evidencia: `/Users/franco/Codes/flucastr/Flucastr.AI/features/F01-base-verificacion-rapida/task-01-limpieza-pruebas.md` (secciones *Evidencia* y *Notas*).
-- Cambio en el repo: borrados `pruebas/capa1/ultima-ejecucion.tap` y `pruebas/comprobaciones/escenario.mjs`, y el directorio vacío `pruebas/comprobaciones/casos-negativos/`. Verificación: 28/28 pruebas, sin referencias colgantes.
-Pendiente de puerta 3: aprobar task-02 a task-05 (cada una por separado).
+Puerta 3 — aprobar task-03 (`/Users/franco/Codes/flucastr/Flucastr.AI/features/F01-base-verificacion-rapida/task-03-formato-tarea.md`). Task-04 y task-05 se aprueban después, cada una por separado.
 
 ## Bloqueos abiertos
 
