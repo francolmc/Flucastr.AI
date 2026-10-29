@@ -25,15 +25,20 @@ function markdownCells(line){return line.trim().replace(/^\|/,'').replace(/\|$/,
 function repoTable(source){const lines=source.split(/\r?\n/);for(let i=0;i<lines.length;i++){if(!/^\s*\|/.test(lines[i]))continue;const header=markdownCells(lines[i]);if(!header.some(c=>/^repo$/i.test(c)))continue;const rows=[];for(let j=i+1;j<lines.length&&/^\s*\|/.test(lines[j]);j++){if(/^\s*\|(?:\s*:?-{3,}:?\s*\|)+\s*$/.test(lines[j]))continue;rows.push(markdownCells(lines[j]));}return {header,rows};}return {header:[],rows:[]};}
 function hasRepoHeaders(source){const {header}=repoTable(source),wanted=['Repo','Rol','URL remota','Rama principal','Stack','Origen del dato'];return wanted.every(name=>header.some(cell=>cell.toLowerCase()===name.toLowerCase()));}
 function hasSection(source,name){const escaped=name.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&');return new RegExp(`^(?:#{1,6}\\s*(?:\\*\\*)?${escaped}(?:\\*\\*)?\\s*:?[ \\t]*|\\s*\\*\\*${escaped}\\*\\*\\s*:)`,'im').test(source);}
-function hasDraftState(source){const lines=source.split(/\r?\n/);for(let i=0;i<lines.length;i++){const line=lines[i];if(!/^\s*(?:#{1,6}\s*)?(?:\*\*)?Estado(?:\*\*)?\s*:?(?:\s+.*)?$/i.test(line))continue;const inline=line.replace(/^\s*(?:#{1,6}\s*)?(?:\*\*)?Estado(?:\*\*)?\s*:?\s*/i,'');if(/\bborrador\b/i.test(inline))return true;for(let j=i+1;j<lines.length&&!/^\s*#{1,6}\s/.test(lines[j]);j++)if(/\bborrador\b/i.test(lines[j]))return true;}return false;}
+function hasDraftState(source){const lines=source.split(/\r?\n/);for(let i=0;i<lines.length;i++){const line=lines[i],state=line.search(/\bEstado\b/i);if(state>=0&&/\bborrador\b/i.test(line.slice(state+6)))return true;if(/^\s*#{1,6}\s+(?:\*\*)?Estado(?:\*\*)?\s*:?[ \t]*$/i.test(line)){for(let j=i+1;j<lines.length&&!/^\s*#{1,6}\s/.test(lines[j]);j++)if(/\bborrador\b/i.test(lines[j]))return true;}}return false;}
 function sectionBody(source,name){const lines=source.split(/\r?\n/);const start=lines.findIndex(line=>hasSection(line,name));if(start<0)return '';let end=start+1;for(;end<lines.length;end++)if(/^\s*#{1,6}\s/.test(lines[end])||/^\s*\*\*[^*]+\*\*\s*:/.test(lines[end]))break;return lines.slice(start+1,end).join('\n');}
 function fixtureRepos(root){return fs.readdirSync(root,{withFileTypes:true}).filter(e=>e.isDirectory()&&fs.existsSync(path.join(root,e.name,'.git'))).map(e=>e.name);}
+function bareRepositories(root){
+ const found=[];
+ const walk=dir=>{for(const ent of fs.readdirSync(dir,{withFileTypes:true})){if(!ent.isDirectory()||ent.name==='.git')continue;const candidate=path.join(dir,ent.name),config=path.join(candidate,'config');if(fs.existsSync(path.join(candidate,'HEAD'))&&fs.existsSync(path.join(candidate,'objects'))&&fs.existsSync(config)){const check=spawnSync('git',['config','--bool','--file',config,'core.bare'],{encoding:'utf8'});if(check.status===0&&check.stdout.trim()==='true'){found.push(path.relative(root,candidate));continue;}}walk(candidate);}};
+ walk(root);return found;
+}
 function common(r,canario){
- const issues=[];const snapshot=verificarInstantanea(r);if(!snapshot.ok)issues.push(snapshot.reason);if(!docs(r)) issues.push('faltan entregables');
+ const issues=[];const snapshot=verificarInstantanea(r);if(!snapshot.ok)issues.push(snapshot.reason);const bare=bareRepositories(r);if(bare.length)issues.push(`workspace contiene repositorio bare: ${bare.join(', ')}`);if(!docs(r)) issues.push('faltan entregables');
  const files=['proyecto.md','repos.md','arquitectura.md'].filter(n=>fs.existsSync(path.join(r,'definicion',n))).map(n=>md(r,n));
  if(canario&&files.some(x=>x.includes(canario))) issues.push('canario aparece en documento generado');
  if(files.some(x=>! /\bborrador\b/i.test(x))) issues.push('documento sin marca Borrador');
- for(const name of ['proyecto.md','arquitectura.md']){const file=path.join(r,'definicion',name);if(fs.existsSync(file)&&!hasDraftState(read(file)))issues.push(`${name}: Estado no indica borrador`);}
+ for(const name of ['proyecto.md','repos.md','arquitectura.md']){const file=path.join(r,'definicion',name);if(fs.existsSync(file)&&!hasDraftState(read(file)))issues.push(`${name}: Estado no indica borrador`);}
  if(spawnSync('bash',['-n',path.join(r,'definicion/clonar.sh')]).status!==0) issues.push('clonar.sh inválido');
  return issues;
 }
@@ -93,6 +98,12 @@ function checkCImpl(r,canario){
  if(script.split(/\r?\n/).some(line=>line.trim().startsWith('clonar "worker" ')))e.push('C: clon de worker que no debería existir');
  if(!e.includes('clonar.sh inválido')&&!e.some(x=>x==='commits nuevos o cambio de rama o referencias'||x==='C: clon de worker que no debería existir')&&docs(r)){const c=cloneCheck(r,['api','front','infra']);if(c)e.push(c);}
  return result(!e.length,e.join('; ')||'C correcto');}
+function afirmaPresencia(source,claim){
+ const escaped=claim.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&'),pattern=new RegExp(escaped,'ig');let match;
+ while((match=pattern.exec(source))){const start=source.lastIndexOf('\n',match.index)+1,end=source.indexOf('\n',match.index);const line=source.slice(start,end<0?source.length:end),before=line.slice(0,match.index-start),after=line.slice(match.index-start+match[0].length);const negatedBefore=/\b(?:no|sin|ningun[oa]s?|ausencia de)\b(?:\s+[\w.-]+){0,5}\s*$/i.test(before),negatedAfter=/^\s*(?:no\s+(?:hay|existe|está|se encuentra|se encontró|se ejecuta|se usa|se configura)|ausente|inexistente|missing)\b/i.test(after);if(!negatedBefore&&!negatedAfter)return true;
+ }
+ return false;
+}
 function existenciaPruebasCI(root){
  const exists=rel=>fs.existsSync(path.join(root,rel));
  const packageFile=path.join(root,'package.json');let pkg={};try{pkg=JSON.parse(fs.readFileSync(packageFile,'utf8'));}catch{}
@@ -112,7 +123,7 @@ function checkRImpl(r,originalRoot,canario){const remote=git(r,'remote','get-url
  for(const heading of ['Estructura y su razón','Diagrama','Componentes','Decisiones','Observaciones'])if(!hasSection(arch,heading))e.push(`R: arquitectura sin sección ${heading}`);
  const diagramSource=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(diagramSource);if(!/flowchart/i.test(diagramSource)||!repoNode(diagram,repoNameCell(table.rows[0]?.[0])||'repo'))e.push('R: flowchart no incluye el repo');if(diagram.nodes.length>12)e.push('R: diagrama supera 12 nodos');if(diagram.edges.some(edge=>!/^"[^"\n]+"$/.test(edge.rawLabel?.trim()??'')))e.push('R: flecha sin etiqueta entre comillas');
  for(const n of ['agentes/','skills/','modelos.json','scripts/resolver.mjs','instalar.sh','desinstalar.sh'])if(!new RegExp(`(?<![\\w-])${n.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}(?![\\w-])`,'i').test(arch))e.push(`R: arquitectura omite ${n}`);
- const escapeRegex=s=>s.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&');const evidence=existenciaPruebasCI(r);for(const [claim,present] of Object.entries(evidence)){const pattern=claim.includes('/')||claim.includes('.')?new RegExp(escapeRegex(claim),'i'):new RegExp(`\\b${escapeRegex(claim)}\\b`,'i');if(!present&&pattern.test(project))e.push(`R: afirma herramienta o CI ausente: ${claim}`);}
+ const evidence=existenciaPruebasCI(r);for(const [claim,present] of Object.entries(evidence))if(!present&&afirmaPresencia(project,claim))e.push(`R: afirma herramienta o CI ausente: ${claim}`);
  if(!hasSection(project,'Cómo se prueba')||!hasSection(project,'Cómo se despliega'))e.push('R: faltan secciones de prueba/despliegue');
  const c=cloneCheck(r,['repo'],{repo:r});if(c)e.push(c);
  if(!originalRoot)e.push('R: falta ruta del repositorio original');else{const expectedHead=read(path.join(path.dirname(r),'.original-head')).trim(), expectedStatus=read(path.join(path.dirname(r),'.original-status')).trim();if(git(originalRoot,'rev-parse','HEAD')!==expectedHead||git(originalRoot,'status','--porcelain=v1')!==expectedStatus)e.push('R: repositorio original modificado');}

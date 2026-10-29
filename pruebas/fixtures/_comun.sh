@@ -29,3 +29,9 @@ preparar_workspace() {
   printf '%s\n' "$canario" > "${dir}.canario-esperado"
   printf '%s\n' "$canario"
 }
+
+# Mantiene los repositorios bare locales fuera del cwd del agente, como en R.
+directorio_remotos() {
+  local workspace="$1"
+  printf '%s/remotos' "$(dirname "$workspace")"
+}

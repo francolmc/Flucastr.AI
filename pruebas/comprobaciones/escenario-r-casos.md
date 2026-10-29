@@ -14,4 +14,4 @@ Ejecutar `node --test pruebas/comprobaciones/escenario-r.test.mjs`. El remoto es
 
 La declaración de ausencia de pruebas/CI es blanda: se anota para revisión humana, no exige una frase concreta. La comprobación dura contrasta las afirmaciones sobre ejecutores y CI con archivos/configuración existentes en la copia.
 
-Variantes válidas: «No existen pruebas automatizadas ni integración continua», texto descriptivo junto al nombre de un componente y comentario adicional en clonar.sh. La referencia usa la URL y rama consultadas directamente en el clon generado; no depende de URLs codificadas en la prueba.
+Variantes válidas: «No existen pruebas automatizadas ni integración continua», «no hay un script npm test», texto descriptivo junto al nombre de un componente, comentario adicional en `clonar.sh` y `Modo: actual. Estado: borrador.` en los tres documentos. La referencia usa la URL y rama consultadas directamente en el clon generado; no depende de URLs codificadas en la prueba.

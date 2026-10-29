@@ -3,7 +3,8 @@ set -euo pipefail
 [[ $# == 1 ]] || { echo 'uso: medio.sh DIRECTORIO' >&2; exit 2; }
 ROOT="$(cd "$(dirname "$0")" && pwd)"; source "$ROOT/_comun.sh"
 out="$(mkdir -p "$1" && cd "$1" && pwd)"; canario="$(preparar_workspace "$out" M)"
-for name in api front; do inicializar_repo "$out/$name" "$name" "$out/remotos/$name.git"; done
+remotos="$(directorio_remotos "$out")"
+for name in api front; do inicializar_repo "$out/$name" "$name" "$remotos/$name.git"; done
 printf '{"name":"fixture-api","private":true}\n' > "$out/api/package.json"
 printf 'PORT=4000\n' > "$out/api/.env.example"
 printf '{"name":"fixture-front","private":true}\n' > "$out/front/package.json"

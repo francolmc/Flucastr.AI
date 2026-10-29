@@ -3,7 +3,8 @@ set -euo pipefail
 [[ $# == 1 ]] || { echo 'uso: basico.sh DIRECTORIO' >&2; exit 2; }
 ROOT="$(cd "$(dirname "$0")" && pwd)"; source "$ROOT/_comun.sh"
 out="$(mkdir -p "$1" && cd "$1" && pwd)"; canario="$(preparar_workspace "$out" B)"
-inicializar_repo "$out/app" 'Aplicación React Router' "$out/remotos/app.git"
+remotos="$(directorio_remotos "$out")"
+inicializar_repo "$out/app" 'Aplicación React Router' "$remotos/app.git"
 cat > "$out/app/package.json" <<'EOF'
 {"name":"fixture-app","private":true,"type":"module","scripts":{"dev":"react-router dev","build":"react-router build"},"dependencies":{"@react-router/node":"^7.0.0","@react-router/serve":"^7.0.0","react":"^19.0.0","react-dom":"^19.0.0","react-router":"^7.0.0"},"devDependencies":{"@react-router/dev":"^7.0.0","vite":"^6.0.0","typescript":"^5.0.0"}}
 EOF
