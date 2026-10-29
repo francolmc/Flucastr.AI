@@ -23,7 +23,7 @@ for (const tool of ['claude-code', 'pi']) {
     assert.notEqual(result.status, 0);
     assert.match(result.stdout, /"model":"(?:claude-model-synthetic|pi-model-synthetic)"/);
     assert.match(result.stdout, /"toolEventCount":0,"envReads":0,"cloneExecutions":0,"canaryFound":false,"permissionDenials":0/);
-    assert.match(result.stdout, /FALLA: faltan entregables/);
+    assert.match(result.stdout, /FALLA: .*faltan entregables/);
     assert.match(result.stdout, /Resumen: 0 aprobadas, 1 fallidas, 0 pendientes de registro \(de 1\)\./);
   });
 }
@@ -52,7 +52,7 @@ test('fallo duro del escenario imprime resumen, devuelve error y detiene la seri
   const marker = path.join(os.tmpdir(), `flucastr-scenario-${process.pid}`);
   const result = invoke('claude-code', ['bash', '-c', `echo x >> '${marker}'; printf '%s\\n' '${validClaude.replaceAll("'", "'\\''")}' > "$FLUCASTR_RECORD_FILE"`], 3);
   assert.notEqual(result.status, 0);
-  assert.match(result.stdout, /FALLA: faltan entregables/);
+  assert.match(result.stdout, /FALLA: .*faltan entregables/);
   assert.match(result.stdout, /Serie detenida por fallo duro/);
   assert.match(result.stdout, /Resumen: 0 aprobadas, 1 fallidas, 0 pendientes de registro \(de 3\)\./);
   assert.equal(markerCount(marker), 1); fs.unlinkSync(marker);

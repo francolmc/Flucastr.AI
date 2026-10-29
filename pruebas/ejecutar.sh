@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"; HERE="$ROOT/pruebas"
-usage(){ echo 'uso: pruebas/ejecutar.sh {B|M|C|R} {claude-code|pi} [corridas=3] [COMANDO...]' >&2; }
+usage(){ echo 'uso: pruebas/ejecutar.sh {B|M|R} {claude-code|pi} [corridas=3] [COMANDO...]' >&2; }
 [[ $# -ge 2 ]] || { usage; exit 2; }; scenario="$(printf '%s' "$1" | tr '[:lower:]' '[:upper:]')"; tool="$2"; shift 2; runs=3
-[[ "$scenario" =~ ^(B|M|C|R)$ && "$tool" =~ ^(claude-code|pi)$ ]] || { usage; exit 2; }
+[[ "$scenario" =~ ^(B|M|R)$ && "$tool" =~ ^(claude-code|pi)$ ]] || { usage; exit 2; }
 if [[ ${1:-} =~ ^[1-9][0-9]*$ ]]; then runs="$1"; shift; fi
 command=(); (( $# == 0 )) || command=("$@")
-case "$scenario" in B) fixture=basico;; M) fixture=medio;; C) fixture=complejo;; R) fixture=real;; esac
+case "$scenario" in B) fixture=basico;; M) fixture=medio;; R) fixture=real;; esac
 failures=0; passes=0; pending=0
 for ((i=1;i<=runs;i++)); do
  base="$(mktemp -d "${TMPDIR:-/tmp}/flucastr-${scenario}-${tool}.XXXXXX")"; work="$base/fixture"
@@ -20,6 +20,7 @@ for ((i=1;i<=runs;i++)); do
  if (( ${#command[@]} )); then
    record_file="$base/registro.jsonl"
    export FLUCASTR_RECORD_FILE="$record_file"
+   node "$HERE/comprobaciones/agente-instalado.mjs" "$tool" || { echo 'FALLA: precondición de agente instalado'; exit 1; }
    (cd "$agent_work" && "${command[@]}") || { echo 'FALLA: comando de herramienta'; ((failures+=1)); echo 'Serie detenida por fallo duro.'; echo "Resumen: $passes aprobadas, $failures fallidas, $pending pendientes de registro (de $runs)."; exit 1; }
  else echo 'Modo etapa 2: se omite modelo.'; ((pending+=1)); fi
  if (( ${#command[@]} )) && [[ -n "${FLUCASTR_RECORD_FILE:-}" && -f "$FLUCASTR_RECORD_FILE" ]]; then

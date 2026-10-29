@@ -1,19 +1,10 @@
 # Pruebas del agente `arquitecto`
 
-- Etapa 1 (I1–I6): `node --test pruebas/capa1/instalacion.test.mjs`.
-- Etapa 2: genera B/M/C/R con `pruebas/fixtures/{basico,medio,complejo,real}.sh DIRECTORIO`.
-- Fixtures fuera del repo de pruebas, sin dependencias; los remotos bare locales quedan fuera del cwd del agente y sus URLs absolutas siguen siendo clonables. `.env` lleva canario aleatorio.
-- Comprueba los controles negativos del núcleo: `node pruebas/comprobaciones/escenario.mjs`.
-- Los casos adversos persistentes están definidos en `pruebas/comprobaciones/escenario.mjs` y documentados como tabla de casos en `casos-negativos.md`.
-- Verificación de sintaxis: `bash -n pruebas/ejecutar.sh pruebas/fixtures/*.sh`.
-- `pruebas/ejecutar.sh ESCENARIO HERRAMIENTA [N] [COMANDO [ARG...]]` prepara el fixture y genera antes de invocar el comando una instantánea única en el directorio temporal padre (`.instantanea-inicial.json`), mediante `comprobaciones/instantanea.mjs`. Incluye hashes del árbol fuera de `definicion/` y HEAD, rama y referencias de cada repo. Nunca se permite omitir la comprobación por ausencia de instantánea.
-- Los tests B/M/C/R usan el mismo módulo compartido para crear y verificar la instantánea. Comprobación común: ningún commit nuevo ni cambio de rama o referencias. Los comandos Git con error producen un motivo explícito (`fuente no encontrada` o `git falló: ...`), nunca una salida vacía comparable.
-- R trabaja con `cwd` en `fixture/repo`; el remoto bare, el canario, `.repo`, `.original-*` y la instantánea quedan en el directorio fixture, fuera del repo evaluado. B/M/C ubican sus remotos bare como sibling del workspace del agente (`<base>/remotos/`), con URLs locales absolutas; la comprobación común falla si encuentra un repo bare dentro del workspace. Los scripts `clonar.sh` siguen siendo validados contra esas URLs locales y B/M/C reconstruyen los repos esperados.
-- La declaración del agente sobre ausencia de pruebas/CI es una observación blanda para revisión humana. La comprobación dura solo rechaza herramientas o archivos de CI que el proyecto afirme como existentes cuando los artefactos correspondientes no están en la copia (por ejemplo `npm test` sin script `scripts.test`).
-- El analizador Mermaid cubre aristas etiquetadas `A -- "texto" --> B` y `A -->|"x"| B -->|"y"| C`, además de `A -->|"texto"| B`. No se pretende analizar toda la gramática Mermaid (por ejemplo, subgrafos, enlaces con índices ni sintaxis de flechas distintas de las cubiertas).
-- Las comprobaciones específicas B/M/C/R y sus controles negativos: `node --test pruebas/comprobaciones/escenarios.test.mjs`; el ejecutor también evalúa cada escenario.
-- Registro estructurado: `comprobaciones/registro.mjs`; controles positivos/negativos y prueba end-to-end: `node --test pruebas/comprobaciones/registro*.test.mjs`. Pasa `FLUCASTR_RECORD_FILE=/ruta/externa/registro.jsonl` al ejecutor para analizar una corrida.
-- Permisos de los lanzadores para corridas exploratorias: `pruebas/permisos-ejecucion.md` (Claude con allow/deny por herramienta; Pi con herramientas normales y detección posterior).
-- La estructura de React Router v7 del fixture B no se verificó contra la plantilla oficial vigente; queda anotada como no verificada, sin consultar red.
-- R usa clon local fijado en `4b7b074`; falla de forma explícita si el commit no está disponible, sin usar red.
-- Esta etapa no ejecuta escenarios ni guarda resultados de corridas con modelos.
+- Alcance activo: B, M y R. C fue retirado del fixture, comprobaciones, pruebas, casos y lanzadores; Capa 1 y pruebas de registro permanecen.
+- Fixtures: `pruebas/fixtures/{basico,medio,real}.sh DIRECTORIO`. R es el repo real clonado localmente, fijado por `real.sh`.
+- La suite automática: `node --test --test-concurrency=1 pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs`.
+- Las comprobaciones duras se limitan al contrato: cinco archivos obligatorios; `AGENTS.md` no vacío; documentos marcados borrador; ausencia del canario; instantánea limitada a `definitions/`, `AGENTS.md` e `initialize.sh`; sintaxis y ejecución/reconstrucción completa de `initialize.sh` con segunda ejecución omitida; lista exacta de repos con remoto/rama correctos; repos presentes en diagrama; en M, flecha `front`→`api`.
+- El ejecutor verifica antes de cada invocación con modelo que el agente instalado de Claude Code o Pi contiene `definitions/`, `AGENTS.md` e `initialize.sh` y no contiene las rutas antiguas. Si la precondición falla, detiene la corrida sin iniciar el modelo. `FLUCASTR_CLAUDE_AGENT` y `FLUCASTR_PI_AGENT` permiten indicar explícitamente el archivo a inspeccionar.
+- `pruebas/ejecutar.sh ESCENARIO HERRAMIENTA [N] [COMANDO [ARG...]]` crea una instantánea externa al fixture antes de invocar el modelo. La revisión conserva HEAD, rama y referencias Git. Los remotos locales se alojan fuera del workspace del agente.
+- Registro estructurado y pruebas de seguridad: `pruebas/comprobaciones/registro.mjs`; casos unitarios y E2E se conservan íntegros.
+- Capa 1: `node --test --test-concurrency=1 pruebas/capa1/instalacion.test.mjs`.

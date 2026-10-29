@@ -14,7 +14,7 @@ const launcherOutputs = new Map();
 fs.writeFileSync(fake, '#!/usr/bin/env bash\nprintf \'%s\\n\' "$@"\n', { mode: 0o755 });
 
 for (const [tool, script, variable, expected] of [
-  ['Claude Code', 'lanzar-claude.sh', 'FLUCASTR_CLAUDE_BIN', ['--agent', 'arquitecto', '--output-format', 'stream-json', 'Bash(git -C ./api remote -v)', 'Write(./definicion/**)', sharedPrompt]],
+  ['Claude Code', 'lanzar-claude.sh', 'FLUCASTR_CLAUDE_BIN', ['--agent', 'arquitecto', '--output-format', 'stream-json', 'Bash(git -C ./api remote -v)', 'Write(./definitions/**)', sharedPrompt]],
   ['Pi', 'lanzar-pi.sh', 'FLUCASTR_PI_BIN', ['--mode', 'json', '--no-session', '-p', sharedPrompt]],
 ]) {
   test(`${script}: sintaxis Bash válida`, () => {

@@ -1,6 +1,6 @@
 ---
 name: revisar-proyecto-existente
-description: "Revisa un proyecto que YA existe, en solo lectura, para obtener contexto y listar sus repos. Úsala al incorporar un workspace con código: deja escritos `definicion/repos.md` y `definicion/proyecto.md`. Para proyectos nuevos usa `definir-proyecto`."
+description: "Revisa un proyecto que YA existe, en solo lectura, para obtener contexto y listar sus repos. Úsala al incorporar un workspace con código: deja escritos `definitions/REPOS.md` y `definitions/PROJECT.md`. Para proyectos nuevos usa `definir-proyecto`."
 ---
 
 # Revisar proyecto existente
@@ -9,7 +9,7 @@ Objetivo: entender lo que hay, tal como es, sin cambiarlo y sin suponer.
 
 ## Reglas de esta revisión
 
-- Todo es solo lectura. Lo único que escribes está en `definicion/`.
+- Todo es solo lectura. Escribes los documentos solo en `definitions/`; la única excepción en la raíz del workspace es `AGENTS.md` e `initialize.sh`. No crees ni modifiques otros archivos.
 - No leas `.env`, llaves ni credenciales; `.env.example` sí.
 - No entres a carpetas generadas: `node_modules`, `dist`, `build`, `.venv`, `target`, `.next`.
 - Cada dato que anotes lleva su origen («leído en `package.json`», «de `git remote -v`»).
@@ -38,11 +38,11 @@ Responde con evidencia: qué hace el sistema, cómo se ejecuta, cómo se prueba,
 Las preguntas vienen **después** de revisar y solo sobre lo que el código no responde. Máximo cinco, numeradas y de más a menos importante.
 
 - Si una respuesta puede cambiar la arquitectura, **espera** antes de seguir.
-- Si solo agrega detalle, sigue y déjala como pendiente en `proyecto.md`.
+- Si solo agrega detalle, sigue y déjala como pendiente en `PROJECT.md`.
 
 ### 5. Escribir la salida
 
-## Formato de `repos.md`
+## Formato de `REPOS.md`
 
 Tabla con las columnas *Repo*, *Rol*, *URL remota*, *Rama principal*, *Stack*, *Origen del dato*. Debajo, dos secciones:
 
@@ -50,7 +50,7 @@ Tabla con las columnas *Repo*, *Rol*, *URL remota*, *Rama principal*, *Stack*, *
 - **Datos que faltan**: lo que no se pudo confirmar.
 - **Estado**: borrador.
 
-## Formato de `proyecto.md` (proyecto existente)
+## Formato de `PROJECT.md` (proyecto existente)
 
 - **Qué hace**
 - **Cómo se ejecuta**

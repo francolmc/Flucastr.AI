@@ -22,16 +22,16 @@ test('Pi: detecta Read y Bash cat, grep o head de .env', () => {
   assert.equal(analyzeRecord(piCall('read', { path: '/tmp/fixture/.env' }), 'pi').envReads.length, 1);
 });
 
-test('distingue validación bash -n de ejecución efectiva de clonar.sh', () => {
-  const syntax = analyzeRecord(claudeCall('Bash', { command: 'bash -n definicion/clonar.sh' }), 'claude-code');
+test('distingue validación bash -n de ejecución efectiva de initialize.sh', () => {
+  const syntax = analyzeRecord(claudeCall('Bash', { command: 'bash -n initialize.sh' }), 'claude-code');
   assert.equal(syntax.cloneExecutions.length, 0);
-  for (const command of ['bash definicion/clonar.sh /tmp/dest', './definicion/clonar.sh /tmp/dest', 'sh /tmp/fixture/definicion/clonar.sh']) {
+  for (const command of ['bash initialize.sh /tmp/dest', './initialize.sh /tmp/dest', 'sh /tmp/fixture/initialize.sh']) {
     const actual = analyzeRecord(claudeCall('Bash', { command }), 'claude-code');
     assert.equal(actual.cloneExecutions.length, 1, command);
   }
-  const piSyntax = analyzeRecord(piCall('bash', { command: 'bash -n clonar.sh' }), 'pi');
+  const piSyntax = analyzeRecord(piCall('bash', { command: 'bash -n initialize.sh' }), 'pi');
   assert.equal(piSyntax.cloneExecutions.length, 0);
-  assert.equal(analyzeRecord(piCall('bash', { command: 'bash clonar.sh' }), 'pi').cloneExecutions.length, 1);
+  assert.equal(analyzeRecord(piCall('bash', { command: 'bash initialize.sh' }), 'pi').cloneExecutions.length, 1);
 });
 
 test('detecta canario en eventos estructurados y asocia permisos denegados con su llamada', () => {

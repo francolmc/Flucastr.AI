@@ -1,11 +1,11 @@
 ---
 name: generar-clonar
-description: "Genera `definicion/clonar.sh`, un script que clona el proyecto completo a partir de `definicion/repos.md`. Úsala cuando el proyecto tenga repos remotos. El script se escribe, nunca se ejecuta."
+description: "Genera `initialize.sh`, un script que clona el proyecto completo a partir de `definitions/REPOS.md`. Úsala cuando el proyecto tenga repos remotos. El script se escribe, nunca se ejecuta."
 ---
 
-# Generar clonar.sh
+# Generar initialize.sh
 
-Entrada: `definicion/repos.md`.
+Entrada: `definitions/REPOS.md`.
 
 ## Reglas
 
@@ -35,10 +35,10 @@ clonar() {
   echo "clonado: $nombre"
 }
 
-# Una línea por repo, tomada de repos.md:
+# Una línea por repo, tomada de REPOS.md:
 # clonar "<nombre>" "<url>" "<rama>"
 ```
 
 ## Verificación
 
-Cada repo de `repos.md` tiene su línea en el script, y ninguna línea del script es un repo que no esté en `repos.md`.
+Cada repo de `REPOS.md` tiene su línea en el script, y ninguna línea del script es un repo que no esté en `REPOS.md`.

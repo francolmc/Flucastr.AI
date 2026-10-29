@@ -1,6 +1,6 @@
 ---
 name: definir-proyecto
-description: "Explora y define un proyecto NUEVO (que todavía no existe). Úsala para entender el problema, comparar enfoques (proposal) y dejar escrito `definicion/proyecto.md`. No sirve para proyectos existentes: para esos usa `revisar-proyecto-existente`."
+description: "Explora y define un proyecto NUEVO (que todavía no existe). Úsala para entender el problema, comparar enfoques (proposal) y dejar escrito `definitions/PROJECT.md`. No sirve para proyectos existentes: para esos usa `revisar-proyecto-existente`."
 ---
 
 # Definir proyecto (nuevo)
@@ -25,11 +25,11 @@ Si una respuesta abre otra duda importante, pregunta de nuevo antes de seguir.
 
 Presenta dos o tres enfoques. Para cada uno: en qué consiste, ventajas, costos o riesgos, y en qué situación sería la mejor opción. Luego recomienda uno y explica por qué. **Espera la elección de Franco** antes de escribir el documento.
 
-### 3. Escribir `definicion/proyecto.md`
+### 3. Escribir `definitions/PROJECT.md`
 
 Con las secciones de abajo, en este orden. Estado: borrador.
 
-## Formato de `proyecto.md`
+## Formato de `PROJECT.md`
 
 - **Problema**
 - **Para quién**

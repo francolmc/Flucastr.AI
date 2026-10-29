@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const executor = path.join(here, 'ejecutar.sh');
-const scenarios = ['B', 'M', 'C', 'R'];
+const scenarios = ['B', 'M', 'R'];
 
 function run(args) {
   return spawnSync('/bin/bash', [executor, ...args], {
@@ -21,7 +21,7 @@ for (const scenario of scenarios) {
     assert.notEqual(result.status, 0, 'Sin entregables del agente, el ejecutor debe reportar el fallo de evaluación');
     assert.match(result.stdout, new RegExp(`Corrida 1/1: escenario=${scenario} herramienta=claude-code`));
     assert.match(result.stdout, /Resumen: 0 aprobadas, 1 fallidas, 1 pendientes de registro \(de 1\)\./);
-    assert.match(result.stdout, /FALLA: faltan entregables/);
+    assert.match(result.stdout, /FALLA: .*faltan entregables/);
     const fixture = result.stdout.split('\n').find((line) => line.startsWith('Fixture temporal: '))?.slice('Fixture temporal: '.length);
     assert.ok(fixture && existsSync(fixture), `No se encontró fixture generado en stdout:\n${result.stdout}`);
     assert.match(result.stdout, new RegExp(`${scenario} generado`));

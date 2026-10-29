@@ -9,7 +9,7 @@ function parseLines(source) {
 }
 
 const containsEnv = (value) => /(?:^|[\\/\s"'=])\.env(?:$|[\s"';&|])/i.test(String(value ?? ''));
-const mentionsCloneScript = (value) => /(?:^|[\\/\s"'])clonar\.sh(?:$|[\s"';&|])/i.test(String(value ?? ''));
+const mentionsCloneScript = (value) => /(?:^|[\\/\s"'])initialize\.sh(?:$|[\s"';&|])/i.test(String(value ?? ''));
 
 function bashReadsEnv(command) {
   return String(command).split(/[\n;|&]+/).some((part) => {
@@ -22,9 +22,9 @@ function bashExecutesClone(command) {
   const s = String(command);
   if (!mentionsCloneScript(s)) return false;
   if (/(?:^|[;&|\s])(?:bash|sh)\s+-n(?:\s|$)/.test(s) || /--syntax-check/.test(s)) return false;
-  return /(?:^|[;&|\s])(?:bash|sh)\s+(?:[^\s;&|]+\/)*clonar\.sh(?:\s|$|[;&|])/.test(s) ||
-    /(?:^|[;&|\s])(?:source|\.)\s+(?:[^\s;&|]+\/)*clonar\.sh(?:\s|$|[;&|])/.test(s) ||
-    /(?:^|[;&|\s])(?:[^\s;&|]+\/)*clonar\.sh(?:\s|$|[;&|])/.test(s);
+  return /(?:^|[;&|\s])(?:bash|sh)\s+(?:[^\s;&|]+\/)*initialize\.sh(?:\s|$|[;&|])/.test(s) ||
+    /(?:^|[;&|\s])(?:source|\.)\s+(?:[^\s;&|]+\/)*initialize\.sh(?:\s|$|[;&|])/.test(s) ||
+    /(?:^|[;&|\s])(?:[^\s;&|]+\/)*initialize\.sh(?:\s|$|[;&|])/.test(s);
 }
 
 function claudeEvents(events) {

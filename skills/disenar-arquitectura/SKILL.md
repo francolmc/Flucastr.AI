@@ -1,11 +1,11 @@
 ---
 name: disenar-arquitectura
-description: "Decide la estructura (uno o varios repos), dibuja el diagrama de arquitectura y escribe `definicion/arquitectura.md`. Úsala después de `definir-proyecto` (modo nueva) o de `revisar-proyecto-existente` (modo actual)."
+description: "Decide la estructura (uno o varios repos), dibuja el diagrama de arquitectura y escribe `definitions/ARCHITECTURE.md`. Úsala después de `definir-proyecto` (modo nueva) o de `revisar-proyecto-existente` (modo actual)."
 ---
 
 # Diseñar arquitectura
 
-Entradas: `definicion/proyecto.md` y, si el proyecto existe, `definicion/repos.md`.
+Entradas: `definitions/PROJECT.md` y, si el proyecto existe, `definitions/REPOS.md`.
 
 ## Paso 1: elegir el modo
 
@@ -30,11 +30,11 @@ Un diagrama Mermaid de tipo `flowchart`:
 
 - Los nodos son componentes: usuarios, repos, bases de datos y servicios externos. Los externos con forma distinta a los propios.
 - Cada flecha lleva una etiqueta con el dato o protocolo.
-- Toda conexión listada en «Conexiones entre repos» de `repos.md` aparece como flecha. Si es inferida, la etiqueta termina en «(inferido)».
+- Toda conexión listada en «Conexiones entre repos» de `REPOS.md` aparece como flecha. Si es inferida, la etiqueta termina en «(inferido)».
 - Etiquetas siempre entre comillas, para evitar errores de sintaxis con paréntesis o tildes.
 - Una sola vista y unos 12 nodos como máximo. Si no cabe, haz una vista general y otra de detalle.
 
-## Paso 4: escribir `definicion/arquitectura.md`
+## Paso 4: escribir `definitions/ARCHITECTURE.md`
 
 Secciones, en este orden:
 
@@ -48,4 +48,4 @@ Secciones, en este orden:
 
 ## Verificación
 
-Cada repo de `repos.md` aparece en el diagrama, y cada repo del diagrama está en `repos.md`.
+Cada repo de `REPOS.md` aparece en el diagrama, y cada repo del diagrama está en `REPOS.md`.
