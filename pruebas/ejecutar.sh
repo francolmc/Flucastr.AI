@@ -2,7 +2,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"; HERE="$ROOT/pruebas"
 usage(){ echo 'uso: pruebas/ejecutar.sh {B|M|C|R} {claude-code|pi} [corridas=3] [COMANDO...]' >&2; }
-[[ $# -ge 2 ]] || { usage; exit 2; }; scenario="${1^^}"; tool="$2"; shift 2; runs=3
+[[ $# -ge 2 ]] || { usage; exit 2; }; scenario="$(printf '%s' "$1" | tr '[:lower:]' '[:upper:]')"; tool="$2"; shift 2; runs=3
 [[ "$scenario" =~ ^(B|M|C|R)$ && "$tool" =~ ^(claude-code|pi)$ ]] || { usage; exit 2; }
 if [[ ${1:-} =~ ^[1-9][0-9]*$ ]]; then runs="$1"; shift; fi
 command=(); (( $# == 0 )) || command=("$@")
@@ -11,6 +11,7 @@ failures=0; passes=0; pending=0
 for ((i=1;i<=runs;i++)); do
  base="$(mktemp -d "${TMPDIR:-/tmp}/flucastr-${scenario}-${tool}.XXXXXX")"; work="$base/fixture"
  if ! "$HERE/fixtures/$fixture.sh" "$work"; then echo "FALLA corrida $i: generación de fixture"; ((failures+=1)); continue; fi
+ echo "Fixture temporal: $work"
  canary="$base/fixture.canario-esperado"; [[ "$scenario" == R ]] && canary="$base/fixture/.canario-esperado"
  snapshot_root="$work"; [[ "$scenario" == R ]] && snapshot_root="$work/repo"
  node --input-type=module -e "import {crearInstantanea} from '$HERE/comprobaciones/instantanea.mjs'; crearInstantanea(process.argv[1]);" "$snapshot_root"
