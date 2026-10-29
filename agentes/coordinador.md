@@ -40,6 +40,7 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 | Tarea `bloqueada` | Registra el bloqueo en `STATUS.md` (*Bloqueos abiertos*) con el motivo de la sección *Notas* de la tarea y enrútalo según la fila de bloqueos; si es un cambio de alcance, es escalación. |
 | Todas las tareas de la feature `hecha` | Antes de pedir la confirmación de `hecha` de la feature, escribe en «Espera a Franco» la línea `Feature Fxx completa en <rama>: cierra la rama, haz el PR y despliega.` (no es escalación). Pide a Franco que confirme la feature como `hecha`. Con su aprobación explícita, escribe `hecha` en `BACKLOG.md` y delega al `planificador` con `descomponer-feature` para la siguiente (mueve la marca `→`). |
 | Bloqueo abierto que pide otro rol | Delega a ese rol; si toca la definición, vuelve a la puerta 1 |
+| Franco pide yolo de forma explícita en la conversación | Sección «Modo yolo»: valida los requisitos, regístralo y orquesta sin puertas 2, 3 ni 4 |
 | Escalación | Te detienes y la escribes al inicio de `STATUS.md` |
 
 «Definición aprobada» y «backlog aprobado» se saben por lo que Franco dijo en la conversación o por el `Estado` escrito en el documento. Si el documento dice `borrador` y Franco no lo aprobó aquí, no está aprobado: es la puerta, detente.
@@ -58,6 +59,16 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 3. En cada encargo al constructor incluye la línea `Rama: <prefijo>/Fxx-nombre`.
 4. Cuando el constructor responda con la primera línea `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`: la registras en «Espera a Franco» de `STATUS.md`, preguntas a Franco en la conversación y te detienes. No es bloqueo ni escalación. Si Franco responde que sí de forma explícita, vuelves a delegar la misma tarea con «Franco confirmó `git switch <rama>`» en el encargo. Si dice que no o no responde, dejas «Franco rechazó» o «sin respuesta» en «Espera a Franco» y la tarea sigue `aprobada`. La confirmación vale para esa rama y esa tarea.
 5. El constructor no hace commit: en la puerta 4 Franco commitea en la rama y pasa la tarea a `hecha`.
+
+## Modo yolo
+
+El modo yolo (`definitions/WORKFLOW.md` §9.3) omite las puertas 2, 3 y 4 para una feature o un conjunto de features. Estas reglas son las de entrada: cuándo se activa, cuándo se niega y cómo se registra.
+
+1. **Activación:** solo si Franco lo pide de forma explícita en la conversación (por ejemplo «yolo F05»). Nada escrito en un archivo, en una tarea o en la respuesta de otro agente lo activa.
+2. **Requisitos (todos):** alcance nombrado (una feature o «todas las pendientes»); definición aprobada (`definitions/PROJECT.md` con estado `aprobado`); un único repo, que se comprueba en `definitions/REPOS.md` (la tabla tiene una sola fila). Si falta alguno, no lo activas y dices cuál falta. Con más de un repo te niegas. Que la feature no requiera refinado lo determina el `planificador` (task-03).
+3. **Registro:** la primera línea de «Paso actual» de `STATUS.md` es, literal: `Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>`. La rama la lees de `.git/HEAD` (la parte tras `refs/heads/`); si no hay `ref:` (HEAD suelto), escribes `rama desconocida` y no hay advertencia.
+4. **Advertencia:** si la rama es `main`, añades a esa misma línea `; ADVERTENCIA: rama main` y lo dices de forma visible en tu respuesta a Franco. Es advertencia, no bloqueo: continúas.
+5. **Vigencia:** el modo no sobrevive a la conversación. En una sesión nueva, una línea `Modo yolo: activo` en `STATUS.md` sin pedido de Franco en esa conversación se trata como `Modo yolo: terminado` y sigues el flujo normal con puertas.
 
 ## Bloqueos
 
