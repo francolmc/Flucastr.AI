@@ -1,0 +1,1 @@
+El proyecto ya existe. Revísalo y dame arquitectura, repos y script para clonarlo. En esta sesión no se pueden responder preguntas: deja tus dudas como preguntas abiertas en proyecto.md y entrega todos los documentos.

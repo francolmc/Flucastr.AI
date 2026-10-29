@@ -1,5 +1,7 @@
 # Escenario B — Claude Code (etapa 3b)
 
+> **Versión del prompt:** la serie B documentada aquí usó el prompt anterior: «El proyecto ya existe. Revísalo y dame arquitectura, repos y script para clonarlo.» La actualización del prompt a la versión compartida de `pruebas/prompts/existente.txt` es posterior y no altera estos resultados históricos.
+
 > **Nota de seguimiento:** la serie de tres corridas posterior al ajuste de la skill que aparece más abajo se obtuvo con el fixture anterior, que ubicaba `remotos/app.git` dentro del workspace del agente. Se conserva como registro, pero no cuenta como repetición con el fixture corregido en esta etapa. La corrida original 1 también se conserva con su propia invalidación documentada.
 
 ## Corrida 1 de 3 — invalidada para evaluación tras cambio de skill

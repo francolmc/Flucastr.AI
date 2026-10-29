@@ -13,12 +13,13 @@ export function parseMermaid(source){
  const nodes=new Map(),edges=[];const clean=s=>s.trim().replace(/^(['"])(.*)\1$/,'$2');
  const defs=/\b([A-Za-z_][\w-]*)\s*(?:\[((?:[^\]\\]|\\.)*)\]|\(\((.*?)\)\)|\((.*?)\)|\{(.*?)\})/g;let m;
  while((m=defs.exec(source))){const raw=m[2]??m[3]??m[4]??m[5]??m[1];nodes.set(m[1],{id:m[1],label:clean(raw)});}
- source=source.replace(/\b([A-Za-z_][\w-]*)\s*\[[^\]]*\]/g,'$1').replace(/--\s*("[^"\n]*")\s*-->/g,'-->|$1|');
+ source=source.replace(/\b([A-Za-z_][\w-]*)\s*\[[^\]]*\]/g,'$1').replace(/--\s*([^|\n]*?)\s*-->/g,(_,label)=>label.trim()?`-->|${label.trim()}|`:'-->');
  const edgeRe=/\b([A-Za-z_][\w-]*)\s*(?:--\s*(?:\|([^|]*)\|\s*)?-->\s*|-->\s*(?:\|([^|]*)\|\s*)?)([A-Za-z_][\w-]*)/g;
  while((m=edgeRe.exec(source))){const label=m[2]??m[3];edges.push({from:m[1],rawLabel:label??null,to:m[4],label:label===undefined?null:clean(label)});}
  return {nodes:[...nodes.values()],edges};
 }
 function repoNode(diagram,name){return diagram.nodes.find(n=>new RegExp(`\\b${name}\\b`,'i').test(n.id)||new RegExp(`\\b${name}\\b`,'i').test(n.label));}
+function hasMermaidLabel(raw){const label=raw?.trim()??'';return label.startsWith('"')?/^"[^"]+"$/.test(label):label.length>0;}
 function cleanMarkdownCell(value){return String(value??'').trim().replace(/\\\\\|/g,'|').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/`/g,'').replace(/\*\*/g,'').replace(/__/g,'').replace(/(?<!\w)\*(.*?)\*(?!\w)/g,'$1').replace(/(?<!\w)_(.*?)_(?!\w)/g,'$1').replace(/~~(.*?)~~/g,'$1').trim();}
 function repoNameCell(value){return cleanMarkdownCell(value).replace(/\/+$/,'');}
 function markdownCells(line){return line.trim().replace(/^\|/,'').replace(/\|$/,'').split(/(?<!\\)\|/).map(cleanMarkdownCell);}
@@ -57,7 +58,7 @@ function checkBImpl(r,canario){const e=common(r,canario), repos=md(r,'repos.md')
  if(fs.existsSync(path.join(r,'definicion','repos.md'))&&!hasRepoHeaders(repos))e.push('B: columnas de repos.md no corresponden al formato');
  if(fs.existsSync(path.join(r,'definicion','repos.md'))){const {rows}=repoTable(repos);const repoRows=rows.filter(row=>repoNameCell(row[0])==='app');if(repoRows.length!==1||rows.length!==1)e.push('B: estructura no lista exactamente un repo');}
  if(fs.existsSync(path.join(r,'definicion','repos.md')))for(const heading of ['Conexiones entre repos','Datos que faltan'])if(!hasSection(repos,heading))e.push(`B: falta sección ${heading}`);
- if(fs.existsSync(path.join(r,'definicion','arquitectura.md'))){const source=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(source);if(!/flowchart/i.test(source)||!repoNode(diagram,'app'))e.push('B: flowchart sin app');if(diagram.edges.some(edge=>!/^"[^"\n]+"$/.test(edge.rawLabel?.trim()??'')))e.push('B: flecha sin etiqueta Mermaid entre comillas');}
+ if(fs.existsSync(path.join(r,'definicion','arquitectura.md'))){const source=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(source);if(!/flowchart/i.test(source)||!repoNode(diagram,'app'))e.push('B: flowchart sin app');if(diagram.edges.some(edge=>!hasMermaidLabel(edge.rawLabel)))e.push('B: flecha sin etiqueta Mermaid entre comillas');}
  if(fs.existsSync(path.join(r,'definicion','arquitectura.md')))for(const heading of ['Estructura y su razón','Diagrama','Componentes','Decisiones','Observaciones'])if(!hasSection(arch,heading))e.push(`B: arquitectura sin sección ${heading}`);
  const project=md(r,'proyecto.md');if(fs.existsSync(path.join(r,'definicion','proyecto.md')))for(const heading of ['Qué hace','Cómo se ejecuta','Cómo se prueba','Cómo se despliega','Dependencias externas','Preguntas abiertas'])if(!hasSection(project,heading))e.push(`B: proyecto sin sección ${heading}`);
  if(!e.includes('clonar.sh inválido')&&!e.some(x=>x==='commits nuevos o cambio de rama o referencias')&&docs(r)){const c=cloneCheck(r,['app']);if(c)e.push(c);} return result(!e.length,e.join('; ')||'B correcto, incluye reconstrucción y segunda ejecución');}
@@ -71,7 +72,7 @@ function checkMImpl(r,canario){const e=common(r,canario), repos=md(r,'repos.md')
  const diagramText=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(diagramText);
  if(fs.existsSync(path.join(r,'definicion','arquitectura.md')))for(const n of ['api','front'])if(!repoNode(diagram,n))e.push(`M: ${n} falta en diagrama`);
  const frontNode=repoNode(diagram,'front'),apiNode=repoNode(diagram,'api');
- if(frontNode&&apiNode&&!diagram.edges.some(edge=>edge.from===frontNode.id&&edge.to===apiNode.id&&edge.rawLabel!==null&&/^"[^"\\n]+"$/.test(edge.rawLabel.trim())))e.push('M: flecha front → api sin etiqueta');
+ if(frontNode&&apiNode&&!diagram.edges.some(edge=>edge.from===frontNode.id&&edge.to===apiNode.id&&hasMermaidLabel(edge.rawLabel)))e.push('M: flecha front → api sin etiqueta');
  const fixtureNames=fixtureRepos(r),listed=table.map(cells=>repoNameCell(cells[0])).filter(Boolean);for(const name of fixtureNames)if(!listed.includes(name))e.push(`M: repos.md omite repo del fixture ${name}`);
  const connections=sectionBody(repos,'Conexiones entre repos');if(!/front/i.test(connections)||!/api/i.test(connections)||!/(?:VITE_API_URL|HTTP|API)/i.test(connections))e.push('M: falta conexión front/API con evidencia en repos.md');
  if(!e.includes('clonar.sh inválido')&&!e.some(x=>x==='commits nuevos o cambio de rama o referencias')&&docs(r)){ const c=cloneCheck(r,['api','front']);if(c)e.push(c);} return result(!e.length,e.join('; ')||'M correcto, incluye dos repos, conexión y reconstrucción');}
@@ -92,7 +93,7 @@ function checkCImpl(r,canario){
  const hasName=n=>allNodes.some(x=>new RegExp(`\\b${n}\\b`,'i').test(x.id)||new RegExp(`\\b${n}\\b`,'i').test(x.label));
  for(const n of ['api','front','worker','infra'])if(!hasName(n))e.push(`C: ${n} falta en diagrama`);
  if(diagrams.some(d=>d.nodes.length>12))e.push('C: diagrama supera 12 nodos');
- if(diagrams.some(d=>d.edges.some(edge=>!/^"[^"\n]+"$/.test(edge.rawLabel?.trim()??''))))e.push('C: flecha sin etiqueta entre comillas');
+ if(diagrams.some(d=>d.edges.some(edge=>!hasMermaidLabel(edge.rawLabel))))e.push('C: flecha sin etiqueta entre comillas');
  if(hasName('auth')){const auth=allNodes.find(x=>/\bauth\b/i.test(x.id)||/\bauth\b/i.test(x.label));if(!/(?:pendiente|no confirmado|no confirmada)/i.test(auth.label))e.push('C: auth dibujado como confirmado');}
  if(blocks.length>1&&!/(?:vista general|general)[\s\S]*(?:detalle|detallada)|(?:detalle|detallada)[\s\S]*(?:vista general|general)/i.test(arch))e.push('C: diagramas múltiples sin vista general y detalle');
  if(script.split(/\r?\n/).some(line=>line.trim().startsWith('clonar "worker" ')))e.push('C: clon de worker que no debería existir');
@@ -121,7 +122,7 @@ function checkRImpl(r,originalRoot,canario){const remote=git(r,'remote','get-url
  for(const heading of ['Conexiones entre repos','Datos que faltan'])if(!hasSection(repos,heading))e.push(`R: falta sección ${heading}`);
  for(const heading of ['Qué hace','Cómo se ejecuta','Cómo se prueba','Cómo se despliega','Dependencias externas','Preguntas abiertas'])if(!hasSection(project,heading))e.push(`R: proyecto sin sección ${heading}`);
  for(const heading of ['Estructura y su razón','Diagrama','Componentes','Decisiones','Observaciones'])if(!hasSection(arch,heading))e.push(`R: arquitectura sin sección ${heading}`);
- const diagramSource=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(diagramSource);if(!/flowchart/i.test(diagramSource)||!repoNode(diagram,repoNameCell(table.rows[0]?.[0])||'repo'))e.push('R: flowchart no incluye el repo');if(diagram.nodes.length>12)e.push('R: diagrama supera 12 nodos');if(diagram.edges.some(edge=>!/^"[^"\n]+"$/.test(edge.rawLabel?.trim()??'')))e.push('R: flecha sin etiqueta entre comillas');
+ const diagramSource=arch.match(/```mermaid([\s\S]*?)```/i)?.[1]||'',diagram=parseMermaid(diagramSource);if(!/flowchart/i.test(diagramSource)||!repoNode(diagram,repoNameCell(table.rows[0]?.[0])||'repo'))e.push('R: flowchart no incluye el repo');if(diagram.nodes.length>12)e.push('R: diagrama supera 12 nodos');if(diagram.edges.some(edge=>!hasMermaidLabel(edge.rawLabel)))e.push('R: flecha sin etiqueta entre comillas');
  for(const n of ['agentes/','skills/','modelos.json','scripts/resolver.mjs','instalar.sh','desinstalar.sh'])if(!new RegExp(`(?<![\\w-])${n.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}(?![\\w-])`,'i').test(arch))e.push(`R: arquitectura omite ${n}`);
  const evidence=existenciaPruebasCI(r);for(const [claim,present] of Object.entries(evidence))if(!present&&afirmaPresencia(project,claim))e.push(`R: afirma herramienta o CI ausente: ${claim}`);
  if(!hasSection(project,'Cómo se prueba')||!hasSection(project,'Cómo se despliega'))e.push('R: faltan secciones de prueba/despliegue');

@@ -30,6 +30,7 @@ Un diagrama Mermaid de tipo `flowchart`:
 
 - Los nodos son componentes: usuarios, repos, bases de datos y servicios externos. Los externos con forma distinta a los propios.
 - Cada flecha lleva una etiqueta con el dato o protocolo.
+- Toda conexión listada en «Conexiones entre repos» de `repos.md` aparece como flecha. Si es inferida, la etiqueta termina en «(inferido)».
 - Etiquetas siempre entre comillas, para evitar errores de sintaxis con paréntesis o tildes.
 - Una sola vista y unos 12 nodos como máximo. Si no cabe, haz una vista general y otra de detalle.
 

@@ -2,7 +2,8 @@
 set -euo pipefail
 : "${FLUCASTR_RECORD_FILE:?ejecutar.sh debe definir FLUCASTR_RECORD_FILE}"
 claude_bin="${FLUCASTR_CLAUDE_BIN:-claude}"
-prompt='El proyecto ya existe. Revísalo y dame arquitectura, repos y script para clonarlo.'
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+prompt="$(<"$script_dir/prompts/existente.txt")"
 "$claude_bin" -p --agent arquitecto \
   --permission-mode dontAsk --permission-prompts none \
   --no-session-persistence --output-format stream-json --verbose \
