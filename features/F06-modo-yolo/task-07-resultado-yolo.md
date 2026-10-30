@@ -1,5 +1,5 @@
 # task-07 — Evaluador de resultados: caso yolo (sin cambio de rama, sin CONFIRMAR, sin commit)
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 `pruebas/comprobaciones/constructor-resultado.mjs` evalúa, sin modelo ni red, el estado de un fixture antes y después de una corrida del constructor. Esta tarea añade el caso `yolo`: la misma tarea feliz, pero en modo yolo la rama no debe cambiar, la respuesta no debe ser `CONFIRMAR:` ni `BLOQUEO:` y no debe haber commit. Así queda comprobable, sin modelo, el comportamiento que task-01 describe.
