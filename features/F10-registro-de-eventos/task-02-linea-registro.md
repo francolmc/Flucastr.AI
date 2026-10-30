@@ -1,5 +1,5 @@
 # task-02 — línea `Registro:` del constructor y evento `ejecucion`
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 El `constructor` agrega a *Notas* una línea `Registro:` por ejecución (intentos, huecos, modo, resultado y causa), que git no conserva de otra forma. Esta tarea fija esa línea en el contrato (`skills/ejecutar-tarea/SKILL.md`), la hace exigible con el validador de contrato y hace que `scripts/registrar.mjs` la lea y emita el evento `ejecucion`, con el modelo configurado. Sin permisos nuevos: *Notas* ya es suyo.

@@ -4,13 +4,14 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 4). task-02 `lista para revisión` (`features/F10-registro-de-eventos/task-02-linea-registro.md`). task-01 `hecha`. F10 `en curso`; las 3 tareas `aprobadas` por Franco (2026-10-30); F10 y F11 reaprobadas en `BACKLOG.md`. F09 `hecha` y mergeada.
+Rol: ninguno (puerta 4). task-03 `lista para revisión` (`features/F10-registro-de-eventos/task-03-documentacion-y-aviso.md`), última de F10. task-01 y task-02 `hecha`. F10 `en curso`; las 3 tareas `aprobadas` por Franco (2026-10-30); F10 y F11 reaprobadas en `BACKLOG.md`. F09 `hecha` y mergeada.
 Rama: feature/F10-registro-de-eventos
 
 ## Espera a Franco
 
-- **Puerta 4:** revisa Evidencia y Notas de `features/F10-registro-de-eventos/task-02-linea-registro.md` y los diffs de `skills/ejecutar-tarea/SKILL.md` (subsección «Línea de registro»; es lo que el constructor seguirá en cada tarea), `pruebas/comprobaciones/contrato-constructor.mjs` y su test (regla 15), `scripts/registrar.mjs` (evento `ejecucion`) y `pruebas/capa1/registrar.test.mjs` (pruebas 7–9). Resultados: contrato 18/18, registro 9/9, `rapida.sh` código 0 en 23 s. Haz el commit y pásala a `hecha`.
-- **Puntos a mirar (Notas):** la regla 7 de contrato no daba error al repetir «estado: bloqueada» en el texto nuevo, así que se reformuló; la prueba 4 busca el literal `.env` en el script, por eso este usa `const { env } = process`. Se actualizaron las cadenas esperadas de la prueba 2 por el sufijo nuevo del resumen.
+- **Puerta 4:** revisa Evidencia y Notas de `features/F10-registro-de-eventos/task-03-documentacion-y-aviso.md` y los diffs de `agentes/coordinador.md` (aviso de `node scripts/registrar.mjs`; `tools:` sin cambios, 0 líneas en `git diff`), `pruebas/comprobaciones/contrato-roles.mjs` y su test (regla 14), `README.md` (sección «Registro de eventos») y `pruebas/README.md`. `contrato-roles` + `readme-estructura` 32/32; `rapida.sh` pasó en 24 s con código 0 (189/189) en la pasada 2; la pasada 1 salió en 37 s con código 1 (registrada tal cual). Haz el commit y pásala a `hecha`. Con eso F10 queda completa.
+- **Riesgo de tiempo:** `rapida.sh` oscila entre 23 y 37 s (tope 30 s). El peso viene de `instalacion.test.mjs` (8–12 s según la corrida) y otros. Conviene una tarea aparte para bajar el margen o mover un archivo lento.
+
 
 - **Desviaciones de task-01 (Notas):** `git log --follow --reverse` corta el historial de renombres en git 2.54, así que se usa sin `--reverse` y se invierte en JavaScript; la raíz debe ser la del repositorio; `tarea_estado.por` no incluye `coordinador` aunque `REGISTRO.md` §1 lo lista. El arquitecto debe alinear `REGISTRO.md` (caso `coordinador`, comando de `--reverse` y `resultado=confirmar`).
 

@@ -1,5 +1,5 @@
 # task-03 — aviso del coordinador, regla de no lectura y documentación del registro
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
 
 ## Descripción
 Deja el registro utilizable por Franco: el `coordinador` anota en «Espera a Franco» el comando `node scripts/registrar.mjs` junto al de archivar y no entra en `registro/`; el validador de roles lo exige; y `README.md` y `pruebas/README.md` explican qué es el registro, cómo correrlo y cómo probarlo. Sin esto el registro existe pero nadie sabe cuándo correrlo.
@@ -49,4 +49,92 @@ Esperado: termina con `rapida: ... (tope 30 s)` y código 0.
 
 ## Evidencia
 
+Pasada 1 (primera pasada completa de la *Verificación*; el tercer comando superó el tope).
+
+```
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/readme-estructura.test.mjs 2>&1 | tail -n 15
+✔ muestra válida: no hay errores (1.149417ms)
+✔ variante: falta un agente en el README (0.118ms)
+✔ variante: falta una skill en el README (0.600166ms)
+✔ variante: sobra un agente en el README (0.39025ms)
+✔ variante: sobra una skill en el README (0.248542ms)
+✔ variante: README sin sección «## Estructura» (0.139542ms)
+✔ repo real: README, agentes/ y skills/ coinciden (0.643416ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 96.204667
+
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs | grep -E "regla 14|fail|^ℹ pass"
+✔ rechaza regla 14: el coordinador pierde el comando de registrar.mjs (0.09425ms)
+✔ rechaza regla 14: el coordinador pierde la exclusión de registro/ (0.152084ms)
+ℹ pass 25
+ℹ fail 0
+
+$ grep -n "registrar.mjs" README.md agentes/coordinador.md; grep -n "registrar.test.mjs" pruebas/README.md
+(misma salida que la pasada 2; no hubo cambios de archivo entre ambas)
+
+$ bash pruebas/rapida.sh | tail -n 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 37235.650916
+rapida: 19 archivos en 37 s (tope 30 s)
+FALLA: la verificación rápida superó el tope de 30 s
+exit=1
+```
+
+Entre pasadas corrí `rapida.sh` una vez más, sin cambios de archivo: `rapida: 19 archivos en 24 s (tope 30 s)`, código 0 (189 pruebas en verde, según la salida de esa corrida).
+
+Pasada 2 (completa y limpia, todos los comandos de la *Verificación* en una sola pasada):
+
+```
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/readme-estructura.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)|regla 14"
+✔ rechaza regla 14: el coordinador pierde el comando de registrar.mjs (0.188708ms)
+✔ rechaza regla 14: el coordinador pierde la exclusión de registro/ (0.060792ms)
+ℹ tests 32
+ℹ pass 32
+ℹ fail 0
+
+$ grep -n "registrar.mjs" README.md agentes/coordinador.md; grep -n "registrar.test.mjs" pruebas/README.md
+agentes/coordinador.md:41:| Todas las tareas de la feature `hecha` | Antes de pedir la confirmación de `hecha` de la feature, escribe en «Espera a Franco» la línea `Feature Fxx completa en <rama>: cierra la rama, haz el PR y despliega.` (no es escalación). Pide a Franco que confirme la feature como `hecha`. Con su aprobación explícita, escribe `hecha` en `BACKLOG.md` y delega al `planificador` con `descomponer-feature` para la siguiente (mueve la marca `→`). Tras eso, en «Espera a Franco» escribe la línea «Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco, antes de archivar; no bloquea).» y, después, la línea «Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx` (lo corre Franco, después del PR y en su propio commit `chore/`).» No es escalación. Nunca ejecutas `--aplicar` ni `registrar.mjs`; en yolo no escribes ninguno de los dos avisos. |
+README.md:55:│   └── registrar.mjs   # registra los eventos del flujo en registro/eventos.jsonl (lo corre Franco)
+README.md:143:Lo corro yo, desde la raíz del proyecto, con `node scripts/registrar.mjs`: las veces que quiera y antes de archivar. `--reconstruir` regenera todo el archivo desde cero y `--raiz <dir>` lo apunta a otra raíz.
+pruebas/README.md:13:- Registro de eventos: `node --test pruebas/capa1/registrar.test.mjs` (9 pruebas, sin modelo ni red; fuera de `rapida.sh` para no acercarla a su tope de 30 s). La línea `Registro:` que escribe un modelo se ve en la primera tarea real y no se prueba aquí.
+
+$ bash pruebas/rapida.sh
+ℹ tests 189
+ℹ pass 189
+ℹ fail 0
+rapida: 19 archivos en 24 s (tope 30 s)
+exit=0
+
+$ grep -n "^## Registro de eventos" README.md
+139:## Registro de eventos
+
+$ git diff -- agentes/coordinador.md | grep -c "^[-+]tools:"
+0
+```
+
+Criterios de aceptación:
+
+1. Coordinador: `node scripts/registrar.mjs` está junto al aviso de `archivar`, sin ejecutarlo; «Tampoco entres en `registro/`» está en `## Qué lees para decidir`. Las dos variantes de la regla 14 pasan (fallan si se quita la frase). `tools:` del coordinador sin cambio (`git diff` imprime `0` líneas de `tools:`).
+2. `grep -n "^## Registro de eventos" README.md` imprime `139:## Registro de eventos`; el árbol incluye `registrar.mjs`; `readme-estructura.test.mjs` pasa.
+3. `grep -n "registrar.test.mjs" pruebas/README.md` imprime la viñeta de la línea 13.
+4. `bash pruebas/rapida.sh`: la pasada 2 termina en `rapida: 19 archivos en 24 s (tope 30 s)` con código 0. La primera pasada superó el tope (37 s); ver *Notas*.
+
+Tiempos por archivo medidos en aislado: `contrato-roles.test.mjs` 87 ms; `readme-estructura.test.mjs` 79 ms; `instalacion.test.mjs` entre 8 y 12 s; `modelos-agentes.test.mjs` ~3.9 s; `constructor-resultado.test.mjs` ~3.7 s.
+
 ## Notas
+
+- Hueco menor (decisión conservadora): la muestra válida de `contrato-roles.test.mjs` tiene el coordinador sin las frases nuevas, así que la prueba base fallaría al añadir la regla 14. Se agregaron a esa muestra las líneas «Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco).» y «Tampoco entres en `registro/`.». Las variantes de la regla 14 usan esas mismas frases.
+- Observación para Franco, fuera de esta tarea: `bash pruebas/rapida.sh` tardó 37 s en la primera pasada (superó el tope y salió con código 1) y 24 s en las dos siguientes. Mi cambio añade menos de 1 ms a la suite; la variación viene de `instalacion.test.mjs` (8 a 12 s según la corrida) y de otros archivos de la lista. `rapida.sh` está fuera de alcance, así que no lo toqué. Conviene vigilar el margen: con este reparto, el tope de 30 s queda cerca.
+- `scripts/registrar.mjs` no se ejecutó en esta tarea. El README y el aviso dicen que lo corre Franco.
+- Se verificó contra el código, antes de escribir el README: `registro/` trae su propio `.gitignore` con `*` (lo crea el script), existen los flags `--reconstruir` y `--raiz`, y el script lee historial de `features/`, `BACKLOG.md` y `STATUS.md` más las líneas `Registro:` de *Notas*.
+- No se tocó `definitions/**`, `AGENTS.md`, `agentes/planificador.md`, `agentes/constructor.md`, `scripts/**`, `skills/**`, `instalar*.sh` ni `rapida.sh`. No hubo commit, push, PR ni merge.
+
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

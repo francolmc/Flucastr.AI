@@ -58,7 +58,9 @@ function muestra() {
         'Modo yolo: detenido (feature Fxx requiere refinado)\n' +
         'Modo yolo: terminado\n' +
         'Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx`.\n' +
-        'Al listar `features/` no entres en `features/completed/`.\n\n' +
+        'Al listar `features/` no entres en `features/completed/`.\n' +
+        'Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco).\n' +
+        'Tampoco entres en `registro/`.\n\n' +
         ESTADOS_TABLA.join('\n') + '\n',
     },
     skills: {
@@ -201,6 +203,25 @@ const variantesF07 = [
 ];
 
 for (const [nombre, frase, alterar] of variantesF07) {
+  test(`rechaza ${nombre}`, () => {
+    const m = muestra();
+    alterar(m, frase);
+    const errores = validarRoles(m);
+    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
+  });
+}
+
+// Controles negativos de la regla 14: quitar cualquiera de las dos frases debe nombrarla en el error.
+const variantesF10 = [
+  ['regla 14: el coordinador pierde el comando de registrar.mjs', 'node scripts/registrar.mjs', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'aviso omitido');
+  }],
+  ['regla 14: el coordinador pierde la exclusión de registro/', 'registro/', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'archivo omitido');
+  }],
+];
+
+for (const [nombre, frase, alterar] of variantesF10) {
   test(`rechaza ${nombre}`, () => {
     const m = muestra();
     alterar(m, frase);

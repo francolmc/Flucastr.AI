@@ -185,5 +185,14 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     }
   }
 
+  // Regla 14: el coordinador deja el comando de registrar.mjs en «Espera a Franco» y no entra en registro/.
+  const FRASE_REGISTRAR = 'node scripts/registrar.mjs';
+  const FRASE_REGISTRO = 'registro/';
+  for (const frase of [FRASE_REGISTRAR, FRASE_REGISTRO]) {
+    if (!(agentes.coordinador ?? '').includes(frase)) {
+      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
+    }
+  }
+
   return errores;
 }
