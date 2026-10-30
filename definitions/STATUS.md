@@ -9,7 +9,8 @@ Rama: feature/F10-registro-de-eventos
 
 ## Espera a Franco
 
-- Feature F10 completa en feature/F10-registro-de-eventos: cierra la rama, haz el PR y despliega.
+- F10: PR hecho por Franco (2026-10-30).
+- **Ahora, archivar F01–F10 (tuyo):** desde `main` actualizado: `git switch -c chore/archivar-F01-F10`; `node scripts/registrar.mjs`; `node scripts/archivar.mjs` (chequeo, revisa la lista); `node scripts/archivar.mjs --aplicar`; revisa `git status` y haz el commit. Después avísame para pedir al planificador compactar `BACKLOG.md` (puerta 2).
 - **Registro de eventos:** corre `node scripts/registrar.mjs` (lo corres tú, antes de archivar; no bloquea). `registro/` está ignorado por git. Los datos útiles llegan con las próximas tareas: la línea `Registro:` del constructor solo existe desde task-02 de F10.
 - **Archivar (tuyo, en su propio commit `chore/`, tras el PR):** `node scripts/archivar.mjs` (chequeo) y luego `--aplicar` con los IDs que correspondan. Candidatas: F01–F10 (F10 tras su PR). Corre antes `registrar.mjs`.
 - **Alinear `definitions/` (arquitecto, sin urgencia):** `REGISTRO.md` §1 (`resultado=confirmar` no se usa; caso `coordinador` en `tarea_estado.por`; comando sin `--reverse` por git 2.54); falta la regla «`registro/` no se lee» en `AGENTS.md`.
@@ -21,6 +22,7 @@ Rama: feature/F10-registro-de-eventos
 - Como el coordinador es un agente instalado, tras los commits conviene `bash instalar.sh` para actualizar tu copia.
 - Rama, PR y despliegue de F05: lo haces tú.
 - Decisión abierta: tarea aparte para ajustar `descomponer-feature` (bajar «~5 archivos» a «~3»; que «Completa» no fije conteos ni estados de otros documentos).
+- **Pedido por Franco (2026-10-30): verificación funcional observable** (curl o Playwright contra la app levantada). Franco teme sobreconstruir (ya costó mucho montar el kit): NO se abre ninguna tarea ni se toca `definitions/` ahora. Se usa el kit en un proyecto real y la verificación observable se resuelve dentro de ese proyecto (una tarea suya crea su propio comando de prueba si hace falta). Solo si el uso real muestra fricción repetida, se evalúa una regla mínima en `descomponer-feature`. Un `verificador` aparte, solo con datos de `Registro:`.
 - Decisiones abiertas de F03: estado del constructor ante una escalación, comandos compuestos en la allowlist y rol del bloqueo.
 - `rapida.sh` dejó `pruebas/.temporales/capa1-*`; puedes borrarlo.
 
