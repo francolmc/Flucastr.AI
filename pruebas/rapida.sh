@@ -4,7 +4,8 @@ RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$RAIZ"
 TOPE="${FLUCASTR_TOPE_RAPIDA:-30}"
 archivos=()
-for f in pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs pruebas/capa1/instalacion.test.mjs pruebas/capa1/copia.test.mjs pruebas/capa1/remoto.test.mjs; do
+# Fuera de la rápida (F09 supera el tope de 30 s; sin red): node --test pruebas/capa1/remoto.test.mjs
+for f in pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs pruebas/capa1/instalacion.test.mjs pruebas/capa1/copia.test.mjs; do
   [[ "$f" == */contrato.test.mjs ]] && continue
   archivos+=("$f")
 done

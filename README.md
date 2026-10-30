@@ -54,6 +54,7 @@ Flucastr.AI/
 │   └── archivar.mjs    # chequea el contexto y, con --aplicar (lo corre Franco), mueve las features hecha a features/completed/
 ├── pruebas/         # comprobaciones del kit y arnés de pruebas del arquitecto (ver pruebas/README.md)
 ├── instalar.sh      # instala agentes y skills en Claude Code y Pi
+├── instalar-remoto.sh   # instala sin clonar el repo: descarga main de GitHub, verifica y actualiza
 └── desinstalar.sh   # quita exactamente lo que instaló
 ```
 
@@ -77,6 +78,49 @@ bash desinstalar.sh --proyecto /ruta/al/proyecto
 - `--proyecto` escribe `{"agent": "arquitecto"}` en `<proyecto>/.claude/settings.local.json`. No pisa un agente que el proyecto ya tenga definido, y `desinstalar.sh` lo deshace.
 - `--agente <nombre>` elige el agente predeterminado del proyecto (por defecto `arquitecto`).
 - Uso: `claude --agent coordinador` o `pi-coordinador`, desde la carpeta del proyecto (también `arquitecto`, `planificador` y `constructor` por separado).
+
+### Sin clonar el repo (PC de trabajo)
+
+En el PC de trabajo no tengo clon. Ahí uso `instalar-remoto.sh`, que baja la versión publicada de `main` (o la de `--ref`), la verifica y corre `instalar.sh --copiar` sobre una copia en `~/.flucastr-ai/kit/`. Lo que recomiendo es bajarlo, leerlo y correrlo en dos pasos:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/francolmc/Flucastr.AI/main/instalar-remoto.sh -o instalar-remoto.sh
+cat instalar-remoto.sh     # lo leo antes de correrlo
+bash instalar-remoto.sh
+```
+
+La forma de una línea, si ya lo leí y confío en el repo:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/francolmc/Flucastr.AI/main/instalar-remoto.sh | bash
+```
+
+Después de la primera instalación, lo manejo desde la copia que quedó en el kit:
+
+```bash
+bash ~/.flucastr-ai/kit/instalar-remoto.sh --estado                # compara la instalada con la publicada; no descarga
+bash ~/.flucastr-ai/kit/instalar-remoto.sh --actualizar            # trae la versión publicada si cambió
+bash ~/.flucastr-ai/kit/instalar-remoto.sh --ref <rama|tag|sha>    # fija otra versión; también sirve para volver atrás
+```
+
+- Volver a correr el comando sin opciones hace lo mismo que `--actualizar`: si ya está al día, lo dice y no toca nada.
+- La actualización es atómica: si algo falla a mitad, vuelve la versión anterior y `version` no cambia. No hay procesos en segundo plano ni avisos automáticos; lo corro yo cuando quiero.
+- Dónde vive todo: `~/.flucastr-ai/kit/` es la copia de la versión instalada (se reemplaza al actualizar; no la edito); `~/.flucastr-ai/version` guarda el sha, la fecha y la rama o tag consultados.
+- `~/.flucastr-ai/modelos.json` es mi `modelos.json` personal. Se crea la primera vez y **nunca se pisa**: al actualizar queda byte a byte igual.
+- Si la versión publicada trae novedades en `modelos.json` (versión mayor, agente o perfil nuevo), el instalador lo avisa y no lo mezcla con el mío. Para compararlos: `diff ~/.flucastr-ai/modelos.json ~/.flucastr-ai/kit/modelos.json`.
+- Para quitar todo: `bash ~/.flucastr-ai/kit/desinstalar.sh`. Conserva mi `modelos.json`; con `--todo` también lo borra.
+- Requisitos: `bash`, `curl`, `tar` y `node`.
+- Riesgo asumido de `curl | bash`: quien controle la cuenta de GitHub controla lo que se ejecuta en este PC. Mitigación prevista: 2FA en la cuenta y `main` con PR obligatorio; por eso la forma de dos pasos va primero.
+
+#### Comprobación manual en el PC de trabajo
+
+Esto no lo pueden hacer los agentes ni las pruebas: necesita la red real y ese equipo. Lo hago yo, en este orden:
+
+1. Comprobar que la red llega a `raw.githubusercontent.com`, `api.github.com` y `codeload.github.com`.
+2. Correr el comando de una línea y arrancar `claude --agent arquitecto` o `pi-arquitecto`, con el modelo que indica mi `modelos.json`.
+3. Editar mi `modelos.json`, publicar un cambio mínimo en `main` (una frase en una skill), correr `--estado` (debe decir «hay versión nueva»), luego `--actualizar`, y comprobar que el cambio llegó y que mi `modelos.json` sigue igual.
+4. Ver si la política de la empresa permite instalar agentes de IA de este tipo.
+5. Probar `desinstalar.sh` en el PC de trabajo.
 
 ## Pruebas
 

@@ -8,6 +8,7 @@
 //   node scripts/resolver.mjs cuerpo <archivo.md>             imprime el agente sin encabezado (para Pi)
 //   node scripts/resolver.mjs fijar-agente <ajustes.json> <agente>   deja `agent` en los ajustes de un proyecto (no pisa otro valor)
 //   node scripts/resolver.mjs quitar-agente <ajustes.json> <agente>  deshace lo anterior, solo si el valor es ese agente
+//   node scripts/resolver.mjs comparar-modelos <personal.json> <publicado.json>  imprime las diferencias que merecen aviso (nada si no hay)
 //
 // Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
 // si no, se lee el modelos.json del repo. Lo usa instalar.sh --copiar con el modelos.json personal.
@@ -73,6 +74,14 @@ function partir(archivo) {
   return { cabecera: m[1], cuerpo: m[2] };
 }
 
+function leerJson(ruta) {
+  try {
+    return JSON.parse(readFileSync(ruta, "utf8"));
+  } catch (e) {
+    fallar(`no pude leer ${ruta} (${e.message})`);
+  }
+}
+
 function leerAjustes(ruta) {
   if (!existsSync(ruta)) return {};
   try {
@@ -132,6 +141,23 @@ if (orden === "modelo" && args.length === 2) {
       console.log("quitado");
     }
   }
+} else if (orden === "comparar-modelos" && args.length === 2) {
+  // Solo avisa: no escribe nada. Diferencias: version mayor en el publicado, agentes y perfiles nuevos.
+  const [personal, publicado] = args;
+  const propio = leerJson(personal);
+  const nuevo = leerJson(publicado);
+  const tiene = (obj, clave) => Object.prototype.hasOwnProperty.call(obj ?? {}, clave);
+  const lineas = [];
+  if (typeof propio.version === "number" && typeof nuevo.version === "number" && nuevo.version > propio.version) {
+    lineas.push(`version: personal ${propio.version}, publicado ${nuevo.version}`);
+  }
+  for (const agente of Object.keys(nuevo.agentes ?? {})) {
+    if (!tiene(propio.agentes, agente)) lineas.push(`agente nuevo: ${agente}`);
+  }
+  for (const perfil of Object.keys(nuevo.perfiles ?? {})) {
+    if (!tiene(propio.perfiles, perfil)) lineas.push(`perfil nuevo: ${perfil}`);
+  }
+  for (const linea of lineas) console.log(linea);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado>");
 }

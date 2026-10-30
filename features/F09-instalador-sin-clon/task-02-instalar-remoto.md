@@ -1,5 +1,5 @@
 # task-02 — `instalar-remoto.sh`: descarga, verificación e instalación inicial
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Crea `instalar-remoto.sh`, el script que Franco ejecuta en el PC de trabajo sin clonar el repo: pregunta el sha de `main` a GitHub, descarga ese sha como `tar.gz`, lo verifica, lo deja en `~/.flucastr-ai/kit/` y corre `instalar.sh --copiar`. Escribe `~/.flucastr-ai/version` al final. Incluye `--estado`, `--mostrar-urls` y `--ref`. La actualización llega en task-03. Todo se prueba sin red con un origen local.

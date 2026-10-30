@@ -17,6 +17,8 @@ const SHA_A = '1234567890abcdef1234567890abcdef12345678';
 const SHA_B = 'fedcba0987654321fedcba0987654321fedcba09';
 const AGENTE_OK = '---\nname: arquitecto\ndescription: "Agente de prueba."\n---\nCuerpo de prueba.\n';
 const AGENTE_MALO = '---\nname: arquitecto\nmodel: modelo-prohibido\ndescription: "Agente de prueba."\n---\nCuerpo.\n';
+const AGENTE_NUEVO = '---\nname: arquitecto\ndescription: "Agente de prueba."\n---\nCuerpo nuevo.\n';
+const SKILL_OTRA = '---\nname: otra\ndescription: "Skill nueva."\n---\nContenido.\n';
 
 function tar(args) {
   const r = spawnSync('tar', args, { encoding: 'utf8' });
@@ -24,16 +26,30 @@ function tar(args) {
 }
 
 // Árbol mínimo con los scripts reales, un agente y una skill. Devuelve la carpeta origen (sha + kit.tar.gz).
-function origen(dir, sha, { agente = AGENTE_OK, quitar = [] } = {}) {
+// Opciones: quitar (rutas a borrar), sumar ({ruta: texto}), modelos (objeto o texto crudo) y fallo (instalar.sh
+// falla a mitad de la instalación, solo en la ejecución real y no en --simular).
+function origen(dir, sha, { agente = AGENTE_OK, quitar = [], sumar = {}, modelos, fallo = false } = {}) {
   const fuente = join(dir, 'fuente');
   const raizSha = join(fuente, `Flucastr.AI-${sha}`);
-  for (const p of ['instalar.sh', 'desinstalar.sh', 'instalar-remoto.sh', 'scripts']) cpSync(join(raiz, p), join(raizSha, p), { recursive: true });
+  for (const p of ['desinstalar.sh', 'instalar-remoto.sh', 'scripts']) cpSync(join(raiz, p), join(raizSha, p), { recursive: true });
+  let instalar = readFileSync(join(raiz, 'instalar.sh'), 'utf8');
+  if (fallo) {
+    const ancla = '\nif [ "$INSTALAR_CLAUDE" = 1 ]; then\n  echo "Claude Code';
+    if (!instalar.includes(ancla)) throw new Error('no encuentro el punto de falla en instalar.sh');
+    instalar = instalar.replace(ancla, () => `\nif [ "$SIMULAR" = 0 ]; then echo "fallo simulado" >&2; exit 1; fi${ancla}`);
+  }
+  writeFileSync(join(raizSha, 'instalar.sh'), instalar);
   mkdirSync(join(raizSha, 'agentes'), { recursive: true });
   mkdirSync(join(raizSha, 'skills', 'prueba'), { recursive: true });
   writeFileSync(join(raizSha, 'agentes', 'arquitecto.md'), agente);
   writeFileSync(join(raizSha, 'skills', 'prueba', 'SKILL.md'), '---\nname: prueba\ndescription: "Skill de prueba."\n---\nContenido.\n');
   const real = JSON.parse(readFileSync(join(raiz, 'modelos.json'), 'utf8'));
-  writeFileSync(join(raizSha, 'modelos.json'), JSON.stringify({ ...real, agentes: { arquitecto: real.agentes.arquitecto } }, null, 2) + '\n');
+  if (typeof modelos === 'string') writeFileSync(join(raizSha, 'modelos.json'), modelos);
+  else writeFileSync(join(raizSha, 'modelos.json'), JSON.stringify(modelos ?? { ...real, agentes: { arquitecto: real.agentes.arquitecto } }, null, 2) + '\n');
+  for (const [ruta, texto] of Object.entries(sumar)) {
+    mkdirSync(dirname(join(raizSha, ruta)), { recursive: true });
+    writeFileSync(join(raizSha, ruta), texto);
+  }
   for (const q of quitar) rmSync(join(raizSha, q), { recursive: true, force: true });
   tar(['-czf', join(dir, 'kit.tar.gz'), '-C', fuente, `Flucastr.AI-${sha}`]);
   writeFileSync(join(dir, 'sha'), `${sha}\n`);
@@ -141,7 +157,7 @@ caso('R1 primera instalación: copia sin enlaces, version escrito, modelos perso
   assert.throws(() => verificarPrimera({ ...h, enlaces: ['.claude/skills/prueba'] }), assert.AssertionError);
 });
 
-caso('R2 segunda corrida: al día sin cambios; sha nuevo: aviso sin tocar nada', () => {
+caso('R2 segunda corrida con el mismo sha: al día sin cambios', () => {
   const e = entorno('R2');
   origen(e.origen, SHA_A);
   exito(ejecutar(e, []));
@@ -152,12 +168,6 @@ caso('R2 segunda corrida: al día sin cambios; sha nuevo: aviso sin tocar nada',
   assert.deepEqual(instantanea(e.home), antes, 'la segunda corrida cambió el HOME');
   // Control negativo: una salida que dice «hay versión nueva» no es «al día».
   assert.throws(() => assert.match('Hay una versión nueva', /al día/), assert.AssertionError);
-
-  writeFileSync(join(e.origen, 'sha'), `${SHA_B}\n`);
-  const nueva = ejecutar(e, []);
-  exito(nueva);
-  assert.match(nueva.stdout, /Hay una versión nueva; la actualización se agrega en task-03/);
-  assert.deepEqual(instantanea(e.home), antes, 'el aviso de versión nueva cambió el HOME');
 });
 
 caso('R3 --estado y --mostrar-urls: no escriben ni descargan; textos exactos', () => {
@@ -260,4 +270,159 @@ caso('R7 instalación en modo repo previa = se niega antes de descargar, sin toc
   const control = entorno('R7-control');
   origen(control.origen, SHA_A);
   exito(ejecutar(control, []));
+});
+
+caso('R8 sha nuevo: actualiza, quita la skill que ya no existe y no deja kit.anterior ni kit.nuevo', () => {
+  const e = entorno('R8');
+  origen(e.origen, SHA_A);
+  exito(ejecutar(e, []));
+  const antes = hechos(e.home);
+  assert.ok(antes.kit.includes('skills/prueba/SKILL.md'), 'la primera instalación debía traer la skill prueba');
+
+  origen(e.origen, SHA_B, { agente: AGENTE_NUEVO, quitar: ['skills/prueba'], sumar: { 'skills/otra/SKILL.md': SKILL_OTRA } });
+  const r = ejecutar(e, []);
+  exito(r);
+  assert.match(r.stdout, new RegExp(`Actualizado: ${SHA_A} -> ${SHA_B}`));
+  const despues = hechos(e.home);
+  assert.match(despues.version, new RegExp(`^sha=${SHA_B}\n`));
+  assert.ok(despues.kit.includes('skills/otra/SKILL.md'), 'falta la skill nueva en kit/');
+  assert.equal(despues.kit.some(k => k.startsWith('skills/prueba')), false, 'quedó la skill que ya no existe en kit/');
+  assert.equal(existsSync(join(e.home, '.claude', 'skills', 'prueba')), false, 'quedó la skill que ya no existe en el destino');
+  assert.equal(existsSync(join(e.home, '.claude', 'skills', 'otra', 'SKILL.md')), true, 'no se instaló la skill nueva');
+  assert.match(texto(instantanea(e.home), '.claude/agents/arquitecto.md'), /Cuerpo nuevo\./);
+  assert.equal(existsSync(join(e.home, '.flucastr-ai', 'kit.anterior')), false, 'quedó kit.anterior');
+  assert.equal(existsSync(join(e.home, '.flucastr-ai', 'kit.nuevo')), false, 'quedó kit.nuevo');
+  // Control negativo: la skill que se quitó sí estaba antes, así que la comprobación de arriba no es trivial.
+  assert.throws(() => assert.equal(despues.kit.some(k => k.startsWith('skills/prueba')), true), assert.AssertionError);
+});
+
+caso('R9 modelos.json personal: idéntico byte a byte tras actualizar; con novedades avisa sin tocarlo', () => {
+  const e = entorno('R9');
+  origen(e.origen, SHA_A);
+  exito(ejecutar(e, []));
+  const personal = join(e.home, '.flucastr-ai', 'modelos.json');
+  const propio = JSON.parse(readFileSync(personal, 'utf8'));
+  propio.agentes.arquitecto = { nivel: 'alto' };
+  propio.nota_personal = 'no se toca';
+  writeFileSync(personal, JSON.stringify(propio, null, 3) + '  \n');
+  const bytes = readFileSync(personal);
+
+  const real = JSON.parse(readFileSync(join(raiz, 'modelos.json'), 'utf8'));
+  origen(e.origen, SHA_B, { modelos: { ...real, version: 2, agentes: { arquitecto: { nivel: 'medio' }, planificador: { nivel: 'medio' } } } });
+  const r = ejecutar(e, []);
+  exito(r);
+  assert.match(r.stdout, /AVISO: el modelos\.json publicado trae cambios; compáralo con el tuyo:/);
+  assert.match(r.stdout, /version: personal 1, publicado 2/);
+  assert.match(r.stdout, /agente nuevo: planificador/);
+  assert.match(r.stdout, /diff ~\/\.flucastr-ai\/modelos\.json ~\/\.flucastr-ai\/kit\/modelos\.json/);
+  assert.deepEqual(readFileSync(personal), bytes, 'la actualización tocó el modelos.json personal');
+  // Control negativo: el publicado sí quedó distinto del personal, así que el aviso tenía motivo.
+  assert.notDeepEqual(readFileSync(join(e.home, '.flucastr-ai', 'kit', 'modelos.json')), bytes);
+});
+
+caso('R10 modelos.json inválido (del paquete o personal) = nada cambia y no se crea el personal', () => {
+  // a) primera instalación con un modelos.json del paquete que no sirve: se rechaza antes de copiarlo.
+  const a = entorno('R10-paquete');
+  origen(a.origen, SHA_A, { modelos: '{ roto' });
+  const ra = ejecutar(a, []);
+  assert.equal(ra.status, 1);
+  assert.match(ra.stderr, /no sirve para el agente/);
+  sinRestos(hechos(a.home));
+  assert.equal(existsSync(join(a.home, '.flucastr-ai', 'modelos.json')), false, 'se creó un personal roto');
+  assert.equal(existsSync(join(a.home, '.flucastr-ai', 'manifiesto.txt')), false, 'quedó manifiesto');
+  // Control negativo: con un paquete sano la misma primera instalación sí funciona.
+  const ca = entorno('R10-paquete-control');
+  origen(ca.origen, SHA_A);
+  exito(ejecutar(ca, []));
+  verificarPrimera(hechos(ca.home));
+
+  // b) actualización con el personal roto: no se mueve nada y el HOME queda idéntico.
+  const b = entorno('R10-personal');
+  origen(b.origen, SHA_A);
+  exito(ejecutar(b, []));
+  writeFileSync(join(b.home, '.flucastr-ai', 'modelos.json'), '{ roto');
+  origen(b.origen, SHA_B, { sumar: { 'skills/otra/SKILL.md': SKILL_OTRA } });
+  const antes = instantanea(b.home);
+  const rb = ejecutar(b, []);
+  assert.equal(rb.status, 1);
+  assert.match(rb.stderr, /no sirve para el agente/);
+  assert.deepEqual(instantanea(b.home), antes, 'un personal inválido cambió el HOME');
+  // Control negativo: con el personal sano, la misma actualización sí se hace.
+  const cb = entorno('R10-personal-control');
+  origen(cb.origen, SHA_A);
+  exito(ejecutar(cb, []));
+  origen(cb.origen, SHA_B, { sumar: { 'skills/otra/SKILL.md': SKILL_OTRA } });
+  exito(ejecutar(cb, []));
+  assert.match(texto(instantanea(cb.home), '.flucastr-ai/version'), new RegExp(SHA_B));
+});
+
+caso('R11 falla de instalar.sh en la actualización = vuelve a la versión anterior con version igual', () => {
+  const e = entorno('R11');
+  origen(e.origen, SHA_A);
+  exito(ejecutar(e, []));
+  const antes = instantanea(e.home);
+
+  origen(e.origen, SHA_B, { agente: AGENTE_NUEVO, sumar: { 'skills/otra/SKILL.md': SKILL_OTRA }, fallo: true });
+  const r = ejecutar(e, []);
+  assert.equal(r.status, 1, 'debía fallar');
+  assert.match(r.stderr, new RegExp(`FALLÓ la actualización; se restauró la versión anterior \\(${SHA_A}\\)\\.`));
+  const despues = instantanea(e.home);
+  assert.equal(texto(despues, '.flucastr-ai/version'), texto(antes, '.flucastr-ai/version'), 'version cambió');
+  assert.equal(existsSync(join(e.home, '.flucastr-ai', 'kit.anterior')), false, 'quedó kit.anterior');
+  assert.equal(existsSync(join(e.home, '.claude', 'skills', 'otra')), false, 'quedó la skill de la versión que falló');
+  assert.deepEqual(despues, antes, 'la versión anterior no quedó como estaba');
+  // Control negativo: el mismo origen sin el fallo sí actualiza.
+  const c = entorno('R11-control');
+  origen(c.origen, SHA_A);
+  exito(ejecutar(c, []));
+  origen(c.origen, SHA_B, { agente: AGENTE_NUEVO, sumar: { 'skills/otra/SKILL.md': SKILL_OTRA } });
+  exito(ejecutar(c, []));
+  assert.match(texto(instantanea(c.home), '.flucastr-ai/version'), new RegExp(SHA_B));
+});
+
+caso('R12 --actualizar sin instalación sale con 1; con el mismo sha no hay cambios ni aviso; comparar-modelos', () => {
+  const e = entorno('R12');
+  origen(e.origen, SHA_A);
+  const vacio = instantanea(e.home);
+  const sin = ejecutar(e, ['--actualizar']);
+  assert.equal(sin.status, 1);
+  assert.match(sin.stderr, /No hay instalación; corre el comando sin --actualizar\./);
+  assert.deepEqual(instantanea(e.home), vacio, '--actualizar sin instalación cambió el HOME');
+
+  exito(ejecutar(e, []));
+  const instalado = instantanea(e.home);
+  const igual = ejecutar(e, ['--actualizar']);
+  exito(igual);
+  assert.match(igual.stdout, new RegExp(`al día \\(${SHA_A}\\)`));
+  assert.deepEqual(instantanea(e.home), instalado, 'al día cambió el HOME');
+
+  origen(e.origen, SHA_B);
+  const r = ejecutar(e, []);
+  exito(r);
+  assert.match(r.stdout, new RegExp(`Actualizado: ${SHA_A} -> ${SHA_B}`));
+  // (instalar.sh puede imprimir su propio AVISO sobre el PATH de Pi; aquí solo importa el aviso de modelos.json)
+  assert.doesNotMatch(r.stdout, /AVISO: el modelos\.json publicado trae cambios/, 'sin cambios en modelos.json no debe haber aviso');
+  // Control negativo: el patrón sí distingue el aviso cuando lo hay (lo prueba R9).
+  assert.throws(() => assert.doesNotMatch('AVISO: el modelos.json publicado trae cambios', /AVISO: el modelos\.json publicado trae cambios/), assert.AssertionError);
+
+  // comparar-modelos directamente: iguales = nada; con novedades = las líneas esperadas.
+  const dir = join(e.dir, 'comparar');
+  mkdirSync(dir, { recursive: true });
+  const propio = join(dir, 'propio.json');
+  const igualJson = join(dir, 'igual.json');
+  const nuevoJson = join(dir, 'nuevo.json');
+  writeFileSync(propio, JSON.stringify({ version: 1, agentes: { arquitecto: { nivel: 'medio' } }, perfiles: { x: {} } }));
+  writeFileSync(igualJson, JSON.stringify({ version: 1, agentes: { arquitecto: { nivel: 'medio' } }, perfiles: { x: {} } }));
+  writeFileSync(nuevoJson, JSON.stringify({ version: 2, agentes: { arquitecto: {}, nuevo: {} }, perfiles: { x: {}, y: {} } }));
+  const cmp = (b) => spawnSync('node', [join(raiz, 'scripts', 'resolver.mjs'), 'comparar-modelos', propio, b], { encoding: 'utf8' });
+  const iguales = cmp(igualJson);
+  assert.equal(iguales.status, 0, iguales.stderr);
+  assert.equal(iguales.stdout, '', 'con modelos iguales no debe imprimir nada');
+  const distintos = cmp(nuevoJson);
+  assert.equal(distintos.status, 0, distintos.stderr);
+  assert.equal(distintos.stdout, 'version: personal 1, publicado 2\nagente nuevo: nuevo\nperfil nuevo: y\n');
+  // Control negativo: un JSON ilegible sale con error, no con «sin diferencias».
+  writeFileSync(join(dir, 'roto.json'), '{ roto');
+  const roto = cmp(join(dir, 'roto.json'));
+  assert.notEqual(roto.status, 0, 'un JSON ilegible debía fallar');
 });

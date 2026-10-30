@@ -1,5 +1,5 @@
 # task-03 — `--actualizar` atómico, aviso de `modelos.json` nuevo y documentación
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
 
 ## Descripción
 Completa `instalar-remoto.sh` con la actualización: si el sha publicado cambió, arma el kit nuevo, lo valida, lo intercambia con vuelta atrás si algo falla y avisa si el `modelos.json` publicado trae novedades respecto del personal (sin tocar el personal). Documenta el flujo en `README.md` para Franco, con la guía de comprobación manual en el PC de trabajo.
@@ -52,4 +52,99 @@ Esperado: `sintaxis-ok`; `fail 0` en las dos pruebas; al menos 4 líneas de `gre
 
 ## Evidencia
 
+Corridas reales del 2026-10-30 en `feature/F09-instalador-sin-clon`, sin commit. `/bin/bash` es GNU bash 3.2.57 (arm64). Todas las pruebas usan HOME temporal y `FLUCASTR_ORIGEN` local; no hubo red ni ejecución contra `~/.claude`, `~/.pi` o `~/.flucastr-ai`.
+
+`bash -n instalar-remoto.sh && echo sintaxis-ok`
+```
+sintaxis-ok
+```
+
+`node --test pruebas/capa1/remoto.test.mjs` (12 pruebas: R1 a R7 de task-02, con R2 ajustada al nuevo comportamiento, y R8 a R12 nuevas)
+```
+✔ R1 primera instalación: copia sin enlaces, version escrito, modelos personal creado
+✔ R2 segunda corrida con el mismo sha: al día sin cambios
+✔ R3 --estado y --mostrar-urls: no escriben ni descargan; textos exactos
+✔ R4 tarball peligroso (.., absoluta, enlace) = RECHAZADO sin kit ni version; con contenido sano sí instala
+✔ R5 tarball incompleto = RECHAZADO «falta …» sin kit ni version; completo sí instala
+✔ R6 falla de instalar.sh en la primera instalación = sin kit, sin version y sin manifiesto
+✔ R7 instalación en modo repo previa = se niega antes de descargar, sin tocar nada
+✔ R8 sha nuevo: actualiza, quita la skill que ya no existe y no deja kit.anterior ni kit.nuevo
+✔ R9 modelos.json personal: idéntico byte a byte tras actualizar; con novedades avisa sin tocarlo
+✔ R10 modelos.json inválido (del paquete o personal) = nada cambia y no se crea el personal
+✔ R11 falla de instalar.sh en la actualización = vuelve a la versión anterior con version igual
+✔ R12 --actualizar sin instalación sale con 1; con el mismo sha no hay cambios ni aviso; comparar-modelos
+ℹ tests 12
+ℹ pass 12
+ℹ fail 0
+```
+
+`node --test pruebas/comprobaciones/readme-estructura.test.mjs`
+```
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+```
+
+`grep -n "instalar-remoto" README.md` (9 líneas; el mínimo era 4)
+```
+57:├── instalar-remoto.sh   # instala sin clonar el repo: descarga main de GitHub, verifica y actualiza
+84:En el PC de trabajo no tengo clon. Ahí uso `instalar-remoto.sh`, que baja la versión publicada de `main` (o la de `--ref`), la verifica y corre `instalar.sh --copiar` sobre una copia en `~/.flucastr-ai/kit/`. Lo que recomiendo es bajarlo, leerlo y correrlo en dos pasos:
+87:curl -fsSL https://raw.githubusercontent.com/francolmc/Flucastr.AI/main/instalar-remoto.sh -o instalar-remoto.sh
+88:cat instalar-remoto.sh     # lo leo antes de correrlo
+89:bash instalar-remoto.sh
+95:curl -fsSL https://raw.githubusercontent.com/francolmc/Flucastr.AI/main/instalar-remoto.sh | bash
+101:bash ~/.flucastr-ai/kit/instalar-remoto.sh --estado                # compara la instalada con la publicada; no descarga
+102:bash ~/.flucastr-ai/kit/instalar-remoto.sh --actualizar            # trae la versión publicada si cambió
+103:bash ~/.flucastr-ai/kit/instalar-remoto.sh --ref <rama|tag|sha>    # fija otra versión; también sirve para volver atrás
+```
+
+`bash pruebas/rapida.sh`, tres corridas con `remoto.test.mjs` ya fuera de la lista (ver Notas):
+```
+corrida 1: ℹ tests 186 · ℹ pass 186 · ℹ fail 0 · rapida: 19 archivos en 25 s (tope 30 s) · código 0
+corrida 2: ℹ tests 186 · ℹ pass 186 · ℹ fail 0 · rapida: 19 archivos en 23 s (tope 30 s) · código 0
+corrida 3: ℹ tests 186 · ℹ pass 186 · ℹ fail 0 · rapida: 19 archivos en 24 s (tope 30 s) · código 0
+```
+Medida previa, con `remoto.test.mjs` dentro de la lista (20 archivos, 198 pruebas en verde): 36 s, 36 s y 36 s, las tres con código 1 por superar el tope. Por eso se sacó.
+
+Paso 1 (`comparar-modelos`), dentro de R12: con dos JSON iguales no imprime nada; con `version` 1→2 y un agente y un perfil nuevos imprime `version: personal 1, publicado 2`, `agente nuevo: nuevo` y `perfil nuevo: y`; con un JSON ilegible sale con error.
+
+Hallazgo de task-02, reproducido con `instalar.sh` solo, HOME temporal y un `modelos.json` roto en el paquete:
+```
+$ env -i PATH=<dir de node>:/usr/bin:/bin HOME=<tmp>/home PI_CODING_AGENT_DIR=<tmp>/home/pi bash kit/instalar.sh --copiar
+modelos.json personal creado: <tmp>/home/.flucastr-ai/modelos.json
+error: no pude leer modelos.json (Expected property name or '}' in JSON at position 2 (line 1 column 3))
+codigo=1
+# el personal queda en disco:  { roto
+```
+Con `instalar-remoto.sh` ya no ocurre: R10 (caso a) comprueba que el paquete con `modelos.json` inválido se rechaza antes de copiar nada, sin personal, sin `kit/` y sin `version`.
+
+Criterios de aceptación:
+1. Con sha nuevo se instala lo nuevo, se quita lo que ya no existe y no queda `kit.anterior`: R8.
+2. Falla a la mitad: vuelve a la versión anterior, `version` no cambia y el árbol del HOME es idéntico al previo: R11.
+3. `modelos.json` personal idéntico byte a byte; con novedades avisa sin tocarlo: R9. Personal inválido = HOME idéntico: R10 (caso b).
+4. README con comando, `--estado`, `--actualizar`, `--ref`, desinstalar y comprobación manual; `readme-estructura.test.mjs` 7/7: ver arriba.
+5. `rapida.sh` pasa dentro del tope: 23 a 25 s en tres corridas, código 0.
+
+Archivos tocados por esta tarea: `instalar-remoto.sh`, `scripts/resolver.mjs`, `pruebas/capa1/remoto.test.mjs`, `pruebas/rapida.sh` (se quita `remoto.test.mjs` de la lista y se añade un comentario), `README.md`, y esta tarea (solo *Evidencia*, *Notas* y `estado`). `definitions/STATUS.md` y `task-02` ya venían modificados antes de empezar; no los toqué.
+
 ## Notas
+
+Huecos menores resueltos (decisión entre paréntesis):
+- **Validación antes de mover nada** (`validar_modelos_kit`): para cada agente del kit nuevo, `resolver.mjs modelo` con `claude-code` y con `pi`, usando `FLUCASTR_MODELOS` = el personal o, si aún no existe, el `modelos.json` del paquete. Se aplica también en la primera instalación, que es el arreglo del hallazgo de task-02 dentro de `instalar-remoto.sh`. La tarea solo lo pedía para la actualización. R6 (falla de `instalar.sh` en la primera instalación) no cambió.
+- **Ensayo `instalar.sh --copiar --simular` antes del swap, solo en la actualización** (no estaba en la tarea). Motivo: `instalar.sh` escribe el manifiesto en su `trap EXIT` aunque falle antes de registrar nada, y eso dejaría el manifiesto vacío y la vuelta atrás sin poder desinstalar. Con el ensayo, lo que `instalar.sh` valida (p. ej., un agente que declara `model`) falla antes de tocar `kit/`. La primera instalación no lo tiene, para no cambiar el comportamiento que prueba R6.
+- **Vuelta atrás con `cp -R` y no con `mv`**: `kit.anterior/` se conserva hasta que la reinstalación sale bien, así el mensaje «se conserva en `~/.flucastr-ai/kit.anterior`» es cierto si también falla la reinstalación. Si la reinstalación sale bien, `kit.anterior/` se borra.
+- **`kit.anterior/` ya existente** (resto de una actualización interrumpida): se niega con un mensaje y código 1, antes de descargar. Mover `kit/` encima de una carpeta existente habría dejado un `kit.anterior/` anidado.
+- **`--actualizar` sin instalación** se decide por la existencia de `version`, no de `kit/`. Un `kit/` sin `version` sigue dando el error de instalación incompleta de task-02.
+- **`kit.nuevo/` residual** (un proceso matado a mitad): `preparar_kit_nuevo` lo borra antes de crearlo; antes el `mkdir` fallaba.
+- **R2 cambió**: su parte «sha nuevo: aviso» reflejaba el mensaje provisional de task-02, que esta tarea reemplaza. Ese caso pasó a R8.
+- **`comparar-modelos` con JSON ilegible del publicado**: la actualización aborta antes de mover nada (código 1, con el mensaje de `fallar`).
+- **Aviso de `modelos.json`**: se imprime después de «Actualizado», no antes; si la actualización falla, no se imprime.
+
+Lo que vi y no toqué (fuera de alcance; para Franco o para una tarea aparte):
+- **Hallazgo de task-02, causa de raíz en `instalar.sh` (task-01).** Copia el `modelos.json` del paquete a `~/.flucastr-ai/modelos.json` antes de validar los agentes (reproducido arriba). Si el paquete lo trae inválido, el personal queda roto y no se repara en corridas posteriores. `instalar-remoto.sh` ya lo bloquea antes de copiar (R10). Pero `bash instalar.sh --copiar` directo sobre un paquete así sigue dejando el personal roto. El arreglo de raíz es validar antes de copiar en `instalar.sh`; no estaba en *A tocar*.
+- **Residuo del `trap EXIT` de `instalar.sh`**: escribe el manifiesto aunque falle antes de registrar nada. El ensayo de la actualización evita que esto llegue a la vuelta atrás, pero la primera instalación sigue dejando un manifiesto vacío y el `desinstalar.sh` lo borra después (R6). Conviene arreglarlo en el mismo cambio de `instalar.sh`.
+- **`pruebas/README.md`** no menciona `remoto.test.mjs` ni cómo correrlo (fuera de alcance). Hoy se corre con `node --test pruebas/capa1/remoto.test.mjs`. Está comentado en `rapida.sh`.
+- **Margen de `rapida.sh`**: con 19 archivos queda en 23 a 25 s. Si vuelve a acercarse al tope, la siguiente candidata a sacar es `pruebas/capa1/instalacion.test.mjs` o `copia.test.mjs`, no `remoto`.
+- **La red real, la política de la empresa y el repo público** son comprobaciones manuales de Franco (ver la sección «Comprobación manual» del README). Nada de eso se probó aquí.
+
+Señal: la tarea estaba incompleta. Faltaban: validar el `modelos.json` también en la primera instalación (el hallazgo de task-02), qué hacer con un `kit.anterior/` que sobra de una actualización interrumpida, y qué hacer si `instalar.sh` falla después de registrar una parte de la instalación (la vuelta atrás depende de ese manifiesto parcial).

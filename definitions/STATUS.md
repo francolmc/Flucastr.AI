@@ -4,16 +4,15 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 4). task-02 `lista para revisión` (`features/F09-instalador-sin-clon/task-02-instalar-remoto.md`). task-01 `hecha`. F09 `en curso`; las 3 tareas `aprobadas` por Franco (2026-10-30). Puerta 1 de F09 aprobada.
+Rol: ninguno (puerta 4). task-03 `lista para revisión` (`features/F09-instalador-sin-clon/task-03-actualizar-y-readme.md`), última de F09. task-01 y task-02 `hecha`. F09 `en curso`; las 3 tareas `aprobadas` por Franco (2026-10-30). Puerta 1 de F09 aprobada.
 Rama: feature/F09-instalador-sin-clon F08 `hecha` y con PR hecho. Decisiones de Franco para F09: instalador que descarga desde GitHub, repo público, actualización repitiendo el comando o con un modo `actualizar`.
 Rama: feature/F08-limpieza-y-archivo
 
 ## Espera a Franco
 
-- **Puerta 4:** revisa Evidencia y Notas de `features/F09-instalador-sin-clon/task-02-instalar-remoto.md`, el nuevo `instalar-remoto.sh` y `pruebas/capa1/remoto.test.mjs` (7 pruebas con control negativo, todas con HOME temporal y `FLUCASTR_ORIGEN` local; sin red). Haz el commit y pásala a `hecha`.
-- **Aviso de tiempo:** `rapida.sh` dio 26 s, 28 s y 34 s en distintas corridas (tope 30 s): el margen es insuficiente. task-03 prevé mover las pruebas de F09 a un archivo propio; conviene decidir si lo hacemos ya.
-- **Hallazgo para task-03:** `instalar.sh` (task-01) copia el `modelos.json` del paquete a `~/.flucastr-ai/modelos.json` antes de validar los agentes; si el paquete trae uno inválido, el personal queda roto. No se probó.
-- **Raro, revísalo:** durante la ejecución `pruebas/capa1/remoto.test.mjs` cambió en disco (el constructor no halló diferencias relevantes). Si no lo tocaste tú, compáralo con el diff antes del commit.
+- **Puerta 4:** revisa Evidencia y Notas de `features/F09-instalador-sin-clon/task-03-actualizar-y-readme.md`, y los diffs de `scripts/resolver.mjs` (`comparar-modelos`), `instalar-remoto.sh` (`--actualizar` atómico con `kit.nuevo`/`kit.anterior` y vuelta atrás), `pruebas/capa1/remoto.test.mjs` (R1–R12, 12 pass) y `README.md` (sección «Sin clonar el repo (PC de trabajo)» con la comprobación manual). Todo con HOME temporal y `FLUCASTR_ORIGEN` local; sin red. Haz el commit y pásala a `hecha`.
+- **Decisión a confirmar (cobertura):** con `remoto.test.mjs` dentro, `rapida.sh` tarda 36 s (código 1); sin él, 23–25 s. El constructor lo sacó de la lista de `rapida.sh`. Nota: dijo que «Franco autorizó» la salida; yo solo le indiqué que aplicara la salida que la tarea ya prevé, así que apruébalo tú expresamente. Consecuencia: esas 12 pruebas ya no corren en la suite rápida; hay que correrlas aparte (`node --test pruebas/capa1/remoto.test.mjs`). Alternativas: dejarlo así y documentarlo, o acelerar esas pruebas en una tarea aparte.
+- **Pendiente fuera de alcance (tarea aparte):** `instalar.sh --copiar` directo con un paquete de `modelos.json` inválido deja roto el personal (reproducido). `instalar-remoto.sh` ya lo bloquea (R10), pero la causa raíz está en `instalar.sh`. ¿La abrimos como tarea nueva en F09?
 
 - **Archivar (tuyo, después del PR, en su propio commit `chore/`):** primero el chequeo, `node scripts/archivar.mjs`; luego `node scripts/archivar.mjs --aplicar F01` … (o sin ID según el uso de `--aplicar` que implementó task-02; revisa `--aplicar` en el script). El chequeo marca F01–F07 como candidatas; F08 lo será tras su PR.
 - **Contexto grande:** `BACKLOG.md` (10 023 caracteres, umbral 8 192) y `WORKFLOW.md` (37 488, umbral 30 720) superan el aviso; filas `hecha` largas: F03, F05, F06, F07. Compactar `BACKLOG.md` es del planificador por la puerta 2 (recomendado tras archivar); acortar `WORKFLOW.md`, del arquitecto.
