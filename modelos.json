@@ -18,7 +18,7 @@
       "modelos": {
         "alto": "openai/gpt-6-astra",
         "medio": "openai/gpt-6.1-sol",
-        "bajo": "openai/gpt-6-sol"
+        "bajo": "openai/gpt-6-luna"
       }
     },
     "claude-code": {

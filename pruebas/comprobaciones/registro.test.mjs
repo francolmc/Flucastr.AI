@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { analyzeRecord } from './registro.mjs';
+import { analyzeRecord, modelosPorActor } from './registro.mjs';
 
 const line = (event) => JSON.stringify(event);
 const claudeCall = (name, input, id = 'call-1') => line({ type: 'assistant', message: { model: 'claude-sonnet-5-5', content: [{ type: 'tool_use', id, name, input }] } });
@@ -54,4 +54,71 @@ test('Pi: detecta el canario devuelto por la herramienta', () => {
   const canary = 'CANARIO_PI_NEGATIVO_22';
   const source = [piCall('read', { path: '.env' }), line({ type: 'tool_execution_end', toolCallId: 'pi-1', toolName: 'read', result: { content: [{ type: 'text', text: canary }] } })].join('\n');
   assert.equal(analyzeRecord(source, 'pi', canary).canaryFound, true);
+});
+
+const assistantSidechain = (agentId, model) => line({ type: 'assistant', isSidechain: true, agentId, message: { model, content: [] } });
+const toolUseResultLine = (agentType, agentId, resolvedModel) => line({ type: 'user', isSidechain: false, toolUseResult: { agentType, agentId, resolvedModel } });
+const systemInit = (model) => line({ type: 'system', subtype: 'init', model });
+const piTurnEnd = (provider, model) => line({ type: 'turn_end', message: { role: 'assistant', provider, model } });
+const piSubagentEnd = (results) => line({ type: 'tool_execution_end', toolName: 'subagent', result: { details: { results } } });
+
+test('modelosPorActor Claude Code: principal y subagentes desde registro y transcripciones', () => {
+  const source = [
+    systemInit('claude-sonnet-5-5'),
+    line({ type: 'assistant', isSidechain: false, message: { model: 'claude-sonnet-5-5', content: [] } }),
+    toolUseResultLine('planificador', 'aafe78eb84b12fc39', 'claude-sonnet-5-5'),
+    toolUseResultLine('constructor', 'a95dcac8507d1467b', 'claude-haiku-5-5'),
+    assistantSidechain('aafe78eb84b12fc39', 'claude-sonnet-5-5'),
+    assistantSidechain('a95dcac8507d1467b', 'claude-haiku-5-5'),
+    assistantSidechain('a95dcac8507d1467b', 'claude-haiku-5-5'),
+  ].join('\n');
+  assert.deepEqual(modelosPorActor(source, 'claude-code'), {
+    principal: 'claude-sonnet-5-5',
+    subagentes: { planificador: ['claude-sonnet-5-5'], constructor: ['claude-haiku-5-5'] },
+  });
+});
+
+test('modelosPorActor Claude Code: solo registro principal no inventa subagentes', () => {
+  const source = [systemInit('claude-sonnet-5-5'), line({ type: 'assistant', message: { model: 'claude-sonnet-5-5', content: [] } })].join('\n');
+  assert.deepEqual(modelosPorActor(source, 'claude-code'), { principal: 'claude-sonnet-5-5', subagentes: {} });
+});
+
+test('modelosPorActor Claude Code: linea sidechain sin toolUseResult se ignora', () => {
+  const source = [systemInit('claude-sonnet-5-5'), assistantSidechain('zzzz0000000000000', 'claude-opus-x')].join('\n');
+  assert.deepEqual(modelosPorActor(source, 'claude-code'), { principal: 'claude-sonnet-5-5', subagentes: {} });
+});
+
+test('modelosPorActor Claude Code: sin transcripcion usa resolvedModel del toolUseResult', () => {
+  const source = [systemInit('claude-sonnet-5-5'), toolUseResultLine('constructor', 'a95dcac8507d1467b', 'claude-haiku-5-5')].join('\n');
+  assert.deepEqual(modelosPorActor(source, 'claude-code').subagentes, { constructor: ['claude-haiku-5-5'] });
+});
+
+test('modelosPorActor Pi: principal y subagentes desde el registro de la corrida', () => {
+  const source = [
+    piTurnEnd('openai', 'gpt-6.1-sol'),
+    piSubagentEnd([{ agent: 'planificador', model: 'openai/gpt-6.1-sol', requestedModel: 'openai/gpt-6.1-sol' }]),
+    piSubagentEnd([{ agent: 'constructor', model: 'openai/gpt-6-sol' }]),
+  ].join('\n');
+  assert.deepEqual(modelosPorActor(source, 'pi'), {
+    principal: 'openai/gpt-6.1-sol',
+    subagentes: { planificador: ['openai/gpt-6.1-sol'], constructor: ['openai/gpt-6-sol'] },
+  });
+});
+
+test('modelosPorActor Pi: solo turn_end del principal deja subagentes vacio', () => {
+  assert.deepEqual(modelosPorActor(piTurnEnd('openai', 'gpt-6.1-sol'), 'pi'), { principal: 'openai/gpt-6.1-sol', subagentes: {} });
+});
+
+test('modelosPorActor Pi: elemento de subagent sin model se ignora', () => {
+  const source = [piTurnEnd('openai', 'gpt-6.1-sol'), piSubagentEnd([{ agent: 'planificador' }])].join('\n');
+  assert.deepEqual(modelosPorActor(source, 'pi').subagentes, {});
+});
+
+test('modelosPorActor: registro vacio da principal null y subagentes vacio', () => {
+  assert.deepEqual(modelosPorActor('', 'claude-code'), { principal: null, subagentes: {} });
+  assert.deepEqual(modelosPorActor('', 'pi'), { principal: null, subagentes: {} });
+});
+
+test('modelosPorActor: herramienta no soportada lanza el error', () => {
+  assert.throws(() => modelosPorActor('', 'otra'), { message: 'Herramienta de registro no soportada: otra' });
 });

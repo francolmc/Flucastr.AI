@@ -63,13 +63,51 @@ test('backlog: encabezado alterado se rechaza', () => {
   assert.ok(errores.some((e) => e.includes('encabezado')));
 });
 
-test('backlog: siete features se rechazan', () => {
+test('backlog: siete features pendientes se rechazan', () => {
   const extra = [3, 4, 5, 6, 7]
     .map((n) => `| F0${n} | Feature ${n} | producto | medio | bajo | Motivo. | pendiente | |`)
     .join('\n');
   const t = BACKLOG_VALIDO.replace('| F02', `${extra}\n| F02`);
   const errores = validarBacklog(t);
-  assert.ok(errores.some((e) => e.includes('entre 1 y 6')));
+  assert.ok(errores.some((e) => e.includes('como máximo 6 features pendientes')));
+});
+
+function backlogCon(filas) {
+  return [
+    '# Backlog — Prueba',
+    '',
+    CABECERA,
+    SEPARADOR,
+    ...filas,
+    '',
+    'Estado del documento: borrador',
+    '',
+  ].join('\n');
+}
+
+const fila = (id, estado, siguiente = '') =>
+  `| ${id} | Feature ${id} | producto | medio | bajo | Motivo. | ${estado} | ${siguiente} |`;
+
+test('backlog: seis hechas y seis pendientes es válido (las hechas no cuentan)', () => {
+  const filas = [
+    ...[1, 2, 3, 4, 5, 6].map((n) => fila(`F0${n}`, 'hecha')),
+    ...[7, 8, 9, 10, 11, 12].map((n) => fila(`F${String(n).padStart(2, '0')}`, 'pendiente', n === 7 ? '→' : '')),
+  ];
+  assert.deepEqual(validarBacklog(backlogCon(filas)), []);
+});
+
+test('backlog: seis hechas y siete pendientes se rechazan', () => {
+  const filas = [
+    ...[1, 2, 3, 4, 5, 6].map((n) => fila(`F0${n}`, 'hecha')),
+    ...[7, 8, 9, 10, 11, 12, 13].map((n) => fila(`F${String(n).padStart(2, '0')}`, 'pendiente', n === 7 ? '→' : '')),
+  ];
+  const errores = validarBacklog(backlogCon(filas));
+  assert.ok(errores.some((e) => e.includes('como máximo 6 features pendientes')));
+});
+
+test('backlog: tabla sin filas de datos se rechaza', () => {
+  const errores = validarBacklog(backlogCon([]));
+  assert.ok(errores.some((e) => e.includes('al menos 1 feature')));
 });
 
 test('backlog: Estado inválido se rechaza', () => {

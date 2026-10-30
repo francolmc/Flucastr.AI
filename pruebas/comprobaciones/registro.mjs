@@ -81,3 +81,74 @@ export function analyzeRecord(source, tool, canary = '') {
 export function analyzeRecordFile(file, tool, canary = '') {
   return analyzeRecord(fs.readFileSync(file, 'utf8'), tool, canary);
 }
+
+function addUnique(list, value) {
+  if (!list.includes(value)) list.push(value);
+}
+
+// Map y no objeto plano: un actor llamado «constructor» choca con Object.prototype.
+function agregarModelo(mapa, actor, modelo) {
+  if (!mapa.has(actor)) mapa.set(actor, []);
+  addUnique(mapa.get(actor), modelo);
+}
+
+function modelosClaude(events) {
+  const init = events.find((e) => e.type === 'system' && e.subtype === 'init' && typeof e.model === 'string');
+  const esSubagente = (e) => e.isSidechain === true || (e.parent_tool_use_id !== undefined && e.parent_tool_use_id !== null);
+  const principalAssistant = events.find((e) => e.type === 'assistant' && !esSubagente(e) && typeof e.message?.model === 'string');
+  const principal = init ? init.model : (principalAssistant ? principalAssistant.message.model : null);
+
+  // Nombre del subagente solo desde toolUseResult con agentType y agentId (en la transcripción de sesión va en una línea user).
+  const agentes = new Map();
+  for (const e of events) {
+    const r = e.toolUseResult;
+    if (!r || typeof r !== 'object' || typeof r.agentType !== 'string' || typeof r.agentId !== 'string') continue;
+    if (!agentes.has(r.agentId)) {
+      agentes.set(r.agentId, { nombre: r.agentType, resolvedModel: typeof r.resolvedModel === 'string' ? r.resolvedModel : null });
+    }
+  }
+
+  // Modelo observado en las líneas sidechain del agentId (solo si ese agentId tiene toolUseResult).
+  const porAgentId = new Map();
+  for (const e of events) {
+    if (e.type !== 'assistant' || e.isSidechain !== true || typeof e.agentId !== 'string') continue;
+    if (!agentes.has(e.agentId) || typeof e.message?.model !== 'string') continue;
+    if (!porAgentId.has(e.agentId)) porAgentId.set(e.agentId, []);
+    addUnique(porAgentId.get(e.agentId), e.message.model);
+  }
+
+  const subagentes = new Map();
+  for (const [agentId, { nombre, resolvedModel }] of agentes) {
+    const modelos = porAgentId.get(agentId) ?? (resolvedModel ? [resolvedModel] : []);
+    for (const modelo of modelos) agregarModelo(subagentes, nombre, modelo);
+  }
+  return { principal, subagentes: Object.fromEntries(subagentes) };
+}
+
+function modelosPi(events) {
+  const mensaje = events.find((e) => (e.type === 'turn_end' || e.type === 'message_start') &&
+    e.message?.role === 'assistant' && typeof e.message?.model === 'string');
+  let principal = null;
+  if (mensaje) {
+    const { provider, model } = mensaje.message;
+    principal = typeof provider === 'string' ? `${provider}/${model}` : model;
+  }
+
+  const subagentes = new Map();
+  for (const e of events) {
+    if (e.type !== 'tool_execution_end' || e.toolName !== 'subagent') continue;
+    const resultados = e.result?.details?.results;
+    if (!Array.isArray(resultados)) continue;
+    for (const r of resultados) {
+      if (typeof r?.agent !== 'string' || typeof r?.model !== 'string') continue;
+      agregarModelo(subagentes, r.agent, r.model);
+    }
+  }
+  return { principal, subagentes: Object.fromEntries(subagentes) };
+}
+
+export function modelosPorActor(source, tool) {
+  if (tool === 'claude-code') return modelosClaude(parseLines(source));
+  if (tool === 'pi') return modelosPi(parseLines(source));
+  throw new Error(`Herramienta de registro no soportada: ${tool}`);
+}
