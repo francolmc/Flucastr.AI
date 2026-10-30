@@ -1,5 +1,5 @@
 # task-01 — Alinear README y comentario de archivar.mjs con WORKFLOW.md §3.1
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Tras F12, el `coordinador` puede correr `scripts/archivar.mjs` a pedido explícito de Franco (`definitions/WORKFLOW.md` §3.1). Dos textos fuera de `definitions/` aún dicen lo contrario o lo omiten: el árbol del `README.md` y el comentario de cabecera de `scripts/archivar.mjs`. Se corrigen solo esas dos frases, sin cambiar comportamiento. Es una sola tarea porque son dos líneas en dos archivos con la misma verificación.

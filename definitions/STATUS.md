@@ -4,12 +4,12 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). Feature F13 (en curso, chore): task-01 `lista para revisión`. F12 `hecha` (PR hecho, coordinador reinstalado). F11 (informe) requiere al `arquitecto` y datos de `Registro:`.
+Rol: ninguno (esperando a Franco). F13 `hecha` (confirmada por Franco, 2026-10-30; task-01 `hecha`). Solo queda F11 (informe). F12 `hecha` (PR hecho, coordinador reinstalado). F11 (informe) requiere al `arquitecto` y datos de `Registro:`.
 Rama: chore/F13-alinear-readme-archivar
 
 ## Espera a Franco
 
-- **PUERTA 4 (F13 task-01, la única):** revisa *Evidencia* y *Notas* en `features/F13-alinear-readme-archivar/task-01-alinear-readme-y-comentario-archivar.md` (cambios solo de texto en `README.md` línea 54 y el comentario de `scripts/archivar.mjs` líneas 11-12; greps 0/1/1/0/1; suite 246/246). Haz el commit en `chore/F13-alinear-readme-archivar` y dime si queda `hecha`; luego confirma F13 como `hecha` y el PR es tuyo.
+- Feature F13 completa en chore/F13-alinear-readme-archivar: cierra la rama, haz el PR y despliega.
 - **Menciones antiguas en `definitions/REGISTRO.md`** líneas 25 y 55 («no tiene Bash»): no estaban en el encargo del arquitecto. Revisa también el reemplazo por script del arquitecto en `WORKFLOW.md` §3.1, `PROJECT.md` y `ARCHITECTURE.md` (solo se verificó con `grep`).
 - Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (ver `definitions/WORKFLOW.md` §3.1).
 - **Registro de eventos:** corre `node scripts/registrar.mjs` cuando quieras (lo corres tú, o yo a tu pedido). `registro/` está ignorado por git.
