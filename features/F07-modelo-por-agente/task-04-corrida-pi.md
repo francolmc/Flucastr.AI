@@ -1,5 +1,5 @@
 # task-04 — Una corrida real en Pi: coordinador y subagentes con el modelo de `modelos.json`
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
 
 ## Descripción
 Equivalente de task-03 para Pi: confirma con **una sola corrida** que `pi-coordinador` usa `--model` resuelto de `modelos.json` y que los subagentes lanzados con la herramienta `subagent` usan el `model` de su archivo generado en `~/.pi/agent/agents/`. `WORKFLOW.md` §7 ya observó esto una vez con el `arquitecto` pero solo en la prueba desechable; aquí queda como evidencia verificable para los tres roles.
@@ -43,4 +43,62 @@ Esperado: sin salida / `modelos de agentes instalados vigentes` / tres modelos q
 
 ## Evidencia
 
+Corrida real (no inferida), 2026-10-30, desde una carpeta temporal vacía (`/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/14b3b3bb-3945-4c18-bed2-c390112a4639/scratchpad/corrida-pi.Xl8T`), con `FLUCASTR_RECORD_FILE=<esa carpeta>/registro.jsonl`.
+
+Precondición y verificación (salida real):
+```
+$ bash -n pruebas/lanzar-modelos-pi.sh
+[exit=0]
+$ node pruebas/comprobaciones/modelos-agentes.mjs
+modelos de agentes instalados vigentes
+[exit=0]
+$ for a in coordinador planificador constructor; do node scripts/resolver.mjs modelo $a pi; done
+openai/gpt-6.1-sol
+openai/gpt-6.1-sol
+openai/gpt-6-sol
+[exit=0]
+```
+
+Corrida:
+```
+$ bash pruebas/lanzar-modelos-pi.sh   (con FLUCASTR_RECORD_FILE, desde la carpeta temporal)
+Fri Oct 30 00:04:57 -03 2026 -> Fri Oct 30 00:06:06 -03 2026  (69 s, tope 300 s)
+lanzador exit=0
+$ wc -l registro.jsonl
+290 .../scratchpad/corrida-pi.Xl8T/registro.jsonl
+```
+
+Modelos observados (fuente generada por Pi, no autodeclarada):
+
+| Rol | Fuente en el registro | Fuente en la transcripción del subagente | Observado | Resuelto | Coincide |
+|---|---|---|---|---|---|
+| coordinador (principal) | `turn_end` de mensaje del asistente: `provider=openai`, `model=gpt-6.1-sol` | — | openai/gpt-6.1-sol | openai/gpt-6.1-sol | sí |
+| planificador | `tool_execution_end` de `subagent`, `details.results[0].model` | `_transcript.jsonl` L4 (turno del asistente) y `_meta.json` `model` | openai/gpt-6.1-sol | openai/gpt-6.1-sol | sí |
+| constructor | `tool_execution_end` de `subagent`, `details.results[0].model` | `_transcript.jsonl` L8 (turno del asistente) y `_meta.json` `model` | openai/gpt-6-sol | openai/gpt-6-sol | sí |
+
+Extractos JSON mínimos (abreviados; las líneas completas están en el registro):
+```
+{"type":"turn_end","message":{"role":"assistant","provider":"openai","model":"gpt-6.1-sol"}}
+{"type":"tool_execution_end","toolName":"subagent","result":{"details":{"results":[{"agent":"planificador","model":"openai/gpt-6.1-sol","requestedModel":"openai/gpt-6.1-sol"}]}}}
+{"type":"tool_execution_end","toolName":"subagent","result":{"details":{"results":[{"agent":"constructor","model":"openai/gpt-6-sol","requestedModel":"openai/gpt-6-sol"}]}}}
+```
+
+Criterios de aceptación:
+1. `bash -n pruebas/lanzar-modelos-pi.sh` termina con 0: cumple.
+2. Corrida dentro del tope (69 s), registro existente con 290 líneas: cumple.
+3. Principal `openai/gpt-6.1-sol` = `resolver.mjs modelo coordinador pi`: cumple.
+4. Planificador y constructor: modelo observado igual al resuelto (no hace falta la nota de «no observable»): cumple.
+
 ## Notas
+
+- Huecos menores resueltos:
+  - El registro no trae el modelo del subagente en los eventos de mensaje del proceso principal (igual que en Claude Code), pero sí en el resultado de la herramienta `subagent` (`details.results[].model` y `requestedModel`) y en la transcripción que Pi guarda por subagente en `/var/folders/.../pi-subagents-uid-501/artifacts/<runId>_<agente>_0_transcript.jsonl`. Se usó la transcripción como fuente análoga a la de task-03. Esa carpeta es temporal y la gestiona el paquete `pi-subagents`; si desaparece, la evidencia queda en el registro de esta corrida.
+  - En el registro, el principal aparece como `model=gpt-6.1-sol` con `provider=openai` aparte. Se comparó como `openai/gpt-6.1-sol`.
+  - `subagent` no estaba activa al inicio: el coordinador la activó él mismo con `subagents_enable`, como indica `agentes/coordinador.md`. No se tocó `~/.pi/agent/settings.json` (no tiene la clave `subagents_enable`; sí `npm:pi-subagents`).
+  - El lanzador usa el prompt en línea (como `lanzar-modelos-claude.sh`), no un archivo de `prompts/`.
+- Observaciones de comportamiento, sin efecto en el criterio de modelo:
+  - El constructor llamó una vez a `contact_supervisor` (coordinación con el proceso principal, no lectura ni escritura de archivos), y en el registro su resultado aparece como `exitCode: -2` mientras estaba separado; la `_meta.json` final da `exitCode: 0` y `model: openai/gpt-6-sol`.
+  - Pese a «sin usar herramientas», el constructor usó `contact_supervisor`. Dato para Franco; no cambia el resultado.
+- Lo observable: modelo del principal, de planificador y de constructor. Nada queda «no observable».
+- Solo se crearon `pruebas/lanzar-modelos-pi.sh` y la *Evidencia*/*Notas*/`estado` de esta tarea. No se tocó `definitions/STATUS.md`, `task-05-extractor-modelos-registro.md`, `instalar.sh`, agentes, `modelos.json` ni la configuración de Pi. No hay commit, push, PR ni merge.
+- Para Franco: revisar la *Evidencia* de esta tarea y el archivo nuevo `pruebas/lanzar-modelos-pi.sh` antes de decidir `hecha`.

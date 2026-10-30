@@ -1,5 +1,5 @@
 # task-03 — Una corrida real en Claude Code: coordinador y subagentes con el modelo de `modelos.json`
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 `WORKFLOW.md` §7 dejó pendiente comprobar con una corrida real que un subagente de Claude Code usa el `model` de su archivo generado. Esta tarea añade un lanzador mínimo y hace **una sola corrida**: el `coordinador` (agente principal) delega en `planificador` y en `constructor`, y se lee del registro estructurado qué modelo respondió cada uno. El constructor es el que discrimina (bajo: `claude-haiku-5-5`; los otros dos, medio: `claude-sonnet-5-5`).
