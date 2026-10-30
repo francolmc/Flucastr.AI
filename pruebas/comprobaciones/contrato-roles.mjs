@@ -194,5 +194,35 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     }
   }
 
+  // Regla 15: el coordinador tiene exactamente los tres comandos Bash(...) en «tools:», sin Bash desnudo; su cuerpo fija la lista cerrada y la revisión de scripts/; ningún otro agente tiene Bash(node scripts/ en «tools:».
+  const PATRONES_BASH_COORDINADOR = [
+    'Bash(node scripts/registrar.mjs)',
+    'Bash(node scripts/archivar.mjs)',
+    'Bash(node scripts/archivar.mjs --aplicar F*)',
+  ];
+  const toolsCoordinador = frontMatter(agentes.coordinador ?? '')?.tools ?? '';
+  const bashCoordinador = toolsCoordinador.match(/Bash(\([^)]*\))?/g) ?? [];
+  for (const patron of PATRONES_BASH_COORDINADOR) {
+    if (!bashCoordinador.includes(patron)) {
+      errores.push(`El agente «coordinador» debe declarar «${patron}» en «tools:».`);
+    }
+  }
+  for (const bash of bashCoordinador) {
+    if (!PATRONES_BASH_COORDINADOR.includes(bash)) {
+      errores.push(`El agente «coordinador» tiene «${bash}» en «tools:»; solo puede tener los tres patrones «Bash(...)» de la lista cerrada, y ningún «Bash» sin patrón.`);
+    }
+  }
+  for (const frase of ['lista cerrada', 'pedido explícito', 'no autoriza', 'git diff scripts/']) {
+    if (!(agentes.coordinador ?? '').includes(frase)) {
+      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
+    }
+  }
+  for (const nombre of nombresAgentes.filter((n) => n !== 'coordinador')) {
+    const tools = frontMatter(agentes[nombre])?.tools ?? '';
+    if (tools.includes('Bash(node scripts/')) {
+      errores.push(`El agente «${nombre}» no debe tener «Bash(node scripts/» en «tools:»; solo el coordinador corre scripts.`);
+    }
+  }
+
   return errores;
 }

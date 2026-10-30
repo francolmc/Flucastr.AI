@@ -4,7 +4,7 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
+Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 `hecha`; task-02 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
 Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Espera a Franco
@@ -12,7 +12,8 @@ Rama: feature/F12-coordinador-ejecuta-scripts
 - F10: PR hecho por Franco (2026-10-30).
 - Puerta 1 del permiso del coordinador para archivar: aprobada por Franco (2026-10-30), opción B en Pi (bash completo, riesgo aceptado y escrito en `WORKFLOW.md` §3.1.1).
 - Backlog con F12: aprobado por Franco (2026-10-30).
-- **PUERTA 4 (F12 task-01):** revisa la evidencia y las notas en `features/F12-coordinador-ejecuta-scripts/task-01-validar-argumentos-scripts.md`, haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`. Cambios: `scripts/archivar.mjs`, `scripts/registrar.mjs`, `pruebas/comprobaciones/archivar.test.mjs`, `pruebas/capa1/registrar.test.mjs`. Aviso del constructor: quitó el mensaje «Nada que archivar.» de la CLI y reescribió 4 pruebas existentes (a, c, g y «Nada que archivar»).
+- F12 task-01: `hecha` y comiteada por Franco (2026-10-30).
+- **PUERTA 4 (F12 task-02):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-02-coordinador-comandos-claude.md`, haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`. Cambios: `agentes/coordinador.md`, `pruebas/comprobaciones/contrato-roles.mjs` (regla 15) y su test (29/29). **Limitación a decidir:** en la prueba con modelo el coordinador no corrió `node scripts/otro.mjs`, pero se negó citando su propio texto, así que no queda probado que `tools:` restrinja `Bash` por sí solo. Opciones: aceptarlo y que task-05 lo pruebe con una petición explícita sin apoyarse en la instrucción, o pedir antes una prueba adicional.
 - F12: las 7 tareas `aprobada` por Franco (2026-10-30); se ejecutan una a la vez en orden (task-01 en curso). Al terminar cada una, puerta 4: revisa evidencia y commit en la rama. Tareas en `features/F12-coordinador-ejecuta-scripts/`: `task-01-validar-argumentos-scripts.md`, `task-02-coordinador-comandos-claude.md` (depende de 01), `task-03-generacion-pi-claude-instalacion.md` (02), `task-04-fixture-y-comprobador-coordinador.md` (01), `task-05-prueba-modelo-claude-code.md` (02, 04), `task-06-prueba-modelo-pi.md` (03, 04), `task-07-documentar-permisos-y-cierre.md` (05, 06). Decisiones a mirar: task-02, si `tools:` no restringe `Bash` queda `bloqueada` con `BLOQUEO: rol=arquitecto` (no se usa `permissions.allow/deny` global); task-03, en Pi `Bash` sin patrones (inferido, sin verificar); task-01 endurece el CLI y reescribe 2 pruebas de `archivar.test.mjs`; task-05/06 hacen 8 llamadas de modelo cada una. `WORKFLOW.md` §3.1 sigue diciendo «comprobación pendiente»: lo actualiza el arquitecto o Franco tras task-02.
 - **Ahora, archivar F01–F10 (tuyo):** desde `main` actualizado: `git switch -c chore/archivar-F01-F10`; `node scripts/registrar.mjs`; `node scripts/archivar.mjs` (chequeo, revisa la lista); `node scripts/archivar.mjs --aplicar`; revisa `git status` y haz el commit. Después avísame para pedir al planificador compactar `BACKLOG.md` (puerta 2).
 - **Registro de eventos:** corre `node scripts/registrar.mjs` (lo corres tú, antes de archivar; no bloquea). `registro/` está ignorado por git. Los datos útiles llegan con las próximas tareas: la línea `Registro:` del constructor solo existe desde task-02 de F10.

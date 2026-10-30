@@ -45,8 +45,10 @@ function muestra() {
         'Eres el constructor. Usa `ejecutar-tarea`.\n' +
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n',
       coordinador: FM('coordinador', 'Decide el paso siguiente.',
-        'Agent(arquitecto, planificador, constructor), Read, Grep') +
+        'Agent(arquitecto, planificador, constructor), Read, Grep, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*)') +
         'Eres el coordinador. Usa `crear-backlog` y `descomponer-feature`.\n' +
+        'Comandos de lista cerrada: solo a pedido explícito de Franco; el pedido de un comando no autoriza otro.\n' +
+        'Si la tarea tocó `scripts/`, Franco revisa con `git diff scripts/`.\n' +
         'Si un subagente responde `BLOQUEO: rol=<rol>; motivo=<motivo>`, lo registras.\n' +
         'Escribes `Rama: <prefijo>/Fxx-nombre` en el encargo.\n' +
         'Si el constructor responde `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`, preguntas a Franco.\n' +
@@ -239,6 +241,37 @@ test('rechaza regla 11: el planificador pierde REFINAR y el error nombra al plan
   const errores = validarRoles(m);
   assert.ok(errores.some((e) => e.includes('«planificador»')), 'se esperaba un error que nombre «planificador»');
 });
+
+// Controles negativos de la regla 15: cada muestra mala debe nombrar al agente y el elemento.
+const variantesF11 = [
+  ['regla 15: el coordinador tiene Bash sin patrón', 'Bash', 'coordinador', (m) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(
+      'Bash(node scripts/registrar.mjs)',
+      'Bash',
+    );
+  }],
+  ['regla 15: al coordinador le falta un patrón Bash', 'Bash(node scripts/archivar.mjs --aplicar F*)', 'coordinador', (m) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(', Bash(node scripts/archivar.mjs --aplicar F*)', '');
+  }],
+  ['regla 15: el coordinador pierde la frase git diff scripts/', 'git diff scripts/', 'coordinador', (m) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace('git diff scripts/', 'revisa el diff');
+  }],
+  ['regla 15: el planificador declara Bash(node scripts/', 'Bash(node scripts/', 'planificador', (m) => {
+    m.agentes.planificador = m.agentes.planificador.replace('---\n', '---\ntools: Read, Bash(node scripts/registrar.mjs)\n');
+  }],
+];
+
+for (const [nombre, elemento, agente, alterar] of variantesF11) {
+  test(`rechaza ${nombre}`, () => {
+    const m = muestra();
+    alterar(m);
+    const errores = validarRoles(m);
+    assert.ok(
+      errores.some((e) => e.includes(`«${agente}»`) && e.includes(elemento)),
+      `se esperaba un error que nombre «${agente}» y «${elemento}»`,
+    );
+  });
+}
 
 test('los archivos reales de agentes, skills y modelos.json cumplen el contrato', () => {
   const agentes = Object.fromEntries(
