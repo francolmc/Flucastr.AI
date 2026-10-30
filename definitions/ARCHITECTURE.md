@@ -1,6 +1,6 @@
 # Arquitectura — Flucastr.AI (modo: actual)
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). **Cambio propuesto por aprobar (puerta 1, 2026-10-30):** `scripts/archivar.mjs` (F08).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Pendiente de aprobación:** `WORKFLOW.md` §10.5 (el `coordinador` no corre el script; lo corre Franco).
 
 ## Estructura y su razón
 
@@ -16,7 +16,7 @@ flowchart LR
     SK["skills/*/SKILL.md"]
     MJ["modelos.json"]
     RS["scripts/resolver.mjs"]
-    AR["scripts/archivar.mjs (F08, propuesta)"]
+    AR["scripts/archivar.mjs (F08)"]
     IN["instalar.sh / desinstalar.sh"]
     PR["pruebas/"]
   end
@@ -63,7 +63,7 @@ flowchart LR
 | `skills/` | Procedimientos que el agente carga por paso. | Markdown con encabezado | `skills/*/SKILL.md` |
 | `modelos.json` | Fuente única de modelos: niveles, respaldo, perfiles, nivel por agente. | JSON | `modelos.json` |
 | `scripts/resolver.mjs` | Resuelve nivel→perfil→modelo y genera los agentes por herramienta. | Node ESM | `README.md`, `definicion/arquitectura.md` |
-| `scripts/archivar.mjs` (propuesta, F08) | Chequeo de contexto de solo lectura; con `--aplicar`, ejecutado por Franco, mueve a `features/completed/` las features `hecha` con todas sus tareas `hecha`. Nunca escribe estados ni borra. | Node ESM, sin dependencias | `WORKFLOW.md` §10 |
+| `scripts/archivar.mjs` (F08) | Chequeo de contexto de solo lectura; con `--aplicar` mueve a `features/completed/` las features `hecha` con todas sus tareas `hecha`. Ambos modos los corre Franco; el `coordinador` no tiene Bash y solo deja el comando en `STATUS.md`. Nunca escribe estados ni borra. | Node ESM, sin dependencias | `WORKFLOW.md` §10 |
 | `instalar.sh` | Valida primero y después enlaza skills, genera agentes y lanzador de Pi, escribe manifiesto. Nunca pisa lo existente. | Bash | `instalar.sh` (cabecera y comentario de validación) |
 | `desinstalar.sh` | Quita solo lo del manifiesto; borra generados únicamente si conservan la marca `flucastr-ai:generado`. | Bash | `README.md`, `definicion/arquitectura.md` |
 | `pruebas/` | Capa 1 (instalación) y escenarios B, M, R con modelo; fixtures generados, remotos *bare* locales, comprobaciones duras con control negativo, registro estructurado e instantánea. | Bash + Node (`node --test`) | `pruebas/README.md`, `pruebas/ejecutar.sh` |
@@ -78,7 +78,7 @@ flowchart LR
 | Validar antes de actuar | Un `modelos.json` roto dejaba una instalación parcial o destruía la previa (defecto confirmado por la Capa 1 y corregido) | Validar al final | — |
 | Pruebas contra el agente **instalado** | Es lo que Franco usa (`plan-pruebas-arquitecto.md`); el ejecutor se detiene si el instalado es el antiguo | Probar los archivos del repo | — |
 | Skills bajo demanda | Mantener corto el agente | Todo en el agente | — |
-| Archivar con script, bajo confirmación de Franco (F08, propuesta) | Mantiene corto lo que leen los agentes sin que un agente mueva carpetas ni decida estados | Que el `coordinador` mueva carpetas (amplía su permiso); mover tareas sueltas (rompe `depende_de:`); segundo archivo de estado para lo archivado (dos fuentes de verdad) | Que el costo de contexto de `features/` siga siendo bajo sin archivar |
+| Archivar con script, bajo confirmación de Franco (F08) | Mantiene corto lo que leen los agentes sin que un agente mueva carpetas ni decida estados | Que el `coordinador` mueva carpetas o corra el script (exigiría darle Bash; Franco lo descartó el 2026-10-30); mover tareas sueltas (rompe `depende_de:`); segundo archivo de estado para lo archivado (dos fuentes de verdad) | Que el costo de contexto de `features/` siga siendo bajo sin archivar |
 
 ## Evolución prevista (no existe hoy)
 

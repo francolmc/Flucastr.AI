@@ -4,14 +4,19 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 1). El arquitecto dejó la definición para F08 como cambio propuesto por aprobar. F07 `hecha` (confirmada por Franco, 2026-10-30). Siguiente: aprobada la definición, el planificador descompone F08.
+Rol: ninguno (puerta 4). task-01 `lista para revisión` (`features/F08-limpieza-y-archivo/task-01-archivar-chequeo.md`); arquitecto terminó el ajuste de §10.5. F08 `en curso`; las 4 tareas `aprobadas` por Franco (2026-10-30). F07 `hecha` y mergeada.
+Rama: feature/F08-limpieza-y-archivo
 
 ## Espera a Franco
 
-- Feature F07 completa en feature/F07-modelo-por-agente: cierra la rama, haz el PR y despliega.
-- **Puerta 1:** revisa y aprueba los cambios propuestos en `definitions/WORKFLOW.md` (§4, §5, §7 «Resultado de F07», §10 nueva con F08), `definitions/PROJECT.md` (etapa 5, fuente de verdad, tabla de pruebas) y `definitions/ARCHITECTURE.md` (`scripts/archivar.mjs`). Diseño: script en modo chequeo por defecto, `--aplicar` solo lo corre Franco; mueve la feature completa (con sus tareas) a `features/completed/` sin borrar ni sobrescribir; el coordinador corre el chequeo al terminar una feature y deja el aviso aquí.
-- **Preguntas abiertas (WORKFLOW §10.6):** (1) ¿archivar antes o después del PR de la feature? Se recomienda después, en su propio commit `chore/`. (2) ¿aceptas los umbrales como punto de partida: `STATUS.md` > 3 KB, `BACKLOG.md` > 8 KB, `AGENTS.md` > 2 KB, filas `hecha` > ~300 caracteres?
-- La nota de `BACKLOG.md` (línea 28, «DECISIÓN PARA FRANCO») queda por alinear: el arquitecto no podía tocarla; la compacta el planificador.
+- **Puerta 4:** revisa Evidencia y Notas de `features/F08-limpieza-y-archivo/task-01-archivar-chequeo.md` (`scripts/archivar.mjs` y `pruebas/comprobaciones/archivar.test.mjs`: 10 pass; `rapida.sh`: 168 pass, 22 s de 30 s). Rama `feature/F08-limpieza-y-archivo` creada desde `main`. El chequeo marca F01–F07 como candidatas a archivar (correcto según las reglas). Haz el commit (incluye los cambios de `definitions/` ya aprobados) y pásala a `hecha`. Luego task-02.
+
+- **Puerta 1 (menor):** el arquitecto ajustó `definitions/WORKFLOW.md` §10.5 y una frase de §10.2 (el `coordinador` no corre `archivar.mjs`; deja el comando aquí y lo corres tú) y reflejó el cambio en `ARCHITECTURE.md` (alternativa descartada). Quitó «por aprobar» del resto de F08 en `WORKFLOW.md`, `PROJECT.md` y `ARCHITECTURE.md`. Revisa esos pasajes y apruébalos. Sin respuesta explícita quedan las dos «Abiertas» de §10.6 (archivar antes/después del PR, umbrales).
+- task-03 de F08 debe alinear `agentes/coordinador.md` con esto (no correr el script, solo escribir el comando).
+- Después de F08: pedir al planificador compactar las filas `hecha` de `BACKLOG.md` (10 424 bytes, umbral 8 KB) por la puerta 2.
+- `rapida.sh` tarda ~22 s de 30 s: las pruebas nuevas deben ser livianas.
+- Los documentos de `definitions/` aún llevan la marca «cambio propuesto por aprobar» del arquitecto; quitarla le toca a él (no la edito yo).
+- Supuestos para F08 (preguntas de WORKFLOW §10.6 sin respuesta explícita): archivar después del PR en un commit `chore/` aparte; umbrales de tamaño como punto de partida. Dime si quieres otra cosa.
 - Si `~/.claude` o `~/.pi` están desactualizados, el constructor pedirá que corras `bash instalar.sh`.
 - Rama, PR y despliegue de F05: lo haces tú.
 - Decisión abierta: tarea aparte para ajustar `descomponer-feature` (bajar «~5 archivos» a «~3»; que «Completa» no fije conteos ni estados de otros documentos).
