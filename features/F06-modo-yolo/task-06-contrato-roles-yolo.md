@@ -1,5 +1,5 @@
 # task-06 — Contrato de roles: frases de yolo en coordinador, planificador y descomponer-feature, con control negativo
-repo: Flucastr.AI   depende_de: task-02, task-03, task-04   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02, task-03, task-04   estado: hecha
 
 ## Descripción
 `pruebas/comprobaciones/contrato-roles.mjs` valida el contrato de agentes y skills. Tras task-02, task-03 y task-04, el coordinador, el planificador y `descomponer-feature` hablan del modo yolo. Esta tarea añade una regla que exige esas frases y las variantes negativas que prueban que, si alguien las borra, la verificación rápida falla.

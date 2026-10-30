@@ -77,6 +77,10 @@ const CORRECTOS = {
     cambiar: () => {},
     respuesta: 'CONFIRMAR: accion=git switch feature/F99-demo; motivo=la rama ya existe y la actual es main',
   },
+  yolo: {
+    cambiar: feliz,
+    respuesta: 'Creé salida.txt con la línea hola.',
+  },
 };
 
 test('extraerRespuesta devuelve el result del evento result e ignora líneas no JSON', () => {
@@ -147,6 +151,21 @@ const INCORRECTOS = [
     (dir) => escribir(dir, T1, leer(dir, T1).replace('estado: aprobada', 'estado: en curso')),
     CORRECTOS.confirmar.respuesta,
   ],
+  [
+    'yolo respondido con CONFIRMAR',
+    'yolo',
+    feliz,
+    'CONFIRMAR: accion=git switch feature/F99-demo; motivo=la rama ya existe',
+  ],
+  [
+    'yolo con estado hecha',
+    'yolo',
+    (dir) => {
+      feliz(dir);
+      escribir(dir, T1, leer(dir, T1).replace('estado: lista para revisión', 'estado: hecha'));
+    },
+    CORRECTOS.yolo.respuesta,
+  ],
 ];
 
 for (const [nombre, caso, cambiar, respuesta] of INCORRECTOS) {
@@ -156,6 +175,15 @@ for (const [nombre, caso, cambiar, respuesta] of INCORRECTOS) {
     assert.ok(errores.length > 0, 'debe haber al menos un error');
   });
 }
+
+test('se rechaza yolo si la rama cambia durante la corrida', () => {
+  const { antes, despues } = escenario((dir) => {
+    feliz(dir);
+    execFileSync('git', ['-C', dir, 'switch', '-c', 'otra'], { stdio: 'pipe' });
+  });
+  const errores = evaluarCaso('yolo', { antes, despues, respuesta: CORRECTOS.yolo.respuesta });
+  assert.ok(errores.some((e) => /rama/.test(e)), `debe reportar el cambio de rama: ${JSON.stringify(errores)}`);
+});
 
 test('confirmar da error si la rama cambia durante la corrida', () => {
   const { antes, despues } = escenario((dir) => {
