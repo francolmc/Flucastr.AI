@@ -1,6 +1,6 @@
 # Repos — Flucastr.AI
 
-> Estado: **aprobado por Franco** (2026-10-29).
+> Estado: **aprobado por Franco** (2026-10-29). **Cambio por aprobar (F09, 2026-10-30):** visibilidad pública del remoto y nuevas conexiones (sección «Cambio por aprobar»).
 
 | Repo | Rol | URL remota | Rama principal | Stack | Origen del dato |
 |---|---|---|---|---|---|
@@ -19,9 +19,20 @@ No aplica: un solo repo. Conexiones hacia fuera (de `README.md`; **no re-verific
 | `modelos.json` | `~/.local/bin/pi-<nombre>` | lanzador que lee el JSON en vivo |
 | `instalar.sh --proyecto <ruta>` | `<ruta>/.claude/settings.local.json` | escribe `{"agent": ...}` |
 
+## Cambio por aprobar (F09, 2026-10-30)
+
+- **Visibilidad del remoto: se decide PÚBLICO** (Franco, 2026-10-30), para que el PC de trabajo descargue sin credenciales. **Lo hace Franco**; ningún agente cambia la visibilidad ni hace push. **Pendiente previo:** Franco revisa el repo y su historial completo (credenciales, datos personales; ver `PROJECT.md`, «Repo público») y solo después lo publica. Hasta que lo publique, el dato sigue siendo «privado o no verificado».
+- Nueva fila de conexiones hacia fuera: el PC de trabajo lee `main` por HTTPS (`raw.githubusercontent.com`, `api.github.com`, `codeload.github.com`), sin `git` ni credenciales. `initialize.sh` ya no necesita credenciales para clonar este repo cuando sea público.
+
+| Desde | Hacia | Medio |
+|---|---|---|
+| GitHub `main` (público) | `~/.flucastr-ai/kit/` | `instalar-remoto.sh`: descarga `tar.gz` de un sha, verifica y copia |
+| `~/.flucastr-ai/kit/skills/<n>/` | `~/.claude/skills/`, `~/.pi/agent/skills/` | copia (marca `.flucastr-ai`), sin enlaces, solo en modo descarga |
+| `~/.flucastr-ai/modelos.json` | `scripts/resolver.mjs`, lanzador `pi-<agente>` | variable `FLUCASTR_MODELOS` |
+
 ## Datos que faltan
 
-- **Visibilidad del remoto** (público o privado): no consta. La URL sí, de `git remote -v`; no verifiqué que el remoto responda ni qué contiene.
+- **Visibilidad del remoto:** decidida pública (arriba), **aún no ejecutada ni verificada**. La URL consta en `git remote -v`; no verifiqué que el remoto responda ni qué contiene.
 - **Cambios sin commit**: 27 archivos modificados y 1 sin seguimiento (`git status`), sobre todo `pruebas/`, `skills/` y `agentes/arquitecto.md`.
 - **Fecha de `pruebas/resultados/2026-11-02-…`**: es posterior a la fecha actual (2026-10-29). Sin explicar.
 

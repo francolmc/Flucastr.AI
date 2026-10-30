@@ -8,6 +8,9 @@
 //   node scripts/resolver.mjs cuerpo <archivo.md>             imprime el agente sin encabezado (para Pi)
 //   node scripts/resolver.mjs fijar-agente <ajustes.json> <agente>   deja `agent` en los ajustes de un proyecto (no pisa otro valor)
 //   node scripts/resolver.mjs quitar-agente <ajustes.json> <agente>  deshace lo anterior, solo si el valor es ese agente
+//
+// Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
+// si no, se lee el modelos.json del repo. Lo usa instalar.sh --copiar con el modelos.json personal.
 
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -20,9 +23,14 @@ function fallar(mensaje) {
   process.exit(1);
 }
 
+function rutaModelos() {
+  const forzada = process.env.FLUCASTR_MODELOS;
+  return forzada ? forzada : join(raiz, "modelos.json");
+}
+
 function leerConfig() {
   try {
-    return JSON.parse(readFileSync(join(raiz, "modelos.json"), "utf8"));
+    return JSON.parse(readFileSync(rutaModelos(), "utf8"));
   } catch (e) {
     fallar(`no pude leer modelos.json (${e.message})`);
   }
