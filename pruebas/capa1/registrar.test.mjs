@@ -139,17 +139,17 @@ test('(2) idempotencia: dos corridas idénticas; un commit nuevo anexa solo lo s
 
   const primera = correr(raiz);
   assert.equal(primera.status, 0, primera.stderr);
-  assert.equal(primera.stdout, 'registrar: 3 eventos nuevos; 3 en total; 0 descartados\n');
+  assert.equal(primera.stdout, 'registrar: 3 eventos nuevos; 3 en total; 0 descartados; 0 líneas Registro: no válidas\n');
   const bytes1 = fs.readFileSync(archivo);
 
   const segunda = correr(raiz);
-  assert.equal(segunda.stdout, 'registrar: 0 eventos nuevos; 3 en total; 0 descartados\n');
+  assert.equal(segunda.stdout, 'registrar: 0 eventos nuevos; 3 en total; 0 descartados; 0 líneas Registro: no válidas\n');
   assert.ok(fs.readFileSync(archivo).equals(bytes1), 'la segunda corrida debe dejar el archivo idéntico');
 
   escribir(raiz, RUTA_TAREA, tareaMd('lista para revisión'));
   const sha3 = commit(raiz, 'c3', 2);
   const tercera = correr(raiz);
-  assert.equal(tercera.stdout, 'registrar: 1 eventos nuevos; 4 en total; 0 descartados\n');
+  assert.equal(tercera.stdout, 'registrar: 1 eventos nuevos; 4 en total; 0 descartados; 0 líneas Registro: no válidas\n');
   const bytes3 = fs.readFileSync(archivo);
   assert.ok(bytes3.subarray(0, bytes1.length).equals(bytes1), 'lo ya escrito no cambia');
   const anadidas = bytes3.subarray(bytes1.length).toString('utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
@@ -158,7 +158,7 @@ test('(2) idempotencia: dos corridas idénticas; un commit nuevo anexa solo lo s
 
   const reconstruida = correr(raiz, ['--reconstruir']);
   assert.equal(reconstruida.status, 0, reconstruida.stderr);
-  assert.equal(reconstruida.stdout, 'registrar: 0 eventos nuevos; 4 en total; 0 descartados\n');
+  assert.equal(reconstruida.stdout, 'registrar: 0 eventos nuevos; 4 en total; 0 descartados; 0 líneas Registro: no válidas\n');
   assert.ok(fs.readFileSync(archivo).equals(bytes3), '--reconstruir reproduce el mismo contenido');
 });
 
@@ -269,4 +269,121 @@ test('(6) feature_estado desde BACKLOG y escalacion al pasar de vacía a con tex
   // Control negativo: el commit que vacía la sección (c3) no genera escalación.
   assert.equal(escalaciones.some((e) => e.sha === shaVacia), false);
   assert.equal(JSON.stringify(eventos).includes('canario Qk'), false, 'el texto de la escalación no se guarda');
+});
+
+// Línea `Registro:` (definitions/REGISTRO.md §3) y modelo configurado desde un modelos.json temporal.
+const MODELOS_PRUEBA = {
+  version: 1,
+  niveles: ['alto', 'medio', 'bajo'],
+  nivel_por_defecto: 'medio',
+  respaldo: { alto: ['medio', 'bajo'], medio: ['alto', 'bajo'], bajo: ['medio', 'alto'] },
+  perfiles: {
+    'claude-code': {
+      herramienta: 'claude-code',
+      proveedor: 'prueba',
+      modelos: { alto: 'modelo-prueba-alto', medio: 'modelo-prueba-medio', bajo: 'modelo-prueba-bajo' },
+    },
+  },
+  perfil_por_defecto: { 'claude-code': 'claude-code' },
+  agentes: { constructor: { nivel: 'bajo' } },
+};
+
+// Ejecuta fn con FLUCASTR_MODELOS apuntando a un modelos.json temporal, y restaura la variable después.
+function conModelosPrueba(fn) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'registrar-modelos-'));
+  temporales.push(dir);
+  const archivo = path.join(dir, 'modelos.json');
+  fs.writeFileSync(archivo, JSON.stringify(MODELOS_PRUEBA));
+  const previo = process.env.FLUCASTR_MODELOS;
+  process.env.FLUCASTR_MODELOS = archivo;
+  try {
+    return fn();
+  } finally {
+    if (previo === undefined) delete process.env.FLUCASTR_MODELOS;
+    else process.env.FLUCASTR_MODELOS = previo;
+  }
+}
+
+const leerEventos = (raiz) =>
+  fs.readFileSync(path.join(raiz, 'registro', 'eventos.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+
+const tareaConRegistros = (notas, evidencia = '') =>
+  `# task-01 — Tarea de prueba\n\nrepo: Flucastr.AI   depende_de: —   estado: lista para revisión\n\n## Descripción\nDescripción de prueba.\n\n## Evidencia\n${evidencia}\n## Notas\n${notas}`;
+
+const LINEA_1 = 'Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna';
+const LINEA_2 = 'Registro: n=2; herramienta=claude-code; modo=yolo; intentos=1; verificacion=parcial; huecos=0; resultado=bloqueada; causa=verificacion_x2';
+
+test('(7) Registro: en Notas da un ejecucion por n con su modelo configurado; fuera de Notas o con un valor fuera de lista no genera evento', () => {
+  conModelosPrueba(() => {
+    const raiz = nuevoRepo();
+    const notas = `${LINEA_1}\n${LINEA_2}\nRegistro: n=3; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=otro; causa=ninguna\n`;
+    const evidencia = 'Registro: n=4; herramienta=pi; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna\n';
+    escribir(raiz, RUTA_TAREA, tareaConRegistros(notas, evidencia));
+    commit(raiz, 'c1', 0);
+
+    const res = correr(raiz);
+    assert.equal(res.status, 0, res.stderr);
+    // Tres eventos: el tarea_estado del commit (primer estado de la tarea) y dos ejecucion.
+    assert.equal(res.stdout, 'registrar: 3 eventos nuevos; 3 en total; 0 descartados; 1 líneas Registro: no válidas\n');
+
+    // El orden de eventos.jsonl es por t e id (el id es un hash): se ordena por n antes de comparar.
+    const ejecuciones = leerEventos(raiz).filter((e) => e.evento === 'ejecucion').sort((a, b) => a.n - b.n);
+    assert.deepEqual(
+      ejecuciones.map((e) => [e.n, e.herramienta, e.modo, e.intentos, e.verificacion, e.huecos, e.resultado, e.causa, e.modelo]),
+      [
+        [1, 'claude-code', 'normal', 2, 'pasa', 1, 'lista', 'ninguna', 'modelo-prueba-bajo'],
+        [2, 'claude-code', 'yolo', 1, 'parcial', 0, 'bloqueada', 'verificacion_x2', 'modelo-prueba-bajo'],
+      ],
+    );
+    for (const e of ejecuciones) assert.deepEqual(validarEvento(e), []);
+    assert.equal(ejecuciones.some((e) => e.n === 4), false, 'una línea fuera de Notas no genera evento');
+  });
+});
+
+test('(8) repetir la corrida no duplica; una línea nueva añade solo su n; --reconstruir reproduce el mismo contenido', () => {
+  conModelosPrueba(() => {
+    const raiz = nuevoRepo();
+    const archivo = path.join(raiz, 'registro', 'eventos.jsonl');
+    escribir(raiz, RUTA_TAREA, tareaConRegistros(`${LINEA_1}\n`));
+    commit(raiz, 'c1', 0);
+    assert.equal(correr(raiz).status, 0);
+    const bytes1 = fs.readFileSync(archivo);
+    assert.equal(leerEventos(raiz).filter((e) => e.evento === 'ejecucion').length, 1);
+
+    const segunda = correr(raiz);
+    assert.equal(segunda.stdout, 'registrar: 0 eventos nuevos; 2 en total; 0 descartados; 0 líneas Registro: no válidas\n');
+    assert.ok(fs.readFileSync(archivo).equals(bytes1), 'la segunda corrida deja el archivo idéntico');
+
+    // Control: n=1 repetido en un commit posterior no genera evento nuevo; n=2 sí.
+    escribir(raiz, RUTA_TAREA, tareaConRegistros(`${LINEA_1}\n${LINEA_2}\n`));
+    const sha2 = commit(raiz, 'c2', 1);
+    const tercera = correr(raiz);
+    assert.equal(tercera.stdout, 'registrar: 1 eventos nuevos; 3 en total; 0 descartados; 0 líneas Registro: no válidas\n');
+    const nuevas = leerEventos(raiz).filter((e) => e.evento === 'ejecucion' && e.sha === sha2);
+    assert.deepEqual(nuevas.map((e) => e.n), [2]);
+    const bytes3 = fs.readFileSync(archivo);
+
+    const reconstruida = correr(raiz, ['--reconstruir']);
+    assert.equal(reconstruida.status, 0, reconstruida.stderr);
+    assert.ok(fs.readFileSync(archivo).equals(bytes3), '--reconstruir reproduce el mismo contenido');
+  });
+});
+
+test('(9) canarios en el resto de Notas y una clave extra (titulo=) no llegan a eventos.jsonl', () => {
+  conModelosPrueba(() => {
+    const raiz = nuevoRepo();
+    const extra = 'Registro: n=2; herramienta=claude-code; modo=normal; intentos=1; titulo=Cliente Canario Wx; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna';
+    const notas = `Canario de notas Vb.\n${LINEA_1}\n${extra}\nOtra nota con sk-CANARIO-NOTA-3d.\n`;
+    escribir(raiz, RUTA_TAREA, tareaConRegistros(notas));
+    commit(raiz, 'c1', 0);
+
+    const res = correr(raiz);
+    assert.equal(res.status, 0, res.stderr);
+    assert.equal(res.stdout, 'registrar: 2 eventos nuevos; 2 en total; 0 descartados; 1 líneas Registro: no válidas\n');
+    const contenido = fs.readFileSync(path.join(raiz, 'registro', 'eventos.jsonl'), 'utf8');
+    for (const canario of ['Canario de notas Vb', 'Cliente Canario Wx', 'sk-CANARIO-NOTA-3d', 'titulo']) {
+      assert.equal(contenido.includes(canario), false, `aparece ${canario}`);
+    }
+    assert.equal(leerEventos(raiz).filter((e) => e.evento === 'ejecucion').length, 1);
+  });
 });

@@ -33,6 +33,7 @@ const variantes = [
   ['regla 12: falta la línea «CONFIRMAR: accion=git switch <rama>; motivo=<motivo>» en la skill', 'skill', ['CONFIRMAR: accion=git switch <rama>; motivo=<motivo>']],
   ['regla 13: falta «Modo yolo: activo», «no creas rama», «no emites `CONFIRMAR:`» o «ni local» en el constructor', 'constructor', ['Modo yolo: activo', 'no creas rama', 'no emites `CONFIRMAR:`', 'ni local']],
   ['regla 14: falta «Modo yolo: activo», «salta este paso entero», «no emites `CONFIRMAR:`» o «ni local» en la skill', 'skill', ['Modo yolo: activo', 'salta este paso entero', 'no emites `CONFIRMAR:`', 'ni local']],
+  ['regla 15: falta la plantilla «Registro: n=<n>; herramienta=…» o «una línea por ejecución» en la skill', 'skill', ['Registro: n=<n>; herramienta=<herramienta>; modo=<modo>; intentos=<n>; verificacion=<resultado>; huecos=<n>; resultado=<resultado>; causa=<causa>', 'una línea por ejecución']],
 ];
 
 for (const [nombre, sobre, frases] of variantes) {

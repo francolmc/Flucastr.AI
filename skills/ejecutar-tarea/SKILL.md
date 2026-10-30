@@ -42,3 +42,24 @@ En cualquiera: anota el motivo en *Notas* y termina tu respuesta final con la **
 - `estado: lista para revisión`. **Nunca `hecha`.**
 - *Notas*: los huecos menores resueltos y su decisión. Si fueron **muchos**, agrega la frase «Señal: la tarea estaba incompleta» y cuáles faltaban, para mejorar la plantilla.
 - En la tarea solo tocaste *Evidencia*, *Notas* y `estado`. Sin commit, push, PR, merge ni despliegue.
+
+## Línea de registro
+
+Al terminar una ejecución que toca la tarea (la dejas `lista para revisión`, `bloqueada` o `escalada`), escribes **una línea por ejecución** como **última línea de *Notas***, con esta plantilla:
+
+```
+Registro: n=<n>; herramienta=<herramienta>; modo=<modo>; intentos=<n>; verificacion=<resultado>; huecos=<n>; resultado=<resultado>; causa=<causa>
+```
+
+Significados, en este orden y separados por `; `:
+
+- `n`: las líneas `Registro:` que ya hay en *Notas*, más 1.
+- `herramienta`: `claude-code` o `pi`, la herramienta en la que corres.
+- `modo`: `yolo` solo si el encargo trae `Modo yolo: activo`; si no, `normal`.
+- `intentos`: veces que corriste la *Verificación* completa (cada pasada completa suma 1).
+- `verificacion`: `pasa` si todos los comandos pasaron en la última pasada; `parcial` si algunos pasaron y otros no se pudieron correr; `falla` si falló, o si no se corrió ninguno (con `intentos=0`).
+- `huecos`: huecos menores anotados en *Notas* en esta ejecución.
+- `resultado`: `lista` si dejas `lista para revisión`; `bloqueada` si la tarea queda bloqueada; `escalada` si terminas con `BLOQUEO:` por cambio de alcance.
+- `causa`: `ninguna` con `lista`; `alcance` con `escalada`; con `bloqueada`, la que corresponda: `credenciales`, `verificacion_x2`, `rama` (falló un `git switch`) u `otra`.
+
+No escribes la línea si rechazas una tarea que no está `aprobada` ni si terminas con `CONFIRMAR:`: en esos casos no tocas la tarea.

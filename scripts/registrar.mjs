@@ -18,6 +18,7 @@
 
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { homedir } from "node:os";
 import {
   appendFileSync,
   existsSync,
@@ -29,7 +30,7 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const ESTADOS_TAREA = ["borrador", "aprobada", "en curso", "lista para revisión", "hecha", "bloqueada"];
@@ -55,9 +56,28 @@ const RE_FILA = /^\| F\d{2} \|/;
 const RE_CARPETA = /^F\d{2}-/;
 const RE_ARCHIVO_TAREA = /^task-(\d{2})-.+\.md$/;
 const LIMITE_AVISO_BYTES = 1048576;
+const RE_MODELO = /^[A-Za-z0-9._/:-]{1,80}$/;
+const MODELO_SIN_CONFIGURAR = "sin-configurar";
+const RUTA_RESOLVER = join(dirname(fileURLToPath(import.meta.url)), "resolver.mjs");
+
+// Valores cerrados de la línea `Registro:` (definitions/REGISTRO.md §1 y §3). `confirmar` no se usa.
+const EJECUCION = {
+  herramienta: ["claude-code", "pi"],
+  modo: ["normal", "yolo"],
+  verificacion: ["pasa", "falla", "parcial"],
+  resultado: ["lista", "bloqueada", "escalada"],
+  causa: ["credenciales", "alcance", "verificacion_x2", "rama", "otra", "ninguna"],
+};
+const enLista = (valores) => `(${valores.join("|")})`;
+// Claves en orden fijo; cualquier otra forma no es una línea Registro: válida.
+const RE_REGISTRO = new RegExp(
+  `^Registro: n=(\\d{1,2}); herramienta=${enLista(EJECUCION.herramienta)}; modo=${enLista(EJECUCION.modo)}; ` +
+    `intentos=(\\d{1,2}); verificacion=${enLista(EJECUCION.verificacion)}; huecos=(\\d{1,2}); ` +
+    `resultado=${enLista(EJECUCION.resultado)}; causa=${enLista(EJECUCION.causa)}$`,
+);
 
 // Esquema cerrado: por evento, la fuente, las claves obligatorias y los campos propios con su validador.
-// Para sumar un evento (task-02 agrega `ejecucion`) basta con una entrada nueva.
+// Para sumar un evento basta con una entrada nueva.
 export const ESQUEMA = {
   tarea_estado: {
     fuente: "git",
@@ -95,10 +115,32 @@ export const ESQUEMA = {
     requeridos: ["sha"],
     campos: {},
   },
+  ejecucion: {
+    fuente: "notas",
+    requeridos: ["feature", "tarea", "sha"],
+    campos: {
+      n: { tipo: "entero", rango: [1, 99] },
+      herramienta: { valores: EJECUCION.herramienta },
+      modo: { valores: EJECUCION.modo },
+      intentos: { tipo: "entero", rango: [0, 99] },
+      verificacion: { valores: EJECUCION.verificacion },
+      huecos: { tipo: "entero", rango: [0, 99] },
+      resultado: { valores: EJECUCION.resultado },
+      causa: { valores: EJECUCION.causa },
+      modelo: { patron: RE_MODELO },
+    },
+  },
 };
 
 function validarCampo(nombre, valor, spec) {
   if (valor === null) return spec.nulo ? [] : [`${nombre} no puede ser nulo`];
+  if (spec.patron) {
+    return typeof valor === "string" && spec.patron.test(valor) ? [] : [`${nombre} fuera de patrón`];
+  }
+  if (spec.rango) {
+    const [min, max] = spec.rango;
+    return Number.isInteger(valor) && valor >= min && valor <= max ? [] : [`${nombre} fuera de rango`];
+  }
   const entero = spec.tipo !== "entero" || Number.isInteger(valor);
   return entero && spec.valores.includes(valor) ? [] : [`${nombre} fuera de la lista o del tipo`];
 }
@@ -201,14 +243,55 @@ function estadoDe(texto) {
   return RE_ESTADO.exec(texto)?.[1]?.trim() ?? "";
 }
 
-// Cuerpo de la sección «## Escalación» (hasta el siguiente «## »); "" si no existe.
-function seccionEscalacion(texto) {
+// Cuerpo de la sección «## <titulo>» (hasta el siguiente «## »); "" si no existe.
+function seccion(texto, titulo) {
   const lineas = texto.replace(/\r\n?/g, "\n").split("\n");
-  const i = lineas.findIndex((l) => /^## Escalación\s*$/.test(l));
+  const i = lineas.findIndex((l) => l.trimEnd() === `## ${titulo}`);
   if (i < 0) return "";
   const cuerpo = [];
   for (let j = i + 1; j < lineas.length && !lineas[j].startsWith("## "); j++) cuerpo.push(lineas[j]);
   return cuerpo.join("\n");
+}
+
+// Líneas `Registro:` de la sección «## Notas»: las que cumplen el patrón (ya con sus valores) y cuántas no.
+function registrosDeNotas(texto) {
+  const lineas = [];
+  let invalidas = 0;
+  for (const linea of seccion(texto, "Notas").split("\n")) {
+    if (!linea.startsWith("Registro:")) continue;
+    const m = RE_REGISTRO.exec(linea.replace(/\s+$/, ""));
+    if (!m) {
+      invalidas++;
+      continue;
+    }
+    lineas.push({
+      n: Number(m[1]),
+      herramienta: m[2],
+      modo: m[3],
+      intentos: Number(m[4]),
+      verificacion: m[5],
+      huecos: Number(m[6]),
+      resultado: m[7],
+      causa: m[8],
+    });
+  }
+  return { lineas, invalidas };
+}
+
+// Modelo configurado (no medido) del constructor con esa herramienta. Archivo: el primero existente entre
+// FLUCASTR_MODELOS (si no está vacía), <raiz>/modelos.json y ~/.flucastr-ai/modelos.json. Sin archivo o si la
+// salida no calza con el patrón: "sin-configurar". No abre archivos de secretos ni llaves.
+export function modeloConfigurado(raiz, herramienta) {
+  const { env } = process;
+  const candidatos = [env.FLUCASTR_MODELOS, join(raiz, "modelos.json"), join(homedir(), ".flucastr-ai", "modelos.json")];
+  const archivo = candidatos.find((c) => c && existsSync(c));
+  if (!archivo) return MODELO_SIN_CONFIGURAR;
+  const r = spawnSync(process.execPath, [RUTA_RESOLVER, "modelo", "constructor", herramienta], {
+    encoding: "utf8",
+    env: Object.assign({}, env, { FLUCASTR_MODELOS: archivo }),
+  });
+  const salida = r.status === 0 ? (r.stdout ?? "").trim() : "";
+  return RE_MODELO.test(salida) ? salida : MODELO_SIN_CONFIGURAR;
 }
 
 // Tareas presentes hoy en el árbol de trabajo: features/Fxx-*/task-NN-*.md y features/completed/Fxx-*/...
@@ -236,6 +319,7 @@ function claveDe(evento, propios) {
     return `${propios.de ?? "null"}>${propios.a}`;
   }
   if (evento === "puerta") return `${propios.n}|${propios.resultado}`;
+  if (evento === "ejecucion") return String(propios.n);
   return "";
 }
 
@@ -264,23 +348,52 @@ function puertaDe(de, a) {
   return null;
 }
 
-// Extrae todos los eventos desde git. Devuelve { eventos (ordenados por t e id), descartados }.
+// Extrae todos los eventos desde git. Devuelve { eventos (ordenados por t e id), descartados, invalidas }.
+// `invalidas` cuenta las líneas Registro: no válidas de la última versión de cada tarea.
 export function extraer(raiz) {
   comprobarRepositorio(raiz);
   const crudos = [];
   let descartados = 0;
+  let invalidas = 0;
+  // El modelo configurado se calcula una vez por herramienta y por corrida.
+  const modelos = new Map();
+  const modeloDe = (herramienta) => {
+    if (!modelos.has(herramienta)) modelos.set(herramienta, modeloConfigurado(raiz, herramienta));
+    return modelos.get(herramienta);
+  };
 
-  // tarea_estado y puerta: historial de cada tarea presente hoy (sigue renombres con --follow).
+  // tarea_estado, puerta y ejecucion: historial de cada tarea presente hoy (sigue renombres con --follow).
   for (const tarea of listarTareas(raiz)) {
     // Sin --reverse: con --follow, git 2.54 corta el historial de un renombre si se pide --reverse.
     // El orden cronológico se invierte aquí.
     const log = git(raiz, ["log", "--follow", "--name-only", "--format=%x01%H%x09%ct", "--", tarea.ruta]);
     let previo = null;
+    // ejecucion: el primer commit donde aparece una línea válida con ese n gana.
+    const ejecucionesVistas = new Set();
+    let invalidasUltima = 0;
     for (const reg of registros(log.salida).reverse()) {
       const rutaEseCommit = reg.lineas[0];
       if (!rutaEseCommit) continue;
       const show = git(raiz, ["show", `${reg.sha}:${rutaEseCommit}`]);
       if (!show.ok) continue;
+
+      const ubicacion = { feature: tarea.feature, tarea: tarea.tarea };
+      const tEjec = iso(reg.epoch);
+      const shaEjec = corto(reg.sha);
+      const notas = registrosDeNotas(show.salida);
+      let invalidasVersion = notas.invalidas;
+      for (const propios of notas.lineas) {
+        if (ejecucionesVistas.has(propios.n)) continue;
+        const ev = construir("ejecucion", tEjec, shaEjec, ubicacion, { ...propios, modelo: modeloDe(propios.herramienta) });
+        if (validarEvento(ev).length > 0) {
+          invalidasVersion++;
+          continue;
+        }
+        ejecucionesVistas.add(propios.n);
+        crudos.push(ev);
+      }
+      invalidasUltima = invalidasVersion;
+
       const estado = estadoDe(show.salida);
       if (!ESTADOS_TAREA.includes(estado)) {
         descartados++;
@@ -289,12 +402,12 @@ export function extraer(raiz) {
       if (estado === previo) continue;
       const t = iso(reg.epoch);
       const sha = corto(reg.sha);
-      const ubicacion = { feature: tarea.feature, tarea: tarea.tarea };
       crudos.push(construir("tarea_estado", t, sha, ubicacion, { de: previo, a: estado, por: POR_DE_ESTADO[estado] }));
       const p = previo === null ? null : puertaDe(previo, estado);
       if (p) crudos.push(construir("puerta", t, sha, ubicacion, { n: p.n, resultado: p.resultado, por: "franco" }));
       previo = estado;
     }
+    invalidas += invalidasUltima;
   }
 
   // feature_estado: historial de la columna Estado de las filas «| Fxx |» de BACKLOG.md.
@@ -343,7 +456,7 @@ export function extraer(raiz) {
   let previaVacia = true;
   for (const reg of registros(logStatus.salida)) {
     const show = git(raiz, ["show", `${reg.sha}:definitions/STATUS.md`]);
-    const vacia = seccionEscalacion(show.ok ? show.salida : "").trim() === "";
+    const vacia = seccion(show.ok ? show.salida : "", "Escalación").trim() === "";
     if (!vacia && previaVacia) crudos.push(construir("escalacion", iso(reg.epoch), corto(reg.sha), {}, {}));
     previaVacia = vacia;
   }
@@ -361,7 +474,7 @@ export function extraer(raiz) {
     eventos.push(e);
   }
   eventos.sort((a, b) => (a.t < b.t ? -1 : a.t > b.t ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  return { eventos, descartados };
+  return { eventos, descartados, invalidas };
 }
 
 const serializar = (e) => JSON.stringify(e) + "\n";
@@ -388,7 +501,7 @@ function idsPresentes(texto) {
 // Escribe registro/eventos.jsonl bajo la raíz. Modo normal: anexa solo los id nuevos.
 // reconstruir: regenera el archivo entero (temporal y renombre).
 export function registrar({ raiz, reconstruir = false }) {
-  const { eventos, descartados } = extraer(raiz);
+  const { eventos, descartados, invalidas } = extraer(raiz);
   const dir = join(raiz, "registro");
   const ruta = join(dir, "eventos.jsonl");
   mkdirSync(dir, { recursive: true });
@@ -403,11 +516,11 @@ export function registrar({ raiz, reconstruir = false }) {
     const contenido = eventos.map(serializar).join("");
     writeFileSync(`${ruta}.tmp`, contenido);
     renameSync(`${ruta}.tmp`, ruta);
-    return { nuevos: nuevos.length, total: eventos.length, descartados, bytes: Buffer.byteLength(contenido) };
+    return { nuevos: nuevos.length, total: eventos.length, descartados, invalidas, bytes: Buffer.byteLength(contenido) };
   }
 
   if (nuevos.length === 0) {
-    return { nuevos: 0, total: presentes.total, descartados, bytes: Buffer.byteLength(existente) };
+    return { nuevos: 0, total: presentes.total, descartados, invalidas, bytes: Buffer.byteLength(existente) };
   }
   const separador = existente !== "" && !existente.endsWith("\n") ? "\n" : "";
   appendFileSync(ruta, separador + nuevos.map(serializar).join(""));
@@ -415,6 +528,7 @@ export function registrar({ raiz, reconstruir = false }) {
     nuevos: nuevos.length,
     total: presentes.total + nuevos.length,
     descartados,
+    invalidas,
     bytes: statSync(ruta).size,
   };
 }
@@ -453,7 +567,7 @@ if (process.argv[1] && resolve(process.argv[1]) === RUTA_ESTE) {
   const mostrada = opciones.raizTexto ?? ".";
   try {
     const r = registrar({ raiz, reconstruir: opciones.reconstruir });
-    console.log(`registrar: ${r.nuevos} eventos nuevos; ${r.total} en total; ${r.descartados} descartados`);
+    console.log(`registrar: ${r.nuevos} eventos nuevos; ${r.total} en total; ${r.descartados} descartados; ${r.invalidas} líneas Registro: no válidas`);
     if (r.bytes > LIMITE_AVISO_BYTES) {
       console.log(`AVISO: registro/eventos.jsonl pesa ${Math.round(r.bytes / 1024)} KB (más de 1024 KB)`);
     }

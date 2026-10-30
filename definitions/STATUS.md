@@ -4,13 +4,15 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 4). task-01 `lista para revisión` (`features/F10-registro-de-eventos/task-01-registrar-script.md`). F10 `en curso`; las 3 tareas `aprobadas` por Franco (2026-10-30); F10 y F11 reaprobadas en `BACKLOG.md`. F09 `hecha` y mergeada.
+Rol: ninguno (puerta 4). task-02 `lista para revisión` (`features/F10-registro-de-eventos/task-02-linea-registro.md`). task-01 `hecha`. F10 `en curso`; las 3 tareas `aprobadas` por Franco (2026-10-30); F10 y F11 reaprobadas en `BACKLOG.md`. F09 `hecha` y mergeada.
 Rama: feature/F10-registro-de-eventos
 
 ## Espera a Franco
 
-- **Puerta 4:** revisa Evidencia y Notas de `features/F10-registro-de-eventos/task-01-registrar-script.md` y el código de `scripts/registrar.mjs` y `pruebas/capa1/registrar.test.mjs` (6 de 6 pasan; `rapida.sh`: 186 pass, 25 s, código 0). Sobre el repo real: la primera corrida generó 128 eventos (F01–F09 y F10 solo en BACKLOG), la segunda 0 (idempotente); `registro/eventos.jsonl` tiene 0 correos y 0 rutas absolutas, y `registro/` queda ignorado (no aparece en `git status`). Haz el commit y pásala a `hecha`. Ojo: `registro/` está ignorado, no se commitea.
-- **Desviaciones (Notas):** `git log --follow --reverse` corta el historial de renombres en git 2.54, así que se usa sin `--reverse` y se invierte en JavaScript; la raíz debe ser la del repositorio; `tarea_estado.por` no incluye `coordinador` aunque `REGISTRO.md` §1 lo lista. El arquitecto debe alinear `REGISTRO.md` (caso `coordinador`, comando de `--reverse` y `resultado=confirmar`).
+- **Puerta 4:** revisa Evidencia y Notas de `features/F10-registro-de-eventos/task-02-linea-registro.md` y los diffs de `skills/ejecutar-tarea/SKILL.md` (subsección «Línea de registro»; es lo que el constructor seguirá en cada tarea), `pruebas/comprobaciones/contrato-constructor.mjs` y su test (regla 15), `scripts/registrar.mjs` (evento `ejecucion`) y `pruebas/capa1/registrar.test.mjs` (pruebas 7–9). Resultados: contrato 18/18, registro 9/9, `rapida.sh` código 0 en 23 s. Haz el commit y pásala a `hecha`.
+- **Puntos a mirar (Notas):** la regla 7 de contrato no daba error al repetir «estado: bloqueada» en el texto nuevo, así que se reformuló; la prueba 4 busca el literal `.env` en el script, por eso este usa `const { env } = process`. Se actualizaron las cadenas esperadas de la prueba 2 por el sufijo nuevo del resumen.
+
+- **Desviaciones de task-01 (Notas):** `git log --follow --reverse` corta el historial de renombres en git 2.54, así que se usa sin `--reverse` y se invierte en JavaScript; la raíz debe ser la del repositorio; `tarea_estado.por` no incluye `coordinador` aunque `REGISTRO.md` §1 lo lista. El arquitecto debe alinear `REGISTRO.md` (caso `coordinador`, comando de `--reverse` y `resultado=confirmar`).
 
 - **Antes de publicar el repo (tuyo):** correr gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Don Financio, Andes), `.gitignore`; activar 2FA y proteger `main`; aclarar qué son los commits «intrusión». Si aparece algo: rotar la credencial primero. Luego haz público el repo.
 - **Comprobación manual de F09 (tuya, con repo público):** comando de una línea en el PC de trabajo, `claude --agent arquitecto` / `pi-arquitecto`, `--estado` y `--actualizar`, que tu `modelos.json` quede igual y que la red deje pasar `raw.githubusercontent.com`, `api.github.com` y `codeload.github.com`. Guía en el `README.md`.

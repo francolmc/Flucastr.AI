@@ -1,5 +1,5 @@
 # task-01 — `scripts/registrar.mjs`: esquema cerrado, extracción desde git y pruebas
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Crea `scripts/registrar.mjs`, el único escritor de `registro/eventos.jsonl`: lee los archivos de la tarea, `BACKLOG.md`, `STATUS.md` y el historial de git, y añade eventos validados contra un esquema cerrado (sin texto libre, sin datos personales). Cubre los eventos que salen solo de git (`tarea_estado`, `puerta`, `feature_estado`, `feature_archivada`, `escalacion`); la línea `Registro:` y el evento `ejecucion` son de task-02. El objetivo es recolectar datos para detectar errores y mejorar el flujo; no hay informe (es F11).
