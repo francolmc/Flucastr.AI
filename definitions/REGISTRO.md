@@ -1,6 +1,7 @@
 # Registro de eventos del flujo — diseño de F10
 
 > Estado: **borrador, por aprobar en la puerta 1** (2026-10-30). Franco aclaró el cometido de F10: **generar el registro** (los datos del flujo) para saber cómo van los resultados y sacar mejoras y features nuevas. El informe es una etapa posterior y opcional (no es F10).
+> Nota (2026-10-30): el permiso del `coordinador` para correr este script quedó **aprobado** (`WORKFLOW.md` §3.1); el resto de F10 sigue como borrador por aprobar.
 > *Confirmado* = dicho por Franco o leído/medido en el repo. *Inferido* = deducido. *Propuesta* = mía, por aprobar. No leí `.env` ni credenciales; no ejecuté nada salvo lecturas de `git log`.
 > Se lee bajo demanda (arquitecto, planificador al descomponer F10, constructor en sus tareas). **Los agentes del flujo no leen `registro/` en su trabajo normal.**
 
@@ -51,7 +52,7 @@ El script la lee con un patrón estricto (claves y valores de la tabla de §1; l
 
 **`modelo`:** el script lo toma de `modelos.json` (nivel del `constructor` → modelo de la herramienta) **al momento de correrlo**. Es el modelo *configurado*, no el *medido* (F07 comprobó que el agente instalado corre con el configurado, `WORKFLOW.md` §7); si cambias `modelos.json`, corre el script antes. El evento lleva `modelo` solo en `ejecucion`.
 
-**Quién corre el script:** Franco o, a su pedido explícito, el `coordinador` (`WORKFLOW.md` §3.1, borrador; antes: solo Franco porque el `coordinador` no tenía Bash). Es seguro correrlo cuando quiera y las veces que quiera. Lo recomendable: justo antes de archivar (`archivar.mjs` mueve carpetas; el script sigue los renombres con `git log --follow`, pero conviene el orden). El `coordinador` deja el comando en «Espera a Franco» junto al de archivar (`WORKFLOW.md` §10.5). **No es una puerta ni bloquea nada:** si no se corre, solo se atrasa el log.
+**Quién corre el script:** Franco o, a su pedido explícito, el `coordinador` (`WORKFLOW.md` §3.1, aprobado por Franco el 2026-10-30; antes: solo Franco porque el `coordinador` no tenía Bash). Es seguro correrlo cuando quiera y las veces que quiera. Lo recomendable: justo antes de archivar (`archivar.mjs` mueve carpetas; el script sigue los renombres con `git log --follow`, pero conviene el orden). El `coordinador` deja el comando en «Espera a Franco» junto al de archivar (`WORKFLOW.md` §10.5). **No es una puerta ni bloquea nada:** si no se corre, solo se atrasa el log.
 
 **Qué se pierde en esta opción:** lo de la lista «No capturado» (§1) y, en yolo, la secuencia: los agentes no commitean, así que todos los cambios de estado de una corrida yolo llegan a git en el commit de Franco con la misma fecha; el detalle por tarea lo aporta solo la línea `Registro:`.
 
