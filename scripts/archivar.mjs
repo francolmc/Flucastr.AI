@@ -4,8 +4,8 @@
 // Uso:
 //   node scripts/archivar.mjs                  imprime el informe del chequeo (solo lectura; código 0)
 //   node scripts/archivar.mjs --raiz <dir>     igual, sobre otra raíz (lo usan las pruebas)
-//   node scripts/archivar.mjs --aplicar        mueve a features/completed/ todas las candidatas
-//   node scripts/archivar.mjs --aplicar F03    mueve solo F03 (código 1 si F03 no se movió)
+//   node scripts/archivar.mjs --aplicar F03    mueve a features/completed/ solo F03 (Fxx obligatorio;
+//                                             código 1 si F03 no se movió)
 //
 // El chequeo nunca escribe, mueve ni corrige estados. --aplicar solo renombra carpetas: no sobrescribe,
 // no borra y no toca BACKLOG.md, STATUS.md, ramas ni git. Lo ejecuta Franco, nunca un agente.
@@ -272,11 +272,16 @@ export function formatearInforme(r) {
 
 const RUTA_ESTE = fileURLToPath(import.meta.url);
 
-// Lee los argumentos. Cualquier cosa desconocida es error (sin mover nada).
+// Lee los argumentos. Cualquier cosa desconocida o ambigua es error (sin mover nada).
 function leerArgumentos(args) {
   const opciones = { raiz: null, aplicar: false, ids: [] };
+  const vistas = new Set();
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
+    if (a === "--raiz" || a === "--aplicar") {
+      if (vistas.has(a)) return { error: `opción repetida '${a}'` };
+      vistas.add(a);
+    }
     if (a === "--raiz") {
       const valor = args[i + 1];
       if (valor === undefined || valor.startsWith("--")) return { error: "falta el valor de --raiz" };
@@ -293,6 +298,8 @@ function leerArgumentos(args) {
   if (opciones.ids.length > 0 && !opciones.aplicar) {
     return { error: `argumento desconocido '${opciones.ids[0]}' (los IDs solo van con --aplicar)` };
   }
+  if (opciones.aplicar && opciones.ids.length === 0) return { error: "--aplicar exige un Fxx explícito" };
+  if (opciones.ids.length > 1) return { error: "--aplicar acepta un solo Fxx" };
   return { opciones };
 }
 
@@ -309,16 +316,14 @@ if (process.argv[1] && resolve(process.argv[1]) === RUTA_ESTE) {
     process.exit(0);
   }
 
-  const ids = opciones.ids.length > 0 ? opciones.ids : null;
-  const { movidas, omitidas } = aplicar(raiz, ids);
+  const [id] = opciones.ids;
+  const { movidas, omitidas } = aplicar(raiz, [id]);
   for (const m of movidas) console.log(`movida: ${m.desde} -> ${m.hasta}`);
   for (const o of omitidas) console.log(`omitida: ${o.id}: ${o.motivo}`);
-  if (movidas.length === 0 && ids === null) console.log("Nada que archivar.");
   if (movidas.length > 0) {
     console.log(
       "Cambios sin commit. Revisa con `git status` y commitéalos en su propio commit chore/ (después del PR de la feature)."
     );
   }
-  const noMovidas = ids === null ? [] : ids.filter((id) => !movidas.some((m) => m.id === id));
-  process.exit(noMovidas.length > 0 ? 1 : 0);
+  process.exit(movidas.length > 0 ? 0 : 1);
 }

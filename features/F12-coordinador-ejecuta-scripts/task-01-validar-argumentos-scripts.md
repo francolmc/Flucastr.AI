@@ -1,5 +1,5 @@
 # task-01 — Validación estricta de argumentos en `archivar.mjs` y `registrar.mjs`
-repo: Flucastr.AI   depende_de: —   estado: borrador
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Hoy `node scripts/archivar.mjs --aplicar` (sin `Fxx`) mueve todas las candidatas, y ambos scripts aceptan opciones repetidas (la última gana). Franco decidió (`definitions/WORKFLOW.md` §3.1.1, punto 2) que `--aplicar` exige siempre un `Fxx` explícito, y §3.1 pide que ambos scripts rechacen argumentos ambiguos. Esta tarea endurece el CLI de los dos scripts y lo prueba sin modelo. Es la contención que queda cuando la herramienta no restringe el comando (patrón `F*` en Claude Code, `bash` completo en Pi).
@@ -50,5 +50,47 @@ git status --short scripts pruebas registro
 Salida esperada: primera suite `fail 0` (tests ≥ 25); segunda `fail 0` (tests 10); `error: --aplicar exige un Fxx explícito` y `rc=1`; `error: opción repetida '--reconstruir'`, la línea `uso:` y `rc=1`; `git status` solo con ` M` en `scripts/archivar.mjs`, `scripts/registrar.mjs` y los dos tests (ningún cambio en `features/` ni `registro/`).
 
 ## Evidencia
+Rama: `git branch --list feature/F12-coordinador-ejecuta-scripts` vacío (no existía); `git switch -c feature/F12-coordinador-ejecuta-scripts` → `Switched to a new branch 'feature/F12-coordinador-ejecuta-scripts'`; `git branch --show-current` → `feature/F12-coordinador-ejecuta-scripts`.
+
+```
+$ node --test pruebas/comprobaciones/archivar.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
+ℹ tests 27
+ℹ pass 27
+ℹ fail 0
+
+$ node --test pruebas/capa1/registrar.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+
+$ node scripts/archivar.mjs --aplicar; echo "rc=$?"
+error: --aplicar exige un Fxx explícito
+rc=1
+
+$ node scripts/registrar.mjs --reconstruir --reconstruir; echo "rc=$?"
+error: opción repetida '--reconstruir'
+uso: node scripts/registrar.mjs [--raiz <dir>] [--reconstruir]
+rc=1
+
+$ git status --short scripts pruebas registro
+ M pruebas/capa1/registrar.test.mjs
+ M pruebas/comprobaciones/archivar.test.mjs
+ M scripts/archivar.mjs
+ M scripts/registrar.mjs
+```
+
+Criterios:
+1. `--aplicar` solo → rc=1, mensaje, nada movido: verificado por el comando de arriba y por las pruebas CLI «CLI rechaza --aplicar sin Fxx» (pasan).
+2. Varios Fxx, opciones repetidas, Fxx mal formado → rc=1, sin mover: pruebas «CLI rechaza …» (7 casos) pasan.
+3. `registrar.mjs` con opciones repetidas y argumento suelto → rc=1, sin `registro/`: prueba (10) pasa.
+4. Chequeo y `--aplicar F02` siguen: pruebas (i), (b) y «CLI sobre el repo real» pasan.
+5. Suites completas: 27/27 y 10/10.
+
+Sin commit, push ni merge. Cambios solo en `scripts/archivar.mjs`, `scripts/registrar.mjs` y las dos pruebas; la tarea solo cambió en *Evidencia*, *Notas* y `estado`.
 
 ## Notas
+- Hueco 1: (c) y (g) de `archivar.test.mjs` también llamaban `--aplicar` sin Fxx y dejarían de pasar. Se reescribieron con `F01`. (c) espera código 1 porque F01 no se mueve.
+- Hueco 2: la CLI ya no imprime «Nada que archivar.» (con Fxx obligatorio no tenía uso). La prueba «--aplicar sin candidatas» pasó a «--aplicar F01 sin candidata».
+- Hueco 3: los `Fxx` mal formados (`F1`, `f01`) salen con el mensaje existente `argumento desconocido '…'`, porque la tarea no fijaba texto para ellos.
+- Hueco 4: la prueba (10) quedó en el archivo antes de la (9); el nombre y el contenido son los pedidos.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=4; resultado=lista; causa=ninguna

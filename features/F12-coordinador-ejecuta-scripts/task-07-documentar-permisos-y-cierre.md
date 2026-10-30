@@ -1,5 +1,5 @@
 # task-07 — Documentar permisos del `coordinador`, README de pruebas y cierre de la feature
-repo: Flucastr.AI   depende_de: task-05, task-06   estado: borrador
+repo: Flucastr.AI   depende_de: task-05, task-06   estado: hecha
 
 ## Descripción
 Deja escrito, con los resultados reales de task-05 y task-06, qué contiene y qué no contiene cada herramienta al ejecutar scripts el `coordinador`, para que Franco lo revise y sea la base de F11. Documenta en `pruebas/permisos-ejecucion.md` la sección del `coordinador` (Claude Code por patrones; Pi solo instruccional), registra las pruebas nuevas en `pruebas/README.md` y comprueba que no queda ninguna mención contradictoria al comportamiento anterior de `--aplicar`.
@@ -46,4 +46,41 @@ Salida esperada: el primer conteo ≥ 4; el segundo ≥ 4; el tercero `0` en amb
 
 ## Evidencia
 
+Verificación, pasada única de esta ejecución (sustituye la evidencia de la corrida bloqueada). Los comandos se corrieron tal cual están en *Verificación*; la salida de la suite se redirigió a un archivo temporal y se filtró con el mismo `grep`:
+
+```
+$ grep -c "Coordinador: ejecución de scripts\|solo instruccional\|coordinador-claude\|coordinador-pi" pruebas/permisos-ejecucion.md
+4
+$ grep -c "fixtures/coordinador.sh\|coordinador-ejecucion.mjs\|lanzar-coordinador-claude.sh\|lanzar-coordinador-pi.sh" pruebas/README.md
+4
+$ grep -c "valor-reconocible-9f3a" pruebas/permisos-ejecucion.md pruebas/README.md
+pruebas/permisos-ejecucion.md:0
+pruebas/README.md:0
+$ node --test --test-concurrency=1 pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs pruebas/capa1/*.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
+ℹ tests 246
+ℹ pass 246
+ℹ fail 0
+```
+
+Revisión del contenido escrito en la corrida anterior, contra sus fuentes: las citas de `permisos-ejecucion.md` coinciden con `pruebas/resultados/2026-10-30-coordinador-claude.md` (8 de 8 ok), `pruebas/resultados/2026-10-30-coordinador-pi.md` (8 de 8 ok, Bash en 3 casos) y con la línea `tools:` de `agentes/coordinador.md`.
+
+Criterios de aceptación:
+1. Cumple: `permisos-ejecucion.md` tiene la sección «Coordinador: ejecución de scripts» con los cuatro puntos y cita ambos informes (conteo 4).
+2. Cumple: `pruebas/README.md` menciona los cuatro archivos nuevos (conteo 4).
+3. Cumple: el documento dice «solo instruccional» para Pi; el valor del canario aparece 0 veces en ambos archivos.
+4. Cumple: la suite completa pasa, `fail 0` (246/246). El fallo de `coherencia-features.test.mjs` de las corridas bloqueadas ya no ocurre tras task-08.
+
+Búsqueda de `aplicar` (paso 4), con el comando `grep -rn -e "aplicar" --include="*.md" --include="*.mjs" --include="*.sh" . --exclude-dir=.git --exclude-dir=completed --exclude-dir=resultados --exclude-dir=.temporales --exclude-dir=definitions --exclude-dir=node_modules`, más la exclusión de las tareas de F12: resultado en *Notas*.
+
 ## Notas
+- Búsqueda de `--aplicar` sin `Fxx` fuera de `definitions/` (re-verificada en esta ejecución; no corregidas, fuera de alcance):
+  - `README.md:54`: «con --aplicar (lo corre Franco), mueve las features hecha a features/completed/». No menciona `Fxx`; contradice «`Fxx` obligatorio» (§3.1, decisión 2).
+  - `scripts/archivar.mjs:9-10` (cabecera): «--aplicar solo renombra carpetas» y «Lo ejecuta Franco, nunca un agente.». La segunda frase contradice §3.1, donde el `coordinador` puede correrlo a pedido de Franco. La línea 7 sí trae `Fxx`.
+  - Las demás menciones (`agentes/coordinador.md`, `pruebas/comprobaciones/*`, `pruebas/lanzar-coordinador-claude.sh`) llevan `Fxx` o son pruebas de rechazo de argumentos.
+- Contradicción para Franco en `definitions/WORKFLOW.md` (no editado, línea 83): §3.1 lista los «Controles compensatorios que se piden (trabajo posterior)». Las pruebas con modelo de task-05 y task-06 ya existen; la frase sigue en futuro.
+- Huecos menores resueltos:
+  1. La línea 9 de `pruebas/README.md` trata de corridas de modelo, no del `coordinador`. Se añadieron cuatro viñetas a continuación, una por archivo, porque la verificación cuenta líneas.
+  2. En `permisos-ejecucion.md`, las citas de Claude y Pi van en sub-líneas, por el mismo motivo (conteo ≥ 4).
+  3. La comprobación de task-02 no tiene informe en `pruebas/resultados/`; se cita por ruta a su *Evidencia* en `features/F12-coordinador-ejecuta-scripts/task-02-coordinador-comandos-claude.md`.
+- Bloqueo anterior resuelto: la *Verificación* falló en dos pasadas por `coherencia-features.test.mjs` (carpetas F01–F10 archivadas). task-08 lo resolvió; en esta ejecución la suite pasa 246/246 sin cambios en `pruebas/` ni en `definitions/`.
+Registro: n=2; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

@@ -538,8 +538,13 @@ const USO = "uso: node scripts/registrar.mjs [--raiz <dir>] [--reconstruir]";
 
 function leerArgumentos(args) {
   const opciones = { raiz: null, raizTexto: null, reconstruir: false };
+  const vistas = new Set();
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
+    if (a === "--raiz" || a === "--reconstruir") {
+      if (vistas.has(a)) return { error: `opción repetida '${a}'` };
+      vistas.add(a);
+    }
     if (a === "--raiz") {
       const valor = args[i + 1];
       if (valor === undefined || valor.startsWith("--")) return { error: "falta el valor de --raiz" };

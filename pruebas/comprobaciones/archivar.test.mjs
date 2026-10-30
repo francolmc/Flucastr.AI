@@ -145,10 +145,10 @@ test('CLI sobre el repo real termina en 0 e imprime el tamaño de lo que se lee'
 
 const cli = (raiz, args) => spawnSync(process.execPath, [SCRIPT, '--raiz', raiz, ...args], { encoding: 'utf8' });
 
-test('(a) --aplicar sin ID mueve la candidata completa (tareas y refinado.md) a features/completed', () => {
+test('(a) --aplicar F01 mueve la candidata completa (tareas y refinado.md) a features/completed', () => {
   const raiz = raizTemporal({ carpetas: { 'F01-base': ['hecha', 'hecha'] } });
   fs.writeFileSync(path.join(raiz, 'features', 'F01-base', 'refinado.md'), 'refinado de prueba\n');
-  const res = spawnSync(process.execPath, [SCRIPT, '--aplicar', '--raiz', raiz], { encoding: 'utf8' });
+  const res = spawnSync(process.execPath, [SCRIPT, '--aplicar', 'F01', '--raiz', raiz], { encoding: 'utf8' });
   assert.equal(res.status, 0, res.stderr);
   assert.ok(res.stdout.includes('movida: features/F01-base -> features/completed/F01-base'));
   assert.equal(fs.existsSync(path.join(raiz, 'features', 'F01-base')), false);
@@ -174,12 +174,11 @@ test('(b) --aplicar F02 mueve solo F02 y deja F01', () => {
 
 test('(c) feature hecha con una tarea en curso no se mueve y el CLI informa el motivo', () => {
   const raiz = raizTemporal({ carpetas: { 'F01-base': ['hecha', 'en curso'] } });
-  const res = cli(raiz, ['--aplicar']);
-  assert.equal(res.status, 0, res.stderr);
+  const res = cli(raiz, ['--aplicar', 'F01']);
+  assert.equal(res.status, 1);
   assert.equal(fs.existsSync(path.join(raiz, 'features', 'F01-base')), true);
   assert.equal(fs.existsSync(path.join(raiz, 'features', 'completed')), false);
   assert.ok(res.stdout.includes('omitida: F01') && res.stdout.includes('task-02') && res.stdout.includes('en curso'));
-  assert.ok(res.stdout.includes('Nada que archivar.'));
 });
 
 test('(d) con el destino ya existente no se mueve ni se sobrescribe', () => {
@@ -216,7 +215,7 @@ test('(g) tras mover, BACKLOG.md y definitions/STATUS.md tienen el mismo conteni
   const raiz = raizTemporal({ carpetas: { 'F01-base': ['hecha'] }, status: 'estado de prueba\n' });
   const backlogAntes = fs.readFileSync(path.join(raiz, 'definitions', 'BACKLOG.md'), 'utf8');
   const statusAntes = fs.readFileSync(path.join(raiz, 'definitions', 'STATUS.md'), 'utf8');
-  const res = cli(raiz, ['--aplicar']);
+  const res = cli(raiz, ['--aplicar', 'F01']);
   assert.equal(res.status, 0, res.stderr);
   assert.equal(fs.existsSync(path.join(raiz, 'features', 'completed', 'F01-base')), true);
   assert.equal(fs.readFileSync(path.join(raiz, 'definitions', 'BACKLOG.md'), 'utf8'), backlogAntes);
@@ -232,13 +231,43 @@ test('(h) el modo chequeo sigue sin mover nada', () => {
   assert.deepEqual(listarRecursivo(raiz), antes);
 });
 
-test('--aplicar sin candidatas imprime «Nada que archivar.» y termina en 0', () => {
+test('--aplicar F01 sin candidata no mueve nada, no imprime «Nada que archivar.» y termina en 1', () => {
   const raiz = raizTemporal({ filas: [fila('F01', 'pendiente')], carpetas: { 'F01-base': ['en curso'] } });
-  const res = cli(raiz, ['--aplicar']);
-  assert.equal(res.status, 0, res.stderr);
-  assert.ok(res.stdout.includes('Nada que archivar.'));
+  const antes = listarRecursivo(raiz);
+  const res = cli(raiz, ['--aplicar', 'F01']);
+  assert.equal(res.status, 1);
+  assert.ok(res.stdout.includes('omitida: F01: no tiene fila hecha (está pendiente)'));
+  assert.equal(res.stdout.includes('Nada que archivar.'), false);
   assert.equal(fs.existsSync(path.join(raiz, 'features', 'completed')), false);
+  assert.deepEqual(listarRecursivo(raiz), antes);
 });
+
+// ---- task-01: argumentos ambiguos o mal formados del CLI de --aplicar ----
+
+const rechazos = [
+  ['--aplicar sin Fxx', (r) => ['--raiz', r, '--aplicar'], '--aplicar exige un Fxx explícito'],
+  ['varios Fxx', (r) => ['--raiz', r, '--aplicar', 'F01', 'F02'], '--aplicar acepta un solo Fxx'],
+  ['--aplicar repetido', (r) => ['--raiz', r, '--aplicar', 'F01', '--aplicar'], "opción repetida '--aplicar'"],
+  ['--raiz repetido', (r) => ['--raiz', r, '--raiz', r, '--aplicar', 'F01'], "opción repetida '--raiz'"],
+  ['Fxx sin --aplicar', (r) => ['--raiz', r, 'F01'], 'los IDs solo van con --aplicar'],
+  ['Fxx con un dígito', (r) => ['--raiz', r, '--aplicar', 'F1'], "argumento desconocido 'F1'"],
+  ['Fxx en minúscula', (r) => ['--raiz', r, '--aplicar', 'f01'], "argumento desconocido 'f01'"],
+];
+
+for (const [nombre, armar, esperado] of rechazos) {
+  test(`CLI rechaza ${nombre}: código 1, stderr con el mensaje y sin mover nada`, () => {
+    const raiz = raizTemporal({
+      filas: [fila('F01', 'hecha'), fila('F02', 'hecha')],
+      carpetas: { 'F01-base': ['hecha'], 'F02-otra': ['hecha'] },
+    });
+    const antes = listarRecursivo(raiz);
+    const res = spawnSync(process.execPath, [SCRIPT, ...armar(raiz)], { encoding: 'utf8' });
+    assert.equal(res.status, 1);
+    assert.ok(res.stderr.includes(esperado), res.stderr);
+    assert.deepEqual(listarRecursivo(raiz), antes);
+    assert.equal(fs.existsSync(path.join(raiz, 'features', 'completed')), false);
+  });
+}
 
 test('aplicar() devuelve movidas y omitidas y solo mueve la candidata pedida', () => {
   const raiz = raizTemporal({

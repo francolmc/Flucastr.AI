@@ -104,9 +104,36 @@ test('regla 5: tarea bloqueada en una feature hecha se rechaza', () => {
   assert.ok(errores.some((e) => e.includes('«bloqueada», pero la feature F01 figura como «hecha»')));
 });
 
+test('filas hecha sin carpeta (archivadas) siguen validando', () => {
+  const m = {
+    backlog: BACKLOG_VALIDO,
+    features: [
+      {
+        carpeta: 'F02-planificar-y-coordinar',
+        tareas: [tarea('01', 'mover', { estado: 'en curso' }), tarea('02', 'coordinador', { dep: 'task-01' })],
+      },
+    ],
+  };
+  assert.deepEqual(validarCoherencia(m), []);
+});
+
+test('una carpeta cuyo ID no está en el backlog se rechaza aunque haya filas hecha archivadas', () => {
+  const m = {
+    backlog: BACKLOG_VALIDO,
+    features: [
+      {
+        carpeta: 'F03-carpeta-huerfana',
+        tareas: [tarea('01', 'algo', { estado: 'aprobada' })],
+      },
+    ],
+  };
+  const errores = validarCoherencia(m);
+  assert.ok(errores.some((e) => e.includes('no tiene fila «F03»')));
+});
+
 test('definitions/BACKLOG.md y features/F*/task-*.md reales son coherentes', () => {
   const carpetas = fs.readdirSync(`${RAIZ}features`).filter((d) => /^F\d{2}-/.test(d));
-  assert.ok(carpetas.length >= 2, `se esperaban al menos dos carpetas de feature y hay ${carpetas.length}`);
+  assert.ok(carpetas.length >= 1, `se esperaba al menos una carpeta de feature y hay ${carpetas.length}`);
   const features = carpetas.map((carpeta) => ({
     carpeta,
     tareas: fs
