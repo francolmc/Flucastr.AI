@@ -4,41 +4,31 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 a 06 `hecha`; task-07 `bloqueada` (la suite completa falla por un test ajeno); task-08 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
+Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 a 06 y task-08 `hecha`; task-07 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
 Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Espera a Franco
 
-- F10: PR hecho por Franco (2026-10-30).
-- Puerta 1 del permiso del coordinador para archivar: aprobada por Franco (2026-10-30), opción B en Pi (bash completo, riesgo aceptado y escrito en `WORKFLOW.md` §3.1.1).
-- Backlog con F12: aprobado por Franco (2026-10-30).
-- F12 task-01: `hecha` y comiteada por Franco (2026-10-30).
-- F12 task-04: `hecha` y comiteada por Franco (2026-10-30).
-- **PUERTA 4 (F12 task-08):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-08-test-coherencia-con-features-archivadas.md`, haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`; luego vuelve task-07 a `aprobada`. Resultado: test 11/11 y suite completa 246/246, 0 fallos; solo cambió `pruebas/comprobaciones/coherencia-features.test.mjs`. Contexto: cambia en `coherencia-features.test.mjs` la exigencia de `>= 2` a `>= 1` carpetas y añade una prueba positiva (filas `hecha` archivadas sin carpeta validan) y una negativa (carpeta `F03` sin fila se rechaza); salida esperada: 11 pruebas del test y 246 en la suite, todas en verde (el planificador no corrió la suite con las pruebas nuevas). Después, volver task-07 a `aprobada`. Otras anotaciones de task-07 para después: `README.md:54` y `scripts/archivar.mjs:9-10` («nunca un agente») contradicen §3.1; en `WORKFLOW.md` §3.1 los controles compensatorios siguen como «trabajo posterior»; revisa también `pruebas/permisos-ejecucion.md` y la *Evidencia* de `features/F12-coordinador-ejecuta-scripts/task-07-documentar-permisos-y-cierre.md`.
-- F12 task-06: `hecha` y comiteada por Franco (2026-10-30); 8 de 8 casos ok en Pi, informe `pruebas/resultados/2026-10-30-coordinador-pi.md`.
-- F12 task-05: `hecha` y comiteada por Franco (2026-10-30); 8 casos ok en Claude Code. Franco aprobó (2026-10-30) el ajuste de `definitions/` (opción c: `tools:` limita, el permiso es aparte) y la tarea reescrita (opción a: lanzador con `--allowedTools` de los tres patrones). Desalineaciones de `definitions/` que quedan para cuando F12 termine: `WORKFLOW.md` línea 4 («el coordinador instalado sigue sin `bash`»), `PROJECT.md` línea 45; `pruebas/permisos-ejecucion.md` lo cubre task-07.
-- F12 task-03: `hecha` y comiteada por Franco (2026-10-30). Tras los commits de F12, `bash instalar.sh` actualiza tu coordinador instalado.
-- F12 task-02: `hecha` y comiteada por Franco (2026-10-30). Pendiente que lo pruebe task-05: si `tools:` restringe `Bash` por sí solo (la prueba de task-02 no lo aísla).
-- F12: las 7 tareas `aprobada` por Franco (2026-10-30); se ejecutan una a la vez en orden (task-01 en curso). Al terminar cada una, puerta 4: revisa evidencia y commit en la rama. Tareas en `features/F12-coordinador-ejecuta-scripts/`: `task-01-validar-argumentos-scripts.md`, `task-02-coordinador-comandos-claude.md` (depende de 01), `task-03-generacion-pi-claude-instalacion.md` (02), `task-04-fixture-y-comprobador-coordinador.md` (01), `task-05-prueba-modelo-claude-code.md` (02, 04), `task-06-prueba-modelo-pi.md` (03, 04), `task-07-documentar-permisos-y-cierre.md` (05, 06). Decisiones a mirar: task-02, si `tools:` no restringe `Bash` queda `bloqueada` con `BLOQUEO: rol=arquitecto` (no se usa `permissions.allow/deny` global); task-03, en Pi `Bash` sin patrones (inferido, sin verificar); task-01 endurece el CLI y reescribe 2 pruebas de `archivar.test.mjs`; task-05/06 hacen 8 llamadas de modelo cada una. `WORKFLOW.md` §3.1 sigue diciendo «comprobación pendiente»: lo actualiza el arquitecto o Franco tras task-02.
-- **Ahora, archivar F01–F10 (tuyo):** desde `main` actualizado: `git switch -c chore/archivar-F01-F10`; `node scripts/registrar.mjs`; `node scripts/archivar.mjs` (chequeo, revisa la lista); `node scripts/archivar.mjs --aplicar F01` (ahora `Fxx` es obligatorio y uno por vez; repite para F02…F10); revisa `git status` y haz el commit. Después avísame para pedir al planificador compactar `BACKLOG.md` (puerta 2).
-- **Registro de eventos:** corre `node scripts/registrar.mjs` (lo corres tú, antes de archivar; no bloquea). `registro/` está ignorado por git. Los datos útiles llegan con las próximas tareas: la línea `Registro:` del constructor solo existe desde task-02 de F10.
-- **Archivar (tuyo, en su propio commit `chore/`, tras el PR):** `node scripts/archivar.mjs` (chequeo) y luego `--aplicar` con los IDs que correspondan. Candidatas: F01–F10 (F10 tras su PR). Corre antes `registrar.mjs`.
+- **PUERTA 4 (F12 task-07, la última):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-07-documentar-permisos-y-cierre.md`, más `pruebas/permisos-ejecucion.md` y `pruebas/README.md`. Resultado: conteos 4/4/0 y suite 246/246 sin fallos. Haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`. Las anotaciones de abajo (README.md:54, archivar.mjs:10, WORKFLOW.md línea 83) no se corrigieron: decide si las abrimos como tarea.
+- Si apruebas task-07, F12 quedará completa: te escribiré «Feature F12 completa en feature/F12-coordinador-ejecuta-scripts: cierra la rama, haz el PR y despliega.» y te pediré confirmar F12 como `hecha`.
+- Tras F12, `bash instalar.sh` actualiza tu coordinador instalado. Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (ver `definitions/WORKFLOW.md` §3.1).
+- **Anotaciones de task-07 para cerrar F12:** `README.md:54` y `scripts/archivar.mjs:9-10` («nunca un agente») contradicen §3.1; en `WORKFLOW.md` §3.1 los controles compensatorios siguen como «trabajo posterior»; `WORKFLOW.md` línea 4 («el coordinador instalado sigue sin `bash`») y `PROJECT.md` línea 45 quedaron desalineadas (arquitecto).
+- **Registro de eventos:** corre `node scripts/registrar.mjs` cuando quieras (lo corres tú, o yo a tu pedido tras instalar F12). `registro/` está ignorado por git.
+- **Contexto grande:** F01–F10 ya están archivadas; falta compactar `BACKLOG.md` (planificador, puerta 2; su nota final «Hoy hay N pendientes» está desactualizada) y acortar `WORKFLOW.md` (arquitecto).
 - **Alinear `definitions/` (arquitecto, sin urgencia):** `REGISTRO.md` §1 (`resultado=confirmar` no se usa; caso `coordinador` en `tarea_estado.por`; comando sin `--reverse` por git 2.54); falta la regla «`registro/` no se lee» en `AGENTS.md`.
-- **Riesgo de tiempo:** `rapida.sh` oscila entre 23 y 37 s (tope 30 s); el peso viene de `instalacion.test.mjs` (8–12 s). Conviene una tarea aparte (¿la abrimos?). `remoto.test.mjs` y `registrar.test.mjs` ya van fuera de la suite rápida.
-- **Antes de publicar el repo (tuyo):** correr gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Don Financio, Andes), `.gitignore`; activar 2FA y proteger `main`; aclarar qué son los commits «intrusión». Si aparece algo: rotar la credencial primero. Luego haz público el repo.
+- **Riesgo de tiempo:** `rapida.sh` oscila entre 23 y 37 s (tope 30 s); el peso viene de `instalacion.test.mjs` (8–12 s). Conviene una tarea aparte (¿la abrimos?).
+- **Antes de publicar el repo (tuyo):** gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Don Financio, Andes), `.gitignore`; activar 2FA y proteger `main`; aclarar qué son los commits «intrusión». Si aparece algo: rotar la credencial primero. Luego haz público el repo.
 - **Comprobación manual de F09 (tuya, con repo público):** comando de una línea en el PC de trabajo, `claude --agent arquitecto` / `pi-arquitecto`, `--estado` y `--actualizar`, que tu `modelos.json` quede igual y que la red deje pasar `raw.githubusercontent.com`, `api.github.com` y `codeload.github.com`. Guía en el `README.md`.
 - **Pendiente sin decidir (tarea aparte):** `instalar.sh --copiar` directo con un `modelos.json` inválido deja roto el personal; `instalar-remoto.sh` ya lo bloquea (R10).
-- **Contexto grande:** `BACKLOG.md` y `WORKFLOW.md` superan el umbral de aviso; compactar `BACKLOG.md` es del planificador (puerta 2, tras archivar; su nota final «Hoy hay 3 pendientes» está desactualizada); acortar `WORKFLOW.md`, del arquitecto.
-- Como el coordinador es un agente instalado, tras los commits conviene `bash instalar.sh` para actualizar tu copia.
-- Rama, PR y despliegue de F05: lo haces tú.
-- Decisión abierta: tarea aparte para ajustar `descomponer-feature` (bajar «~5 archivos» a «~3»; que «Completa» no fije conteos ni estados de otros documentos).
-- **Pedido por Franco (2026-10-30): verificación funcional observable** (curl o Playwright contra la app levantada). Franco teme sobreconstruir (ya costó mucho montar el kit): NO se abre ninguna tarea ni se toca `definitions/` ahora. Se usa el kit en un proyecto real y la verificación observable se resuelve dentro de ese proyecto (una tarea suya crea su propio comando de prueba si hace falta). Solo si el uso real muestra fricción repetida, se evalúa una regla mínima en `descomponer-feature`. Un `verificador` aparte, solo con datos de `Registro:`.
+- **Decisión abierta:** tarea aparte para ajustar `descomponer-feature` (bajar «~5 archivos» a «~3»; que «Completa» no fije conteos ni estados de otros documentos).
+- **Verificación funcional observable (curl/Playwright):** NO se abre tarea ni se toca `definitions/` por ahora; se resuelve dentro del proyecto real. Solo con fricción repetida se evalúa una regla mínima en `descomponer-feature`. Un `verificador` aparte, solo con datos de `Registro:`.
 - Decisiones abiertas de F03: estado del constructor ante una escalación, comandos compuestos en la allowlist y rol del bloqueo.
+- Rama, PR y despliegue de F05: lo haces tú.
 - `rapida.sh` dejó `pruebas/.temporales/capa1-*`; puedes borrarlo.
 
 ## Bloqueos abiertos
 
-- task-07 (F12), bloquea el `constructor`; rol indicado: planificador (tarea nueva). `pruebas/comprobaciones/coherencia-features.test.mjs:109` exige al menos 2 carpetas `F*` en `features/` y, tras archivar F01–F10 en `features/completed/`, solo queda F12. Falla en la suite completa (243 pasan, 1 falla), no por el trabajo de task-07, que dejó hechos `pruebas/permisos-ejecucion.md` y `pruebas/README.md`. Corregir el test está fuera de alcance de task-07.
+Ninguno.
 
 ## Última actualización
 

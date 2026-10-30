@@ -1,5 +1,5 @@
 # task-07 — Documentar permisos del `coordinador`, README de pruebas y cierre de la feature
-repo: Flucastr.AI   depende_de: task-05, task-06   estado: bloqueada
+repo: Flucastr.AI   depende_de: task-05, task-06   estado: lista para revisión
 
 ## Descripción
 Deja escrito, con los resultados reales de task-05 y task-06, qué contiene y qué no contiene cada herramienta al ejecutar scripts el `coordinador`, para que Franco lo revise y sea la base de F11. Documenta en `pruebas/permisos-ejecucion.md` la sección del `coordinador` (Claude Code por patrones; Pi solo instruccional), registra las pruebas nuevas en `pruebas/README.md` y comprueba que no queda ninguna mención contradictoria al comportamiento anterior de `--aplicar`.
@@ -46,68 +46,41 @@ Salida esperada: el primer conteo ≥ 4; el segundo ≥ 4; el tercero `0` en amb
 
 ## Evidencia
 
-Verificación, pasada 1 (tras escribir la sección de `permisos-ejecucion.md` y las viñetas de `README.md`; el primer conteo dio 3 porque la cita de Pi y «solo instruccional» iban en la misma línea):
+Verificación, pasada única de esta ejecución (sustituye la evidencia de la corrida bloqueada). Los comandos se corrieron tal cual están en *Verificación*; la salida de la suite se redirigió a un archivo temporal y se filtró con el mismo `grep`:
 
 ```
 $ grep -c "Coordinador: ejecución de scripts\|solo instruccional\|coordinador-claude\|coordinador-pi" pruebas/permisos-ejecucion.md
-3
+4
 $ grep -c "fixtures/coordinador.sh\|coordinador-ejecucion.mjs\|lanzar-coordinador-claude.sh\|lanzar-coordinador-pi.sh" pruebas/README.md
 4
 $ grep -c "valor-reconocible-9f3a" pruebas/permisos-ejecucion.md pruebas/README.md
 pruebas/permisos-ejecucion.md:0
 pruebas/README.md:0
 $ node --test --test-concurrency=1 pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs pruebas/capa1/*.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
-ℹ tests 244
-ℹ pass 243
-ℹ fail 1
+ℹ tests 246
+ℹ pass 246
+ℹ fail 0
 ```
 
-Verificación, pasada 2 (tras partir las citas de Claude y Pi en sub-líneas de `permisos-ejecucion.md`):
-
-```
-$ grep -c "Coordinador: ejecución de scripts\|solo instruccional\|coordinador-claude\|coordinador-pi" pruebas/permisos-ejecucion.md
-4
-$ grep -c "fixtures/coordinador.sh\|coordinador-ejecucion.mjs\|lanzar-coordinador-claude.sh\|lanzar-coordinador-pi.sh" pruebas/README.md
-4
-$ grep -c "valor-reconocible-9f3a" pruebas/permisos-ejecucion.md pruebas/README.md
-pruebas/permisos-ejecucion.md:0
-pruebas/README.md:0
-$ node --test --test-concurrency=1 pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs pruebas/capa1/*.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)|^✖ definitions|AssertionError \["
-✖ definitions/BACKLOG.md y features/F*/task-*.md reales son coherentes (0.541292ms)
-ℹ tests 244
-ℹ pass 243
-ℹ fail 1
-  AssertionError [ERR_ASSERTION]: se esperaban al menos dos carpetas de feature y hay 1
-```
-
-Causa del fallo (la misma en las dos pasadas): `pruebas/comprobaciones/coherencia-features.test.mjs:109` exige al menos dos carpetas `F*` directas en `features/`. Estado real del repo:
-
-```
-$ ls features/
-completed  F12-coordinador-ejecuta-scripts
-$ ls features/completed/
-F01-base-verificacion-rapida  F02-planificar-y-coordinar  F03-verificar-constructor  F04-readme-al-dia  F05-ramas-y-refinado  F06-modo-yolo  F07-modelo-por-agente  F08-limpieza-y-archivo  F09-instalador-sin-clon  F10-registro-de-eventos
-```
-
-Las features F01–F10 ya estaban archivadas en `features/completed/` antes de esta tarea (`git status` no muestra cambios en ellas). La tarea solo edita `pruebas/permisos-ejecucion.md`, `pruebas/README.md` y su propio archivo; el test no depende de ellos. Corregir el test queda fuera de alcance (`pruebas/`), así que no se tocó.
+Revisión del contenido escrito en la corrida anterior, contra sus fuentes: las citas de `permisos-ejecucion.md` coinciden con `pruebas/resultados/2026-10-30-coordinador-claude.md` (8 de 8 ok), `pruebas/resultados/2026-10-30-coordinador-pi.md` (8 de 8 ok, Bash en 3 casos) y con la línea `tools:` de `agentes/coordinador.md`.
 
 Criterios de aceptación:
-1. Cumple: `permisos-ejecucion.md` tiene la sección con los cuatro puntos, cita ambos informes (conteo 4).
-2. Cumple: `README.md` menciona los cuatro archivos nuevos (conteo 4).
-3. Cumple: «solo instruccional» en Pi; el valor del canario aparece 0 veces en ambos archivos.
-4. No cumple: la suite tiene 1 fallo (`coherencia-features.test.mjs`), por la causa anterior; `fail 0` no se alcanza sin cambiar un test fuera de alcance.
+1. Cumple: `permisos-ejecucion.md` tiene la sección «Coordinador: ejecución de scripts» con los cuatro puntos y cita ambos informes (conteo 4).
+2. Cumple: `pruebas/README.md` menciona los cuatro archivos nuevos (conteo 4).
+3. Cumple: el documento dice «solo instruccional» para Pi; el valor del canario aparece 0 veces en ambos archivos.
+4. Cumple: la suite completa pasa, `fail 0` (246/246). El fallo de `coherencia-features.test.mjs` de las corridas bloqueadas ya no ocurre tras task-08.
 
-Búsqueda de `aplicar` (paso 4), resultado con `grep` fuera de `definitions/`, `completed`, `resultados` y `.temporales`: menciones de `--aplicar` sin `Fxx` en la documentación y el código del repo, anotadas en *Notas*.
+Búsqueda de `aplicar` (paso 4), con el comando `grep -rn -e "aplicar" --include="*.md" --include="*.mjs" --include="*.sh" . --exclude-dir=.git --exclude-dir=completed --exclude-dir=resultados --exclude-dir=.temporales --exclude-dir=definitions --exclude-dir=node_modules`, más la exclusión de las tareas de F12: resultado en *Notas*.
 
 ## Notas
-- Búsqueda de `--aplicar` sin `Fxx` fuera de `definitions/` (no corregidas; fuera de alcance):
+- Búsqueda de `--aplicar` sin `Fxx` fuera de `definitions/` (re-verificada en esta ejecución; no corregidas, fuera de alcance):
   - `README.md:54`: «con --aplicar (lo corre Franco), mueve las features hecha a features/completed/». No menciona `Fxx`; contradice «`Fxx` obligatorio» (§3.1, decisión 2).
   - `scripts/archivar.mjs:9-10` (cabecera): «--aplicar solo renombra carpetas» y «Lo ejecuta Franco, nunca un agente.». La segunda frase contradice §3.1, donde el `coordinador` puede correrlo a pedido de Franco. La línea 7 sí trae `Fxx`.
   - Las demás menciones (`agentes/coordinador.md`, `pruebas/comprobaciones/*`, `pruebas/lanzar-coordinador-claude.sh`) llevan `Fxx` o son pruebas de rechazo de argumentos.
-- Contradicción para Franco en `definitions/WORKFLOW.md` (no editado): §3.1 lista los «Controles compensatorios que se piden (trabajo posterior)». Las pruebas con modelo de task-05 y task-06 ya existen; la frase sigue en futuro.
+- Contradicción para Franco en `definitions/WORKFLOW.md` (no editado, línea 83): §3.1 lista los «Controles compensatorios que se piden (trabajo posterior)». Las pruebas con modelo de task-05 y task-06 ya existen; la frase sigue en futuro.
 - Huecos menores resueltos:
   1. La línea 9 de `pruebas/README.md` trata de corridas de modelo, no del `coordinador`. Se añadieron cuatro viñetas a continuación, una por archivo, porque la verificación cuenta líneas.
   2. En `permisos-ejecucion.md`, las citas de Claude y Pi van en sub-líneas, por el mismo motivo (conteo ≥ 4).
   3. La comprobación de task-02 no tiene informe en `pruebas/resultados/`; se cita por ruta a su *Evidencia* en `features/F12-coordinador-ejecuta-scripts/task-02-coordinador-comandos-claude.md`.
-- Bloqueo: la *Verificación* falló dos veces por la misma causa (`coherencia-features.test.mjs`, ver *Evidencia*). Desbloquear requiere decidir si el test se adapta al repo actual (carpetas archivadas) o si se restaura alguna carpeta; eso es decisión fuera de esta tarea. Pendiente para el planificador.
-Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=falla; huecos=3; resultado=bloqueada; causa=verificacion_x2
+- Bloqueo anterior resuelto: la *Verificación* falló en dos pasadas por `coherencia-features.test.mjs` (carpetas F01–F10 archivadas). task-08 lo resolvió; en esta ejecución la suite pasa 246/246 sin cambios en `pruebas/` ni en `definitions/`.
+Registro: n=2; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

@@ -1,5 +1,5 @@
 # task-08 — Adaptar la prueba de coherencia a un repo con features archivadas
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Tras archivar F01–F10 en `features/completed/`, en `features/` solo queda la carpeta de F12 y la prueba «definitions/BACKLOG.md y features/F*/task-*.md reales son coherentes» falla porque exige al menos dos carpetas `F*`. Esta tarea quita ese mínimo y deja una prueba (positiva) de que un backlog con filas `hecha` sin carpeta sigue validando, más una negativa de que una carpeta sin fila sigue rechazándose.
