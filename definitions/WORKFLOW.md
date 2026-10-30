@@ -1,6 +1,6 @@
 # Flujo de trabajo — diseño de `coordinador`, `planificador` y `constructor`
 
-> Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3). Puerta 1 de F08 aprobada por Franco el 2026-10-30 (§4, §5, §7 y §10). **Pasaje pendiente de aprobación:** §10.5 (y la frase de §10.2 que lo acompaña), por la desviación aceptada el 2026-10-30: el `coordinador` no tiene Bash ni corre `scripts/archivar.mjs`.
+> Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3). Puerta 1 de F08 aprobada por Franco el 2026-10-30 (§4, §5, §7 y §10). **Aprobado en la puerta 1 (Franco, 2026-10-30):** el `coordinador` puede correr `registrar.mjs` y `archivar.mjs` a pedido explícito de Franco (§3.1; ajustes en §2, §10.2, §10.5 y §10.6). Restringido por patrones en Claude Code; **sin restricción técnica en Pi** (riesgo aceptado por Franco, §3.1). Sustituye la desviación del mismo día («el `coordinador` no tiene Bash»). El código que lo implementa (`agentes/`, instaladores, pruebas) está pendiente: hasta que exista, el `coordinador` instalado sigue sin `bash`.
 > **F10 (borrador, puerta 1):** el registro de eventos del flujo se diseña en [`REGISTRO.md`](REGISTRO.md), no aquí, para no engordar este documento. Toca este flujo en tres puntos, por aprobar: el `constructor` agrega a *Notas* una línea `Registro:` por ejecución (mismo permiso de escritura que hoy; §2 y §6), `registro/` entra en «no se lee salvo pedido explícito» (§10.4) y el `coordinador` deja en «Espera a Franco» el comando `node scripts/registrar.mjs` junto al de archivar (§10.5). No es una puerta; en yolo no cambia nada salvo `modo=yolo` en la línea.
 > Complementa `PROJECT.md` («Flujo de trabajo»). Este documento define **qué** se construye y las reglas; lo construye una sesión de implementación, no el arquitecto.
 > *Confirmado* = dicho por Franco o leído en archivo. *Propuesta* = mía, por aprobar.
@@ -17,7 +17,7 @@
 
 | Rol | Archivo | Escribe | No hace |
 |---|---|---|---|
-| `coordinador` | `agentes/coordinador.md` | `definitions/STATUS.md`; y el campo `estado` de `BACKLOG.md` y de las tareas, **solo** cuando Franco aprueba de forma explícita en la conversación | Definir, planificar, construir |
+| `coordinador` | `agentes/coordinador.md` | `definitions/STATUS.md`; y el campo `estado` de `BACKLOG.md` y de las tareas, **solo** cuando Franco aprueba de forma explícita en la conversación. Además corre, solo a pedido explícito de Franco, `scripts/registrar.mjs` y `scripts/archivar.mjs` (§3.1); no escribe otros archivos por su cuenta | Definir, planificar, construir. Ningún otro comando de shell |
 | `arquitecto` (listo) | `agentes/arquitecto.md` | `definitions/{PROJECT,REPOS,ARCHITECTURE}.md`, `AGENTS.md`, `initialize.sh` | Planificar, construir |
 | `planificador` | `agentes/planificador.md` + skills `crear-backlog`, `descomponer-feature` | `definitions/BACKLOG.md`, `features/**` | Construir, aprobar |
 | `constructor` | `agentes/constructor.md` + skill `ejecutar-tarea` | Código del repo de la tarea; solo *Evidencia* y *Notas* de la tarea | Marcar `hecha`, commit, push, PR, merge, despliegue. Git de escritura permitido: crear la rama de la feature (`git switch -c`) y, solo con confirmación expresa de Franco, `git switch <rama>` a una rama existente (§9.1) |
@@ -43,6 +43,46 @@ Reglas:
 - **Bloqueos:** un rol que necesita a otro lo informa en su respuesta final con una primera línea `BLOQUEO: rol=<rol requerido>; motivo=<…>` y se detiene. Solo el `coordinador` escribe en `STATUS.md`, que registra el bloqueo y lo enruta.
 - Con Pi, su instrucción debe **autorizar la delegación de forma explícita** (el paquete lo exige: «la complejidad por sí sola no autoriza delegar»).
 - Si no puede delegar (herramienta sin subagentes), respaldo: carga el rol como skill en la misma sesión.
+
+### 3.1 Comandos que puede correr (aprobado por Franco, 2026-10-30)
+
+**Lista cerrada** (nada más; ni `git`, ni `bash`, ni otros `node`):
+
+1. `node scripts/registrar.mjs`
+2. `node scripts/archivar.mjs` (chequeo, solo lectura)
+3. `node scripts/archivar.mjs --aplicar Fxx` (mueve solo esa feature)
+
+**Condiciones:**
+- **Solo a pedido explícito de Franco en la conversación**, para ese comando y esa vez. Un silencio, un «ok» a otra cosa o su propia conclusión («la feature está archivable») no bastan; el aviso en «Espera a Franco» (§10.5) sigue siendo lo que hace por iniciativa propia. El pedido de un modo no autoriza otro: pedir el chequeo no autoriza `--aplicar`.
+- **`--aplicar` siempre con un `Fxx` explícito** (decidido por Franco, 2026-10-30). Sin `Fxx` el script mueve todas las candidatas, lo que excede «lo que Franco pidió». Antes de correrlo, el `coordinador` ejecuta el chequeo, muestra las candidatas y comprueba que `Fxx` lo es; si no, no lo corre.
+- **En yolo no** (§9.3, que sigue sin archivar), salvo que Franco lo pida en la conversación; el pedido vale para ese comando, no activa archivado automático.
+- **Sin efectos fuera del alcance de los scripts:** `registrar.mjs` escribe solo en `registro/`; `archivar.mjs --aplicar` solo renombra `features/Fxx-nombre/` a `features/completed/`, sin tocar `BACKLOG.md`, `STATUS.md` ni git. El `coordinador` no hace commit, push, PR, merge ni despliegue: el commit del movimiento (`chore/`) sigue siendo de Franco. Sus límites de escritura (`STATUS.md` y campo `estado`) no cambian.
+- **Después de correrlo** informa la salida tal cual y deja en «Espera a Franco» que el movimiento o el registro queda sin commit. No interpreta la salida para cambiar estados.
+
+**Cómo se hace cumplir la restricción** (la regla es de contrato; el límite técnico depende de la herramienta):
+
+| Herramienta | Mecanismo | ¿Restringible a esos comandos? |
+|---|---|---|
+| Claude Code | En `tools:` del agente, `Bash(node scripts/registrar.mjs)`, `Bash(node scripts/archivar.mjs)` y `Bash(node scripts/archivar.mjs --aplicar F*)`, o reglas equivalentes de permisos (`allow`/`deny`). | **Sí, con matices (inferido; comprobación pendiente en la tarea):** Claude Code compara el comando contra el patrón y trata `&&`, `;`, `|` por separado, pero (a) no está confirmado que `tools:` de un agente acepte patrones de `Bash(...)`: si no los acepta, hay que ponerlos en `permissions.allow` del proyecto/usuario y `deny` para el resto, lo que afecta a todos los agentes; (b) `F*` deja pasar un argumento extra tras `Fxx`; se acota con la validación del propio script (rechazar argumentos desconocidos) y no con el patrón. |
+| Pi | El agente generado declara las herramientas del paquete de subagentes. | **No, no hay forma de restringir `bash` por comando (inferido: `pruebas/permisos-ejecucion.md` ya dice que en Pi no hay confinamiento y solo se detecta después).** Darle `bash` le da shell completo, incluidos `git commit`/`push`, `rm` y lectura de `.env`; solo lo frena la instrucción. |
+
+**Pi: opción B elegida por Franco (2026-10-30).** Se evaluaron: (A) sin `bash` en Pi y el comando queda a Franco (recomendación mía, descartada); (B) dar `bash` y confiar en la instrucción (elegida); (C) herramienta propia sin shell que ejecute solo los tres comandos (descartada: código nuevo en un paquete de terceros). Franco no eligió A ni C.
+
+**Riesgo aceptado por Franco (opción B).** En Pi el `coordinador` tendrá **shell completo**: técnicamente podría correr `git commit`/`push`, `rm`, leer `.env` o ejecutar cualquier `node`. Contradice «permiso mínimo» y la regla de `AGENTS.md` de no commit/push ni leer `.env`; esas reglas **no las impide la herramienta en Pi**. La contención es solo: (1) la instrucción de límites del propio agente (lista cerrada de §3.1, solo a pedido explícito); (2) la regla de que la puerta 4 revise cualquier cambio en `scripts/`; (3) que `archivar.mjs` rechace argumentos desconocidos (y lo mismo `registrar.mjs`). Una violación se vería después (registro, `git status`), no se impediría. En Claude Code el riesgo no existe en esa magnitud: allí sí hay restricción por patrones (sujeta a la comprobación pendiente de si `tools:` acepta `Bash(...)`).
+
+**Controles compensatorios que se piden (trabajo posterior):**
+- Prueba con modelo, en Pi y en Claude Code, de que **sin pedido explícito no ejecuta ningún comando** (ni los tres autorizados), con controles negativos: «ok» a otra cosa, «la feature está archivable», pedir el chequeo y verificar que no corre `--aplicar`.
+- Prueba con modelo de que, ante un pedido de archivar, **no hace commit/push ni lee `.env`** (archivo canario con contenido reconocible; verificar que no aparece en la salida) y no corre `--aplicar` sin `Fxx` o con `Fxx` no candidata.
+- Pruebas sin modelo de `archivar.mjs` y `registrar.mjs`: rechazo de argumentos desconocidos, `--aplicar` sin `Fxx` y varios `Fxx`.
+- Regla de la puerta 4 (revisión de la tarea) escrita en la skill/agente que revisa: todo cambio en `scripts/` se mira de forma explícita.
+- La instrucción del agente repite la lista cerrada y la prohibición de commit/push/`.env`, y se documenta en `pruebas/permisos-ejecucion.md` que en Pi la contención del `coordinador` es solo instruccional.
+
+*Riesgo común a ambas herramientas:* el `coordinador` ejecuta código del repo (`scripts/*.mjs`) que el `constructor` puede modificar; la revisión de la puerta 4 debe mirar cualquier cambio en `scripts/`.
+
+#### 3.1.1 Decisiones de Franco (2026-10-30, cerradas)
+1. **Aprobada** la lista cerrada de tres comandos y sus condiciones de §3.1.
+2. **`--aplicar` exige siempre un `Fxx` explícito.**
+3. **Pi: opción B.** El `coordinador` tendrá `bash` con shell completo, confiando en su instrucción y no en una restricción técnica; Franco acepta el riesgo descrito arriba. En Claude Code se restringe por patrones.
 
 ### `STATUS.md` (propuesta)
 
@@ -288,7 +328,7 @@ Excepción explícita y acotada a «cuatro puertas» y «sin commit». No es un 
 
 **Preguntas abiertas:** ninguna.
 
-## 10. Limpieza, chequeo de contexto y archivo de lo terminado (aprobado en la puerta 1, 2026-10-30; §10.5 pendiente)
+## 10. Limpieza, chequeo de contexto y archivo de lo terminado (aprobado en la puerta 1, 2026-10-30, incluido §10.5)
 
 > *Confirmado* = pedido de Franco (`BACKLOG.md`, F08). *Propuesta* = redacción mía. Cifras: **a calibrar** con la primera corrida real, como las de «acotada».
 
@@ -306,7 +346,7 @@ Excepción explícita y acotada a «cuatro puertas» y «sin commit». No es un 
 Un solo script de Node, sin dependencias ni red, con dos modos:
 
 - **Chequeo** (por defecto, solo lectura, sin efectos sobre archivos): imprime el informe de §10.4 y la lista de candidatas. Siempre termina con código 0; es un aviso, no una puerta.
-- **`--aplicar`**: mueve las candidatas. Lo ejecuta **Franco** (como `initialize.sh`, que se escribe y él corre). Con `--aplicar Fxx` mueve solo esa. **Cambio por aprobar:** el chequeo también lo corre Franco; el `coordinador` no tiene Bash y no corre ninguno de los dos modos.
+- **`--aplicar`**: mueve las candidatas. Lo ejecuta **Franco** (como `initialize.sh`, que se escribe y él corre). Con `--aplicar Fxx` mueve solo esa. **Aprobado (2026-10-30):** ambos modos pueden correrlos también el `coordinador`, solo a pedido explícito de Franco y con las condiciones de §3.1 (en Pi, con el riesgo aceptado allí); el commit sigue siendo de Franco.
 
 **Candidata** (todas, o no se mueve): (1) la fila de la feature en `BACKLOG.md` está `hecha`; (2) todas las `task-*.md` de su carpeta están `hecha`; (3) existe `features/Fxx-nombre/` y el nombre coincide con el ID; (4) no existe ya `features/completed/Fxx-nombre/`. Si algo no coincide (fila `hecha` con una tarea que no lo está, carpeta sin fila, destino ocupado), no mueve nada de esa feature y lo informa; el script **no corrige estados** ni resuelve la inconsistencia.
 
@@ -339,10 +379,10 @@ El `coordinador` y el `planificador` listan `features/` sin entrar en `completed
 
 ### 10.5 Cuándo ocurre
 
-1. Al quedar `hecha` la última tarea de una feature y Franco darla por hecha (aviso de §9.1), el `coordinador` (sin Bash, no corre el script) añade a «Espera a Franco» el comando: `node scripts/archivar.mjs` para el chequeo o `node scripts/archivar.mjs --aplicar Fxx` para archivar. Franco lo corre cuando quiera (antes o después del PR) y commitea el movimiento. *(Cambio por aprobar, 2026-10-30.)*
-2. Antes de la puerta 3 (descomponer una feature nueva), el `coordinador` deja en «Espera a Franco» el comando del chequeo (`node scripts/archivar.mjs`) para que Franco lo corra; no bloquea. *(Cambio por aprobar.)*
-3. Franco puede correrlo cuando quiera.
-4. En yolo no se archiva (la feature no tiene revisión de Franco); queda para después.
+1. Al quedar `hecha` la última tarea de una feature y Franco darla por hecha (aviso de §9.1), el `coordinador` añade a «Espera a Franco» el comando: `node scripts/archivar.mjs` para el chequeo o `node scripts/archivar.mjs --aplicar Fxx` para archivar (y `node scripts/registrar.mjs` antes). **No los corre por iniciativa propia:** si Franco le pide en la conversación que lo haga, lo corre según §3.1; si no, Franco los corre cuando quiera (antes o después del PR) y commitea el movimiento. *(Aprobado, 2026-10-30.)*
+2. Antes de la puerta 3 (descomponer una feature nueva), el `coordinador` deja en «Espera a Franco» el comando del chequeo (`node scripts/archivar.mjs`); no bloquea y no lo corre sin pedido de Franco. *(Aprobado, 2026-10-30.)*
+3. Franco puede correrlo, o pedírselo al `coordinador`, cuando quiera.
+4. En yolo no se archiva (la feature no tiene revisión de Franco); queda para después, salvo pedido explícito de Franco (§3.1).
 
 ### 10.6 Decisiones de Franco y preguntas abiertas
 
@@ -352,4 +392,4 @@ El `coordinador` y el `planificador` listan `features/` sin entrar en `completed
 
 ## Estado
 
-Aprobado por Franco el 2026-10-29, incluidos §2, §3 y la nueva §9 (F05 y F06, con sus respuestas a §9.5). Cambios de F08 (§4, §5, §7, §10) aprobados en la puerta 1 el 2026-10-30. **Pendiente de aprobación: §10.5** (el `coordinador` no corre `archivar.mjs`; lo corre Franco).
+Aprobado por Franco el 2026-10-29, incluidos §2, §3 y la nueva §9 (F05 y F06, con sus respuestas a §9.5). Cambios de F08 (§4, §5, §7, §10) aprobados en la puerta 1 el 2026-10-30. **Aprobado el 2026-10-30: §3.1, §2 (fila `coordinador`), §10.2 y §10.5** (el `coordinador` corre `registrar.mjs` y `archivar.mjs` a pedido explícito de Franco, con `--aplicar` siempre con `Fxx`; en Pi, con shell completo y riesgo aceptado por Franco, opción B, §3.1.1). La desviación anterior «sin Bash» queda sustituida; la implementación está pendiente.
