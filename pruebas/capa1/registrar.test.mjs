@@ -369,6 +369,25 @@ test('(8) repetir la corrida no duplica; una línea nueva añade solo su n; --re
   });
 });
 
+test('(10) argumentos inválidos: opción repetida, opción desconocida y argumento suelto terminan en 1 sin crear registro/', () => {
+  const raiz = nuevoRepo();
+  escribir(raiz, RUTA_TAREA, tareaMd('borrador'));
+  commit(raiz, 'c1', 0);
+  const casos = [
+    [['--reconstruir', '--reconstruir'], "opción repetida '--reconstruir'"],
+    [['--raiz', '.', '--raiz', '.'], "opción repetida '--raiz'"],
+    [['--foo'], "opción desconocida '--foo'"],
+    [['F01'], "opción desconocida 'F01'"],
+  ];
+  for (const [args, esperado] of casos) {
+    const res = spawnSync(process.execPath, [SCRIPT, ...args], { encoding: 'utf8', cwd: raiz });
+    assert.equal(res.status, 1, `args ${args.join(' ')}`);
+    assert.ok(res.stderr.includes(`error: ${esperado}`), res.stderr);
+    assert.ok(res.stderr.includes('uso: node scripts/registrar.mjs'), res.stderr);
+    assert.equal(fs.existsSync(path.join(raiz, 'registro')), false, `args ${args.join(' ')} creó registro/`);
+  }
+});
+
 test('(9) canarios en el resto de Notas y una clave extra (titulo=) no llegan a eventos.jsonl', () => {
   conModelosPrueba(() => {
     const raiz = nuevoRepo();

@@ -1,5 +1,5 @@
 # task-07 — Documentar permisos del `coordinador`, README de pruebas y cierre de la feature
-repo: Flucastr.AI   depende_de: task-05, task-06   estado: borrador
+repo: Flucastr.AI   depende_de: task-05, task-06   estado: aprobada
 
 ## Descripción
 Deja escrito, con los resultados reales de task-05 y task-06, qué contiene y qué no contiene cada herramienta al ejecutar scripts el `coordinador`, para que Franco lo revise y sea la base de F11. Documenta en `pruebas/permisos-ejecucion.md` la sección del `coordinador` (Claude Code por patrones; Pi solo instruccional), registra las pruebas nuevas en `pruebas/README.md` y comprueba que no queda ninguna mención contradictoria al comportamiento anterior de `--aplicar`.
