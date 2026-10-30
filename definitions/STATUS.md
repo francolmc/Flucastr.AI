@@ -4,7 +4,7 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 y task-02 `hecha`; task-03 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
+Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01, 02 y 03 `hecha`; task-04 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
 Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Espera a Franco
@@ -13,7 +13,8 @@ Rama: feature/F12-coordinador-ejecuta-scripts
 - Puerta 1 del permiso del coordinador para archivar: aprobada por Franco (2026-10-30), opción B en Pi (bash completo, riesgo aceptado y escrito en `WORKFLOW.md` §3.1.1).
 - Backlog con F12: aprobado por Franco (2026-10-30).
 - F12 task-01: `hecha` y comiteada por Franco (2026-10-30).
-- **PUERTA 4 (F12 task-03):** revisa *Evidencia* en `features/F12-coordinador-ejecuta-scripts/task-03-generacion-pi-claude-instalacion.md`, más `scripts/resolver.mjs` y `pruebas/comprobaciones/resolver-agentes.test.mjs` (10/10). En Pi el coordinador generado queda con `Bash` sin patrones; en Claude Code conserva los tres `Bash(...)`. Haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`. Recuerda `bash instalar.sh` después para actualizar tu coordinador instalado.
+- **PUERTA 4 (F12 task-04):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-04-fixture-y-comprobador-coordinador.md`. Archivos nuevos: `pruebas/fixtures/coordinador.sh`, `pruebas/comprobaciones/coordinador-ejecucion.mjs` y `coordinador-ejecucion.test.mjs` (9/9). Haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`.
+- F12 task-03: `hecha` y comiteada por Franco (2026-10-30). Tras los commits de F12, `bash instalar.sh` actualiza tu coordinador instalado.
 - F12 task-02: `hecha` y comiteada por Franco (2026-10-30). Pendiente que lo pruebe task-05: si `tools:` restringe `Bash` por sí solo (la prueba de task-02 no lo aísla).
 - F12: las 7 tareas `aprobada` por Franco (2026-10-30); se ejecutan una a la vez en orden (task-01 en curso). Al terminar cada una, puerta 4: revisa evidencia y commit en la rama. Tareas en `features/F12-coordinador-ejecuta-scripts/`: `task-01-validar-argumentos-scripts.md`, `task-02-coordinador-comandos-claude.md` (depende de 01), `task-03-generacion-pi-claude-instalacion.md` (02), `task-04-fixture-y-comprobador-coordinador.md` (01), `task-05-prueba-modelo-claude-code.md` (02, 04), `task-06-prueba-modelo-pi.md` (03, 04), `task-07-documentar-permisos-y-cierre.md` (05, 06). Decisiones a mirar: task-02, si `tools:` no restringe `Bash` queda `bloqueada` con `BLOQUEO: rol=arquitecto` (no se usa `permissions.allow/deny` global); task-03, en Pi `Bash` sin patrones (inferido, sin verificar); task-01 endurece el CLI y reescribe 2 pruebas de `archivar.test.mjs`; task-05/06 hacen 8 llamadas de modelo cada una. `WORKFLOW.md` §3.1 sigue diciendo «comprobación pendiente»: lo actualiza el arquitecto o Franco tras task-02.
 - **Ahora, archivar F01–F10 (tuyo):** desde `main` actualizado: `git switch -c chore/archivar-F01-F10`; `node scripts/registrar.mjs`; `node scripts/archivar.mjs` (chequeo, revisa la lista); `node scripts/archivar.mjs --aplicar F01` (ahora `Fxx` es obligatorio y uno por vez; repite para F02…F10); revisa `git status` y haz el commit. Después avísame para pedir al planificador compactar `BACKLOG.md` (puerta 2).

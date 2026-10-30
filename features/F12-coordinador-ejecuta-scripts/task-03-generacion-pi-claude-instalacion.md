@@ -1,5 +1,5 @@
 # task-03 — Generación del `coordinador` en Pi y Claude Code, e instalación
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Tras task-02 el `tools:` del `coordinador` lleva tres patrones `Bash(...)`. Para Claude Code el agente generado debe conservarlos tal cual. Para Pi, Franco eligió la opción B (§3.1.1): `bash` completo sin restricción técnica; el agente generado para Pi debe declararlo de forma explícita (`Bash` sin patrones) en vez de arrastrar patrones que Pi no puede hacer cumplir y que darían una falsa sensación de contención. La tarea ajusta el generador y deja pruebas sin modelo de que ambas salidas son las esperadas y de que la instalación en entorno aislado las produce.
