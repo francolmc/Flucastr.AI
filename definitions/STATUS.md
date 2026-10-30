@@ -4,12 +4,14 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 4). task-01 `lista para revisión` (`features/F08-limpieza-y-archivo/task-01-archivar-chequeo.md`); arquitecto terminó el ajuste de §10.5. F08 `en curso`; las 4 tareas `aprobadas` por Franco (2026-10-30). F07 `hecha` y mergeada.
+Rol: ninguno (puerta 4). task-02 `lista para revisión` (`features/F08-limpieza-y-archivo/task-02-archivar-aplicar.md`). task-01 `hecha`. F08 `en curso`; las 4 tareas `aprobadas` por Franco (2026-10-30). F07 `hecha` y mergeada.
 Rama: feature/F08-limpieza-y-archivo
 
 ## Espera a Franco
 
-- **Puerta 4:** revisa Evidencia y Notas de `features/F08-limpieza-y-archivo/task-01-archivar-chequeo.md` (`scripts/archivar.mjs` y `pruebas/comprobaciones/archivar.test.mjs`: 10 pass; `rapida.sh`: 168 pass, 22 s de 30 s). Rama `feature/F08-limpieza-y-archivo` creada desde `main`. El chequeo marca F01–F07 como candidatas a archivar (correcto según las reglas). Haz el commit (incluye los cambios de `definitions/` ya aprobados) y pásala a `hecha`. Luego task-02.
+- **Puerta 4:** revisa Evidencia y Notas de `features/F08-limpieza-y-archivo/task-02-archivar-aplicar.md` y `scripts/archivar.mjs` (`archivar.test.mjs`: 20 pass; `rapida.sh`: 178 pass, 21 s de 30 s). `--aplicar` probado solo en una raíz temporal (movió una feature a `completed/`; la segunda corrida dijo «Nada que archivar.»); el repo real no se tocó (`features/completed/` no existe). Haz el commit y pásala a `hecha`. Cambios de comportamiento a confirmar: un argumento desconocido ahora es error con código 1 (antes task-01 avisaba y seguía con 0), y pasar IDs sin `--aplicar` también es error.
+- **Cuándo ejecutar `--aplicar` en el repo real:** es tuyo; por tu respuesta pendiente de §10.6, recomendado después del PR de F08, en su propio commit `chore/`.
+
 
 - **Puerta 1 (menor):** el arquitecto ajustó `definitions/WORKFLOW.md` §10.5 y una frase de §10.2 (el `coordinador` no corre `archivar.mjs`; deja el comando aquí y lo corres tú) y reflejó el cambio en `ARCHITECTURE.md` (alternativa descartada). Quitó «por aprobar» del resto de F08 en `WORKFLOW.md`, `PROJECT.md` y `ARCHITECTURE.md`. Revisa esos pasajes y apruébalos. Sin respuesta explícita quedan las dos «Abiertas» de §10.6 (archivar antes/después del PR, umbrales).
 - task-03 de F08 debe alinear `agentes/coordinador.md` con esto (no correr el script, solo escribir el comando).

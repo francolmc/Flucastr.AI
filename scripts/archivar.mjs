@@ -1,13 +1,16 @@
 #!/usr/bin/env node
-// Chequeo de contexto y archivo de lo terminado (definitions/WORKFLOW.md §10). Este modo es solo lectura.
+// Chequeo de contexto y archivo de lo terminado (definitions/WORKFLOW.md §10).
 //
 // Uso:
-//   node scripts/archivar.mjs                  imprime el informe del chequeo
+//   node scripts/archivar.mjs                  imprime el informe del chequeo (solo lectura; código 0)
 //   node scripts/archivar.mjs --raiz <dir>     igual, sobre otra raíz (lo usan las pruebas)
+//   node scripts/archivar.mjs --aplicar        mueve a features/completed/ todas las candidatas
+//   node scripts/archivar.mjs --aplicar F03    mueve solo F03 (código 1 si F03 no se movió)
 //
-// Siempre termina con código 0: es un aviso, no una puerta. Nunca escribe, mueve ni corrige estados.
+// El chequeo nunca escribe, mueve ni corrige estados. --aplicar solo renombra carpetas: no sobrescribe,
+// no borra y no toca BACKLOG.md, STATUS.md, ramas ni git. Lo ejecuta Franco, nunca un agente.
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,6 +25,7 @@ export const UMBRALES = {
 
 const RE_FILA = /^\| F\d{2} \|/;
 const RE_CARPETA = /^F\d{2}-/;
+const RE_ID = /^F\d{2}$/;
 const RE_TAREA = /^task-(\d{2})-.+\.md$/;
 const RE_ESTADO = /^repo: .*estado: (.+?)\s*$/m;
 
@@ -173,6 +177,58 @@ export function chequear(raiz) {
   return { archivos, filasHecha, candidatas, inconsistentes, carpetasSinFilaHecha };
 }
 
+// Mueve a features/completed/ las features candidatas (ids = arreglo de IDs, o null para todas).
+// Vuelve a calcular el chequeo, no sobrescribe, no borra y no toca BACKLOG.md ni STATUS.md.
+export function aplicar(raiz, ids = null) {
+  const r = chequear(raiz);
+  const dirFeatures = join(raiz, "features");
+  const dirCompleted = join(dirFeatures, "completed");
+  const movidas = [];
+  const omitidas = [];
+
+  const pedidas = ids === null ? null : [...new Set(ids)];
+  const aMover = [];
+
+  if (pedidas === null) {
+    for (const id of [...new Set(r.inconsistentes.map((i) => i.id))]) {
+      omitidas.push({ id, motivo: motivoSinCandidata(raiz, r, id) });
+    }
+    aMover.push(...r.candidatas);
+  } else {
+    for (const id of pedidas) {
+      if (r.candidatas.includes(id)) aMover.push(id);
+      else omitidas.push({ id, motivo: motivoSinCandidata(raiz, r, id) });
+    }
+  }
+
+  for (const id of aMover) {
+    const carpeta = listarCarpetas(dirFeatures).find((c) => RE_CARPETA.test(c) && c.startsWith(`${id}-`));
+    const destino = join(dirCompleted, carpeta);
+    if (existsSync(destino)) {
+      omitidas.push({ id, motivo: `el destino features/completed/${carpeta} ya existe` });
+      continue;
+    }
+    mkdirSync(dirCompleted, { recursive: true });
+    renameSync(join(dirFeatures, carpeta), destino);
+    movidas.push({ id, desde: `features/${carpeta}`, hasta: `features/completed/${carpeta}` });
+  }
+
+  return { movidas, omitidas };
+}
+
+function motivoSinCandidata(raiz, r, id) {
+  const motivos = r.inconsistentes.filter((i) => i.id === id).map((i) => i.motivo);
+  if (motivos.length > 0) return motivos.join("; ");
+  const rutaBacklog = join(raiz, "definitions", "BACKLOG.md");
+  const backlog = existsSync(rutaBacklog) ? readFileSync(rutaBacklog, "utf8") : null;
+  const fila = filasDelBacklog(backlog).find((f) => f.id === id);
+  if (!fila) return "no existe la fila";
+  if (fila.estado !== "hecha") return `no tiene fila hecha (está ${fila.estado || "sin estado"})`;
+  const archivada = listarCarpetas(join(raiz, "features", "completed")).some((c) => c.startsWith(`${id}-`));
+  if (archivada) return "ya está en features/completed/";
+  return "no es candidata";
+}
+
 const aviso = (excede) => (excede ? " AVISO" : "");
 
 export function formatearInforme(r) {
@@ -216,17 +272,53 @@ export function formatearInforme(r) {
 
 const RUTA_ESTE = fileURLToPath(import.meta.url);
 
-if (process.argv[1] && resolve(process.argv[1]) === RUTA_ESTE) {
-  const args = process.argv.slice(2);
-  let raiz = join(dirname(RUTA_ESTE), "..");
+// Lee los argumentos. Cualquier cosa desconocida es error (sin mover nada).
+function leerArgumentos(args) {
+  const opciones = { raiz: null, aplicar: false, ids: [] };
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--raiz" && args[i + 1]) {
-      raiz = resolve(args[i + 1]);
+    const a = args[i];
+    if (a === "--raiz") {
+      const valor = args[i + 1];
+      if (valor === undefined || valor.startsWith("--")) return { error: "falta el valor de --raiz" };
+      opciones.raiz = resolve(valor);
       i++;
+    } else if (a === "--aplicar") {
+      opciones.aplicar = true;
+    } else if (RE_ID.test(a)) {
+      opciones.ids.push(a);
     } else {
-      console.error(`argumento no reconocido: ${args[i]}`);
+      return { error: `argumento desconocido '${a}'` };
     }
   }
-  process.stdout.write(formatearInforme(chequear(raiz)));
-  process.exit(0);
+  if (opciones.ids.length > 0 && !opciones.aplicar) {
+    return { error: `argumento desconocido '${opciones.ids[0]}' (los IDs solo van con --aplicar)` };
+  }
+  return { opciones };
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === RUTA_ESTE) {
+  const { error, opciones } = leerArgumentos(process.argv.slice(2));
+  if (error) {
+    console.error(`error: ${error}`);
+    process.exit(1);
+  }
+  const raiz = opciones.raiz ?? join(dirname(RUTA_ESTE), "..");
+
+  if (!opciones.aplicar) {
+    process.stdout.write(formatearInforme(chequear(raiz)));
+    process.exit(0);
+  }
+
+  const ids = opciones.ids.length > 0 ? opciones.ids : null;
+  const { movidas, omitidas } = aplicar(raiz, ids);
+  for (const m of movidas) console.log(`movida: ${m.desde} -> ${m.hasta}`);
+  for (const o of omitidas) console.log(`omitida: ${o.id}: ${o.motivo}`);
+  if (movidas.length === 0 && ids === null) console.log("Nada que archivar.");
+  if (movidas.length > 0) {
+    console.log(
+      "Cambios sin commit. Revisa con `git status` y commitéalos en su propio commit chore/ (después del PR de la feature)."
+    );
+  }
+  const noMovidas = ids === null ? [] : ids.filter((id) => !movidas.some((m) => m.id === id));
+  process.exit(noMovidas.length > 0 ? 1 : 0);
 }

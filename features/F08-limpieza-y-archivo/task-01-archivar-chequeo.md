@@ -1,5 +1,5 @@
 # task-01 — `scripts/archivar.mjs`: modo chequeo (solo lectura)
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Crea el script `scripts/archivar.mjs` con su modo por defecto, el **chequeo**: imprime cuánto pesa lo que los agentes leen siempre, qué filas `hecha` del backlog son largas, qué features son candidatas a archivar y cuáles son inconsistentes. Es solo lectura, sin efectos sobre archivos, y siempre termina con código 0 (es un aviso, no una puerta). Es la base del archivado (task-02) y de los avisos del `coordinador` (task-03). Diseño en `definitions/WORKFLOW.md` §10.2 y §10.4.
