@@ -1,5 +1,5 @@
 # task-02 — Comprobación determinista: los agentes instalados usan el modelo de `modelos.json`
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Hoy la Capa 1 solo comprueba que el modelo resuelto «pertenece» a `modelos.json`, no que cada agente instalado (Claude Code y Pi) lleve el modelo que `modelos.json` le asigna ni que el lanzador de Pi lo resuelva al arrancar. Esta tarea añade una comprobación sin modelo ni red que compara, agente por agente, lo instalado contra lo que resuelve `scripts/resolver.mjs`, y que detecta una instalación desactualizada tras editar `modelos.json`.

@@ -4,21 +4,16 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 4). task-02 `lista para revisión` (`features/F07-modelo-por-agente/task-02-modelos-instalados.md`); task-01 `hecha`. F07 `en curso`, rama `feature/F07-modelo-por-agente` (sin commit). Las tareas se renumeraron a task-01…task-06 (bloqueo por numeración resuelto). La nueva task-01 (tope de features pendientes) y task-02 (modelos instalados) están `bloqueada` con su trabajo ya hecho; task-03 a task-06 siguen `aprobada`.
+Rol: ninguno (puerta 4). F07 `en curso`. task-01 y task-02 `hecha`; task-03 `lista para revisión` (`features/F07-modelo-por-agente/task-03-corrida-claude-code.md`); task-04 a task-06 `aprobada`.
 Rama: feature/F07-modelo-por-agente
 
 ## Espera a Franco
 
-- **Puerta 4:** revisa la Evidencia de `features/F07-modelo-por-agente/task-02-modelos-instalados.md` (`rapida.sh`: 149 pass, 0 fail), haz el commit en `feature/F07-modelo-por-agente` y pásala a `hecha`. Luego task-03 (corrida real en Claude Code, usa modelo).
-
-- Pendiente fuera de alcance: `WORKFLOW.md` (líneas 146 y 149), la nota de `BACKLOG.md` (línea 28) y este archivo aún dicen «máximo de 6»; se alinean con el `arquitecto` o con F08.
-
-- **Confirmación necesaria:** volver a `aprobada` las dos tareas `bloqueada` para reintentarlas, en este orden, en `features/F07-modelo-por-agente/`:
-  - `task-01-tope-features-pendientes.md` (sin dependencias; su código ya está hecho, falta que `rapida.sh` quede verde con la numeración corregida)
-  - `task-02-modelos-instalados.md` (depende de task-01)
-- **Reaprobación pedida:** el renombrado cambió los nombres de las 6 tareas (contenido igual, salvo numeración); revísalas si quieres: task-03-corrida-claude-code, task-04-corrida-pi, task-05-extractor-modelos-registro, task-06-documentar-modelos.
+- **Puerta 4:** revisa la Evidencia («Corridas por fuente») y las Notas de `features/F07-modelo-por-agente/task-03-corrida-claude-code.md`, haz el commit en `feature/F07-modelo-por-agente` y pásala a `hecha`. Resultado informado: las transcripciones de subagentes en `~/.claude/projects/` (sin `--no-session-persistence`) muestran el modelo real: coordinador y planificador `claude-sonnet-5-5`, constructor `claude-haiku-5-5`, igual que `resolver.mjs`. Cambió `pruebas/lanzar-modelos-claude.sh`.
+- **Después:** ajustar task-05 (paso 2 y criterio 1) para leer `subagents/agent-*.jsonl` mapeando por `toolUseResult.agentId`; luego task-04 (Pi).
+- Pendiente fuera de alcance: `WORKFLOW.md` (líneas 146 y 149), la nota de `BACKLOG.md` (línea 28) aún dicen «máximo de 6»; se alinean con el `arquitecto` o con F08.
 - Si `~/.claude` o `~/.pi` están desactualizados, el constructor pedirá que corras `bash instalar.sh`.
-- Las tareas de corrida (task-03, task-04) usan modelo real; en Pi el modelo del subagente podría no aparecer en el registro.
+- task-04 (Pi) usa modelo real; el modelo del subagente podría no aparecer en el registro.
 - Rama, PR y despliegue de F05: lo haces tú.
 - Decisión abierta: tarea aparte para ajustar `descomponer-feature` (bajar «~5 archivos» a «~3»; que «Completa» no fije conteos ni estados de otros documentos).
 - Decisiones abiertas de F03: estado del constructor ante una escalación, comandos compuestos en la allowlist y rol del bloqueo.
@@ -30,4 +25,4 @@ Ninguno.
 
 ## Última actualización
 
-2026-10-29
+2026-10-30
