@@ -1,6 +1,6 @@
 # Arquitectura — Flucastr.AI (modo: actual)
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Pendiente de aprobación:** `WORKFLOW.md` §10.5 (el `coordinador` no corre el script; lo corre Franco) **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Pendiente de aprobación:** `WORKFLOW.md` §3.1 y §10.5 (borrador del 2026-10-30: el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido de Franco, con Bash restringido; hasta aprobarlo, los corre Franco) **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1).
 
 ## Estructura y su razón
 
@@ -63,8 +63,8 @@ flowchart LR
 | `skills/` | Procedimientos que el agente carga por paso. | Markdown con encabezado | `skills/*/SKILL.md` |
 | `modelos.json` | Fuente única de modelos: niveles, respaldo, perfiles, nivel por agente. | JSON | `modelos.json` |
 | `scripts/resolver.mjs` | Resuelve nivel→perfil→modelo y genera los agentes por herramienta. | Node ESM | `README.md`, `definicion/arquitectura.md` |
-| `scripts/archivar.mjs` (F08) | Chequeo de contexto de solo lectura; con `--aplicar` mueve a `features/completed/` las features `hecha` con todas sus tareas `hecha`. Ambos modos los corre Franco; el `coordinador` no tiene Bash y solo deja el comando en `STATUS.md`. Nunca escribe estados ni borra. | Node ESM, sin dependencias | `WORKFLOW.md` §10 |
-| `scripts/registrar.mjs` (F10, por aprobar) | Deriva eventos de estados, *Notas* (`Registro:`), `STATUS.md` y `git log` hacia `registro/eventos.jsonl` (solo añadir, idempotente, esquema cerrado sin texto libre). Lo corre Franco; no escribe fuera de `registro/` ni lee `.env`. | Node ESM, sin dependencias; usa `git` | `REGISTRO.md` |
+| `scripts/archivar.mjs` (F08) | Chequeo de contexto de solo lectura; con `--aplicar` mueve a `features/completed/` las features `hecha` con todas sus tareas `hecha`. Ambos modos los corre Franco o, a su pedido explícito, el `coordinador` (Bash restringido a esos comandos, `WORKFLOW.md` §3.1, por aprobar); sin pedido, el `coordinador` solo deja el comando en `STATUS.md`. Nunca escribe estados ni borra. | Node ESM, sin dependencias | `WORKFLOW.md` §10 |
+| `scripts/registrar.mjs` (F10, por aprobar) | Deriva eventos de estados, *Notas* (`Registro:`), `STATUS.md` y `git log` hacia `registro/eventos.jsonl` (solo añadir, idempotente, esquema cerrado sin texto libre). Lo corre Franco o, a su pedido, el `coordinador` (`WORKFLOW.md` §3.1); no escribe fuera de `registro/` ni lee `.env`. | Node ESM, sin dependencias; usa `git` | `REGISTRO.md` |
 | `instalar.sh` | Valida primero y después enlaza skills, genera agentes y lanzador de Pi, escribe manifiesto. Nunca pisa lo existente. | Bash | `instalar.sh` (cabecera y comentario de validación) |
 | `desinstalar.sh` | Quita solo lo del manifiesto; borra generados únicamente si conservan la marca `flucastr-ai:generado`. | Bash | `README.md`, `definicion/arquitectura.md` |
 | `pruebas/` | Capa 1 (instalación) y escenarios B, M, R con modelo; fixtures generados, remotos *bare* locales, comprobaciones duras con control negativo, registro estructurado e instantánea. | Bash + Node (`node --test`) | `pruebas/README.md`, `pruebas/ejecutar.sh` |
@@ -81,7 +81,7 @@ flowchart LR
 | Validar antes de actuar | Un `modelos.json` roto dejaba una instalación parcial o destruía la previa (defecto confirmado por la Capa 1 y corregido) | Validar al final | — |
 | Pruebas contra el agente **instalado** | Es lo que Franco usa (`plan-pruebas-arquitecto.md`); el ejecutor se detiene si el instalado es el antiguo | Probar los archivos del repo | — |
 | Skills bajo demanda | Mantener corto el agente | Todo en el agente | — |
-| Archivar con script, bajo confirmación de Franco (F08) | Mantiene corto lo que leen los agentes sin que un agente mueva carpetas ni decida estados | Que el `coordinador` mueva carpetas o corra el script (exigiría darle Bash; Franco lo descartó el 2026-10-30); mover tareas sueltas (rompe `depende_de:`); segundo archivo de estado para lo archivado (dos fuentes de verdad) | Que el costo de contexto de `features/` siga siendo bajo sin archivar |
+| Archivar con script, bajo confirmación de Franco (F08) | Mantiene corto lo que leen los agentes sin que un agente mueva carpetas ni decida estados | Que el `coordinador` mueva carpetas o corra el script por iniciativa propia (Franco lo descartó el 2026-10-30; el mismo día pidió permitirlo solo a pedido suyo y con Bash restringido, `WORKFLOW.md` §3.1, por aprobar); mover tareas sueltas (rompe `depende_de:`); segundo archivo de estado para lo archivado (dos fuentes de verdad) | Que el costo de contexto de `features/` siga siendo bajo sin archivar |
 
 ## Evolución prevista (no existe hoy)
 
