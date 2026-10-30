@@ -74,6 +74,40 @@ function partir(archivo) {
   return { cabecera: m[1], cuerpo: m[2] };
 }
 
+// Pi no puede hacer cumplir patrones de Bash: en `tools:` cada `Bash(...)` pasa a `Bash`, una sola vez.
+// Solo toca la línea `tools:`; el resto de la cabecera queda igual.
+function bashPlano(cabecera) {
+  return cabecera.replace(/^tools:[ \t]*(.*)$/m, (_linea, valor) => {
+    const partes = [];
+    let prof = 0;
+    let actual = "";
+    for (const ch of valor) {
+      if (ch === "(") prof++;
+      if (ch === ")") prof--;
+      if (ch === "," && prof === 0) {
+        partes.push(actual.trim());
+        actual = "";
+      } else {
+        actual += ch;
+      }
+    }
+    if (actual.trim()) partes.push(actual.trim());
+
+    const salida = [];
+    let hayBash = false;
+    for (const p of partes) {
+      if (/^Bash(\(.*\))?$/.test(p)) {
+        if (hayBash) continue;
+        hayBash = true;
+        salida.push("Bash");
+      } else {
+        salida.push(p);
+      }
+    }
+    return `tools: ${salida.join(", ")}`;
+  });
+}
+
 function leerJson(ruta) {
   try {
     return JSON.parse(readFileSync(ruta, "utf8"));
@@ -109,8 +143,9 @@ if (orden === "modelo" && args.length === 2) {
   }
 
   const modelo = resolverModelo(agente, orden === "agente-pi" ? "pi" : "claude-code");
+  const cabeceraSalida = orden === "agente-pi" ? bashPlano(cabecera) : cabecera;
   process.stdout.write(
-    `---\n${cabecera}\nmodel: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${cuerpo}`
+    `---\n${cabeceraSalida}\nmodel: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${cuerpo}`
   );
 } else if (orden === "cuerpo" && args.length === 1) {
   process.stdout.write(partir(args[0]).cuerpo.replace(/^\s+/, ""));

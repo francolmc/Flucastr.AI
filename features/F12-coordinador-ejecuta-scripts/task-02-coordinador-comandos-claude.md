@@ -1,5 +1,5 @@
 # task-02 — `coordinador`: lista cerrada de comandos y regla de la puerta 4 (Claude Code)
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Cambia `agentes/coordinador.md` para que pueda correr, solo a pedido explícito de Franco, los tres comandos de `definitions/WORKFLOW.md` §3.1, con la restricción por patrones `Bash(...)` en Claude Code. Antes comprueba si `tools:` de un agente acepta esos patrones (hoy es una inferencia). Añade a la instrucción la prohibición de commit/push/`.env`, la condición de «un pedido no autoriza otro» y la regla de que la puerta 4 revise cualquier cambio en `scripts/`; y el contrato de roles pasa a exigirlo.

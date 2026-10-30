@@ -1,5 +1,5 @@
 # task-03 — Generación del `coordinador` en Pi y Claude Code, e instalación
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
 
 ## Descripción
 Tras task-02 el `tools:` del `coordinador` lleva tres patrones `Bash(...)`. Para Claude Code el agente generado debe conservarlos tal cual. Para Pi, Franco eligió la opción B (§3.1.1): `bash` completo sin restricción técnica; el agente generado para Pi debe declararlo de forma explícita (`Bash` sin patrones) en vez de arrastrar patrones que Pi no puede hacer cumplir y que darían una falsa sensación de contención. La tarea ajusta el generador y deja pruebas sin modelo de que ambas salidas son las esperadas y de que la instalación en entorno aislado las produce.
@@ -46,4 +46,53 @@ Salida esperada: `fail 0` y `tests` ≥ 7; la línea de Pi contiene `Bash,` o `B
 
 ## Evidencia
 
+Paso 1 (estado de partida, antes del cambio):
+```
+$ node scripts/resolver.mjs agente-pi agentes/coordinador.md | sed -n 1,8p
+---
+name: coordinador
+...
+tools: Agent(arquitecto, planificador, constructor), Read, Grep, Glob, Write, Edit, Skill, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*)
+model: openai/gpt-6.1-sol
+...
+$ node scripts/resolver.mjs agente-claude agentes/coordinador.md | sed -n 1,8p
+...
+tools: Agent(arquitecto, planificador, constructor), Read, Grep, Glob, Write, Edit, Skill, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*)
+model: claude-sonnet-5-5
+...
+```
+
+Verificación (salida real, tras el cambio):
+```
+$ cd /Users/franco/Codes/flucastr/Flucastr.AI
+$ node --test pruebas/comprobaciones/resolver-agentes.test.mjs pruebas/comprobaciones/modelos-agentes.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+$ node scripts/resolver.mjs agente-pi agentes/coordinador.md | grep "^tools:"
+tools: Agent(arquitecto, planificador, constructor), Read, Grep, Glob, Write, Edit, Skill, Bash
+$ node scripts/resolver.mjs agente-claude agentes/coordinador.md | grep "^tools:"
+tools: Agent(arquitecto, planificador, constructor), Read, Grep, Glob, Write, Edit, Skill, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*)
+$ git status --short scripts pruebas instalar.sh
+ M scripts/resolver.mjs
+?? pruebas/comprobaciones/resolver-agentes.test.mjs
+```
+
+Criterios:
+1. Pi para `coordinador`: `Bash` sin patrones y conserva `Agent(...)`, `Read`, `Grep`, `Glob`, `Write`, `Edit`, `Skill`. Cumple (prueba 4 y salida de Pi arriba).
+2. Claude Code conserva los tres patrones. Cumple (prueba 5 y salida de Claude arriba).
+3. `arquitecto`, `planificador`, `constructor` sin cambio en ninguna salida. Cumple (prueba 6; el `model:` se excluye de la comparación porque difiere por herramienta).
+4. Instalación aislada: Claude con patrones, Pi con `Bash` completo. Cumple (prueba 7). `instalar.sh` sin cambios (no aparece en `git status`).
+
+Pruebas: `resolver-agentes.test.mjs` tiene 7 pruebas (1 a 7); `modelos-agentes.test.mjs` tiene 3 previas; total 10, 0 fallos.
+
 ## Notas
+Antes del cambio, el `tools:` de Pi ya era igual al de Claude (paso 1), como se esperaba.
+
+Huecos menores y decisión:
+- Criterio 3 pide comparar con `agente-claude`, pero el `model:` difiere por herramienta. Decisión: la prueba compara ambas salidas quitando la línea `model:`.
+- La prueba 3 (agente sin Bash) también excluye `model:` por el mismo motivo.
+- `bashPlano` colapsa solo las entradas `Bash`/`Bash(...)`: si hay más de una, deja la primera. Otras entradas se mantienen tal cual.
+- La función `instalacionAislada` se repite en `resolver-agentes.test.mjs` porque `modelos-agentes.test.mjs` no la exporta. No se tocó ese archivo.
+
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=4; resultado=lista; causa=ninguna
