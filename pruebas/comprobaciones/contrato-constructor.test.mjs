@@ -31,6 +31,8 @@ const variantes = [
   ['regla 10: falta «git switch -c», «git branch --show-current» o la prohibición de `commit`, `push`, `merge`, `reset`, `rebase` ni `checkout` en el constructor', 'constructor', ['git switch -c', 'git branch --show-current', 'Nunca `commit`, `push`, `merge`, `reset`, `rebase` ni `checkout`']],
   ['regla 11: falta «git switch -c», «git branch --show-current», «Rama:», «Franco confirmó `git switch <rama>`» o «Cambia `estado` a `en curso`» en la skill', 'skill', ['git switch -c', 'git branch --show-current', 'Rama:', 'Franco confirmó `git switch <rama>`', 'Cambia `estado` a `en curso`']],
   ['regla 12: falta la línea «CONFIRMAR: accion=git switch <rama>; motivo=<motivo>» en la skill', 'skill', ['CONFIRMAR: accion=git switch <rama>; motivo=<motivo>']],
+  ['regla 13: falta «Modo yolo: activo», «no creas rama», «no emites `CONFIRMAR:`» o «ni local» en el constructor', 'constructor', ['Modo yolo: activo', 'no creas rama', 'no emites `CONFIRMAR:`', 'ni local']],
+  ['regla 14: falta «Modo yolo: activo», «salta este paso entero», «no emites `CONFIRMAR:`» o «ni local» en la skill', 'skill', ['Modo yolo: activo', 'salta este paso entero', 'no emites `CONFIRMAR:`', 'ni local']],
 ];
 
 for (const [nombre, sobre, frases] of variantes) {
@@ -48,4 +50,11 @@ test('rechaza la regla 11 si la rama se resuelve después del paso a «en curso�
   textos.skill = textos.skill.replace('git switch -c', 'X') + '\ngit switch -c';
   const errores = validarConstructor(textos);
   assert.ok(errores.some((e) => e.startsWith('Regla 11 ')), `se esperaba error de la regla 11, llegó: ${JSON.stringify(errores)}`);
+});
+
+test('rechaza la regla 14 si «Modo yolo: activo» aparece después de «git switch -c» en la skill', () => {
+  const textos = real();
+  textos.skill = textos.skill.replace('Modo yolo: activo', 'X') + '\nModo yolo: activo';
+  const errores = validarConstructor(textos);
+  assert.ok(errores.some((e) => e.startsWith('Regla 14 ')), `se esperaba error de la regla 14, llegó: ${JSON.stringify(errores)}`);
 });

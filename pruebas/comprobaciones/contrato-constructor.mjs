@@ -21,6 +21,8 @@ const REGLAS = [
   { n: 10, sobre: 'constructor', frases: ['git switch -c', 'git branch --show-current', 'Nunca `commit`, `push`, `merge`, `reset`, `rebase` ni `checkout`'] },
   { n: 11, sobre: 'skill', frases: ['git switch -c', 'git branch --show-current', 'Rama:', 'Franco confirmó `git switch <rama>`', 'Cambia `estado` a `en curso`'], despuesDe: ['git switch -c', 'Cambia `estado` a `en curso`'] },
   { n: 12, sobre: 'skill', frases: ['CONFIRMAR: accion=git switch <rama>; motivo=<motivo>'], regex: /CONFIRMAR: accion=git switch <[^>]+>; motivo=[^\n]+/, mensajeRegex: 'falta la línea «CONFIRMAR: accion=git switch <rama>; motivo=<motivo>»' },
+  { n: 13, sobre: 'constructor', frases: ['Modo yolo: activo', 'no creas rama', 'no emites `CONFIRMAR:`', 'ni local'] },
+  { n: 14, sobre: 'skill', frases: ['Modo yolo: activo', 'salta este paso entero', 'no emites `CONFIRMAR:`', 'ni local'], despuesDe: ['Modo yolo: activo', 'git switch -c'] },
 ];
 
 export function validarConstructor({ constructor, skill } = {}) {

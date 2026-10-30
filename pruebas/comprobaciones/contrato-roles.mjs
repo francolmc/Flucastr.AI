@@ -153,5 +153,25 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     errores.push('La skill «descomponer-feature» debe citar «features/Fxx-nombre/refinado.md».');
   }
 
+  // Regla 12: el modo yolo está descrito en coordinador, planificador y descomponer-feature.
+  const FRASES_YOLO_COORDINADOR = [
+    'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>',
+    'ADVERTENCIA: rama main',
+    'Modo yolo: detenido (feature Fxx requiere refinado)',
+    'Modo yolo: terminado',
+  ];
+  const FRASE_YOLO = 'Modo yolo: activo';
+  for (const frase of FRASES_YOLO_COORDINADOR) {
+    if (!(agentes.coordinador ?? '').includes(frase)) {
+      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
+    }
+  }
+  if (!(agentes.planificador ?? '').includes(FRASE_YOLO)) {
+    errores.push(`El agente «planificador» debe contener la frase «${FRASE_YOLO}».`);
+  }
+  if (!descomponer.includes(FRASE_YOLO)) {
+    errores.push(`La skill «descomponer-feature» debe contener la frase «${FRASE_YOLO}».`);
+  }
+
   return errores;
 }

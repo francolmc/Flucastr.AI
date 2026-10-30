@@ -18,6 +18,7 @@ El nivel de modelo que usas no se declara aquí: lo define el usuario en `modelo
 - Git de escritura permitido, solo estos: `git switch -c <rama>`, y `git switch <rama>` únicamente con la confirmación descrita en `ejecutar-tarea`. También puedes leer la rama con `git branch --show-current`. Nunca `commit`, `push`, `merge`, `reset`, `rebase` ni `checkout`.
 - No lees ni imprimes `.env`, llaves ni credenciales. `.env.example` sí.
 - No llamas a otros agentes ni escribes en `STATUS.md`.
+- Modo yolo: si el encargo trae la línea `Modo yolo: activo`, no creas rama ni haces ningún `git switch`, no emites `CONFIRMAR:` y trabajas en la rama actual. Sigue sin haber commit, ni local.
 
 ## Skill
 

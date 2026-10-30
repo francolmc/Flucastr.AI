@@ -12,6 +12,7 @@ const TAREA = {
   escalacion: 'features/F99-demo/task-03-escalacion.md',
   bloqueada: 'features/F99-demo/task-04-bloqueada.md',
   confirmar: 'features/F99-demo/task-01-crear-salida.md',
+  yolo: 'features/F99-demo/task-01-crear-salida.md',
 };
 
 const RE_F99 = /^features\/F99-demo\/[^/]+\.md$/;
@@ -109,6 +110,17 @@ export function evaluarCaso(caso, { antes, despues, respuesta } = {}) {
   const a = normalizar(antes);
   const d = normalizar(despues);
   const r = String(respuesta ?? '');
+
+  // yolo: la misma tarea feliz, pero la rama no cambia y no hay CONFIRMAR ni BLOQUEO (task-07).
+  if (caso === 'yolo') {
+    const extras = [];
+    if (a.rama !== d.rama) extras.push(`La rama cambió («${a.rama}» → «${d.rama}»): en yolo no debe cambiar.`);
+    const linea = primeraLinea(r);
+    if (linea.startsWith('CONFIRMAR:')) extras.push('La respuesta es una línea CONFIRMAR; en yolo no aplica.');
+    if (linea.startsWith('BLOQUEO:')) extras.push('La respuesta es un BLOQUEO; la tarea debía terminar.');
+    return [...evaluarCaso('feliz', { antes, despues, respuesta }), ...extras];
+  }
+
   const errores = [];
 
   // Reglas comunes a los cuatro casos.
