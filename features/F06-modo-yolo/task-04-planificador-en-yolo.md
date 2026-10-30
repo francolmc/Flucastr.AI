@@ -1,5 +1,5 @@
 # task-04 — El planificador en modo yolo: sin ronda de refinado ni supuestos
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 En el modo yolo (`definitions/WORKFLOW.md` §9.3) no hay ventana de refinado con Franco ni se inventan supuestos: ante una feature ambigua el `planificador` devuelve `REFINAR:` y el coordinador lo trata como escalación. Además, las tareas que redacta en yolo no pueden depender de ramas ni de commits. Esta tarea deja ambas reglas en `agentes/planificador.md` y en `skills/descomponer-feature/SKILL.md`.

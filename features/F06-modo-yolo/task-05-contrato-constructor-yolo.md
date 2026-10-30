@@ -1,5 +1,5 @@
 # task-05 — Contrato del constructor: reglas de yolo, con control negativo
-repo: Flucastr.AI   depende_de: task-01   estado: aprobada
+repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
 
 ## Descripción
 `pruebas/comprobaciones/contrato-constructor.mjs` verifica por frases literales el contrato de `agentes/constructor.md` y `skills/ejecutar-tarea/SKILL.md`. Esta tarea añade las reglas que dejó task-01 (yolo: sin rama, sin `git switch`, sin `CONFIRMAR:`, sin commit) para que un cambio futuro que las borre, o que ponga el sub-bullet de yolo después de la resolución de rama, falle la verificación rápida. Va acompañada de variantes negativas.
@@ -43,4 +43,43 @@ Esperado: la primera con `fail 0`; la segunda termina con `rapida: N archivos en
 
 ## Evidencia
 
+Rama (`git branch --show-current`): `feature/F06-modo-yolo`, igual a la de la tarea; no hubo `git switch`.
+Dependencia: `features/F06-modo-yolo/task-01-constructor-en-yolo.md` tiene `estado: hecha`.
+Textos reales: `agentes/constructor.md` y `skills/ejecutar-tarea/SKILL.md` contienen `Modo yolo: activo`, `no creas rama`, `no emites `CONFIRMAR:``, `ni local` y `salta este paso entero`, con `Modo yolo: activo` antes de `git switch -c` en la skill.
+
+Comando: `node --test pruebas/comprobaciones/contrato-constructor.test.mjs`
+Salida (final):
+```
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+EXIT=0
+```
+Pruebas nuevas en esa salida: `rechaza regla 13: falta «Modo yolo: activo», «no creas rama», «no emites `CONFIRMAR:`» o «ni local» en el constructor` ✔, `rechaza regla 14: falta «Modo yolo: activo», «salta este paso entero», «no emites `CONFIRMAR:`» o «ni local» en la skill` ✔, `rechaza la regla 14 si «Modo yolo: activo» aparece después de «git switch -c» en la skill` ✔, y `los textos reales del constructor y de ejecutar-tarea cumplen todas las reglas` ✔.
+
+Comando: `bash pruebas/rapida.sh`
+Última línea de salida: `rapida: 16 archivos en 27 s (tope 30 s)`; código de salida 0. Resumen: 133 pruebas, `pass 133`, `fail 0`.
+
+Comando: `git status --short pruebas/comprobaciones`
+Salida:
+```
+ M pruebas/comprobaciones/contrato-constructor.mjs
+ M pruebas/comprobaciones/contrato-constructor.test.mjs
+```
+
+Criterios de aceptación:
+1. Textos reales cumplen todas las reglas: cumplido (prueba «los textos reales…» ✔, `fail 0`).
+2. Borrar frases de las reglas 13 o 14 produce error: cumplido (variantes «regla 13» y «regla 14» ✔).
+3. `Modo yolo: activo` después de `git switch -c` produce error de la regla 14: cumplido (prueba de orden ✔; el error empieza por `Regla 14 `).
+4. Verificación rápida pasa: cumplido (`rapida: 16 archivos en 27 s (tope 30 s)`, código 0).
+
+Sin commit, push, PR, merge ni despliegue. `definitions/STATUS.md` no se tocó.
+
 ## Notas
+- Cambios de código: en `pruebas/comprobaciones/contrato-constructor.mjs` se añadieron las reglas 13 y 14 al final de `REGLAS`, con las frases y `despuesDe` exactos de la tarea. En `pruebas/comprobaciones/contrato-constructor.test.mjs` se añadieron las variantes «regla 13» y «regla 14» al arreglo `variantes` y la prueba de orden de la regla 14. Sin huecos ni decisiones menores; no se modificó `agentes/` ni `skills/`.
+- `bash pruebas/rapida.sh` imprimió «Entorno conservado: .../pruebas/.temporales/capa1-…»; es salida normal de esa comprobación, no un cambio de este encargo.
+- Tiempo de la verificación rápida: 27 s sobre tope de 30 s; queda margen acotado, a vigilar si crecen las comprobaciones.
