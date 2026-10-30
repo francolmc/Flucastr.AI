@@ -1,6 +1,6 @@
 # Flujo de trabajo — diseño de `coordinador`, `planificador` y `constructor`
 
-> Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3). **Cambio propuesto, por aprobar (puerta 1, 2026-10-30, F08):** §4, §5, §7 (tope de 6 pendientes y resultado de F07) y la nueva §10.
+> Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3). Puerta 1 de F08 aprobada por Franco el 2026-10-30 (§4, §5, §7 y §10). **Pasaje pendiente de aprobación:** §10.5 (y la frase de §10.2 que lo acompaña), por la desviación aceptada el 2026-10-30: el `coordinador` no tiene Bash ni corre `scripts/archivar.mjs`.
 > Complementa `PROJECT.md` («Flujo de trabajo»). Este documento define **qué** se construye y las reglas; lo construye una sesión de implementación, no el arquitecto.
 > *Confirmado* = dicho por Franco o leído en archivo. *Propuesta* = mía, por aprobar.
 
@@ -287,9 +287,9 @@ Excepción explícita y acotada a «cuatro puertas» y «sin commit». No es un 
 
 **Preguntas abiertas:** ninguna.
 
-## 10. Limpieza, chequeo de contexto y archivo de lo terminado (borrador, F08, 2026-10-30)
+## 10. Limpieza, chequeo de contexto y archivo de lo terminado (aprobado en la puerta 1, 2026-10-30; §10.5 pendiente)
 
-> *Confirmado* = pedido de Franco (`BACKLOG.md`, F08). *Propuesta* = redacción mía, por aprobar. Cifras: **a calibrar** con la primera corrida real, como las de «acotada».
+> *Confirmado* = pedido de Franco (`BACKLOG.md`, F08). *Propuesta* = redacción mía. Cifras: **a calibrar** con la primera corrida real, como las de «acotada».
 
 ### 10.1 Qué choca y cómo se resuelve
 
@@ -305,7 +305,7 @@ Excepción explícita y acotada a «cuatro puertas» y «sin commit». No es un 
 Un solo script de Node, sin dependencias ni red, con dos modos:
 
 - **Chequeo** (por defecto, solo lectura, sin efectos sobre archivos): imprime el informe de §10.4 y la lista de candidatas. Siempre termina con código 0; es un aviso, no una puerta.
-- **`--aplicar`**: mueve las candidatas. Lo ejecuta **Franco** (como `initialize.sh`, que se escribe y él corre). Con `--aplicar Fxx` mueve solo esa. El `coordinador` puede correr el chequeo, pero nunca `--aplicar`, y en yolo no corre ninguno de los dos.
+- **`--aplicar`**: mueve las candidatas. Lo ejecuta **Franco** (como `initialize.sh`, que se escribe y él corre). Con `--aplicar Fxx` mueve solo esa. **Cambio por aprobar:** el chequeo también lo corre Franco; el `coordinador` no tiene Bash y no corre ninguno de los dos modos.
 
 **Candidata** (todas, o no se mueve): (1) la fila de la feature en `BACKLOG.md` está `hecha`; (2) todas las `task-*.md` de su carpeta están `hecha`; (3) existe `features/Fxx-nombre/` y el nombre coincide con el ID; (4) no existe ya `features/completed/Fxx-nombre/`. Si algo no coincide (fila `hecha` con una tarea que no lo está, carpeta sin fila, destino ocupado), no mueve nada de esa feature y lo informa; el script **no corrige estados** ni resuelve la inconsistencia.
 
@@ -338,17 +338,17 @@ El `coordinador` y el `planificador` listan `features/` sin entrar en `completed
 
 ### 10.5 Cuándo ocurre
 
-1. Al quedar `hecha` la última tarea de una feature y Franco darla por hecha (aviso de §9.1), el `coordinador` corre el chequeo y, si la feature es candidata, añade a «Espera a Franco»: «Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx`». Franco decide cuándo (antes o después del PR) y commitea el movimiento.
-2. Antes de descomponer una feature nueva (puerta 3), el `coordinador` corre el chequeo y traslada sus avisos a «Espera a Franco» si los hay; no bloquea.
+1. Al quedar `hecha` la última tarea de una feature y Franco darla por hecha (aviso de §9.1), el `coordinador` (sin Bash, no corre el script) añade a «Espera a Franco» el comando: `node scripts/archivar.mjs` para el chequeo o `node scripts/archivar.mjs --aplicar Fxx` para archivar. Franco lo corre cuando quiera (antes o después del PR) y commitea el movimiento. *(Cambio por aprobar, 2026-10-30.)*
+2. Antes de la puerta 3 (descomponer una feature nueva), el `coordinador` deja en «Espera a Franco» el comando del chequeo (`node scripts/archivar.mjs`) para que Franco lo corra; no bloquea. *(Cambio por aprobar.)*
 3. Franco puede correrlo cuando quiera.
 4. En yolo no se archiva (la feature no tiene revisión de Franco); queda para después.
 
 ### 10.6 Decisiones de Franco y preguntas abiertas
 
-**Propuestas por aprobar:** (1) `--aplicar` solo lo corre Franco; (2) las tareas viajan con su feature, no sueltas; (3) filas `hecha` se quedan y se compactan por el `planificador`; (4) umbrales de §10.4 a calibrar.
+**Aprobadas en la puerta 1 (2026-10-30), salvo §10.5:** (1) `--aplicar` solo lo corre Franco; (2) las tareas viajan con su feature, no sueltas; (3) filas `hecha` se quedan y se compactan por el `planificador`; (4) umbrales de §10.4 a calibrar.
 
 **Abiertas:** 1. ¿Archivar antes o después del PR de la feature? (recomiendo después de que Franco dé la feature por hecha, en su propio commit `chore/`). 2. ¿Aceptas los umbrales de §10.4 como punto de partida?
 
 ## Estado
 
-Aprobado por Franco el 2026-10-29, incluidos §2, §3 y la nueva §9 (F05 y F06, con sus respuestas a §9.5). **Cambios de F08 (§4, §5, §7, §10) en borrador, pendientes de la puerta 1 (2026-10-30).**
+Aprobado por Franco el 2026-10-29, incluidos §2, §3 y la nueva §9 (F05 y F06, con sus respuestas a §9.5). Cambios de F08 (§4, §5, §7, §10) aprobados en la puerta 1 el 2026-10-30. **Pendiente de aprobación: §10.5** (el `coordinador` no corre `archivar.mjs`; lo corre Franco).

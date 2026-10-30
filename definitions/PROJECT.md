@@ -1,6 +1,6 @@
 # Flucastr.AI — proyecto existente
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). **Cambio propuesto por aprobar (puerta 1, 2026-10-30):** F08, archivo y chequeo de contexto, y modelo por agente comprobado (F07).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (archivo y chequeo de contexto; modelo por agente comprobado, F07). **Pendiente de aprobación:** `WORKFLOW.md` §10.5 (el `coordinador` no corre `archivar.mjs`).
 > Documento definitivo: consolida `definicion/{proyecto,mvp,plan-pruebas-arquitecto,diseno-primera-herramienta}.md` y los dos encargos (ver «Documentos reemplazados»).
 > Origen de los datos: *confirmado* = leído en archivo o dicho por Franco; *inferido* = deducido; entre paréntesis, la fuente.
 
@@ -82,7 +82,7 @@ Cuatro roles. Franco abre **siempre el `coordinador`**; los demás roles los inv
 | 2. Planificar | `planificador` (por crear) | Lo anterior + conversación con Franco | `definitions/BACKLOG.md`: features generales, ordenadas por valor/esfuerzo, con estado y la siguiente marcada |
 | 3. Descomponer | `planificador` | La feature en curso | `features/F01-nombre/task-01-nombre.md`…: descripción, alcance, lista de pasos, criterios de aceptación, verificación, estado y campo `repo:` (con orden de dependencia si hay varios repos) |
 | 4. Construir | `constructor` (por crear, después) | Una tarea aprobada | Código en el repo de la tarea, evidencia de la verificación; la deja «lista para revisión» |
-| 5. Cerrar | Franco | Tarea revisada | Aprueba, hace el commit; la feature pasa a `features/completed/` solo cuando él la da por hecha y confirma el archivado con `scripts/archivar.mjs --aplicar` (F08, borrador; `WORKFLOW.md` §10) |
+| 5. Cerrar | Franco | Tarea revisada | Aprueba, hace el commit; la feature pasa a `features/completed/` solo cuando él la da por hecha y confirma el archivado con `scripts/archivar.mjs --aplicar` (F08; `WORKFLOW.md` §10) |
 
 **Cuatro puertas de aprobación** (decidido por Franco): el `coordinador` solo se detiene para (1) aprobar la definición, (2) aprobar el backlog y su prioridad, (3) aprobar cada tarea antes de construir, (4) revisar el resultado y hacer el commit. Entre puertas el trabajo avanza solo.
 
@@ -100,7 +100,7 @@ Reglas:
 - **Prioridad por valor/esfuerzo, con habilitantes primero:** antes de ordenar por aporte, el `planificador` revisa qué falta para poder construir y *verificar*. Si falta, eso va primero como feature «habilitante», según el contexto: en un proyecto nuevo, el andamiaje; en uno existente sin despliegue local para pruebas e2e, ese despliegue. Sin habilitantes no hay criterio de «hecha» comprobable. Cada feature del backlog lleva su tipo (habilitante o de producto) y la razón de su posición.
 - **Tareas completas y acotadas** (Franco): suficientemente detalladas para que el ejecutor termine sin detenerse, y lo bastante pequeñas para caber en una sesión. Reglas en `WORKFLOW.md`, §6.
 - **Planificar justo a tiempo:** solo la feature en curso se descompone en tareas.
-- **Una fuente de verdad del estado de las features:** `BACKLOG.md`; `completed/` es solo archivo y no se lee salvo pedido. Un script mueve las features `hecha` solo con confirmación de Franco y nunca decide estados (F08, borrador, `WORKFLOW.md` §10). Las filas `hecha` siguen en el backlog, cortas, y no cuentan para el tope de 6. `STATUS.md` es del flujo, no de las features.
+- **Una fuente de verdad del estado de las features:** `BACKLOG.md`; `completed/` es solo archivo y no se lee salvo pedido. Un script mueve las features `hecha` solo con confirmación de Franco y nunca decide estados (F08, `WORKFLOW.md` §10). Las filas `hecha` siguen en el backlog, cortas, y no cuentan para el tope de 6. `STATUS.md` es del flujo, no de las features.
 - **Estructura igual para uno o varios repos:** el campo `repo:` reemplaza subcarpetas por repo.
 - **Nombres en inglés, contenido en español** (`features/`, `task-NN-…`, `completed/`).
 - El `constructor` nunca marca `hecha`; si la misma verificación falla dos veces por la misma causa, queda `bloqueada`. Una tarea cabe en una sesión; si no, se parte.
@@ -133,4 +133,4 @@ Resueltas (Franco, 2026-10-29): los tests se recortan por exceso para el alcance
 
 ## Estado
 
-Aprobado por Franco el 2026-10-29, incluidos los cambios de F05 y F06 y sus respuestas a `WORKFLOW.md` §9.5.
+Aprobado por Franco el 2026-10-29, incluidos los cambios de F05 y F06 y sus respuestas a `WORKFLOW.md` §9.5. Puerta 1 de F08 aprobada el 2026-10-30.

@@ -39,7 +39,8 @@ function muestra() {
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n' +
         'Si te bloqueas, primera línea: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n' +
         'Si la feature requiere refinado, respondes `REFINAR: feature=Fxx; preguntas=<n>`.\n' +
-        'Con el encargo «Modo yolo: activo», no preguntas: respondes REFINAR.\n',
+        'Con el encargo «Modo yolo: activo», no preguntas: respondes REFINAR.\n' +
+        'No entras en `features/completed/`.\n',
       constructor: FM('constructor', 'Ejecuta una tarea aprobada.') +
         'Eres el constructor. Usa `ejecutar-tarea`.\n' +
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n',
@@ -55,7 +56,9 @@ function muestra() {
         'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>\n' +
         'ADVERTENCIA: rama main\n' +
         'Modo yolo: detenido (feature Fxx requiere refinado)\n' +
-        'Modo yolo: terminado\n\n' +
+        'Modo yolo: terminado\n' +
+        'Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx`.\n' +
+        'Al listar `features/` no entres en `features/completed/`.\n\n' +
         ESTADOS_TABLA.join('\n') + '\n',
     },
     skills: {
@@ -176,6 +179,28 @@ const variantesF06 = [
 ];
 
 for (const [nombre, frase, alterar] of variantesF06) {
+  test(`rechaza ${nombre}`, () => {
+    const m = muestra();
+    alterar(m, frase);
+    const errores = validarRoles(m);
+    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
+  });
+}
+
+// Controles negativos de la regla 13: quitar cualquiera de las tres frases debe nombrarla en el error.
+const variantesF07 = [
+  ['regla 13: el coordinador pierde el aviso de --aplicar', 'node scripts/archivar.mjs --aplicar Fxx', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'aviso omitido');
+  }],
+  ['regla 13: el coordinador pierde la exclusión de features/completed/', 'features/completed/', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'archivo omitido');
+  }],
+  ['regla 13: el planificador pierde la exclusión de features/completed/', 'features/completed/', (m, f) => {
+    m.agentes.planificador = m.agentes.planificador.replace(f, 'archivo omitido');
+  }],
+];
+
+for (const [nombre, frase, alterar] of variantesF07) {
   test(`rechaza ${nombre}`, () => {
     const m = muestra();
     alterar(m, frase);
