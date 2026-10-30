@@ -1,5 +1,5 @@
 # task-01 — El tope de 6 features cuenta solo las pendientes
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 `pruebas/comprobaciones/formato-flujo.mjs` exige entre 1 y 6 filas en total en `definitions/BACKLOG.md`, y `skills/crear-backlog/SKILL.md` fija «Máximo 6 features». Con F01–F06 `hecha` y F07–F10 abiertas el backlog tiene 10 filas y `bash pruebas/rapida.sh` falla en «definitions/BACKLOG.md real cumple el formato». Decisión de Franco (2026-10-29, opción 1 / opción (a) del backlog): el tope de 6 se cuenta solo sobre las features no `hecha`. Esta tarea cambia validador, pruebas y texto de la skill para que sea así y habilita task-02.
