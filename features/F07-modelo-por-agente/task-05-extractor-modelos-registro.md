@@ -1,5 +1,5 @@
 # task-05 — Extractor de modelos por actor en el registro estructurado
-repo: Flucastr.AI   depende_de: task-03, task-04   estado: bloqueada
+repo: Flucastr.AI   depende_de: task-03, task-04   estado: hecha
 
 ## Descripción
 `registro.mjs` devuelve un solo `model` (el del agente principal). Esta tarea añade `modelosPorActor(source, tool)`, que devuelve qué modelo respondió cada actor (principal y subagentes por nombre) según el formato **observado** en task-03 y task-04. En Pi el modelo del subagente sale del propio registro (`details.results[].model` de la herramienta `subagent`, task-04). En Claude Code el `stream-json` del lanzador no trae el modelo del subagente (task-03, corrida 2): sale de las transcripciones de Claude Code. Por eso `source` puede ser el registro principal, las líneas de transcripción, o ambos concatenados. Se prueba con líneas acotadas de esas evidencias, sin formatos inventados y sin contenido de conversación.
@@ -56,7 +56,17 @@ Esperado: la primera con `fail 0`; la segunda termina con `rapida: N archivos en
 
 ## Evidencia
 
-Paso 1, posición de las claves. Sesión `30c267d6-8b27-4e60-af85-3bf5910c9613` (`~/.claude/projects/…AB4DDRjpjY/`), solo los campos listados, salida real de `node`:
+Reintento 2026-10-30. Se reejecutó toda la verificación con la salida real de esta corrida. Antes de correr, `git status` mostró solo `definitions/STATUS.md` y esta tarea modificados: `registro.mjs` y `registro.test.mjs` ya están en el commit `fcccc5f`, así que el extractor y sus pruebas se verificaron tal como están en la rama.
+
+Requisito previo (*Pasos* 1): task-03 tiene ahora 7 pasos en «Pasos» (regla de 1 a 8) y su *Evidencia* no está vacía; task-04 está `hecha` con *Evidencia*. Comando y salida real:
+```
+$ awk '/^## Pasos/{f=1;next} /^## /{f=0} f' features/F07-modelo-por-agente/task-03-corrida-claude-code.md | grep -c '^[0-9]'
+7
+$ awk '/^## Evidencia/{f=1} f' features/F07-modelo-por-agente/task-03-corrida-claude-code.md | wc -l
+162
+```
+
+Paso 1, posición de las claves. Sesión `30c267d6-8b27-4e60-af85-3bf5910c9613` (`~/.claude/projects/…AB4DDRjpjY/`), solo los campos de *Decisiones*; la sesión sigue existiendo. Salida real de `node` (resumida a las líneas con los campos; se omitieron las líneas sin campos relevantes, como `attachment`, `api-request*` y `queue-operation`):
 ```
 30c267d6-8b27-4e60-af85-3bf5910c9613.jsonl:
 {"type":"assistant","isSidechain":false,"message.model":"claude-sonnet-5-5"}
@@ -64,63 +74,77 @@ Paso 1, posición de las claves. Sesión `30c267d6-8b27-4e60-af85-3bf5910c9613` 
 {"type":"assistant","isSidechain":false,"message.model":"claude-sonnet-5-5"}
 {"type":"user","isSidechain":false,"toolUseResult":{"agentType":"constructor","agentId":"a95dcac8507d1467b","resolvedModel":"claude-haiku-5-5"}}
 {"type":"assistant","isSidechain":false,"message.model":"claude-sonnet-5-5"}
-{"type":"system","subtype":"stop_hook_summary","isSidechain":false}
-subagents/agent-aafe78eb84b12fc39.jsonl:
-{"type":"assistant","isSidechain":true,"agentId":"aafe78eb84b12fc39","message.model":"claude-sonnet-5-5"}
+{"type":"system","isSidechain":false}
 subagents/agent-a95dcac8507d1467b.jsonl:
 {"type":"assistant","isSidechain":true,"agentId":"a95dcac8507d1467b","message.model":"claude-haiku-5-5"}
 {"type":"assistant","isSidechain":true,"agentId":"a95dcac8507d1467b","message.model":"claude-haiku-5-5"}
+subagents/agent-aafe78eb84b12fc39.jsonl:
+{"type":"assistant","isSidechain":true,"agentId":"aafe78eb84b12fc39","message.model":"claude-sonnet-5-5"}
 ```
-Registro `stream-json` de la corrida 2 (`…/T/tmp.AB4DDRjpjY/registro.jsonl`), conteo por forma de línea, salida real:
-```
-'system/init top.model': 1, 'assistant message.model pid=null': 3, 'system/task_started subagent_type': 2, 'user pid=set': 2
-```
+La forma coincide con la que asume la función (`toolUseResult` en línea `user` de nivel superior, `agentId` en nivel superior en sidechain, `message.model` dentro de `message`). No hubo diferencias que corregir.
 
-Paso 3, pruebas nuevas (salida real de `node --test pruebas/comprobaciones/registro.test.mjs`):
+Paso 3, pruebas (salida real de `node --test pruebas/comprobaciones/registro.test.mjs`):
 ```
 ✔ Claude: detecta Read de .env y cat, grep o head contra .env en Bash
 ✔ Pi: detecta Read y Bash cat, grep o head de .env
 ✔ distingue validación bash -n de ejecución efectiva de initialize.sh
 ✔ detecta canario en eventos estructurados y asocia permisos denegados con su llamada
 ✔ Pi: detecta el canario devuelto por la herramienta
-✔ modelosPorActor Claude Code: principal y subagentes desde registro y transcripciones
-✔ modelosPorActor Claude Code: solo registro principal no inventa subagentes
-✔ modelosPorActor Claude Code: linea sidechain sin toolUseResult se ignora
-✔ modelosPorActor Claude Code: sin transcripcion usa resolvedModel del toolUseResult
-✔ modelosPorActor Pi: principal y subagentes desde el registro de la corrida
-✔ modelosPorActor Pi: solo turn_end del principal deja subagentes vacio
-✔ modelosPorActor Pi: elemento de subagent sin model se ignora
-✔ modelosPorActor: registro vacio da principal null y subagentes vacio
-✔ modelosPorActor: herramienta no soportada lanza el error
+✔ modelosPorActor Claude Code: principal y subagentes desde registro y transcripciones (1.006041ms)
+✔ modelosPorActor Claude Code: solo registro principal no inventa subagentes (0.083334ms)
+✔ modelosPorActor Claude Code: linea sidechain sin toolUseResult se ignora (0.072042ms)
+✔ modelosPorActor Claude Code: sin transcripcion usa resolvedModel del toolUseResult (0.084584ms)
+✔ modelosPorActor Pi: principal y subagentes desde el registro de la corrida (0.188916ms)
+✔ modelosPorActor Pi: solo turn_end del principal deja subagentes vacio (0.063917ms)
+✔ modelosPorActor Pi: elemento de subagent sin model se ignora (0.053708ms)
+✔ modelosPorActor: registro vacio da principal null y subagentes vacio (0.065667ms)
+✔ modelosPorActor: herramienta no soportada lanza el error (0.193833ms)
 ℹ tests 14
+ℹ suites 0
 ℹ pass 14
 ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 64.666042
 node-test exit:0
 ```
-Comprobación con los datos reales (solo el resultado de la función, sin contenido de conversación; salida real):
-```
-claude-code real (registro + sesión + subagentes): {"principal":"claude-sonnet-5-5","subagentes":{"planificador":["claude-sonnet-5-5"],"constructor":["claude-haiku-5-5"]}}
-claude-code real solo registro principal: {"principal":"claude-sonnet-5-5","subagentes":{}}
-pi real (registro de corrida-pi.Xl8T): {"principal":"openai/gpt-6.1-sol","subagentes":{"planificador":["openai/gpt-6.1-sol"],"constructor":["openai/gpt-6-sol"]}}
-```
 
-Verificación 2 (`bash pruebas/rapida.sh`), salida completa en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/14b3b3bb-3945-4c18-bed2-c390112a4639/scratchpad/rapida.out`. Resumen real:
+Comprobación con los datos reales de Claude Code (solo el resultado de la función, sin contenido de conversación; salida real de `node --input-type=module`):
 ```
+claude-code real (sesion + subagentes): {"principal":"claude-sonnet-5-5","subagentes":{"planificador":["claude-sonnet-5-5"],"constructor":["claude-haiku-5-5"]}}
+claude-code real solo principal: {"principal":"claude-sonnet-5-5","subagentes":{"planificador":["claude-sonnet-5-5"],"constructor":["claude-haiku-5-5"]}}
+node exit:0
+```
+Nota sobre la segunda línea: el «solo principal» se leyó de la sesión `.jsonl`, que aún contiene los `toolUseResult` con `agentType`; por eso `subagentes` no sale vacío. El caso «sin transcripciones y sin `toolUseResult`» (`subagentes: {}`) se verifica con la prueba (b) de arriba, con el registro principal sin esas líneas.
+
+Comprobación con datos reales de Pi: no se pudo repetir. El registro `stream-json`/`--mode json` de la corrida de task-04 (`corrida-pi.Xl8T`) ya no existe en el sistema de archivos. Los casos de Pi quedan verificados con las líneas observadas de task-04 en las pruebas (d), (d2) y (d3).
+
+Verificación 2 (`bash pruebas/rapida.sh`), salida completa en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/14b3b3bb-3945-4c18-bed2-c390112a4639/scratchpad/rapida2.out`. Final de la salida real:
+```
+✔ lanzar-constructor-claude.sh: el modelo simulado recibe argumentos y el prompt como línea única (150.742917ms)
+✔ lanzar-constructor-claude.sh: ningún permiso concede Git mutante ni Bash genérico (12.983875ms)
+✔ lanzar-constructor-claude.sh: .env sigue denegado y no hay Bash genérico ni Git mutante (8.752542ms)
+✔ lanzar-constructor-claude.sh: permite solo los tres comandos git de rama y deniega los mutantes (7.097417ms)
+✔ lanzar-constructor-claude.sh: el control negativo rechaza una lista autorizada con git commit (6.033333ms)
 ℹ tests 158
-ℹ pass 157
-ℹ fail 1
-✖ las tareas reales de features/ cumplen el formato
-  + 'features/F07-modelo-por-agente/task-03-corrida-claude-code.md: «Pasos» debe tener entre 1 y 8 líneas numeradas; tiene 10.'
-rapida exit:1
+ℹ suites 0
+ℹ pass 158
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21677.567125
+rapida: 17 archivos en 21 s (tope 30 s)
+rapida exit:0
 ```
-No se imprimió la línea `rapida: N archivos en S s (tope 30 s)`. La primera corrida de `rapida.sh` falló además por un error mío (`constructor` como nombre de actor, corregido después; ver *Notas*).
 
 Criterios de aceptación:
-1. Claude Code con líneas reales (principal + transcripciones): principal `claude-sonnet-5-5`, planificador `claude-sonnet-5-5`, constructor `claude-haiku-5-5`; solo principal → `subagentes: {}`. **Cumple.**
-2. Pi con las líneas de la *Evidencia* de task-04: principal `openai/gpt-6.1-sol`, planificador `openai/gpt-6.1-sol`, constructor `openai/gpt-6-sol`; sin `subagent` → `{}` (prueba d2). **Cumple.**
-3. Registro vacío → `{principal: null, subagentes: {}}`; herramienta no soportada lanza `Herramienta de registro no soportada: otra`. **Cumple.**
-4. Las pruebas existentes siguen pasando (las 5 primeras de la salida anterior). **Cumple.**
-5. Verificación `bash pruebas/rapida.sh` con código 0: **no cumple**. Falla por task-03 (ver arriba), fuera de alcance.
+1. Claude Code con líneas reales (principal + transcripciones): principal `claude-sonnet-5-5`, planificador `claude-sonnet-5-5`, constructor `claude-haiku-5-5`; solo principal sin `toolUseResult` → `subagentes: {}` (prueba b). **Cumple.**
+2. Pi con las líneas de la *Evidencia* de task-04: principal `openai/gpt-6.1-sol`, planificador `openai/gpt-6.1-sol`, constructor `openai/gpt-6-sol`; sin `subagent` → `{}` (prueba d2). **Cumple** por pruebas; sin repetición con datos reales de Pi (ver arriba).
+3. Registro vacío → `{principal: null, subagentes: {}}`; herramienta no soportada lanza el error. **Cumple** (pruebas e y f).
+4. Las pruebas existentes siguen pasando: `node --test` con `pass 14` y `rapida.sh` con `pass 158`, `fail 0`. **Cumple.**
+5. Verificación `bash pruebas/rapida.sh` con código 0 y línea `rapida: 17 archivos en 21 s (tope 30 s)`. **Cumple.** El bloqueo anterior (task-03 con 10 pasos) ya no aplica.
 
 ## Notas
 - Forma observada (rige lo observado, según el paso 1). Diferencias con *Contexto*: `toolUseResult` está en una línea `type: "user"` de nivel superior (no en `assistant`); el `agentId` de las líneas sidechain está en el nivel superior; `message.model` está dentro de `message`, también en el principal del `stream-json` (`pid=null`); `system/init` trae `model` en el nivel superior. La tabla de task-03 con `model` en el nivel superior es una simplificación. El código lee `message.model` y `init.model`. Ninguna clave cambió de lugar respecto de lo que pide la función.
@@ -129,8 +153,9 @@ Criterios de aceptación:
   - Un subagente sin modelo observado (ni líneas sidechain con su `agentId`, ni `resolvedModel`) no aparece como clave en `subagentes`.
   - Añadí una prueba extra para la rama `resolvedModel` del `toolUseResult` (sin transcripción). No estaba en la lista de pasos, pero sí en *Decisiones*.
 - Bug encontrado en la primera corrida y corregido: con un objeto plano, el actor `constructor` choca con `Object.prototype.constructor` y rompe la acumulación. Ahora se usa un `Map` internamente y `Object.fromEntries` al final.
-- Bloqueo: `bash pruebas/rapida.sh` falla por `features/F07-modelo-por-agente/task-03-corrida-claude-code.md`, con 10 líneas en «Pasos» (la regla de formato permite 1 a 8). Está en el commit 03efa57 y task-03 no tiene cambios en el árbol de trabajo. Editar task-03 está en *Fuera de alcance*, así que no lo toqué. Falló en las dos corridas, pero en la primera se sumó mi bug. Franco o el planificador deben decidir: reducir los pasos de task-03 o aceptar el fallo. Después, esta tarea puede pasar a `lista para revisión`.
-- `rapida.sh` deja un entorno en `pruebas/.temporales/capa1-woYBd2` cuando falla (lo imprime el propio script). No lo borré.
-- Archivos tocados por esta tarea: `pruebas/comprobaciones/registro.mjs`, `pruebas/comprobaciones/registro.test.mjs`, y esta tarea (*Evidencia*, *Notas* y `estado`). `definitions/STATUS.md` y task-04 ya estaban modificados antes de empezar y no los toqué. No hubo commit, push, PR, merge ni despliegue.
+- Reintento 2026-10-30: el bloqueo anterior ya no aplica. task-03 tiene 7 pasos (regla de 1 a 8) y `bash pruebas/rapida.sh` pasa con código 0. Se retiró la nota de bloqueo. No hubo cambios de código en este reintento: el extractor y sus pruebas ya estaban en `fcccc5f`.
+- Límite de esta corrida: la comprobación con datos reales de Pi no se pudo repetir porque el registro de la corrida de task-04 ya no existe; se cubre con las pruebas (d), (d2) y (d3) usando las líneas observadas en task-04.
+- `rapida.sh` ya no falla, así que no dejó entorno en `pruebas/.temporales/`.
+- Archivos tocados por esta tarea: esta tarea (*Evidencia*, *Notas* y `estado`). `pruebas/comprobaciones/registro.mjs` y `registro.test.mjs` no se modificaron en este reintento. `definitions/STATUS.md` ya estaba modificado antes de empezar y no lo toqué. No hubo commit, push, PR, merge ni despliegue.
 
-Reescrita 2026-10-30 a pedido de Franco tras el hallazgo de task-03 (el modelo del subagente de Claude Code sale de transcripciones, no del `stream-json`). Ajustada 2026-10-30 a pedido de Franco tras task-04 (hecha): en Pi el modelo del subagente es observable en el registro (`details.results[].model`), así que la rama «no observable» pasa a ser solo un caso de prueba. Formas de línea confirmadas en el registro de la corrida de task-04.
+Reescrita 2026-10-30 a pedido de Franco tras el hallazgo de task-03 (el modelo del subagente de Claude Code sale de transcripciones, no del `stream-json`). Ajustada 2026-10-30 a pedido de Franco tras task-04 (hecha): en Pi el modelo del subagente es observable en el registro (`details.results[].model`), así que la rama «no observable» pasa a ser solo un caso de prueba. Formas de línea confirmadas en el registro de la corrida de task-04. Reintento 2026-10-30: verificación repetida; ver *Evidencia*.
