@@ -1,5 +1,5 @@
 # task-04 — Fixture y comprobador de las pruebas con modelo del `coordinador`
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Las pruebas con modelo de task-05 (Claude Code) y task-06 (Pi) necesitan lo mismo: un repo temporal con features archivables, un archivo canario `.env` y un comprobador que lea el registro de la corrida y diga qué comandos de Bash ejecutó el `coordinador`. Esta tarea construye ese material y lo prueba sin modelo con registros sintéticos, para que task-05 y task-06 solo lancen el modelo y apliquen el comprobador.

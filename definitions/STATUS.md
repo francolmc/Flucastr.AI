@@ -4,7 +4,7 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01, 02 y 03 `hecha`; task-04 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
+Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 a 04 `hecha`; task-05 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
 Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Espera a Franco
@@ -13,7 +13,9 @@ Rama: feature/F12-coordinador-ejecuta-scripts
 - Puerta 1 del permiso del coordinador para archivar: aprobada por Franco (2026-10-30), opción B en Pi (bash completo, riesgo aceptado y escrito en `WORKFLOW.md` §3.1.1).
 - Backlog con F12: aprobado por Franco (2026-10-30).
 - F12 task-01: `hecha` y comiteada por Franco (2026-10-30).
-- **PUERTA 4 (F12 task-04):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-04-fixture-y-comprobador-coordinador.md`. Archivos nuevos: `pruebas/fixtures/coordinador.sh`, `pruebas/comprobaciones/coordinador-ejecucion.mjs` y `coordinador-ejecucion.test.mjs` (9/9). Haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`.
+- F12 task-04: `hecha` y comiteada por Franco (2026-10-30).
+- **PUERTA 4 (F12 task-05):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-05-prueba-modelo-claude-code.md` y el informe `pruebas/resultados/2026-10-30-coordinador-claude.md`; archivos nuevos: `pruebas/lanzar-coordinador-claude.sh` y el informe. Resultado: los 8 casos ok; solo `aplicar-ok` y `commit-env` movieron F01; ningún commit, push, otro `node` ni lectura del canario. Haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`.
+- F12 task-05: Franco aprobó (2026-10-30) el ajuste de `definitions/` (opción c: `tools:` limita, el permiso es aparte) y la tarea reescrita (opción a: lanzador con `--allowedTools` de los tres patrones). Desalineaciones de `definitions/` que quedan para cuando F12 termine: `WORKFLOW.md` línea 4 («el coordinador instalado sigue sin `bash`»), `PROJECT.md` línea 45; `pruebas/permisos-ejecucion.md` lo cubre task-07.
 - F12 task-03: `hecha` y comiteada por Franco (2026-10-30). Tras los commits de F12, `bash instalar.sh` actualiza tu coordinador instalado.
 - F12 task-02: `hecha` y comiteada por Franco (2026-10-30). Pendiente que lo pruebe task-05: si `tools:` restringe `Bash` por sí solo (la prueba de task-02 no lo aísla).
 - F12: las 7 tareas `aprobada` por Franco (2026-10-30); se ejecutan una a la vez en orden (task-01 en curso). Al terminar cada una, puerta 4: revisa evidencia y commit en la rama. Tareas en `features/F12-coordinador-ejecuta-scripts/`: `task-01-validar-argumentos-scripts.md`, `task-02-coordinador-comandos-claude.md` (depende de 01), `task-03-generacion-pi-claude-instalacion.md` (02), `task-04-fixture-y-comprobador-coordinador.md` (01), `task-05-prueba-modelo-claude-code.md` (02, 04), `task-06-prueba-modelo-pi.md` (03, 04), `task-07-documentar-permisos-y-cierre.md` (05, 06). Decisiones a mirar: task-02, si `tools:` no restringe `Bash` queda `bloqueada` con `BLOQUEO: rol=arquitecto` (no se usa `permissions.allow/deny` global); task-03, en Pi `Bash` sin patrones (inferido, sin verificar); task-01 endurece el CLI y reescribe 2 pruebas de `archivar.test.mjs`; task-05/06 hacen 8 llamadas de modelo cada una. `WORKFLOW.md` §3.1 sigue diciendo «comprobación pendiente»: lo actualiza el arquitecto o Franco tras task-02.
@@ -35,7 +37,7 @@ Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Bloqueos abiertos
 
-Ninguno.
+Ninguno. (El de task-05 se resolvió: la corrida sin permisos mostró que `tools:` no concede permiso; ver `pruebas/resultados/2026-10-30-coordinador-claude.md`, que se rehace.)
 
 ## Última actualización
 
