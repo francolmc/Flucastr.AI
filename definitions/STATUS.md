@@ -4,15 +4,14 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). Feature F12 (en curso): las 8 tareas `hecha`; falta que Franco confirme la feature. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
+Rol: ninguno (esperando a Franco). F12 `hecha` (confirmada por Franco, 2026-10-30; PR hecho; `bash instalar.sh` corrido). Solo queda F11 (informe), que requiere al `arquitecto` y datos de `Registro:`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
 Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Espera a Franco
 
-- Feature F12 completa en feature/F12-coordinador-ejecuta-scripts: cierra la rama, haz el PR y despliega.
-- **Confirma F12 como `hecha`** (dime «F12 hecha») y la marco en `BACKLOG.md`. F11 sigue pendiente (espera datos de `Registro:`).
+- F12: PR hecho y coordinador reinstalado por Franco (2026-10-30). Falta el merge si aún no lo hiciste.
 - F12 task-07: `hecha` por Franco (2026-10-30). Las anotaciones de abajo (README.md:54, archivar.mjs:10, WORKFLOW.md línea 83) no se corrigieron: decide si las abrimos como tarea chica.
-- Tras F12, `bash instalar.sh` actualiza tu coordinador instalado. Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (ver `definitions/WORKFLOW.md` §3.1).
+- Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (ver `definitions/WORKFLOW.md` §3.1).
 - **Anotaciones de task-07 para cerrar F12:** `README.md:54` y `scripts/archivar.mjs:9-10` («nunca un agente») contradicen §3.1; en `WORKFLOW.md` §3.1 los controles compensatorios siguen como «trabajo posterior»; `WORKFLOW.md` línea 4 («el coordinador instalado sigue sin `bash`») y `PROJECT.md` línea 45 quedaron desalineadas (arquitecto).
 - **Registro de eventos:** corre `node scripts/registrar.mjs` cuando quieras (lo corres tú, o yo a tu pedido tras instalar F12). `registro/` está ignorado por git.
 - **Contexto grande:** F01–F10 ya están archivadas; falta compactar `BACKLOG.md` (planificador, puerta 2; su nota final «Hoy hay N pendientes» está desactualizada) y acortar `WORKFLOW.md` (arquitecto).
