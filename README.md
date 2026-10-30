@@ -51,7 +51,7 @@ Flucastr.AI/
 │   └── ejecutar-tarea/
 ├── scripts/
 │   ├── resolver.mjs    # resuelve el modelo de cada agente y genera los archivos por herramienta
-│   ├── archivar.mjs    # chequea el contexto y, con --aplicar (lo corre Franco), mueve las features hecha a features/completed/
+│   ├── archivar.mjs    # chequea el contexto y, con --aplicar Fxx (Fxx explícito; lo corre Franco o el coordinador a su pedido, WORKFLOW.md §3.1), mueve esa feature hecha a features/completed/
 │   └── registrar.mjs   # registra los eventos del flujo en registro/eventos.jsonl (lo corre Franco)
 ├── pruebas/         # comprobaciones del kit y arnés de pruebas del arquitecto (ver pruebas/README.md)
 ├── instalar.sh      # instala agentes y skills en Claude Code y Pi

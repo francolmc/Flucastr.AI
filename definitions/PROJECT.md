@@ -1,6 +1,6 @@
 # Flucastr.AI — proyecto existente
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (archivo y chequeo de contexto; modelo por agente comprobado, F07). **Aprobado el 2026-10-30:** `WORKFLOW.md` §3.1 y §10.5 (el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido explícito de Franco; en Claude Code `tools:` limita con patrones y el permiso lo da Franco por aprobación o regla `allow` (ajuste del 2026-10-30), con `bash` completo en Pi por decisión y riesgo aceptado de Franco; implementación pendiente). **Pendiente de aprobación:** **F09 (instalación sin clon desde GitHub, repo público; borrador del 2026-10-30, puerta 1; mergeada) y **F10** (registro de eventos del flujo, diseño en [`REGISTRO.md`](REGISTRO.md); borrador del 2026-10-30, puerta 1).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (archivo y chequeo de contexto; modelo por agente comprobado, F07). **Aprobado el 2026-10-30:** `WORKFLOW.md` §3.1 y §10.5 (el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido explícito de Franco; en Claude Code `tools:` limita con patrones y el permiso lo da Franco por aprobación o regla `allow` (ajuste del 2026-10-30), con `bash` completo en Pi por decisión y riesgo aceptado de Franco; implementado en F12, 2026-10-30, probado con modelo 8/8 en Claude Code y 8/8 en Pi). **Pendiente de aprobación:** **F09 (instalación sin clon desde GitHub, repo público; borrador del 2026-10-30, puerta 1; mergeada) y **F10** (registro de eventos del flujo, diseño en [`REGISTRO.md`](REGISTRO.md); borrador del 2026-10-30, puerta 1).
 > Documento definitivo: consolida `definicion/{proyecto,mvp,plan-pruebas-arquitecto,diseno-primera-herramienta}.md` y los dos encargos (ver «Documentos reemplazados»).
 > Origen de los datos: *confirmado* = leído en archivo o dicho por Franco; *inferido* = deducido; entre paréntesis, la fuente.
 
@@ -42,7 +42,7 @@ Fuente: `pruebas/README.md` y `pruebas/permisos-ejecucion.md` (leídos; no ejecu
 - Los fixtures se generan al ejecutar (`pruebas/fixtures/{basico,medio,real}.sh`); los remotos son repos *bare* locales; sin red.
 - Comprobaciones duras de contrato (cinco archivos, borrador, canario ausente, solo cambios permitidos, `initialize.sh` válido y reconstruye los repos, repos y rama correctos, repos en el diagrama), cada una con control negativo.
 - Un «aprobado» vale para un modelo y una herramienta concretos; cambiar de modelo obliga a repetir.
-- Claude Code corre con permisos por comando; **Pi solo con detección** (registro e instantánea), sin confinamiento.
+- Claude Code corre con permisos por comando, que concede Franco (aprobación o reglas `allow`; F12, 2026-10-30); **Pi solo con detección** (registro e instantánea), sin confinamiento.
 - **Corridas con modelo, último informe:** B y R pasan en Pi. B en Claude Code falló porque el agente instalado era el antiguo; R en Claude no se corrió; la configuración aislada no tenía sesión.
 - Sin CI.
 

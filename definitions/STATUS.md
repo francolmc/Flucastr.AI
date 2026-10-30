@@ -4,17 +4,16 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). F12 `hecha` (confirmada por Franco, 2026-10-30; PR hecho; `bash instalar.sh` corrido). Solo queda F11 (informe), que requiere al `arquitecto` y datos de `Registro:`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
-Rama: feature/F12-coordinador-ejecuta-scripts
+Rol: ninguno (esperando a Franco). F13 `hecha` (confirmada por Franco, 2026-10-30; task-01 `hecha`). Solo queda F11 (informe). F12 `hecha` (PR hecho, coordinador reinstalado). F11 (informe) requiere al `arquitecto` y datos de `Registro:`.
+Rama: chore/F13-alinear-readme-archivar
 
 ## Espera a Franco
 
-- F12: PR hecho y coordinador reinstalado por Franco (2026-10-30). Falta el merge si aún no lo hiciste.
-- F12 task-07: `hecha` por Franco (2026-10-30). Las anotaciones de abajo (README.md:54, archivar.mjs:10, WORKFLOW.md línea 83) no se corrigieron: decide si las abrimos como tarea chica.
+- Feature F13 completa en chore/F13-alinear-readme-archivar: cierra la rama, haz el PR y despliega.
+- **Menciones antiguas en `definitions/REGISTRO.md`** líneas 25 y 55 («no tiene Bash»): no estaban en el encargo del arquitecto. Revisa también el reemplazo por script del arquitecto en `WORKFLOW.md` §3.1, `PROJECT.md` y `ARCHITECTURE.md` (solo se verificó con `grep`).
 - Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (ver `definitions/WORKFLOW.md` §3.1).
-- **Anotaciones de task-07 para cerrar F12:** `README.md:54` y `scripts/archivar.mjs:9-10` («nunca un agente») contradicen §3.1; en `WORKFLOW.md` §3.1 los controles compensatorios siguen como «trabajo posterior»; `WORKFLOW.md` línea 4 («el coordinador instalado sigue sin `bash`») y `PROJECT.md` línea 45 quedaron desalineadas (arquitecto).
-- **Registro de eventos:** corre `node scripts/registrar.mjs` cuando quieras (lo corres tú, o yo a tu pedido tras instalar F12). `registro/` está ignorado por git.
-- **Contexto grande:** F01–F10 ya están archivadas; falta compactar `BACKLOG.md` (planificador, puerta 2; su nota final «Hoy hay N pendientes» está desactualizada) y acortar `WORKFLOW.md` (arquitecto).
+- **Registro de eventos:** corre `node scripts/registrar.mjs` cuando quieras (lo corres tú, o yo a tu pedido). `registro/` está ignorado por git.
+- **Contexto grande:** F01–F10 ya están archivadas; falta compactar `BACKLOG.md` (planificador, puerta 2; su nota final «Hoy hay N pendientes» puede estar desactualizada) y acortar `WORKFLOW.md` (arquitecto). F11–F12 `hecha`: F12 se puede archivar con `node scripts/archivar.mjs --aplicar F12` (a tu pedido puedo correrlo yo).
 - **Alinear `definitions/` (arquitecto, sin urgencia):** `REGISTRO.md` §1 (`resultado=confirmar` no se usa; caso `coordinador` en `tarea_estado.por`; comando sin `--reverse` por git 2.54); falta la regla «`registro/` no se lee» en `AGENTS.md`.
 - **Riesgo de tiempo:** `rapida.sh` oscila entre 23 y 37 s (tope 30 s); el peso viene de `instalacion.test.mjs` (8–12 s). Conviene una tarea aparte (¿la abrimos?).
 - **Antes de publicar el repo (tuyo):** gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Don Financio, Andes), `.gitignore`; activar 2FA y proteger `main`; aclarar qué son los commits «intrusión». Si aparece algo: rotar la credencial primero. Luego haz público el repo.

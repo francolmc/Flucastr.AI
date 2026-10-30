@@ -8,7 +8,8 @@
 //                                             código 1 si F03 no se movió)
 //
 // El chequeo nunca escribe, mueve ni corrige estados. --aplicar solo renombra carpetas: no sobrescribe,
-// no borra y no toca BACKLOG.md, STATUS.md, ramas ni git. Lo ejecuta Franco, nunca un agente.
+// no borra y no toca BACKLOG.md, STATUS.md, ramas ni git. Lo ejecuta Franco o, a su pedido explícito,
+// el coordinador (definitions/WORKFLOW.md §3.1); el commit es siempre de Franco.
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

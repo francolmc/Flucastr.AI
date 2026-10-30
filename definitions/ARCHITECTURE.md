@@ -1,6 +1,6 @@
 # Arquitectura — Flucastr.AI (modo: actual)
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Aprobado el 2026-10-30:** `WORKFLOW.md` §3.1 y §10.5 (el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido explícito de Franco; en Claude Code `tools:` con patrones `Bash(...)` limita y el permiso lo da Franco por aprobación o regla `allow` (ajuste del 2026-10-30); **sin restricción técnica en Pi**, riesgo aceptado por Franco; implementación pendiente, hasta entonces los corre Franco). **Pendiente de aprobación:** **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Aprobado el 2026-10-30:** `WORKFLOW.md` §3.1 y §10.5 (el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido explícito de Franco; en Claude Code `tools:` con patrones `Bash(...)` limita y el permiso lo da Franco por aprobación o regla `allow` (ajuste del 2026-10-30); **sin restricción técnica en Pi**, riesgo aceptado por Franco; implementado en F12, 2026-10-30, probado con modelo en ambas herramientas). **Pendiente de aprobación:** **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1).
 
 ## Estructura y su razón
 
@@ -231,7 +231,7 @@ flowchart LR
   AGT -. "no lo leen" .-> EV
 ```
 
-- **Decisión:** un solo escritor, `registrar.mjs`, que corre Franco (el `coordinador` no tiene Bash). Los agentes no reciben permisos nuevos; el único cambio es el contenido de *Notas*. *Descartado:* agentes que escriben el log; versionar el log (ver `REGISTRO.md` §2 y §8).
+- **Decisión:** un solo escritor, `registrar.mjs`, que corre Franco o, a su pedido explícito, el `coordinador` (`WORKFLOW.md` §3.1, F12, 2026-10-30). Los agentes no reciben permisos nuevos; el único cambio es el contenido de *Notas*. *Descartado:* agentes que escriben el log; versionar el log (ver `REGISTRO.md` §2 y §8).
 - **Privacidad:** esquema cerrado, sin texto libre, sin autores ni títulos; archivo ignorado por git (`REGISTRO.md` §5).
 - **Fuera de lo que `instalar-remoto.sh` distribuye:** `registro/` no está en su lista permitida; `scripts/registrar.mjs` sí viaja con `scripts/`.
 
