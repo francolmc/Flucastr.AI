@@ -1,6 +1,6 @@
 # Flucastr.AI — proyecto existente
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (archivo y chequeo de contexto; modelo por agente comprobado, F07). **Pendiente de aprobación:** `WORKFLOW.md` §10.5 (el `coordinador` no corre `archivar.mjs`) y **F09** (instalación sin clon desde GitHub, repo público; borrador del 2026-10-30, puerta 1).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (archivo y chequeo de contexto; modelo por agente comprobado, F07). **Pendiente de aprobación:** `WORKFLOW.md` §10.5 (el `coordinador` no corre `archivar.mjs`) **F09** (instalación sin clon desde GitHub, repo público; borrador del 2026-10-30, puerta 1; mergeada) y **F10** (registro de eventos del flujo, diseño en [`REGISTRO.md`](REGISTRO.md); borrador del 2026-10-30, puerta 1).
 > Documento definitivo: consolida `definicion/{proyecto,mvp,plan-pruebas-arquitecto,diseno-primera-herramienta}.md` y los dos encargos (ver «Documentos reemplazados»).
 > Origen de los datos: *confirmado* = leído en archivo o dicho por Franco; *inferido* = deducido; entre paréntesis, la fuente.
 
@@ -53,6 +53,8 @@ Fuente: `pruebas/README.md` y `pruebas/permisos-ejecucion.md` (leídos; no ejecu
 - **Presupuesto:** dentro del tope de `rapida.sh` (30 s); si no cabe, las pruebas de F09 van en un archivo propio, fuera de `rapida.sh`, pero también sin red.
 - **Lo que queda para Franco (manual, con red real):** (1) revisar el repo antes de publicarlo (abajo); (2) ya público y con F09 mergeado, correr el comando de una línea en el PC de trabajo y comprobar que `claude --agent arquitecto` y/o `pi-arquitecto` arrancan con el modelo de su `modelos.json`; (3) editar su `modelos.json` local, publicar un cambio mínimo en `main` (por ejemplo una frase en una skill), correr `--estado` (debe decir «hay versión nueva»), luego `--actualizar`, y comprobar que el cambio llegó y su `modelos.json` sigue igual; (4) comprobar que la red de la empresa deja pasar los tres dominios de GitHub; (5) probar `desinstalar.sh` en el PC de trabajo. Los agentes no pueden hacer 2–5: necesitan el repo público y ese equipo.
 
+**Pruebas de F10 (por aprobar):** sin modelo y sin red; repo git temporal con fechas fijas y datos canario (autor, título, llave, mensaje de commit) que no deben aparecer en el registro; idempotencia byte a byte; controles negativos. Detalle y casos en [`REGISTRO.md`](REGISTRO.md) §6. Con modelo, solo se observa en la primera tarea real que el `constructor` escriba la línea `Registro:`.
+
 ## Cómo se despliega
 
 Hasta F09: no se despliega, se instala en local desde un clon. Remoto en GitHub (`git remote -v`), sin CI.
@@ -83,6 +85,7 @@ Hasta F09: no se despliega, se instala en local desde un clon. Remoto en GitHub 
 | Actualizar a mano: reejecutar el comando o `--actualizar`; sin procesos en segundo plano (F09, **supuesto a confirmar**: recomendación mía que Franco aceptó implícitamente) | Simple, predecible, sin permisos de sistema | Cron/aviso automático (procesos, más superficie) | Que Franco quiera enterarse solo de las versiones nuevas |
 | Dos modos de instalación (enlaces con clon; copia sin clon) (F09, por aprobar) | No quita la edición en vivo al desarrollar | Un solo modo copiando (cada cambio exige reinstalar) | Que se deje de desarrollar con clon |
 | `modelos.json` del usuario en `~/.flucastr-ai/`, fuera de lo que se reemplaza (F09, por aprobar) | Actualizar nunca pierde su elección de modelos | Fusionar o parchear (decide por él) | Que `modelos.json` deje de ser personal |
+| Registro de eventos del flujo (F10, **por aprobar**; Franco aclaró el cometido el 2026-10-30): script que deriva de archivos y git + una línea `Registro:` del `constructor` en *Notas*; `registro/eventos.jsonl` ignorado por git, esquema cerrado sin texto libre; el informe va aparte | Los datos solo se acumulan si el registro existe desde antes; sin permisos nuevos; git por sí solo guarda pocos estados intermedios (23 de 47 tareas en un solo commit, medido) | Que los agentes escriban el log (permisos y contexto); solo script (pierde retrabajo e intentos); versionar el log (duplica y publica); diferir F10 | Que Franco no use los datos; que el `constructor` no anote bien la línea |
 | Arquitecto con 5 entregables en inglés | Había acumulado demasiada responsabilidad | Mantener los 4 archivos en español | Que `AGENTS.md` termine duplicando `PROJECT.md` |
 
 ## Flujo de trabajo (decidido por Franco en líneas generales; roles por construir)
@@ -150,6 +153,8 @@ Resueltas (Franco, 2026-10-29): los tests se recortan por exceso para el alcance
 8. ¿Aceptas el modo dual (el PC con clon sigue con enlaces; el de trabajo copia)?
 9. ¿Quieres un comando corto de atajo (por ejemplo `flucastr-ai actualizar` en `~/.local/bin`) o basta con el comando largo? Recomiendo el largo primero (menos piezas).
 
+**Abiertas por F10 (a Franco):** qué preguntas quiere responder con los datos; registro por proyecto o central; permiso de `date` para el `constructor`; aceptar la línea `Registro:`; informe como feature aparte. Lista completa en [`REGISTRO.md`](REGISTRO.md) §9.
+
 ## Repo público: qué debe revisar Franco antes de publicar
 
 Lo hace **Franco**, antes de cambiar la visibilidad; no lo leí ni lo ejecuté, y los agentes no leen `.env` ni credenciales. Hacer público un repo expone **todo el historial**, no solo el último estado: borrar un secreto en un commit nuevo no lo quita.
@@ -175,4 +180,4 @@ La revisión del repo público y la publicación **no son tareas de agentes**: s
 
 ## Estado
 
-Aprobado por Franco el 2026-10-29, incluidos los cambios de F05 y F06 y sus respuestas a `WORKFLOW.md` §9.5. Puerta 1 de F08 aprobada el 2026-10-30. **Cambios de F09 (2026-10-30): borrador, por aprobar en la puerta 1** (secciones marcadas «F09»). Lo decidido por Franco: descarga desde GitHub, repo público, actualizar reejecutando el comando. Lo recomendado por mí y por confirmar: `main` + sha, actualización manual, modo dual, tres tareas.
+Aprobado por Franco el 2026-10-29, incluidos los cambios de F05 y F06 y sus respuestas a `WORKFLOW.md` §9.5. Puerta 1 de F08 aprobada el 2026-10-30. **Cambios de F09 (2026-10-30): borrador, por aprobar en la puerta 1** (secciones marcadas «F09»). Lo decidido por Franco: descarga desde GitHub, repo público, actualizar reejecutando el comando. Lo recomendado por mí y por confirmar: `main` + sha, actualización manual, modo dual, tres tareas. **F10 (2026-10-30): borrador, por aprobar en la puerta 1** (`REGISTRO.md`); Franco aclaró que F10 es generar el registro, no el informe.

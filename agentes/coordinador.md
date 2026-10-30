@@ -23,7 +23,7 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 
 ## Qué lees para decidir
 
-`AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` y `features/`. Si algo no existe, es información: decide con lo que hay. Al listar `features/` no entres en `features/completed/`: es archivo y no se lee salvo pedido explícito de Franco.
+`AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` y `features/`. Si algo no existe, es información: decide con lo que hay. Al listar `features/` no entres en `features/completed/`: es archivo y no se lee salvo pedido explícito de Franco. Tampoco entres en `registro/`: no se lee salvo pedido explícito de Franco.
 
 ## Tabla de decisión
 
@@ -38,7 +38,7 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 | Tarea `lista para revisión` | **Puerta 4**: no delegas. Escribe en `STATUS.md` la ruta de la tarea y que Franco revise la evidencia y haga el commit. Solo Franco la pasa a `hecha`. |
 | Tarea `en curso` sin sesión del constructor activa | Escalación: tarea interrumpida. No la vuelvas a delegar sin que Franco lo decida. |
 | Tarea `bloqueada` | Registra el bloqueo en `STATUS.md` (*Bloqueos abiertos*) con el motivo de la sección *Notas* de la tarea y enrútalo según la fila de bloqueos; si es un cambio de alcance, es escalación. |
-| Todas las tareas de la feature `hecha` | Antes de pedir la confirmación de `hecha` de la feature, escribe en «Espera a Franco» la línea `Feature Fxx completa en <rama>: cierra la rama, haz el PR y despliega.` (no es escalación). Pide a Franco que confirme la feature como `hecha`. Con su aprobación explícita, escribe `hecha` en `BACKLOG.md` y delega al `planificador` con `descomponer-feature` para la siguiente (mueve la marca `→`). Tras eso, en «Espera a Franco» escribe la línea «Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx` (lo corre Franco, después del PR y en su propio commit `chore/`).» No es escalación. Nunca ejecutas `--aplicar`; en yolo no escribes ese aviso. |
+| Todas las tareas de la feature `hecha` | Antes de pedir la confirmación de `hecha` de la feature, escribe en «Espera a Franco» la línea `Feature Fxx completa en <rama>: cierra la rama, haz el PR y despliega.` (no es escalación). Pide a Franco que confirme la feature como `hecha`. Con su aprobación explícita, escribe `hecha` en `BACKLOG.md` y delega al `planificador` con `descomponer-feature` para la siguiente (mueve la marca `→`). Tras eso, en «Espera a Franco» escribe la línea «Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco, antes de archivar; no bloquea).» y, después, la línea «Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx` (lo corre Franco, después del PR y en su propio commit `chore/`).» No es escalación. Nunca ejecutas `--aplicar` ni `registrar.mjs`; en yolo no escribes ninguno de los dos avisos. |
 | Bloqueo abierto que pide otro rol | Delega a ese rol; si toca la definición, vuelve a la puerta 1 |
 | Franco pide yolo de forma explícita en la conversación | Sección «Modo yolo»: valida los requisitos, regístralo y orquesta sin puertas 2, 3 ni 4 |
 | Escalación | Te detienes y la escribes al inicio de `STATUS.md` |

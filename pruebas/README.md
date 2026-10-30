@@ -10,3 +10,4 @@
 - `pruebas/ejecutar.sh ESCENARIO HERRAMIENTA [N] [COMANDO [ARG...]]` crea una instantánea externa al fixture antes de invocar el modelo. La revisión conserva HEAD, rama y referencias Git. Los remotos locales se alojan fuera del workspace del agente.
 - Registro estructurado y pruebas de seguridad: `pruebas/comprobaciones/registro.mjs`; casos unitarios y E2E se conservan íntegros.
 - Capa 1: `node --test --test-concurrency=1 pruebas/capa1/instalacion.test.mjs`.
+- Registro de eventos: `node --test pruebas/capa1/registrar.test.mjs` (9 pruebas, sin modelo ni red; fuera de `rapida.sh` para no acercarla a su tope de 30 s). La línea `Registro:` que escribe un modelo se ve en la primera tarea real y no se prueba aquí.
