@@ -1,6 +1,6 @@
 # Flujo de trabajo — diseño de `coordinador`, `planificador` y `constructor`
 
-> Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3).
+> Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3). **Cambio propuesto, por aprobar (puerta 1, 2026-10-30, F08):** §4, §5, §7 (tope de 6 pendientes y resultado de F07) y la nueva §10.
 > Complementa `PROJECT.md` («Flujo de trabajo»). Este documento define **qué** se construye y las reglas; lo construye una sesión de implementación, no el arquitecto.
 > *Confirmado* = dicho por Franco o leído en archivo. *Propuesta* = mía, por aprobar.
 
@@ -57,7 +57,7 @@ Reglas:
 ## 4. `BACKLOG.md` (propuesta)
 
 Tabla: `ID | Feature | Tipo (habilitante / producto) | Valor | Esfuerzo | Por qué en esta posición | Estado | Siguiente`.
-Estados: `pendiente`, `en curso`, `hecha`. Lista ordenada; la primera pendiente va marcada. Corta y general: nada de detalle de tareas aquí. Antes de ordenar, el `planificador` revisa qué falta para construir y verificar, y lo pone primero como habilitante.
+Estados: `pendiente`, `en curso`, `hecha`. Lista ordenada; la primera pendiente va marcada. Corta y general: nada de detalle de tareas aquí. **El tope de 6 features cuenta solo las pendientes** (estado distinto de `hecha`); las filas `hecha` no cuentan, pero se mantienen cortas (§10.3). Antes de ordenar, el `planificador` revisa qué falta para construir y verificar, y lo pone primero como habilitante.
 
 ## 5. Estructura de `features/` (decidido: junto a `definitions/`)
 
@@ -72,7 +72,7 @@ Estados: `pendiente`, `en curso`, `hecha`. Lista ordenada; la primera pendiente 
         └── F00-nombre/…
 ```
 
-Con varios repos, el campo `repo:` de cada tarea indica dónde se ejecuta, y `depende_de:` fija el orden (la API antes que el front). Una feature pasa a `completed/` solo cuando Franco la da por hecha; el estado vive en `BACKLOG.md`.
+Con varios repos, el campo `repo:` de cada tarea indica dónde se ejecuta, y `depende_de:` fija el orden (la API antes que el front). Una feature pasa a `completed/` solo cuando Franco la dio por hecha (la fila de `BACKLOG.md` en `hecha`) **y** confirma el archivado: lo hace `scripts/archivar.mjs --aplicar` (§10), nunca un agente por su cuenta. `completed/` es solo archivo: el estado sigue viviendo en `BACKLOG.md`, que sigue siendo la única fuente de verdad del estado (el script lo lee, nunca lo escribe).
 
 ## 6. La tarea: completa y acotada
 
@@ -143,15 +143,21 @@ Alcance de escritura: `agentes/`, `skills/`, `modelos.json` y `pruebas/`. Nada m
 - Un subagente instalado de Pi usó el `model` de su archivo generado sin pasarlo a mano (resuelve la hipótesis del paso 1). Tope de 300 s en `pruebas/lanzar-pi.sh`; `pi-coordinador` interactivo no lo tiene.
 - Una corrida por herramienta: el `coordinador` delegó en el `planificador`, que creó `BACKLOG.md` en borrador, y se detuvo en la puerta 2 escribiendo `STATUS.md`, sin cambiar estados.
 - **No ejercitado:** ruta de `BLOQUEO:`, respaldo sin subagentes, puertas 3 y 4, delegación al `constructor`. Se ejercitan en el paso 5.
-- **Observado:** el backlog varía entre corridas (7 features en Claude, 4 en Pi). Es esperable y para eso existe la puerta 2, pero `crear-backlog` no fija un máximo: se añade uno (*propuesta:* hasta 6 features) y se exige que ninguna sea «probar el flujo».
+- **Observado:** el backlog varía entre corridas (7 features en Claude, 4 en Pi). Es esperable y para eso existe la puerta 2, pero `crear-backlog` no fija un máximo: se añade uno (*propuesta:* hasta 6 features pendientes; las `hecha` no cuentan, §4) y se exige que ninguna sea «probar el flujo».
 - Los `BACKLOG.md` y `STATUS.md` de esas corridas son de prueba; se borran antes de la corrida real.
 
-**Resultado del paso 4** (informado por la sesión de implementación, 2026-10-29; revisé `agentes/constructor.md`, `skills/ejecutar-tarea/SKILL.md` y el máximo de 6 features en `crear-backlog`; no ejecuté nada):
+**Resultado del paso 4** (informado por la sesión de implementación, 2026-10-29; revisé `agentes/constructor.md`, `skills/ejecutar-tarea/SKILL.md` y el máximo de 6 features pendientes en `crear-backlog`; no ejecuté nada):
 - `constructor` y `ejecutar-tarea` creados; nivel medio. Capa 1 y lanzadores 17/17.
 - Pi: una tarea mínima completa; evidencia real, estado «lista para revisión», sin «hecha» ni commit.
 - Claude Code: **no concluyente** por un error de permisos de la propia prueba (comando Bash compuesto denegado). El agente actuó según la skill (no inventó evidencia, informó `BLOQUEO:`). Se cubre en el paso 5, con permisos normales.
 - **No ejercitado:** escalación por alcance, `bloqueada` tras dos fallos, rechazo de una tarea no aprobada, varios huecos menores, `repo:` con varios repos.
 - **Pendiente para multi-repo:** el constructor no resuelve de dónde sale la ruta de cada `repo:` (`REPOS.md`). No afecta a este repo; se resuelve antes de la prueba del proyecto de dos repos.
+
+**Resultado de F07, modelo por agente** (confirmado por Franco como `hecha`, 2026-10-30; sustituye a la hipótesis 3 del paso 1 y a lo que quedó «no verificado» del subagente en Claude Code; revisé los lanzadores `pruebas/lanzar-modelos-claude.sh` y `pruebas/lanzar-modelos-pi.sh`, no los ejecuté):
+- **El modelo de cada agente y subagente está comprobado, no supuesto, en ambas herramientas.** Un agente instalado corre con el modelo de `modelos.json` sin pasarlo a mano.
+- **Claude Code:** el `coordinador` (agente principal) delega en `planificador` y `constructor` con la herramienta `Agent`, sin parámetro `model`. El modelo de cada subagente se lee de las **transcripciones de `~/.claude/projects/`**, por lo que el lanzador no usa `--no-session-persistence` (se puede activar con `FLUCASTR_PERSISTIR_SESION`, y entonces la comprobación no puede concluir).
+- **Pi:** el lanzador corre `pi-coordinador --mode json --no-session`; el modelo de cada subagente sale del registro, en `result.details.results[].model`. Tope de 300 s.
+- **Lanzadores:** `pruebas/lanzar-modelos-claude.sh` y `pruebas/lanzar-modelos-pi.sh` (una corrida por herramienta, fuera de la suite determinista). Un resultado vale para los modelos de `modelos.json` en ese momento; si cambian, se repite la corrida (regla de `PROJECT.md`, «Cómo se prueba»).
 
 **Pruebas: rápidas y acotadas** (decidido por Franco: hoy se pierde mucho tiempo en pruebas):
 - Solo comprobaciones deterministas, **sin modelo y sin red**, que corren en segundos. *Propuesta:* toda la suite nueva en menos de ~30 s.
@@ -281,6 +287,68 @@ Excepción explícita y acotada a «cuatro puertas» y «sin commit». No es un 
 
 **Preguntas abiertas:** ninguna.
 
+## 10. Limpieza, chequeo de contexto y archivo de lo terminado (borrador, F08, 2026-10-30)
+
+> *Confirmado* = pedido de Franco (`BACKLOG.md`, F08). *Propuesta* = redacción mía, por aprobar. Cifras: **a calibrar** con la primera corrida real, como las de «acotada».
+
+### 10.1 Qué choca y cómo se resuelve
+
+| Regla vigente | Cambio |
+|---|---|
+| «Una feature pasa a `completed/` solo cuando Franco la da por hecha» (§5) | Se mantiene la condición y se añade el medio: la mueve un script, solo con confirmación de Franco |
+| «`BACKLOG.md` es la única fuente de verdad del estado» | Se mantiene: el script lee estados, nunca los escribe ni los decide |
+| Tope de 6 features en el backlog | Cuenta solo pendientes (ya implementado en `formato-flujo.mjs` y `crear-backlog`) |
+| Los agentes no borran ni mueven nada fuera de su alcance (§2) | Se mantiene: ningún agente mueve carpetas; lo hace Franco ejecutando el script |
+
+### 10.2 Archivar: `scripts/archivar.mjs` (propuesta)
+
+Un solo script de Node, sin dependencias ni red, con dos modos:
+
+- **Chequeo** (por defecto, solo lectura, sin efectos sobre archivos): imprime el informe de §10.4 y la lista de candidatas. Siempre termina con código 0; es un aviso, no una puerta.
+- **`--aplicar`**: mueve las candidatas. Lo ejecuta **Franco** (como `initialize.sh`, que se escribe y él corre). Con `--aplicar Fxx` mueve solo esa. El `coordinador` puede correr el chequeo, pero nunca `--aplicar`, y en yolo no corre ninguno de los dos.
+
+**Candidata** (todas, o no se mueve): (1) la fila de la feature en `BACKLOG.md` está `hecha`; (2) todas las `task-*.md` de su carpeta están `hecha`; (3) existe `features/Fxx-nombre/` y el nombre coincide con el ID; (4) no existe ya `features/completed/Fxx-nombre/`. Si algo no coincide (fila `hecha` con una tarea que no lo está, carpeta sin fila, destino ocupado), no mueve nada de esa feature y lo informa; el script **no corrige estados** ni resuelve la inconsistencia.
+
+**Qué hace al mover:** `features/Fxx-nombre/` completa, con sus tareas, `refinado.md` y lo demás, pasa a `features/completed/Fxx-nombre/` (una sola carpeta; sin sobrescribir ni borrar nada, solo renombrar). Lista lo movido. No toca `BACKLOG.md`, `STATUS.md`, ramas ni git: los cambios quedan sin commit para que Franco los revise y commitee (es un `chore/`, no cambia comportamiento).
+
+**Tareas `hecha` de una feature que aún no está `hecha`:** se quedan en su carpeta. Moverlas separaría la feature, rompería las rutas de `depende_de:` y el contexto que el `planificador` y el `constructor` necesitan. Descartado: mover tarea a tarea (más reglas, más roturas, ahorro mínimo); lo que cambia es que se leen poco (§10.3).
+
+### 10.3 Filas `hecha` del backlog
+
+- **Se quedan en `BACKLOG.md`** aun archivada la feature: es la fuente de verdad del estado y de las dependencias de orden. No se mueven a otro archivo (descartado: un segundo archivo de estado, que contradice «una fuente de verdad»).
+- **Se mantienen cortas.** Una fila `hecha` conserva ID, feature, tipo, estado y una línea de «Por qué» (propuesta: hasta ~300 caracteres) más la ruta `features/completed/Fxx-nombre` cuando está archivada; la justificación larga ya cumplió su función. Compactarlas es trabajo del `planificador` (único que escribe `BACKLOG.md`), pedido por Franco o sugerido por el chequeo, y pasa por la puerta 2 como cualquier cambio del backlog. Lo mismo para las viñetas de «Base de la prioridad» que solo expliquen features `hecha`.
+- **Tope:** las `hecha` no cuentan para el máximo de 6; sí cuentan en el informe de tamaño.
+
+### 10.4 Chequeo de contexto: qué leen los agentes y cómo se mantiene liviano
+
+Los agentes empiezan leyendo archivos (principio de `PROJECT.md`). Lo que entra al contexto, por rol (*confirmado* por los contratos de §2 y §3; las cifras de tamaño son *propuesta*):
+
+| Se lee siempre | Se lee bajo demanda | No se lee salvo pedido explícito |
+|---|---|---|
+| `AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` | `definitions/{PROJECT,WORKFLOW,ARCHITECTURE,REPOS}.md` (por rol y paso), las tareas y `refinado.md` de la feature en curso | `features/completed/**` |
+
+El `coordinador` y el `planificador` listan `features/` sin entrar en `completed/`. El chequeo imprime, sin juzgar el contenido:
+
+1. Tamaño (caracteres y líneas) de los archivos de «se lee siempre» y de `definitions/*.md`, con aviso si superan un umbral (propuesta: `STATUS.md` > 3 KB, `BACKLOG.md` > 8 KB, `AGENTS.md` > 2 KB; los de definición > 30 KB, solo informativo).
+2. Filas `hecha` del backlog con su largo, marcando las que superan ~300 caracteres.
+3. Features candidatas a archivar (§10.2) y las inconsistentes.
+4. Carpetas de `features/` con todas sus tareas `hecha` pero fila no `hecha` (solo informa; el estado lo decide Franco).
+
+**Qué decide el script y qué no:** mide, lista y mueve las candidatas bajo confirmación. No decide estados, no edita ni borra contenido, no resume y no recorta documentos. Acortar un documento de definición (p. ej. `WORKFLOW.md`) es del `arquitecto` por la puerta 1; acortar el backlog, del `planificador` por la puerta 2.
+
+### 10.5 Cuándo ocurre
+
+1. Al quedar `hecha` la última tarea de una feature y Franco darla por hecha (aviso de §9.1), el `coordinador` corre el chequeo y, si la feature es candidata, añade a «Espera a Franco»: «Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx`». Franco decide cuándo (antes o después del PR) y commitea el movimiento.
+2. Antes de descomponer una feature nueva (puerta 3), el `coordinador` corre el chequeo y traslada sus avisos a «Espera a Franco» si los hay; no bloquea.
+3. Franco puede correrlo cuando quiera.
+4. En yolo no se archiva (la feature no tiene revisión de Franco); queda para después.
+
+### 10.6 Decisiones de Franco y preguntas abiertas
+
+**Propuestas por aprobar:** (1) `--aplicar` solo lo corre Franco; (2) las tareas viajan con su feature, no sueltas; (3) filas `hecha` se quedan y se compactan por el `planificador`; (4) umbrales de §10.4 a calibrar.
+
+**Abiertas:** 1. ¿Archivar antes o después del PR de la feature? (recomiendo después de que Franco dé la feature por hecha, en su propio commit `chore/`). 2. ¿Aceptas los umbrales de §10.4 como punto de partida?
+
 ## Estado
 
-Aprobado por Franco el 2026-10-29, incluidos §2, §3 y la nueva §9 (F05 y F06, con sus respuestas a §9.5).
+Aprobado por Franco el 2026-10-29, incluidos §2, §3 y la nueva §9 (F05 y F06, con sus respuestas a §9.5). **Cambios de F08 (§4, §5, §7, §10) en borrador, pendientes de la puerta 1 (2026-10-30).**

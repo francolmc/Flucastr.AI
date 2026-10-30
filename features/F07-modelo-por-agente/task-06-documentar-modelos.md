@@ -1,5 +1,5 @@
 # task-06 — Documentar cómo se comprueba el modelo de cada agente
-repo: Flucastr.AI   depende_de: task-02, task-03, task-04, task-05   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02, task-03, task-04, task-05   estado: hecha
 
 ## Descripción
 Deja escrito en `pruebas/README.md` cómo comprobar que cada agente corre con el modelo de `modelos.json` (comprobación determinista y lanzadores con modelo), sin duplicar lo ya dicho.
