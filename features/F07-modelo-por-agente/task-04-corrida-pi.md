@@ -1,5 +1,5 @@
 # task-04 — Una corrida real en Pi: coordinador y subagentes con el modelo de `modelos.json`
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Equivalente de task-03 para Pi: confirma con **una sola corrida** que `pi-coordinador` usa `--model` resuelto de `modelos.json` y que los subagentes lanzados con la herramienta `subagent` usan el `model` de su archivo generado en `~/.pi/agent/agents/`. `WORKFLOW.md` §7 ya observó esto una vez con el `arquitecto` pero solo en la prueba desechable; aquí queda como evidencia verificable para los tres roles.

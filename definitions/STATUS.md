@@ -4,13 +4,15 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 4). F07 `en curso`. task-01 a task-03 `hecha`; task-04 `lista para revisión` (`features/F07-modelo-por-agente/task-04-corrida-pi.md`); task-05 y task-06 `aprobada`.
+Rol: ninguno (esperando a Franco). «Pasos» de task-03 condensados a 7; falta tu commit y la confirmación para volver task-05 a `aprobada`. task-05 `bloqueada` (`features/F07-modelo-por-agente/task-05-extractor-modelos-registro.md`): extractor y 14 pruebas listos, pero `bash pruebas/rapida.sh` falla por el formato de task-03. task-06 con ajuste pendiente para Pi. F07 `en curso`. task-01 a task-04 `hecha`; task-05 y task-06 `aprobada`.
 Rama: feature/F07-modelo-por-agente
 
 ## Espera a Franco
 
-- **Puerta 4:** revisa la Evidencia y las Notas de `features/F07-modelo-por-agente/task-04-corrida-pi.md` y el nuevo `pruebas/lanzar-modelos-pi.sh`, haz el commit en `feature/F07-modelo-por-agente` y pásala a `hecha`. Resultado informado (corrida real, 69 s): coordinador `openai/gpt-6.1-sol`, planificador `openai/gpt-6.1-sol`, constructor `openai/gpt-6-sol`, los tres iguales a lo resuelto. En Pi el modelo del subagente sale de `details.results[].model` de la herramienta `subagent`, presente en el registro principal. Las transcripciones del subagente quedan en una carpeta temporal de `pi-subagents` que puede limpiarse. Nota: el constructor usó `contact_supervisor` pese a «sin herramientas»; no afecta al modelo.
-- **Ajuste pendiente de task-05:** su rama Pi asume «subagente no observable», pero task-04 muestra que sí es observable en el registro principal. Hay que reescribir esa rama (extraer `details.results[].model`) antes de ejecutarla; lo delego al planificador y te pido reaprobar.
+- **Commit + confirmación:** haz el commit del cambio en `features/F07-modelo-por-agente/task-03-corrida-claude-code.md` (Pasos de 10 a 7; sigue `hecha`) y confirma que vuelva task-05 a `aprobada` para reintentar `rapida.sh`. Nota menor: los pasos de task-03 quedaron numerados 1, 5, 6, 7, 8, 9, 10 para no desfasar referencias en Criterios y Evidencia; los criterios 1 y 4 dicen «paso 2» (precondición), que ahora vive dentro del paso 1 (¿lo ajusto?).
+- **Decisión pendiente (task-06):** ajustar su texto sobre Pi (viñeta: en Pi el modelo del subagente sale del registro `--mode json`, `details.results[].model`).
+
+- **Ajuste pendiente de task-06:** su texto sobre Pi («depende de lo que halle task-04») ya no vale; propuesta: viñeta que diga que en Pi el modelo del subagente sale del propio registro `--mode json` (`details.results[].model`), sin transcripciones ni variable equivalente. Confirma y lo delego.
 - Pendiente fuera de alcance: `WORKFLOW.md` (líneas 146 y 149) y la nota de `BACKLOG.md` (línea 28) aún dicen «máximo de 6»; se alinean con el `arquitecto` o con F08.
 - Si `~/.claude` o `~/.pi` están desactualizados, el constructor pedirá que corras `bash instalar.sh`.
 - Rama, PR y despliegue de F05: lo haces tú.
@@ -20,7 +22,7 @@ Rama: feature/F07-modelo-por-agente
 
 ## Bloqueos abiertos
 
-Ninguno.
+- task-05 de F07 (constructor): rol requerido `planificador`; motivo: `features/F07-modelo-por-agente/task-03-corrida-claude-code.md` (ya `hecha` y commiteada) tiene 10 líneas en «Pasos» y el formato permite de 1 a 8 (la reescritura de task-03 añadió los pasos 5-9). Salida completa de `rapida.sh` en el scratchpad (`rapida.out`).
 
 ## Última actualización
 
