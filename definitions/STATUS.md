@@ -10,6 +10,7 @@ Rama: chore/F13-alinear-readme-archivar
 ## Espera a Franco
 
 - Feature F13 completa en chore/F13-alinear-readme-archivar: cierra la rama, haz el PR y despliega.
+- **Archivo aplicado (a tu pedido, 2026-10-30):** F12 y F13 movidas a `features/completed/` con `node scripts/archivar.mjs --aplicar`. Quedan **sin commit**: revisa `git status` y commitéalas en su propio commit `chore/` (el script recomienda hacerlo después del PR de la feature; F13 aún no tiene PR).
 - **Menciones antiguas en `definitions/REGISTRO.md`** líneas 25 y 55 («no tiene Bash»): no estaban en el encargo del arquitecto. Revisa también el reemplazo por script del arquitecto en `WORKFLOW.md` §3.1, `PROJECT.md` y `ARCHITECTURE.md` (solo se verificó con `grep`).
 - Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (ver `definitions/WORKFLOW.md` §3.1).
 - **Registro de eventos:** corre `node scripts/registrar.mjs` cuando quieras (lo corres tú, o yo a tu pedido). `registro/` está ignorado por git.
