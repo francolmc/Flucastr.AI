@@ -1,5 +1,5 @@
 # task-08 — README al día con el modo yolo
-repo: Flucastr.AI   depende_de: task-03, task-04   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-03, task-04   estado: hecha
 
 ## Descripción
 `README.md` explica las cuatro puertas, las ramas por feature y el refinado, pero no el modo yolo. Esta tarea añade dos frases breves para que quien lea el README sepa que existe, cuándo se activa y qué no cambia (sin commit de agentes), sin romper la comprobación de estructura de F04.
