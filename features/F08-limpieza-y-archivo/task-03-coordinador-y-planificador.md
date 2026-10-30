@@ -1,5 +1,5 @@
 # task-03 — Coordinador y planificador: avisos de archivo y `completed/` fuera de lectura
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Los agentes aplican §10.4 y §10.5 de `definitions/WORKFLOW.md`: el `coordinador` y el `planificador` no entran en `features/completed/` al listar `features/`, y el `coordinador` avisa en «Espera a Franco» cuando una feature es archivable o cuando el contexto creció, sin ejecutar nunca `--aplicar`. Un validador determinista (regla 13 en `contrato-roles.mjs`) fija las frases clave.

@@ -34,7 +34,7 @@ Flucastr.AI/
 ├── README.md
 ├── AGENTS.md        # entrada breve para agentes
 ├── definitions/     # definición vigente del proyecto
-├── features/        # tareas por feature (features/Fxx-nombre/task-NN-nombre.md)
+├── features/        # tareas por feature (features/Fxx-nombre/task-NN-nombre.md); las terminadas, archivadas en features/completed/
 ├── modelos.json     # niveles y modelos por herramienta; los agentes declaran nivel, no modelo
 ├── agentes/         # un archivo por agente
 │   ├── arquitecto.md    # define proyecto, estructura y arquitectura
@@ -50,7 +50,8 @@ Flucastr.AI/
 │   ├── descomponer-feature/
 │   └── ejecutar-tarea/
 ├── scripts/
-│   └── resolver.mjs    # resuelve el modelo de cada agente y genera los archivos por herramienta
+│   ├── resolver.mjs    # resuelve el modelo de cada agente y genera los archivos por herramienta
+│   └── archivar.mjs    # chequea el contexto y, con --aplicar (lo corre Franco), mueve las features hecha a features/completed/
 ├── pruebas/         # comprobaciones del kit y arnés de pruebas del arquitecto (ver pruebas/README.md)
 ├── instalar.sh      # instala agentes y skills en Claude Code y Pi
 └── desinstalar.sh   # quita exactamente lo que instaló

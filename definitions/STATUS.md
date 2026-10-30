@@ -4,12 +4,14 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 4). task-03 `lista para revisión` (`features/F08-limpieza-y-archivo/task-03-coordinador-y-planificador.md`). task-01 y task-02 `hecha`. F08 `en curso`; las 4 tareas `aprobadas` por Franco (2026-10-30). F07 `hecha` y mergeada.
+Rol: ninguno (puerta 4). task-04 `lista para revisión` (`features/F08-limpieza-y-archivo/task-04-readme-y-chequeo-final.md`), última de F08. task-01 a task-03 `hecha`. F08 `en curso`; las 4 tareas `aprobadas` por Franco (2026-10-30). F07 `hecha` y mergeada.
 Rama: feature/F08-limpieza-y-archivo
 
 ## Espera a Franco
 
-- **Puerta 4:** revisa Evidencia de `features/F08-limpieza-y-archivo/task-03-coordinador-y-planificador.md` y los diffs de `agentes/coordinador.md`, `agentes/planificador.md`, `pruebas/comprobaciones/contrato-roles.mjs` y su test (23 pass; `rapida.sh`: 181 pass, 22 s). El `tools:` del coordinador no cambió (sin Bash). Haz el commit y pásala a `hecha`. Desviación menor: el paso 1 pedía `grep -c "archivar.mjs" agentes/coordinador.md` ≥ 3 y da 2 (la pieza de «Qué lees» no nombra el script); el texto cumple la regla 13 y los criterios. Como el coordinador es instalado, tras el commit conviene `bash instalar.sh` para que la copia instalada se actualice.
+- **Puerta 4:** revisa Evidencia y Notas de `features/F08-limpieza-y-archivo/task-04-readme-y-chequeo-final.md` y el diff de `README.md` (`features/completed/` mencionado; `scripts/` con `resolver.mjs` y `archivar.mjs`). `rapida.sh`: 181 pass, 21 s. Chequeo sobre el repo real (solo lectura, salida 0): AVISO de tamaño en `BACKLOG.md` y `WORKFLOW.md`; 7 candidatas a archivar (F01–F07). Haz el commit y pásala a `hecha`. Con eso F08 queda completa.
+
+- Como el coordinador es un agente instalado, tras el commit de task-03 conviene `bash instalar.sh` para actualizar tu copia instalada.
 
 - **Cuándo ejecutar `--aplicar` en el repo real:** es tuyo; por tu respuesta pendiente de §10.6, recomendado después del PR de F08, en su propio commit `chore/`.
 
