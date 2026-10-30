@@ -4,7 +4,7 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 a 05 `hecha`; task-06 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
+Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 a 06 `hecha`; task-07 `bloqueada` (la suite completa falla por un test ajeno); task-08 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
 Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Espera a Franco
@@ -14,7 +14,8 @@ Rama: feature/F12-coordinador-ejecuta-scripts
 - Backlog con F12: aprobado por Franco (2026-10-30).
 - F12 task-01: `hecha` y comiteada por Franco (2026-10-30).
 - F12 task-04: `hecha` y comiteada por Franco (2026-10-30).
-- **PUERTA 4 (F12 task-06):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-06-prueba-modelo-pi.md` y el informe `pruebas/resultados/2026-10-30-coordinador-pi.md` (primera línea: «Pi: sin confinamiento técnico; la contención es solo instruccional»). Archivos nuevos: `pruebas/lanzar-coordinador-pi.sh` y el informe. Resultado: 8 de 8 casos ok; canario 0; ningún commit, push ni lectura de `.env`. Haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`.
+- **PUERTA 4 (F12 task-08):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-08-test-coherencia-con-features-archivadas.md`, haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`; luego vuelve task-07 a `aprobada`. Resultado: test 11/11 y suite completa 246/246, 0 fallos; solo cambió `pruebas/comprobaciones/coherencia-features.test.mjs`. Contexto: cambia en `coherencia-features.test.mjs` la exigencia de `>= 2` a `>= 1` carpetas y añade una prueba positiva (filas `hecha` archivadas sin carpeta validan) y una negativa (carpeta `F03` sin fila se rechaza); salida esperada: 11 pruebas del test y 246 en la suite, todas en verde (el planificador no corrió la suite con las pruebas nuevas). Después, volver task-07 a `aprobada`. Otras anotaciones de task-07 para después: `README.md:54` y `scripts/archivar.mjs:9-10` («nunca un agente») contradicen §3.1; en `WORKFLOW.md` §3.1 los controles compensatorios siguen como «trabajo posterior»; revisa también `pruebas/permisos-ejecucion.md` y la *Evidencia* de `features/F12-coordinador-ejecuta-scripts/task-07-documentar-permisos-y-cierre.md`.
+- F12 task-06: `hecha` y comiteada por Franco (2026-10-30); 8 de 8 casos ok en Pi, informe `pruebas/resultados/2026-10-30-coordinador-pi.md`.
 - F12 task-05: `hecha` y comiteada por Franco (2026-10-30); 8 casos ok en Claude Code. Franco aprobó (2026-10-30) el ajuste de `definitions/` (opción c: `tools:` limita, el permiso es aparte) y la tarea reescrita (opción a: lanzador con `--allowedTools` de los tres patrones). Desalineaciones de `definitions/` que quedan para cuando F12 termine: `WORKFLOW.md` línea 4 («el coordinador instalado sigue sin `bash`»), `PROJECT.md` línea 45; `pruebas/permisos-ejecucion.md` lo cubre task-07.
 - F12 task-03: `hecha` y comiteada por Franco (2026-10-30). Tras los commits de F12, `bash instalar.sh` actualiza tu coordinador instalado.
 - F12 task-02: `hecha` y comiteada por Franco (2026-10-30). Pendiente que lo pruebe task-05: si `tools:` restringe `Bash` por sí solo (la prueba de task-02 no lo aísla).
@@ -37,7 +38,7 @@ Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Bloqueos abiertos
 
-Ninguno. (El de task-05 se resolvió: la corrida sin permisos mostró que `tools:` no concede permiso; ver `pruebas/resultados/2026-10-30-coordinador-claude.md`, que se rehace.)
+- task-07 (F12), bloquea el `constructor`; rol indicado: planificador (tarea nueva). `pruebas/comprobaciones/coherencia-features.test.mjs:109` exige al menos 2 carpetas `F*` en `features/` y, tras archivar F01–F10 en `features/completed/`, solo queda F12. Falla en la suite completa (243 pasan, 1 falla), no por el trabajo de task-07, que dejó hechos `pruebas/permisos-ejecucion.md` y `pruebas/README.md`. Corregir el test está fuera de alcance de task-07.
 
 ## Última actualización
 
