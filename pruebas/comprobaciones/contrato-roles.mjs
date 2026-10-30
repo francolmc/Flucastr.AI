@@ -173,5 +173,17 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     errores.push(`La skill «descomponer-feature» debe contener la frase «${FRASE_YOLO}».`);
   }
 
+  // Regla 13: el coordinador avisa del archivo sin ejecutarlo; coordinador y planificador no entran en features/completed/.
+  const FRASE_APLICAR = 'node scripts/archivar.mjs --aplicar Fxx';
+  const FRASE_ARCHIVO = 'features/completed/';
+  if (!(agentes.coordinador ?? '').includes(FRASE_APLICAR)) {
+    errores.push(`El agente «coordinador» debe contener la frase «${FRASE_APLICAR}».`);
+  }
+  for (const nombre of ['coordinador', 'planificador']) {
+    if (!(agentes[nombre] ?? '').includes(FRASE_ARCHIVO)) {
+      errores.push(`El agente «${nombre}» debe contener la frase «${FRASE_ARCHIVO}».`);
+    }
+  }
+
   return errores;
 }

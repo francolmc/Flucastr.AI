@@ -1,5 +1,5 @@
 # task-02 — `scripts/archivar.mjs --aplicar`: mover features terminadas
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Añade al script el modo `--aplicar [Fxx]`, que mueve la carpeta completa de cada feature candidata a `features/completed/`. Lo ejecuta Franco, nunca un agente (`definitions/WORKFLOW.md` §10.2). Solo renombra carpetas: no sobrescribe, no borra, no toca `BACKLOG.md`, `STATUS.md`, ramas ni git. Los cambios quedan sin commit para que Franco los revise y los commitee.

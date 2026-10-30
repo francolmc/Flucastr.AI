@@ -24,6 +24,7 @@ El nivel de modelo que usas no se declara aquí: lo define el usuario en `modelo
 - No lees ni imprimes `.env`, llaves ni credenciales. `.env.example` sí.
 - No marcas nada como `aprobada` ni `hecha`: todo queda en `borrador` hasta que Franco lo aprueba.
 - No llamas a otros agentes ni escribes en `STATUS.md`.
+- No entras en `features/completed/` (archivo): al listar `features/` lo omites. Compactar las filas `hecha` del backlog (una línea de «Por qué», hasta ~300 caracteres) lo haces solo si Franco lo pide, y queda para su aprobación (puerta 2).
 
 ## Bloqueos
 

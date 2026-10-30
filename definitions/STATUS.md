@@ -4,12 +4,13 @@
 
 ## Paso actual
 
-Rol: ninguno (puerta 4). task-02 `lista para revisión` (`features/F08-limpieza-y-archivo/task-02-archivar-aplicar.md`). task-01 `hecha`. F08 `en curso`; las 4 tareas `aprobadas` por Franco (2026-10-30). F07 `hecha` y mergeada.
+Rol: ninguno (puerta 4). task-03 `lista para revisión` (`features/F08-limpieza-y-archivo/task-03-coordinador-y-planificador.md`). task-01 y task-02 `hecha`. F08 `en curso`; las 4 tareas `aprobadas` por Franco (2026-10-30). F07 `hecha` y mergeada.
 Rama: feature/F08-limpieza-y-archivo
 
 ## Espera a Franco
 
-- **Puerta 4:** revisa Evidencia y Notas de `features/F08-limpieza-y-archivo/task-02-archivar-aplicar.md` y `scripts/archivar.mjs` (`archivar.test.mjs`: 20 pass; `rapida.sh`: 178 pass, 21 s de 30 s). `--aplicar` probado solo en una raíz temporal (movió una feature a `completed/`; la segunda corrida dijo «Nada que archivar.»); el repo real no se tocó (`features/completed/` no existe). Haz el commit y pásala a `hecha`. Cambios de comportamiento a confirmar: un argumento desconocido ahora es error con código 1 (antes task-01 avisaba y seguía con 0), y pasar IDs sin `--aplicar` también es error.
+- **Puerta 4:** revisa Evidencia de `features/F08-limpieza-y-archivo/task-03-coordinador-y-planificador.md` y los diffs de `agentes/coordinador.md`, `agentes/planificador.md`, `pruebas/comprobaciones/contrato-roles.mjs` y su test (23 pass; `rapida.sh`: 181 pass, 22 s). El `tools:` del coordinador no cambió (sin Bash). Haz el commit y pásala a `hecha`. Desviación menor: el paso 1 pedía `grep -c "archivar.mjs" agentes/coordinador.md` ≥ 3 y da 2 (la pieza de «Qué lees» no nombra el script); el texto cumple la regla 13 y los criterios. Como el coordinador es instalado, tras el commit conviene `bash instalar.sh` para que la copia instalada se actualice.
+
 - **Cuándo ejecutar `--aplicar` en el repo real:** es tuyo; por tu respuesta pendiente de §10.6, recomendado después del PR de F08, en su propio commit `chore/`.
 
 
