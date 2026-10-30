@@ -1,5 +1,5 @@
 # task-03 — `--actualizar` atómico, aviso de `modelos.json` nuevo y documentación
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Completa `instalar-remoto.sh` con la actualización: si el sha publicado cambió, arma el kit nuevo, lo valida, lo intercambia con vuelta atrás si algo falla y avisa si el `modelos.json` publicado trae novedades respecto del personal (sin tocar el personal). Documenta el flujo en `README.md` para Franco, con la guía de comprobación manual en el PC de trabajo.
