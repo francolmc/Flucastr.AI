@@ -1,5 +1,5 @@
 # task-04 — README al día y chequeo final de F08
-repo: Flucastr.AI   depende_de: task-03   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
 Deja el README coherente con lo que añadió F08 (`scripts/archivar.mjs`, `features/completed/`) y comprueba de punta a punta, en solo lectura, que el chequeo corre sobre el repo real. No ejecuta `--aplicar`: archivar F01–F07 lo decide y lo hace Franco.
