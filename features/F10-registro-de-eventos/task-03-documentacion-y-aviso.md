@@ -1,5 +1,5 @@
 # task-03 — aviso del coordinador, regla de no lectura y documentación del registro
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Deja el registro utilizable por Franco: el `coordinador` anota en «Espera a Franco» el comando `node scripts/registrar.mjs` junto al de archivar y no entra en `registro/`; el validador de roles lo exige; y `README.md` y `pruebas/README.md` explican qué es el registro, cómo correrlo y cómo probarlo. Sin esto el registro existe pero nadie sabe cuándo correrlo.
