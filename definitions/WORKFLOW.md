@@ -1,6 +1,7 @@
 # Flujo de trabajo — diseño de `coordinador`, `planificador` y `constructor`
 
 > Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3). Puerta 1 de F08 aprobada por Franco el 2026-10-30 (§4, §5, §7 y §10). **Pasaje pendiente de aprobación:** §10.5 (y la frase de §10.2 que lo acompaña), por la desviación aceptada el 2026-10-30: el `coordinador` no tiene Bash ni corre `scripts/archivar.mjs`.
+> **F10 (borrador, puerta 1):** el registro de eventos del flujo se diseña en [`REGISTRO.md`](REGISTRO.md), no aquí, para no engordar este documento. Toca este flujo en tres puntos, por aprobar: el `constructor` agrega a *Notas* una línea `Registro:` por ejecución (mismo permiso de escritura que hoy; §2 y §6), `registro/` entra en «no se lee salvo pedido explícito» (§10.4) y el `coordinador` deja en «Espera a Franco» el comando `node scripts/registrar.mjs` junto al de archivar (§10.5). No es una puerta; en yolo no cambia nada salvo `modo=yolo` en la línea.
 > Complementa `PROJECT.md` («Flujo de trabajo»). Este documento define **qué** se construye y las reglas; lo construye una sesión de implementación, no el arquitecto.
 > *Confirmado* = dicho por Franco o leído en archivo. *Propuesta* = mía, por aprobar.
 

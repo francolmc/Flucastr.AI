@@ -1,6 +1,6 @@
 # Arquitectura — Flucastr.AI (modo: actual)
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Pendiente de aprobación:** `WORKFLOW.md` §10.5 (el `coordinador` no corre el script; lo corre Franco) y **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Pendiente de aprobación:** `WORKFLOW.md` §10.5 (el `coordinador` no corre el script; lo corre Franco) **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1).
 
 ## Estructura y su razón
 
@@ -64,6 +64,7 @@ flowchart LR
 | `modelos.json` | Fuente única de modelos: niveles, respaldo, perfiles, nivel por agente. | JSON | `modelos.json` |
 | `scripts/resolver.mjs` | Resuelve nivel→perfil→modelo y genera los agentes por herramienta. | Node ESM | `README.md`, `definicion/arquitectura.md` |
 | `scripts/archivar.mjs` (F08) | Chequeo de contexto de solo lectura; con `--aplicar` mueve a `features/completed/` las features `hecha` con todas sus tareas `hecha`. Ambos modos los corre Franco; el `coordinador` no tiene Bash y solo deja el comando en `STATUS.md`. Nunca escribe estados ni borra. | Node ESM, sin dependencias | `WORKFLOW.md` §10 |
+| `scripts/registrar.mjs` (F10, por aprobar) | Deriva eventos de estados, *Notas* (`Registro:`), `STATUS.md` y `git log` hacia `registro/eventos.jsonl` (solo añadir, idempotente, esquema cerrado sin texto libre). Lo corre Franco; no escribe fuera de `registro/` ni lee `.env`. | Node ESM, sin dependencias; usa `git` | `REGISTRO.md` |
 | `instalar.sh` | Valida primero y después enlaza skills, genera agentes y lanzador de Pi, escribe manifiesto. Nunca pisa lo existente. | Bash | `instalar.sh` (cabecera y comentario de validación) |
 | `desinstalar.sh` | Quita solo lo del manifiesto; borra generados únicamente si conservan la marca `flucastr-ai:generado`. | Bash | `README.md`, `definicion/arquitectura.md` |
 | `pruebas/` | Capa 1 (instalación) y escenarios B, M, R con modelo; fixtures generados, remotos *bare* locales, comprobaciones duras con control negativo, registro estructurado e instantánea. | Bash + Node (`node --test`) | `pruebas/README.md`, `pruebas/ejecutar.sh` |
@@ -205,6 +206,34 @@ flowchart LR
 ### Supuestos sobre el PC de trabajo (a confirmar)
 
 Sistema operativo con `bash`, `curl`, `tar` y `node` (macOS o Linux); acceso HTTPS a `raw.githubusercontent.com`, `api.github.com` y `codeload.github.com`; Claude Code y/o Pi ya instalados. Si el PC es Windows, o la red filtra GitHub, este diseño no sirve tal cual (preguntas 1 y 2 de Franco).
+
+## Registro de eventos del flujo (propuesta, F10)
+
+> **Cambio por aprobar (puerta 1 de F10).** Diseño completo, esquema, privacidad y pruebas en [`REGISTRO.md`](REGISTRO.md). Es un índice **derivado y reproducible**: la fuente de verdad sigue siendo `BACKLOG.md`, las tareas y git.
+
+```mermaid
+flowchart LR
+  F["Franco"]
+  CN["constructor"]
+  TK[("features/Fxx/task-NN.md: estado, Notas con línea Registro:")]
+  GT[("git log: historial de estados, BACKLOG y STATUS")]
+  MJ[("modelos.json: modelo configurado")]
+  RG["scripts/registrar.mjs (F10)"]
+  EV[("registro/eventos.jsonl + .gitignore (ignorado por git)")]
+  AGT["agentes del flujo"]
+
+  CN -->|"una línea Registro: por ejecución (mismo permiso que hoy)"| TK
+  F -->|"node scripts/registrar.mjs (cuando quiera)"| RG
+  RG -->|"lee"| TK
+  RG -->|"lee"| GT
+  RG -->|"nivel a modelo"| MJ
+  RG -->|"añade eventos nuevos, validados"| EV
+  AGT -. "no lo leen" .-> EV
+```
+
+- **Decisión:** un solo escritor, `registrar.mjs`, que corre Franco (el `coordinador` no tiene Bash). Los agentes no reciben permisos nuevos; el único cambio es el contenido de *Notas*. *Descartado:* agentes que escriben el log; versionar el log (ver `REGISTRO.md` §2 y §8).
+- **Privacidad:** esquema cerrado, sin texto libre, sin autores ni títulos; archivo ignorado por git (`REGISTRO.md` §5).
+- **Fuera de lo que `instalar-remoto.sh` distribuye:** `registro/` no está en su lista permitida; `scripts/registrar.mjs` sí viaja con `scripts/`.
 
 ## Supuestos y pendientes
 
