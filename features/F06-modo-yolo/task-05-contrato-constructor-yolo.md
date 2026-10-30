@@ -1,5 +1,5 @@
 # task-05 — Contrato del constructor: reglas de yolo, con control negativo
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 `pruebas/comprobaciones/contrato-constructor.mjs` verifica por frases literales el contrato de `agentes/constructor.md` y `skills/ejecutar-tarea/SKILL.md`. Esta tarea añade las reglas que dejó task-01 (yolo: sin rama, sin `git switch`, sin `CONFIRMAR:`, sin commit) para que un cambio futuro que las borre, o que ponga el sub-bullet de yolo después de la resolución de rama, falle la verificación rápida. Va acompañada de variantes negativas.

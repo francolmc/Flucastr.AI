@@ -38,7 +38,8 @@ function muestra() {
         'Eres el planificador. Usa `crear-backlog` o `descomponer-feature`.\n' +
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n' +
         'Si te bloqueas, primera línea: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n' +
-        'Si la feature requiere refinado, respondes `REFINAR: feature=Fxx; preguntas=<n>`.\n',
+        'Si la feature requiere refinado, respondes `REFINAR: feature=Fxx; preguntas=<n>`.\n' +
+        'Con el encargo «Modo yolo: activo», no preguntas: respondes REFINAR.\n',
       constructor: FM('constructor', 'Ejecuta una tarea aprobada.') +
         'Eres el constructor. Usa `ejecutar-tarea`.\n' +
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n',
@@ -50,7 +51,11 @@ function muestra() {
         'Si el constructor responde `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`, preguntas a Franco.\n' +
         'Con su sí explícito, delegas con «Franco confirmó `git switch <rama>`».\n' +
         'Con la feature completa, indicas a Franco: cierra la rama, haz el PR y despliega.\n' +
-        'Si el planificador responde `REFINAR: feature=Fxx; preguntas=<n>`, registras las preguntas.\n\n' +
+        'Si el planificador responde `REFINAR: feature=Fxx; preguntas=<n>`, registras las preguntas.\n' +
+        'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>\n' +
+        'ADVERTENCIA: rama main\n' +
+        'Modo yolo: detenido (feature Fxx requiere refinado)\n' +
+        'Modo yolo: terminado\n\n' +
         ESTADOS_TABLA.join('\n') + '\n',
     },
     skills: {
@@ -58,7 +63,8 @@ function muestra() {
         'Si te bloqueas: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n',
       'descomponer-feature': FM('descomponer-feature', 'Descompone la feature siguiente.') +
         '5. En `BACKLOG.md` solo puedes mover la marca `→`.\n' +
-        'Si falta refinado, responde `REFINAR: feature=Fxx; preguntas=<n>` y cita `features/Fxx-nombre/refinado.md`.\n',
+        'Si falta refinado, responde `REFINAR: feature=Fxx; preguntas=<n>` y cita `features/Fxx-nombre/refinado.md`.\n' +
+        'Modo yolo: activo: no hay ronda de refinado.\n',
       'crear-backlog': FM('crear-backlog', 'Crea el backlog de features.') +
         'Lista ordenada de features.\n',
     },
@@ -139,6 +145,37 @@ const variantesF05 = [
 ];
 
 for (const [nombre, frase, alterar] of variantesF05) {
+  test(`rechaza ${nombre}`, () => {
+    const m = muestra();
+    alterar(m, frase);
+    const errores = validarRoles(m);
+    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
+  });
+}
+
+// Controles negativos de la regla 12: quitar cualquiera de las seis frases debe nombrarla en el error.
+const variantesF06 = [
+  ['regla 12: el coordinador pierde la línea de registro del modo yolo', 'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'registro sin formato');
+  }],
+  ['regla 12: el coordinador pierde la advertencia de rama main', 'ADVERTENCIA: rama main', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'advertencia omitida');
+  }],
+  ['regla 12: el coordinador pierde el estado detenido', 'Modo yolo: detenido (feature Fxx requiere refinado)', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'detenido sin motivo');
+  }],
+  ['regla 12: el coordinador pierde el estado terminado', 'Modo yolo: terminado', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'cierre sin nombre');
+  }],
+  ['regla 12: el planificador pierde la frase del modo yolo', 'Modo yolo: activo', (m, f) => {
+    m.agentes.planificador = m.agentes.planificador.replace(f, 'modo activo');
+  }],
+  ['regla 12: descomponer-feature pierde la frase del modo yolo', 'Modo yolo: activo', (m, f) => {
+    m.skills['descomponer-feature'] = m.skills['descomponer-feature'].replace(f, 'modo activo');
+  }],
+];
+
+for (const [nombre, frase, alterar] of variantesF06) {
   test(`rechaza ${nombre}`, () => {
     const m = muestra();
     alterar(m, frase);
