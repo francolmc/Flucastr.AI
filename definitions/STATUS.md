@@ -4,13 +4,14 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). Feature F12 (en curso): task-01 a 06 y task-08 `hecha`; task-07 `lista para revisión`. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
+Rol: ninguno (esperando a Franco). Feature F12 (en curso): las 8 tareas `hecha`; falta que Franco confirme la feature. F10 `hecha`; F11 (informe) espera datos de `Registro:`.
 Rama: feature/F12-coordinador-ejecuta-scripts
 
 ## Espera a Franco
 
-- **PUERTA 4 (F12 task-07, la última):** revisa *Evidencia* y *Notas* en `features/F12-coordinador-ejecuta-scripts/task-07-documentar-permisos-y-cierre.md`, más `pruebas/permisos-ejecucion.md` y `pruebas/README.md`. Resultado: conteos 4/4/0 y suite 246/246 sin fallos. Haz el commit en `feature/F12-coordinador-ejecuta-scripts` y dime si queda `hecha`. Las anotaciones de abajo (README.md:54, archivar.mjs:10, WORKFLOW.md línea 83) no se corrigieron: decide si las abrimos como tarea.
-- Si apruebas task-07, F12 quedará completa: te escribiré «Feature F12 completa en feature/F12-coordinador-ejecuta-scripts: cierra la rama, haz el PR y despliega.» y te pediré confirmar F12 como `hecha`.
+- Feature F12 completa en feature/F12-coordinador-ejecuta-scripts: cierra la rama, haz el PR y despliega.
+- **Confirma F12 como `hecha`** (dime «F12 hecha») y la marco en `BACKLOG.md`. F11 sigue pendiente (espera datos de `Registro:`).
+- F12 task-07: `hecha` por Franco (2026-10-30). Las anotaciones de abajo (README.md:54, archivar.mjs:10, WORKFLOW.md línea 83) no se corrigieron: decide si las abrimos como tarea chica.
 - Tras F12, `bash instalar.sh` actualiza tu coordinador instalado. Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (ver `definitions/WORKFLOW.md` §3.1).
 - **Anotaciones de task-07 para cerrar F12:** `README.md:54` y `scripts/archivar.mjs:9-10` («nunca un agente») contradicen §3.1; en `WORKFLOW.md` §3.1 los controles compensatorios siguen como «trabajo posterior»; `WORKFLOW.md` línea 4 («el coordinador instalado sigue sin `bash`») y `PROJECT.md` línea 45 quedaron desalineadas (arquitecto).
 - **Registro de eventos:** corre `node scripts/registrar.mjs` cuando quieras (lo corres tú, o yo a tu pedido tras instalar F12). `registro/` está ignorado por git.
