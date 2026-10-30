@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Instala Flucastr.AI en Claude Code y Pi.
-# Uso: bash instalar.sh [--simular] [--solo claude|pi] [--proyecto <ruta> [--agente <nombre>]]
+# Uso: bash instalar.sh [--simular] [--copiar] [--solo claude|pi] [--proyecto <ruta> [--agente <nombre>]]
+#   --copiar: copia las skills (carpetas reales) en vez de enlazarlas, y usa un modelos.json personal
+#             en ~/.flucastr-ai/modelos.json (o en $FLUCASTR_MODELOS si está definida). Modo "descarga".
+#   Sin --copiar: enlaza las skills al repo (modo "repo").
 if [ -z "${BASH_VERSION:-}" ]; then
   echo "Ejecuta con bash: bash instalar.sh" >&2
   exit 1
@@ -16,12 +19,14 @@ ESTADO_DIR="$HOME/.flucastr-ai"
 MANIFIESTO="$ESTADO_DIR/manifiesto.txt"
 
 SIMULAR=0
+MODO=repo
 SOLO=""
 PROYECTO=""
 AGENTE="arquitecto"
 while [ $# -gt 0 ]; do
   case "$1" in
     --simular) SIMULAR=1 ;;
+    --copiar) MODO=descarga ;;
     --solo)
       shift
       SOLO="${1:-}"
@@ -49,6 +54,39 @@ done
 command -v node >/dev/null 2>&1 || { echo "Falta node: se usa para leer modelos.json." >&2; exit 1; }
 [ -f "$RAIZ/modelos.json" ] || { echo "No encuentro modelos.json en $RAIZ" >&2; exit 1; }
 [ -f "$RAIZ/agentes/$AGENTE.md" ] || { echo "No existe el agente '$AGENTE' en agentes/" >&2; exit 1; }
+
+# Una instalación no cambia de modo sin desinstalar antes. Solo lee el manifiesto; va antes de cualquier escritura.
+# Un manifiesto sin línea «modo» es de modo repo.
+if [ -f "$MANIFIESTO" ]; then
+  IFS=$'\t' read -r p_tipo p_valor _ < "$MANIFIESTO" || true
+  MODO_ANTERIOR=repo
+  if [ "${p_tipo:-}" = modo ]; then MODO_ANTERIOR="${p_valor:-repo}"; fi
+  if [ "$MODO_ANTERIOR" != "$MODO" ]; then
+    echo "Hay una instalación en modo $MODO_ANTERIOR; ejecuta desinstalar.sh antes de cambiar de modo." >&2
+    exit 1
+  fi
+fi
+
+# modelos.json personal (solo modo descarga). Se crea si falta y nunca se sobrescribe.
+# Con --simular no se crea nada: se valida contra el del repo.
+MODELOS=""
+if [ "$MODO" = descarga ]; then
+  MODELOS="${FLUCASTR_MODELOS:-$ESTADO_DIR/modelos.json}"
+  if [ ! -f "$MODELOS" ]; then
+    if [ "$SIMULAR" = 0 ]; then
+      mkdir -p "$(dirname "$MODELOS")"
+      cp "$RAIZ/modelos.json" "$MODELOS"
+      echo "modelos.json personal creado: $MODELOS"
+    else
+      echo "SIMULACIÓN: se creará $MODELOS a partir de $RAIZ/modelos.json"
+      MODELOS="$RAIZ/modelos.json"
+    fi
+  fi
+  export FLUCASTR_MODELOS="$MODELOS"
+else
+  # sin --copiar no se usa ningún modelos.json personal, aunque el shell lo tenga definido
+  unset FLUCASTR_MODELOS
+fi
 
 # Decide primero qué herramientas se instalarán y valida todo antes de tocar
 # la instalación anterior o cualquier destino.
@@ -119,6 +157,36 @@ enlazar_skills() { # carpeta destino de skills
   done
 }
 
+instalar_skills() { # carpeta destino de skills, según el modo
+  if [ "$MODO" = descarga ]; then copiar_skills "$1"; else enlazar_skills "$1"; fi
+}
+
+# Modo descarga: copia cada skill como carpeta real y le pone la marca .flucastr-ai (la que desinstalar.sh exige).
+copiar_skills() { # carpeta destino de skills
+  local base="$1" s n destino
+  for s in "$RAIZ"/skills/*/; do
+    [ -f "${s}SKILL.md" ] || continue
+    n="$(basename "$s")"
+    destino="$base/$n"
+    if [ -e "$destino" ] || [ -L "$destino" ]; then
+      if [ -d "$destino" ] && [ ! -L "$destino" ] && [ -f "$destino/.flucastr-ai" ]; then
+        # copia anterior de este kit: se reemplaza
+        if [ "$SIMULAR" = 0 ]; then rm -rf "$destino"; fi
+      else
+        echo "  OMITIDO (ya existe y no es una copia de Flucastr.AI): $destino"
+        continue
+      fi
+    fi
+    if [ "$SIMULAR" = 0 ]; then
+      mkdir -p "$base"
+      cp -R "$RAIZ/skills/$n" "$destino"
+      : > "$destino/.flucastr-ai"
+      registrar directorio "$destino"
+    fi
+    echo "  copiado: $destino"
+  done
+}
+
 # Si el destino es un enlace a este repo (instalación manual anterior), lo quita para poder generar el archivo.
 # Devuelve 0 si lo liberó (o lo liberaría, en simulación) y 1 si no era un enlace nuestro.
 liberar() { # destino
@@ -180,11 +248,13 @@ generar_lanzador_pi() { # archivo del agente
   fi
   if [ "$SIMULAR" = 0 ]; then
     mkdir -p "$BIN_DIR"
+    local exportar=""
+    if [ "$MODO" = descarga ]; then exportar="export FLUCASTR_MODELOS=\"$MODELOS\""$'\n'; fi
     cat > "$destino" <<EOF
 #!/usr/bin/env bash
 # flucastr-ai:generado - lo crea instalar.sh y lo borra desinstalar.sh
 RAIZ="$RAIZ"
-exec pi --model "\$(node "\$RAIZ/scripts/resolver.mjs" modelo $nombre pi)" \\
+${exportar}exec pi --model "\$(node "\$RAIZ/scripts/resolver.mjs" modelo $nombre pi)" \\
   --append-system-prompt "\$(node "\$RAIZ/scripts/resolver.mjs" cuerpo "\$RAIZ/agentes/$nombre.md")" "\$@"
 EOF
     chmod +x "$destino"
@@ -211,6 +281,9 @@ fijar_agente_proyecto() {
   esac
 }
 
+# Primera línea del manifiesto: el modo con el que se instaló (lo leen desinstalar.sh y la comprobación de modo).
+registrar modo "$MODO"
+
 # Quita primero lo instalado antes, para que no queden restos de skills o agentes borrados del repo.
 # Los ajustes de proyectos se conservan: se pasan tal cual al registro nuevo.
 if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
@@ -223,7 +296,7 @@ if [ "$SIMULAR" = 1 ]; then echo "SIMULACIÓN: no se escribe nada."; fi
 
 if [ "$INSTALAR_CLAUDE" = 1 ]; then
   echo "Claude Code ($CLAUDE_DIR)"
-  enlazar_skills "$CLAUDE_DIR/skills"
+  instalar_skills "$CLAUDE_DIR/skills"
   for f in "$RAIZ"/agentes/*.md; do
     [ -f "$f" ] && generar_agente_claude "$f"
   done
@@ -238,7 +311,7 @@ fi
 
 if [ "$INSTALAR_PI" = 1 ]; then
   echo "Pi ($PI_DIR)"
-  enlazar_skills "$PI_DIR/skills"
+  instalar_skills "$PI_DIR/skills"
   for f in "$RAIZ"/agentes/*.md; do
     [ -f "$f" ] && generar_agente_pi "$f"
     [ -f "$f" ] && generar_lanzador_pi "$f"
