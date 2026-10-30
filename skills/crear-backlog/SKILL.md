@@ -31,7 +31,7 @@ Debajo de la tabla, una línea `Estado del documento: borrador`.
 ## Reglas
 
 - Corto y general: **sin detalle de tareas**. Eso lo hace `descomponer-feature`.
-- **Máximo 6 features.** Si salen más, agrupa o deja las últimas fuera y dilo en una nota.
+- **Máximo 6 features pendientes** (Estado distinto de `hecha`); las `hecha` no cuentan. Si salen más pendientes, agrupa o deja las últimas fuera y dilo en una nota.
 - **Ninguna feature es «probar el flujo» ni una prueba.** Solo entran resultados que Franco pueda ver o usar, o habilitantes reales (lo que hace falta para construir o verificar). Las pruebas del propio flujo no son features.
 - No inventes features que no estén en la definición; si algo falta, pregúntalo.
 - Con varios repos, indica en `Feature` el repo principal entre paréntesis.

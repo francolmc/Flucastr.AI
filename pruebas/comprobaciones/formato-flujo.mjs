@@ -41,10 +41,11 @@ export function validarBacklog(texto) {
     errores.push('La fila de encabezado debe seguirse de una fila separadora «|---|…».');
   }
 
-  // Regla 2: entre 1 y 6 filas de datos, cada una con 8 celdas, IDs únicos.
+  // Regla 2: al menos 1 fila de datos en total (sin tope total) y como máximo 6 filas
+  // con Estado distinto de «hecha». Cada fila sigue necesitando 8 celdas e ID único.
   const filas = lineas.filter((l) => RE_FILA_DATOS.test(l));
-  if (filas.length < 1 || filas.length > 6) {
-    errores.push(`La tabla debe tener entre 1 y 6 features; tiene ${filas.length}.`);
+  if (filas.length < 1) {
+    errores.push(`La tabla debe tener al menos 1 feature; tiene ${filas.length}.`);
   }
   const ids = new Set();
   const datos = [];
@@ -68,6 +69,10 @@ export function validarBacklog(texto) {
     if (c[7] !== '' && c[7] !== '→') {
       errores.push(`${c[0]}: «Siguiente» debe ser vacío o «→»; es «${c[7]}».`);
     }
+  }
+  const pendientes = datos.filter((c) => c[6] !== 'hecha').length;
+  if (pendientes > 6) {
+    errores.push(`El backlog admite como máximo 6 features pendientes (Estado distinto de hecha); tiene ${pendientes}.`);
   }
 
   // Regla 4: un único → en la primera fila no hecha; ninguno si todas están hechas.
