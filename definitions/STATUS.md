@@ -9,6 +9,8 @@ Rama: feature/F17-skills-pi-en-workspace
 
 ## Espera a Franco
 
+- **Riesgo de tiempo de `rapida.sh` (decisión tuya):** el `planificador` midió una corrida de 36 s (superó el tope de 30 s) y otra con `I7` en 30,6 s; las 224 pruebas pasaron. Antes de F17 estaba en 11–15 s y task-04 midió 13–25 s. Sospecha: el archivo nuevo `skills-proyecto.test.mjs` (task-04) sumó carga, o había otros procesos corriendo a la vez; no investigado. Opciones: (a) tarea para sacar `skills-proyecto.test.mjs` de la rápida o aligerarlo; (b) medirlo tú con la máquina libre antes de decidir.
+
 - **Comprobado por Franco (2026-10-31):** en `testskills`, Pi lee las skills desde `.pi/skills/` (con `/trust`). Falta repetirlo en el PC de trabajo, cuya política podría diferir; el README aún dice «Pendiente de comprobar en el PC de trabajo».
 - Feature F17 completa en feature/F17-skills-pi-en-workspace: cierra la rama, haz el PR y despliega.
 - Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea).
