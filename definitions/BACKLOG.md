@@ -17,8 +17,8 @@ Base confirmada: definición aprobada por Franco el 2026-10-29; alcance y orden 
 | F12 | Coordinador ejecuta registro y archivo con controles | habilitante | alto | medio | Verifica el permiso de ejecutar scripts (`WORKFLOW.md` §3.1); antes de F11. | hecha | |
 | F13 | Alinear README y comentario de `scripts/archivar.mjs` con el permiso del `coordinador` | habilitante | bajo | bajo | Chore tras F12, sin cambio de comportamiento. | hecha | |
 | F14 | Estabilizar `pruebas/rapida.sh` bajo su tope de 30 s | habilitante | medio | bajo | Una verificación rápida inestable resta confianza; antes de F11. | hecha | |
-| F15 | Actualizar `README.md`: idea, uso (flujo y roles), instalación (local y sin clonar), diagramas y logo sencillo | habilitante | medio | bajo | Pedida por Franco (2026-10-30); documentación sin cambio de comportamiento; va antes de F11 (en pausa por datos) a pedido suyo (reordenado 2026-10-30). Diagramas en Mermaid y logo en un SVG chico; sin `arquitecto` salvo que choque con la definición. | pendiente | → |
-| F11 | Informe de resultados del flujo | producto | medio | bajo | Feature aparte, tras F10 y con datos de ~10 tareas con línea `Registro:` (cifra a calibrar): se diseña con datos reales. Requiere al `arquitecto` antes de descomponer. | pendiente | |
+| F15 | Actualizar `README.md`: idea, uso, instalación, diagramas y logo | habilitante | medio | bajo | Pedida por Franco (2026-10-30); documentación sin cambio de comportamiento, antes de F11. | hecha | |
+| F11 | Informe de resultados del flujo | producto | medio | bajo | Feature aparte, tras F10 y con datos de ~10 tareas con línea `Registro:` (cifra a calibrar): se diseña con datos reales. Requiere al `arquitecto` antes de descomponer. | pendiente | → |
 
 Estado del documento: aprobado
 
@@ -26,6 +26,7 @@ Estado del documento: aprobado
 
 - **Confirmado por lectura:** el kit no tiene servicio que desplegar; hay instalador, resolver y arnés local (`instalar.sh`, `scripts/resolver.mjs`, `pruebas/README.md`).
 - **Confirmado por Franco (2026-10-29 y 2026-10-30):** F05–F14 son pedidos suyos; orden, valor y esfuerzo, inferidos por el planificador. Cada fila nueva agrega alcance y exige reaprobar el backlog.
-- **F15 (diseño):** diagramas como texto Mermaid dentro del `README.md` (ya se usa en `ARCHITECTURE.md`, sin choque); logo como un SVG único y chico en `assets/`. Solo si `assets/` exige cambiar la estructura de `ARCHITECTURE.md` iría al `arquitecto`. F15 va antes de F11 por pedido de Franco (2026-10-30); F11 sigue `pendiente` y en pausa por datos, sin `→`; el `→` queda en F15, la primera no `hecha`.
+- **F15:** `hecha` (2026-10-30). Diagramas en Mermaid dentro del `README.md` y logo en `assets/`; sin cambio de estructura.
 - **Requiere al `arquitecto` antes de descomponer:** F11.
-- **Máximo de features:** el tope de 6 cuenta solo las pendientes (hoy 2: F11 y F15); las `hecha` no cuentan.
+- **Siguiente (`→`):** F11, `pendiente` y en pausa: Franco decidió esperar más tareas con línea `Registro:`; sin tareas hasta que `arquitecto` la diseñe.
+- **Máximo de features:** el tope de 6 cuenta solo las pendientes (hoy 1: F11); las `hecha` no cuentan.

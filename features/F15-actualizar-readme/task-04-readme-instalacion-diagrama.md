@@ -1,5 +1,5 @@
 # task-04 — README: instalación local y sin clonar, con diagrama
-repo: Flucastr.AI   depende_de: task-03   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
 `## Instalación` ya explica los dos caminos, pero no dice de entrada cuál usar ni los muestra juntos. Esta tarea agrega al inicio de la sección una guía de elección y un diagrama Mermaid de los dos caminos, y títulos para separar «con el repo clonado» de «sin clonar». Los comandos y las viñetas existentes no cambian.
