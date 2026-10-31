@@ -5,12 +5,13 @@
 ## Paso actual
 
 Rol: ninguno (esperando a Franco). F14 `hecha` (confirmada por Franco, 2026-10-30). F01–F10 y F12–F13 `hecha` y archivadas. Solo queda F11 (informe), en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
-Rama: chore/F14-estabilizar-rapida
+Rama: main
 
 ## Espera a Franco
 
 - **Commit del mantenimiento (tuyo):** puertas 1 y 2 aprobadas por Franco (2026-10-30): `BACKLOG.md` compactado, `WORKFLOW.md` (30.596 caracteres), `REGISTRO.md` y `AGENTS.md`. Quedan sin commit; conviene un commit `chore/` aparte del de F14. `rapida.sh`: 218 pruebas, 13 s.
-- **Rama F14:** `chore/F14-estabilizar-rapida` (task-01 `hecha`): cierra la rama, haz el PR y despliega.
+- **Archivo y registro aplicados (a tu pedido, 2026-10-30):** `registrar.mjs` (78 eventos nuevos, 222 en total; `registro/` ignorado por git) y `archivar.mjs --aplicar F14` (movida a `features/completed/`). El archivo de F14 queda **sin commit**: revísalo con `git status` y commitéalo en un commit `chore/` en su propia rama.
+- F14: PR #9 mergeado a `main`. El commit de mantenimiento (`48f4ddd`) se hizo directo en `main`, no en rama aparte (anotado por Franco).
 - **Archivo:** F14 archivable con `node scripts/archivar.mjs --aplicar F14` (tú, o yo a tu pedido, después del PR y en su propio commit `chore/`). Registro de eventos: `node scripts/registrar.mjs` (antes de archivar; no bloquea).
 - Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (`WORKFLOW.md` §3.1).
 - **Antes de publicar el repo (tuyo):** gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Don Financio, Andes), `.gitignore`; activar 2FA y proteger `main`; aclarar los commits «intrusión». Si aparece algo: rotar la credencial primero.
