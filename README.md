@@ -1,8 +1,16 @@
+<p align="center"><img src="assets/logo.svg" alt="Logo de Flucastr.AI" width="64" height="64"></p>
+
 # Flucastr.AI
 
 Mi forma de construir productos con agentes de IA, sin enredarme en la herramienta.
 
-> Estado: MVP en construcción (2026-10-29). Arquitecto, coordinador, planificador y constructor existen; F01 a F03 están hechas en el backlog y F04 dejó este README al día con su comprobación de estructura.
+> Estado: en uso (2026-10-30). El kit completo (arquitecto, coordinador, planificador y constructor, con instalador local y remoto) está hecho; el avance real está en `definitions/BACKLOG.md`.
+
+## La idea
+
+Flucastr.AI es un kit personal de agentes, skills e instaladores para trabajar con IA en Claude Code y Pi. Yo abro un solo agente, el `coordinador`, y él reparte el trabajo entre un `arquitecto`, un `planificador` y un `constructor`. Todo pasa por archivos que puedo leer y por cuatro puertas donde yo apruebo antes de seguir. Los agentes no hacen commit, push, PR ni despliegue: eso es mío.
+
+No es un servicio ni una aplicación: es texto (agentes y skills), unos scripts y las pruebas que comprueban que el kit hace lo que dice.
 
 ## Para qué existe
 
@@ -32,6 +40,7 @@ La definición vigente del proyecto está en [`definitions/`](definitions/):
 ```
 Flucastr.AI/
 ├── README.md
+├── assets/         # logo del README
 ├── AGENTS.md        # entrada breve para agentes
 ├── definitions/     # definición vigente del proyecto
 ├── features/        # tareas por feature (features/Fxx-nombre/task-NN-nombre.md); las terminadas, archivadas en features/completed/
@@ -58,6 +67,8 @@ Flucastr.AI/
 ├── instalar-remoto.sh   # instala sin clonar el repo: descarga main de GitHub, verifica y actualiza
 └── desinstalar.sh   # quita exactamente lo que instaló
 ```
+
+Una comprobación (`pruebas/comprobaciones/readme-estructura.mjs`) falla si el árbol de agentes y skills de este bloque no coincide con `agentes/` y `skills/`.
 
 ## Instalación
 

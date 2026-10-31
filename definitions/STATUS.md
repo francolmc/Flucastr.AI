@@ -5,9 +5,19 @@
 ## Paso actual
 
 Rol: ninguno (esperando a Franco). F14 `hecha` (confirmada por Franco, 2026-10-30). F01–F10 y F12–F13 `hecha` y archivadas. Solo queda F11 (informe), en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
-Rama: main
+Rama: chore/F15-actualizar-readme
+F15 en curso: task-01 `hecha` (Franco, 2026-10-30); task-02 `lista para revisión` (puerta 4); task-03 y 04 `aprobada`, en orden.
 
 ## Espera a Franco
+
+- **Puerta 4 (task-02, cabecera y «La idea»):** `features/F15-actualizar-readme/task-02-readme-cabecera-idea.md`. Revisa *Evidencia* y *Notas*, y `git diff README.md`. Commitea en `chore/F15-actualizar-readme` y dime si la pasas a `hecha`; entonces sigo con task-03.
+
+- task-01 sigue sin commit (`assets/logo.svg`, la tarea); commitea en `chore/F15-actualizar-readme` cuando quieras.
+
+- Franco aprobó (2026-10-30) las 4 tareas de F15 (`aprobada`) y reordenar el backlog (F15 antes de F11); el `planificador` lo está aplicando. Después se delega task-01 al `constructor` (rama `chore/F15-actualizar-readme`).
+- (Resuelto con el reordenamiento) Conflicto de orden: el `→` ya está en F15 (adelantada a tu pedido), pero el validador de formato exige `→` en la primera feature no `hecha` (F11), así que `rapida.sh` falla en `formato-flujo.test.mjs`. Opción recomendada: que el `planificador` reordene el backlog poniendo F15 antes de F11 (F11 sigue pendiente y en pausa). Alternativas: devolver el `→` a F11, o cambiar el validador y la regla (arquitecto).
+- Puerta 2 aprobada por Franco (2026-10-30): backlog con F15 `aprobado`.
+- **`rapida.sh` falla hoy** (`coherencia-features.test.mjs:134`: «se esperaba al menos una carpeta de feature y hay 0»). Causa: archivé F14 y `features/` quedó solo con `completed/`. No viene de F15. Se resuelve cuando exista una carpeta de feature nueva; si prefieres, abrimos una tarea para que esa prueba acepte `features/` sin carpetas activas.
 
 - **Commit del mantenimiento (tuyo):** puertas 1 y 2 aprobadas por Franco (2026-10-30): `BACKLOG.md` compactado, `WORKFLOW.md` (30.596 caracteres), `REGISTRO.md` y `AGENTS.md`. Quedan sin commit; conviene un commit `chore/` aparte del de F14. `rapida.sh`: 218 pruebas, 13 s.
 - **Archivo y registro aplicados (a tu pedido, 2026-10-30):** `registrar.mjs` (78 eventos nuevos, 222 en total; `registro/` ignorado por git) y `archivar.mjs --aplicar F14` (movida a `features/completed/`). El archivo de F14 queda **sin commit**: revísalo con `git status` y commitéalo en un commit `chore/` en su propia rama.
