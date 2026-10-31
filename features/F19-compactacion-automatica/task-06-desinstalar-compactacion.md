@@ -1,0 +1,64 @@
+# task-06 — `desinstalar.sh`: quita solo la compactación que puso el kit
+repo: Flucastr.AI   depende_de: task-04   estado: aprobada
+
+## Descripción
+Enseñar a `desinstalar.sh` a leer las líneas `compactacion` del manifiesto y deshacerlas con `quitar-compactacion` (task-02 y task-04): las de Pi se quitan siempre (se rehacen al reinstalar) y las de Claude Code, que viven en proyectos, se conservan cuando `instalar.sh` reinstala con `--conservar-ajustes`. Va antes que `instalar.sh` para que la reinstalación nunca deje restos. Solo se quita lo que sigue valiendo lo que escribió el kit.
+
+## Contexto
+- Leído `desinstalar.sh` (250 líneas): el bucle principal `while IFS=$'\t' read -r tipo ruta extra … done < "$MANIFIESTO"` (líneas 169–230) trae los casos `enlace`, `archivo`, `directorio`, `exclusion`, `skills-proyecto` y `ajuste`; `ajuste` usa `if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi`, llama `node "$RAIZ/scripts/resolver.mjs" quitar-agente … < /dev/null` con `|| resultado="error"` y hace `rmdir "$(dirname "$ruta")" 2>/dev/null || true`. `decir` imprime salvo con `--silencioso`. La rama de `--proyecto` (líneas 71–165) es la task-07.
+- Formato de las líneas (lo escribe `instalar.sh`, tareas 08 y 09): `compactacion<TAB><ruta del settings><TAB>pi:<modelo>=<reserve>[:creado]` y `compactacion<TAB><settings.local.json del proyecto><TAB>claude:<valor>`.
+- Resolver (tareas 02 y 04): `quitar-compactacion pi <ruta> <modelo> <reserve> [creado]` imprime `quitado`, `archivo-quitado` u `omitido`; `quitar-compactacion claude <ruta> <valor>` igual.
+- Pruebas que ejercitan la desinstalación: `pruebas/capa1/instalacion.test.mjs`, `copia.test.mjs`, `skills-proyecto.test.mjs` (todas en `rapida.sh`).
+
+## Decisiones ya tomadas
+- Un caso nuevo `compactacion)` en el bucle principal, sin cambiar los demás.
+- Parseo de `extra` en bash puro:
+  - Pi: `case "${extra:-}" in pi:*)`: `spec="${extra#pi:}"`; `creado=""`; si `spec` termina en `:creado`, `creado="creado"` y se recorta; `modelo="${spec%%=*}"`; `reserve="${spec#*=}"`. Real: `resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-compactacion pi "$ruta" "$modelo" "$reserve" $creado < /dev/null)" || resultado="error"` y `decir "  compactación de Pi ($resultado): $modelo"`. Simulación: `decir "  quitaría la compactación de Pi: $modelo ($ruta)"`. Se ejecuta aunque `CONSERVAR_AJUSTES=1`.
+  - Claude Code: `claude:*)`: `valor="${extra#claude:}"`. Con `CONSERVAR_AJUSTES=1` → `continue` (no se toca y la línea la conserva `instalar.sh`, task-09). Real: `quitar-compactacion claude "$ruta" "$valor"` con el mismo patrón de error; `decir "  compactación de Claude Code ($resultado): $ruta"`; luego `rmdir "$(dirname "$ruta")" 2>/dev/null || true`. Simulación: `decir "  quitaría la compactación de Claude Code de: $ruta"`.
+  - Cualquier otro `extra`: `decir "  omitido (línea compactacion desconocida): $ruta"`.
+- No se toca el bucle de `--proyecto`, ni el cálculo de `MODO_INSTALADO`, ni el borrado final del manifiesto.
+- El comentario de uso (líneas 2–4) no cambia.
+
+## Alcance / Fuera de alcance
+Alcance: `desinstalar.sh` (caso `compactacion)` del bucle principal).
+Fuera de alcance: la rama `--proyecto` (task-07), `instalar.sh`, `scripts/resolver.mjs`, pruebas nuevas (task-10).
+
+## Pasos
+1. Leer `desinstalar.sh` y confirmar los patrones de `ajuste`. Resultado: líneas de inserción anotadas en *Notas*.
+2. Añadir el caso `compactacion)` con las ramas `pi:*`, `claude:*` y el resto. Resultado: `bash -n desinstalar.sh` sin errores.
+3. Probar con un manifiesto escrito a mano en un HOME temporal (ver *Verificación*). Resultado: las salidas de abajo.
+4. Correr `bash pruebas/rapida.sh`. Resultado: exit 0.
+5. Pegar todo en *Evidencia*.
+
+## Criterios de aceptación
+1. Con un `settings.json` de Pi creado por `fijar-compactacion pi` y su manifiesto, `bash desinstalar.sh` imprime `compactación de Pi (quitado)` dos veces y `compactación de Pi (archivo-quitado)` una, y el archivo ya no existe.
+2. Si el usuario cambió un valor (171999), esa línea imprime `compactación de Pi (omitido)` y el valor del usuario sigue en el archivo.
+3. Un `settings.local.json` de proyecto con `autoCompactWindow` 133000 y otras claves queda sin esa clave tras `desinstalar.sh`, y `desinstalar.sh --conservar-ajustes` no lo toca.
+4. `--simular` imprime `quitaría la compactación…` y no cambia ningún archivo.
+5. `bash pruebas/rapida.sh` termina con exit 0.
+
+## Verificación
+```
+cd /Users/franco/Codes/flucastr/Flucastr.AI
+bash -n desinstalar.sh
+T=$(mktemp -d); H="$T/h"
+preparar() {
+  rm -rf "$T/h" "$T/proy"; mkdir -p "$H/.flucastr-ai" "$H/pi" "$T/proy/.claude"
+  node scripts/resolver.mjs fijar-compactacion pi "$H/pi/settings.json" >/dev/null
+  printf '{"agent":"coordinador","autoCompactWindow":133000}\n' > "$T/proy/.claude/settings.local.json"
+  printf 'modo\trepo\ncompactacion\t%s\tpi:openai/gpt-6-astra=172000:creado\ncompactacion\t%s\tpi:openai/gpt-6.1-sol=172000:creado\ncompactacion\t%s\tpi:openai/gpt-6-luna=172000:creado\ncompactacion\t%s\tclaude:133000\n' "$H/pi/settings.json" "$H/pi/settings.json" "$H/pi/settings.json" "$T/proy/.claude/settings.local.json" > "$H/.flucastr-ai/manifiesto.txt"
+}
+preparar; HOME="$H" bash desinstalar.sh --simular | grep -i compactaci; ls -A "$H/pi"
+preparar; HOME="$H" bash desinstalar.sh --conservar-ajustes | grep -i compactaci; cat "$T/proy/.claude/settings.local.json"; ls -A "$H/pi"
+preparar; HOME="$H" bash desinstalar.sh | grep -i compactaci; cat "$T/proy/.claude/settings.local.json"; ls -A "$H/pi"
+preparar; node -e "const f=process.argv[1],o=JSON.parse(require('fs').readFileSync(f));o.compaction.modelOverrides['openai/gpt-6-luna'].reserveTokens=171999;require('fs').writeFileSync(f,JSON.stringify(o))" "$H/pi/settings.json"
+HOME="$H" bash desinstalar.sh | grep -i "compactación de Pi"; cat "$H/pi/settings.json"
+R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -2 "$R"
+```
+Esperado: (1) la simulación imprime cuatro líneas `quitaría la compactación…` y `settings.json` sigue en `$H/pi`; (2) con `--conservar-ajustes` imprime tres líneas `compactación de Pi (…)` (`quitado`, `quitado`, `archivo-quitado`), el `settings.local.json` conserva `autoCompactWindow: 133000` y `ls -A "$H/pi"` queda vacío; (3) la desinstalación completa suma `compactación de Claude Code (quitado)` y el proyecto queda con `{"agent":"coordinador"}` (la clave `agent` la gestiona el caso `ajuste`, que aquí no hay línea para ella); (4) con el valor de `gpt-6-luna` cambiado a 171999 esa línea imprime `compactación de Pi (omitido)` y el archivo conserva ese override con 171999 y ya sin los otros dos; `rapida` con exit 0. No ejecutado por el planificador: `desinstalar.sh` aún no tiene el caso.
+
+## Evidencia
+(lo llena el constructor)
+
+## Notas
+(lo llena el constructor)
