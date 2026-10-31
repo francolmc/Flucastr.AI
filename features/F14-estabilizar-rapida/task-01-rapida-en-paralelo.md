@@ -1,5 +1,5 @@
 # task-01 — Correr los archivos de `pruebas/rapida.sh` en paralelo
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 `bash pruebas/rapida.sh` tarda 23–37 s con tope de 30 s y a veces falla por tiempo. Causa medida: `rapida.sh` corre los archivos de prueba uno tras otro (`node --test --test-concurrency=1`), así que el tiempo es la suma de todos (~26 s; el mayor es `pruebas/capa1/instalacion.test.mjs`, ~8 s, seguido de `modelos-agentes.test.mjs` ~4 s y `constructor-resultado.test.mjs` ~3,3 s). Medido en el checkout: sin `--test-concurrency=1` la misma lista de archivos tarda ~11 s, con los mismos 217 casos que pasan. La tarea quita esa opción para dejar el tiempo muy por debajo del tope, sin quitar ni saltar ninguna prueba.

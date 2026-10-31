@@ -4,12 +4,15 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). F14 task-01 `lista para revisión` (puerta 4). F01–F10 y F12–F13 `hecha` y archivadas. F11 (informe) requiere al `arquitecto` y datos de `Registro:`.
+Rol: ninguno (esperando a Franco). F14 `hecha` (task-01 y feature confirmadas por Franco, 2026-10-30). Solo queda F11 (informe). F01–F10 y F12–F13 `hecha` y archivadas. F11 (informe) requiere al `arquitecto` y datos de `Registro:`.
 Rama: chore/F14-estabilizar-rapida
 
 ## Espera a Franco
 
-- **Puerta 4 (revisión y commit):** `features/F14-estabilizar-rapida/task-01-rapida-en-paralelo.md`. Revisa *Evidencia* y *Notas*, y el diff de `pruebas/rapida.sh` (3 líneas; `git diff pruebas/rapida.sh`). Commitea en `chore/F14-estabilizar-rapida` y dime si la pasas a `hecha`.
+- F14 `hecha` en `BACKLOG.md` (confirmada por Franco, 2026-10-30). `→` movido a F11.
+- **F11 (informe) no se puede descomponer aún:** (1) falta que el `arquitecto` diseñe el informe (métricas, fuente, formato); (2) faltan datos reales: hay 13 líneas `Registro:` en `features/`, pero la mayoría son ejemplos o plantillas de F10/F14; decide cuántas tareas reales quieres como mínimo; (3) falta refinado de alcance. Dime si llamo al `arquitecto` ahora o esperamos más datos.
+- Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea).
+- Feature F14 archivable: `node scripts/archivar.mjs --aplicar F14` (lo corre Franco o, si lo pide, tú, después del PR y en su propio commit `chore/`).
 - Feature F14 completa en chore/F14-estabilizar-rapida (con task-01 `hecha`): cierra la rama, haz el PR y despliega.
 - Puerta 2 aprobada por Franco (2026-10-30): backlog con F14 `aprobado`; `→` ya en F14.
 - Chequeo de contexto: `node scripts/archivar.mjs` (sugerencia, no bloquea).
