@@ -124,6 +124,9 @@ bash desinstalar.sh          # quita lo instalado
 # Dejar al arquitecto como agente predeterminado de un proyecto (cada sesión ahí arranca con él):
 bash instalar.sh --proyecto /ruta/al/proyecto
 
+# Copiar las skills de Pi dentro del proyecto (para Pi cuando se abre desde el workspace):
+bash instalar.sh --proyecto /ruta/al/proyecto --skills-proyecto   # copia las skills a <proyecto>/.pi/skills/ (para Pi en el workspace)
+
 # Quitar solo ese ajuste de un proyecto, sin desinstalar lo demás:
 bash desinstalar.sh --proyecto /ruta/al/proyecto
 ```
@@ -134,6 +137,10 @@ bash desinstalar.sh --proyecto /ruta/al/proyecto
 - `--proyecto` escribe `{"agent": "arquitecto"}` en `<proyecto>/.claude/settings.local.json`. No pisa un agente que el proyecto ya tenga definido, y `desinstalar.sh` lo deshace.
 - `--agente <nombre>` elige el agente predeterminado del proyecto (por defecto `arquitecto`).
 - Uso: `claude --agent coordinador` o `pi-coordinador`, desde la carpeta del proyecto (también `arquitecto`, `planificador` y `constructor` por separado).
+- `--skills-proyecto` (con `--proyecto`) copia las skills a `<proyecto>/.pi/skills/` como carpetas reales, sin enlaces, para que Pi las lea desde el workspace. Nunca enlaza ni pisa una carpeta que no sea de Flucastr.AI: la omite y lo avisa. No se combina con `--solo claude`.
+- Las copias quedan fuera de git del proyecto: cada una se añade a `.git/info/exclude` (no al `.gitignore`). No se editan: se rehacen al volver a correr `bash instalar.sh` o `instalar-remoto.sh --actualizar`. Con `--solo claude` las copias de los proyectos registrados se borran y no se rehacen; el registro se conserva, y `bash instalar.sh --proyecto <ruta> --skills-proyecto` las vuelve a crear.
+- Pi pide confiar en el proyecto (`/trust`) la primera vez que lo abre. El instalador no cambia esa confianza.
+- `--proyecto` deja `.claude/settings.local.json` sin ignorar en git: el proyecto lo muestra como no versionado (`?? .claude/`). `desinstalar.sh --proyecto <ruta>` quita ese ajuste, las copias de skills y sus líneas en `.git/info/exclude`.
 
 ### Sin clonar el repo (PC de trabajo)
 
@@ -167,6 +174,8 @@ bash ~/.flucastr-ai/kit/instalar-remoto.sh --ref <rama|tag|sha>    # fija otra v
 - Para quitar todo: `bash ~/.flucastr-ai/kit/desinstalar.sh`. Conserva mi `modelos.json`; con `--todo` también lo borra.
 - Requisitos: `bash`, `curl`, `tar` y `node`.
 - Riesgo asumido de `curl | bash`: quien controle la cuenta de GitHub controla lo que se ejecuta en este PC. Mitigación prevista: 2FA en la cuenta y `main` con PR obligatorio; por eso la forma de dos pasos va primero.
+
+Si Pi está en el workspace de ese PC, el flag de skills de proyecto también funciona: `bash ~/.flucastr-ai/kit/instalar.sh --copiar --proyecto <ruta> --skills-proyecto`, y `--actualizar` rehace esas copias. Pendiente de comprobar en el PC de trabajo: si Pi lee las skills desde .pi/skills/ ahí.
 
 #### Comprobación manual en el PC de trabajo
 

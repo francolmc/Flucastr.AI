@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Quita lo que instalar.sh creó (y solo eso), según ~/.flucastr-ai/manifiesto.txt.
-# Uso: bash desinstalar.sh [--simular] [--todo] [--proyecto <ruta>]   (con --proyecto solo se quita el agente fijado ahí)
+# Uso: bash desinstalar.sh [--simular] [--todo] [--proyecto <ruta>]   (con --proyecto se quita lo instalado en ese proyecto: agente y skills)
 #   --todo: además borra ~/.flucastr-ai/modelos.json (el personal). Sin él, ese archivo se conserva siempre.
 if [ -z "${BASH_VERSION:-}" ]; then
   echo "Ejecuta con bash: bash desinstalar.sh" >&2
@@ -39,6 +39,19 @@ decir() {
   if [ "$SILENCIOSO" = 0 ]; then echo "$*"; fi
 }
 
+# Ruta absoluta de .git/info/exclude del proyecto; vacía si el proyecto no es un repo git.
+exclusion_de_git() { # ruta del proyecto
+  git -C "$1" rev-parse --path-format=absolute --git-path info/exclude 2>/dev/null || true
+}
+
+# Tras quitar una copia de skill, borra <proyecto>/.pi/skills y <proyecto>/.pi solo si quedaron vacíos.
+limpiar_pi_vacio() { # ruta de una copia
+  case "$1" in */.pi/skills/*) ;; *) return 0 ;; esac
+  local skills="${1%/*}"
+  rmdir "$skills" 2>/dev/null || true
+  rmdir "${skills%/*}" 2>/dev/null || true
+}
+
 if [ ! -f "$MANIFIESTO" ]; then
   decir "Nada que desinstalar: no hay manifiesto en $MANIFIESTO."
   if [ "$TODO" = 1 ] && [ "$SIMULAR" = 0 ]; then
@@ -53,24 +66,97 @@ MODO_INSTALADO=repo
 IFS=$'\t' read -r p_tipo p_valor _ < "$MANIFIESTO" || true
 if [ "${p_tipo:-}" = modo ]; then MODO_INSTALADO="${p_valor:-repo}"; fi
 
-# Solo un proyecto: quita el agente fijado ahí y deja todo lo demás instalado.
+# Solo un proyecto: quita lo que este instalador puso ahí (agente fijado, copias de skills, líneas de
+# exclusión de git y la línea skills-proyecto) y deja el resto del manifiesto tal cual.
 if [ -n "$PROYECTO" ]; then
   AJUSTES="$PROYECTO/.claude/settings.local.json"
-  PREFIJO="$(printf 'ajuste\t%s\t' "$AJUSTES")"
-  LINEA="$(grep -F "$PREFIJO" "$MANIFIESTO" | head -n 1 || true)"
-  if [ -z "$LINEA" ]; then
-    decir "Este instalador no fijó ningún agente en $PROYECTO."
+  EXCL_GIT="$(exclusion_de_git "$PROYECTO")"
+  MANTENER="$MANIFIESTO.tmp"
+  hallados=0
+  copias=0
+  : > "$MANTENER"
+  while IFS= read -r linea || [ -n "$linea" ]; do
+    IFS=$'\t' read -r tipo ruta extra <<< "$linea"
+    quitar=0
+    case "$tipo" in
+      ajuste)
+        if [ "$ruta" = "$AJUSTES" ]; then
+          quitar=1
+          hallados=$((hallados + 1))
+          if [ "$SIMULAR" = 1 ]; then
+            decir "SIMULACIÓN: quitaría el agente '${extra:-}' de: $AJUSTES"
+          else
+            resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-agente "$AJUSTES" "${extra:-}" < /dev/null)" || resultado="error"
+            decir "  ajuste de proyecto ($resultado): $AJUSTES"
+            rmdir "$PROYECTO/.claude" 2>/dev/null || true # solo si quedó vacía
+          fi
+        fi
+        ;;
+      directorio)
+        case "$ruta" in
+          "$PROYECTO"/.pi/skills/*)
+            quitar=1
+            hallados=$((hallados + 1))
+            copias=1
+            if [ -d "$ruta" ] && [ ! -L "$ruta" ] && [ -f "$ruta/.flucastr-ai" ]; then
+              if [ "$SIMULAR" = 1 ]; then
+                decir "  quitaría: $ruta"
+              else
+                rm -rf "$ruta"
+                limpiar_pi_vacio "$ruta"
+                decir "  quitado: $ruta"
+              fi
+            else
+              decir "  omitido (no tiene la marca): $ruta"
+            fi
+            ;;
+        esac
+        ;;
+      exclusion)
+        if [ -n "$EXCL_GIT" ] && [ "$ruta" = "$EXCL_GIT" ]; then
+          quitar=1
+          hallados=$((hallados + 1))
+          if [ -n "${extra:-}" ] && [ -f "$ruta" ] && grep -qxF -- "$extra" "$ruta"; then
+            if [ "$SIMULAR" = 0 ]; then
+              grep -vxF -- "$extra" "$ruta" > "$ruta.tmp" || true
+              if cmp -s "$ruta" "$ruta.tmp"; then rm -f "$ruta.tmp"; else mv "$ruta.tmp" "$ruta"; fi
+            fi
+            if [ "$SIMULAR" = 1 ]; then
+              decir "  quitaría exclusión: $extra ($ruta)"
+            else
+              decir "  quitada exclusión: $extra ($ruta)"
+            fi
+          else
+            decir "  omitido (no está la exclusión): $ruta"
+          fi
+        elif [ -z "$EXCL_GIT" ] && case "$ruta" in "$PROYECTO"/*) true ;; *) false ;; esac; then
+          decir "  AVISO: el proyecto ya no es un repo git; no se quita la exclusión (sigue registrada): $extra"
+        fi
+        ;;
+      skills-proyecto)
+        if [ "$ruta" = "$PROYECTO" ]; then
+          quitar=1
+          hallados=$((hallados + 1))
+        fi
+        ;;
+    esac
+    if [ "$quitar" = 0 ]; then printf '%s\n' "$linea" >> "$MANTENER"; fi
+  done < "$MANIFIESTO"
+
+  if [ "$copias" = 1 ]; then
+    decir "  (las copias no se editan: si cambiaste algo dentro, se pierde)"
+  fi
+  if [ "$hallados" = 0 ]; then
+    rm -f "$MANTENER"
+    decir "Este instalador no instaló nada en $PROYECTO."
     exit 0
   fi
-  AGENTE_FIJADO="${LINEA##*$'\t'}"
   if [ "$SIMULAR" = 1 ]; then
-    decir "SIMULACIÓN: quitaría el agente '$AGENTE_FIJADO' de: $AJUSTES"
+    rm -f "$MANTENER"
+    decir "SIMULACIÓN: no se borra nada."
     exit 0
   fi
-  resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-agente "$AJUSTES" "$AGENTE_FIJADO" < /dev/null)" || resultado="error"
-  decir "  ajuste de proyecto ($resultado): $AJUSTES"
-  grep -vF "$PREFIJO" "$MANIFIESTO" > "$MANIFIESTO.tmp" || true
-  mv "$MANIFIESTO.tmp" "$MANIFIESTO"
+  mv "$MANTENER" "$MANIFIESTO"
   if [ ! -s "$MANIFIESTO" ]; then
     rm -f "$MANIFIESTO"
     rmdir "$ESTADO_DIR" 2>/dev/null || true
@@ -102,13 +188,32 @@ while IFS=$'\t' read -r tipo ruta extra; do
       fi
       ;;
     directorio)
-      # copia de una skill (modo descarga): solo se borra si es carpeta real con la marca, no un enlace
+      # copia de una skill (modo descarga o --skills-proyecto): solo se borra si es carpeta real con la marca, no un enlace
       if [ -d "$ruta" ] && [ ! -L "$ruta" ] && [ -f "$ruta/.flucastr-ai" ]; then
-        if [ "$SIMULAR" = 0 ]; then rm -rf "$ruta"; fi
+        if [ "$SIMULAR" = 0 ]; then rm -rf "$ruta"; limpiar_pi_vacio "$ruta"; fi
         decir "  quitado: $ruta"
       else
         decir "  omitido (no tiene la marca): $ruta"
       fi
+      ;;
+    exclusion)
+      # línea de .git/info/exclude que añadió --skills-proyecto: se quita solo esa línea exacta
+      if [ -n "${extra:-}" ] && [ -f "$ruta" ] && grep -qxF -- "$extra" "$ruta"; then
+        if [ "$SIMULAR" = 0 ]; then
+          grep -vxF -- "$extra" "$ruta" > "$ruta.tmp" || true
+          if cmp -s "$ruta" "$ruta.tmp"; then rm -f "$ruta.tmp"; else mv "$ruta.tmp" "$ruta"; fi
+        fi
+        if [ "$SIMULAR" = 1 ]; then
+          decir "  quitaría exclusión: $extra ($ruta)"
+        else
+          decir "  quitada exclusión: $extra ($ruta)"
+        fi
+      else
+        decir "  omitido (no está la exclusión): $ruta"
+      fi
+      ;;
+    skills-proyecto)
+      # solo registro: la línea se va con el manifiesto (las copias tienen sus propias líneas directorio)
       ;;
     ajuste)
       # agente predeterminado de un proyecto: solo se quita si sigue siendo el que fijamos
@@ -118,6 +223,7 @@ while IFS=$'\t' read -r tipo ruta extra; do
       else
         resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-agente "$ruta" "${extra:-}" < /dev/null)" || resultado="error"
         decir "  ajuste de proyecto ($resultado): $ruta"
+        rmdir "$(dirname "$ruta")" 2>/dev/null || true # .claude del proyecto, solo si quedó vacía
       fi
       ;;
   esac

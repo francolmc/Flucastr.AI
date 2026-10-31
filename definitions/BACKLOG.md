@@ -19,6 +19,7 @@ Base confirmada: definición aprobada por Franco el 2026-10-29; alcance y orden 
 | F14 | Estabilizar `pruebas/rapida.sh` bajo su tope de 30 s | habilitante | medio | bajo | Una verificación rápida inestable resta confianza; antes de F11. | hecha | |
 | F15 | Actualizar `README.md`: idea, uso, instalación, diagramas y logo | habilitante | medio | bajo | Pedida por Franco (2026-10-30); documentación sin cambio de comportamiento, antes de F11. | hecha | |
 | F16 | `coherencia-features` acepte `features/` sin carpetas de feature activas | habilitante | medio | bajo | Pedida por Franco (2026-10-30). Quitó el assert `carpetas.length >= 1`: con todo archivado en `completed/` el backlog se valida y pasa. | hecha | |
+| F17 | Skills de Pi dentro del workspace (`instalar.sh`) | producto | alto | medio | Pedida por Franco (2026-10-31): `--proyecto` ahora instala las skills de Pi en el workspace. Confirmada por Franco (2026-10-31). | hecha | |
 | F11 | Informe de resultados del flujo | producto | medio | bajo | Feature aparte, tras F10 y con datos de ~10 tareas con línea `Registro:` (cifra a calibrar): se diseña con datos reales. Requiere al `arquitecto` antes de descomponer. | pendiente | → |
 
 Estado del documento: aprobado
@@ -26,9 +27,7 @@ Estado del documento: aprobado
 ## Base de la prioridad
 
 - **Confirmado por lectura:** el kit no tiene servicio que desplegar; hay instalador, resolver y arnés local (`instalar.sh`, `scripts/resolver.mjs`, `pruebas/README.md`).
-- **Confirmado por Franco (2026-10-29 y 2026-10-30):** F05–F14 son pedidos suyos; orden, valor y esfuerzo, inferidos por el planificador. Cada fila nueva agrega alcance y exige reaprobar el backlog.
-- **F15:** `hecha` (2026-10-30). Diagramas en Mermaid dentro del `README.md` y logo en `assets/`; sin cambio de estructura.
+- **Confirmado por Franco (2026-10-29 a 2026-10-31):** F05–F17 son pedidos suyos; orden, valor y esfuerzo, inferidos por el planificador. Cada fila nueva agrega alcance y exige reaprobar el backlog.
 - **Requiere al `arquitecto` antes de descomponer:** F11.
-- **F16:** `hecha` (2026-10-30).
-- **Siguiente (`→`):** F11, sin tareas: `pendiente` y en pausa. Franco decidió esperar más tareas con línea `Registro:`; no se descompone hasta que `arquitecto` la diseñe.
+- **Siguiente (`→`):** F11, `pendiente` y en pausa, sin tareas. Franco decidió esperar más tareas con línea `Registro:`; no se descompone hasta que `arquitecto` la diseñe.
 - **Máximo de features:** el tope de 6 cuenta solo las pendientes (hoy 1: F11); las `hecha` no cuentan.

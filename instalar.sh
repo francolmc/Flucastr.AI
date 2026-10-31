@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Instala Flucastr.AI en Claude Code y Pi.
-# Uso: bash instalar.sh [--simular] [--copiar] [--solo claude|pi] [--proyecto <ruta> [--agente <nombre>]]
+# Uso: bash instalar.sh [--simular] [--copiar] [--solo claude|pi] [--proyecto <ruta> [--agente <nombre>]] [--skills-proyecto]
 #   --copiar: copia las skills (carpetas reales) en vez de enlazarlas, y usa un modelos.json personal
 #             en ~/.flucastr-ai/modelos.json (o en $FLUCASTR_MODELOS si está definida). Modo "descarga".
 #   Sin --copiar: enlaza las skills al repo (modo "repo").
@@ -23,6 +23,7 @@ MODO=repo
 SOLO=""
 PROYECTO=""
 AGENTE="arquitecto"
+SKILLS_PROYECTO=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --simular) SIMULAR=1 ;;
@@ -45,11 +46,18 @@ while [ $# -gt 0 ]; do
       shift
       AGENTE="${1:-}"
       ;;
+    --skills-proyecto) SKILLS_PROYECTO=1 ;;
     -h | --help) sed -n '2,3p' "$0"; exit 0 ;;
     *) echo "Opción desconocida: $1" >&2; exit 1 ;;
   esac
   shift
 done
+
+# Validación del flag: antes de escribir nada.
+if [ "$SKILLS_PROYECTO" = 1 ]; then
+  [ -n "$PROYECTO" ] || { echo "--skills-proyecto necesita --proyecto <ruta>" >&2; exit 1; }
+  [ "$SOLO" != claude ] || { echo "--skills-proyecto no se combina con --solo claude" >&2; exit 1; }
+fi
 
 command -v node >/dev/null 2>&1 || { echo "Falta node: se usa para leer modelos.json." >&2; exit 1; }
 [ -f "$RAIZ/modelos.json" ] || { echo "No encuentro modelos.json en $RAIZ" >&2; exit 1; }
@@ -187,6 +195,64 @@ copiar_skills() { # carpeta destino de skills
   done
 }
 
+# Skills de Pi dentro del proyecto (--skills-proyecto): carpetas reales en <proyecto>/.pi/skills/, sin enlaces.
+SIN_GIT_AVISADO=0
+
+# Ruta absoluta de .git/info/exclude del proyecto; vacía si el proyecto no es un repo git.
+exclusion_de_git() { # ruta del proyecto
+  git -C "$1" rev-parse --path-format=absolute --git-path info/exclude 2>/dev/null || true
+}
+
+# Excluye en git, de forma local, la carpeta de una skill copiada. Solo añade la línea si no estaba
+# (si la puso el cliente, no se toca ni se registra, para que desinstalar.sh no borre una línea ajena).
+excluir_en_git() { # nombre de la skill
+  local n="$1" archivo linea="/.pi/skills/$1/"
+  archivo="$(exclusion_de_git "$PROYECTO")"
+  if [ -z "$archivo" ]; then
+    if [ "$SIN_GIT_AVISADO" = 0 ]; then
+      echo "  AVISO: el proyecto no es un repo git; no hay nada que excluir."
+      SIN_GIT_AVISADO=1
+    fi
+    return
+  fi
+  if [ -f "$archivo" ] && grep -qxF "$linea" "$archivo"; then
+    echo "  ya estaba excluido en git (no se toca): $linea"
+    return
+  fi
+  if [ "$SIMULAR" = 1 ]; then
+    echo "  excluiría: $linea"
+    return
+  fi
+  mkdir -p "$(dirname "$archivo")"
+  if [ -s "$archivo" ] && [ -n "$(tail -c1 "$archivo")" ]; then printf '\n' >> "$archivo"; fi
+  printf '%s\n' "$linea" >> "$archivo"
+  registrar exclusion "$archivo" "$linea"
+  echo "  excluido en git: $linea"
+}
+
+instalar_skills_proyecto() { # usa $PROYECTO
+  local base="$PROYECTO/.pi/skills" s n destino
+  if [ "$SIMULAR" = 0 ]; then copiar_skills "$base"; fi
+  for s in "$RAIZ"/skills/*/; do
+    [ -f "${s}SKILL.md" ] || continue
+    n="$(basename "$s")"
+    destino="$base/$n"
+    if [ "$SIMULAR" = 1 ]; then
+      if { [ -e "$destino" ] || [ -L "$destino" ]; } && { [ -L "$destino" ] || [ ! -f "$destino/.flucastr-ai" ]; }; then
+        echo "  OMITIDO (ya existe y no es una copia de Flucastr.AI): $destino"
+        continue
+      fi
+      echo "  copiaría: $destino"
+    elif [ -L "$destino" ] || [ ! -d "$destino" ] || [ ! -f "$destino/.flucastr-ai" ]; then
+      continue # copiar_skills la omitió (carpeta ajena): no se excluye
+    fi
+    excluir_en_git "$n"
+  done
+  if [ "$SIMULAR" = 0 ] && ! grep -qxF "$(printf 'skills-proyecto\t%s\t' "$PROYECTO")" "$NUEVO"; then
+    registrar skills-proyecto "$PROYECTO"
+  fi
+}
+
 # Si el destino es un enlace a este repo (instalación manual anterior), lo quita para poder generar el archivo.
 # Devuelve 0 si lo liberó (o lo liberaría, en simulación) y 1 si no era un enlace nuestro.
 liberar() { # destino
@@ -284,6 +350,17 @@ fijar_agente_proyecto() {
 # Primera línea del manifiesto: el modo con el que se instaló (lo leen desinstalar.sh y la comprobación de modo).
 registrar modo "$MODO"
 
+# Proyectos registrados con skills-proyecto: se leen antes de quitar la instalación anterior (desinstalar.sh borra
+# el manifiesto). No se copian a $NUEVO: su línea la escribe registrar al reinstalar. Lista separada por saltos de línea.
+PROYECTOS_REGISTRADOS=""
+if [ -f "$MANIFIESTO" ]; then
+  while IFS=$'\t' read -r p_tipo p_ruta _; do
+    if [ "${p_tipo:-}" = skills-proyecto ] && [ -n "${p_ruta:-}" ]; then
+      PROYECTOS_REGISTRADOS+="$p_ruta"$'\n'
+    fi
+  done < "$MANIFIESTO"
+fi
+
 # Quita primero lo instalado antes, para que no queden restos de skills o agentes borrados del repo.
 # Los ajustes de proyectos se conservan: se pasan tal cual al registro nuevo.
 if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
@@ -322,6 +399,47 @@ if [ "$INSTALAR_PI" = 1 ]; then
   esac
 else
   echo "Pi: no encontrado, se omite."
+fi
+
+if [ "$SKILLS_PROYECTO" = 1 ]; then
+  echo
+  echo "Skills de Pi en el proyecto ($PROYECTO)"
+  instalar_skills_proyecto
+  echo "  Las copias en .pi/skills/ no se editan: se rehacen al reinstalar. Pi pedirá confiar en el proyecto (/trust)."
+fi
+
+# Proyectos registrados con skills-proyecto: se rehacen en cada instalación (con --solo claude, no).
+# Si no hay ninguno, no se imprime nada.
+if [ -n "$PROYECTOS_REGISTRADOS" ]; then
+  ANTERIOR_PROYECTO="$PROYECTO"
+  if [ "$SOLO" = claude ]; then
+    echo
+    echo "  (proyectos con skills registradas no se actualizan con --solo claude)"
+  fi
+  while IFS= read -r ruta; do
+    [ -n "$ruta" ] || continue
+    if [ "$SOLO" = claude ]; then
+      # solo se conserva el registro; el proyecto no se toca
+      if [ "$SIMULAR" = 0 ] && ! grep -qxF "$(printf 'skills-proyecto\t%s\t' "$ruta")" "$NUEVO"; then
+        registrar skills-proyecto "$ruta"
+      fi
+      continue
+    fi
+    # ya procesado arriba, con --skills-proyecto
+    if [ "$SKILLS_PROYECTO" = 1 ] && [ "$ruta" = "$ANTERIOR_PROYECTO" ]; then continue; fi
+    if [ -d "$ruta" ]; then
+      echo
+      echo "Skills de Pi en el proyecto registrado ($ruta)"
+      PROYECTO="$ruta"
+      instalar_skills_proyecto
+    else
+      echo "  AVISO: el proyecto registrado ya no existe, se omite (registro conservado): $ruta"
+      if [ "$SIMULAR" = 0 ] && ! grep -qxF "$(printf 'skills-proyecto\t%s\t' "$ruta")" "$NUEVO"; then
+        registrar skills-proyecto "$ruta"
+      fi
+    fi
+  done <<< "$PROYECTOS_REGISTRADOS"
+  PROYECTO="$ANTERIOR_PROYECTO"
 fi
 
 echo
