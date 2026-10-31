@@ -1,5 +1,5 @@
 # task-04 — README: instalación local y sin clonar, con diagrama
-repo: Flucastr.AI   depende_de: task-03   estado: aprobada
+repo: Flucastr.AI   depende_de: task-03   estado: lista para revisión
 
 ## Descripción
 `## Instalación` ya explica los dos caminos, pero no dice de entrada cuál usar ni los muestra juntos. Esta tarea agrega al inicio de la sección una guía de elección y un diagrama Mermaid de los dos caminos, y títulos para separar «con el repo clonado» de «sin clonar». Los comandos y las viñetas existentes no cambian.
@@ -65,4 +65,69 @@ Salida esperada: `Con el repo clonado` antes de `Sin clonar el repo (PC de traba
 
 ## Evidencia
 
+Comando: `grep -n "^## \|^### " README.md` (salida, sección Instalación):
+```
+101:## Instalación
+117:### Con el repo clonado
+138:### Sin clonar el repo (PC de trabajo)
+```
+
+Comando: fences y mermaid (`node -e ...`):
+```
+fences ok
+mermaid: 2
+```
+
+Comando: `grep -c "bash instalar.sh --simular\|bash instalar-remoto.sh --estado\|--proyecto /ruta/al/proyecto" README.md`:
+```
+3
+```
+
+Comando: `grep -c "copiar" instalar.sh instalar-remoto.sh`:
+```
+instalar.sh:7
+instalar-remoto.sh:7
+```
+
+Comando: `node --test pruebas/comprobaciones/readme-estructura.test.mjs pruebas/comprobaciones/coherencia-features.test.mjs pruebas/comprobaciones/formato-tarea.test.mjs 2>&1 | grep -E "^ℹ (pass|fail)"`:
+```
+ℹ pass 31
+ℹ fail 0
+```
+
+Comando: `bash pruebas/rapida.sh` (corrida completa, 21 archivos). Resumen real, salida final:
+```
+ℹ tests 218
+ℹ suites 0
+ℹ pass 218
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+rapida: 21 archivos en 13 s (tope 30 s)
+exit code: 0
+```
+La falla conocida de `formato-flujo` (criterio 5) ya no ocurre: «definitions/BACKLOG.md real cumple el formato» pasa en la corrida. Se corrió dos veces (la primera con salida completa en pantalla; la segunda para leer el código de salida); ambas con `fail 0`.
+
+Comando: `git status --short` (salida real):
+```
+ M README.md
+ M definitions/STATUS.md
+ M features/F15-actualizar-readme/task-03-readme-uso-flujo-roles.md
+ M features/F15-actualizar-readme/task-04-readme-instalacion-diagrama.md
+```
+`definitions/STATUS.md` y el cambio de task-03 ya estaban modificados antes de empezar; no se tocaron. Sin commit, push, PR ni merge.
+
+Criterios de aceptación:
+1. Dos bloques mermaid, fences balanceados: cumple (`fences ok`, `mermaid: 2`).
+2. Comandos y viñetas presentes: cumple (conteo 3).
+3. Orden de encabezados: cumple (`Con el repo clonado` en 117, antes de `Sin clonar` en 138).
+4. Comandos del diagrama existen: cumple (`copiar` en ambos scripts, 7 y 7).
+5. Comprobaciones de la tarea: cumple (`ℹ fail 0`, 31 pasan). La rápida completa también pasa (218/218).
+
+Mermaid sin renderizar localmente (no hay `mmdc`): validado por forma; lo revisa Franco en GitHub.
+
 ## Notas
+- Hueco menor: ninguno. El contenido de *Decisiones ya tomadas* se insertó tal cual, entre `## Instalación` y el bloque bash, con el encabezado `### Con el repo clonado` justo antes del bloque bash existente. Comandos, rutas y viñetas sin cambios.
+- La excepción de criterio 5 (formato-flujo) de la tarea ya no aplica: Franco reordenó el backlog (F15 antes de F11) y la comprobación pasa.
+- Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

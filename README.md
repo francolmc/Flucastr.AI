@@ -100,6 +100,22 @@ Una comprobación (`pruebas/comprobaciones/readme-estructura.mjs`) falla si el �
 
 ## Instalación
 
+Hay dos caminos: **con el repo clonado** (mi equipo principal) y **sin clonar** (el PC de trabajo, donde no tengo clon). Los dos terminan igual: agentes y skills instalados para Claude Code y Pi.
+
+```mermaid
+flowchart TD
+    Q{"¿Tengo el repo<br/>clonado?"}
+    Q -->|Sí| L["bash instalar.sh"]
+    Q -->|No| R["bash instalar-remoto.sh"]
+    R --> K["Copia en ~/.flucastr-ai/kit/"]
+    K --> L2["instalar.sh --copiar"]
+    L --> OK["Agentes y skills en<br/>Claude Code y Pi"]
+    L2 --> OK
+    OK --> U["claude --agent coordinador<br/>o pi-coordinador"]
+```
+
+### Con el repo clonado
+
 ```bash
 bash instalar.sh --simular   # valida y muestra qué haría, sin escribir nada
 bash instalar.sh             # instala (Claude Code y Pi, los que encuentre)

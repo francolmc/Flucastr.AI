@@ -6,11 +6,13 @@
 
 Rol: ninguno (esperando a Franco). F14 `hecha` (confirmada por Franco, 2026-10-30). F01–F10 y F12–F13 `hecha` y archivadas. Solo queda F11 (informe), en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
 Rama: chore/F15-actualizar-readme
-F15 en curso: task-01 `hecha` (Franco, 2026-10-30); task-02 `hecha` (Franco, 2026-10-30); task-03 `lista para revisión` (puerta 4); task-04 `aprobada`.
+F15 en curso: task-01 `hecha` (Franco, 2026-10-30); task-02 `hecha` (Franco, 2026-10-30); task-03 `hecha` (Franco, 2026-10-30); task-04 `lista para revisión` (puerta 4, la última de F15).
 
 ## Espera a Franco
 
-- **Puerta 4 (task-03, uso, flujo y roles):** `features/F15-actualizar-readme/task-03-readme-uso-flujo-roles.md`. Revisa *Evidencia* y *Notas*, y `git diff README.md`. El Mermaid no se renderizó (no hay `mmdc`): míralo en la vista de GitHub o en un visor Mermaid. Commitea en `chore/F15-actualizar-readme` y dime si la pasas a `hecha`; entonces sigo con task-04.
+- **Puerta 4 (task-04, instalación con diagrama):** `features/F15-actualizar-readme/task-04-readme-instalacion-diagrama.md`. Revisa *Evidencia* y *Notas*, y `README.md` líneas ~101–135 (`git diff README.md`). Mira los dos Mermaid renderizados en GitHub. Commitea en `chore/F15-actualizar-readme` y dime si la pasas a `hecha`. El constructor dejó `/tmp/rapida-check.txt`; puedes borrarlo.
+
+- task-01 a task-03 `hecha`; commitea cuando quieras en `chore/F15-actualizar-readme`. Mira el Mermaid de task-03 renderizado en GitHub (no hay `mmdc` aquí).
 
 - task-01 y task-02 `hecha`; commitea cuando quieras en `chore/F15-actualizar-readme`.
 
