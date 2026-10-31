@@ -1,6 +1,6 @@
 # Flujo de trabajo — diseño de `coordinador`, `planificador` y `constructor`
 
-> Estado: **aprobado por Franco (2026-10-30, puerta 1).** Mantenimiento que solo acorta: no cambia ninguna regla ni decisión (aprobadas por Franco; ver «Estado» al final). Resultados de pruebas pasadas: `pruebas/resultados/`. El registro de eventos está en [`REGISTRO.md`](REGISTRO.md). *Confirmado* = dicho por Franco o leído en archivo; *propuesta* = por aprobar.
+> Estado: **aprobado por Franco (2026-10-30, puerta 1).** El registro de eventos está en [`REGISTRO.md`](REGISTRO.md). *Confirmado* = dicho por Franco o leído en archivo; *propuesta* = por aprobar.
 
 ## 1. Principios (confirmados por Franco)
 
@@ -19,8 +19,7 @@
 | `planificador` | `agentes/planificador.md` + skills `crear-backlog`, `descomponer-feature` | `definitions/BACKLOG.md`, `features/**` | Construir, aprobar |
 | `constructor` | `agentes/constructor.md` + skill `ejecutar-tarea` | Código del repo de la tarea; solo *Evidencia* y *Notas* de la tarea (en *Notas*, también la línea `Registro:` de `REGISTRO.md`) | Marcar `hecha`, commit, push, PR, merge, despliegue. Git de escritura permitido: crear la rama de la feature (`git switch -c`) y, solo con confirmación expresa de Franco, `git switch <rama>` a una rama existente (§9.1) |
 
-Ramas, refinado y modo yolo: §9. Todos: sin leer `.env`, llaves ni credenciales. Cada rol configura su nivel de modelo en `modelos.json`, a elección de Franco (inicialmente `planificador` en medio).
-
+Ramas, refinado y modo yolo: §9. Todos: sin leer `.env`, llaves ni credenciales.
 ## 3. `coordinador`
 
 Lee `STATUS.md`, `BACKLOG.md` y `features/`, decide el paso siguiente y lo delega como subagente.
@@ -37,6 +36,7 @@ Lee `STATUS.md`, `BACKLOG.md` y `features/`, decide el paso siguiente y lo deleg
 Reglas:
 - Entre puertas continúa solo (excepciones: la ronda de refinado, §9.2, y el modo yolo, §9.3). En una puerta se detiene y escribe en `STATUS.md` qué debe revisar Franco y dónde.
 - **Confirmaciones:** el `constructor` pide permiso a Franco con una primera línea `CONFIRMAR: accion=<…>; motivo=<…>` (hoy solo `git switch <rama>`, §9.1); el `coordinador` la registra en «Espera a Franco» y pregunta. No es un bloqueo.
+- **Higiene de contexto (aprobada 2026-10-31):** el estado vive en `STATUS.md` y archivos, no en la conversación; el kit deja puesta la compactación automática (`instalar.sh`). Mecanismo: `ARCHITECTURE.md`.
 - **Bloqueos:** un rol que necesita a otro lo informa en su respuesta final con una primera línea `BLOQUEO: rol=<rol requerido>; motivo=<…>` y se detiene. Solo el `coordinador` escribe en `STATUS.md`, que registra el bloqueo y lo enruta.
 - Con Pi, su instrucción debe **autorizar la delegación de forma explícita** (el paquete lo exige).
 - Sin subagentes, respaldo: carga el rol como skill en la misma sesión.

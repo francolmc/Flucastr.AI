@@ -1,6 +1,6 @@
 # Arquitectura — Flucastr.AI (modo: actual)
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Aprobado el 2026-10-30:** `WORKFLOW.md` §3.1 y §10.5 (el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido explícito de Franco; en Claude Code `tools:` con patrones `Bash(...)` limita y el permiso lo da Franco por aprobación o regla `allow` (ajuste del 2026-10-30); **sin restricción técnica en Pi**, riesgo aceptado por Franco; implementado en F12, 2026-10-30, probado con modelo en ambas herramientas). **Pendiente de aprobación:** **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1). **Aprobado el 2026-10-31, puerta 1:** sección «Skills dentro del workspace para Pi» (F17; queda por verificar en el PC de trabajo lo indicado en «No verificado»).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Aprobado el 2026-10-30:** `WORKFLOW.md` §3.1 y §10.5 (el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido explícito de Franco; en Claude Code `tools:` con patrones `Bash(...)` limita y el permiso lo da Franco por aprobación o regla `allow` (ajuste del 2026-10-30); **sin restricción técnica en Pi**, riesgo aceptado por Franco; implementado en F12, 2026-10-30, probado con modelo en ambas herramientas). **Pendiente de aprobación:** **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1). **Aprobado el 2026-10-31, puerta 1:** sección «Higiene de contexto» y su línea en `WORKFLOW.md` §3 (queda pendiente de Franco confirmar el proveedor de `openai/gpt-6.1-sol` en el pie de Pi). **Cambio de diseño pendiente de aprobación (borrador del 2026-10-31, puerta 1):** esa sección pasa a «compactación automática instalada por el kit»; ver su subsección «Cambio de diseño». **Aprobado el 2026-10-31, puerta 1:** sección «Skills dentro del workspace para Pi» (F17; queda por verificar en el PC de trabajo lo indicado en «No verificado»).
 
 ## Estructura y su razón
 
@@ -269,6 +269,146 @@ flowchart LR
 2. **Ruta.** **Decidido:** `.pi/skills/` (documentada y específica de Pi). Descartada: `.agents/skills/`.
 3. **¿Siempre al usar `--proyecto`, o solo con el flag?** **Decidido:** solo con el flag: `--proyecto` hoy solo toca Claude Code y no escribe nada nuevo en el cliente sin pedirlo.
 4. **Exclusión local** (`.git/info/exclude`) en vez de `.gitignore` del cliente. **Decidido.**
+
+## Higiene de contexto (aprobado 2026-10-31; cambio de diseño APROBADO el 2026-10-31, puerta 1)
+
+### Cambio de diseño (APROBADO el 2026-10-31, puerta 1)
+
+**Aprobación (Franco, 2026-10-31, puerta 1; informe `pruebas/resultados/2026-10-31-verificacion-compactacion.md`).** (1) Ajuste global de Pi (`~/.pi/agent/settings.json`, `compaction.modelOverrides`) y, en Claude Code, `.claude/settings.local.json` de los proyectos instalados con `--proyecto`. (2) `compactar_en` = 100000, editable en `modelos.json` (Claude Code lleva +33000). (3) Se elimina `CONTEXTO:`. (4) Se descarta la extensión de Pi con `ctx.compact()`. (5) Línea de identidad «Herramienta | Modelo | Agente» como primera línea del cuerpo de cada agente generado. Implementación en dos features: F18 (identidad, quitar la referencia a `modelos.json` de los prompts, lectura acotada) y F19 (compactación automática instalada por el kit). Las preguntas de «5. Preguntas abiertas» quedan respondidas por estas decisiones.
+
+**Tras instalar, Franco debe comprobar:** abrir Pi nuevo o ejecutar `/reload` (Pi no relee `settings.json` en caliente) y hacer `diff` de `~/.pi/agent/settings.json` contra su copia previa: solo debe aparecer `compaction.modelOverrides` para los modelos del kit; el resto, intacto.
+
+**Motivo.** Franco trabaja a menudo desde el celular: no quiere aplicar la configuración a mano ni depender de teclear `/new` o `/compact`. Prefiere que el kit la deje puesta y que el agente la gestione.
+
+**Qué cambia respecto de lo aprobado hoy** (lo no listado queda igual):
+
+| Tema | Aprobado hoy | Aprobado (2026-10-31) |
+|---|---|---|
+| Compactación por proyecto | Guía en el README; **no** se instala | **La instala `instalar.sh`** (Pi, ajuste global; ver abajo) |
+| `CONTEXTO: sesion-nueva \| compactar` en puertas y pausas | Obligatoria | **Se elimina** (opción B: queda opcional; ver pregunta 3). La compactación automática la hace la herramienta; yolo ya no necesita `compactar` porque la sesión sigue |
+| «Fuera de alcance: instalar `.pi/settings.json`» | Fuera | **Dentro**, pero en el ajuste global de Pi, no en el proyecto |
+| `modelos.json` | Sin ventanas | Campos nuevos `ventanas` (por perfil) y `compactar_en` |
+| Claude Code | Solo guía | **La instala `instalar.sh`** en `<proyecto>/.claude/settings.local.json` (`autoCompactWindow`, ya verificado el 2026-10-31; ver «Verificado») |
+
+**1. ¿Puede un agente o extensión disparar `/compact` o abrir sesión nueva?**
+
+- Pi, CONFIRMADO: una extensión **puede compactar**: `ctx.compact(options?)` («Trigger compaction without awaiting completion», en `ExtensionContext`, disponible en todos los contextos) y los manejadores de `turn_end`/`agent_before_settle` pueden proponer una entrada `compaction` (`~/.pi/agent/install/releases/1.4.0/node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types.d.ts` líneas ~249 y ~1671; `docs/extensions.md` líneas 230 y 326). `ctx.getContextUsage()` permite medir.
+- Pi, CONFIRMADO: **sesión nueva solo desde comandos de extensión** (`ExtensionCommandContext.newSession()`, `types.d.ts` ~292); `docs/extensions.md` línea 330 dice que esas operaciones son «command-only» porque desde manejadores de ciclo de vida pueden bloquear el runtime. Un **modelo** no tiene herramienta propia para ninguna de las dos cosas: ninguna herramienta integrada lo hace, y `pi-subagents` 0.84.0 tampoco (CONFIRMADO el 2026-10-31: registra solo las herramientas `subagent`, `contact_supervisor`, `structured_output`, `bg_wait` y `watchdog_*`, y comandos `/subagents…`/`/run`; ninguna llama a `compact` ni a `newSession`; `pi-agent-mode` 1.3.0 y `pi-notify` 1.4.0 tampoco).
+- Claude Code 2.1.308, CONFIRMADO en el binario (cadenas, no documentación ni prueba): existen `/compact`, `/clear`, `/autocompact` y el evento de hook `PreCompact` (40 apariciones). Resuelto el 2026-10-31 (binario 2.1.308 y prueba): `PreCompact` **solo reacciona** (descripción del propio hook: exit 0 añade instrucciones de resumen, exit 2 **bloquea** la compactación); no inicia nada. `/compact` es un comando local con `supportsNonInteractive: true`: **un proceso externo** sí lo puede lanzar (`claude -p -c "/compact"` compactó la sesión, evento `compact_boundary` con `trigger: manual`), pero **no hay herramienta del modelo** que lo haga. Conclusión: un agente o hook **no puede** disparar compactación ni sesión nueva en Claude Code.
+- Conclusión: el diseño **no depende** de que el agente dispare nada. Usa la compactación automática de la herramienta (umbral) que ya existe en ambas. Una extensión de Pi que llame `ctx.compact()` en cada puerta es posible pero es código nuevo, un artefacto más que instalar y no aporta sobre el umbral: queda **descartada por ahora** (se reevalúa solo si el umbral demuestra compactar tarde).
+
+**2. Qué deja puesto el instalador**
+
+*Pi (diseñable hoy).* `instalar.sh` escribe, en `~/.pi/agent/settings.json` (ajuste **global**), solo esto por cada modelo de Pi que resuelva `modelos.json` y que declare ventana:
+
+```json
+{ "compaction": { "modelOverrides": { "openai/gpt-6.1-sol": { "reserveTokens": 172000 } } } }
+```
+
+- *Por qué global y no por proyecto.* CONFIRMADO (`docs/settings.md` líneas 69-80; `docs/configuration.md` línea 3): `compaction.modelOverrides` se indexa por `provider/modelId` exacto, así que el ajuste global **solo afecta a los modelos del kit**; el global no exige `/trust`; el de proyecto sí y se ignora hasta confiar. Para Franco (celular, `--proyecto` y varios proyectos) el global funciona en todos de una vez y no escribe nada en el repo del cliente: no hay `.pi/settings.json` que excluir de git. Costo: también compacta a ≈100 k cuando Franco usa esos modelos fuera del kit (se avisa en la salida). El ajuste de **proyecto** (`<proyecto>/.pi/settings.json`) queda descartado para el instalador; si algún día se quisiera, iría por `--proyecto` con exclusión en `.git/info/exclude` (mecanismo ya existente de F17, `exclusion`) y `/trust` manual de Franco.
+- *Forma exacta y validación (CONFIRMADO en `core/settings-manager.js` y `core/settings-schema.js` de Pi 1.4.0 y por prueba).* `compaction` admite `enabled` (booleano), `reserveTokens` y `keepRecentTokens` (enteros seguros no negativos) y `modelOverrides` (objeto `"provider/modelId"` → `{reserveTokens?, keepRecentTokens?}`); la clave es exacta y distingue mayúsculas. Un valor inválido en el override del modelo activo **falla al leer** (`Invalid compaction.modelOverrides["openai/gpt-6-luna"].reserveTokens setting: abc. Expected a non-negative safe integer.`); las claves desconocidas se **toleran y se conservan**; un JSON roto produce `Warning: Invalid settings file …` y se **ignora** el archivo (Pi sigue). Se aplica en ajuste global y de proyecto (se fusionan antes de buscar el modelo).
+- *Fusión sin pisar.* Se lee el JSON; si no es válido, no se toca (como `leerAjustes` en `scripts/resolver.mjs`). Se escribe `compaction.modelOverrides[modelo].reserveTokens` **solo si** ese campo no existe. Si Franco ya definió `compaction.enabled`, `compaction.reserveTokens` en el nivel superior o cualquier `modelOverrides` para ese modelo, **se respeta** y se imprime `OMITIDO (ya define compaction...)`, igual que con el agente predeterminado. Las demás claves (`packages`, `deviceId`, etc.) quedan tal cual. Escritura atómica (archivo temporal y renombrar) porque Pi también reescribe ese archivo. CONFIRMADO cómo escribe Pi: toma un bloqueo `proper-lockfile` (`mkdir` de `<settings.json>.lock`, 10 reintentos de 20 ms), **relee el archivo bajo el bloqueo**, cambia solo los campos que él modificó (`enabled`, etc.) y escribe con `writeFileSync` (sin renombrar; reformatea a 2 espacios). Prueba aislada: una clave que otro proceso añadió *después* de que Pi cargó **se conserva** en su escritura siguiente. No relee en caliente: lee al arrancar y con `/reload` (un Pi ya abierto aplica el cambio al reiniciar). El kit debe, entonces, tomar el mismo bloqueo (`mkdir <settings.json>.lock`, soltarlo con `rmdir`, reintentos cortos) además de escribir con temporal y renombrar. Orden nuevo en `resolver.mjs`: `fijar-compactacion <settings.json> <modelo> <reserve>` y `quitar-compactacion <settings.json> <modelo> <reserve>` (salidas `fijado`, `ya-estaba`, `omitido:<motivo>`; `quitado`, `omitido`, `archivo-quitado`), simétricas a `fijar-agente`/`quitar-agente`.
+- *Manifiesto y desinstalación.* Línea nueva `compactacion<TAB><settings.json><TAB><modelo>=<reserve>`. `desinstalar.sh` llama `quitar-compactacion`, que borra la clave **solo si su valor sigue siendo el que puso el kit** y poda `modelOverrides`/`compaction` solo si quedan vacíos; nunca borra un `settings.json` que ya existía. A diferencia de `ajuste` (por proyecto, se conserva al reinstalar), esta se **rehace en cada instalación** (se quita y se vuelve a poner con los valores actuales de `modelos.json`). `--simular` imprime lo que escribiría.
+- *Valores sin hardcodear.* En `modelos.json`, por perfil, `ventanas` (ventana de contexto en tokens por `provider/modelId`) y, arriba, `compactar_en` (umbral deseado, defecto propuesto 100000; un perfil puede sobreescribirlo). Cálculo en `resolver.mjs`: `reserveTokens = ventana − compactar_en`. Ejemplo: `"ventanas": { "openai/gpt-6-astra": 272000, "openai/gpt-6.1-sol": 272000, "openai/gpt-6-luna": 272000 }` y `compactar_en: 100000` dan `172000` para cada uno (coincide con el sondeo). Las tres ventanas están CONFIRMADAS el 2026-10-31 en el catálogo de Pi (`pi-ai/dist/providers/data/openai.json`, entradas `chat:`; y `pi --list-models gpt-6`): proveedor `openai`, `openai/gpt-6-astra` = 272000, `openai/gpt-6.1-sol` = 272000, `openai/gpt-6-luna` = 272000 (todas 272K; `maxTokens` 128000). Ojo: el mismo archivo trae `classifier:gpt-6-luna` con 922000 (API `openai-decisions`, no es el modelo de chat) y el proveedor `openai-codex` declara `gpt-6.1-sol` en 500000; la clave del override usa el proveedor del perfil (`openai`), así que no aplica. Se declaran las tres.
+- *Modelo sin ventana, o umbral inaplicable.* Si falta `ventanas[modelo]` o `compactar_en`, o si `ventana − compactar_en` < 16384 (peor que el defecto de Pi), ese modelo se **omite con aviso** y Pi usa su valor por defecto (compacta cerca del límite); el flujo funciona igual. Un `modelos.json` personal antiguo (sin los campos) simplemente no instala nada; `comparar-modelos` avisa de «campo nuevo: compactar_en/ventanas».
+
+*Claude Code (verificado el 2026-10-31; informe `pruebas/resultados/2026-10-31-verificacion-compactacion.md`).* CONFIRMADO con `claude -p "/context"` (sin costo de modelo) y con una compactación real:
+
+- *Claves.* `autoCompactWindow` (número, global) y `modelSettings.<modelo canónico>.autoCompactWindow` (número o `"auto"`; p. ej. `claude-haiku-5-5`). Variable `CLAUDE_CODE_AUTO_COMPACT_WINDOW`.
+- *Archivos y precedencia (de menor a mayor).* `~/.claude/settings.json` < `<proyecto>/.claude/settings.json` < `<proyecto>/.claude/settings.local.json` < `--settings` < variable de entorno. El campo `autoCompactWindow:` del frontmatter de un agente **no** afecta a la sesión principal (`claude --agent …`): solo vale como tope para ese agente cuando corre como subagente (código: «Overrides the window it would inherit»; la sesión principal midió 230k con el agente en 111k y en 300k).
+- *Rango.* 100000 a 1000000. En ajustes, un valor fuera de rango (50000, 2000000) o no numérico se **ignora en silencio** (la ventana vuelve al valor del modelo, 1m en estos modelos); en la variable de entorno, un valor bajo se **sube a 100000** y uno no numérico se ignora con aviso. JSON roto: `Invalid or malformed JSON` y se ignora el archivo. Claves desconocidas: se toleran.
+- *Dentro de un mismo archivo,* el valor por modelo reemplaza al global para ese modelo; entre archivos, un `autoCompactWindow` global en un archivo de mayor precedencia descarta los valores por modelo de los de menor, y un valor por modelo de mayor precedencia gana para ese modelo.
+- *Umbral real = ventana − 33000.* `/context` muestra `Autocompact buffer 33k` (igual en haiku, sonnet y opus). Prueba real: con `autoCompactWindow: 100000` la sesión se compactó sola (`trigger: auto`) con `pre_tokens: 74082` (el contexto estaba en ≈55 k al empezar el turno anterior, sin compactar, y en 74 k al compactar: el disparo ocurrió antes de los 100 k de la ventana, consistente con 100 k − 33 k = 67 k). Por eso, para compactar al llegar a `compactar_en` tokens de contexto, el valor a escribir es **`compactar_en + 33000`** (100000 → 133000), constante en `resolver.mjs` con este comentario; con 100000 compactaría a ≈67k. Mínimo alcanzable: ≈67k.
+- *Dónde.* `<proyecto>/.claude/settings.local.json` (el mismo que usa `fijar-agente`, personal, fuera de git por convención de la herramienta) con `fijar-compactacion` y la misma regla de no pisar. Se prefiere esto a `~/.claude/settings.json`, que no se toca (lo escribe Claude Code y tiene `modelSettings`).
+
+**3. La regla neutral.** Con compactación automática el estado ya no depende de que Franco cierre sesión. `WORKFLOW.md` §3 pasa de «`CONTEXTO:` en cada puerta» a una frase corta: el estado vive en `STATUS.md` y archivos; el kit deja puesta la compactación automática (`instalar.sh`). Se elimina la línea fija y su prueba (la prueba sin modelo pasa a comprobar que `modelos.json` produce el `reserveTokens` esperado y que instalar/desinstalar es simétrico). En yolo, compactar en la misma sesión **no** pierde la vigencia de yolo (§9.3), lo que resolvía `CONTEXTO: compactar`. `WORKFLOW.md` mide 30.680 caracteres (umbral 30.720): la viñeta borrador es casi igual de larga por llevar la marca de borrador; al aprobar, quitar la marca la deja ≈100 caracteres más corta.
+
+**4. Riesgos.**
+
+- *Compactar pierde detalle.* INFERIDO, a verificar con modelo: el estado del flujo está en `STATUS.md`, `BACKLOG.md` y `features/`, no en la conversación, y Pi conserva los últimos 20 k tokens (`keepRecentTokens`) y un resumen estructurado (`docs/compaction.md`). Pierde: razonamiento intermedio, salidas de subagentes que el `coordinador` no haya anotado, una pregunta a Franco a medias. Mitigación: el `coordinador` ya escribe «Espera a Franco» y el paso actual en `STATUS.md` antes de pausar; la prueba con modelo de F18 incluye una corrida que cruce una compactación (con `reserveTokens` bajo de prueba) y compruebe que retoma desde `STATUS.md`. Pi puede compactar entre turnos de una misma corrida (`docs/compaction.md`), así que no hay punto «seguro»: por eso el estado se escribe antes de delegar, no al final.
+- *Tocar archivos del usuario.* `~/.pi/agent/settings.json` es del usuario y Pi lo reescribe. Mitigación: solo si es JSON válido, solo claves nuevas, escritura atómica, registro y desinstalación exactos, `--simular`, y aviso si el usuario ya tenía `compaction`.
+- *Proyectos del cliente.* El diseño global no crea nada en el repo del cliente. Si se usara el ajuste de proyecto de Claude Code, es `.claude/settings.local.json`, personal por convención de la herramienta; aun así se debe verificar que no se versiona y, si hiciera falta, excluirlo en `.git/info/exclude` como las skills.
+- *Efecto fuera del kit.* El mismo modelo en uso personal también compacta a ≈100 k. Reversible con `desinstalar.sh` o editando el valor (si Franco lo cambia, el kit lo respeta como suyo).
+- *Fórmula con el proveedor equivocado.* Si `openai/gpt-6.1-sol` fuera `openai-codex` (500 k), `172000` compactaría a ≈328 k: no rompe nada, solo no ahorra. Resuelto: el perfil `pi-openai` declara proveedor `openai` (272 k, catálogo y pie de Pi); `openai-codex` no se usa.
+
+**5. Preguntas abiertas para Franco (con recomendación).**
+
+1. ¿Ajuste **global** de Pi en vez de por proyecto? *Recomiendo global* (celular, sin `/trust`, nada en repos del cliente); costo: también aplica fuera del kit.
+2. ¿Umbral `compactar_en` = 100000 como defecto, editable en `modelos.json`? *Recomiendo sí* (punto de partida del sondeo, a medir con `showCacheMissNotices`).
+3. ¿Elimino `CONTEXTO:` del todo (A) o lo dejo como línea opcional de una sola forma `CONTEXTO: sesion-nueva` (B)? *Recomiendo A*: Franco no quiere teclear comandos y no hay nada que sugerir que el kit no haga solo; si se prefiere B, no es obligatoria ni probada.
+4. Claude Code: **resuelta por la verificación** (ya no se espera): se instala `autoCompactWindow = compactar_en + 33000` en `.claude/settings.local.json` (ver arriba). Solo queda tu visto bueno del valor por defecto (pregunta 2).
+5. ¿Descartar la extensión de Pi con `ctx.compact()`? *Recomiendo descartar por ahora*; reevaluar si el umbral compacta tarde. (Dato nuevo: `pi-subagents` no aporta ninguna herramienta de compactar; en Claude Code tampoco existe.)
+6. **Resuelta por la verificación:** se declaran las tres ventanas (`gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna`, 272000 cada una; ya no se omite ninguna).
+
+**Qué se revisó en la puerta 1 (aprobado).** (a) La tabla «Qué cambia». (b) Global frente a proyecto (pregunta 1). (c) Eliminar `CONTEXTO:` (pregunta 3), que cambia el alcance ya decidido de F18 (puntos 1, 3 y «Fuera» del `BACKLOG.md`: el coordinador lo reescribirá al aprobar). (d) Que el riesgo de compactar durante una corrida es aceptable con la mitigación indicada.
+
+**6. Identidad del agente en ejecución (requisito nuevo de Franco, 2026-10-31).** Para que el agente sepa en qué herramienta corre, con qué modelo y como qué agente, `resolver.mjs` (órdenes `agente-claude` y `agente-pi`, que ya conocen herramienta, modelo y nombre) escribe, como **primera línea del cuerpo** (justo después del `---` de cierre del encabezado), una línea fija distinta por herramienta:
+
+```
+Herramienta: Pi | Modelo: openai/gpt-6.1-sol | Agente: coordinador
+Herramienta: Claude Code | Modelo: claude-sonnet-5-5 | Agente: coordinador
+```
+
+Probado en una copia aislada del repo (el repo no se tocó): la salida queda correcta; **no rompe** ningún comprobador de contrato (`contrato-roles`, `agente-instalado`, `modelos-agentes` y la Capa 1 leen el archivo fuente de `agentes/` o solo el encabezado), pero **dos pruebas de `resolver-agentes.test.mjs` ((3) y (6)) comparan la salida de Pi con la de Claude Code «salvo `model:`»** y fallan porque la línea difiere por herramienta; se corrige añadiendo `Herramienta:` al filtro de su ayudante `sinLineaModelo` (con eso la copia vuelve al resultado del control). Esas dos pruebas son parte de la tarea. Límites: la línea fija el modelo **al instalar** (si Franco lanza con otro `--model`, la línea queda desactualizada); en Pi, además, el agente puede leer el modelo real con `echo "$PI_PROVIDER/$PI_MODEL"` (variables que Pi documenta para sus herramientas de shell, `docs/environment-variables.md`); en Claude Code el modelo real ya figura en su contexto de sistema.
+
+**SUSTITUIDO parcialmente por el cambio aprobado arriba (2026-10-31, puerta 1). El texto que sigue se mantiene solo por trazabilidad; donde contradiga el cuadro de arriba (en particular `CONTEXTO:` y «Fuera de alcance: instalar `.pi/settings.json`») ya no rige.**
+
+> Base: `pruebas/resultados/2026-10-31-sondeo-consumo-pi.md` (Pi) y `2026-10-31-sondeo-codex.md` (Codex). Este bloque separa **regla** (neutral y estable, vive en `WORKFLOW.md` §3) de **mecanismo** (cambia por herramienta, vive aquí). Nada de esto toca código, agentes ni skills todavía; la implementación sería una feature aparte (F18).
+
+### La regla (neutral)
+
+- **Qué.** El estado del flujo vive en `STATUS.md` y en los archivos, no en la conversación. Por eso, en cada puerta o pausa, Franco puede cerrar la sesión y abrir otra (o compactar) sin perder nada. Más contexto reenviado por turno es más costo y más deriva (Pi, *inferido*: ≈2,4 veces más por turno a 130 k que a 25 k de contexto; sesión nueva por puerta ≈ −55 %).
+- **Quién y cuándo.** El `coordinador`, en cada puerta y en cada pausa de pregunta (`CONFIRMAR:`, `REFINAR:`), sin bloquear.
+- ~~SUSTITUIDO (se elimina `CONTEXTO:`, puerta 1 2026-10-31)~~ **Frase fija (comprobable).** Última línea de «Espera a Franco» **y** de su respuesta: `CONTEXTO: sesion-nueva` (fuera de yolo) o `CONTEXTO: compactar` (en yolo, porque la vigencia de yolo no cruza sesiones, `WORKFLOW.md` §9.3). Solo esas dos formas, sin nombrar herramienta ni comando: cómo se hace lo dice la tabla de abajo y el README. Una prueba sin modelo puede exigir que el rol contenga la regla y la frase; una con modelo, que la respuesta de puerta termine en esa línea.
+- **Quién ejecuta.** Solo Franco: un agente no puede teclear comandos de barra ni abrir sesiones. El agente sugiere; no lo hace ni lo exige.
+- **Límite.** Es una sugerencia, no una puerta ni una escalación. No cambia estados ni quién aprueba.
+
+### Mecanismos por herramienta (cambian; se revisan al actualizar la herramienta)
+
+*CONFIRMADO* = leído en la instalación local o dicho en el sondeo (ruta); *NO VERIFICADO* = sin evidencia local. Claude Code 2.1.308 verificado por `claude --help` y cadenas del binario (`/opt/homebrew/Caskroom/claude-code/2.1.308/claude`), **no** por documentación ni por pruebas de ejecución.
+
+| | Pi 1.4.0 | Claude Code 2.1.308 | Codex 0.160.0 |
+|---|---|---|---|
+| Sesión nueva | `/new` (sondeo Pi, P1/§4) | CONFIRMADO: `/clear` (binario; sugiere `/clear` «to start fresh»). Volver: `claude --continue` o `--resume <id>` (`--help`) | pendiente: se completa al darle soporte (sondeo Codex) |
+| Compactar a mano | `/compact` | CONFIRMADO: `/compact` (binario) | pendiente |
+| Compactación automática | Sí: dispara con `contextTokens > ventana − reserveTokens` (`reserveTokens` 16384 por defecto) | CONFIRMADO: existe. Ajuste por tamaño de ventana en tokens, 100000 a 1000000 o `"auto"` | pendiente |
+| Dónde se configura | `compaction` en `settings.json`: global `~/.pi/agent/settings.json` o por proyecto `<proyecto>/.pi/settings.json` (exige `/trust`). `modelOverrides` por `provider/modelId` exacto | CONFIRMADO (existen): clave de settings `autoCompactWindow`, variable `CLAUDE_CODE_AUTO_COMPACT_WINDOW`, opción `--autocompact <auto\|tokens>`, comando `/autocompact`. NO VERIFICADO: archivo exacto de proyecto (`.claude/settings.json`?) y precedencia; no se probó | pendiente |
+| Umbral recomendado | ≈100 k (punto de partida; estimado −30 % en sesiones largas, *inferido*) | ≈100 k en tokens, mismo punto de partida; NO VERIFICADO que el efecto sea equivalente | pendiente |
+| Cómo se calcula | `reserveTokens = ventana − umbral`. Ventana de `gpt-6.1-sol`: 272 000 con proveedor `openai` (→ `172000`), 500 000 con `openai-codex` (→ `400000`). Confirmar el proveedor en el pie o `/session` (pregunta abierta del sondeo) | Directo: el valor **es** el umbral en tokens, sin resta. Ventana real por modelo: NO VERIFICADO. En un agente, `autoCompactWindow` solo vale para subagentes y **no** para la sesión principal (binario): el `coordinador` corre como principal, así que se ajusta por settings, variable u opción | pendiente |
+| Lecturas acotadas | `read`: tope 2000 líneas o 50 KB, con `offset`/`limit`; `grep` con `limit`; los topes no son configurables | `Read` con `offset`/`limit` (lo declara la propia herramienta, 2000 líneas por defecto); el tope exacto no se probó | pendiente |
+| Medir consumo | Pie de Pi y `/session`; `showCacheMissNotices: true` | NO VERIFICADO (`/context` y `/cost` no se comprobaron) | pendiente (`--json`, rollouts en `~/.codex/sessions/`; sondeo P6) |
+
+Ajuste ilustrativo para Pi (proyecto o global; *punto de partida*, mismo fragmento del sondeo): `{ "compaction": { "modelOverrides": { "openai/gpt-6.1-sol": { "reserveTokens": 172000 } } } }`. Para Claude Code, **no** se propone un fragmento hasta verificar el archivo de proyecto y la precedencia (no se inventan nombres: solo los cuatro confirmados arriba).
+
+### Contrato para cualquier herramienta nueva
+
+Antes de darle soporte, el sondeo o el diseño de la herramienta (el `arquitecto` lo consulta aquí al evaluarla) responde, con CONFIRMADO/NO VERIFICADO y ruta o comando:
+
+1. ¿Cómo se abre una sesión nueva en el mismo proyecto y cómo se retoma la anterior?
+2. ¿Cómo se compacta a mano y existe compactación automática?
+3. ¿Cuál es la ventana **real** por proveedor y modelo (no la del nombre del modelo) y dónde se ve en pantalla?
+4. ¿Cómo se configura el umbral **por proyecto** (archivo, confianza o permiso que exige) y cuál es la fórmula para el valor?
+5. ¿Cómo se mide el consumo (tokens de contexto, costo, fallos de caché) sin gastar una corrida con modelo?
+6. ¿Qué topes tiene la lectura de archivos y salidas, y si son configurables?
+
+Sin esas seis respuestas la herramienta puede tener soporte, pero su fila de la tabla queda «pendiente» y la regla se cumple solo con la sugerencia neutral (`CONTEXTO:` no nombra herramienta, así que funciona igual). Codex: las seis siguen pendientes; el sondeo ya confirma `-c clave=valor`, perfiles y `--json`, nada sobre compactación.
+
+### Fuera de alcance (por ahora)
+
+- Reportes breves de subagentes (`outputMode: file-only`): choca con `BLOQUEO:`, `REFINAR:`, `CONFIRMAR:`, `Registro:`; los subagentes no son la causa medida.
+- ~~SUSTITUIDO (ahora dentro, F19: ajuste global de Pi y `.claude/settings.local.json`)~~ Instalar `.pi/settings.json` (o el ajuste de Claude Code) desde `instalar.sh`: depende de la ventana real y de fundir JSON ajeno.
+- `PI_CACHE_RETENTION`, `cacheWarming`, `codemode`, recortar el prompt del `coordinador`: sin fallos de caché medidos; impacto bajo o riesgo alto.
+
+### Decisiones tomadas por Franco (2026-10-31)
+
+Franco aprobó las seis con la recomendación indicada; solo la 4 queda pendiente de él.
+
+1. ¿Aceptas la frase fija `CONTEXTO: sesion-nueva | compactar` y el lugar (última línea de «Espera a Franco» y de la respuesta)? *Recomiendo sí*; es lo mínimo que una prueba puede comprobar.
+2. ¿`/compact` en yolo y sesión nueva fuera de yolo? (pregunta 3 del sondeo Pi) *Recomiendo sí.*
+3. ¿La compactación por proyecto queda como guía en el README y no en `instalar.sh`? (pregunta 4 del sondeo) *Recomiendo guía*, y reevaluar tras medir.
+4. ¿El proveedor de `openai/gpt-6.1-sol` es `openai` (272 k) y no `openai-codex` (500 k)? Se lee en el pie de Pi. Decide el valor `172000`. (pregunta 1) **PENDIENTE DE FRANCO:** confirmar el proveedor en el pie de Pi; sin eso el valor del README queda sin fijar. Se aprueba `openai` (272 k) como hipótesis.
+5. ¿Probar `showCacheMissNotices: true` una semana antes de decidir sobre caché larga? (pregunta 2) *Recomiendo sí; no cuesta nada.*
+6. Claude Code: ¿verifico en una sesión corta el archivo de proyecto y la precedencia de `autoCompactWindow` (y `/context`, `/cost`) antes de documentar un fragmento? *Recomiendo sí, como primera tarea de F18.*
 
 ## Supuestos y pendientes
 

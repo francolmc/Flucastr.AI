@@ -5,7 +5,7 @@
 //   node scripts/resolver.mjs modelo <agente> <herramienta>   imprime el modelo (herramienta: claude-code | pi)
 //   node scripts/resolver.mjs agente-claude <archivo.md>      imprime el agente con el campo `model` ya resuelto (Claude Code)
 //   node scripts/resolver.mjs agente-pi <archivo.md>          igual, con el modelo de Pi (para el paquete de subagentes)
-//   node scripts/resolver.mjs cuerpo <archivo.md>             imprime el agente sin encabezado (para Pi)
+//   node scripts/resolver.mjs cuerpo <archivo.md>             imprime el agente sin encabezado, con la línea de identidad de Pi (para Pi)
 //   node scripts/resolver.mjs fijar-agente <ajustes.json> <agente>   deja `agent` en los ajustes de un proyecto (no pisa otro valor)
 //   node scripts/resolver.mjs quitar-agente <ajustes.json> <agente>  deshace lo anterior, solo si el valor es ese agente
 //   node scripts/resolver.mjs comparar-modelos <personal.json> <publicado.json>  imprime las diferencias que merecen aviso (nada si no hay)
@@ -72,6 +72,12 @@ function partir(archivo) {
   const m = texto.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) fallar(`${archivo} no tiene encabezado entre líneas '---'`);
   return { cabecera: m[1], cuerpo: m[2] };
+}
+
+// Línea fija que dice al agente en qué herramienta corre, con qué modelo y como qué agente.
+function lineaIdentidad(herramienta, agente) {
+  const nombre = herramienta === "pi" ? "Pi" : "Claude Code";
+  return `Herramienta: ${nombre} | Modelo: ${resolverModelo(agente, herramienta)} | Agente: ${agente}`;
 }
 
 // Pi no puede hacer cumplir patrones de Bash: en `tools:` cada `Bash(...)` pasa a `Bash`, una sola vez.
@@ -142,13 +148,15 @@ if (orden === "modelo" && args.length === 2) {
     fallar(`${archivo} no debe declarar 'model': se define en modelos.json`);
   }
 
-  const modelo = resolverModelo(agente, orden === "agente-pi" ? "pi" : "claude-code");
+  const herramienta = orden === "agente-pi" ? "pi" : "claude-code";
+  const modelo = resolverModelo(agente, herramienta);
   const cabeceraSalida = orden === "agente-pi" ? bashPlano(cabecera) : cabecera;
   process.stdout.write(
-    `---\n${cabeceraSalida}\nmodel: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${cuerpo}`
+    `---\n${cabeceraSalida}\nmodel: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${lineaIdentidad(herramienta, agente)}\n${cuerpo}`
   );
 } else if (orden === "cuerpo" && args.length === 1) {
-  process.stdout.write(partir(args[0]).cuerpo.replace(/^\s+/, ""));
+  const agente = basename(args[0], ".md");
+  process.stdout.write(`${lineaIdentidad("pi", agente)}\n\n` + partir(args[0]).cuerpo.replace(/^\s+/, ""));
 } else if (orden === "fijar-agente" && args.length === 2) {
   const [ruta, agente] = args;
   const ajustes = leerAjustes(ruta);
