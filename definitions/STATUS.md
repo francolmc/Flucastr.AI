@@ -5,10 +5,16 @@
 ## Paso actual
 
 Rol: ninguno (esperando a Franco). F14 `hecha` (confirmada por Franco, 2026-10-30). F01–F10 y F12–F13 `hecha` y archivadas. Solo queda F11 (informe), en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
-Rama: chore/F15-actualizar-readme
+Rama: chore/F16-coherencia-sin-carpetas
+F16: task-01 `hecha` (Franco, 2026-10-30); falta que confirmes F16 como `hecha`.
 F15 en curso: task-01 `hecha` (Franco, 2026-10-30); task-02 `hecha` (Franco, 2026-10-30); task-03 `hecha` (Franco, 2026-10-30); task-04 `hecha` (Franco, 2026-10-30). F15 `hecha` en `BACKLOG.md` (confirmada por Franco, 2026-10-30); `→` movido a F11 (en pausa por datos, sin tareas). Solo queda F11 pendiente.
 
 ## Espera a Franco
+
+- Feature F16 completa en chore/F16-coherencia-sin-carpetas: cierra la rama, haz el PR y despliega. Confirma F16 como `hecha` de forma explícita para marcarla en `BACKLOG.md`.
+
+- Puerta 2 aprobada por Franco (2026-10-30): backlog con F16 `aprobado`; el `planificador` descompone F16 (puerta 3 después). La celda «Por qué» de F16 mide ~380 caracteres; se puede acortar más adelante.
+- F15 sigue sin archivar a propósito, hasta que F16 esté lista (así `rapida.sh` no falla).
 
 - Feature F15 completa en chore/F15-actualizar-readme: cierra la rama, haz el PR y despliega.
 - Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea).
