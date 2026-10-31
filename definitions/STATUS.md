@@ -6,12 +6,12 @@
 
 Rol: ninguno (esperando a Franco). F14 `hecha` (confirmada por Franco, 2026-10-30). F01–F10 y F12–F13 `hecha` y archivadas. Solo queda F11 (informe), en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
 Rama: chore/F16-coherencia-sin-carpetas
-F16 en curso: task-01 `lista para revisión` (puerta 4).
+F16: task-01 `hecha` (Franco, 2026-10-30); falta que confirmes F16 como `hecha`.
 F15 en curso: task-01 `hecha` (Franco, 2026-10-30); task-02 `hecha` (Franco, 2026-10-30); task-03 `hecha` (Franco, 2026-10-30); task-04 `hecha` (Franco, 2026-10-30). F15 `hecha` en `BACKLOG.md` (confirmada por Franco, 2026-10-30); `→` movido a F11 (en pausa por datos, sin tareas). Solo queda F11 pendiente.
 
 ## Espera a Franco
 
-- **Puerta 4 (F16 task-01, `lista para revisión`):** `features/F16-coherencia-sin-carpetas/task-01-aceptar-cero-carpetas.md`. Revisa *Evidencia* y *Notas*, y `git diff pruebas/comprobaciones/coherencia-features.test.mjs`. Commitea en `chore/F16-coherencia-sin-carpetas` y dime si la pasas a `hecha`.
+- Feature F16 completa en chore/F16-coherencia-sin-carpetas: cierra la rama, haz el PR y despliega. Confirma F16 como `hecha` de forma explícita para marcarla en `BACKLOG.md`.
 
 - Puerta 2 aprobada por Franco (2026-10-30): backlog con F16 `aprobado`; el `planificador` descompone F16 (puerta 3 después). La celda «Por qué» de F16 mide ~380 caracteres; se puede acortar más adelante.
 - F15 sigue sin archivar a propósito, hasta que F16 esté lista (así `rapida.sh` no falla).

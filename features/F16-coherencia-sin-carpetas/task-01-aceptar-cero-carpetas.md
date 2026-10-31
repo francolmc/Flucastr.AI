@@ -1,5 +1,5 @@
 # task-01 — coherencia-features acepta features/ sin carpetas activas
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 La última prueba de `coherencia-features.test.mjs` exige `carpetas.length >= 1`. Cuando todo está archivado en `features/completed/` (estado normal, `definitions/WORKFLOW.md` §5 y §10) esa prueba falla aunque no haya incoherencia. Esta tarea quita ese assert, deja que el caso de 0 carpetas valide el backlog y pase, y agrega pruebas que cubren 0 carpetas y el caso con carpetas sobre fixtures temporales.
