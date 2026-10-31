@@ -9,6 +9,10 @@ Rama: feature/F17-skills-pi-en-workspace
 
 ## Espera a Franco
 
+- **Puerta 4 (F17 task-01, `lista para revisión`):** `features/F17-skills-pi-en-workspace/task-01-instalar-skills-proyecto.md`. Revisa *Evidencia*, *Notas* y `git diff instalar.sh` (+74/-1). Franco corrió `rapida.sh` y pasa 220/220 en 12 s; los 7 fallos de `ejecutar.sh` que reportó el constructor no se reproducen (probablemente propios de su entorno de ejecución). Falta tu aprobación explícita para pasarla a `hecha`.
+- **Hueco conocido hasta task-02/03:** reinstalar sin el flag tras usarlo borra las copias del proyecto y deja las 7 líneas de `exclude` huérfanas. No corras `bash instalar.sh` sin opciones en un proyecto con el flag hasta terminar task-02 y task-03.
+- Hay un commit tuyo `1fd4f0a` en la rama de F17 con `definitions/` y las tareas; el cambio de `instalar.sh` y de la tarea están sin commit.
+
 - **Puerta 3 (5 tareas de F17 en `borrador`, una por una)** en `features/F17-skills-pi-en-workspace/`: `task-01-instalar-skills-proyecto.md`, `task-02-desinstalar-skills-proyecto.md`, `task-03-reinstalar-proyectos-registrados.md`, `task-04-pruebas-skills-proyecto.md`, `task-05-readme-instalacion-skills-proyecto.md`. Revisa las decisiones que añadió el planificador (ver respuesta en la conversación): sin comentario `# flucastr-ai` en `exclude`; `--skills-proyecto` con `--solo claude` es error; copias aunque Pi no esté instalado; `desinstalar.sh --proyecto` borra `.pi` y `.pi/skills` solo si quedan vacíos; margen de `rapida.sh` (hoy 21 s, tope 30 s). Diseño de `ARCHITECTURE.md` aprobado (2026-10-31).
 
 - Puertas 1 y 2 aprobadas por Franco (2026-10-31): backlog con F17 `aprobado` y el diseño de `definitions/ARCHITECTURE.md` (sección «Skills dentro del workspace para Pi») con las 4 recomendaciones: `--skills-proyecto` con `--proyecto`, copia a `<proyecto>/.pi/skills/`, solo con el flag, exclusión en `.git/info/exclude`. Después viene la puerta 3 (tareas de F17).
