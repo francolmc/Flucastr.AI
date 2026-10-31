@@ -1,5 +1,5 @@
 # task-04 — pruebas Capa 1 de skills de Pi en el proyecto
-repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: hecha
 
 ## Descripción
 Prueba automática, sin red ni modelo, del flujo completo de `--skills-proyecto`: copia con marca, exclusión local, `git status` limpio, reinstalación idempotente y actualizada, proyecto sin git, carpeta ajena intacta, desinstalación por proyecto y total, y un control negativo. Va en un archivo nuevo para no alterar `instalacion.test.mjs`.

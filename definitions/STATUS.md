@@ -4,12 +4,14 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). F17 task-04 `lista para revisión` (puerta 4). task-01 a task-03 `hecha` (Franco, 2026-10-31); task-05 `aprobada`. task-01 y task-02 `hecha` (Franco, 2026-10-31). task-01 `hecha` (Franco, 2026-10-31); task-03 a 05 `aprobada`, en orden. F01–F16 `hecha` (F15 y F16 archivadas, sin commit). F17 (skills de Pi dentro del workspace) `→`. F11 (informe) en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
+Rol: ninguno (esperando a Franco). F17 task-05 `lista para revisión` (puerta 4, la última). task-01 a task-04 `hecha` (Franco, 2026-10-31). task-01 a task-03 `hecha` (Franco, 2026-10-31); task-05 `aprobada`. task-01 y task-02 `hecha` (Franco, 2026-10-31). task-01 `hecha` (Franco, 2026-10-31); task-03 a 05 `aprobada`, en orden. F01–F16 `hecha` (F15 y F16 archivadas, sin commit). F17 (skills de Pi dentro del workspace) `→`. F11 (informe) en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
 Rama: feature/F17-skills-pi-en-workspace
 
 ## Espera a Franco
 
-- **Puerta 4 (F17 task-04, pruebas):** `features/F17-skills-pi-en-workspace/task-04-pruebas-skills-proyecto.md`. Revisa *Evidencia*, *Notas*, `pruebas/capa1/skills-proyecto.test.mjs` (nuevo, 4 pruebas) y `git diff pruebas/rapida.sh`. Tiempo de `rapida.sh`: 25, 15 y 13 s (peor 25 s, tope 30 s; el margen de 5 s es chico, la primera corrida en frío fue la lenta); suite 224/224. Tres puntos: (1) usó 7 ejecuciones de `instalar.sh` y 2 de `desinstalar.sh` (la tarea fijaba máximo 5 y 3); (2) `git status` muestra `?? .claude/` por `--proyecto` (comportamiento previo, la prueba lo afirma); (3) las 4 pruebas comparten entornos y dependen del orden. Commitea y dime si la pasas a `hecha`; entonces sigo con task-05 (README).
+- **Puerta 4 (F17 task-05, README):** `features/F17-skills-pi-en-workspace/task-05-readme-instalacion-skills-proyecto.md`. Revisa *Evidencia*, *Notas* y `git diff README.md` (9 inserciones, 0 borrados). `rapida.sh` con tu HOME real: 224/224 en 20 s. Commitea en `feature/F17-skills-pi-en-workspace` y dime si la pasas a `hecha`; con eso F17 queda completa y te pediré confirmarla.
+- **Comprobación pendiente en tu PC de trabajo (F17):** que Pi lea las skills desde `<proyecto>/.pi/skills/` (con `/trust`). El README lo declara como pendiente. No hay garantía de que resuelva el bloqueo «fuera del workspace».
+
 
 
 
