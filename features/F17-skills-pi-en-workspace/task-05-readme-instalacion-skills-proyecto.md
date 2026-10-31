@@ -1,5 +1,5 @@
 # task-05 — README: sección Instalación para skills de Pi en el proyecto
-repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: hecha
 
 ## Descripción
 Documentar en la sección «Instalación» del `README.md` el flag `--skills-proyecto`: para qué sirve (Pi que no lee `~/.pi/agent/skills/` desde el workspace), cómo usarlo y deshacerlo, que las copias van fuera de git y se actualizan al reinstalar, y la condición de confianza de proyecto de Pi.

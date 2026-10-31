@@ -4,12 +4,16 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). F17 task-05 `lista para revisión` (puerta 4, la última). task-01 a task-04 `hecha` (Franco, 2026-10-31). task-01 a task-03 `hecha` (Franco, 2026-10-31); task-05 `aprobada`. task-01 y task-02 `hecha` (Franco, 2026-10-31). task-01 `hecha` (Franco, 2026-10-31); task-03 a 05 `aprobada`, en orden. F01–F16 `hecha` (F15 y F16 archivadas, sin commit). F17 (skills de Pi dentro del workspace) `→`. F11 (informe) en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
+Rol: ninguno (esperando a Franco). F17 `hecha` en `BACKLOG.md` (confirmada por Franco, 2026-10-31); el `planificador` mueve el `→` a F11 (en pausa por datos). task-01 a task-04 `hecha` (Franco, 2026-10-31). task-01 a task-03 `hecha` (Franco, 2026-10-31); task-05 `aprobada`. task-01 y task-02 `hecha` (Franco, 2026-10-31). task-01 `hecha` (Franco, 2026-10-31); task-03 a 05 `aprobada`, en orden. F01–F16 `hecha` (F15 y F16 archivadas, sin commit). F17 (skills de Pi dentro del workspace) `→`. F11 (informe) en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
 Rama: feature/F17-skills-pi-en-workspace
 
 ## Espera a Franco
 
-- **Puerta 4 (F17 task-05, README):** `features/F17-skills-pi-en-workspace/task-05-readme-instalacion-skills-proyecto.md`. Revisa *Evidencia*, *Notas* y `git diff README.md` (9 inserciones, 0 borrados). `rapida.sh` con tu HOME real: 224/224 en 20 s. Commitea en `feature/F17-skills-pi-en-workspace` y dime si la pasas a `hecha`; con eso F17 queda completa y te pediré confirmarla.
+- **Comprobado por Franco (2026-10-31):** en `testskills`, Pi lee las skills desde `.pi/skills/` (con `/trust`). Falta repetirlo en el PC de trabajo, cuya política podría diferir; el README aún dice «Pendiente de comprobar en el PC de trabajo».
+- Feature F17 completa en feature/F17-skills-pi-en-workspace: cierra la rama, haz el PR y despliega.
+- Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea).
+- Features F15, F16 y F17 archivables: `node scripts/archivar.mjs --aplicar F15`, `--aplicar F16` y `--aplicar F17` (lo corre Franco o, si lo pide, tú, después del PR y en su propio commit `chore/`).
+
 - **Comprobación pendiente en tu PC de trabajo (F17):** que Pi lea las skills desde `<proyecto>/.pi/skills/` (con `/trust`). El README lo declara como pendiente. No hay garantía de que resuelva el bloqueo «fuera del workspace».
 
 
