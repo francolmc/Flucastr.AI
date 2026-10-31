@@ -1,5 +1,5 @@
 # task-03 — Prueba del resolver: compactación de Pi, con controles negativos
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Fijar con una prueba determinista (sin modelo ni red) lo que hacen `fijar-compactacion pi` y `quitar-compactacion pi`: valores calculados desde `modelos.json`, fusión sin pisar al usuario, bloqueo `settings.json.lock`, escritura atómica y simetría de instalar/quitar. Incluye controles negativos que demuestran que las comprobaciones sí detectan un daño. Queda dentro de `rapida.sh` sin tocarla (toma todos los `pruebas/comprobaciones/*.test.mjs`).
@@ -56,7 +56,85 @@ git status --short pruebas/comprobaciones/
 Esperado: `tests` ≥ 9, `fail 0`, tiempo < 3 s; `rapida: N archivos en X s (tope 30 s)` con exit 0; el archivo nuevo aparece como `??`. No ejecutado por el planificador: depende de la task-02.
 
 ## Evidencia
-(lo llena el constructor)
+Modo yolo: sin rama nueva ni `git switch`; trabajo en `feature/F19-compactacion-automatica` (`git branch --show-current` → `feature/F19-compactacion-automatica`). Sin commit, push, PR, merge ni despliegue. Pruebas con `mkdtemp`/`mktemp -d` y `FLUCASTR_MODELOS` apuntando a un `modelos.json` temporal; no se tocó `~/.pi/agent/settings.json`, `~/.claude` ni `auth.json`. `definitions/STATUS.md` no se escribió.
+
+Archivo nuevo: `pruebas/comprobaciones/resolver-compactacion-pi.test.mjs` (20 pruebas: casos 1 a 9, con 3 variantes de 3, 2 de 5, 5 de 8 y 3 controles de 9).
+
+Sintaxis (`node --check`):
+```
+CHECK_OK
+```
+
+Ejecución completa previa (salida real, `node --test`):
+```
+✔ 1. carpeta vacía: fija los tres modelos con 172000 y crea el archivo
+✔ 2. fusión: conserva deviceId, packages, claveNueva y compaction.keepRecentTokens
+✔ 3a. override propio de un modelo: se omite ese y los otros dos se fijan
+✔ 3b. compaction.enabled en el nivel superior: una sola línea y el archivo igual
+✔ 3c. compaction.reserveTokens en el nivel superior: igual que 3b
+✔ 3d. compaction como texto: igual que 3b
+✔ 4. JSON inválido: exit 1, mensaje «no es JSON válido» y el archivo sin cambios
+✔ 5a. sin ventana para un modelo: omitido-ventana y los otros dos se fijan
+✔ 5b. compactar_en 270000: omitido-umbral para los tres, sin fijar y sin crear el archivo
+✔ 6. --simular: misma salida que la real y la carpeta sigue vacía
+✔ 7a. bloqueo fresco: exit 1, mensaje de bloqueo, archivo sin cambios y .lock intacto
+✔ 7b. bloqueo de hace 60 s: procede, fija, no deja .lock ni .tmp
+✔ 8a. tras fijar con creado: quitado, quitado, archivo-quitado y carpeta vacía
+✔ 8b. sobre archivo previo del usuario: quitar deja exactamente el objeto original
+✔ 8c. si el usuario cambió el valor (171999): omitido y el valor sigue
+✔ 8d. si el override tiene además keepRecentTokens: omitido y el valor sigue
+✔ 8e. un {} preexistente sigue existiendo tras fijar y quitar sin creado
+✔ 9a. control negativo: una fusión real no pierde ninguna clave
+✔ 9b. control negativo: una copia dañada lista exactamente packages y deviceId
+✔ 9c. control negativo: con bloqueo fresco el escritor se niega (status distinto de 0)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ duration_ms 1533.716458
+```
+
+Verificación (salida real, primera pasada completa, HOME=/Users/franco):
+```
+$ time node --test pruebas/comprobaciones/resolver-compactacion-pi.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
+ℹ tests 20
+ℹ pass 20
+ℹ fail 0
+node --test ... 0.88s user 0.22s system 69% cpu 1.581 total
+
+$ R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -3 "$R"
+rapida exit=0
+ℹ todo 0
+ℹ duration_ms 11826.630875
+rapida: 24 archivos en 12 s (tope 30 s)
+
+$ git status --short pruebas/comprobaciones/
+?? pruebas/comprobaciones/resolver-compactacion-pi.test.mjs
+```
+
+Control negativo a mano (paso 6): en una copia temporal `pruebas/comprobaciones/tmp-control-negativo.test.mjs` se sustituyó `perdidas(antes, dañado)` por una lista fija, y el caso falla:
+```
+✖ 9b. control negativo: una copia dañada lista exactamente packages y deviceId (31.326708ms)
+ℹ pass 19
+ℹ fail 1
+```
+La copia se borró después (`ls pruebas/comprobaciones/ | grep -c tmp-control` → 0). El archivo real no se modificó.
+
+Criterios de aceptación:
+1. Cumple: `tests 20` (≥ 9), `fail 0`.
+2. Cumple: 1,58 s en total (< 3 s).
+3. Cumple: la copia dañada da `['deviceId', 'packages']` (caso 9b); la fusión real da `[]` (caso 9a).
+4. Cumple: `rapida exit=0`, 12 s (< 30 s).
+5. Cumple: `git status --short` muestra solo `?? pruebas/comprobaciones/resolver-compactacion-pi.test.mjs` de esta tarea (los `M` de `definitions/STATUS.md` y de task-02 venían ya de antes y no se tocaron).
 
 ## Notas
-(lo llena el constructor)
+- Pasos 1 a 5 seguidos tal cual. Salidas reales de `fijar-compactacion`/`quitar-compactacion` leídas de `scripts/resolver.mjs` (sin modificarlo): las líneas coinciden con las de la task-02 (`fijado:…`, `omitido-usuario:…`, `omitido-ventana:…`, `omitido-umbral:…`, `:creado`, `quitado`, `archivo-quitado`, `omitido`, `omitido-usuario:*`).
+- Huecos menores resueltos (3):
+  1. La definición de `perdidas(antes, despues)` («claves de antes que cambiaron o faltan») no dice cómo comparar `compaction`, que la fusión sí cambia (añade `modelOverrides`). Con comparación de igualdad superficial, el control 9a daría `['compaction']` y no `[]`. Decisión: contención profunda (cada clave de `antes` sigue en `despues` con su valor; en objetos pueden aparecer claves nuevas). Sigue detectando lo pedido: 9b lista exactamente `packages` y `deviceId`.
+  2. Caso 5a: la «ventana ausente en un modelo» se hizo con `openai/gpt-6-luna` (último de la lista). Los otros dos se fijan como pide la tarea.
+  3. Caso 8e: el `{}` preexistente se prueba con fijar y luego quitar tres veces sin `creado` (el archivo queda `{}` y existe). Así cubre también la poda de `compaction` vacía.
+- Caso 9c se prueba sobre el mismo bloqueo fresco que 7a (control negativo: sin la comprobación de bloqueo el escritor no se niega).
+- No se corrigió `scripts/resolver.mjs`; no hubo defecto que reportar.
+- Sin señal de tarea incompleta más allá del hueco 1.
+
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=3; resultado=lista; causa=ninguna

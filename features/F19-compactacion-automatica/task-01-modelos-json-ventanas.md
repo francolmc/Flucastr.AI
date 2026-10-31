@@ -1,5 +1,5 @@
 # task-01 — `modelos.json` con `ventanas` y `compactar_en`
-repo: Flucastr.AI   depende_de: —   estado: aprobada
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Declarar en `modelos.json` los datos que necesita la compactación automática: la ventana de contexto de cada modelo de Pi del perfil `pi-openai` (`ventanas`) y el umbral deseado (`compactar_en`, defecto 100000). Sin esto el resolver no puede calcular `reserveTokens = ventana − compactar_en`. Es el primer paso de F19 y no cambia ninguna resolución de modelos.
@@ -45,7 +45,50 @@ git diff --stat
 Esperado: `100000 {"openai/gpt-6-astra":272000,"openai/gpt-6.1-sol":272000,"openai/gpt-6-luna":272000}` y `true`; ocho líneas con `claude-sonnet-5-5` / `claude-haiku-5-5` (constructor) y `openai/gpt-6.1-sol` / `openai/gpt-6-luna` (constructor); `rapida: … (tope 30 s)` con exit 0; el diff solo tiene `modelos.json` de esta tarea (el árbol ya trae otros cambios sin commit de F18: ignorarlos, filtrar por `modelos.json`). Ejecutado por el planificador: solo los comandos de lectura; el resultado de `rapida.sh` se mide al construir.
 
 ## Evidencia
-(lo llena el constructor)
+Rama: `git switch -c feature/F19-compactacion-automatica` desde `main` (no existía). `git branch --show-current` → `feature/F19-compactacion-automatica`.
+
+Verificación (salida real, primera pasada):
+```
+$ node -e "...console.log(c.compactar_en, JSON.stringify(p.ventanas)); ...Object.keys...===...Object.values..."
+100000 {"openai/gpt-6-astra":272000,"openai/gpt-6.1-sol":272000,"openai/gpt-6-luna":272000}
+true
+
+$ for a in arquitecto planificador coordinador constructor; do for h in claude-code pi; do echo "$a $h $(node scripts/resolver.mjs modelo $a $h)"; done; done
+arquitecto claude-code claude-sonnet-5-5
+arquitecto pi openai/gpt-6.1-sol
+planificador claude-code claude-sonnet-5-5
+planificador pi openai/gpt-6.1-sol
+coordinador claude-code claude-sonnet-5-5
+coordinador pi openai/gpt-6.1-sol
+constructor claude-code claude-haiku-5-5
+constructor pi openai/gpt-6-luna
+
+$ bash pruebas/rapida.sh   (HOME real, salida a fichero temporal)
+rapida exit=0
+ℹ duration_ms 14188.640541
+rapida: 23 archivos en 14 s (tope 30 s)
+
+$ git diff --stat modelos.json
+ modelos.json | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+$ git diff --stat   (árbol completo)
+ definitions/STATUS.md | 86 ++++-------  (cambio previo de F18, sin commit; no tocado por esta tarea)
+ modelos.json          |  8 ++++-
+ 2 files changed, 21 insertions(+), 73 deletions(-)
+```
+
+Criterios de aceptación:
+1. Cumple: JSON válido, `compactar_en` = 100000, `ventanas` con las tres claves en 272000.
+2. Cumple: `true`, las claves de `ventanas` coinciden con `modelos` del perfil `pi-openai`.
+3. Cumple: ocho líneas, con `claude-sonnet-5-5` / `claude-haiku-5-5` para constructor en claude-code y `openai/gpt-6.1-sol` / `openai/gpt-6-luna` en pi. No hubo captura previa del resolver; se compara con los valores esperados de la tarea.
+4. Cumple: `rapida exit=0`.
+5. Cumple: `git diff --stat modelos.json` solo toca `modelos.json`. El resto del árbol (`definitions/STATUS.md`) ya venía modificado sin commit antes de empezar.
 
 ## Notas
-(lo llena el constructor)
+- Sin huecos menores: se siguieron los pasos tal cual. `version` no se tocó (sigue en 1).
+- Un edit fallido durante la tarea (mayúscula en «Para» dentro de `_leeme`) fue un error de escritura mío al localizar el texto; se reintentó con el texto exacto y no cambió el contenido final.
+- `definitions/STATUS.md` no se escribió.
+- Sin commit, push, PR, merge ni despliegue.
+
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

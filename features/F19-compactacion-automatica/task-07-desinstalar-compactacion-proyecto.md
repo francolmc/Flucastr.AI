@@ -1,5 +1,5 @@
 # task-07 — `desinstalar.sh --proyecto`: quita también la compactación del proyecto
-repo: Flucastr.AI   depende_de: task-06   estado: aprobada
+repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
 ## Descripción
 Hacer que `bash desinstalar.sh --proyecto <ruta>` quite del `.claude/settings.local.json` de ese proyecto el `autoCompactWindow` que puso el kit, junto con el agente, las copias de skills y las exclusiones que ya quita, y la línea `compactacion` correspondiente del manifiesto. No toca la compactación de Pi (global) ni las líneas de otros proyectos.
@@ -51,7 +51,50 @@ R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -2 
 Esperado: la simulación imprime `SIMULACIÓN: quitaría la compactación de Claude Code de: …/p1/…` y `manifiesto-igual`; la real imprime `ajuste de proyecto (quitado)` y `compactación de Claude Code (archivo-quitado)`, `ls -A "$T/p1"` vacío (la carpeta `.claude` ya no está), el manifiesto conserva `modo`, la línea de `p2` y la de `pi:`; `p2` sigue con 133000; el proyecto `vacio` imprime «Este instalador no instaló nada en …»; `rapida` exit 0. No ejecutado por el planificador: `desinstalar.sh` aún no tiene el caso.
 
 ## Evidencia
-(lo llena el constructor)
+Modo yolo: sin rama nueva ni `git switch`; trabajo en `feature/F19-compactacion-automatica` (`git branch --show-current` → `feature/F19-compactacion-automatica`). Sin commit, push, PR, merge ni despliegue. `definitions/STATUS.md` no se tocó. Verificación con `HOME` falso (`$H` dentro de `mktemp -d`); `desinstalar.sh` no se ejecutó contra el HOME real ni se tocaron `~/.pi` ni `~/.claude`.
+
+Caso insertado en la rama `--proyecto` de `desinstalar.sh`, después de `ajuste)` y antes de `directorio)`: bloque `compactacion)` con `case "${extra:-}" in claude:*)`, que solo actúa si `$ruta = $AJUSTES`.
+
+Sintaxis (`bash -n desinstalar.sh`): `SYNTAX_OK`.
+
+Verificación (salida real, `T=/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.FbyWgtSiOL`):
+```
+== (1) simular
+SIMULACIÓN: quitaría el agente 'coordinador' de: /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.FbyWgtSiOL/p1/.claude/settings.local.json
+SIMULACIÓN: quitaría la compactación de Claude Code de: /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.FbyWgtSiOL/p1/.claude/settings.local.json
+SIMULACIÓN: no se borra nada.
+exit=0
+manifiesto-igual
+== (2) real
+  ajuste de proyecto (quitado): /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.FbyWgtSiOL/p1/.claude/settings.local.json
+  compactación de Claude Code (archivo-quitado): /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.FbyWgtSiOL/p1/.claude/settings.local.json
+exit=0
+-- ls p1:
+(vacío)
+-- manifiesto:
+modo	repo
+compactacion	/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.FbyWgtSiOL/p2/.claude/settings.local.json	claude:133000
+compactacion	/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.FbyWgtSiOL/h/pi-settings.json	pi:openai/gpt-6-luna=172000
+-- p2:
+{"autoCompactWindow":133000}
+== (3) proyecto vacio
+Este instalador no instaló nada en /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.FbyWgtSiOL/vacio.
+exit=0
+== rapida (HOME real)
+rapida exit=0 segundos=12
+ℹ duration_ms 12060.700791
+rapida: 25 archivos en 12 s (tope 30 s)
+```
+
+Criterios de aceptación:
+1. Cumple: imprime `compactación de Claude Code (archivo-quitado)`; el archivo se borró entero al quedar vacío (`ls -A` de `p1` vacío), así que `autoCompactWindow` ya no está.
+2. Cumple: el manifiesto conserva `modo`, la línea `pi:` y la de `p2` (`claude:133000`); la de `p1` desapareció.
+3. Cumple: `--simular` imprime `SIMULACIÓN: quitaría la compactación de Claude Code de: …/p1/…`; `cmp` confirma manifiesto sin cambios.
+4. Cumple: el proyecto `vacio` imprime «Este instalador no instaló nada en …».
+5. Cumple: `bash pruebas/rapida.sh` exit 0.
 
 ## Notas
-(lo llena el constructor)
+- Punto de inserción (paso 1): rama `--proyecto` tras el caso `ajuste)`; `directorio)` no se tocó.
+- Huecos menores resueltos: 0.
+- `pruebas/rapida.sh` con HOME real: 12 s, dentro del tope de 25 s; no hay exceso que anotar.
+- Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

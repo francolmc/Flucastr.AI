@@ -1,5 +1,5 @@
 # task-08 — `instalar.sh`: deja puesta la compactación de Pi
-repo: Flucastr.AI   depende_de: task-06   estado: aprobada
+repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
 ## Descripción
 Hacer que `bash instalar.sh` escriba en `~/.pi/agent/settings.json` (o `$PI_CODING_AGENT_DIR/settings.json`) la compactación automática de los modelos de Pi del kit, llamando a `fijar-compactacion pi` de la task-02 (y apoyándose en que `desinstalar.sh` ya las quita, task-06), y que registre en el manifiesto una línea `compactacion` por modelo para que `desinstalar.sh` (ya preparado en la task-06) quite exactamente eso. `--simular` solo informa. Si el archivo del usuario no se puede tocar, avisa y sigue: la instalación no falla por esto.
@@ -58,7 +58,106 @@ R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -2 
 Esperado: la simulación imprime tres líneas `(simulación) compactación fijada: …=172000` y `ls -A` sin `settings.json`; la real, tres líneas `compactación fijada` más el aviso de recarga, el JSON con tres overrides y tres líneas `compactacion` del manifiesto; con el archivo del usuario, `OMITIDO … gpt-6.1-sol` y las otras dos fijadas (el JSON conserva `deviceId`, `packages` y el 100000); con `{ roto`, `AVISO: no se tocó` y el archivo igual; `rapida` exit 0. No ejecutado por el planificador: `instalar.sh` aún no tiene la función.
 
 ## Evidencia
-(lo llena el constructor)
+Modo yolo: sin rama nueva ni `git switch`; trabajo en la rama actual `feature/F19-compactacion-automatica`. Sin commit, push, PR, merge ni despliegue. `definitions/STATUS.md` no se escribió. Todas las verificaciones con HOME falso (`$T/h`) y `PI_CODING_AGENT_DIR` falso dentro de `mktemp -d`; no se ejecutó `instalar.sh` contra el HOME real ni se tocó `~/.pi/agent/settings.json` ni `~/.claude`.
+
+Sintaxis y referencias:
+```
+$ bash -n instalar.sh && echo SYNTAX_OK
+SYNTAX_OK
+$ grep -n instalar_compactacion_pi instalar.sh
+334:instalar_compactacion_pi() {
+437:  instalar_compactacion_pi
+```
+
+Simulación (`--simular`, HOME falso, `T=/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.c6KXiYboQK`):
+```
+$ HOME="$T/h" PI_CODING_AGENT_DIR="$T/h/pi" bash instalar.sh --simular | grep -i compactaci
+  (simulación) compactación fijada: openai/gpt-6-astra reserveTokens=172000 (.../h/pi/settings.json)
+  (simulación) compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (.../h/pi/settings.json)
+  (simulación) compactación fijada: openai/gpt-6-luna reserveTokens=172000 (.../h/pi/settings.json)
+$ ls -A "$T/h/pi"
+(vacío)
+```
+Instantánea del árbol del HOME falso (otra `mktemp -d`, `find` antes y después de `--simular`):
+```
+antes=3 despues=3
+ARBOL_IGUAL
+```
+
+Instalación real (HOME falso, carpeta de Pi vacía):
+```
+$ HOME="$T/h" PI_CODING_AGENT_DIR="$T/h/pi" bash instalar.sh | grep -i -e compactaci -e "Pi no relee"
+  compactación fijada: openai/gpt-6-astra reserveTokens=172000 (.../h/pi/settings.json)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (.../h/pi/settings.json)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (.../h/pi/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+$ cat "$T/h/pi/settings.json"
+{
+  "compaction": {
+    "modelOverrides": {
+      "openai/gpt-6-astra": {
+        "reserveTokens": 172000
+      },
+      "openai/gpt-6.1-sol": {
+        "reserveTokens": 172000
+      },
+      "openai/gpt-6-luna": {
+        "reserveTokens": 172000
+      }
+    }
+  }
+}
+$ grep compactacion "$T/h/.flucastr-ai/manifiesto.txt"
+compactacion	.../h/pi/settings.json	pi:openai/gpt-6-astra=172000:creado
+compactacion	.../h/pi/settings.json	pi:openai/gpt-6.1-sol=172000:creado
+compactacion	.../h/pi/settings.json	pi:openai/gpt-6-luna=172000:creado
+```
+
+Archivo del usuario (`deviceId`, `packages` y un override propio de `openai/gpt-6.1-sol` en 100000), reinstalación:
+```
+$ ... bash instalar.sh   (exit=0)
+  compactación fijada: openai/gpt-6-astra reserveTokens=172000 (.../h/pi/settings.json)
+  OMITIDO (ya define compaction para openai/gpt-6.1-sol: se respeta)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (.../h/pi/settings.json)
+$ cat settings.json   →  conserva "deviceId": "x", "packages": ["p"], y "openai/gpt-6.1-sol": {"reserveTokens": 100000};
+                         añade "openai/gpt-6-astra" y "openai/gpt-6-luna" con 172000.
+```
+
+JSON no válido (`{ roto`):
+```
+$ ... bash instalar.sh   (exit=0)
+  AVISO: no se tocó .../h/pi/settings.json (error: .../h/pi/settings.json no es JSON válido (Expected property name or '}' in JSON at position 2 (line 1 column 3)); no lo toco)
+md5 antes:  7314a1c22b4afb5ae06fdc2f431ed7f3
+md5 después: 7314a1c22b4afb5ae06fdc2f431ed7f3   (contenido: { roto)
+```
+
+Verificación rápida con HOME real (una sola vez, `bash pruebas/rapida.sh`):
+```
+$ bash pruebas/rapida.sh > <scratchpad>/rapida-task08.txt 2>&1; echo $?
+exit=0, duración 14 s
+...
+ℹ tests 263
+ℹ pass 263
+ℹ fail 0
+ℹ cancelled 0
+rapida: 25 archivos en 14 s (tope 30 s)
+```
+
+Criterios de aceptación:
+1. Cumplido: tres overrides en 172000 y tres líneas `compactacion` con `pi:<modelo>=172000:creado`.
+2. Cumplido: `--simular` no crea `settings.json` ni cambia el árbol del HOME falso; imprime tres líneas `(simulación) compactación fijada:`.
+3. Cumplido: conserva `deviceId`, `packages` y el 100000; avisa `OMITIDO … gpt-6.1-sol`.
+4. Cumplido: exit 0, `AVISO: no se tocó`, bytes iguales.
+5. Cumplido: `rapida.sh` exit 0, 263/263.
 
 ## Notas
-(lo llena el constructor)
+- Modo yolo: sin rama nueva ni `git switch`; sin commit.
+- Paso 1: salida real de `fijar-compactacion pi` confirmada contra una carpeta temporal (tres líneas `fijado:<modelo>=172000:creado`; con `--simular` la carpeta queda vacía; con JSON roto sale con código 1 y `error: … no lo toco` por stderr, que la función captura con `2>&1`).
+- Huecos menores resueltos (decisión conservadora):
+  1. La línea literal `omitido-usuario:*` se trata con un caso propio antes del caso `omitido-usuario:<modelo>`, para que el texto sea el de la tarea.
+  2. La línea «Pi no relee settings.json…» se imprime si hubo al menos un `fijado`, también con `--simular` (la tarea no distingue el caso; no escribe nada en ese modo).
+- Las líneas `omitido-ventana`/`omitido-umbral` no se probaron con un caso real (no entran en la verificación); su texto sale de la tarea.
+- `rapida.sh`: 14 s con HOME real, dentro del tope de 25 s; no hay exceso que anotar.
+- Al verificar, creé por error un archivo `flucastr-T-last.txt` en el directorio temporal padre (fuera del repo) y lo borré con `rm -f` en el siguiente comando; no afectó al repo.
+- Sin señal de tarea incompleta.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

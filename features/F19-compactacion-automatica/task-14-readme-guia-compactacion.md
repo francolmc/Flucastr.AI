@@ -1,5 +1,5 @@
 # task-14 — Guía de higiene de contexto y compactación en el `README.md`
-repo: Flucastr.AI   depende_de: task-09   estado: aprobada
+repo: Flucastr.AI   depende_de: task-09   estado: hecha
 
 ## Descripción
 Documentar en `README.md` lo que el kit deja puesto (compactación automática en Pi y Claude Code), con la tabla de mecanismos por herramienta, cómo cambiar el umbral, cómo comprobar el resultado tras instalar y las limitaciones. Es la guía para Franco, también desde el celular: no pide teclear comandos para que funcione.
@@ -25,7 +25,7 @@ Documentar en `README.md` lo que el kit deja puesto (compactación automática e
 
 ## Alcance / Fuera de alcance
 Alcance: `README.md` (sección nueva, una viñeta de instalación, dos comentarios de `## Estructura`).
-Fuera de alcance: `definitions/`, `pruebas/README.md` (task-17), el árbol de agentes y skills de `## Estructura`, `instalar.sh`, `AGENTS.md`, la bitácora.
+Fuera de alcance: `definitions/`, `pruebas/README.md` (task-16), el árbol de agentes y skills de `## Estructura`, `instalar.sh`, `AGENTS.md`, la bitácora.
 
 ## Pasos
 1. Releer la salida real de `bash instalar.sh --simular` en un HOME temporal con `--proyecto` y los mensajes de las tareas 08 y 09. Resultado: textos exactos anotados en *Notas*.
@@ -52,7 +52,80 @@ git diff --stat README.md
 Esperado: dos líneas del `grep` (encabezado y enlace); ocho contadores ≥ 1; `fail 0`; el diff toca solo `README.md`. Leído por el planificador: el README existe con las secciones citadas; la sección nueva se escribe al construir.
 
 ## Evidencia
-(lo llena el constructor)
+Rama: `git branch --show-current` → `feature/F19-compactacion-automatica` (ya era la actual; sin `git switch`). Sin commit, push, PR, merge ni despliegue. `definitions/STATUS.md` no se tocó. No se ejecutó `instalar.sh` ni `desinstalar.sh` salvo `--simular` en HOME temporal; `~/.pi` y `~/.claude` reales no se tocaron.
+
+Simulación real (HOME y `PI_CODING_AGENT_DIR` temporales, proyecto temporal, `--proyecto`; la salida se filtró con `grep -i -e compactaci -e "Pi no relee" -e SIMULA`):
+```
+$ HOME="$T/h" PI_CODING_AGENT_DIR="$T/h/pi" bash instalar.sh --simular --proyecto "$T/p" | grep -i -e compactaci -e "Pi no relee" -e SIMULA
+SIMULACIÓN: no se escribe nada.
+  (simulación) compactación de Claude Code fijada: autoCompactWindow=133000 (.../p/.claude/settings.local.json)
+  (simulación) compactación fijada: openai/gpt-6-astra reserveTokens=172000 (.../h/pi/settings.json)
+  (simulación) compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (.../h/pi/settings.json)
+  (simulación) compactación fijada: openai/gpt-6-luna reserveTokens=172000 (.../h/pi/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+```
+
+Verificación de la tarea (salida real):
+```
+$ grep -n "^## Higiene de contexto y compactación\|higiene-de-contexto-y-compactación" README.md
+139:- Deja puesta la compactación automática en Pi y, con `--proyecto`, en Claude Code; ver [Higiene de contexto y compactación](#higiene-de-contexto-y-compactación).
+204:## Higiene de contexto y compactación
+$ for t in ...; printf '%s: ' "$t"; grep -c -F -- "$t" README.md
+reserveTokens = ventana − compactar_en: 1
+autoCompactWindow = compactar_en + 33000: 2
+172000: 2
+133000: 2
+compaction.modelOverrides: 3
+.claude/settings.local.json: 4
+/reload: 2
+desinstalar.sh --proyecto: 3
+$ node --test pruebas/comprobaciones/readme-estructura.test.mjs 2>&1 | grep -E "^ℹ (pass|fail)"
+ℹ pass 7
+ℹ fail 0
+$ git diff --stat README.md
+ README.md | 55 +++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 53 insertions(+), 2 deletions(-)
+```
+
+Inspección de la tabla (`sed -n '/^| | Pi 1.4.0/,/^| Medir/p' README.md`):
+```
+| | Pi 1.4.0 | Claude Code 2.1.308 |
+|---|---|---|
+| Compactación automática | Sí, al superar `ventana − reserveTokens` | Sí, según `autoCompactWindow` |
+| Dónde se configura | `compaction.modelOverrides` en `~/.pi/agent/settings.json`, lo pone `instalar.sh` | `autoCompactWindow` en `<proyecto>/.claude/settings.local.json`, solo con `--proyecto` |
+| Fórmula | `reserveTokens = ventana − compactar_en` (172000) | `autoCompactWindow = compactar_en + 33000` (133000) |
+| Rango y validación | Enteros no negativos. Un valor inválido en el modelo activo detiene Pi | Entre 100000 y 1000000. Fuera de rango se ignora en silencio |
+| Cuándo se aplica | Al abrir Pi de nuevo o con `/reload` (no relee en caliente) | Al abrir una sesión nueva |
+| Sesión nueva a mano | `/new` | `/clear` |
+| Compactar a mano | `/compact` | `/compact` |
+| Medir | Pie del TUI y `/session`; `showCacheMissNotices: true` | `/context`, donde aparece `Autocompact buffer 33k` |
+```
+
+Verificación rápida con HOME real (`HOME=/Users/franco`, `bash pruebas/rapida.sh`, una pasada):
+```
+exit=0
+ℹ tests 277
+ℹ pass 277
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+rapida: 27 archivos en 14 s (tope 30 s)
+```
+
+Cifras contra fuentes: `modelos.json` tiene `compactar_en` 100000 y `ventanas` 272000 para los tres modelos; `172000` = 272000 − 100000 y `133000` = 100000 + 33000. El informe `pruebas/resultados/2026-10-31-verificacion-compactacion.md` da las mismas ventanas (punto 4), el colchón de 33 k (punto 6) y «Pi no relee en caliente» (línea 52).
+
+Criterios de aceptación:
+1. Cumple: la sección tiene `reserveTokens = ventana − compactar_en`, `autoCompactWindow = compactar_en + 33000`, `172000`, `133000`, `compaction.modelOverrides`, `.claude/settings.local.json`, `/reload` y `desinstalar.sh --proyecto` (8 de 8 con contador ≥ 1).
+2. Cumple: la tabla tiene una fila por tema (compactación automática, dónde se configura, fórmula, rango y validación, cuándo se aplica, sesión nueva, compactar a mano, medir) y las columnas Pi 1.4.0 y Claude Code 2.1.308. Codex va en una línea debajo, como «pendiente».
+3. Cumple: el enlace está en la línea 139 y el encabezado en la 204.
+4. Cumple: `readme-estructura.test.mjs` termina con `pass 7`, `fail 0`.
+5. Cumple: `git diff --stat README.md` toca solo `README.md`.
 
 ## Notas
-(lo llena el constructor)
+- Paso 1 (textos reales de `--simular`, HOME temporal con `--proyecto`): `(simulación) compactación de Claude Code fijada: autoCompactWindow=133000 (<proyecto>/.claude/settings.local.json)`; `(simulación) compactación fijada: <modelo> reserveTokens=172000 (<HOME>/pi/settings.json)` para `openai/gpt-6-astra`, `openai/gpt-6.1-sol` y `openai/gpt-6-luna`; `Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.`. Los mensajes `OMITIDO (ya define compaction para <modelo>: se respeta)` y `OMITIDO (el proyecto ya define autoCompactWindow: se respeta)` vienen de las tareas 08 y 09, no de esta simulación. La simulación también avisó que `~/.local/bin` no está en PATH: ese aviso es del instalador, no del README.
+- Paso 4: cifras comprobadas arriba (`modelos.json` e informe). Lista: 272000 y 100000 en `modelos.json`; 172000 y 133000 derivados; 33000 y «Pi no relee» en el informe.
+- Hueco menor 1: Codex no tiene columna en la tabla, porque la tabla compara Pi y Claude Code y la tarea pide que Codex aparezca como «pendiente». Lo puse en una línea debajo de la tabla. Decisión conservadora.
+- Hueco menor 2: en «Limitaciones» escribí que el «campo nuevo» lo avisa el comparador de `modelos.json` (texto de `scripts/resolver.mjs`, líneas 491-494), no `instalar-remoto.sh --actualizar` directamente. Es la misma fuente de aviso, con el nombre del comando omitido a propósito.
+- Observación fuera de alcance (no tocada): la viñeta existente en `### Con el repo clonado` dice que «el lanzador de Pi lo lee en vivo» al cambiar `modelos.json`. No contradice la sección nueva (habla del lanzador, no de `settings.json`), pero conviene revisarla al cerrar F19.
+- Intermitencia: `registro.e2e.test.mjs` («2 !== 1») no apareció en la corrida de `rapida.sh` (277/277 pasan); no fue necesario repetir ni editarla.
+- Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

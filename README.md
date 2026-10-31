@@ -72,7 +72,7 @@ Flucastr.AI/
 ├── AGENTS.md        # entrada breve para agentes
 ├── definitions/     # definición vigente del proyecto
 ├── features/        # tareas por feature (features/Fxx-nombre/task-NN-nombre.md); las terminadas, archivadas en features/completed/
-├── modelos.json     # niveles y modelos por herramienta; los agentes declaran nivel, no modelo
+├── modelos.json     # niveles y modelos por herramienta, ventanas y compactar_en; los agentes declaran nivel, no modelo
 ├── agentes/         # un archivo por agente
 │   ├── arquitecto.md    # define proyecto, estructura y arquitectura
 │   ├── coordinador.md   # el único que abres; delega y se detiene en las cuatro puertas
@@ -87,7 +87,7 @@ Flucastr.AI/
 │   ├── descomponer-feature/
 │   └── ejecutar-tarea/
 ├── scripts/
-│   ├── resolver.mjs    # resuelve el modelo de cada agente y genera los archivos por herramienta
+│   ├── resolver.mjs    # resuelve el modelo de cada agente, genera los archivos por herramienta y la compactación
 │   ├── archivar.mjs    # chequea el contexto y, con --aplicar Fxx (Fxx explícito; lo corre Franco o el coordinador a su pedido, WORKFLOW.md §3.1), mueve esa feature hecha a features/completed/
 │   └── registrar.mjs   # registra los eventos del flujo en registro/eventos.jsonl (lo corre Franco)
 ├── pruebas/         # comprobaciones del kit y arnés de pruebas del arquitecto (ver pruebas/README.md)
@@ -136,6 +136,7 @@ bash desinstalar.sh --proyecto /ruta/al/proyecto
 - Si cambias `modelos.json`, vuelve a correr `bash instalar.sh` (el lanzador de Pi lo lee en vivo; el agente de Claude Code no). El nivel de cada agente lo eliges tú en ese archivo.
 - `--proyecto` escribe `{"agent": "arquitecto"}` en `<proyecto>/.claude/settings.local.json`. No pisa un agente que el proyecto ya tenga definido, y `desinstalar.sh` lo deshace.
 - `--agente <nombre>` elige el agente predeterminado del proyecto (por defecto `arquitecto`).
+- Deja puesta la compactación automática en Pi y, con `--proyecto`, en Claude Code; ver [Higiene de contexto y compactación](#higiene-de-contexto-y-compactación).
 - Uso: `claude --agent coordinador` o `pi-coordinador`, desde la carpeta del proyecto (también `arquitecto`, `planificador` y `constructor` por separado).
 - `--skills-proyecto` (con `--proyecto`) copia las skills a `<proyecto>/.pi/skills/` como carpetas reales, sin enlaces, para que Pi las lea desde el workspace. Nunca enlaza ni pisa una carpeta que no sea de Flucastr.AI: la omite y lo avisa. No se combina con `--solo claude`.
 - Las copias quedan fuera de git del proyecto: cada una se añade a `.git/info/exclude` (no al `.gitignore`). No se editan: se rehacen al volver a correr `bash instalar.sh` o `instalar-remoto.sh --actualizar`. Con `--solo claude` las copias de los proyectos registrados se borran y no se rehacen; el registro se conserva, y `bash instalar.sh --proyecto <ruta> --skills-proyecto` las vuelve a crear.
@@ -199,6 +200,56 @@ Detalle de escenarios y permisos en [`pruebas/README.md`](pruebas/README.md).
 ## Flujo
 
 El `coordinador` (el único agente que abro) invoca al `arquitecto`, al `planificador` y al `constructor`, y se detiene en cuatro puertas de aprobación: definición, backlog, cada tarea y revisión del resultado. Detalle en [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md). Cada feature trabaja en una rama `feature/`, `fix/` o `chore/` + `Fxx-nombre`; al quedar `hecha` su última tarea, el aviso llega por `STATUS.md` para que yo cierre la rama. Antes de descomponer una feature ambigua puede haber un refinado previo (hasta 5 preguntas con recomendación en `features/Fxx/refinado.md`), solo cuando se requiere. Solo si lo pido de forma explícita en la conversación (por ejemplo «yolo F05»), con el alcance nombrado, la definición aprobada y un único repo, existe el modo yolo: el `coordinador` omite las puertas 2, 3 y 4, trabaja directo en la rama actual (con una advertencia si es `main`) y se detiene ante cualquier escalación o si una feature necesita refinado. Detalle en `definitions/WORKFLOW.md` §9.3.
+
+## Higiene de contexto y compactación
+
+### Por qué
+
+El estado del flujo vive en `definitions/STATUS.md` y en los archivos de cada feature, no en la conversación. Así una sesión que se corta no pierde el hilo. Pero un contexto largo cuesta más en cada turno, porque la herramienta reenvía todo lo acumulado, y con más contexto el modelo tiende a derivar. Medido en Pi (*inferido*): unas 2,4 veces más costo por turno con 130 k de contexto que con 25 k. Por eso el kit deja puesta la compactación automática: cuando el contexto llega al umbral, la herramienta lo resume sola. No tengo que teclear nada, tampoco desde el celular.
+
+### Qué deja puesto el kit
+
+- **Pi**: en `~/.pi/agent/settings.json` (o `$PI_CODING_AGENT_DIR/settings.json`), un ajuste global `compaction.modelOverrides["<proveedor>/<modelo>"].reserveTokens` con el valor `ventana − compactar_en`. Con ventana 272000 y `compactar_en` 100000, queda `172000` para `openai/gpt-6-astra`, `openai/gpt-6.1-sol` y `openai/gpt-6-luna`. Es global: también aplica a esos modelos fuera del kit.
+- **Claude Code**: solo con `--proyecto`, en `<proyecto>/.claude/settings.local.json`, con `autoCompactWindow = compactar_en + 33000` (`133000`). Claude Code guarda 33.000 tokens de colchón antes de su límite de compactación, así que ese valor hace que compacte cerca de `compactar_en`. Sin `--proyecto` el kit no toca Claude Code.
+
+### Mecanismos por herramienta
+
+Versiones verificadas: Pi 1.4.0 y Claude Code 2.1.308. Codex: pendiente, todavía no tiene compactación verificada en el kit.
+
+| | Pi 1.4.0 | Claude Code 2.1.308 |
+|---|---|---|
+| Compactación automática | Sí, al superar `ventana − reserveTokens` | Sí, según `autoCompactWindow` |
+| Dónde se configura | `compaction.modelOverrides` en `~/.pi/agent/settings.json`, lo pone `instalar.sh` | `autoCompactWindow` en `<proyecto>/.claude/settings.local.json`, solo con `--proyecto` |
+| Fórmula | `reserveTokens = ventana − compactar_en` (172000) | `autoCompactWindow = compactar_en + 33000` (133000) |
+| Rango y validación | Enteros no negativos. Un valor inválido en el modelo activo detiene Pi | Entre 100000 y 1000000. Fuera de rango se ignora en silencio |
+| Cuándo se aplica | Al abrir Pi de nuevo o con `/reload` (no relee en caliente) | Al abrir una sesión nueva |
+| Sesión nueva a mano | `/new` | `/clear` |
+| Compactar a mano | `/compact` | `/compact` |
+| Medir | Pie del TUI y `/session`; `showCacheMissNotices: true` | `/context`, donde aparece `Autocompact buffer 33k` |
+
+### Cambiar el umbral
+
+Edita `compactar_en` en `modelos.json` (y `ventanas` si cambias de modelo) y corre `bash instalar.sh`. Pi se rehace solo con los valores nuevos.
+
+En Claude Code, un proyecto ya instalado conserva el valor que tiene. Para cambiarlo, quita primero el ajuste con `bash desinstalar.sh --proyecto <ruta>` y vuelve a instalar con `bash instalar.sh --proyecto <ruta>`.
+
+### Qué respeta
+
+El kit nunca pisa lo que ya definiste. En Pi respeta `compaction.enabled`, `compaction.reserveTokens` y cualquier `modelOverrides` del mismo modelo; en Claude Code respeta un `autoCompactWindow` que ya tenga el proyecto. Si encuentra uno, lo omite y lo avisa con `OMITIDO`.
+
+Escribe con un bloqueo `settings.json.lock` y con escritura atómica. `bash instalar.sh --simular` muestra qué haría sin escribir nada. `bash desinstalar.sh` quita solo lo suyo: borra una clave únicamente si su valor sigue siendo el que puso el kit.
+
+### Después de instalar, comprobar
+
+1. Abre Pi de nuevo o ejecuta `/reload`. Pi no relee `settings.json` en caliente.
+2. Compara `~/.pi/agent/settings.json` con la copia que tenías antes (`diff`). Solo debe aparecer `compaction.modelOverrides` para los modelos del kit; el resto del archivo debe quedar igual.
+
+### Limitaciones
+
+- En Pi el ajuste es global: compacta también cuando uso esos modelos fuera del kit, a unos 100 k.
+- Compactar pierde el razonamiento intermedio y las salidas de subagentes que no quedaron anotadas. Por eso el `coordinador` escribe `STATUS.md` antes de delegar: el estado del flujo sobrevive a la compactación.
+- Un `modelos.json` personal antiguo, sin `compactar_en` ni `ventanas`, no instala nada. Al actualizar, el comparador de `modelos.json` avisa «campo nuevo».
+- Un modelo sin ventana declarada, o con `ventana − compactar_en` menor que 16384, se omite con aviso; Pi usa entonces su valor por defecto.
 
 ## Registro de eventos
 

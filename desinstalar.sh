@@ -92,6 +92,25 @@ if [ -n "$PROYECTO" ]; then
           fi
         fi
         ;;
+      compactacion)
+        # compactación de Claude Code de este proyecto: solo la línea claude: de su settings.local.json
+        case "${extra:-}" in
+          claude:*)
+            if [ "$ruta" = "$AJUSTES" ]; then
+              quitar=1
+              hallados=$((hallados + 1))
+              valor="${extra#claude:}"
+              if [ "$SIMULAR" = 1 ]; then
+                decir "SIMULACIÓN: quitaría la compactación de Claude Code de: $AJUSTES"
+              else
+                resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-compactacion claude "$AJUSTES" "$valor" < /dev/null)" || resultado="error"
+                decir "  compactación de Claude Code ($resultado): $AJUSTES"
+                rmdir "$PROYECTO/.claude" 2>/dev/null || true # solo si quedó vacía
+              fi
+            fi
+            ;;
+        esac
+        ;;
       directorio)
         case "$ruta" in
           "$PROYECTO"/.pi/skills/*)
@@ -214,6 +233,38 @@ while IFS=$'\t' read -r tipo ruta extra; do
       ;;
     skills-proyecto)
       # solo registro: la línea se va con el manifiesto (las copias tienen sus propias líneas directorio)
+      ;;
+    compactacion)
+      # compactación automática: Pi (ajuste global, siempre) y Claude Code (ajuste del proyecto, salvo --conservar-ajustes)
+      case "${extra:-}" in
+        pi:*)
+          spec="${extra#pi:}"
+          creado=""
+          if [ "${spec%:creado}" != "$spec" ]; then creado="creado"; spec="${spec%:creado}"; fi
+          modelo="${spec%%=*}"
+          reserve="${spec#*=}"
+          if [ "$SIMULAR" = 1 ]; then
+            decir "  quitaría la compactación de Pi: $modelo ($ruta)"
+          else
+            resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-compactacion pi "$ruta" "$modelo" "$reserve" $creado < /dev/null)" || resultado="error"
+            decir "  compactación de Pi ($resultado): $modelo"
+          fi
+          ;;
+        claude:*)
+          if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
+          valor="${extra#claude:}"
+          if [ "$SIMULAR" = 1 ]; then
+            decir "  quitaría la compactación de Claude Code de: $ruta"
+          else
+            resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-compactacion claude "$ruta" "$valor" < /dev/null)" || resultado="error"
+            decir "  compactación de Claude Code ($resultado): $ruta"
+            rmdir "$(dirname "$ruta")" 2>/dev/null || true # .claude del proyecto, solo si quedó vacía
+          fi
+          ;;
+        *)
+          decir "  omitido (línea compactacion desconocida): $ruta"
+          ;;
+      esac
       ;;
     ajuste)
       # agente predeterminado de un proyecto: solo se quita si sigue siendo el que fijamos

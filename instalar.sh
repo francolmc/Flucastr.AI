@@ -329,6 +329,47 @@ EOF
   echo "  lanzador generado: $destino (modelo: $modelo)"
 }
 
+# Compactación automática de los modelos de Pi del kit, en el settings.json global de Pi. Si el archivo del
+# usuario no se puede tocar, avisa y sigue: no falla la instalación.
+instalar_compactacion_pi() {
+  local ajustes="$PI_DIR/settings.json" salida linea valor modelo resto reserve sufijo fijados=0
+  local extra=()
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); fi
+  if ! salida="$(node "$RESOLVER" fijar-compactacion pi "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+    echo "  AVISO: no se tocó $ajustes ($salida)"
+    return 0
+  fi
+  while IFS= read -r linea; do
+    [ -n "$linea" ] || continue
+    case "$linea" in
+      fijado:*)
+        valor="${linea#fijado:}"
+        modelo="${valor%%=*}"
+        resto="${valor#*=}"
+        reserve="${resto%%:*}"
+        sufijo=""
+        case "$resto" in *:creado) sufijo=":creado" ;; esac
+        fijados=$((fijados + 1))
+        if [ "$SIMULAR" = 1 ]; then
+          echo "  (simulación) compactación fijada: $modelo reserveTokens=$reserve ($ajustes)"
+        else
+          echo "  compactación fijada: $modelo reserveTokens=$reserve ($ajustes)"
+          registrar compactacion "$ajustes" "pi:$modelo=$reserve$sufijo"
+        fi
+        ;;
+      "omitido-usuario:*") echo "  OMITIDO (ya define compaction en $ajustes: se respeta)" ;;
+      omitido-usuario:*) echo "  OMITIDO (ya define compaction para ${linea#omitido-usuario:}: se respeta)" ;;
+      omitido-ventana:*) echo "  OMITIDO (modelos.json no declara la ventana de ${linea#omitido-ventana:})" ;;
+      omitido-umbral:*) echo "  OMITIDO (compactar_en no aplica a ${linea#omitido-umbral:}: ventana − compactar_en < 16384)" ;;
+      *) echo "  $linea" ;;
+    esac
+  done <<< "$salida"
+  if [ "$fijados" -gt 0 ]; then
+    echo "  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita."
+  fi
+  return 0
+}
+
 # Deja el agente como predeterminado de un proyecto, en su archivo de ajustes personal (no se sube a git).
 fijar_agente_proyecto() {
   local ajustes="$PROYECTO/.claude/settings.local.json" resultado
@@ -345,6 +386,32 @@ fijar_agente_proyecto() {
     ya-estaba) echo "  ya estaba fijado: $ajustes" ;;
     omitido:*) echo "  OMITIDO (el proyecto ya define otro agente predeterminado: ${resultado#omitido:}): $ajustes" ;;
   esac
+}
+
+# Compactación automática de Claude Code en el ajuste personal del proyecto (settings.local.json, no se sube a git).
+# El resolver escribe autoCompactWindow = compactar_en + 33000 (el colchón de Claude Code). Si el proyecto ya define
+# autoCompactWindow, lo respeta.
+instalar_compactacion_claude() {
+  local ajustes="$PROYECTO/.claude/settings.local.json" salida valor prefijo=""
+  local extra=()
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" fijar-compactacion claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+    echo "  AVISO: no se tocó $ajustes ($salida)"
+    return 0
+  fi
+  case "$salida" in
+    fijado:*)
+      valor="${salida#fijado:}"
+      echo "  ${prefijo}compactación de Claude Code fijada: autoCompactWindow=$valor ($ajustes)"
+      if [ "$SIMULAR" = 0 ]; then registrar compactacion "$ajustes" "claude:$valor"; fi
+      ;;
+    ya-estaba) echo "  ${prefijo}compactación de Claude Code ya estaba fijada: $ajustes" ;;
+    omitido-usuario) echo "  ${prefijo}OMITIDO (el proyecto ya define autoCompactWindow: se respeta): $ajustes" ;;
+    omitido-umbral) echo "  ${prefijo}OMITIDO (modelos.json no tiene un compactar_en válido para Claude Code)" ;;
+    omitido-rango:*) echo "  ${prefijo}OMITIDO (autoCompactWindow=${salida#omitido-rango:} queda fuera de 100000-1000000, el rango de Claude Code)" ;;
+    *) echo "  AVISO: resultado inesperado de fijar-compactacion claude ($salida)" ;;
+  esac
+  return 0
 }
 
 # Primera línea del manifiesto: el modo con el que se instaló (lo leen desinstalar.sh y la comprobación de modo).
@@ -366,6 +433,7 @@ fi
 if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
   echo "Quitando la instalación anterior..."
   grep -E "^ajuste$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
+  grep -E "^compactacion$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude:" "$MANIFIESTO" >> "$NUEVO" || true
   bash "$RAIZ/desinstalar.sh" --silencioso --conservar-ajustes
 fi
 
@@ -380,6 +448,7 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
   if [ -n "$PROYECTO" ]; then
     echo "Proyecto ($PROYECTO)"
     fijar_agente_proyecto
+    instalar_compactacion_claude
   fi
 else
   echo "Claude Code: no encontrado, se omite."
@@ -393,6 +462,7 @@ if [ "$INSTALAR_PI" = 1 ]; then
     [ -f "$f" ] && generar_agente_pi "$f"
     [ -f "$f" ] && generar_lanzador_pi "$f"
   done
+  instalar_compactacion_pi
   case ":$PATH:" in
     *":$BIN_DIR:"*) ;;
     *) echo "  AVISO: $BIN_DIR no está en tu PATH; agrégalo para usar los comandos pi-<agente>." ;;

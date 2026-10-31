@@ -1,5 +1,5 @@
 # task-04 — `resolver.mjs`: compactación de Claude Code y aviso en `comparar-modelos`
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Completar `scripts/resolver.mjs` con la variante de Claude Code: `fijar-compactacion claude` escribe `autoCompactWindow = compactar_en + 33000` en el `settings.local.json` de un proyecto (sin pisar nada) y `quitar-compactacion claude` lo deshace. Además `comparar-modelos` avisa cuando el `modelos.json` personal no trae los campos nuevos (`compactar_en`, `ventanas`). La puerta 4 de esta tarea exige revisar `git diff scripts/`.
@@ -61,7 +61,95 @@ git diff scripts/
 Esperado: simulación imprime `fijado:133000` y `ls -A` vacío; luego `fijado:133000`, el JSON, `ya-estaba`; `b.json` con `agent`, `otra` y `autoCompactWindow: 133000`; `c.json` con `omitido-usuario` y 150000; `quitar` en `b.json` imprime `quitado` y vuelve a `agent`+`otra`; con `1` imprime `omitido`; con `133000` imprime `archivo-quitado` y `a` queda vacío; `comparar-modelos` imprime las dos líneas `campo nuevo:` y, entre iguales, nada con `exit=0`; `rapida` exit 0; `remoto.test.mjs` con `fail 0` (sin red; tarda más de 30 s por eso queda fuera de la rápida: anotar la duración); `git diff scripts/` muestra solo `scripts/resolver.mjs`. No ejecutado por el planificador: las órdenes aún no existen.
 
 ## Evidencia
-(lo llena el constructor)
+Modo yolo: sin rama nueva ni `git switch`; trabajo en `feature/F19-compactacion-automatica`. Sin commit, push, PR, merge ni despliegue. Todas las pruebas con `mktemp -d`; no se tocó `~/.claude`, `~/.pi`, `auth.json` ni `.env`; `definitions/STATUS.md` no se escribió.
+
+Sintaxis (`node --check scripts/resolver.mjs`): `CHECK_OK`.
+
+Verificación (salida real, `T=/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.iEOa4e6XOl`, HOME=/Users/franco):
+```
+== 1 simular
+fijado:133000
+exit=0
+ls:
+== 1 escritura
+fijado:133000
+exit=0
+{
+  "autoCompactWindow": 133000
+}
+== 1 repetido
+ya-estaba
+exit=0
+== 2 fusion
+fijado:133000
+exit=0
+{
+  "agent": "coordinador",
+  "otra": 1,
+  "autoCompactWindow": 133000
+}
+== 2 usuario
+omitido-usuario
+exit=0
+{"autoCompactWindow":150000}
+== 3 quitar 133000 en b
+quitado
+exit=0
+{
+  "agent": "coordinador",
+  "otra": 1
+}
+== 3 quitar valor 1
+omitido
+exit=0
+== 3 quitar 133000 en a
+archivo-quitado
+exit=0
+(ls -A "$T/a": vacío)
+== 4 comparar personal sin campos
+campo nuevo: compactar_en
+campo nuevo: ventanas (perfil pi-openai)
+exit=0
+== 4 comparar iguales
+exit=0
+== 6 uso
+error: uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor>
+exit=1
+```
+
+Rapida (HOME real, `bash pruebas/rapida.sh`):
+```
+rapida exit=0
+ℹ todo 0
+ℹ duration_ms 13128.061666
+rapida: 24 archivos en 13 s (tope 30 s)
+```
+
+Remoto (`node --test pruebas/capa1/remoto.test.mjs`):
+```
+ℹ pass 12
+ℹ fail 0
+```
+
+Diff (`git diff --stat scripts/`):
+```
+ scripts/resolver.mjs | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 74 insertions(+), 1 deletion(-)
+```
+
+Criterios de aceptación:
+1. Cumple: `fijado:133000` y el archivo es `{ "autoCompactWindow": 133000 }`; repetido `ya-estaba`.
+2. Cumple: `agent` y `otra` se conservan y se suma `autoCompactWindow`; con 150000 imprime `omitido-usuario` y no cambia.
+3. Cumple: `quitado` en `b.json` deja `agent` y `otra`; con valor `1` imprime `omitido`; con `133000` en la carpeta `a` imprime `archivo-quitado`.
+4. Cumple: `campo nuevo: compactar_en` y `campo nuevo: ventanas (perfil pi-openai)`; con iguales no imprime nada.
+5. Cumple: `rapida.sh` exit 0 (13 s); `remoto.test.mjs` con `fail 0`.
 
 ## Notas
-(lo llena el constructor)
+- Punto de inserción (paso 1): tras `quitarCompactacionPi` y antes de `const [orden, ...args]`; despacho `claude` antes de la rama `pi`.
+- Huecos menores resueltos (2):
+  1. En `fijar-compactacion claude`, el umbral y el rango se evalúan antes de mirar un `autoCompactWindow` ajeno: si el perfil no tiene umbral válido, sale `omitido-umbral` aunque el usuario ya tenga su valor. La tarea no fijaba el orden; se sigue el de la rama Pi (lo que se escribiría se valida primero).
+  2. `quitar-compactacion claude` escribe con `escribirAtomico` (temporal y renombrar) en vez de `writeFileSync` como `fijar-agente`: reutiliza el helper existente y evita un archivo a medias. Sin bloqueo, como se pidió.
+- `rapida.sh` tardó 13 s con HOME real (dentro del tope de 25 s; no hace falta anotarlo como exceso).
+- Sin señal de tarea incompleta.
+
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna
