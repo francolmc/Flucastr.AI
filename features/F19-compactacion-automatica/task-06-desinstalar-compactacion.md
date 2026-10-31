@@ -1,5 +1,5 @@
 # task-06 — `desinstalar.sh`: quita solo la compactación que puso el kit
-repo: Flucastr.AI   depende_de: task-04   estado: aprobada
+repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
 ## Descripción
 Enseñar a `desinstalar.sh` a leer las líneas `compactacion` del manifiesto y deshacerlas con `quitar-compactacion` (task-02 y task-04): las de Pi se quitan siempre (se rehacen al reinstalar) y las de Claude Code, que viven en proyectos, se conservan cuando `instalar.sh` reinstala con `--conservar-ajustes`. Va antes que `instalar.sh` para que la reinstalación nunca deje restos. Solo se quita lo que sigue valiendo lo que escribió el kit.
@@ -58,7 +58,68 @@ R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -2 
 Esperado: (1) la simulación imprime cuatro líneas `quitaría la compactación…` y `settings.json` sigue en `$H/pi`; (2) con `--conservar-ajustes` imprime tres líneas `compactación de Pi (…)` (`quitado`, `quitado`, `archivo-quitado`), el `settings.local.json` conserva `autoCompactWindow: 133000` y `ls -A "$H/pi"` queda vacío; (3) la desinstalación completa suma `compactación de Claude Code (quitado)` y el proyecto queda con `{"agent":"coordinador"}` (la clave `agent` la gestiona el caso `ajuste`, que aquí no hay línea para ella); (4) con el valor de `gpt-6-luna` cambiado a 171999 esa línea imprime `compactación de Pi (omitido)` y el archivo conserva ese override con 171999 y ya sin los otros dos; `rapida` con exit 0. No ejecutado por el planificador: `desinstalar.sh` aún no tiene el caso.
 
 ## Evidencia
-(lo llena el constructor)
+Modo yolo: sin rama nueva ni `git switch`; trabajo en `feature/F19-compactacion-automatica` (`git branch --show-current` → `feature/F19-compactacion-automatica`). Sin commit, push, PR, merge ni despliegue. `definitions/STATUS.md` no se escribió (ya venía modificado en el estado inicial; no se tocó). Verificación con `HOME` falso (`$H` dentro de `mktemp -d`); no se ejecutó `desinstalar.sh` contra el HOME real ni se tocó `~/.pi` ni `~/.claude`.
+
+Sintaxis (`bash -n desinstalar.sh`): `SYNTAX_OK`.
+
+Verificación (salida real, `T=/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.aUciSqA2WC`):
+```
+== (1) simular
+  quitaría la compactación de Pi: openai/gpt-6-astra (/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.aUciSqA2WC/h/pi/settings.json)
+  quitaría la compactación de Pi: openai/gpt-6.1-sol (/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.aUciSqA2WC/h/pi/settings.json)
+  quitaría la compactación de Pi: openai/gpt-6-luna (/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.aUciSqA2WC/h/pi/settings.json)
+  quitaría la compactación de Claude Code de: /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.aUciSqA2WC/proy/.claude/settings.local.json
+settings.json
+== (2) conservar-ajustes
+  compactación de Pi (quitado): openai/gpt-6-astra
+  compactación de Pi (quitado): openai/gpt-6.1-sol
+  compactación de Pi (archivo-quitado): openai/gpt-6-luna
+{"agent":"coordinador","autoCompactWindow":133000}
+== (3) completa
+  compactación de Pi (quitado): openai/gpt-6-astra
+  compactación de Pi (quitado): openai/gpt-6.1-sol
+  compactación de Pi (archivo-quitado): openai/gpt-6-luna
+  compactación de Claude Code (quitado): /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.aUciSqA2WC/proy/.claude/settings.local.json
+{
+  "agent": "coordinador"
+}
+== (4) valor de usuario
+  compactación de Pi (quitado): openai/gpt-6-astra
+  compactación de Pi (quitado): openai/gpt-6.1-sol
+  compactación de Pi (omitido): openai/gpt-6-luna
+{
+  "compaction": {
+    "modelOverrides": {
+      "openai/gpt-6-luna": {
+        "reserveTokens": 171999
+      }
+    }
+  }
+}
+```
+
+Ls de `$H/pi` tras (2): vacío (sin salida). Tras (3): vacío. Tras (1): solo `settings.json` (intacto).
+
+rapida (HOME real, primera pasada):
+```
+rapida exit=0 segundos=12
+ℹ duration_ms 12270.440916
+rapida: 25 archivos en 12 s (tope 30 s)
+```
+Pruebas con fallas (`grep -c "not ok\|✖"`): 0.
+
+Criterios de aceptación:
+1. Cumple: (3) imprime `compactación de Pi (quitado)` dos veces y `(archivo-quitado)` una; el `settings.json` ya no existe (`ls` vacío).
+2. Cumple: (4) imprime `compactación de Pi (omitido)` para `gpt-6-luna` y el valor 171999 sigue en el archivo.
+3. Cumple: (3) quita `autoCompactWindow` del `settings.local.json` y deja `{"agent":"coordinador"}`; (2) con `--conservar-ajustes` no lo toca (`{"agent":"coordinador","autoCompactWindow":133000}`).
+4. Cumple: (1) imprime cuatro líneas `quitaría la compactación…` y `settings.json` sigue en `$H/pi`.
+5. Cumple: `rapida` exit 0.
 
 ## Notas
-(lo llena el constructor)
+- Inserción (paso 1): caso `compactacion)` en el bucle principal, antes de `ajuste)`. Único sitio con el comentario de `ajuste`; la rama `--proyecto` no se tocó.
+- Huecos menores resueltos: 0. El caso `*)` (línea desconocida), la simulación de Claude sin `rmdir` y el `rmdir` solo en la escritura real estaban especificados en la tarea.
+- Pi no hace `rmdir` de `~/.pi/agent` (la tarea no lo pide y el HOME falso queda con la carpeta).
+- `rapida.sh`: 12 s con HOME real, dentro del tope de 25 s; no hay exceso que anotar.
+- Incidente menor: al encadenar comandos, lancé `rapida.sh` una segunda vez sin registrar su salida ni su exit. No cambia el resultado registrado (es la primera pasada). No afectó al repo.
+- Sin señal de tarea incompleta.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

@@ -1,5 +1,5 @@
 # task-02 — `resolver.mjs`: `fijar-compactacion pi` y `quitar-compactacion pi`
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Añadir a `scripts/resolver.mjs` las órdenes que escriben y quitan, en el `settings.json` global de Pi, `compaction.modelOverrides["<provider>/<modelo>"].reserveTokens = ventana − compactar_en`. Fusionan sin pisar nada del usuario, toman el bloqueo `<settings.json>.lock` como Pi y escriben de forma atómica. `instalar.sh` y `desinstalar.sh` (tareas 06 y 08) solo llaman a estas órdenes. La puerta 4 de esta tarea exige revisar `git diff scripts/`.

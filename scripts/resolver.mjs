@@ -11,6 +11,8 @@
 //   node scripts/resolver.mjs comparar-modelos <personal.json> <publicado.json>  imprime las diferencias que merecen aviso (nada si no hay)
 //   node scripts/resolver.mjs fijar-compactacion pi <settings.json> [--simular]  pone compaction.modelOverrides de Pi (no pisa lo del usuario)
 //   node scripts/resolver.mjs quitar-compactacion pi <settings.json> <modelo> <reserve> [creado]  deshace lo anterior, solo si el valor es ese
+//   node scripts/resolver.mjs fijar-compactacion claude <settings.json> [--simular]  pone autoCompactWindow (Claude Code) en los ajustes del proyecto
+//   node scripts/resolver.mjs quitar-compactacion claude <settings.json> <valor>  deshace lo anterior, solo si el valor es ese
 //
 // Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
 // si no, se lee el modelos.json del repo. Lo usa instalar.sh --copiar con el modelos.json personal.
@@ -355,6 +357,67 @@ function quitarCompactacionPi(ruta, modelo, reserve, creado) {
   console.log(salida);
 }
 
+// --- Compactación automática de Claude Code (fijar-compactacion claude / quitar-compactacion claude) ---
+
+// Claude Code compacta a ventana − 33000 (informe 2026-10-31 de verificación de compactación);
+// para compactar a compactar_en se escribe compactar_en + 33000.
+const COLCHON_CLAUDE_CODE = 33000;
+// Claude Code ignora en silencio un autoCompactWindow fuera de este rango.
+const VENTANA_MINIMA_CLAUDE_CODE = 100000;
+const VENTANA_MAXIMA_CLAUDE_CODE = 1000000;
+
+// Valor de autoCompactWindow que corresponde al perfil por defecto de Claude Code, o la línea de omisión.
+function valorClaude(c) {
+  const perfil = (c.perfiles ?? {})[(c.perfil_por_defecto ?? {})["claude-code"]] ?? {};
+  const compactar = perfil.compactar_en ?? c.compactar_en;
+  if (!esEntero(compactar)) return { omision: "omitido-umbral" };
+  const valor = compactar + COLCHON_CLAUDE_CODE;
+  if (valor < VENTANA_MINIMA_CLAUDE_CODE || valor > VENTANA_MAXIMA_CLAUDE_CODE) {
+    return { omision: `omitido-rango:${valor}` };
+  }
+  return { valor };
+}
+
+function fijarCompactacionClaude(ruta, simular) {
+  const { valor, omision } = valorClaude(leerConfig());
+  const ajustes = ajustesDeObjeto(ruta);
+  let salida;
+  if (omision) {
+    salida = omision;
+  } else if (ajustes.autoCompactWindow === valor) {
+    salida = "ya-estaba";
+  } else if (tiene(ajustes, "autoCompactWindow")) {
+    salida = "omitido-usuario";
+  } else {
+    salida = `fijado:${valor}`;
+  }
+  if (salida === `fijado:${valor}` && !simular) {
+    mkdirSync(dirname(ruta), { recursive: true });
+    writeFileSync(ruta, JSON.stringify({ ...ajustes, autoCompactWindow: valor }, null, 2) + "\n");
+  }
+  console.log(salida);
+}
+
+function quitarCompactacionClaude(ruta, valor) {
+  if (!existsSync(ruta)) {
+    console.log("omitido");
+    return;
+  }
+  const ajustes = ajustesDeObjeto(ruta);
+  if (ajustes.autoCompactWindow !== Number(valor)) {
+    console.log("omitido");
+    return;
+  }
+  delete ajustes.autoCompactWindow;
+  if (Object.keys(ajustes).length === 0) {
+    rmSync(ruta);
+    console.log("archivo-quitado");
+  } else {
+    escribirAtomico(ruta, ajustes);
+    console.log("quitado");
+  }
+}
+
 const [orden, ...args] = process.argv.slice(2);
 
 if (orden === "modelo" && args.length === 2) {
@@ -424,11 +487,21 @@ if (orden === "modelo" && args.length === 2) {
   for (const perfil of Object.keys(nuevo.perfiles ?? {})) {
     if (!tiene(propio.perfiles, perfil)) lineas.push(`perfil nuevo: ${perfil}`);
   }
+  // Campos del modelos.json publicado que el personal no trae: compactar_en y ventanas (por perfil).
+  if (tiene(nuevo, "compactar_en") && !tiene(propio, "compactar_en")) lineas.push("campo nuevo: compactar_en");
+  for (const [perfil, datos] of Object.entries(nuevo.perfiles ?? {})) {
+    if (!tiene(datos, "ventanas") || !tiene(propio.perfiles, perfil)) continue;
+    if (!tiene(propio.perfiles[perfil], "ventanas")) lineas.push(`campo nuevo: ventanas (perfil ${perfil})`);
+  }
   for (const linea of lineas) console.log(linea);
+} else if (orden === "fijar-compactacion" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+  fijarCompactacionClaude(args[1], args.length === 3);
+} else if (orden === "quitar-compactacion" && args[0] === "claude" && args.length === 3 && /^\d+$/.test(args[2])) {
+  quitarCompactacionClaude(args[1], args[2]);
 } else if (orden === "fijar-compactacion" && args[0] === "pi" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
   fijarCompactacionPi(args[1], args.length === 3);
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado]");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor>");
 }

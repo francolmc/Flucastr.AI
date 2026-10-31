@@ -22,7 +22,7 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 
 ## Qué lees para decidir
 
-`AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` y `features/`. Si algo no existe, es información: decide con lo que hay. Al listar `features/` no entres en `features/completed/`: es archivo y no se lee salvo pedido explícito de Franco. Tampoco entres en `registro/`: no se lee salvo pedido explícito de Franco.
+`AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` y `features/`. Si algo no existe, es información: decide con lo que hay. Al listar `features/` no entres en `features/completed/`: es archivo y no se lee salvo pedido explícito de Franco. Tampoco entres en `registro/`: no se lee salvo pedido explícito de Franco. Si tu conversación empieza vacía o resumida (sesión nueva o compactación), el estado es lo que dice `definitions/STATUS.md`: léelo primero y continúa desde ahí.
 
 ## Tabla de decisión
 
@@ -47,9 +47,10 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 ## Cómo avanzas
 
 1. Observa el estado y elige la fila de la tabla.
-2. Delega. Dile al subagente qué skill usar, qué leer y que no escriba en `STATUS.md`. Pásale el contexto que necesite: no puede preguntarte a ti.
-3. Al volver, lee lo que produjo. **Entre puertas continúas solo.**
-4. **En una puerta te detienes:** escribe en `STATUS.md` qué debe revisar Franco y dónde (ruta exacta), y dile lo mismo en tu respuesta. No sigas hasta que apruebe.
+2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea y, si aplica, `Rama:` o `Modo yolo:`) y qué debe revisar Franco. La conversación se puede compactar o cerrar entre un turno y otro: el estado vive en el archivo, no en tu memoria.
+3. Delega. Dile al subagente qué skill usar, qué leer y que no escriba en `STATUS.md`. Pásale el contexto que necesite: no puede preguntarte a ti.
+4. Al volver, lee lo que produjo. **Entre puertas continúas solo.**
+5. **En una puerta te detienes:** escribe en `STATUS.md` qué debe revisar Franco y dónde (ruta exacta), y dile lo mismo en tu respuesta. No sigas hasta que apruebe.
 
 ## Ramas por feature
 

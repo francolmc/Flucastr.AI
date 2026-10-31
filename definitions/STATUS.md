@@ -4,13 +4,32 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). F19 task-02 `lista para revisión` (puerta 4; `fijar-compactacion` y `quitar-compactacion` de Pi en `scripts/resolver.mjs`). task-01 `hecha` (Franco, 2026-10-31).
-Rama: feature/F19-compactacion-automatica
+Modo yolo: terminado (Franco prefirió modo normal para las tareas 11 a 14, 2026-10-31)
+Rol: ninguno (esperando a Franco). F19: las 16 tareas `hecha`; falta que Franco confirme F19 como `hecha` en `BACKLOG.md`. Sin commits: los cambios quedan sin commitear en `feature/F19-compactacion-automatica`.
+task-03: hecha | features/F19-compactacion-automatica/task-03-prueba-resolver-compactacion-pi.md
+task-04: hecha | features/F19-compactacion-automatica/task-04-resolver-compactacion-claude.md
+task-05: hecha | features/F19-compactacion-automatica/task-05-prueba-resolver-compactacion-claude.md (errata del texto de la tarea: 85000 por 83000; anotada en sus Notas)
+task-06: hecha | features/F19-compactacion-automatica/task-06-desinstalar-compactacion.md
+task-07: hecha | features/F19-compactacion-automatica/task-07-desinstalar-compactacion-proyecto.md
+task-08: hecha | features/F19-compactacion-automatica/task-08-instalar-compactacion-pi.md
+task-09: hecha | features/F19-compactacion-automatica/task-09-instalar-compactacion-claude.md
+task-10: hecha (Franco, 2026-10-31; criterio «< 6 s» aceptado tal cual, `registro.e2e` intermitente no reproducido) | features/F19-compactacion-automatica/task-10-prueba-capa1-compactacion.md
 Feature en curso: F19 «Compactación automática instalada por el kit» (`→`). Tareas 01 a 14 `aprobadas` por Franco (2026-10-31), en orden de `depende_de:`; 15 a 17 en `borrador`. F01–F18 `hecha` (F17 y F18 archivadas en `features/completed/`). F11 (informe) en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
 
 ## Espera a Franco
 
-- **Puerta 4 (F19 task-02, `lista para revisión`; toca `scripts/`):** `features/F19-compactacion-automatica/task-02-resolver-compactacion-pi.md`. Revisa `git diff scripts/` (+230/−2 en `scripts/resolver.mjs`), *Evidencia* y *Notas* (4 huecos menores). Mira en especial: (1) el helper `conBloqueo` (mkdir `<ruta>.lock`, 10 intentos de 20 ms, lock huérfano >10 s se borra una vez); (2) la escritura atómica (tmp + rename); (3) el borrado del archivo de ajustes (`archivo-quitado` con `rmSync`): debe ocurrir solo si el kit lo creó (`:creado`) y quedó vacío; (4) que ninguna ruta por defecto apunte a `~/.pi/agent` (la ruta llega como argumento). `rapida.sh` con tu HOME: 13 s, exit 0. Commitea en `feature/F19-compactacion-automatica` y dime si la pasas a `hecha`; sigue task-03 (prueba del resolver).
+- Feature F19 completa en feature/F19-compactacion-automatica: cierra la rama, haz el PR y despliega. Antes de commitear revisa `git diff scripts/`, `git diff instalar.sh desinstalar.sh` y `git diff agentes/coordinador.md` (no pasaron por puerta 4 tarea a tarea en yolo). Confirma F19 como `hecha` de forma explícita para marcarla en `BACKLOG.md`.
+
+
+
+
+
+
+
+
+
+
+
 
 
 - **Puerta 3 pendiente (tareas 15, 16 y 17 de F19):** corridas con modelo que cruzan una compactación (15 Pi, 16 Claude Code) y `pruebas/README.md` (17). La 16 está estimada en US$1–3 (tope US$6) frente a ~US$0,065 de la verificación de Claude Code ya hecha: decide ese gasto, o redúcela, al llegar a ella. Las 15 y 16 exigen que corras `bash instalar.sh` después de la task-12.
@@ -28,7 +47,7 @@ Feature en curso: F19 «Compactación automática instalada por el kit» (`→`)
 
 ## Bloqueos abiertos
 
-Ninguno.
+- **F19 task-15** (constructor, modo normal): veredicto FALLA por diseño de la prueba (umbral artificial de 1500 tokens inviable para el `coordinador`). Rol requerido: `planificador` (reescribir la tarea con un umbral viable) si Franco elige repetir la corrida; si no, se acepta como hallazgo.
 
 ## Última actualización
 

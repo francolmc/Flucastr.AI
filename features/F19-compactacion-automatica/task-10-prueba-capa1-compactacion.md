@@ -1,5 +1,5 @@
 # task-10 — Prueba Capa 1: instalar y desinstalar la compactación, de punta a punta
-repo: Flucastr.AI   depende_de: task-09   estado: aprobada
+repo: Flucastr.AI   depende_de: task-09   estado: hecha
 
 ## Descripción
 Prueba determinista (sin modelo ni red) de `instalar.sh` y `desinstalar.sh` con la compactación: lo que se escribe en el `settings.json` de Pi y en el `settings.local.json` de un proyecto, el manifiesto, la simetría de instalar/desinstalar, el respeto a lo del usuario, `--simular` y la reinstalación. Todo en un HOME temporal; nunca toca `~/.claude`, `~/.pi` ni `~/.flucastr-ai` reales. Con controles negativos.
@@ -52,7 +52,59 @@ git status --short pruebas/capa1/
 Esperado: `tests` ≥ 6, `fail 0`, menos de 6 s; `home-real-intacto`; el archivo nuevo como `??`. No ejecutado por el planificador: depende de las tareas 06 a 09.
 
 ## Evidencia
-(lo llena el constructor)
+Modo yolo: sin rama nueva ni `git switch`; trabajo en la rama actual `feature/F19-compactacion-automatica`. Sin commit, push, PR, merge ni despliegue. `definitions/STATUS.md` no se tocó. Todas las instalaciones de la prueba usan `HOME` y `PI_CODING_AGENT_DIR` falsos dentro de `pruebas/.temporales/compactacion-*`; no se abrió `auth.json`, `.env` ni credenciales. `instalar.sh` y `desinstalar.sh` no se ejecutaron contra el HOME real.
+
+Sintaxis (`node --check`):
+```
+$ node --check pruebas/capa1/compactacion.test.mjs && echo CHECK_OK
+CHECK_OK
+```
+
+Verificación (bloque de la tarea tal cual, última pasada):
+```
+$ time node --test pruebas/capa1/compactacion.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
+ℹ tests 9
+ℹ pass 9
+ℹ fail 0
+node --test pruebas/capa1/compactacion.test.mjs 2>&1  3.70s user 1.50s system 81% cpu 6.416 total
+$ ls -A ~/.flucastr-ai 2>&1 | diff - "$A" && echo home-real-intacto
+home-real-intacto
+$ git status --short pruebas/capa1/
+?? pruebas/capa1/compactacion.test.mjs
+```
+
+Medidas de tiempo de `node --test pruebas/capa1/compactacion.test.mjs` sin tubería: 4,73 s; 4,85 s; 5,83 s; 4,73 s (cuatro corridas). La medida de 6,416 s es la del bloque con `grep` en tubería; supera el criterio «menos de 6 s» por poco.
+
+Casos (los 9 de la prueba, salida de la última corrida: `✔ a` a `✔ f2`): a 409 ms, b 1125 ms, c 971 ms, d 256 ms, e1 295 ms, e2 345 ms, e3 352 ms, f1 611 ms, f2 276 ms.
+
+Rápida (HOME real, `bash pruebas/rapida.sh`, una sola corrida, salida en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-task10.txt`):
+```
+$ bash pruebas/rapida.sh > …/rapida-task10.txt 2>&1; echo exit=$?
+exit=1  (13 s de pared)
+ℹ tests 263
+ℹ pass 262
+ℹ fail 1
+✖ fallo duro del escenario imprime resumen, devuelve error y detiene la serie
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal: 2 !== 1
+  at … pruebas/comprobaciones/registro.e2e.test.mjs:58:10
+```
+La rápida tardó 13 s, dentro del tope de 25 s. El fallo es de `pruebas/comprobaciones/registro.e2e.test.mjs:51`, no de este archivo (que no está en `rapida.sh` hasta la task-11).
+
+Criterios de aceptación:
+1. Cumple: `fail 0`, 9 pruebas aprobadas (al menos 6).
+2. Cumple con margen corto: 4,7 a 5,8 s sin tubería; una medida de 6,416 s con `grep` en tubería (ver arriba).
+3. Cumple: `sinCambios` rechaza la instalación real (f1 y a); `perdidas` devuelve `[]` con el resultado real y `['packages']` con `packages` borrado (f2 y b).
+4. Cumple: cada caso compara con `snapshot` dentro de su HOME falso; `ls -A ~/.flucastr-ai` igual antes y después (verificado).
+5. Cumple: `git status --short pruebas/capa1/` muestra solo `?? pruebas/capa1/compactacion.test.mjs`.
 
 ## Notas
-(lo llena el constructor)
+- Modo yolo: sin rama nueva ni `git switch`; sin commit.
+- Paso 1: lectura de `skills-proyecto.test.mjs` y de la salida de task-08/task-09. Mensajes reales que usa el archivo: `compactación fijada:`, `Pi no relee settings.json`, `OMITIDO (ya define compaction para openai/gpt-6.1-sol: se respeta)`, `AVISO: no se tocó`, `(simulación) compactación de Claude Code fijada`, `OMITIDO (el proyecto ya define autoCompactWindow: se respeta)`, `OMITIDO (modelos.json no declara la ventana de`.
+- Huecos menores resueltos (decisión conservadora):
+  1. Tope de llamadas: la tarea pide como máximo 10 llamadas a `instalar.sh`/`desinstalar.sh`, pero los casos a–f exigen 14 (a: 2, b: 4, c: 4, d: 1, e1–e3: 3). Mantuve los casos, porque quitar uno dejaría sin comprobar un criterio. Franco debe decidir si sube el tope o recorta casos.
+  2. Restauración del HOME: tras desinstalar quedan directorios vacíos que crea el kit (`.claude/agents`, `.claude/skills`, `.local/bin`, `pi/agents`, `pi/skills`). No son de la compactación y el caso I3 de `instalacion.test.mjs` ya los excluye (`persistentes` filtra `tipo: 'directorio'`). En a y c la comparación tras desinstalar usa solo archivos y enlaces (`sinDirectorios`); en d, la simulación, la comparación es estricta. El kit deja esas carpetas: fuera de alcance, no se corrigió.
+  3. `perdidas` no estaba definido en la tarea: recorre las hojas de `antes` y reporta la clave de nivel superior de cada hoja perdida o cambiada. Así `compaction.modelOverrides["openai/gpt-6.1-sol"]` del usuario cuenta como hoja, y el resultado real da `[]`.
+- Tiempo: el criterio «menos de 6 s» queda al límite (4,7 a 5,8 s sin tubería; una medida de 6,416 s con tubería). Si Franco quiere holgura, lo más directo es reducir llamadas (ver hueco 1).
+- Fallo fuera de alcance en la rápida: `pruebas/comprobaciones/registro.e2e.test.mjs:51`, «fallo duro del escenario imprime resumen, devuelve error y detiene la serie»: el marcador (`flucastr-scenario-<pid>` en `os.tmpdir()`) se añadió dos veces (2 !== 1). No lo investigué a fondo ni edité nada; solo corrí `rapida.sh` una vez, como se pidió. Está fuera de esta tarea; el coordinador o Franco deciden si requiere BLOQUEO.
+- Señal: la tarea estaba incompleta: el tope de 10 llamadas no cuadra con los casos a–f.
+- Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=3; resultado=lista; causa=ninguna

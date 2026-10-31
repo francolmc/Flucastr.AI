@@ -1,5 +1,5 @@
 # task-05 — Prueba del resolver: compactación de Claude Code y `comparar-modelos`
-repo: Flucastr.AI   depende_de: task-04   estado: aprobada
+repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
 ## Descripción
 Fijar con una prueba determinista (sin modelo ni red) la variante de Claude Code de `fijar-compactacion` / `quitar-compactacion` (valor `compactar_en + 33000`, rango 100000–1000000, no pisar al usuario, convivencia con `fijar-agente`) y los avisos nuevos de `comparar-modelos`, con controles negativos. Entra en `rapida.sh` sin tocarla.
@@ -54,7 +54,51 @@ git status --short pruebas/comprobaciones/
 Esperado: `tests` ≥ 9, `fail 0`, tiempo < 2 s; `rapida: … (tope 30 s)` con exit 0; el archivo nuevo aparece como `??`. No ejecutado por el planificador: depende de la task-04.
 
 ## Evidencia
-(lo llena el constructor)
+Modo yolo: sin rama nueva ni `git switch`; trabajo en `feature/F19-compactacion-automatica`. Sin commit, push, PR, merge ni despliegue. Todas las pruebas con `mktemp`/`tmpdir()`; no se tocó `~/.claude`, `~/.pi`, `auth.json` ni `.env`; `definitions/STATUS.md` no se escribió.
+
+Sintaxis (`node --check pruebas/comprobaciones/resolver-compactacion-claude.test.mjs`): `CHECK_OK`.
+
+Verificación (salida real, HOME=/Users/franco):
+```
+$ time node --test pruebas/comprobaciones/resolver-compactacion-claude.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+node --test pruebas/comprobaciones/resolver-compactacion-claude.test.mjs 2>&1  0.82s user 0.19s system 96% cpu 1.057 total
+
+$ R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -3 "$R"
+rapida exit=0
+ℹ todo 0
+ℹ duration_ms 12475.78375
+rapida: 25 archivos en 12 s (tope 30 s)
+
+$ git status --short pruebas/comprobaciones/
+?? pruebas/comprobaciones/resolver-compactacion-claude.test.mjs
+?? pruebas/comprobaciones/resolver-compactacion-pi.test.mjs
+```
+
+Control negativo (paso 6), sobre una copia temporal `pruebas/comprobaciones/control-tmp-rango.test.mjs` (borrada después; el archivo original no se tocó): en el caso 3 se cambió `assert.equal(r.stdout, caso.linea, …)` por `assert.notEqual(…)` y el caso 3 falló:
+```
+✖ 3. rango: fuera de 100000-1000000 se omite con aviso y no se escribe (33.017875ms)
+ℹ pass 9
+ℹ fail 1
+```
+
+Criterios de aceptación:
+1. Cumple: `tests 10`, `pass 10`, `fail 0` (≥ 9).
+2. Cumple: `time` 1.057 s total (`duration_ms` 1008 en la ejecución de comprobación); menos de 2 s.
+3. Cumple: el control 9(a) da `[]` con el resultado de los casos 4 y 5 y `["agent", "otra"]` con la copia dañada.
+4. Cumple: `rapida.sh` exit 0 en 12 s (tope 30 s).
+5. Cumple para esta tarea: el archivo nuevo es el único de esta tarea. El otro `??` (`resolver-compactacion-pi.test.mjs`) es de task-03 y sigue sin commit; esta tarea no lo tocó.
 
 ## Notas
-(lo llena el constructor)
+- Paso 1 (lectura): las órdenes `claude` están en `scripts/resolver.mjs` (constante `COLCHON_CLAUDE_CODE = 33000`, `valorClaude`, `fijarCompactacionClaude`, `quitarCompactacionClaude`, despacho por `args[0] === "claude"`). `modelos.json`: el perfil `claude-code` no trae `compactar_en`, así que el caso 2 con override de perfil funciona tal cual.
+- Huecos menores (1):
+  1. El texto de la tarea dice «compactar_en = 50000 (85000 resultante…)». La aritmética da 50000 + 33000 = 83000, y las *Decisiones* piden `omitido-rango:83000`. Se probó 83000 y se anota aquí la errata de 85000.
+- Caso 9(a): el control se armó con el resultado real de los casos 4 y 5 (se reproducen las mismas órdenes sobre archivos temporales y se pasa el «antes» y el «después» a `ajenasIntactas`), no reutilizando variables del caso anterior, porque `node:test` no comparte estado entre casos.
+- Caso 7: `--simular` se comprueba con `readdirSync` de la carpeta temporal (debe quedar vacía, sin subcarpeta `a`).
+- Caso 8: el publicado de la comparación es una copia temporal de `modelos.json` (no el real), para que la prueba no dependa de cambios futuros en el archivo del repo.
+- Tiempo: la prueba corre en ~1.0 s (`duration_ms` 1008); el tiempo total con `node` fue 1.057 s. Dentro del límite de 2 s.
+- `rapida.sh` tardó 12 s con HOME real (25 archivos); dentro del tope de 25 s, no hace falta anotarlo.
+- No hay defectos en `scripts/resolver.mjs`: ningún caso falló salvo el control negativo deliberado.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna
