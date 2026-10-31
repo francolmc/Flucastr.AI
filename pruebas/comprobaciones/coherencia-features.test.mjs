@@ -35,6 +35,20 @@ function tarea(numero, slug, { dep = '—', estado = 'aprobada', primera = numer
   };
 }
 
+// Lee las carpetas F##-… de `dirFeatures` con sus tareas task-*.md (las carpetas en completed/ no entran).
+function leerFeatures(dirFeatures) {
+  const carpetas = fs.readdirSync(dirFeatures).filter((d) => /^F\d{2}-/.test(d));
+  return carpetas.map((carpeta) => ({
+    carpeta,
+    tareas: fs
+      .readdirSync(`${dirFeatures}/${carpeta}`)
+      .filter((n) => n.startsWith('task-') && n.endsWith('.md'))
+      .map((archivo) => ({ archivo, texto: fs.readFileSync(`${dirFeatures}/${carpeta}/${archivo}`, 'utf8') })),
+  }));
+}
+
+const DIR_TEMPORALES = `${RAIZ}pruebas/.temporales`;
+
 function muestraValida() {
   return {
     backlog: BACKLOG_VALIDO,
@@ -131,16 +145,39 @@ test('una carpeta cuyo ID no está en el backlog se rechaza aunque haya filas he
   assert.ok(errores.some((e) => e.includes('no tiene fila «F03»')));
 });
 
+test('sin carpetas activas (todo en completed/) valida el backlog y pasa', () => {
+  fs.mkdirSync(DIR_TEMPORALES, { recursive: true });
+  const dir = fs.mkdtempSync(`${DIR_TEMPORALES}/coherencia-`);
+  try {
+    fs.mkdirSync(`${dir}/completed/F01-base`, { recursive: true });
+    fs.writeFileSync(`${dir}/completed/F01-base/task-01-x.md`, tarea('01', 'x').texto);
+    const features = leerFeatures(dir);
+    assert.deepEqual(features, []);
+    assert.deepEqual(validarCoherencia({ backlog: BACKLOG_VALIDO, features }), []);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('con carpetas activas valida, y rechaza una carpeta sin fila en el backlog', () => {
+  fs.mkdirSync(DIR_TEMPORALES, { recursive: true });
+  const dir = fs.mkdtempSync(`${DIR_TEMPORALES}/coherencia-`);
+  try {
+    const carpeta = `${dir}/F02-planificar-y-coordinar`;
+    fs.mkdirSync(carpeta);
+    fs.writeFileSync(`${carpeta}/task-01-mover.md`, tarea('01', 'mover', { estado: 'en curso' }).texto);
+    fs.writeFileSync(`${carpeta}/task-02-coordinador.md`, tarea('02', 'coordinador', { dep: 'task-01' }).texto);
+    const features = leerFeatures(dir);
+    assert.deepEqual(validarCoherencia({ backlog: BACKLOG_VALIDO, features }), []);
+    const errores = validarCoherencia({ backlog: BACKLOG_VALIDO.replace('| F02 |', '| F09 |'), features });
+    assert.ok(errores.some((e) => e.includes('no tiene fila «F02»')));
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('definitions/BACKLOG.md y features/F*/task-*.md reales son coherentes', () => {
-  const carpetas = fs.readdirSync(`${RAIZ}features`).filter((d) => /^F\d{2}-/.test(d));
-  assert.ok(carpetas.length >= 1, `se esperaba al menos una carpeta de feature y hay ${carpetas.length}`);
-  const features = carpetas.map((carpeta) => ({
-    carpeta,
-    tareas: fs
-      .readdirSync(`${RAIZ}features/${carpeta}`)
-      .filter((n) => n.startsWith('task-') && n.endsWith('.md'))
-      .map((archivo) => ({ archivo, texto: fs.readFileSync(`${RAIZ}features/${carpeta}/${archivo}`, 'utf8') })),
-  }));
+  const features = leerFeatures(`${RAIZ}features`);
   const backlog = fs.readFileSync(`${RAIZ}definitions/BACKLOG.md`, 'utf8');
   assert.deepEqual(validarCoherencia({ backlog, features }), []);
 });
