@@ -23,6 +23,7 @@ Entrada: la ruta del archivo de la tarea.
 2. **Ante un hueco menor** (algo no cubierto por la tarea): elige la opción más conservadora y coherente con la tarea, anótala en *Notas* y sigue. No preguntes.
 3. Corre la *Verificación* tal cual está escrita. Pega en *Evidencia* la salida **real** (comando y salida), nunca una versión resumida o inventada.
 4. Comprueba cada criterio de aceptación contra esa evidencia.
+5. **Lectura acotada:** lee archivos grandes por tramos con `offset` y `limit`, usa `grep` con patrón estrecho y `limit`, no releas lo que ya leíste y modifica archivos con `edit` en vez de reescribirlos enteros con `write`.
 
 ## Cuándo detenerte (solo estos casos)
 

@@ -34,8 +34,18 @@ function lineaTools(salida) {
   return salida.split('\n').find(l => l.startsWith('tools:'));
 }
 
+// Quita las líneas que difieren por herramienta: model: y la línea de identidad Herramienta:.
 function sinLineaModelo(salida) {
-  return salida.split('\n').filter(l => !l.startsWith('model:')).join('\n');
+  return salida.split('\n').filter(l => !l.startsWith('model:') && !l.startsWith('Herramienta:')).join('\n');
+}
+
+// Como resolver(), pero en la raíz indicada y sin FLUCASTR_MODELOS (lee el modelos.json de esa raíz).
+function resolverEn(raiz, ...args) {
+  const env = { ...process.env };
+  delete env.FLUCASTR_MODELOS;
+  const r = spawnSync('node', [join(raiz, 'scripts', 'resolver.mjs'), ...args], { encoding: 'utf8', timeout: 30000, env });
+  assert.equal(r.status, 0, r.stderr || r.stdout);
+  return r.stdout;
 }
 
 test('(1) agente-pi reduce Bash(...) a Bash y conserva el resto de tools', () => {
@@ -108,4 +118,41 @@ test('(7) instalación aislada: Claude Code conserva patrones y Pi declara Bash 
   assert.ok(tClaude.includes('Bash(node scripts/archivar.mjs --aplicar F*)'), tClaude);
   assert.ok(tPi.includes('Bash'), tPi);
   assert.ok(!tPi.includes('Bash('), tPi);
+
+  const modeloClaude = resolverEn(repo, 'modelo', 'coordinador', 'claude-code').trim();
+  const modeloPi = resolverEn(repo, 'modelo', 'coordinador', 'pi').trim();
+  assert.ok(claude.includes(`Herramienta: Claude Code | Modelo: ${modeloClaude} | Agente: coordinador`), claude);
+  assert.ok(pi.includes(`Herramienta: Pi | Modelo: ${modeloPi} | Agente: coordinador`), pi);
+});
+
+test('(8) agente-claude y agente-pi ponen la línea de identidad justo después del encabezado', () => {
+  const herramientas = [['agente-claude', 'claude-code', 'Claude Code'], ['agente-pi', 'pi', 'Pi']];
+  for (const [orden, herramienta, nombreHerramienta] of herramientas) {
+    for (const nombre of ['coordinador', 'constructor']) {
+      const ruta = join(RAIZ_REPO, 'agentes', `${nombre}.md`);
+      const modelo = resolver('modelo', nombre, herramienta).trim();
+      const linea = `Herramienta: ${nombreHerramienta} | Modelo: ${modelo} | Agente: ${nombre}`;
+      const lineas = resolver(orden, ruta).split('\n');
+      const cierre = lineas.indexOf('---', 1);
+      assert.ok(cierre > 0, `${orden} ${nombre}: no hay --- de cierre`);
+      assert.equal(lineas[cierre + 1], linea, `${orden} ${nombre}`);
+    }
+  }
+});
+
+test('(9) cuerpo empieza con la línea de identidad de Pi seguida de una línea en blanco', () => {
+  for (const nombre of ['coordinador', 'constructor']) {
+    const ruta = join(RAIZ_REPO, 'agentes', `${nombre}.md`);
+    const modelo = resolver('modelo', nombre, 'pi').trim();
+    const primeras = resolver('cuerpo', ruta).split('\n').slice(0, 2);
+    assert.deepEqual(primeras, [`Herramienta: Pi | Modelo: ${modelo} | Agente: ${nombre}`, ''], nombre);
+  }
+});
+
+test('(10) control negativo: sin filtrar Herramienta: las salidas de Pi y Claude Code difieren', () => {
+  const ruta = agenteTemporal('prueba-sin-bash', 'Read, Grep, Skill');
+  const sinModel = salida => salida.split('\n').filter(l => !l.startsWith('model:')).join('\n');
+  const pi = sinModel(resolver('agente-pi', ruta));
+  const claude = sinModel(resolver('agente-claude', ruta));
+  assert.notEqual(pi, claude);
 });
