@@ -1,5 +1,5 @@
 # task-02 — README: logo, estado y la idea del proyecto
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 La cabecera del `README.md` tiene un estado desactualizado («MVP en construcción (2026-10-29)… F01 a F03…») y no explica qué es el kit en pocas líneas. Esta tarea pone el logo, un estado vigente, una sección «La idea» que cuenta qué es y qué no es el kit, y agrega `assets/` al árbol de `## Estructura`.

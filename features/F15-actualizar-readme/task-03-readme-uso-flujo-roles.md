@@ -1,5 +1,5 @@
 # task-03 — README: uso con el flujo, los roles y su diagrama
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
 
 ## Descripción
 El README explica el flujo en un solo párrafo largo (`## Flujo`) y no muestra cómo se usa el kit. Esta tarea agrega la sección `## Cómo se usa`, con el paso a paso, una tabla de roles y un diagrama Mermaid de las cuatro puertas, y quita de `## Flujo` la frase obsoleta sobre F04. No cambia el comportamiento del kit.
@@ -75,4 +75,53 @@ Salida esperada: `Cómo se usa` entre `Documentación` y `Estructura`; `fences o
 
 ## Evidencia
 
+Rama verificada antes de editar: `git branch --show-current` → `chore/F15-actualizar-readme` (sin `switch`, según el encargo).
+
+Comando `grep -n "^## " README.md` (salida real):
+```
+9:## La idea
+15:## Para qué existe
+19:## Reglas
+28:## Documentación
+38:## Cómo se usa
+66:## Estructura
+101:## Instalación
+165:## Pruebas
+174:## Flujo
+178:## Registro de eventos
+188:## Archivo y rescate
+192:## Bitácora
+```
+
+Comando de fences y mermaid (salida real):
+```
+fences ok
+mermaid: 1
+flowchart LR ok
+```
+
+`grep -c "^| \`\(coordinador\|arquitecto\|planificador\|constructor\)\`" README.md` → `4`
+
+`grep -c "F04 dejó este README" README.md` → `0`
+
+`node --test pruebas/comprobaciones/readme-estructura.test.mjs 2>&1 | grep -E "^ℹ (pass|fail)"` (salida real):
+```
+ℹ pass 7
+ℹ fail 0
+```
+
+Criterios de aceptación:
+1. Cumple: `Cómo se usa` aparece entre `Documentación` (28) y `Estructura` (66).
+2. Cumple: `fences ok`, `mermaid: 1`, `flowchart LR ok`.
+3. Cumple: `4` filas de rol.
+4. Cumple: `0` ocurrencias de la frase de F04.
+5. Cumple: `ℹ fail 0`.
+
+No ejecutado: render del Mermaid (`which mmdc` → sin salida; no hay renderizador en el equipo). La sintaxis queda validada solo por forma; Franco la revisa en la vista de GitHub.
+
 ## Notas
+- Cambios en `README.md` solo: se insertó `## Cómo se usa` con el texto exacto de *Decisiones ya tomadas* (entre `## Documentación` y `## Estructura`, con línea en blanco antes y después) y se borró de `## Flujo` la frase de F04 con su espacio final. El resto de `## Flujo` no se tocó.
+- Sin huecos menores: la tarea trae el texto exacto y la verificación era ejecutable tal cual.
+- Los cambios sin commit previos del árbol (`definitions/STATUS.md`, `task-02`) no se tocaron.
+- Estado de la tarea: `en curso` al empezar y `lista para revisión` al terminar; no se marcó `hecha`.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

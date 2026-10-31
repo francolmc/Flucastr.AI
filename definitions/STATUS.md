@@ -6,11 +6,13 @@
 
 Rol: ninguno (esperando a Franco). F14 `hecha` (confirmada por Franco, 2026-10-30). F01–F10 y F12–F13 `hecha` y archivadas. Solo queda F11 (informe), en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
 Rama: chore/F15-actualizar-readme
-F15 en curso: task-01 `hecha` (Franco, 2026-10-30); task-02 `lista para revisión` (puerta 4); task-03 y 04 `aprobada`, en orden.
+F15 en curso: task-01 `hecha` (Franco, 2026-10-30); task-02 `hecha` (Franco, 2026-10-30); task-03 `lista para revisión` (puerta 4); task-04 `aprobada`.
 
 ## Espera a Franco
 
-- **Puerta 4 (task-02, cabecera y «La idea»):** `features/F15-actualizar-readme/task-02-readme-cabecera-idea.md`. Revisa *Evidencia* y *Notas*, y `git diff README.md`. Commitea en `chore/F15-actualizar-readme` y dime si la pasas a `hecha`; entonces sigo con task-03.
+- **Puerta 4 (task-03, uso, flujo y roles):** `features/F15-actualizar-readme/task-03-readme-uso-flujo-roles.md`. Revisa *Evidencia* y *Notas*, y `git diff README.md`. El Mermaid no se renderizó (no hay `mmdc`): míralo en la vista de GitHub o en un visor Mermaid. Commitea en `chore/F15-actualizar-readme` y dime si la pasas a `hecha`; entonces sigo con task-04.
+
+- task-01 y task-02 `hecha`; commitea cuando quieras en `chore/F15-actualizar-readme`.
 
 - task-01 sigue sin commit (`assets/logo.svg`, la tarea); commitea en `chore/F15-actualizar-readme` cuando quieras.
 
