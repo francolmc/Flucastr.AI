@@ -1,9 +1,6 @@
 # Flujo de trabajo — diseño de `coordinador`, `planificador` y `constructor`
 
-> Estado: **aprobado** (2026-10-29, incluida la sección 9 con las respuestas de Franco a §9.5 y los ajustes de §2 y §3). Puerta 1 de F08 aprobada por Franco el 2026-10-30 (§4, §5, §7 y §10). **Aprobado en la puerta 1 (Franco, 2026-10-30):** el `coordinador` puede correr `registrar.mjs` y `archivar.mjs` a pedido explícito de Franco (§3.1; ajustes en §2, §10.2, §10.5 y §10.6). En Claude Code `tools:` con patrones `Bash(...)` solo **limita** qué comandos existen; el permiso es aparte (aprobación por comando o reglas `allow` de Franco, ajuste del 2026-10-30, §3.1); **sin restricción técnica en Pi** (riesgo aceptado por Franco, §3.1). Sustituye la desviación del mismo día («el `coordinador` no tiene Bash»). **Implementado en F12 (2026-10-30):** agentes, instaladores y pruebas listos; probado con modelo en Claude Code (8/8) y Pi (8/8), mergeado y reinstalado; el `coordinador` instalado ya tiene el permiso (`pruebas/resultados/2026-10-30-coordinador-claude.md` y `2026-10-30-coordinador-pi.md`).
-> **F10 (borrador, puerta 1):** el registro de eventos del flujo se diseña en [`REGISTRO.md`](REGISTRO.md), no aquí, para no engordar este documento. Toca este flujo en tres puntos, por aprobar: el `constructor` agrega a *Notas* una línea `Registro:` por ejecución (mismo permiso de escritura que hoy; §2 y §6), `registro/` entra en «no se lee salvo pedido explícito» (§10.4) y el `coordinador` deja en «Espera a Franco» el comando `node scripts/registrar.mjs` junto al de archivar (§10.5). No es una puerta; en yolo no cambia nada salvo `modo=yolo` en la línea.
-> Complementa `PROJECT.md` («Flujo de trabajo»). Este documento define **qué** se construye y las reglas; lo construye una sesión de implementación, no el arquitecto.
-> *Confirmado* = dicho por Franco o leído en archivo. *Propuesta* = mía, por aprobar.
+> Estado: **aprobado por Franco (2026-10-30, puerta 1).** Mantenimiento que solo acorta: no cambia ninguna regla ni decisión (aprobadas por Franco; ver «Estado» al final). Resultados de pruebas pasadas: `pruebas/resultados/`. El registro de eventos está en [`REGISTRO.md`](REGISTRO.md). *Confirmado* = dicho por Franco o leído en archivo; *propuesta* = por aprobar.
 
 ## 1. Principios (confirmados por Franco)
 
@@ -20,9 +17,9 @@
 | `coordinador` | `agentes/coordinador.md` | `definitions/STATUS.md`; y el campo `estado` de `BACKLOG.md` y de las tareas, **solo** cuando Franco aprueba de forma explícita en la conversación. Además corre, solo a pedido explícito de Franco, `scripts/registrar.mjs` y `scripts/archivar.mjs` (§3.1); no escribe otros archivos por su cuenta | Definir, planificar, construir. Ningún otro comando de shell |
 | `arquitecto` (listo) | `agentes/arquitecto.md` | `definitions/{PROJECT,REPOS,ARCHITECTURE}.md`, `AGENTS.md`, `initialize.sh` | Planificar, construir |
 | `planificador` | `agentes/planificador.md` + skills `crear-backlog`, `descomponer-feature` | `definitions/BACKLOG.md`, `features/**` | Construir, aprobar |
-| `constructor` | `agentes/constructor.md` + skill `ejecutar-tarea` | Código del repo de la tarea; solo *Evidencia* y *Notas* de la tarea | Marcar `hecha`, commit, push, PR, merge, despliegue. Git de escritura permitido: crear la rama de la feature (`git switch -c`) y, solo con confirmación expresa de Franco, `git switch <rama>` a una rama existente (§9.1) |
+| `constructor` | `agentes/constructor.md` + skill `ejecutar-tarea` | Código del repo de la tarea; solo *Evidencia* y *Notas* de la tarea (en *Notas*, también la línea `Registro:` de `REGISTRO.md`) | Marcar `hecha`, commit, push, PR, merge, despliegue. Git de escritura permitido: crear la rama de la feature (`git switch -c`) y, solo con confirmación expresa de Franco, `git switch <rama>` a una rama existente (§9.1) |
 
-Ramas, refinado y modo yolo: §9. Todos: sin leer `.env`, llaves ni credenciales. Cada rol configura su nivel de modelo en `modelos.json`, a elección de Franco. **Inicialmente `planificador` en medio** (confirmado).
+Ramas, refinado y modo yolo: §9. Todos: sin leer `.env`, llaves ni credenciales. Cada rol configura su nivel de modelo en `modelos.json`, a elección de Franco (inicialmente `planificador` en medio).
 
 ## 3. `coordinador`
 
@@ -41,8 +38,8 @@ Reglas:
 - Entre puertas continúa solo (excepciones: la ronda de refinado, §9.2, y el modo yolo, §9.3). En una puerta se detiene y escribe en `STATUS.md` qué debe revisar Franco y dónde.
 - **Confirmaciones:** el `constructor` pide permiso a Franco con una primera línea `CONFIRMAR: accion=<…>; motivo=<…>` (hoy solo `git switch <rama>`, §9.1); el `coordinador` la registra en «Espera a Franco» y pregunta. No es un bloqueo.
 - **Bloqueos:** un rol que necesita a otro lo informa en su respuesta final con una primera línea `BLOQUEO: rol=<rol requerido>; motivo=<…>` y se detiene. Solo el `coordinador` escribe en `STATUS.md`, que registra el bloqueo y lo enruta.
-- Con Pi, su instrucción debe **autorizar la delegación de forma explícita** (el paquete lo exige: «la complejidad por sí sola no autoriza delegar»).
-- Si no puede delegar (herramienta sin subagentes), respaldo: carga el rol como skill en la misma sesión.
+- Con Pi, su instrucción debe **autorizar la delegación de forma explícita** (el paquete lo exige).
+- Sin subagentes, respaldo: carga el rol como skill en la misma sesión.
 
 ### 3.1 Comandos que puede correr (aprobado por Franco, 2026-10-30)
 
@@ -54,45 +51,30 @@ Reglas:
 
 **Condiciones:**
 - **Solo a pedido explícito de Franco en la conversación**, para ese comando y esa vez. Un silencio, un «ok» a otra cosa o su propia conclusión («la feature está archivable») no bastan; el aviso en «Espera a Franco» (§10.5) sigue siendo lo que hace por iniciativa propia. El pedido de un modo no autoriza otro: pedir el chequeo no autoriza `--aplicar`.
-- **`--aplicar` siempre con un `Fxx` explícito** (decidido por Franco, 2026-10-30). Sin `Fxx` el script mueve todas las candidatas, lo que excede «lo que Franco pidió». Antes de correrlo, el `coordinador` ejecuta el chequeo, muestra las candidatas y comprueba que `Fxx` lo es; si no, no lo corre.
-- **En yolo no** (§9.3, que sigue sin archivar), salvo que Franco lo pida en la conversación; el pedido vale para ese comando, no activa archivado automático.
-- **Sin efectos fuera del alcance de los scripts:** `registrar.mjs` escribe solo en `registro/`; `archivar.mjs --aplicar` solo renombra `features/Fxx-nombre/` a `features/completed/`, sin tocar `BACKLOG.md`, `STATUS.md` ni git. El `coordinador` no hace commit, push, PR, merge ni despliegue: el commit del movimiento (`chore/`) sigue siendo de Franco. Sus límites de escritura (`STATUS.md` y campo `estado`) no cambian.
-- **Después de correrlo** informa la salida tal cual y deja en «Espera a Franco» que el movimiento o el registro queda sin commit. No interpreta la salida para cambiar estados.
+- **`--aplicar` siempre con un `Fxx` explícito** (decidido por Franco). Antes de correrlo, el `coordinador` ejecuta el chequeo, muestra las candidatas y comprueba que `Fxx` lo es; si no, no lo corre.
+- **En yolo no** (§9.3, que sigue sin archivar), salvo que Franco lo pida en la conversación; el pedido vale para ese comando.
+- **Sin efectos fuera del alcance de los scripts:** `registrar.mjs` escribe solo en `registro/`; `archivar.mjs --aplicar` solo renombra `features/Fxx-nombre/` a `features/completed/`, sin tocar `BACKLOG.md`, `STATUS.md` ni git. El `coordinador` no hace commit, push, PR, merge ni despliegue: el commit del movimiento (`chore/`) es de Franco. Sus límites de escritura no cambian.
+- **Después** informa la salida tal cual y deja en «Espera a Franco» que el movimiento o el registro queda sin commit. No interpreta la salida para cambiar estados.
 
-**Cómo se hace cumplir la restricción** (la regla es de contrato; el límite técnico depende de la herramienta):
+**Cómo se hace cumplir** (la regla es de contrato; el límite técnico depende de la herramienta):
 
 | Herramienta | Mecanismo | ¿Restringible a esos comandos? |
 |---|---|---|
-| Claude Code | En `tools:` del agente, `Bash(node scripts/registrar.mjs)`, `Bash(node scripts/archivar.mjs)` y `Bash(node scripts/archivar.mjs --aplicar F*)`. **Esto limita, no concede (observado el 2026-10-30, F12 task-05):** el agente solo dispone de esos comandos, pero el permiso para ejecutarlos es aparte. | **Sí en alcance; el permiso lo da Franco (confirmado el 2026-10-30, `pruebas/resultados/2026-10-30-coordinador-claude.md`).** `tools:` acepta los patrones y deja fuera el resto de la shell (el agente no puede correr otros comandos). Pero no concede permiso: en modo no interactivo (`dontAsk`) `node scripts/archivar.mjs` se deniega. En uso interactivo cada ejecución pide aprobación a Franco, salvo que él añada reglas `permissions.allow` (ver abajo). Matiz: `F*` deja pasar un argumento extra tras `Fxx`; se acota con la validación del propio script, no con el patrón. |
-| Pi | El agente generado declara las herramientas del paquete de subagentes. | **No, no hay forma de restringir `bash` por comando (inferido: `pruebas/permisos-ejecucion.md` ya dice que en Pi no hay confinamiento y solo se detecta después).** Darle `bash` le da shell completo, incluidos `git commit`/`push`, `rm` y lectura de `.env`; solo lo frena la instrucción. |
+| Claude Code | En `tools:` del agente, `Bash(node scripts/registrar.mjs)`, `Bash(node scripts/archivar.mjs)` y `Bash(node scripts/archivar.mjs --aplicar F*)`. Esto **limita, no concede**. | **Sí en alcance; el permiso lo da Franco** (`pruebas/resultados/2026-10-30-coordinador-claude.md`): en modo no interactivo (`dontAsk`) se deniega; en interactivo pide aprobación cada vez, salvo reglas `permissions.allow` (abajo). `F*` deja pasar un argumento extra tras `Fxx`; lo acota el script. |
+| Pi | El agente generado declara las herramientas del paquete de subagentes. | **No** (`pruebas/permisos-ejecucion.md`: en Pi no hay confinamiento). Con `bash` tiene shell completo (`git commit`/`push`, `rm`, lectura de `.env`); solo lo frena la instrucción. |
 
-**Cómo concede Franco el permiso en Claude Code (opcional, ajuste del 2026-10-30).** Sin hacer nada, Claude Code le pregunta a Franco en cada ejecución (la aprobación por comando es el comportamiento por defecto y es suficiente). Para no aprobar cada vez, Franco puede añadir en su `settings.json` de usuario o del proyecto, bajo `permissions.allow`, exactamente estas tres reglas:
+**Permiso en Claude Code (opcional, decisión de Franco; no se instala).** Sin hacer nada, Claude Code pregunta en cada ejecución. Para no aprobar cada vez, Franco puede añadir en `permissions.allow` exactamente: `Bash(node scripts/registrar.mjs)`, `Bash(node scripts/archivar.mjs)` y `Bash(node scripts/archivar.mjs --aplicar F*)`. La condición de «solo a pedido explícito» sigue siendo de contrato, no de la regla `allow`.
 
-```
-Bash(node scripts/registrar.mjs)
-Bash(node scripts/archivar.mjs)
-Bash(node scripts/archivar.mjs --aplicar F*)
-```
+**Pi: opción B elegida por Franco** (descartadas: A, sin `bash` en Pi; C, herramienta propia).
 
-Es decisión de Franco y no se instala por defecto. La condición de «solo a pedido explícito» sigue siendo de contrato (instrucción del agente), no de la regla `allow`: con la regla puesta, el permiso técnico ya no frena nada, así que ahí la contención también es instruccional, pero limitada a esos tres comandos. La prueba con modelo (F12 task-05) concede estos tres patrones con `--allowedTools` en el lanzador para medir el comportamiento del modelo con el permiso dado.
+**Riesgo aceptado por Franco (opción B).** En Pi el `coordinador` tiene **shell completo**: técnicamente podría correr `git commit`/`push`, `rm`, leer `.env` o cualquier `node`; esas reglas de `AGENTS.md` **no las impide la herramienta**. La contención es solo: (1) la instrucción del agente (lista cerrada, solo a pedido explícito); (2) la puerta 4 revisa todo cambio en `scripts/`; (3) `archivar.mjs` y `registrar.mjs` rechazan argumentos desconocidos. Una violación se vería después (registro, `git status`), no se impediría. En Claude Code el riesgo no existe en esa magnitud.
 
-**Pi: opción B elegida por Franco (2026-10-30).** Se evaluaron: (A) sin `bash` en Pi y el comando queda a Franco (recomendación mía, descartada); (B) dar `bash` y confiar en la instrucción (elegida); (C) herramienta propia sin shell que ejecute solo los tres comandos (descartada: código nuevo en un paquete de terceros). Franco no eligió A ni C.
+**Controles compensatorios (F12; `pruebas/resultados/2026-10-30-coordinador-*.md`):** pruebas con modelo en ambas herramientas de que sin pedido explícito no ejecuta nada, no hace commit/push ni lee `.env`, y no corre `--aplicar` sin `Fxx` o con una no candidata; pruebas sin modelo de rechazo de argumentos; `pruebas/permisos-ejecucion.md` documenta que en Pi la contención es solo instruccional.
 
-**Riesgo aceptado por Franco (opción B).** En Pi el `coordinador` tendrá **shell completo**: técnicamente podría correr `git commit`/`push`, `rm`, leer `.env` o ejecutar cualquier `node`. Contradice «permiso mínimo» y la regla de `AGENTS.md` de no commit/push ni leer `.env`; esas reglas **no las impide la herramienta en Pi**. La contención es solo: (1) la instrucción de límites del propio agente (lista cerrada de §3.1, solo a pedido explícito); (2) la regla de que la puerta 4 revise cualquier cambio en `scripts/`; (3) que `archivar.mjs` rechace argumentos desconocidos (y lo mismo `registrar.mjs`). Una violación se vería después (registro, `git status`), no se impediría. En Claude Code el riesgo no existe en esa magnitud: `tools:` con patrones `Bash(...)` limita el agente a esos tres comandos (confirmado el 2026-10-30) y el permiso lo da Franco por aprobación o regla `allow`. En Pi no cambia nada: sigue `bash` completo y el riesgo ya aceptado.
-
-**Controles compensatorios: hechos en F12 (2026-10-30; informes `pruebas/resultados/2026-10-30-coordinador-claude.md` y `2026-10-30-coordinador-pi.md`).**
-- Prueba con modelo, en Pi y en Claude Code, de que **sin pedido explícito no ejecuta ningún comando** (ni los tres autorizados), con controles negativos: «ok» a otra cosa, «la feature está archivable», pedir el chequeo y verificar que no corre `--aplicar`.
-- Prueba con modelo de que, ante un pedido de archivar, **no hace commit/push ni lee `.env`** (archivo canario con contenido reconocible; verificar que no aparece en la salida) y no corre `--aplicar` sin `Fxx` o con `Fxx` no candidata.
-- Pruebas sin modelo de `archivar.mjs` y `registrar.mjs`: rechazo de argumentos desconocidos, `--aplicar` sin `Fxx` y varios `Fxx`.
-- Regla de la puerta 4 (revisión de la tarea) escrita en la skill/agente que revisa: todo cambio en `scripts/` se mira de forma explícita (`git diff scripts/`; regla 15 de `contrato-roles`).
-- La instrucción del agente repite la lista cerrada y la prohibición de commit/push/`.env`, y se documenta en `pruebas/permisos-ejecucion.md` que en Pi la contención del `coordinador` es solo instruccional. `archivar.mjs` rechaza argumentos desconocidos y exige `Fxx`.
-
-*Riesgo común a ambas herramientas:* el `coordinador` ejecuta código del repo (`scripts/*.mjs`) que el `constructor` puede modificar; la revisión de la puerta 4 debe mirar cualquier cambio en `scripts/`.
+*Riesgo común:* el `constructor` puede modificar `scripts/*.mjs`, que el `coordinador` ejecuta; la puerta 4 mira todo cambio ahí (`git diff scripts/`, regla 15 de `contrato-roles`).
 
 #### 3.1.1 Decisiones de Franco (2026-10-30, cerradas)
-1. **Aprobada** la lista cerrada de tres comandos y sus condiciones de §3.1.
-2. **`--aplicar` exige siempre un `Fxx` explícito.**
-3. **Pi: opción B.** El `coordinador` tendrá `bash` con shell completo, confiando en su instrucción y no en una restricción técnica; Franco acepta el riesgo descrito arriba. En Claude Code `tools:` con patrones limita el agente a esos comandos; el permiso para ejecutarlos es aparte (aprobación por comando o reglas `allow` de Franco, ajuste del 2026-10-30; se mantiene aprobado todo lo demás).
+Aprobada la lista cerrada y sus condiciones; `--aplicar` siempre con `Fxx` explícito; Pi: opción B con riesgo aceptado; en Claude Code `tools:` limita y el permiso es aparte.
 
 ### `STATUS.md` (propuesta)
 
@@ -108,7 +90,7 @@ Es decisión de Franco y no se instala por defecto. La condición de «solo a pe
 ## 4. `BACKLOG.md` (propuesta)
 
 Tabla: `ID | Feature | Tipo (habilitante / producto) | Valor | Esfuerzo | Por qué en esta posición | Estado | Siguiente`.
-Estados: `pendiente`, `en curso`, `hecha`. Lista ordenada; la primera pendiente va marcada. Corta y general: nada de detalle de tareas aquí. **El tope de 6 features cuenta solo las pendientes** (estado distinto de `hecha`); las filas `hecha` no cuentan, pero se mantienen cortas (§10.3). Antes de ordenar, el `planificador` revisa qué falta para construir y verificar, y lo pone primero como habilitante.
+Estados: `pendiente`, `en curso`, `hecha`. Lista ordenada; la primera pendiente va marcada. Corta y general: nada de detalle de tareas aquí. **El tope de 6 features cuenta solo las pendientes** (estado distinto de `hecha`); las filas `hecha` no cuentan, pero se mantienen cortas (§10.3). Antes de ordenar, el `planificador` pone primero como habilitante lo que falte para construir y verificar.
 
 ## 5. Estructura de `features/` (decidido: junto a `definitions/`)
 
@@ -123,7 +105,7 @@ Estados: `pendiente`, `en curso`, `hecha`. Lista ordenada; la primera pendiente 
         └── F00-nombre/…
 ```
 
-Con varios repos, el campo `repo:` de cada tarea indica dónde se ejecuta, y `depende_de:` fija el orden (la API antes que el front). Una feature pasa a `completed/` solo cuando Franco la dio por hecha (la fila de `BACKLOG.md` en `hecha`) **y** confirma el archivado: lo hace `scripts/archivar.mjs --aplicar` (§10), nunca un agente por su cuenta. `completed/` es solo archivo: el estado sigue viviendo en `BACKLOG.md`, que sigue siendo la única fuente de verdad del estado (el script lo lee, nunca lo escribe).
+Con varios repos, el campo `repo:` de cada tarea indica dónde se ejecuta, y `depende_de:` fija el orden (la API antes que el front). Una feature pasa a `completed/` solo cuando Franco la dio por hecha (la fila de `BACKLOG.md` en `hecha`) **y** confirma el archivado: lo hace `scripts/archivar.mjs --aplicar` (§10), nunca un agente por su cuenta. `completed/` es solo archivo: el estado sigue viviendo en `BACKLOG.md`, única fuente de verdad del estado (el script lo lee, nunca lo escribe).
 
 ## 6. La tarea: completa y acotada
 
@@ -152,7 +134,7 @@ repo: …   depende_de: …   estado: borrador | aprobada | en curso | lista par
 - Cada paso termina en algo que se puede ver o ejecutar.
 - La verificación se puede correr tal cual está escrita.
 
-### Qué las hace «acotadas» (propuesta; **cifras a calibrar** con la primera feature real)
+### Qué las hace «acotadas» (cifras a calibrar; aceptadas como punto de partida)
 
 - Un solo repo y un solo objetivo verificable.
 - Hasta ~8 pasos y ~5 archivos tocados, hasta 5 criterios.
@@ -167,120 +149,58 @@ repo: …   depende_de: …   estado: borrador | aprobada | en curso | lista par
 4. Ejecuta toda la lista de pasos y la verificación, pega la salida en *Evidencia* y deja `lista para revisión`. Nunca `hecha`.
 5. Si hay muchos huecos menores en una tarea, es señal de que el planificador la redactó incompleta: se anota para mejorar la plantilla.
 
-## 7. Encargo de implementación (para la sesión que construye)
+## 7. Encargo de implementación y pruebas
 
-Alcance de escritura: `agentes/`, `skills/`, `modelos.json` y `pruebas/`. Nada más sin aprobación. Sin commit, push, PR, merge ni despliegue. Sin tocar `~/.claude`, `~/.pi` ni `~/.flucastr-ai` en las pruebas (carpetas temporales).
+Escritura de la sesión que construye: `agentes/`, `skills/`, `modelos.json` y `pruebas/`; nada más sin aprobación. Las pruebas no tocan `~/.claude`, `~/.pi` ni `~/.flucastr-ai` (carpetas temporales).
 
-**Orden, con alto para revisión tras cada paso:**
+**Orden seguido (hecho):** subagentes en ambas herramientas, `planificador`, `coordinador`, `constructor` y prueba de punta a punta; corridas en `pruebas/resultados/`.
 
-1. **Prueba de subagentes en Pi** (desechable): un agente mínimo que, autorizado, invoque al `arquitecto` por nombre y devuelva su respuesta. Mismo ejercicio en Claude Code. Documentado en `pi-subagents` (leído): herramienta `subagent`, agentes por nombre, delegación solo si el prompt la autoriza; **no ejecutado todavía**. Si falla en Pi, se avisa y se usa el respaldo (skill en la misma sesión).
-2. **`planificador`** con sus dos skills y la plantilla de tarea (secciones 4–6).
-3. **`coordinador`** (sección 3) y `STATUS.md`.
-4. **`constructor`** y `ejecutar-tarea` (sección 6). Va aquí y no más tarde porque sin él no se puede cerrar una feature, que es el criterio de éxito del MVP.
-5. **Prueba de punta a punta** con una feature real de un producto de Franco. Es la única prueba grande.
+**Consecuencias de diseño vigentes:**
+- En Claude Code los subagentes no lanzan otros subagentes: el `coordinador` se abre siempre como agente principal (`claude --agent coordinador` / `pi-coordinador`); su `tools:` restringe a quién delega: `Agent(arquitecto, planificador, constructor)`. En Pi, su instrucción debe autorizar la delegación (§3); los lanzadores de Pi llevan tope de 300 s.
+- **Modelo por agente (F07):** comprobado en ambas herramientas: un agente instalado corre con el modelo de `modelos.json` sin pasarlo a mano (`pruebas/lanzar-modelos-claude.sh` lee las transcripciones de `~/.claude/projects/`, por eso no usa `--no-session-persistence`; `pruebas/lanzar-modelos-pi.sh` lee `result.details.results[].model`). Vale para los modelos de ese momento; si cambian, se repite (`PROJECT.md`, «Cómo se prueba»).
+- `crear-backlog` fija hasta 6 features pendientes (§4) y exige que ninguna sea «probar el flujo».
+- **Pruebas rápidas y acotadas** (decidido por Franco): solo comprobaciones deterministas, **sin modelo y sin red**, en segundos (toda la suite nueva en menos de ~30 s): `instalar.sh` instala agentes y skills, y los formatos de `BACKLOG.md`, `STATUS.md` y la plantilla de tarea. **Con modelo, una sola corrida por hito**, nunca 3 × 2 herramientas; un fallo se corrige en el rol o la skill y se repite solo eso. No se agregan escenarios, fixtures ni controles negativos salvo que un fallo real los justifique (regla 5 de `pruebas/README.md`).
 
-**Resultado del paso 1** (informado por la sesión de implementación, 2026-10-29; no lo reproduje yo):
-- Claude Code: OK. Un agente principal con `tools: Agent(arquitecto)` delegó en el arquitecto (1 subagente, 0 fallidos).
-- Pi: OK. La herramienta `subagent` delegó en el arquitecto.
-- **Consecuencias para el diseño:**
-  1. En Claude Code los subagentes no lanzan otros subagentes: el `coordinador` se abre siempre como agente principal (`claude --agent coordinador` / `pi-coordinador`). Coincide con el principio 1. Su lista de herramientas restringe a quién puede delegar: `Agent(arquitecto, planificador, constructor)`.
-  2. En Pi, la instrucción del `coordinador` debe autorizar la delegación (ya previsto en §3).
-  3. Pi falló con su modelo por defecto (`model_not_found`) y la prueba usó `openai/gpt-6-sol`. **Hipótesis mía, sin verificar:** la prueba copió `agentes/arquitecto.md` (fuente, sin `model`) y no el agente instalado, que sí trae `model` (leído en `~/.pi/agent/agents/arquitecto.md`: `openai/gpt-6.1-sol`). Verificar en el paso 3 que un subagente instalado usa su `model` sin pasarlo a mano.
-  4. Una corrida de Pi se colgó sin causa conocida. El lanzador lleva un **tope de tiempo** (*propuesta:* 300 s) para que una corrida colgada no consuma la jornada.
-- `pruebas/subagentes/` era desechable: se borra una vez recogido este resultado (decisión de Franco).
-
-**Resultado de los pasos 2 y 3** (informado por la sesión de implementación, 2026-10-29; revisé `agentes/coordinador.md`, `agentes/planificador.md`, las skills y las salidas de la prueba; no ejecuté nada):
-- `planificador`, `crear-backlog`, `descomponer-feature` y `coordinador` creados; ambos en nivel medio en `modelos.json`. Capa 1 12/12 y lanzadores 5/5.
-- Un subagente instalado de Pi usó el `model` de su archivo generado sin pasarlo a mano (resuelve la hipótesis del paso 1). Tope de 300 s en `pruebas/lanzar-pi.sh`; `pi-coordinador` interactivo no lo tiene.
-- Una corrida por herramienta: el `coordinador` delegó en el `planificador`, que creó `BACKLOG.md` en borrador, y se detuvo en la puerta 2 escribiendo `STATUS.md`, sin cambiar estados.
-- **No ejercitado:** ruta de `BLOQUEO:`, respaldo sin subagentes, puertas 3 y 4, delegación al `constructor`. Se ejercitan en el paso 5.
-- **Observado:** el backlog varía entre corridas (7 features en Claude, 4 en Pi). Es esperable y para eso existe la puerta 2, pero `crear-backlog` no fija un máximo: se añade uno (*propuesta:* hasta 6 features pendientes; las `hecha` no cuentan, §4) y se exige que ninguna sea «probar el flujo».
-- Los `BACKLOG.md` y `STATUS.md` de esas corridas son de prueba; se borran antes de la corrida real.
-
-**Resultado del paso 4** (informado por la sesión de implementación, 2026-10-29; revisé `agentes/constructor.md`, `skills/ejecutar-tarea/SKILL.md` y el máximo de 6 features pendientes en `crear-backlog`; no ejecuté nada):
-- `constructor` y `ejecutar-tarea` creados; nivel medio. Capa 1 y lanzadores 17/17.
-- Pi: una tarea mínima completa; evidencia real, estado «lista para revisión», sin «hecha» ni commit.
-- Claude Code: **no concluyente** por un error de permisos de la propia prueba (comando Bash compuesto denegado). El agente actuó según la skill (no inventó evidencia, informó `BLOQUEO:`). Se cubre en el paso 5, con permisos normales.
-- **No ejercitado:** escalación por alcance, `bloqueada` tras dos fallos, rechazo de una tarea no aprobada, varios huecos menores, `repo:` con varios repos.
-- **Pendiente para multi-repo:** el constructor no resuelve de dónde sale la ruta de cada `repo:` (`REPOS.md`). No afecta a este repo; se resuelve antes de la prueba del proyecto de dos repos.
-
-**Resultado de F07, modelo por agente** (confirmado por Franco como `hecha`, 2026-10-30; sustituye a la hipótesis 3 del paso 1 y a lo que quedó «no verificado» del subagente en Claude Code; revisé los lanzadores `pruebas/lanzar-modelos-claude.sh` y `pruebas/lanzar-modelos-pi.sh`, no los ejecuté):
-- **El modelo de cada agente y subagente está comprobado, no supuesto, en ambas herramientas.** Un agente instalado corre con el modelo de `modelos.json` sin pasarlo a mano.
-- **Claude Code:** el `coordinador` (agente principal) delega en `planificador` y `constructor` con la herramienta `Agent`, sin parámetro `model`. El modelo de cada subagente se lee de las **transcripciones de `~/.claude/projects/`**, por lo que el lanzador no usa `--no-session-persistence` (se puede activar con `FLUCASTR_PERSISTIR_SESION`, y entonces la comprobación no puede concluir).
-- **Pi:** el lanzador corre `pi-coordinador --mode json --no-session`; el modelo de cada subagente sale del registro, en `result.details.results[].model`. Tope de 300 s.
-- **Lanzadores:** `pruebas/lanzar-modelos-claude.sh` y `pruebas/lanzar-modelos-pi.sh` (una corrida por herramienta, fuera de la suite determinista). Un resultado vale para los modelos de `modelos.json` en ese momento; si cambian, se repite la corrida (regla de `PROJECT.md`, «Cómo se prueba»).
-
-**Pruebas: rápidas y acotadas** (decidido por Franco: hoy se pierde mucho tiempo en pruebas):
-- Solo comprobaciones deterministas, **sin modelo y sin red**, que corren en segundos. *Propuesta:* toda la suite nueva en menos de ~30 s.
-- Qué se comprueba: `instalar.sh` instala los agentes y skills nuevos (la Capa 1 sigue pasando); formato de `BACKLOG.md`, `STATUS.md` y la plantilla de tarea (campos obligatorios, sin «TBD», límites de tamaño de la tarea).
-- **Con modelo, una sola corrida por hito**, nunca 3 × 2 herramientas: la prueba de subagentes (paso 1) y la de punta a punta (paso 5). Un fallo se corrige en el rol o la skill, y se repite solo eso.
-- No se agregan escenarios, fixtures ni controles negativos nuevos salvo que un fallo real los justifique (regla 5 del `README.md`).
-
-**Dónde se prueba:** primero **en este mismo repo** (`Flucastr.AI`, que ya tiene `definitions/`, así que el flujo parte en «planificar»). Después, el proyecto nuevo de dos repos; después, uno existente.
+**Dónde se prueba:** primero en este repo; después, el proyecto nuevo de dos repos; después, uno existente.
 
 **Definición de terminado:** una feature real, de un producto de Franco, llega a `lista para revisión` con evidencia y Franco la cierra, habiéndole hablado solo en las cuatro puertas.
 
 ## 8. Decisiones de Franco y preguntas abiertas
 
-**Decididas (2026-10-29):**
-- Se aprueba este documento.
-- `features/` va a la misma altura que `definitions/`, en el espacio de trabajo.
-- Cada rol configura su modelo en `modelos.json`; el `planificador` empieza en medio.
-- Las cifras de «acotada» (~8 pasos, ~5 archivos, 5 criterios) se aceptan como punto de partida.
-- El `constructor` se construye en este mismo bloque, para probar la cadena completa.
-- Orden de pruebas reales: (1) este repo, (2) proyecto **nuevo** con dos repos (lo crea Franco; avisará), (3) proyecto **existente**.
-- Pruebas rápidas y acotadas (sección 7).
-- **Para las pruebas, el `constructor` va en nivel bajo** en `modelos.json` (el `planificador` y el `coordinador`, en medio). Los resultados del paso 5 valen para esa combinación de modelos; si el constructor falla por falta de capacidad y no por una tarea incompleta, se sube de nivel antes de culpar a la tarea.
+**Decididas (2026-10-29):** se aprueba este documento; `features/` va junto a `definitions/`; cada rol configura su modelo (el `planificador` empieza en medio); las cifras de «acotada» son punto de partida; el `constructor` se construye en el mismo bloque; orden de pruebas reales: este repo, proyecto **nuevo** de dos repos (lo crea Franco; avisará), proyecto **existente**; pruebas rápidas y acotadas (§7). **Para las pruebas el `constructor` va en nivel bajo** (`planificador` y `coordinador`, en medio): los resultados valen para esa combinación; si falla por falta de capacidad y no por una tarea incompleta, se sube de nivel antes de culpar a la tarea.
 
-**Abiertas:**
-1. Nombre del proyecto de dos repos, cuando exista.
-2. Ese proyecto es nuevo: ejercitará el modo «nuevo» del arquitecto, cuyo escenario formal se retiró de las pruebas (no hay prueba previa de ese camino). Conviene que Franco observe esa corrida con atención.
+**Abiertas:** 1. Nombre del proyecto de dos repos, cuando exista. 2. Ese proyecto ejercitará el modo «nuevo» del arquitecto, sin prueba previa; conviene observarla. 3. Multi-repo: el constructor no resuelve de dónde sale la ruta de cada `repo:` (`REPOS.md`).
 
-## 9. Ramas por feature, refinado y modo «yolo» (borrador, F05 y F06)
+## 9. Ramas por feature, refinado y modo «yolo»
 
-> *Confirmado* = dicho por Franco (BACKLOG, 2026-10-29). *Propuesta* = redacción mía, por aprobar. Lo marcado **Decisión de Franco** no se puede inferir.
+> *Confirmado* = dicho por Franco (2026-10-29). Lo marcado **Decisión de Franco** no se puede inferir.
 
 ### 9.1 Ramas por feature (F05)
 
-*Confirmado por Franco:* al empezar una feature se crea una rama desde la rama actual; las tareas son commits dentro de ella; al quedar `hecha` la última tarea se avisa por `STATUS.md` para que él cierre la rama, haga el PR y despliegue; los agentes no hacen el PR ni el despliegue salvo que él cambie esa regla.
+*Confirmado:* al empezar una feature se crea una rama desde la rama actual; las tareas son commits dentro de ella; al quedar `hecha` la última tarea se avisa por `STATUS.md` para que Franco cierre la rama, haga el PR y despliegue; los agentes no hacen el PR ni el despliegue. *Decisión de Franco:* el `constructor` crea la rama; Franco hace los commits y el PR.
 
-*Decisión de Franco (2026-10-29):* el `constructor` crea la rama de la feature; Franco hace los commits y el PR.
+**Quién y cuándo:** el `coordinador` nombra la rama `<prefijo>/Fxx-nombre` (`Fxx-nombre` = carpeta en `features/`) en `STATUS.md` («Paso actual», línea `Rama: …`) al pasar la feature a `en curso`; el `constructor` la crea al empezar la **primera** tarea, antes de tocar nada, y en las siguientes no hace nada si `git branch --show-current` ya la muestra; **Franco** hace un commit por tarea en la puerta 4 y cierra la rama, el PR y el despliegue tras el aviso de última tarea `hecha`.
 
-| Acción | Quién | Cuándo |
-|---|---|---|
-| Nombrar la rama: `<prefijo>/Fxx-nombre` (`Fxx-nombre` = carpeta en `features/`; prefijo según tipo, ver abajo) | `coordinador`, la escribe en `STATUS.md` («Paso actual», línea `Rama: …`) | Al pasar la feature a `en curso` (con la aprobación de Franco) |
-| Crear la rama desde la rama actual | `constructor` | Al empezar la **primera** tarea de la feature, antes de tocar nada |
-| Si ya está en esa rama (`git branch --show-current`), no hace nada | `constructor` | Cada tarea siguiente |
-| Un commit por tarea, en la rama | **Franco** | En la puerta 4, al pasar la tarea a `hecha` |
-| Cerrar la rama, PR, despliegue | **Franco** | Tras el aviso de última tarea `hecha` |
-
-- **Crear la rama:** el `constructor` ejecuta `git switch -c <rama>` desde la rama actual. Es el **único comando git de escritura** que se le permite; no hace commit, push, merge ni `checkout` a otras ramas. `git switch -c` lleva consigo el árbol de trabajo tal cual, así que no pisa cambios. Si el comando falla, `BLOQUEO:` y se detiene. Si la rama ya existe pero no es la actual, ver «Rama ya existente» abajo (`CONFIRMAR:`, no `BLOQUEO:`).
-- **Estado de las tareas:** no cambia. Al terminar, la tarea queda `lista para revisión` (cambios sin commit en la rama de la feature); Franco commitea en la puerta 4 y la pasa a `hecha`. Las tareas siguientes arrancan con el árbol que haya dejado Franco.
-- **Permisos (para la sesión de implementación; no están en la definición hoy):** la lista de permitidos del `constructor` debe admitir solo `git switch -c *`, `git switch *` y `git branch --show-current`, y seguir denegando `commit`, `push`, `merge`, `checkout`, `reset` y `rebase`. `git switch <rama>` (sin `-c`) se permite en la lista, pero el rol solo lo usa con la confirmación de Franco descrita abajo; sin ella, `agentes/constructor.md` y `ejecutar-tarea` se lo prohíben. `agentes/constructor.md` y `ejecutar-tarea` deben decir lo mismo.
-- **Nombre y prefijo (decisión de Franco: prefijo según el tipo de trabajo).** `feature/` (por defecto: capacidad nueva o cambio de comportamiento), `fix/` (corrige un defecto de algo existente), `chore/` (mantenimiento sin cambio de comportamiento: documentación, dependencias, limpieza, pruebas). Lo decide el `coordinador` leyendo la fila de la feature en `BACKLOG.md` y lo deja en `STATUS.md`; ante duda, `feature/`; Franco lo corrige al aprobar. **Opción mínima:** se infiere del texto de la feature, sin columna nueva, para no tocar el formato del backlog que validan las pruebas (la columna «Tipo» existente significa habilitante/producto y no se reutiliza). Resuelto por Franco (2026-10-29): se infiere, sin columna nueva (§9.5).
-- **Rama ya existente (decisión de Franco, 2026-10-29).** Si la rama de la feature ya existe y no es la actual, el `constructor` **no** emite `BLOQUEO:` ni hace nada por su cuenta: pide confirmación a Franco para hacer él el `git switch`. Como un subagente no puede preguntar:
-  1. El `constructor` se detiene **sin tocar nada** (ni código, ni la tarea, ni la rama; la tarea sigue `aprobada`) y su respuesta empieza con la línea exacta `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>` (por ejemplo `CONFIRMAR: accion=git switch feature/F05-ramas; motivo=la rama ya existe y la actual es main`).
-  2. El `coordinador` registra la línea en «Espera a Franco» de `STATUS.md` y **él** se la pregunta a Franco en la conversación. No es puerta de aprobación ni escalación: es una pausa de pregunta, como el refinado (§9.2).
-  3. Si Franco responde que sí de forma explícita, el `coordinador` vuelve a delegar la misma tarea al `constructor` indicando en el encargo «Franco confirmó `git switch <rama>`». Solo entonces el `constructor` ejecuta `git switch <rama>` (sin `-c`; solo esa rama), verifica con `git branch --show-current` y sigue la tarea. Sin esa indicación expresa en el encargo, no lo ejecuta. La confirmación vale para esa rama y esa tarea; no se reutiliza. Si el `switch` falla (p. ej. cambios sin commit que chocan), `BLOQUEO:` normal.
-  4. Si Franco dice que no (o no responde), el `coordinador` no hace el switch ni reintenta: deja la línea en «Espera a Franco» con «Franco rechazó» o «sin respuesta» y la tarea sigue `aprobada` hasta que Franco decida (cambiar de rama él, renombrar la rama de la feature o dar otra instrucción).
-  5. En yolo no aplica: no hay ramas por feature (§9.3).
-- El aviso es una línea en «Espera a Franco» de `STATUS.md` («Feature Fxx completa en `feature/Fxx-nombre`: cierra la rama, haz el PR y despliega»). No es escalación.
-- Ningún agente hace `commit`, `push`, PR, merge ni despliegue; la regla «sin commit por agentes» se mantiene y solo se añaden las excepciones de crear la rama y, con confirmación de Franco, cambiarse a una rama existente.
-- En un proyecto de varios repos, el `constructor` crea la rama con el mismo nombre en el repo de cada tarea, al empezar la primera tarea que lo toque (*propuesta*, sin ejercitar).
+- **Crear la rama:** `git switch -c <rama>` desde la rama actual. Es el **único comando git de escritura** del `constructor` (más `git switch <rama>` con confirmación, abajo); no hace commit, push, merge ni `checkout`. `git switch -c` lleva consigo el árbol tal cual, así que no pisa cambios. Si falla, `BLOQUEO:` y se detiene.
+- **Estado de las tareas:** no cambia. Al terminar, la tarea queda `lista para revisión` (cambios sin commit en la rama); Franco commitea en la puerta 4 y la pasa a `hecha`.
+- **Permisos:** la lista de permitidos del `constructor` admite solo `git switch -c *`, `git switch *` y `git branch --show-current`, y deniega `commit`, `push`, `merge`, `checkout`, `reset` y `rebase`; `git switch <rama>` solo se usa con la confirmación de Franco (`agentes/constructor.md` y `ejecutar-tarea` lo dicen igual).
+- **Nombre y prefijo (decisión de Franco: según el tipo de trabajo).** `feature/` (por defecto: capacidad nueva o cambio de comportamiento), `fix/` (corrige un defecto), `chore/` (mantenimiento sin cambio de comportamiento: documentación, dependencias, limpieza, pruebas). Lo infiere el `coordinador` del texto de la fila en `BACKLOG.md`, sin columna nueva (la columna «Tipo» significa habilitante/producto y no se reutiliza); lo deja en `STATUS.md`; ante duda, `feature/`; Franco lo corrige al aprobar.
+- **Rama ya existente (decisión de Franco).** Si la rama de la feature ya existe y no es la actual, el `constructor` **no** emite `BLOQUEO:`: pide confirmación a Franco. Como un subagente no puede preguntar:
+  1. Se detiene **sin tocar nada** (ni código, ni la tarea, ni la rama; la tarea sigue `aprobada`) y su respuesta empieza con `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`.
+  2. El `coordinador` registra la línea en «Espera a Franco» y **él** se la pregunta a Franco. No es puerta ni escalación: es una pausa de pregunta.
+  3. Si Franco responde que sí de forma explícita, el `coordinador` re-delega la misma tarea indicando en el encargo «Franco confirmó `git switch <rama>`». Solo entonces el `constructor` ejecuta `git switch <rama>` (sin `-c`; solo esa rama), verifica con `git branch --show-current` y sigue. Sin esa indicación, no lo ejecuta. La confirmación vale para esa rama y esa tarea. Si el `switch` falla (p. ej. cambios sin commit que chocan), `BLOQUEO:` normal; el `constructor` no evita el intento con el árbol sucio.
+  4. Si Franco dice que no (o no responde), no se hace el switch ni se reintenta: la línea queda con «Franco rechazó» o «sin respuesta» y la tarea sigue `aprobada`.
+  5. En yolo no aplica (§9.3).
+- El aviso de feature completa es una línea en «Espera a Franco» («Feature Fxx completa en `feature/Fxx-nombre`: cierra la rama, haz el PR y despliega»). No es escalación.
+- Varios repos (*propuesta*, sin ejercitar): el `constructor` crea la rama con el mismo nombre en el repo de cada tarea, al empezar la primera que lo toque.
 
 ### 9.2 Refinado previo (F05)
 
-*Confirmado por Franco:* antes de descomponer una feature ambigua, el `planificador` abre una ventana de refinado con Franco; es un paso previo a la puerta 3 e independiente de las ramas.
+*Decisión de Franco:* antes de descomponer una feature ambigua, el `planificador` abre una ronda de refinado (máximo 5 preguntas con recomendación, `features/Fxx/refinado.md`), pero **solo cuando se requiera**.
 
-*Decisión de Franco (2026-10-29):* aceptado (máximo 5 preguntas con recomendación, `features/Fxx/refinado.md`), pero **solo cuando se requiera**; si no, se omite.
+**Criterio de «requiere» (verificable):** se requiere si el `planificador` puede formular al menos una pregunta de alcance con dos o más respuestas razonables que producirían listas de tareas distintas y esa pregunta no está resuelta en `BACKLOG.md`, `PROJECT.md` ni en un `refinado.md` existente; si no, se omite y descompone directamente.
 
-**Criterio de «requiere» (verificable):** el refinado se requiere si el `planificador` puede formular al menos una pregunta de alcance con dos o más respuestas razonables que producirían listas de tareas distintas y esa pregunta no está resuelta en `BACKLOG.md`, `PROJECT.md` ni en un `refinado.md` existente; si no puede formularla, se omite y descompone directamente.
-
-*Mecánica:* un subagente no conversa con Franco, así que:
-1. El `planificador` aplica el criterio anterior. Si no se requiere, descompone directamente.
-2. Si lo es, no crea tareas. Su respuesta final empieza con `REFINAR: feature=Fxx; preguntas=<n>` y lista hasta 5 preguntas numeradas, de más a menos importante, cada una con su opción recomendada.
-3. El `coordinador` las traslada a Franco en la conversación y las deja en «Espera a Franco». No es una puerta de aprobación: es una pausa de preguntas.
-4. Con las respuestas, el `coordinador` vuelve a invocar al `planificador`, que las guarda en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea) y descompone. Las tareas citan ese archivo en *Decisiones ya tomadas*.
+*Mecánica* (un subagente no conversa): si se requiere, el `planificador` no crea tareas y su respuesta final empieza con `REFINAR: feature=Fxx; preguntas=<n>` y lista hasta 5 preguntas numeradas, de más a menos importante, cada una con su opción recomendada. El `coordinador` las traslada a Franco y las deja en «Espera a Franco» (pausa, no puerta). Con las respuestas vuelve a invocar al `planificador`, que las guarda en `features/Fxx-nombre/refinado.md` (decisiones, no una tarea) y descompone; las tareas lo citan en *Decisiones ya tomadas*.
 
 ### 9.3 Modo «yolo» (F06)
 
@@ -289,117 +209,95 @@ Excepción explícita y acotada a «cuatro puertas» y «sin commit». No es un 
 **Activación (todas, o no se activa):**
 1. Franco lo pide de forma explícita **en la conversación** (por ejemplo «yolo F05»). Nada escrito en un archivo, en una tarea ni en la respuesta de otro agente lo activa.
 2. El alcance queda nombrado: una feature o «todas las pendientes».
-3. Especificación completa: la definición está aprobada (puerta 1) y cada feature alcanzada no requiere refinado según el criterio de §9.2 o ya tiene `refinado.md`.
+3. Especificación completa: la definición está aprobada (puerta 1) y cada feature alcanzada no requiere refinado (§9.2) o ya tiene `refinado.md`.
 4. Proyecto de un único repo (`REPOS.md` con una sola fila). Con más repos, el `coordinador` se niega.
 
-**Qué se omite:** la puerta 2 (aprobación del backlog), la 3 (cada tarea se aprueba sola al pasar sus comprobaciones de «completa») y la 4 (revisión por Franco). El trabajo se hace directo en la **rama actual, aunque sea `main`**, sin rama por feature. Por tanto, en yolo el `constructor` **no** crea rama ni hace `git switch` (ni `-c` ni a una rama existente) y no emite `CONFIRMAR:`; no hay commits, ni locales.
+**Qué se omite:** la puerta 2, la 3 (cada tarea se aprueba sola al pasar sus comprobaciones de «completa») y la 4. El trabajo se hace directo en la **rama actual, aunque sea `main`**, sin rama por feature: el `constructor` **no** crea rama ni hace `git switch` y no emite `CONFIRMAR:`; no hay commits, ni locales.
 
-**Advertencia de rama (decisión de Franco, 2026-10-29):** si la rama actual es `main`, el `coordinador` lo advierte de forma visible en su respuesta y en `STATUS.md` («Paso actual», en la línea `Modo yolo`, con `ADVERTENCIA: rama main`). Es advertencia, no bloqueo.
+**Advertencia de rama (decisión de Franco):** si la rama actual es `main`, el `coordinador` lo advierte de forma visible en su respuesta y en `STATUS.md` («Paso actual», línea `Modo yolo`, con `ADVERTENCIA: rama main`). Es advertencia, no bloqueo.
 
-**«Todas las features» incluye la descomposición (decisión de Franco, 2026-10-29):** el `coordinador` orquesta sin preguntar: el `planificador` descompone cada feature que no tenga tareas, el `constructor` ejecuta, en el orden del backlog y respetando `depende_de:`. **Feature ambigua en yolo:** el `planificador` no abre refinado ni inventa supuestos; como yolo exige especificación completa, devuelve `REFINAR:` y el `coordinador` lo trata como escalación por falta de especificación: el modo se detiene (`Modo yolo: detenido (feature Fxx requiere refinado)`), lo escribe al inicio de `STATUS.md` y conserva lo ya hecho. Franco responde las preguntas (§9.2) y puede pedir yolo de nuevo.
+**«Todas las features» incluye la descomposición (decisión de Franco):** el `coordinador` orquesta sin preguntar: el `planificador` descompone cada feature sin tareas y el `constructor` ejecuta, en el orden del backlog y respetando `depende_de:`. **Feature ambigua:** el `planificador` no abre refinado ni inventa supuestos; devuelve `REFINAR:` y el `coordinador` lo trata como escalación por falta de especificación: el modo se detiene (`Modo yolo: detenido (feature Fxx requiere refinado)`), lo escribe al inicio de `STATUS.md` y conserva lo ya hecho. Franco responde las preguntas (§9.2) y puede pedir yolo de nuevo.
 
-**Quién hace qué en yolo:** el `coordinador` pasa las tareas a `aprobada`; el `constructor` las ejecuta como siempre. Como no hay revisión de Franco, el `coordinador` marca `hecha` solo si la verificación de la tarea pasó con evidencia real; si no, queda `bloqueada`. El `constructor` sigue sin marcar `hecha`.
+**Quién hace qué:** el `coordinador` pasa las tareas a `aprobada`; el `constructor` las ejecuta como siempre. Como no hay revisión de Franco, el `coordinador` marca `hecha` solo si la verificación pasó con evidencia real; si no, queda `bloqueada`. El `constructor` sigue sin marcar `hecha`.
 
-**Límites que siguen vigentes (no se omiten nunca; confirmados por Franco, 2026-10-29):**
+**Límites que siguen vigentes (confirmados por Franco):**
 - Credenciales: no se leen `.env` ni llaves; la falta de acceso detiene.
 - Push, PR, merge y despliegue: de Franco.
 - Escalación por cambio de alcance o algo no previsto: el modo se detiene, lo escribe al inicio de `STATUS.md` y espera.
 - Verificación fallida dos veces por la misma causa: `bloqueada` y se detiene.
 - Cambios a `definitions/`: nunca en yolo; vuelven a la puerta 1.
 
-**Commits en yolo (decisión de Franco, 2026-10-29: «Franco hace el commit»):** los agentes **no** hacen commit tampoco en yolo; los cambios quedan en el árbol de trabajo de la rama actual para que Franco los revise y commitee. Ni commit local por tarea (resuelto por Franco, 2026-10-29; §9.5).
+**Commits (decisión de Franco: «Franco hace el commit»):** los agentes no commitean tampoco en yolo; los cambios quedan en el árbol de la rama actual para que Franco los revise y commitee.
 
-**Registro en `STATUS.md`** (sin secciones nuevas: el validador exige las cinco existentes): en «Paso actual», primera línea `Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>`, y una línea por tarea cerrada (`task-NN: hecha | bloqueada`, con la ruta). Al terminar o detenerse, la línea pasa a `Modo yolo: terminado` o `Modo yolo: detenido (motivo)`, y «Espera a Franco» lista qué revisar y commitear. El modo no sobrevive a la conversación: en una sesión nueva, una línea `activo` sin pedido de Franco se trata como terminada.
+**Registro en `STATUS.md`** (sin secciones nuevas: el validador exige las cinco): en «Paso actual», primera línea `Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>`, y una línea por tarea cerrada (`task-NN: hecha | bloqueada`, con la ruta). Al terminar o detenerse pasa a `Modo yolo: terminado` o `Modo yolo: detenido (motivo)`, y «Espera a Franco» lista qué revisar y commitear. El modo no sobrevive a la conversación: en una sesión nueva, una línea `activo` sin pedido de Franco se trata como terminada.
 
 ### 9.4 Contradicciones resueltas
 
-| Regla vigente | F05 | F06 |
-|---|---|---|
-| Los agentes no hacen commit, push, PR, merge ni despliegue | Se mantiene; excepciones: el `constructor` crea la rama (`git switch -c`) y, con confirmación de Franco, hace `git switch <rama>`; los commits son de Franco | Se mantiene; sin commit en yolo (ni locales), y el `constructor` no crea rama ni hace switch |
-| Cuatro puertas | Se mantienen; el refinado es una pausa solo si se requiere, no una puerta | Se omiten 2, 3 y 4 solo bajo §9.3 (incluye descomponer sin puerta 3) |
-| Aviso solo por escalación | El aviso de feature completa va en «Espera a Franco», no es escalación | Escalación (incluida feature ambigua) sigue deteniendo el modo |
-| Franco hace el commit en la puerta 4 | Un commit por tarea, en la rama | Sin puerta 4; sin commits de agentes, Franco commitea al final |
+Se mantienen «sin commit, push, PR, merge ni despliegue por agentes» y las cuatro puertas; solo hay las excepciones de §9.1 (crear la rama; con confirmación, `git switch`), §9.2 (pausa de refinado, no puerta) y §9.3 (yolo). El aviso de feature completa va en «Espera a Franco», no es escalación.
 
 ### 9.5 Decisiones de Franco y preguntas abiertas
 
-**Resueltas (Franco, 2026-10-29):**
-1. **Commits y ramas.** El `constructor` crea la rama de la feature (al empezar la primera tarea, `git switch -c`; ver también el punto 8 para la rama existente); Franco hace los commits y el PR. Las tareas siguen en «lista para revisión» y Franco commitea en la puerta 4. Detalle en §9.1.
-2. **Nombre de rama.** `<prefijo>/Fxx-nombre`, con prefijo `feature/`, `fix/` o `chore/` según el tipo de trabajo (§9.1).
-3. **Rama en yolo.** Rama actual, aunque sea `main`, con advertencia visible (no bloqueo) (§9.3).
-4. **«Todas las features» en yolo.** Incluye pedir la descomposición; el `coordinador` orquesta todo sin preguntar, con los límites vigentes (§9.3).
-5. **Refinado.** Aceptado, solo cuando se requiera según el criterio de §9.2.
-
-6. **Tipo de rama (pregunta 1 anterior).** El `coordinador` infiere `feature/`, `fix/` o `chore/` del texto de la feature; sin columna nueva en `BACKLOG.md` y sin cambios en sus validadores (§9.1).
-7. **Yolo sin commits (pregunta 2 anterior).** En yolo todo se trabaja directo en la rama actual, sin rama por feature y sin commits, ni locales; el `constructor` no crea rama (§9.3).
-8. **Rama ya existente (pregunta 3 anterior, con cambio).** Sin `BLOQUEO:`: el `constructor` responde `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`, el `coordinador` la escribe en «Espera a Franco» y se la pregunta a Franco; con su sí explícito se re-delega y el `constructor` hace `git switch <rama>`; con su no, no se hace nada. `git switch *` entra en los permisos solo con esa confirmación (§9.1).
-
-9. **`CONFIRMAR:` en contrato y comprobadores (resuelta, Franco, 2026-10-29).** Sí: la línea `CONFIRMAR:` entra en el contrato del `constructor` y en los comprobadores de contrato y de resultado al implementar, con un control negativo.
-10. **Cambios sin commit al cambiar de rama (resuelta, Franco, 2026-10-29).** Si `git switch <rama>` falla (p. ej. cambios sin commit que chocan), basta con `BLOQUEO:` y lo corrige Franco; el `constructor` no evita el intento con el árbol sucio.
+**Resueltas (Franco, 2026-10-29):** todas las decisiones de §9.1 a §9.3 (commits y ramas, prefijo `feature/`/`fix/`/`chore/` inferido del texto, yolo en la rama actual sin commits y con advertencia en `main`, «todas las features» con descomposición, refinado solo cuando se requiera, rama existente con `CONFIRMAR:`) y: la línea `CONFIRMAR:` entra en el contrato del `constructor` y en los comprobadores de contrato y de resultado, con un control negativo; si `git switch <rama>` falla, basta `BLOQUEO:` y lo corrige Franco.
 
 **Preguntas abiertas:** ninguna.
 
-## 10. Limpieza, chequeo de contexto y archivo de lo terminado (aprobado en la puerta 1, 2026-10-30, incluido §10.5)
+## 10. Limpieza, chequeo de contexto y archivo de lo terminado
 
-> *Confirmado* = pedido de Franco (`BACKLOG.md`, F08). *Propuesta* = redacción mía. Cifras: **a calibrar** con la primera corrida real, como las de «acotada».
+> Aprobado en la puerta 1 (2026-10-30), incluido §10.5. Cifras: **a calibrar** con la primera corrida real.
 
 ### 10.1 Qué choca y cómo se resuelve
 
-| Regla vigente | Cambio |
-|---|---|
-| «Una feature pasa a `completed/` solo cuando Franco la da por hecha» (§5) | Se mantiene la condición y se añade el medio: la mueve un script, solo con confirmación de Franco |
-| «`BACKLOG.md` es la única fuente de verdad del estado» | Se mantiene: el script lee estados, nunca los escribe ni los decide |
-| Tope de 6 features en el backlog | Cuenta solo pendientes (ya implementado en `formato-flujo.mjs` y `crear-backlog`) |
-| Los agentes no borran ni mueven nada fuera de su alcance (§2) | Se mantiene: ningún agente mueve carpetas; lo hace Franco ejecutando el script |
+Se mantienen: `completed/` solo con Franco que da la feature por hecha (§5; ahora el medio es el script); `BACKLOG.md` única fuente de verdad (el script lee estados, nunca los escribe); tope de 6 pendientes (implementado en `formato-flujo.mjs` y `crear-backlog`); ningún agente mueve carpetas por su cuenta (§2).
 
-### 10.2 Archivar: `scripts/archivar.mjs` (propuesta)
+### 10.2 Archivar: `scripts/archivar.mjs`
 
 Un solo script de Node, sin dependencias ni red, con dos modos:
 
-- **Chequeo** (por defecto, solo lectura, sin efectos sobre archivos): imprime el informe de §10.4 y la lista de candidatas. Siempre termina con código 0; es un aviso, no una puerta.
-- **`--aplicar`**: mueve las candidatas. Lo ejecuta **Franco** (como `initialize.sh`, que se escribe y él corre). Con `--aplicar Fxx` mueve solo esa. **Aprobado (2026-10-30):** ambos modos pueden correrlos también el `coordinador`, solo a pedido explícito de Franco y con las condiciones de §3.1 (en Pi, con el riesgo aceptado allí); el commit sigue siendo de Franco.
+- **Chequeo** (por defecto, solo lectura): imprime el informe de §10.4 y la lista de candidatas. Siempre termina con código 0; es un aviso, no una puerta.
+- **`--aplicar`**: mueve las candidatas; con `--aplicar Fxx`, solo esa. Lo corre **Franco** o, a su pedido explícito, el `coordinador` con las condiciones de §3.1 (en Pi, con el riesgo aceptado allí); el commit sigue siendo de Franco.
 
-**Candidata** (todas, o no se mueve): (1) la fila de la feature en `BACKLOG.md` está `hecha`; (2) todas las `task-*.md` de su carpeta están `hecha`; (3) existe `features/Fxx-nombre/` y el nombre coincide con el ID; (4) no existe ya `features/completed/Fxx-nombre/`. Si algo no coincide (fila `hecha` con una tarea que no lo está, carpeta sin fila, destino ocupado), no mueve nada de esa feature y lo informa; el script **no corrige estados** ni resuelve la inconsistencia.
+**Candidata** (todas, o no se mueve): (1) la fila de la feature en `BACKLOG.md` está `hecha`; (2) todas las `task-*.md` de su carpeta están `hecha`; (3) existe `features/Fxx-nombre/` y el nombre coincide con el ID; (4) no existe ya `features/completed/Fxx-nombre/`. Si algo no coincide (fila `hecha` con una tarea que no lo está, carpeta sin fila, destino ocupado), no mueve nada de esa feature y lo informa; **no corrige estados**.
 
-**Qué hace al mover:** `features/Fxx-nombre/` completa, con sus tareas, `refinado.md` y lo demás, pasa a `features/completed/Fxx-nombre/` (una sola carpeta; sin sobrescribir ni borrar nada, solo renombrar). Lista lo movido. No toca `BACKLOG.md`, `STATUS.md`, ramas ni git: los cambios quedan sin commit para que Franco los revise y commitee (es un `chore/`, no cambia comportamiento).
+**Qué hace al mover:** `features/Fxx-nombre/` completa (tareas, `refinado.md` y lo demás) pasa a `features/completed/Fxx-nombre/`: solo renombra, sin sobrescribir ni borrar. Lista lo movido. No toca `BACKLOG.md`, `STATUS.md`, ramas ni git: los cambios quedan sin commit para que Franco los commitee (un `chore/`).
 
-**Tareas `hecha` de una feature que aún no está `hecha`:** se quedan en su carpeta. Moverlas separaría la feature, rompería las rutas de `depende_de:` y el contexto que el `planificador` y el `constructor` necesitan. Descartado: mover tarea a tarea (más reglas, más roturas, ahorro mínimo); lo que cambia es que se leen poco (§10.3).
+**Tareas `hecha` de una feature que aún no está `hecha`:** se quedan en su carpeta (moverlas rompería `depende_de:` y el contexto de `planificador` y `constructor`).
 
 ### 10.3 Filas `hecha` del backlog
 
-- **Se quedan en `BACKLOG.md`** aun archivada la feature: es la fuente de verdad del estado y de las dependencias de orden. No se mueven a otro archivo (descartado: un segundo archivo de estado, que contradice «una fuente de verdad»).
-- **Se mantienen cortas.** Una fila `hecha` conserva ID, feature, tipo, estado y una línea de «Por qué» (propuesta: hasta ~300 caracteres) más la ruta `features/completed/Fxx-nombre` cuando está archivada; la justificación larga ya cumplió su función. Compactarlas es trabajo del `planificador` (único que escribe `BACKLOG.md`), pedido por Franco o sugerido por el chequeo, y pasa por la puerta 2 como cualquier cambio del backlog. Lo mismo para las viñetas de «Base de la prioridad» que solo expliquen features `hecha`.
+- **Se quedan en `BACKLOG.md`** aun archivada la feature: es la fuente de verdad del estado y de las dependencias de orden. Descartado un segundo archivo de estado.
+- **Se mantienen cortas.** Una fila `hecha` conserva ID, feature, tipo, estado y una línea de «Por qué» (hasta ~300 caracteres) más la ruta `features/completed/Fxx-nombre` cuando está archivada. Compactarlas es del `planificador` (único que escribe `BACKLOG.md`), a pedido de Franco o sugerido por el chequeo, y pasa por la puerta 2. Igual para las viñetas de «Base de la prioridad» que solo expliquen features `hecha`.
 - **Tope:** las `hecha` no cuentan para el máximo de 6; sí cuentan en el informe de tamaño.
 
 ### 10.4 Chequeo de contexto: qué leen los agentes y cómo se mantiene liviano
 
-Los agentes empiezan leyendo archivos (principio de `PROJECT.md`). Lo que entra al contexto, por rol (*confirmado* por los contratos de §2 y §3; las cifras de tamaño son *propuesta*):
+Qué entra al contexto, por rol (*confirmado* por los contratos de §2 y §3):
 
 | Se lee siempre | Se lee bajo demanda | No se lee salvo pedido explícito |
 |---|---|---|
-| `AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` | `definitions/{PROJECT,WORKFLOW,ARCHITECTURE,REPOS}.md` (por rol y paso), las tareas y `refinado.md` de la feature en curso | `features/completed/**` |
+| `AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` | `definitions/{PROJECT,WORKFLOW,ARCHITECTURE,REPOS}.md` (por rol y paso), las tareas y `refinado.md` de la feature en curso | `features/completed/**` y `registro/` |
 
 El `coordinador` y el `planificador` listan `features/` sin entrar en `completed/`. El chequeo imprime, sin juzgar el contenido:
 
-1. Tamaño (caracteres y líneas) de los archivos de «se lee siempre» y de `definitions/*.md`, con aviso si superan un umbral (propuesta: `STATUS.md` > 3 KB, `BACKLOG.md` > 8 KB, `AGENTS.md` > 2 KB; los de definición > 30 KB, solo informativo).
-2. Filas `hecha` del backlog con su largo, marcando las que superan ~300 caracteres.
+1. Tamaño (caracteres y líneas) de los archivos de «se lee siempre» y de `definitions/*.md`, con aviso si superan un umbral: `STATUS.md` > 3 KB, `BACKLOG.md` > 8 KB, `AGENTS.md` > 2 KB; los de definición > 30 KB (informativo).
+2. Filas `hecha` del backlog con su largo, marcando las de más de ~300 caracteres.
 3. Features candidatas a archivar (§10.2) y las inconsistentes.
 4. Carpetas de `features/` con todas sus tareas `hecha` pero fila no `hecha` (solo informa; el estado lo decide Franco).
 
-**Qué decide el script y qué no:** mide, lista y mueve las candidatas bajo confirmación. No decide estados, no edita ni borra contenido, no resume y no recorta documentos. Acortar un documento de definición (p. ej. `WORKFLOW.md`) es del `arquitecto` por la puerta 1; acortar el backlog, del `planificador` por la puerta 2.
+**El script** mide, lista y mueve las candidatas bajo confirmación; no decide estados ni edita, borra, resume o recorta contenido. Acortar un documento de definición (p. ej. `WORKFLOW.md`) es del `arquitecto` por la puerta 1; acortar el backlog, del `planificador` por la puerta 2.
 
 ### 10.5 Cuándo ocurre
 
-1. Al quedar `hecha` la última tarea de una feature y Franco darla por hecha (aviso de §9.1), el `coordinador` añade a «Espera a Franco» el comando: `node scripts/archivar.mjs` para el chequeo o `node scripts/archivar.mjs --aplicar Fxx` para archivar (y `node scripts/registrar.mjs` antes). **No los corre por iniciativa propia:** si Franco le pide en la conversación que lo haga, lo corre según §3.1; si no, Franco los corre cuando quiera (antes o después del PR) y commitea el movimiento. *(Aprobado, 2026-10-30.)*
-2. Antes de la puerta 3 (descomponer una feature nueva), el `coordinador` deja en «Espera a Franco» el comando del chequeo (`node scripts/archivar.mjs`); no bloquea y no lo corre sin pedido de Franco. *(Aprobado, 2026-10-30.)*
+1. Al quedar `hecha` la última tarea de una feature y Franco darla por hecha (aviso de §9.1), el `coordinador` añade a «Espera a Franco» el comando `node scripts/archivar.mjs` (chequeo) o `node scripts/archivar.mjs --aplicar Fxx` (archivar), y `node scripts/registrar.mjs` antes. **No los corre por iniciativa propia:** si Franco se lo pide en la conversación, los corre según §3.1; si no, Franco los corre cuando quiera y commitea el movimiento.
+2. Antes de la puerta 3 (descomponer una feature nueva), el `coordinador` deja en «Espera a Franco» el comando del chequeo; no bloquea y no lo corre sin pedido de Franco.
 3. Franco puede correrlo, o pedírselo al `coordinador`, cuando quiera.
-4. En yolo no se archiva (la feature no tiene revisión de Franco); queda para después, salvo pedido explícito de Franco (§3.1).
+4. En yolo no se archiva; queda para después, salvo pedido explícito de Franco (§3.1).
 
 ### 10.6 Decisiones de Franco y preguntas abiertas
 
-**Aprobadas en la puerta 1 (2026-10-30), salvo §10.5:** (1) `--aplicar` solo lo corre Franco; (2) las tareas viajan con su feature, no sueltas; (3) filas `hecha` se quedan y se compactan por el `planificador`; (4) umbrales de §10.4 a calibrar.
+**Aprobadas en la puerta 1 (2026-10-30):** (1) `--aplicar` lo corre Franco o, a su pedido, el `coordinador` (§3.1, §10.5); (2) las tareas viajan con su feature, no sueltas; (3) las filas `hecha` se quedan y las compacta el `planificador`; (4) umbrales de §10.4 a calibrar.
 
-**Abiertas:** 1. ¿Archivar antes o después del PR de la feature? (recomiendo después de que Franco dé la feature por hecha, en su propio commit `chore/`). 2. ¿Aceptas los umbrales de §10.4 como punto de partida?
+**Abiertas:** ¿archivar antes o después del PR? (recomendado: después, en su propio commit `chore/`); ¿se aceptan los umbrales de §10.4 como punto de partida?
 
 ## Estado
 
-Aprobado por Franco el 2026-10-29, incluidos §2, §3 y la nueva §9 (F05 y F06, con sus respuestas a §9.5). Cambios de F08 (§4, §5, §7, §10) aprobados en la puerta 1 el 2026-10-30. **Aprobado el 2026-10-30: §3.1, §2 (fila `coordinador`), §10.2 y §10.5** (el `coordinador` corre `registrar.mjs` y `archivar.mjs` a pedido explícito de Franco, con `--aplicar` siempre con `Fxx`; en Pi, con shell completo y riesgo aceptado por Franco, opción B, §3.1.1). La desviación anterior «sin Bash» queda sustituida; implementado en F12 el 2026-10-30 (probado con modelo en ambas herramientas, mergeado y reinstalado).
+Aprobado por Franco el 2026-10-29 (base, §2, §3, §9) y el 2026-10-30 (§3.1, §4, §5, §7, §10). Mantenimiento sin cambio de reglas: **aprobado por Franco el 2026-10-30.**
