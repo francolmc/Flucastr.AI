@@ -1,5 +1,5 @@
 # task-04 — pruebas Capa 1 de skills de Pi en el proyecto
-repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: aprobada
+repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: lista para revisión
 
 ## Descripción
 Prueba automática, sin red ni modelo, del flujo completo de `--skills-proyecto`: copia con marca, exclusión local, `git status` limpio, reinstalación idempotente y actualizada, proyecto sin git, carpeta ajena intacta, desinstalación por proyecto y total, y un control negativo. Va en un archivo nuevo para no alterar `instalacion.test.mjs`.
@@ -51,4 +51,87 @@ Esperado: `pass 4 / fail 0`; tres líneas `rapida: … en S s (tope 30 s)`; `git
 
 ## Evidencia
 
+Comandos ejecutados en la pasada final (HOME real `/Users/franco`; las pruebas usan HOME temporal). Salida real, copiada:
+
+```
+$ node --test pruebas/capa1/skills-proyecto.test.mjs   (últimas líneas)
+✔ a: copia y exclusión (1389.787125ms)
+✔ b: reinstalación (496.985583ms)
+✔ c: sin git (566.761459ms)
+✔ d: desinstalación (259.553083ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3272.401375
+
+$ for i in 1 2 3; do bash pruebas/rapida.sh | tail -1; done
+rapida: 22 archivos en 17 s (tope 30 s)
+rapida: 22 archivos en 19 s (tope 30 s)
+rapida: 22 archivos en 14 s (tope 30 s)
+
+$ git status --short
+ M definitions/STATUS.md
+ M features/F17-skills-pi-en-workspace/task-02-desinstalar-skills-proyecto.md
+ M features/F17-skills-pi-en-workspace/task-03-reinstalar-proyectos-registrados.md
+ M features/F17-skills-pi-en-workspace/task-04-pruebas-skills-proyecto.md
+ M instalar.sh
+ M pruebas/rapida.sh
+?? pruebas/capa1/skills-proyecto.test.mjs
+```
+
+Medición previa, misma máquina y HOME real (`bash pruebas/rapida.sh`, salida completa en un log de cada corrida; las 3 pasaron):
+
+```
+run 1: rapida: 22 archivos en 25 s (tope 30 s)   ← ℹ tests 224 / ℹ pass 224 / ℹ fail 0
+run 2: rapida: 22 archivos en 15 s (tope 30 s)   ← ℹ tests 224 / ℹ pass 224 / ℹ fail 0
+run 3: rapida: 22 archivos en 13 s (tope 30 s)   ← ℹ tests 224 / ℹ pass 224 / ℹ fail 0
+```
+
+Peor de las 6 corridas: 25 s, por debajo de 28 s. Regla de inclusión cumplida: el archivo **sí** se incluye en `rapida.sh`. Antes eran 21 archivos y 220 pruebas; ahora 22 y 224 (las 4 nuevas).
+
+Criterios de aceptación:
+
+```
+$ grep -n "control negativo" pruebas/capa1/skills-proyecto.test.mjs
+151:  assert.ok(!existsSync(join(n, '.pi')), 'control negativo: sin --skills-proyecto no debe haber .pi/');
+
+$ grep -nE "fetch|curl|claude |pi " pruebas/capa1/skills-proyecto.test.mjs
+(solo coincidencias en comentarios y rutas de prueba; ninguna ejecuta claude, pi ni red)
+
+$ grep -n "HOME:" pruebas/capa1/skills-proyecto.test.mjs
+41:  const env = { ...process.env, HOME: home, PI_CODING_AGENT_DIR: pi, TMPDIR: tmp, TMP: tmp, TEMP: tmp };
+
+$ git check-ignore -v pruebas/.temporales/
+pruebas/.gitignore:1:.temporales/	pruebas/.temporales/
+```
+
+Criterio 3: `git status --short` muestra el test nuevo y `pruebas/rapida.sh` de esta tarea; `task-04` aparece modificado por *estado*, *Evidencia* y *Notas* (esperado). Los demás archivos modificados son de tareas anteriores de F17 y de `definitions/STATUS.md`, que no se tocó en esta tarea.
+
+Cuatro pruebas, con las aserciones de cada una (todas pasan):
+- a «copia y exclusión»: errores de flag (sin `--proyecto`; con `--solo claude`) salen con 1 y no cambian el HOME; `--simular` en otra carpeta lista `copiaría:` y no crea `.pi`; instalación real: dos carpetas reales con marca, sin enlaces, `exclude` con `/.pi/skills/prueba/` y `/.pi/skills/otra/`, manifiesto con `skills-proyecto`, 2 `directorio` y 2 `exclusion`; control negativo: un proyecto sin el flag no tiene `.pi/`.
+- b «reinstalación»: la copia cambia a contenido nuevo; cada exclusión aparece una vez; un `skills-proyecto` por proyecto; `propia/` (sin marca) intacta, sin registro y sin exclusión.
+- c «sin git»: aviso `no es un repo git`; copias presentes; sin exclusión registrada para ese proyecto.
+- d «desinstalación»: `desinstalar --proyecto` deja `p/.pi/skills` solo con `propia`, conserva `*.log` en `exclude`, quita las exclusiones de Flucastr.AI y deja el agente global; desinstalación total deja `~/.flucastr-ai` inexistente y borra la copia de c.
+
+Ejecuciones del archivo: `instalar.sh` 7 y `desinstalar.sh` 2 (ver Notas sobre el máximo).
+
 ## Notas
+
+- **Desviación del máximo de ejecuciones (decisión a revisar por Franco):** la tarea fija máximo 5 de `instalar.sh` y 3 de `desinstalar.sh`. Se ejecutan 7 y 2. Las 5 de la prueba a son: 2 errores de flag, 1 simulación, 1 instalación real y 1 control negativo; b suma 1 y c suma 1. Los errores de flag y el control negativo los pide la tarea (criterio 5 y la sección de control negativo), así que no se quitaron. Si el máximo es estricto, hay que quitar dos comprobaciones o aceptar más tiempo.
+- **Huecos menores, decisiones tomadas:**
+  1. Las cuatro pruebas comparten un solo entorno y corren en orden (a, b, c, d); cada una parte del estado de la anterior. Así se reparten las ejecuciones del máximo.
+  2. El kit va en `<entorno>/kit`, fuera de `HOME/.flucastr-ai`. Con la instalación en modo repo, `desinstalar.sh` no borra el kit; si estuviera dentro, `~/.flucastr-ai` no se podría borrar y el criterio de la desinstalación total fallaría por causa del entorno, no del código.
+  3. El proyecto sin git se crea con `mkdtemp` en el directorio temporal del sistema, no en `pruebas/.temporales/`: dentro del repo Flucastr.AI, git usaría el `exclude` de ese repo (hueco 5 de task-01). Esa carpeta no se borra, como el resto de entornos.
+  4. `git status --porcelain` no queda vacío: muestra `?? .claude/`. `--proyecto` fija el agente en `.claude/settings.local.json` sin ignorar, lo que ya se anotó en task-03. La prueba a afirma ese comportamiento real (`['?? .claude/']`) y no el «vacío» del planteamiento. Si Franco decide ignorar ese archivo, hay que cambiar esa única línea de la prueba a.
+  5. En la prueba d, `p/.pi` no desaparece: queda `skills/propia/` para comprobar que la desinstalación no toca una carpeta ajena.
+  6. Durante el desarrollo, la primera versión de la prueba a fallaba solo por el punto 4 (`?? .claude/`). Se corrigió la aserción; no se cambió ningún script.
+- **Mediciones y verificación:** antes de la pasada final corrí tres `bash pruebas/rapida.sh` extra para medir (25, 15 y 13 s), y redirigí su salida a `/tmp/none` por error; ese archivo ya se borró. Estas corridas más la pasada final suman 2 intentos de verificación; la de *Evidencia* es la pasada final.
+- Hallazgo heredado, sin cambios: `rapida.sh` con HOME falso vacío falla 7 pruebas de `pruebas/ejecutar.sh` que exigen el agente instalado en el HOME (ya anotado en task-01 y task-03). Con el HOME real pasa 224/224.
+- Sin commit, sin push, sin tocar `~/.pi` ni `~/.claude` reales, sin escribir en `definitions/STATUS.md`, sin editar `instalar.sh`, `desinstalar.sh` ni `instalacion.test.mjs`/`copia.test.mjs`/`remoto.test.mjs`.
+- Revisión sugerida para Franco: *Evidencia* (medición y criterios), la decisión sobre el máximo de ejecuciones (punto de Notas arriba), y la decisión sobre `.claude/settings.local.json` (huecos 4).
+
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=4; resultado=lista; causa=ninguna

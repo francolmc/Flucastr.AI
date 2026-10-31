@@ -1,5 +1,5 @@
 # task-02 — desinstalar.sh: quitar copias y exclusiones de skills en un proyecto
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 `desinstalar.sh` debe entender el tipo de manifiesto nuevo `exclusion` y, con `--proyecto <ruta>`, quitar además del agente fijado las copias `.pi/skills/` y las líneas de exclusión de ese proyecto. Sin opciones sigue quitando todo lo registrado.

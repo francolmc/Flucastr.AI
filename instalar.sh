@@ -350,6 +350,17 @@ fijar_agente_proyecto() {
 # Primera línea del manifiesto: el modo con el que se instaló (lo leen desinstalar.sh y la comprobación de modo).
 registrar modo "$MODO"
 
+# Proyectos registrados con skills-proyecto: se leen antes de quitar la instalación anterior (desinstalar.sh borra
+# el manifiesto). No se copian a $NUEVO: su línea la escribe registrar al reinstalar. Lista separada por saltos de línea.
+PROYECTOS_REGISTRADOS=""
+if [ -f "$MANIFIESTO" ]; then
+  while IFS=$'\t' read -r p_tipo p_ruta _; do
+    if [ "${p_tipo:-}" = skills-proyecto ] && [ -n "${p_ruta:-}" ]; then
+      PROYECTOS_REGISTRADOS+="$p_ruta"$'\n'
+    fi
+  done < "$MANIFIESTO"
+fi
+
 # Quita primero lo instalado antes, para que no queden restos de skills o agentes borrados del repo.
 # Los ajustes de proyectos se conservan: se pasan tal cual al registro nuevo.
 if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
@@ -395,6 +406,40 @@ if [ "$SKILLS_PROYECTO" = 1 ]; then
   echo "Skills de Pi en el proyecto ($PROYECTO)"
   instalar_skills_proyecto
   echo "  Las copias en .pi/skills/ no se editan: se rehacen al reinstalar. Pi pedirá confiar en el proyecto (/trust)."
+fi
+
+# Proyectos registrados con skills-proyecto: se rehacen en cada instalación (con --solo claude, no).
+# Si no hay ninguno, no se imprime nada.
+if [ -n "$PROYECTOS_REGISTRADOS" ]; then
+  ANTERIOR_PROYECTO="$PROYECTO"
+  if [ "$SOLO" = claude ]; then
+    echo
+    echo "  (proyectos con skills registradas no se actualizan con --solo claude)"
+  fi
+  while IFS= read -r ruta; do
+    [ -n "$ruta" ] || continue
+    if [ "$SOLO" = claude ]; then
+      # solo se conserva el registro; el proyecto no se toca
+      if [ "$SIMULAR" = 0 ] && ! grep -qxF "$(printf 'skills-proyecto\t%s\t' "$ruta")" "$NUEVO"; then
+        registrar skills-proyecto "$ruta"
+      fi
+      continue
+    fi
+    # ya procesado arriba, con --skills-proyecto
+    if [ "$SKILLS_PROYECTO" = 1 ] && [ "$ruta" = "$ANTERIOR_PROYECTO" ]; then continue; fi
+    if [ -d "$ruta" ]; then
+      echo
+      echo "Skills de Pi en el proyecto registrado ($ruta)"
+      PROYECTO="$ruta"
+      instalar_skills_proyecto
+    else
+      echo "  AVISO: el proyecto registrado ya no existe, se omite (registro conservado): $ruta"
+      if [ "$SIMULAR" = 0 ] && ! grep -qxF "$(printf 'skills-proyecto\t%s\t' "$ruta")" "$NUEVO"; then
+        registrar skills-proyecto "$ruta"
+      fi
+    fi
+  done <<< "$PROYECTOS_REGISTRADOS"
+  PROYECTO="$ANTERIOR_PROYECTO"
 fi
 
 echo
