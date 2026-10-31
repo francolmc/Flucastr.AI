@@ -4,17 +4,20 @@
 
 ## Paso actual
 
-Rol: ninguno (esperando a Franco). F13 `hecha` (confirmada por Franco, 2026-10-30; task-01 `hecha`). Solo queda F11 (informe). F12 `hecha` (PR hecho, coordinador reinstalado). F11 (informe) requiere al `arquitecto` y datos de `Registro:`.
-Rama: chore/F13-alinear-readme-archivar
+Rol: ninguno (esperando a Franco). F14 task-01 `lista para revisión` (puerta 4). F01–F10 y F12–F13 `hecha` y archivadas. F11 (informe) requiere al `arquitecto` y datos de `Registro:`.
+Rama: chore/F14-estabilizar-rapida
 
 ## Espera a Franco
 
-- Feature F13 completa en chore/F13-alinear-readme-archivar: cierra la rama, haz el PR y despliega.
-- **Archivo aplicado (a tu pedido, 2026-10-30):** F12 y F13 movidas a `features/completed/` con `node scripts/archivar.mjs --aplicar`. Quedan **sin commit**: revisa `git status` y commitéalas en su propio commit `chore/` (el script recomienda hacerlo después del PR de la feature; F13 aún no tiene PR).
+- **Puerta 4 (revisión y commit):** `features/F14-estabilizar-rapida/task-01-rapida-en-paralelo.md`. Revisa *Evidencia* y *Notas*, y el diff de `pruebas/rapida.sh` (3 líneas; `git diff pruebas/rapida.sh`). Commitea en `chore/F14-estabilizar-rapida` y dime si la pasas a `hecha`.
+- Feature F14 completa en chore/F14-estabilizar-rapida (con task-01 `hecha`): cierra la rama, haz el PR y despliega.
+- Puerta 2 aprobada por Franco (2026-10-30): backlog con F14 `aprobado`; `→` ya en F14.
+- Chequeo de contexto: `node scripts/archivar.mjs` (sugerencia, no bloquea).
+
 - **Menciones antiguas en `definitions/REGISTRO.md`** líneas 25 y 55 («no tiene Bash»): no estaban en el encargo del arquitecto. Revisa también el reemplazo por script del arquitecto en `WORKFLOW.md` §3.1, `PROJECT.md` y `ARCHITECTURE.md` (solo se verificó con `grep`).
 - Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (ver `definitions/WORKFLOW.md` §3.1).
 - **Registro de eventos:** corre `node scripts/registrar.mjs` cuando quieras (lo corres tú, o yo a tu pedido). `registro/` está ignorado por git.
-- **Contexto grande:** F01–F10 ya están archivadas; falta compactar `BACKLOG.md` (planificador, puerta 2; su nota final «Hoy hay N pendientes» puede estar desactualizada) y acortar `WORKFLOW.md` (arquitecto). F11–F12 `hecha`: F12 se puede archivar con `node scripts/archivar.mjs --aplicar F12` (a tu pedido puedo correrlo yo).
+- **Contexto grande:** F01–F10 ya están archivadas; falta compactar `BACKLOG.md` (planificador, puerta 2; su nota final «Hoy hay N pendientes» puede estar desactualizada) y acortar `WORKFLOW.md` (arquitecto). F12 y F13 ya archivadas.
 - **Alinear `definitions/` (arquitecto, sin urgencia):** `REGISTRO.md` §1 (`resultado=confirmar` no se usa; caso `coordinador` en `tarea_estado.por`; comando sin `--reverse` por git 2.54); falta la regla «`registro/` no se lee» en `AGENTS.md`.
 - **Riesgo de tiempo:** `rapida.sh` oscila entre 23 y 37 s (tope 30 s); el peso viene de `instalacion.test.mjs` (8–12 s). Conviene una tarea aparte (¿la abrimos?).
 - **Antes de publicar el repo (tuyo):** gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Don Financio, Andes), `.gitignore`; activar 2FA y proteger `main`; aclarar qué son los commits «intrusión». Si aparece algo: rotar la credencial primero. Luego haz público el repo.
