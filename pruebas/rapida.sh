@@ -10,7 +10,8 @@ for f in pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs pruebas/capa1/inst
   archivos+=("$f")
 done
 inicio=$SECONDS
-node --test --test-concurrency=1 "${archivos[@]}"
+# Archivos en paralelo: cada prueba usa su propio directorio temporal en pruebas/.temporales.
+node --test "${archivos[@]}"
 duracion=$((SECONDS - inicio))
 echo "rapida: ${#archivos[@]} archivos en ${duracion} s (tope ${TOPE} s)"
 if (( duracion > TOPE )); then
