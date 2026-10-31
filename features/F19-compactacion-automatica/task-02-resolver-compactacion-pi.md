@@ -1,5 +1,5 @@
 # task-02 — `resolver.mjs`: `fijar-compactacion pi` y `quitar-compactacion pi`
-repo: Flucastr.AI   depende_de: task-01   estado: aprobada
+repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
 
 ## Descripción
 Añadir a `scripts/resolver.mjs` las órdenes que escriben y quitan, en el `settings.json` global de Pi, `compaction.modelOverrides["<provider>/<modelo>"].reserveTokens = ventana − compactar_en`. Fusionan sin pisar nada del usuario, toman el bloqueo `<settings.json>.lock` como Pi y escriben de forma atómica. `instalar.sh` y `desinstalar.sh` (tareas 06 y 08) solo llaman a estas órdenes. La puerta 4 de esta tarea exige revisar `git diff scripts/`.
@@ -65,7 +65,165 @@ git diff scripts/
 Esperado: la simulación imprime tres `fijado:…:creado` y `ls -A` vacío; la escritura real imprime las tres líneas, muestra el JSON de tres overrides y lista solo `settings.json`; la repetición imprime tres `omitido-usuario:…`; `otro.json` conserva `deviceId`, `packages`, `zzz` y suma `compaction`; el primer `quitar` imprime `quitado`, el segundo `omitido`; el último imprime `quitado` (aún quedan dos modelos); `pass` > 0 y `fail 0`; `rapida` con exit 0; `git diff scripts/` muestra solo cambios en `scripts/resolver.mjs`. No ejecutado por el planificador: las órdenes nuevas aún no existen.
 
 ## Evidencia
-(lo llena el constructor)
+Rama: `git branch --show-current` → `feature/F19-compactacion-automatica` (ya era la actual; sin `git switch`). Sin commit, push, PR, merge ni despliegue. Todas las pruebas con `mktemp -d`; no se tocó `~/.pi/agent/settings.json` ni `~/.claude`.
+
+Sintaxis: `node --check scripts/resolver.mjs` → `CHECK_OK`. Uso sin argumentos:
+```
+$ node scripts/resolver.mjs
+error: uso: resolver.mjs modelo <agente> <herramienta> | … | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado]
+exit=1
+```
+
+Verificación (salida real, primera pasada completa, `T=/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.iNhJkQ762p`):
+```
+== 1 simular (vacía)
+fijado:openai/gpt-6-astra=172000:creado
+fijado:openai/gpt-6.1-sol=172000:creado
+fijado:openai/gpt-6-luna=172000:creado
+exit=0
+ls:            (vacío)
+
+== 2 escritura real
+fijado:openai/gpt-6-astra=172000:creado
+fijado:openai/gpt-6.1-sol=172000:creado
+fijado:openai/gpt-6-luna=172000:creado
+exit=0
+-- cat:
+{
+  "compaction": {
+    "modelOverrides": {
+      "openai/gpt-6-astra": {
+        "reserveTokens": 172000
+      },
+      "openai/gpt-6.1-sol": {
+        "reserveTokens": 172000
+      },
+      "openai/gpt-6-luna": {
+        "reserveTokens": 172000
+      }
+    }
+  }
+}
+-- ls: settings.json
+
+== 3 repetición
+omitido-usuario:openai/gpt-6-astra
+omitido-usuario:openai/gpt-6.1-sol
+omitido-usuario:openai/gpt-6-luna
+exit=0
+
+== 4 otro.json con claves ajenas (deviceId, packages, zzz)
+fijado:openai/gpt-6-astra=172000
+fijado:openai/gpt-6.1-sol=172000
+fijado:openai/gpt-6-luna=172000
+exit=0
+-- cat:
+{
+  "deviceId": "x",
+  "packages": [
+    "a"
+  ],
+  "zzz": 1,
+  "compaction": {
+    "modelOverrides": {
+      "openai/gpt-6-astra": {
+        "reserveTokens": 172000
+      },
+      "openai/gpt-6.1-sol": {
+        "reserveTokens": 172000
+      },
+      "openai/gpt-6-luna": {
+        "reserveTokens": 172000
+      }
+    }
+  }
+}
+
+== 5 quitar otro (valor 172000)
+quitado
+exit=0
+== 6 quitar otro (valor 1, distinto)
+omitido
+exit=0
+== 7 quitar settings creado (quedan dos modelos)
+quitado
+exit=0
+== 8 estado tras quitar
+ls: otro.json  settings.json
+-- otro.json (cat, real):
+{
+  "deviceId": "x",
+  "packages": [
+    "a"
+  ],
+  "zzz": 1,
+  "compaction": {
+    "modelOverrides": {
+      "openai/gpt-6-astra": {
+        "reserveTokens": 172000
+      },
+      "openai/gpt-6-luna": {
+        "reserveTokens": 172000
+      }
+    }
+  }
+}
+lock residual: 0
+
+== 9 pruebas resolver
+ℹ pass 10
+ℹ fail 0
+== 10 rapida (HOME real, sin HOME falso)
+rapida exit=0
+ℹ duration_ms 12208.446375
+rapida: 23 archivos en 13 s (tope 30 s)
+== 11 git diff scripts/ --stat
+ scripts/resolver.mjs | 232 ++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 230 insertions(+), 2 deletions(-)
+```
+
+Ramas no cubiertas por la *Verificación* (comprobación extra, carpetas temporales):
+```
+== A archivo-quitado (creado, único override restante)
+quitado
+quitado
+archivo-quitado          → el archivo se borró; ls sin a.json
+== B settings con compaction.enabled en la raíz
+omitido-usuario:*        → el archivo no cambia: {"compaction":{"enabled":true}}; sin lock residual
+== C JSON inválido
+error: …/c.json no es JSON válido (…); no lo toco
+exit=1                   → el archivo queda {roto
+== D modelos falsos (FLUCASTR_MODELOS): reserve 12000, 100000-260000<0, ventana 0, y --simular
+omitido-umbral:openai/x-a
+omitido-umbral:openai/x-b
+omitido-ventana:openai/x-c
+omitido-umbral:openai/x-d
+exit=0                   → d.json no se creó
+== E bloqueo huérfano (mtime de 2020) 
+fijado ×3, exit=0; el .lock se borró y no queda residuo
+== F bloqueo vivo reciente
+error: no pude tomar el bloqueo …/f.json.lock; no toco el archivo
+exit=1 (≈0,3 s); f.json queda {}
+```
+
+Criterios de aceptación:
+1. Cumple: `fijado:…=172000:creado` ×3 en carpeta vacía; el archivo tiene exactamente las tres claves bajo `compaction.modelOverrides` (verificación paso 2).
+2. Cumple: `deviceId`, `packages` y `zzz` se conservan; solo se añade `compaction` (verificación paso 4).
+3. Cumple: con los overrides ya definidos, `omitido-usuario:<modelo>` ×3 y ninguna escritura (verificación paso 3). El valor no cambia porque no hubo escritura.
+4. Cumple: `quitado` con el valor puesto; `omitido` con otro valor (`1`); con `creado` y archivo que queda vacío, `archivo-quitado` (caso A).
+5. Cumple: `node --test …resolver-agentes.test.mjs` → pass 10, fail 0; `rapida.sh` exit 0 (con HOME real).
+
+Notas sobre la verificación de `git diff scripts/`: solo `scripts/resolver.mjs` (232 líneas tocadas). La revisión del diff queda para la puerta 4 (Franco).
 
 ## Notas
-(lo llena el constructor)
+- Candidatos (paso 1): `openai/gpt-6-astra`, `openai/gpt-6.1-sol`, `openai/gpt-6-luna` (único perfil `pi`, `pi-openai`, en el orden de `modelos`). Ventanas 272000, `compactar_en` 100000 → 172000 cada uno.
+- Huecos menores resueltos (4):
+  1. Error de `mkdir` del bloqueo distinto de `EEXIST` (p. ej. carpeta inexistente o permisos): falla de inmediato con `no pude tomar el bloqueo …; no toco el archivo`, sin esperar los 10 intentos. Decisión: no tiene sentido reintentar.
+  2. `compaction.modelOverrides` presente pero no objeto: se trata como «define algo en el nivel superior» y se imprime `omitido-usuario:*`, sin escribir. La tarea no lo cubría; es la opción más conservadora.
+  3. `--simular` también falla si el archivo es JSON inválido o su raíz no es objeto (mismo mensaje que la escritura), en vez de simular sobre un archivo que no se puede escribir.
+  4. Bajo el bloqueo se relee el archivo y las líneas de salida salen de esa lectura (no de la previa), para que reflejen lo que realmente se escribió. El control previo sin bloqueo solo decide si hace falta tomarlo.
+- Un JSON inválido releído bajo el bloqueo no hace `process.exit` dentro del bloqueo (se marca y se falla después de soltarlo), para no dejar el `.lock` residual.
+- El tmp `<ruta>.flucastr-<pid>.tmp` no se borra si `writeFileSync`/`renameSync` fallan (caso raro de disco); se deja anotado como limitación.
+- `definitions/STATUS.md` no se tocó. El resto del árbol (`definitions/STATUS.md`, `modelos.json`, task-01) ya venía sin commit y no se modificó.
+
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=4; resultado=lista; causa=ninguna

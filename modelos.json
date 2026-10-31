@@ -1,9 +1,10 @@
 {
   "version": 1,
-  "_leeme": "Fuente única de verdad de los modelos. Los agentes declaran un NIVEL (alto, medio, bajo), nunca un modelo. Resolución: nivel = agentes[agente].nivel o nivel_por_defecto; perfil = agentes[agente].perfil o perfil_por_defecto[herramienta]; modelo = perfiles[perfil].modelos[nivel]; si falta, se prueba el orden de 'respaldo'. Para cambiar de modelo o proveedor se edita solo este archivo.",
+  "_leeme": "Fuente única de verdad de los modelos. Los agentes declaran un NIVEL (alto, medio, bajo), nunca un modelo. Resolución: nivel = agentes[agente].nivel o nivel_por_defecto; perfil = agentes[agente].perfil o perfil_por_defecto[herramienta]; modelo = perfiles[perfil].modelos[nivel]; si falta, se prueba el orden de 'respaldo'. Para cambiar de modelo o proveedor se edita solo este archivo. compactar_en = tokens de contexto a los que compacta la herramienta; ventanas = ventana de contexto por modelo (Pi: reserveTokens = ventana − compactar_en; Claude Code: autoCompactWindow = compactar_en + 33000).",
 
   "niveles": ["alto", "medio", "bajo"],
   "nivel_por_defecto": "medio",
+  "compactar_en": 100000,
 
   "respaldo": {
     "alto": ["medio", "bajo"],
@@ -19,6 +20,11 @@
         "alto": "openai/gpt-6-astra",
         "medio": "openai/gpt-6.1-sol",
         "bajo": "openai/gpt-6-luna"
+      },
+      "ventanas": {
+        "openai/gpt-6-astra": 272000,
+        "openai/gpt-6.1-sol": 272000,
+        "openai/gpt-6-luna": 272000
       }
     },
     "claude-code": {
