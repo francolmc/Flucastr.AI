@@ -5,14 +5,14 @@
 ## Paso actual
 
 Rol: ninguno (esperando a Franco). F14 `hecha` (confirmada por Franco, 2026-10-30). F01–F10 y F12–F13 `hecha` y archivadas. Solo queda F11 (informe), en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
-Rama: chore/F16-coherencia-sin-carpetas
+Rama: main
 F16 `hecha` (PR #11 mergeado; confirmada por Franco, 2026-10-30). Solo queda F11 (en pausa por datos).
 F15 en curso: task-01 `hecha` (Franco, 2026-10-30); task-02 `hecha` (Franco, 2026-10-30); task-03 `hecha` (Franco, 2026-10-30); task-04 `hecha` (Franco, 2026-10-30). F15 `hecha` en `BACKLOG.md` (confirmada por Franco, 2026-10-30); `→` movido a F11 (en pausa por datos, sin tareas). Solo queda F11 pendiente.
 
 ## Espera a Franco
 
-- Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea).
-- Features F15 y F16 archivables: `node scripts/archivar.mjs --aplicar F15` y `--aplicar F16` (lo corre Franco o, si lo pide, tú, en su propio commit `chore/`).
+- **Archivo aplicado (a tu pedido, 2026-10-30):** F15 y F16 movidas a `features/completed/` con `node scripts/archivar.mjs --aplicar`. Quedan **sin commit**: revisa `git status` y commitéalas en un commit `chore/` en su propia rama.
+- Registro de eventos: `node scripts/registrar.mjs` (no lo corrí en este paso; dime si lo quieres).
 
 - Puerta 2 aprobada por Franco (2026-10-30): backlog con F16 `aprobado`; el `planificador` descompone F16 (puerta 3 después). La celda «Por qué» de F16 mide ~380 caracteres; se puede acortar más adelante.
 - F15 sigue sin archivar a propósito, hasta que F16 esté lista (así `rapida.sh` no falla).
