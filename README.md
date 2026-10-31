@@ -1,8 +1,16 @@
+<p align="center"><img src="assets/logo.svg" alt="Logo de Flucastr.AI" width="64" height="64"></p>
+
 # Flucastr.AI
 
 Mi forma de construir productos con agentes de IA, sin enredarme en la herramienta.
 
-> Estado: MVP en construcción (2026-10-29). Arquitecto, coordinador, planificador y constructor existen; F01 a F03 están hechas en el backlog y F04 dejó este README al día con su comprobación de estructura.
+> Estado: en uso (2026-10-30). El kit completo (arquitecto, coordinador, planificador y constructor, con instalador local y remoto) está hecho; el avance real está en `definitions/BACKLOG.md`.
+
+## La idea
+
+Flucastr.AI es un kit personal de agentes, skills e instaladores para trabajar con IA en Claude Code y Pi. Yo abro un solo agente, el `coordinador`, y él reparte el trabajo entre un `arquitecto`, un `planificador` y un `constructor`. Todo pasa por archivos que puedo leer y por cuatro puertas donde yo apruebo antes de seguir. Los agentes no hacen commit, push, PR ni despliegue: eso es mío.
+
+No es un servicio ni una aplicación: es texto (agentes y skills), unos scripts y las pruebas que comprueban que el kit hace lo que dice.
 
 ## Para qué existe
 
@@ -27,11 +35,40 @@ La definición vigente del proyecto está en [`definitions/`](definitions/):
 
 [`AGENTS.md`](AGENTS.md) es la entrada breve para cualquier agente. Todo es borrador hasta que lo apruebo.
 
+## Cómo se usa
+
+1. Instalo el kit (ver [Instalación](#instalación)) y abro el coordinador desde la carpeta de mi proyecto: `claude --agent coordinador` o `pi-coordinador`.
+2. El `coordinador` mira qué falta y delega: sin definición llama al `arquitecto`; con definición aprobada y sin backlog, al `planificador`; con tareas aprobadas, al `constructor`.
+3. Me detiene en cuatro puertas y ahí reviso y apruebo. Lo que decido queda escrito en `definitions/STATUS.md`.
+4. Los commits, el PR y el despliegue los hago yo.
+
+```mermaid
+flowchart LR
+    D["Definir el proyecto<br/>(arquitecto)"] --> P1{"Puerta 1<br/>definición"}
+    P1 --> B["Armar el backlog<br/>(planificador)"]
+    B --> P2{"Puerta 2<br/>backlog"}
+    P2 --> T["Escribir las tareas<br/>(planificador)"]
+    T --> P3{"Puerta 3<br/>cada tarea"}
+    P3 --> C["Construir y verificar<br/>(constructor)"]
+    C --> P4{"Puerta 4<br/>revisión"}
+    P4 --> F["Commit y PR<br/>(Franco)"]
+```
+
+| Rol | Qué hace | Qué no hace |
+|---|---|---|
+| `coordinador` | Es el único que abro; decide el paso siguiente, delega y se detiene en las puertas. | Construir. |
+| `arquitecto` | Define el proyecto, sus repos y su arquitectura. | Planificar o construir. |
+| `planificador` | Escribe el backlog y descompone cada feature en tareas completas y acotadas. | Construir o aprobar. |
+| `constructor` | Ejecuta una tarea aprobada, la verifica y deja la evidencia. | Marcar `hecha`, hacer commit, push, PR, merge o despliegue. |
+
+Detalle del flujo, de la rama por feature, del refinado y del modo yolo en [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md) y en la sección [Flujo](#flujo).
+
 ## Estructura
 
 ```
 Flucastr.AI/
 ├── README.md
+├── assets/         # logo del README
 ├── AGENTS.md        # entrada breve para agentes
 ├── definitions/     # definición vigente del proyecto
 ├── features/        # tareas por feature (features/Fxx-nombre/task-NN-nombre.md); las terminadas, archivadas en features/completed/
@@ -59,7 +96,25 @@ Flucastr.AI/
 └── desinstalar.sh   # quita exactamente lo que instaló
 ```
 
+Una comprobación (`pruebas/comprobaciones/readme-estructura.mjs`) falla si el árbol de agentes y skills de este bloque no coincide con `agentes/` y `skills/`.
+
 ## Instalación
+
+Hay dos caminos: **con el repo clonado** (mi equipo principal) y **sin clonar** (el PC de trabajo, donde no tengo clon). Los dos terminan igual: agentes y skills instalados para Claude Code y Pi.
+
+```mermaid
+flowchart TD
+    Q{"¿Tengo el repo<br/>clonado?"}
+    Q -->|Sí| L["bash instalar.sh"]
+    Q -->|No| R["bash instalar-remoto.sh"]
+    R --> K["Copia en ~/.flucastr-ai/kit/"]
+    K --> L2["instalar.sh --copiar"]
+    L --> OK["Agentes y skills en<br/>Claude Code y Pi"]
+    L2 --> OK
+    OK --> U["claude --agent coordinador<br/>o pi-coordinador"]
+```
+
+### Con el repo clonado
 
 ```bash
 bash instalar.sh --simular   # valida y muestra qué haría, sin escribir nada
@@ -134,7 +189,7 @@ Detalle de escenarios y permisos en [`pruebas/README.md`](pruebas/README.md).
 
 ## Flujo
 
-El `coordinador` (el único agente que abro) invoca al `arquitecto`, al `planificador` y al `constructor`, y se detiene en cuatro puertas de aprobación: definición, backlog, cada tarea y revisión del resultado. Detalle en [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md). F04 dejó este README al día y una comprobación que falla si el árbol de `## Estructura` no coincide con `agentes/` y `skills/` (`pruebas/comprobaciones/readme-estructura.mjs`); su cierre en `definitions/BACKLOG.md` lo hago yo. Cada feature trabaja en una rama `feature/`, `fix/` o `chore/` + `Fxx-nombre`; al quedar `hecha` su última tarea, el aviso llega por `STATUS.md` para que yo cierre la rama. Antes de descomponer una feature ambigua puede haber un refinado previo (hasta 5 preguntas con recomendación en `features/Fxx/refinado.md`), solo cuando se requiere. Solo si lo pido de forma explícita en la conversación (por ejemplo «yolo F05»), con el alcance nombrado, la definición aprobada y un único repo, existe el modo yolo: el `coordinador` omite las puertas 2, 3 y 4, trabaja directo en la rama actual (con una advertencia si es `main`) y se detiene ante cualquier escalación o si una feature necesita refinado. Detalle en `definitions/WORKFLOW.md` §9.3.
+El `coordinador` (el único agente que abro) invoca al `arquitecto`, al `planificador` y al `constructor`, y se detiene en cuatro puertas de aprobación: definición, backlog, cada tarea y revisión del resultado. Detalle en [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md). Cada feature trabaja en una rama `feature/`, `fix/` o `chore/` + `Fxx-nombre`; al quedar `hecha` su última tarea, el aviso llega por `STATUS.md` para que yo cierre la rama. Antes de descomponer una feature ambigua puede haber un refinado previo (hasta 5 preguntas con recomendación en `features/Fxx/refinado.md`), solo cuando se requiere. Solo si lo pido de forma explícita en la conversación (por ejemplo «yolo F05»), con el alcance nombrado, la definición aprobada y un único repo, existe el modo yolo: el `coordinador` omite las puertas 2, 3 y 4, trabaja directo en la rama actual (con una advertencia si es `main`) y se detiene ante cualquier escalación o si una feature necesita refinado. Detalle en `definitions/WORKFLOW.md` §9.3.
 
 ## Registro de eventos
 
