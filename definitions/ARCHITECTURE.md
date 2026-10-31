@@ -1,6 +1,6 @@
 # Arquitectura — Flucastr.AI (modo: actual)
 
-> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Aprobado el 2026-10-30:** `WORKFLOW.md` §3.1 y §10.5 (el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido explícito de Franco; en Claude Code `tools:` con patrones `Bash(...)` limita y el permiso lo da Franco por aprobación o regla `allow` (ajuste del 2026-10-30); **sin restricción técnica en Pi**, riesgo aceptado por Franco; implementado en F12, 2026-10-30, probado con modelo en ambas herramientas). **Pendiente de aprobación:** **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1).
+> Estado: **aprobado** (2026-10-29; incluye los cambios de F05 y F06). Puerta 1 de F08 aprobada el 2026-10-30 (`scripts/archivar.mjs`). **Aprobado el 2026-10-30:** `WORKFLOW.md` §3.1 y §10.5 (el `coordinador` corre `registrar.mjs` y `archivar.mjs` solo a pedido explícito de Franco; en Claude Code `tools:` con patrones `Bash(...)` limita y el permiso lo da Franco por aprobación o regla `allow` (ajuste del 2026-10-30); **sin restricción técnica en Pi**, riesgo aceptado por Franco; implementado en F12, 2026-10-30, probado con modelo en ambas herramientas). **Pendiente de aprobación:** **F09, instalación sin clon desde GitHub** (sección «Instalación sin clon…», borrador del 2026-10-30; puerta 1; mergeada) y **F10, registro de eventos del flujo** (sección «Registro de eventos…», borrador del 2026-10-30; puerta 1). **Aprobado el 2026-10-31, puerta 1:** sección «Skills dentro del workspace para Pi» (F17; queda por verificar en el PC de trabajo lo indicado en «No verificado»).
 
 ## Estructura y su razón
 
@@ -234,6 +234,41 @@ flowchart LR
 - **Decisión:** un solo escritor, `registrar.mjs`, que corre Franco o, a su pedido explícito, el `coordinador` (`WORKFLOW.md` §3.1, F12, 2026-10-30). Los agentes no reciben permisos nuevos; el único cambio es el contenido de *Notas*. *Descartado:* agentes que escriben el log; versionar el log (ver `REGISTRO.md` §2 y §8).
 - **Privacidad:** esquema cerrado, sin texto libre, sin autores ni títulos; archivo ignorado por git (`REGISTRO.md` §5).
 - **Fuera de lo que `instalar-remoto.sh` distribuye:** `registro/` no está en su lista permitida; `scripts/registrar.mjs` sí viaja con `scripts/`.
+
+## Skills dentro del workspace para Pi (F17)
+
+> **Puerta 1 aprobada por Franco el 2026-10-31** (sus 4 decisiones, abajo). Problema (*confirmado por Franco*): en el PC de trabajo, `pi-arquitecto` no puede leer fuera del workspace y queda pidiendo `definir-proyecto` y `disenar-arquitectura` «dentro del workspace»; hoy las skills viven en `~/.pi/agent/skills/`. No hay código aún. No toca `WORKFLOW.md`.
+
+### Evidencia sobre Pi (leída en el equipo, Pi 1.4.0)
+
+- **Confirmado** (`docs/configuration.md` y `docs/security.md` del paquete `pi-coding-agent`, en `~/.pi/agent/install/releases/1.4.0/`): `.pi/skills/` es una ruta de **skills de proyecto**, y Pi las descubre recursivamente (`docs/skills.md`). También acepta `.agents/skills/` (del directorio de trabajo hacia arriba, hasta la raíz del repo).
+- **Confirmado, y es una condición:** `.pi/skills/` está protegida por la **confianza de proyecto**. Pi pregunta una vez (`/trust` la guarda en `~/.pi/agent/trust.json`); en modo sin pantalla (print, JSON, RPC) las omite salvo `defaultProjectTrust: "always"`. Un `.pi/` vacío no pide confianza, pero con skills dentro sí.
+- **No verificado:** (a) que el bloqueo de Franco desaparezca con esta ruta: no reproduje su PC ni encontré en la documentación local una restricción de lectura «fuera del workspace»; el límite puede venir de su configuración, de una extensión o de la política del PC; (b) si Pi sigue enlaces simbólicos en `.pi/skills/` (la documentación no lo dice; irrelevante porque se copia). Se comprueba en el PC de trabajo, antes de dar la feature por buena.
+
+### Qué se propone
+
+- **Dónde:** `<proyecto>/.pi/skills/<skill>/`, una carpeta real por cada skill de `skills/*/` (las siete son autocontenidas: solo `SKILL.md`, sin rutas fuera de su carpeta; *confirmado*). Cada copia lleva la marca `.flucastr-ai`, como en el modo descarga. *Descartado:* `.agents/skills/` (lo leen también otras herramientas y se busca en ancestros: más alcance del necesario).
+- **Flag (recomendación):** uno nuevo, **`--skills-proyecto`**, que se combina con `--proyecto <ruta>`; solo copia las skills a Pi, no cambia el agente de Claude Code. Sin `--proyecto` es error. *Descartado:* extender `--solo pi` con `--proyecto`: hoy `--solo pi` significa «solo la instalación global de Pi» y `--proyecto` «ajuste de Claude Code»; combinarlos cambiaría el significado de ambos y el efecto sobre el proyecto quedaría implícito.
+- **Siempre copia, nunca enlace**, en modo repo y en modo descarga: un enlace apunta fuera del workspace, justo lo que falla. Reutiliza `copiar_skills` apuntando a `<proyecto>/.pi/skills`. Nunca pisa una carpeta del cliente sin la marca (`OMITIDO`, como hoy).
+- **Que no entren al git del cliente:** una línea por skill copiada (`/.pi/skills/<skill>/`) en `<proyecto>/.git/info/exclude`, la exclusión **local** de git (no se versiona ni cambia el `.gitignore` del cliente). Rutas por skill, no `/.pi/`, para no ocultar skills propias del cliente. Se resuelve con `git -C <proyecto> rev-parse --git-path info/exclude`; si no es repo git, se copia igual y avisa que no hay nada que excluir. Las líneas llevan el comentario `# flucastr-ai` y solo se quitan esas. Verificación: `git status --porcelain` del proyecto no muestra las copias.
+- **Registro en el manifiesto** (formato `tipo<TAB>ruta<TAB>extra`): `skills-proyecto<TAB><proyecto>` (una por proyecto, se conserva al reinstalar, como `ajuste`); `directorio<TAB><proyecto>/.pi/skills/<skill>` por copia (tipo existente: `desinstalar.sh` ya exige carpeta real con marca); `exclusion<TAB><archivo exclude><TAB><línea>` (tipo nuevo, quita solo esa línea).
+- **Actualizar:** al correr `instalar.sh` (o `instalar-remoto.sh --actualizar`, que lo invoca) se rehace la copia en cada proyecto registrado, tras quitar la anterior; así las skills del cliente nunca quedan viejas respecto del kit. Si la carpeta del proyecto ya no existe, se omite con aviso y se conserva el registro. No hay actualización automática ni en segundo plano.
+- **Desinstalar:** `desinstalar.sh --proyecto <ruta>` quita, además del agente, las copias y las líneas de exclusión de ese proyecto; `desinstalar.sh` sin opciones quita todo lo registrado. Borra solo carpetas con marca; si el usuario editó dentro de una copia, se pierde: las copias no se editan (se dice en la salida).
+- **`--simular`:** imprime lo que copiaría y excluiría, sin escribir. Valida antes de actuar (proyecto existente, skills presentes) como el resto.
+- **Pruebas (Capa 1, sin red ni modelo):** `HOME` falso y proyecto de prueba con `git init` local; comprobar copias reales con marca, exclusión en `.git/info/exclude`, `git status` limpio, reinstalación idempotente, proyecto sin git, carpeta ajena sin marca intacta, desinstalar con `--proyecto` y total, y un control negativo (sin el flag no aparece `.pi/`). No cambia el flujo sin clon ya aprobado: `instalar-remoto.sh` solo hereda el flag al reinstalar proyectos registrados.
+
+### Riesgos
+
+- Las copias en el proyecto quedan **fuera de git** y pueden desfasarse hasta la siguiente corrida del instalador.
+- El cliente ve `.pi/skills/` en su disco (no en git). Contenido: solo texto de las skills del kit.
+- La confianza de proyecto es una decisión de Franco dentro de Pi; el instalador no la toca (no escribe `trust.json`).
+
+### Decisiones tomadas por Franco (2026-10-31)
+
+1. **Nombre del flag.** **Decidido:** `--skills-proyecto` (explícito, aparte de `--proyecto`). Descartada: `--proyecto <ruta> --solo pi`.
+2. **Ruta.** **Decidido:** `.pi/skills/` (documentada y específica de Pi). Descartada: `.agents/skills/`.
+3. **¿Siempre al usar `--proyecto`, o solo con el flag?** **Decidido:** solo con el flag: `--proyecto` hoy solo toca Claude Code y no escribe nada nuevo en el cliente sin pedirlo.
+4. **Exclusión local** (`.git/info/exclude`) en vez de `.gitignore` del cliente. **Decidido.**
 
 ## Supuestos y pendientes
 
