@@ -1,5 +1,5 @@
 # task-01 — instalar.sh: flag --skills-proyecto (copia, exclusión y manifiesto)
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Pi no lee `~/.pi/agent/skills/` desde el workspace del cliente. `instalar.sh` debe aceptar `--skills-proyecto` junto con `--proyecto <ruta>` y copiar cada skill del kit a `<proyecto>/.pi/skills/<skill>/` (carpeta real con marca `.flucastr-ai`), excluirlas del git del cliente de forma local y registrarlo todo en el manifiesto. Esta tarea no cubre la reinstalación de proyectos ya registrados (task-03) ni `desinstalar.sh` (task-02).

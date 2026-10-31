@@ -4,10 +4,12 @@
 
 ## Paso actual
 
-Rol: `constructor`, F17 task-01 (delegada). Las 5 tareas de F17 `aprobada` por Franco (2026-10-31), en orden 01→05. F01–F16 `hecha` (F15 y F16 archivadas, sin commit). F17 (skills de Pi dentro del workspace) `→`. F11 (informe) en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
+Rol: ninguno (esperando a Franco). F17 task-02 `lista para revisión` (puerta 4). task-01 `hecha` (Franco, 2026-10-31); task-03 a 05 `aprobada`, en orden. F01–F16 `hecha` (F15 y F16 archivadas, sin commit). F17 (skills de Pi dentro del workspace) `→`. F11 (informe) en pausa por decisión de Franco: esperar más tareas reales con `Registro:` antes de llamar al `arquitecto`.
 Rama: feature/F17-skills-pi-en-workspace
 
 ## Espera a Franco
+
+- **Puerta 4 (F17 task-02, desinstalar):** `features/F17-skills-pi-en-workspace/task-02-desinstalar-skills-proyecto.md`. Revisa *Evidencia*, *Notas* (7 huecos menores, entre ellos `rmdir` de `.claude`, `.pi/skills` y `.pi` vacíos y el trato de una copia sin marca) y `git diff -- desinstalar.sh`. Commitea en `feature/F17-skills-pi-en-workspace` y dime si la pasas a `hecha`; entonces sigo con task-03.
 
 - **Puerta 4 (F17 task-01, `lista para revisión`):** `features/F17-skills-pi-en-workspace/task-01-instalar-skills-proyecto.md`. Revisa *Evidencia*, *Notas* y `git diff instalar.sh` (+74/-1). Franco corrió `rapida.sh` y pasa 220/220 en 12 s; los 7 fallos de `ejecutar.sh` que reportó el constructor no se reproducen (probablemente propios de su entorno de ejecución). Falta tu aprobación explícita para pasarla a `hecha`.
 - **Hueco conocido hasta task-02/03:** reinstalar sin el flag tras usarlo borra las copias del proyecto y deja las 7 líneas de `exclude` huérfanas. No corras `bash instalar.sh` sin opciones en un proyecto con el flag hasta terminar task-02 y task-03.
