@@ -26,7 +26,7 @@ Base confirmada: definición aprobada por Franco el 2026-10-29; alcance y orden 
 | F21 | `coordinador` con menos turnos | producto | alto | medio | `CONTEXTO.md` §2.4/§2.5: reglas de lectura, `STATUS.md` por sección, `subagents_enable` una vez, encargo-plantilla. Depende de F20 (la meta se mide con ella). | hecha | |
 | F22 | Lectura acotada de planificador, constructor y arquitecto | producto | medio | medio | `CONTEXTO.md` §2.2: reglas de lectura por rol y tarea que se basta sola en las skills. Depende de F20. | hecha | |
 | F23 | Topes verificables de tarea y aviso de `STATUS.md` | habilitante | medio | bajo | `CONTEXTO.md` §2.3: avisos (`STATUS.md` 1,5 KB, tarea 6 KB) y error de tarea a 8 KB en las comprobaciones. Depende de F20. | hecha | |
-| F11 | Informe de resultados del flujo | producto | medio | bajo | Feature aparte, tras F10 y con datos de ~10 tareas con línea `Registro:` (cifra a calibrar): se diseña con datos reales. Requiere al `arquitecto` antes de descomponer. | en curso | → |
+| F11 | Informe de resultados del flujo | producto | medio | bajo | Feature aparte, tras F10 y con datos de ~10 tareas con línea `Registro:` (cifra a calibrar): se diseña con datos reales. Requiere al `arquitecto` antes de descomponer. | hecha | → |
 
 Estado del documento: aprobado
 

@@ -1,5 +1,5 @@
 # task-02 — Bloque `--consumo`, pruebas de privacidad y documentación
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Añadir a `scripts/informe.mjs` la opción `--consumo <dir>`: bloque con costo y turnos totales, por rol y por tarea (aproximado), usando `scripts/consumo.mjs`. Probar privacidad y el bloque opcional, y documentar el comando en `README.md`.

@@ -414,9 +414,9 @@ Franco aprobó las seis con la recomendación indicada; solo la 4 queda pendient
 5. ¿Probar `showCacheMissNotices: true` una semana antes de decidir sobre caché larga? (pregunta 2) *Recomiendo sí; no cuesta nada.*
 6. Claude Code: ¿verifico en una sesión corta el archivo de proyecto y la precedencia de `autoCompactWindow` (y `/context`, `/cost`) antes de documentar un fragmento? *Recomiendo sí, como primera tarea de F18.*
 
-## Informe de resultados del flujo (BORRADOR, F11)
+## Informe de resultados del flujo (F11)
 
-> **Borrador, por aprobar en la puerta 1 de F11** (2026-11-01). Diseño del `arquitecto` antes de descomponer. *Confirmado* = leído en `BACKLOG.md`, `REGISTRO.md`, `scripts/registrar.mjs` y `scripts/consumo.mjs` (cabeceras y exportaciones; no se leyó `registro/`). *Inferido* = deducido de eso. *Propuesta* = mía, por aprobar. **No se sabe cuántas tareas tienen hoy línea `Registro:`** (no se leyó el log): no condiciona el diseño, porque el propio script lo cuenta y se niega a calcular por debajo del umbral.
+> **Aprobado en la puerta 1 de F11** (2026-11-01, con las 5 recomendaciones). Diseño del `arquitecto` antes de descomponer. *Confirmado* = leído en `BACKLOG.md`, `REGISTRO.md`, `scripts/registrar.mjs` y `scripts/consumo.mjs` (cabeceras y exportaciones; no se leyó `registro/`). *Inferido* = deducido de eso. *Propuesta* = mía, por aprobar. **No se sabe cuántas tareas tienen hoy línea `Registro:`** (no se leyó el log): no condiciona el diseño, porque el propio script lo cuenta y se niega a calcular por debajo del umbral.
 
 ### Qué es y qué no es
 
@@ -529,7 +529,7 @@ Lo que **no** se prueba y queda para el primer uso real: que los intervalos sirv
 4. ¿Lo corres tú (recomendado) o ampliamos el permiso del `coordinador` en `WORKFLOW.md` §3.1?
 5. ¿El bloque de consumo entra como opcional en F11 (recomendado) o queda fuera y se usa `consumo.mjs` aparte?
 
-**Estado: borrador.** No cambia el estado de ninguna definición ni de `BACKLOG.md`. F11 sigue `pendiente`.
+**Estado: aprobado** (2026-11-01). No cambia el estado de ninguna definición.
 
 ## Supuestos y pendientes
 
