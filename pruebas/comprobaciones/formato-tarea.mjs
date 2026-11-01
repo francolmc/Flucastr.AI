@@ -13,6 +13,8 @@ export const SECCIONES = [
   'Notas',
 ];
 
+export const MAX_CARACTERES = 8192;
+
 const SECCIONES_LIBRES = ['Evidencia', 'Notas'];
 const ESTADOS_QUE_EXIGEN_EVIDENCIA = ['lista para revisión', 'hecha'];
 
@@ -108,6 +110,11 @@ export function validarTarea(texto) {
   const sinCodigo = todo.replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]*`/g, '');
   if (RE_PENDIENTE.test(sinCodigo)) {
     errores.push('Hay un marcador de pendiente («TBD», «a definir» o «según corresponda») fuera de bloques de código.');
+  }
+
+  // Regla 9: largo máximo de la tarea en caracteres (8 KB).
+  if (todo.length > MAX_CARACTERES) {
+    errores.push(`La tarea mide ${todo.length} caracteres; el máximo es ${MAX_CARACTERES} (8 KB).`);
   }
 
   return errores;

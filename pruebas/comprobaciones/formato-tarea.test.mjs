@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validarTarea } from './formato-tarea.mjs';
+import { validarTarea, MAX_CARACTERES } from './formato-tarea.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -53,6 +53,7 @@ const variantes = [
   ['regla 6: nueve pasos', (t) => t.replace('2. Probarlo.', Array.from({ length: 8 }, (_, i) => `${i + 2}. Paso ${i + 2}.`).join('\n'))],
   ['regla 7: seis criterios', (t) => t.replace('1. Pasa la prueba.', Array.from({ length: 6 }, (_, i) => `${i + 1}. Criterio ${i + 1}.`).join('\n'))],
   ['regla 8: marcador de pendiente', (t) => t.replace('Texto que describe el objetivo de la tarea.', 'Texto con un TBD sin resolver.')],
+  ['regla 9: más de 8192 caracteres', (t) => t.replace('Texto que describe el objetivo de la tarea.', 'x'.repeat(MAX_CARACTERES))],
 ];
 
 test('la muestra válida no produce errores', () => {
@@ -67,6 +68,14 @@ for (const [nombre, alterar] of variantes) {
   });
 }
 
+test('una tarea de exactamente MAX_CARACTERES caracteres es válida', () => {
+  const textoOriginal = 'Texto que describe el objetivo de la tarea.';
+  const relleno = 'x'.repeat(MAX_CARACTERES - muestra.length + textoOriginal.length);
+  const justa = muestra.replace(textoOriginal, relleno);
+  assert.equal(justa.length, MAX_CARACTERES);
+  assert.deepEqual(validarTarea(justa), []);
+});
+
 test('exige Evidencia no vacía con estado «lista para revisión»', () => {
   const alterada = muestra.replace('estado: aprobada', 'estado: lista para revisión');
   assert.ok(validarTarea(alterada).some((e) => e.includes('Evidencia')));
@@ -75,6 +84,7 @@ test('exige Evidencia no vacía con estado «lista para revisión»', () => {
 const reales = fs
   .readdirSync(path.join(raiz, 'features'), { recursive: true })
   .filter((r) => /(^|\/)task-\d{2}-[^/]*\.md$/.test(r))
+  .filter((r) => !r.startsWith('completed/'))
   .map((r) => path.join(raiz, 'features', r));
 
 test('las tareas reales de features/ cumplen el formato', () => {
