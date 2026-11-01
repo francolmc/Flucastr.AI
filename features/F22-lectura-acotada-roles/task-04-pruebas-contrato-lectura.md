@@ -1,5 +1,5 @@
 # task-04 — Pruebas de contrato de la lectura acotada (regla 17)
-repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: aprobada
+repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: lista para revisión
 
 ## Descripción
 Para que las reglas de lectura de F22 no se pierdan en ediciones futuras, `pruebas/comprobaciones/contrato-roles.mjs` pasa a exigir las frases clave en `planificador`, `constructor`, `arquitecto` y las skills `descomponer-feature`, `ejecutar-tarea` y `disenar-arquitectura`, igual que la regla 16 lo hace con el `coordinador` (F21). Cada frase tiene un control negativo en el test.
@@ -48,5 +48,30 @@ Fuera de alcance: editar agentes o skills (task-01 a 03); otras reglas de `valid
 - `bash pruebas/rapida.sh` → código 0 y `rapida: … (tope 30 s)` con S ≤ 30.
 
 ## Evidencia
+Antes de los cambios: `node --test pruebas/comprobaciones/contrato-roles.test.mjs` → `ℹ tests 40`, `ℹ pass 40`, `ℹ fail 0`.
+
+Después de los cambios: `node --test pruebas/comprobaciones/contrato-roles.test.mjs`
+```
+ℹ tests 52
+ℹ pass 52
+ℹ fail 0
+```
+(52 = 40 + 12; la prueba «los archivos reales…» pasa.)
+
+`node --test pruebas/comprobaciones/contrato-roles.test.mjs 2>&1 | grep -c 'regla 17'` → `12`.
+`grep -c 'Regla 17' pruebas/comprobaciones/contrato-roles.mjs` → `1`.
+
+`bash pruebas/rapida.sh; echo EXIT=$?` → última línea `rapida: 29 archivos en 19 s (tope 30 s)`, `EXIT=0`.
+
+`git diff --stat -- pruebas/`
+```
+ pruebas/comprobaciones/contrato-roles.mjs      | 42 ++++++++++++++++++++++++++
+ pruebas/comprobaciones/contrato-roles.test.mjs | 40 ++++++++++++++++++++----
+ 2 files changed, 76 insertions(+), 6 deletions(-)
+```
 
 ## Notas
+- Las frases de *Decisiones ya tomadas* se copiaron literales, sin el espacio final de las que terminan en `` ` `` (p. ej. «No lees tareas de otras features ni tareas `hecha`»).
+- En `muestra()` las frases se escribieron como literales dentro de cada texto de ejemplo (no con `join`), y `arquitecto` cita `disenar-arquitectura` para que la regla 4 la encuentre; la skill `disenar-arquitectura` se agregó a la muestra.
+- No se leyeron las tareas task-01 a task-03: las frases vienen de *Decisiones ya tomadas* de esta tarea, y la verificación con «los archivos reales…» confirmó que los agentes y skills reales las contienen.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

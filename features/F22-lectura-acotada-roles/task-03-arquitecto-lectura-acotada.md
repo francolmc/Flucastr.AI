@@ -1,5 +1,5 @@
 # task-03 — `arquitecto` y `disenar-arquitectura`: cada definición una vez por sesión
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 `definitions/CONTEXTO.md` §2.2 fija que el `arquitecto` lee `PROJECT`, `REPOS` y `ARCHITECTURE` una vez por sesión (si necesita algo de nuevo, lee la sección con `offset`/`limit`) y que no lee `features/` ni tareas. Hoy `agentes/arquitecto.md` y `skills/disenar-arquitectura/SKILL.md` no dicen nada de lectura. Esta tarea agrega esa regla en ambos.
