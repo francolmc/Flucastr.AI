@@ -17,7 +17,8 @@ import { fileURLToPath } from "node:url";
 
 // Puntos de partida a calibrar (1 KB = 1024 caracteres).
 export const UMBRALES = {
-  STATUS: 3072,
+  STATUS: 1536,
+  TAREA: 6144,
   BACKLOG: 8192,
   AGENTS: 2048,
   FILA_HECHA: 300,
@@ -175,7 +176,20 @@ export function chequear(raiz) {
     }
   }
 
-  return { archivos, filasHecha, candidatas, inconsistentes, carpetasSinFilaHecha };
+  // Tareas sobre el umbral (solo aviso): features/Fxx-* sin completed/, ruta relativa con «/».
+  const tareasGrandes = [];
+  for (const carpeta of carpetas) {
+    for (const archivo of readdirSync(join(dirFeatures, carpeta)).sort()) {
+      if (!RE_TAREA.test(archivo)) continue;
+      const caracteres = readFileSync(join(dirFeatures, carpeta, archivo), "utf8").length;
+      if (caracteres > UMBRALES.TAREA) {
+        tareasGrandes.push({ ruta: `features/${carpeta}/${archivo}`, caracteres, umbral: UMBRALES.TAREA });
+      }
+    }
+  }
+  tareasGrandes.sort((a, b) => (a.ruta < b.ruta ? -1 : a.ruta > b.ruta ? 1 : 0));
+
+  return { archivos, filasHecha, candidatas, inconsistentes, carpetasSinFilaHecha, tareasGrandes };
 }
 
 // Mueve a features/completed/ las features candidatas (ids = arreglo de IDs, o null para todas).
@@ -244,6 +258,13 @@ export function formatearInforme(r) {
         `- ${a.ruta}: ${a.caracteres} caracteres, ${a.lineas} líneas (umbral ${a.umbral})${aviso(a.excede)}`
       );
     }
+  }
+  lineas.push("");
+
+  lineas.push("## Tareas sobre el umbral");
+  if (r.tareasGrandes.length === 0) lineas.push("- ninguna");
+  for (const t of r.tareasGrandes) {
+    lineas.push(`- ${t.ruta}: ${t.caracteres} caracteres (umbral ${t.umbral})${aviso(true)}`);
   }
   lineas.push("");
 

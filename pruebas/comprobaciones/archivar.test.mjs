@@ -94,15 +94,15 @@ test('(e) destino features/completed ya existente es inconsistente', () => {
   assert.ok(r.inconsistentes.some((i) => i.id === 'F01' && i.motivo.includes('ya existe')));
 });
 
-test('(f) STATUS.md de 3073 caracteres excede y de 3072 no', () => {
+test('(f) STATUS.md de 1537 caracteres excede y de 1536 no', () => {
   const r1 = chequear(raizTemporal({ status: 'x'.repeat(UMBRALES.STATUS + 1) }));
   const st1 = r1.archivos.find((a) => a.ruta === 'definitions/STATUS.md');
-  assert.equal(st1.caracteres, 3073);
+  assert.equal(st1.caracteres, 1537);
   assert.equal(st1.excede, true);
 
   const r2 = chequear(raizTemporal({ status: 'x'.repeat(UMBRALES.STATUS) }));
   const st2 = r2.archivos.find((a) => a.ruta === 'definitions/STATUS.md');
-  assert.equal(st2.caracteres, 3072);
+  assert.equal(st2.caracteres, 1536);
   assert.equal(st2.excede, false);
 });
 
@@ -139,6 +139,47 @@ test('CLI sobre el repo real termina en 0 e imprime el tamaño de lo que se lee'
   const res = spawnSync(process.execPath, [SCRIPT], { encoding: 'utf8', cwd: RAIZ });
   assert.equal(res.status, 0);
   assert.ok(res.stdout.includes('Tamaño de lo que se lee'));
+});
+
+test('(j) tarea de 6145 caracteres en features/Fxx-* se avisa; 6144 no; completed/ se omite', () => {
+  const raiz = raizTemporal({ carpetas: { 'F01-base': ['hecha'] } });
+  const tarea = path.join(raiz, 'features', 'F01-base', 'task-01-tarea.md');
+  const base = fs.readFileSync(tarea, 'utf8');
+  const con = (n) => base + 'x'.repeat(n - base.length);
+
+  fs.writeFileSync(tarea, con(UMBRALES.TAREA + 1));
+  const r1 = chequear(raiz);
+  assert.deepEqual(r1.tareasGrandes, [
+    { ruta: 'features/F01-base/task-01-tarea.md', caracteres: UMBRALES.TAREA + 1, umbral: UMBRALES.TAREA },
+  ]);
+  const linea1 = formatearInforme(r1).split('\n').find((l) => l.includes('task-01-tarea.md'));
+  assert.ok(linea1.endsWith(' AVISO'), linea1);
+
+  fs.writeFileSync(tarea, con(UMBRALES.TAREA));
+  const r2 = chequear(raiz);
+  assert.deepEqual(r2.tareasGrandes, []);
+  assert.ok(formatearInforme(r2).includes('## Tareas sobre el umbral\n- ninguna'));
+
+  const dirCompleted = path.join(raiz, 'features', 'completed', 'F09-archivada');
+  fs.mkdirSync(dirCompleted, { recursive: true });
+  fs.writeFileSync(path.join(dirCompleted, 'task-01-tarea.md'), 'x'.repeat(UMBRALES.TAREA + 1));
+  const r3 = chequear(raiz);
+  assert.deepEqual(r3.tareasGrandes, []);
+});
+
+test('(k) con STATUS.md de 1537 y una tarea de 6145, el CLI termina en 0 y avisa', () => {
+  const raiz = raizTemporal({
+    carpetas: { 'F01-base': ['hecha'] },
+    status: 'x'.repeat(UMBRALES.STATUS + 1),
+  });
+  fs.writeFileSync(
+    path.join(raiz, 'features', 'F01-base', 'task-01-tarea.md'),
+    'x'.repeat(UMBRALES.TAREA + 1)
+  );
+  const res = spawnSync(process.execPath, [SCRIPT, '--raiz', raiz], { encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+  assert.ok(res.stdout.includes('AVISO'));
+  assert.ok(res.stdout.includes('## Tareas sobre el umbral'));
 });
 
 // ---- task-02: --aplicar ----

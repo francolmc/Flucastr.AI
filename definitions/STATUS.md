@@ -4,13 +4,15 @@
 
 ## Paso actual
 
-F22 `hecha` (Franco, 2026-11-01); tareas 01–04 `hecha`. En pausa: Franco commitea y hace el PR.
-Siguiente al volver: `planificador`, `descomponer-feature` de F23 (mueve la marca `→` de F22 a F23).
+F22 `hecha` y mergeada. F23 `hecha` (Franco, 2026-11-01); tareas 01–02 `hecha`. En pausa: Franco commitea y hace el PR.
+Sin feature siguiente lista: F11 requiere al `arquitecto` antes de descomponer (y datos de ~10 tareas con `Registro:`).
+Rama: feature/F23-topes-verificables
 
 ## Espera a Franco
 
-- Feature F22 completa en feature/F22-lectura-acotada-roles: cierra la rama, haz el PR y despliega. Commitea antes task-03 y task-04 si falta.
-- `BACKLOG.md` línea 39 (nota «Siguiente (`→`)») aún dice F21; actualízala (el planificador no pudo).
+- Feature F23 completa en feature/F23-topes-verificables: cierra la rama, haz el PR y despliega. Commitea antes task-02 si falta.
+- Feature F23 archivable (junto con F22): `node scripts/archivar.mjs --aplicar F23`, después del PR y en su propio commit `chore/` (lo corre Franco o, si lo pide, tú).
+- Revisa la nota en prosa de `BACKLOG.md` línea 39 (dice F23 `pendiente`; ahora está `hecha`).
 - Chequeo de contexto: `node scripts/archivar.mjs` (sugerencia, no bloquea).
 - Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea).
 - Feature F22 archivable: `node scripts/archivar.mjs --aplicar F22` (lo corre Franco o, si lo pide, tú, después del PR y en su propio commit `chore/`).
