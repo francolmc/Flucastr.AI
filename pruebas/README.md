@@ -27,3 +27,4 @@
     - Ninguno de los dos prueba un umbral real para uso normal.
   - Claude Code: no se hizo corrida con modelo (decisión de Franco, 2026-10-31): costo estimado US$1–3 y el mismo límite de diseño que Pi. La compactación automática real de Claude Code ya está observada en `pruebas/resultados/2026-10-31-verificacion-compactacion.md` (`trigger: "auto"`, umbral real ≈ ventana − 33 000). Claude Code lleva el colchón de 33.000 tokens.
   - La corrida con modelo solo se hace a pedido de Franco.
+- Consumo (F20): `node --test pruebas/comprobaciones/consumo.test.mjs` (43 pruebas, sin modelo ni red; fuera de `rapida.sh`). El comando de medición es `node scripts/consumo.mjs --raiz <carpeta de logs>`, documentado en README.md, sección «Medición de consumo».

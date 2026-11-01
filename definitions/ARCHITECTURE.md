@@ -272,6 +272,10 @@ flowchart LR
 
 ## Higiene de contexto (aprobado 2026-10-31; cambio de diseño APROBADO el 2026-10-31, puerta 1)
 
+### Consumo del `coordinador` (medido 2026-10-31)
+
+El costo está en las sesiones largas que releen su contexto, sobre todo el `coordinador`; la mitigación (lectura por rol, topes de tamaño y medición) está en [`CONTEXTO.md`](CONTEXTO.md). `compactar_en` por perfil se decide en F25. No cambia el diseño de compactación ya aprobado.
+
 ### Cambio de diseño (APROBADO el 2026-10-31, puerta 1)
 
 **Aprobación (Franco, 2026-10-31, puerta 1; informe `pruebas/resultados/2026-10-31-verificacion-compactacion.md`).** (1) Ajuste global de Pi (`~/.pi/agent/settings.json`, `compaction.modelOverrides`) y, en Claude Code, `.claude/settings.local.json` de los proyectos instalados con `--proyecto`. (2) `compactar_en` = 100000, editable en `modelos.json` (Claude Code lleva +33000). (3) Se elimina `CONTEXTO:`. (4) Se descarta la extensión de Pi con `ctx.compact()`. (5) Línea de identidad «Herramienta | Modelo | Agente» como primera línea del cuerpo de cada agente generado. Implementación en dos features: F18 (identidad, quitar la referencia a `modelos.json` de los prompts, lectura acotada) y F19 (compactación automática instalada por el kit). Las preguntas de «5. Preguntas abiertas» quedan respondidas por estas decisiones.

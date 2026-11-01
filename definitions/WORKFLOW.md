@@ -22,7 +22,7 @@
 Ramas, refinado y modo yolo: §9. Todos: sin leer `.env`, llaves ni credenciales.
 ## 3. `coordinador`
 
-Lee `STATUS.md`, `BACKLOG.md` y `features/`, decide el paso siguiente y lo delega como subagente.
+Lee `STATUS.md`, `BACKLOG.md` y `features/` (de tareas, 3 primeras líneas), decide el paso siguiente y lo delega como subagente.
 
 | Estado observado | Paso |
 |---|---|
@@ -86,6 +86,7 @@ Aprobada la lista cerrada y sus condiciones; `--aplicar` siempre con `Fxx` expl�
 ## Bloqueos abiertos     (quién bloquea, rol requerido, motivo)
 ## Última actualización  (fecha)
 ```
+Se reescribe solo en puertas y cambios de rol; aviso a 1,5 KB.
 
 ## 4. `BACKLOG.md` (propuesta)
 
@@ -137,7 +138,8 @@ repo: …   depende_de: …   estado: borrador | aprobada | en curso | lista par
 ### Qué las hace «acotadas» (cifras a calibrar; aceptadas como punto de partida)
 
 - Un solo repo y un solo objetivo verificable.
-- Hasta ~8 pasos y ~5 archivos tocados, hasta 5 criterios.
+- Hasta ~8 pasos y ~3 archivos tocados, hasta 5 criterios.
+- Hasta 6 KB (aviso) / 8 KB (error); *Evidencia* hasta 1,5 KB.
 - Al terminar, el repo queda funcionando (nada a medias).
 - Si no cabe, el planificador la parte en dos tareas con `depende_de:`; no la entrega grande.
 
@@ -270,15 +272,11 @@ Un solo script de Node, sin dependencias ni red, con dos modos:
 
 ### 10.4 Chequeo de contexto: qué leen los agentes y cómo se mantiene liviano
 
-Qué entra al contexto, por rol (*confirmado* por los contratos de §2 y §3):
-
-| Se lee siempre | Se lee bajo demanda | No se lee salvo pedido explícito |
-|---|---|---|
-| `AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` | `definitions/{PROJECT,WORKFLOW,ARCHITECTURE,REPOS}.md` (por rol y paso), las tareas y `refinado.md` de la feature en curso | `features/completed/**` y `registro/` |
+Qué lee cada rol: [`CONTEXTO.md`](CONTEXTO.md) §2.2–2.3. El `coordinador` lee `AGENTS.md`, `STATUS.md`, `BACKLOG.md`, `features/` y las 3 primeras líneas de cada tarea de la feature en curso; los demás, lo que su tarea nombra. Nadie lee `completed/`, `registro/` ni `PENDIENTES.md` sin pedido de Franco.
 
 El `coordinador` y el `planificador` listan `features/` sin entrar en `completed/`. El chequeo imprime, sin juzgar el contenido:
 
-1. Tamaño (caracteres y líneas) de los archivos de «se lee siempre» y de `definitions/*.md`, con aviso si superan un umbral: `STATUS.md` > 3 KB, `BACKLOG.md` > 8 KB, `AGENTS.md` > 2 KB; los de definición > 30 KB (informativo).
+1. Tamaño (caracteres y líneas) de los archivos de «se lee siempre» y de `definitions/*.md`, con aviso si superan un umbral: `STATUS.md` > 1,5 KB (aviso; error más adelante, según F20), `BACKLOG.md` > 8 KB, `AGENTS.md` > 2 KB; tareas > 6 KB; los de definición > 20 KB (informativo).
 2. Filas `hecha` del backlog con su largo, marcando las de más de ~300 caracteres.
 3. Features candidatas a archivar (§10.2) y las inconsistentes.
 4. Carpetas de `features/` con todas sus tareas `hecha` pero fila no `hecha` (solo informa; el estado lo decide Franco).

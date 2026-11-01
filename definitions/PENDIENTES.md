@@ -1,0 +1,12 @@
+# Pendientes de largo plazo de Franco
+
+> Lista de Franco. Ningún agente la lee salvo pedido explícito de Franco: no entra en «se lee siempre» (`WORKFLOW.md` §10.4) y el `coordinador` la ignora. Movida desde `STATUS.md` el 2026-10-31 (puerta 1 de `CONTEXTO.md`), textualmente.
+
+- **Comprobación pendiente en el PC de trabajo (F17):** que Pi lea las skills desde `<proyecto>/.pi/skills/` (con `/trust`). En `testskills` ya funciona. El README aún dice «Pendiente de comprobar en el PC de trabajo».
+- **Antes de publicar el repo (tuyo):** gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Don Financio, Andes), `.gitignore`; activar 2FA y proteger `main`; aclarar los commits «intrusión». Si aparece algo: rotar la credencial primero. (El repo ya es público: revísalo cuanto antes.)
+- **Comprobación manual de F09 (tuya):** la descarga desde `raw` ya funciona. Falta en el PC de trabajo: `claude --agent arquitecto` / `pi-arquitecto`, `--estado` y `--actualizar`; que `modelos.json` quede igual y que la red deje pasar `api.github.com` y `codeload.github.com` (guía en `README.md`).
+- **Decisión sobre Codex:** el sondeo (`pruebas/resultados/2026-10-31-sondeo-codex.md`) recomienda soporte parcial en dos fases con un spike. Si se abre, pasa por el backlog (puerta 2) y el diseño del arquitecto (puerta 1); respeta el contrato de herramientas nuevas de `ARCHITECTURE.md` («Higiene de contexto»).
+- **Observación de consumo en Pi (en espera de datos):** (El análisis se hizo el 2026-10-31 y originó `CONTEXTO.md`.) si repites una sesión parecida, anota tu mensaje, la respuesta previa del coordinador y qué subagente se lanzó; si delegó sin escalar, abrimos una tarea para reforzar `agentes/coordinador.md`.
+- **Decisiones abiertas (tareas aparte, sin urgencia):** `instalar.sh --copiar` con `modelos.json` inválido deja roto el personal (`instalar-remoto.sh` ya lo bloquea); ajustar `descomponer-feature` (bajar «~5 archivos» a «~3»; que «Completa» no fije conteos ni estados de otros documentos); estado del constructor ante una escalación, comandos compuestos en la allowlist y rol del bloqueo (F03); `rapida.sh` rozó el tope de 30 s en dos corridas (36 s y 46 s): vigílalo, hoy marca ~12 s.
+- **Higiene del árbol:** saca `modelos.txt` del repo si sigue (630 KB, sin trackear) y puedes borrar `pruebas/.temporales/capa1-*` y `/tmp/rapida-check.txt`.
+- Concesión opcional del permiso en Claude Code: tres reglas `allow` en tu `settings.json` (`WORKFLOW.md` §3.1).
