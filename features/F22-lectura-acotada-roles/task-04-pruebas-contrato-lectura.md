@@ -1,5 +1,5 @@
 # task-04 — Pruebas de contrato de la lectura acotada (regla 17)
-repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: hecha
 
 ## Descripción
 Para que las reglas de lectura de F22 no se pierdan en ediciones futuras, `pruebas/comprobaciones/contrato-roles.mjs` pasa a exigir las frases clave en `planificador`, `constructor`, `arquitecto` y las skills `descomponer-feature`, `ejecutar-tarea` y `disenar-arquitectura`, igual que la regla 16 lo hace con el `coordinador` (F21). Cada frase tiene un control negativo en el test.
