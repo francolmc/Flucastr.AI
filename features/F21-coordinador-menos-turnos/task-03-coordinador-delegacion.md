@@ -1,5 +1,5 @@
 # task-03 — `coordinador`: `subagents_enable` una vez, plantilla de encargo y sin `contact_supervisor`
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
 
 ## Descripción
 En Pi, el `coordinador` activó `subagents_enable` 18 veces en una sesión, y sus encargos incompletos obligaron a reintentos (`definitions/CONTEXTO.md` §1 y §2.5). Esta tarea ajusta «Autorización de delegar» y el paso de delegar de `agentes/coordinador.md`: activar la herramienta una vez por sesión, una plantilla fija de encargo y la prohibición de `contact_supervisor`.
@@ -39,7 +39,23 @@ Fuera de alcance: reglas de lectura (task-01); `STATUS.md` (task-02); pruebas (t
 - `wc -c agentes/coordinador.md` → ≤ 17920.
 
 ## Evidencia
-(lo llena el constructor)
+Verificación (pasada final, comando y salida real):
+
+```
+$ grep -cF -e 'actívala una vez por sesión; si `subagent` ya funcionó, no la repitas' -e 'Plantilla de encargo' -e 'no uses `contact_supervisor` para preguntar: ante falta de información responde `BLOQUEO:` o `REFINAR:`' agentes/coordinador.md
+3
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/coordinador-status.test.mjs pruebas/comprobaciones/higiene-contexto.test.mjs 2>&1 | grep -E '^ℹ (tests|pass|fail)'
+ℹ tests 40
+ℹ pass 40
+ℹ fail 0
+$ wc -c agentes/coordinador.md
+17687 agentes/coordinador.md
+```
+
+Criterio 4: `git diff --stat -- agentes/coordinador.md` → `agentes/coordinador.md | 10 ++++++++--` (1 file changed, 8 insertions, 2 deletions). Un `git diff --stat` sin ruta muestra además `definitions/STATUS.md` y `task-02-…md`, cambios previos que no son de esta tarea y no se tocaron.
 
 ## Notas
-(lo llena el constructor)
+- Hueco menor: la prueba `coordinador-status.test.mjs` exige que el paso 3 contenga la frase literal «Delega.»; la primera pasada falló (1 fail) y se corrigió la línea del paso 3 («3. Delega. Usa la **Plantilla de encargo** …»). Lo demás quedó literal, sin reordenar pasos.
+- La plantilla de encargo va como sub-viñetas del paso 3 (skill, `Lee:`, `No leas:`, `Devuelve:`, `Rama:`/`Modo yolo:`, `contact_supervisor`).
+- Tamaño: 17152 → 17687 bytes (tope 17920).
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

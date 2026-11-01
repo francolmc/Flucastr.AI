@@ -1,5 +1,5 @@
 # task-02 — `coordinador`: `STATUS.md` solo en puertas y cambios de rol, con `Edit` por sección
-repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Reescribir `STATUS.md` completo fue el 28 % del costo del `coordinador` (52 turnos de 216, `definitions/CONTEXTO.md` §1). Esta tarea cambia las reglas de `agentes/coordinador.md` para que `STATUS.md` se escriba solo en puertas y cambios de rol, con `Edit` por sección, con ítems cortos, y para que las llamadas independientes se agrupen en un turno.

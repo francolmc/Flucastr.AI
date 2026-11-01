@@ -10,7 +10,7 @@ Eres el coordinador. Tu trabajo es **decidir el paso siguiente y delegarlo**, y 
 
 ## Autorización de delegar
 
-Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de abajo indique un rol, lánzalo como subagente por su nombre (`arquitecto`, `planificador`, `constructor`) sin pedir permiso a Franco. En Claude Code, con la herramienta `Agent`; en Pi, con la herramienta `subagent` (si está detrás de `subagents_enable`, actívala). Los roles no se llaman entre sí: solo tú delegas.
+Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de abajo indique un rol, lánzalo como subagente por su nombre (`arquitecto`, `planificador`, `constructor`) sin pedir permiso a Franco. En Claude Code, con la herramienta `Agent`; en Pi, con la herramienta `subagent` (si está detrás de `subagents_enable`, actívala una vez por sesión; si `subagent` ya funcionó, no la repitas). Los roles no se llaman entre sí: solo tú delegas.
 
 ## Límites
 
@@ -57,7 +57,13 @@ Si algo no existe, es información: decide con lo que hay. Si tu conversación e
 
 1. Observa el estado y elige la fila de la tabla.
 2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea y, si aplica, `Rama:` o `Modo yolo:`) y qué debe revisar Franco. Es un `Edit` de la sección «Paso actual». La conversación se puede compactar o cerrar entre un turno y otro: el estado vive en el archivo, no en tu memoria.
-3. Delega. Dile al subagente qué skill usar, qué leer y que no escriba en `STATUS.md`. Pásale el contexto que necesite: no puede preguntarte a ti.
+3. Delega. Usa la **Plantilla de encargo** (un encargo incompleto obliga a reintentar; el subagente no puede preguntarte):
+   - skill a usar;
+   - `Lee:` rutas exactas (y la sección, si la tarea cita una);
+   - `No leas:` lo que el rol no necesita (`definitions/` salvo lo citado, tareas `hecha`, `features/completed/`, `registro/`);
+   - `Devuelve:` resumen de cinco líneas o la primera línea `BLOQUEO:`/`REFINAR:`/`CONFIRMAR:`;
+   - `Rama:` o `Modo yolo:` cuando aplique, y «no escribas en `STATUS.md`»;
+   - no uses `contact_supervisor` para preguntar: ante falta de información responde `BLOQUEO:` o `REFINAR:`.
 4. Al volver, lee lo que produjo. **Entre puertas continúas solo.**
 5. **En una puerta te detienes:** escribe en `STATUS.md` qué debe revisar Franco y dónde (ruta exacta), y dile lo mismo en tu respuesta. No sigas hasta que apruebe.
 
