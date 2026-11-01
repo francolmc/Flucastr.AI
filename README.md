@@ -90,6 +90,7 @@ Flucastr.AI/
 │   ├── resolver.mjs    # resuelve el modelo de cada agente, genera los archivos por herramienta y la compactación
 │   ├── archivar.mjs    # chequea el contexto y, con --aplicar Fxx (Fxx explícito; lo corre Franco o el coordinador a su pedido, WORKFLOW.md §3.1), mueve esa feature hecha a features/completed/
 │   ├── consumo.mjs     # mide consumo de tokens, turnos y KB leídos por rol desde los logs de Pi y Claude Code (solo lectura; lo corre Franco)
+│   ├── informe.mjs    # informe de resultados del flujo desde registro/eventos.jsonl; con --consumo añade el bloque de consumo (lo corre Franco)
 │   └── registrar.mjs   # registra los eventos del flujo en registro/eventos.jsonl (lo corre Franco)
 ├── pruebas/         # comprobaciones del kit y arnés de pruebas del arquitecto (ver pruebas/README.md)
 ├── instalar.sh      # instala agentes y skills en Claude Code y Pi
@@ -262,7 +263,7 @@ Los logs de Pi están en `~/.pi/agent/sessions/--<proyecto>--/` y los de Claude 
 
 ## Registro de eventos
 
-Junto datos de cada ejecución del flujo para detectar errores y mejorar cómo trabajo con los agentes. El informe que lo resuma es una feature aparte (F11), que quiero tener cuando haya unas 10 tareas con datos.
+Junto datos de cada ejecución del flujo para detectar errores y mejorar cómo trabajo con los agentes. El informe que lo resume existe: `node scripts/informe.mjs [--consumo <carpeta de logs>] [--minimo <n>] [--json]`. Lo corro yo tras `registrar.mjs`; escribe `registro/informe.md` (ignorado por git) y lo imprime. Bajo 10 tareas con datos (o bajo `--minimo`) solo da conteos, sin porcentajes ni medianas. Con `--consumo <carpeta>` añade el bloque «Consumo (aproximado)», con costo y turnos totales y por rol, leídos con `consumo.mjs`; sin esa bandera el informe no cambia. `--json` agrega la clave `consumo` con los mismos números.
 
 Lo corro yo, desde la raíz del proyecto, con `node scripts/registrar.mjs`: las veces que quiera y antes de archivar. `--reconstruir` regenera todo el archivo desde cero y `--raiz <dir>` lo apunta a otra raíz.
 
