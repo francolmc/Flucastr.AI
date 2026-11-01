@@ -15,7 +15,7 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
    - Si el encargo trae las respuestas de Franco, escríbelas en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea; una sección por pregunta con su respuesta) y descompón. Cada tarea cita `features/Fxx-nombre/refinado.md` en *Decisiones ya tomadas*.
    - **Modo yolo:** si el encargo trae la línea `Modo yolo: activo`, no hay ronda de refinado ni supuestos. Si el refinado se requiere y no hay `features/Fxx-nombre/refinado.md`, responde con la primera línea `REFINAR: feature=Fxx; preguntas=<n>` y no crees tareas: el coordinador lo trata como escalación y detiene el modo. Si no se requiere, descompón con normalidad.
 
-1. Lee la feature y el código real de cada repo que toca. Ejecuta únicamente comandos sin efectos sobre archivos versionados (pruebas, lint, `--help`) para confirmar que los comandos de *Verificación* existen. Los que no puedas ejecutar así se marcan «no ejecutado, inferido» en el *Contexto* de la tarea.
+1. Lee la feature y el código real de cada repo que toca. Ejecuta únicamente comandos sin efectos sobre archivos versionados (pruebas, lint, `--help`) para confirmar que los comandos de *Verificación* existen. Los que no puedas ejecutar así se marcan «no ejecutado, inferido» en el *Contexto* de la tarea. De `definitions/` lee solo la sección que toca la feature, nunca el documento entero.
 2. Define tareas: un solo repo y un solo objetivo verificable cada una. Con varios repos, fija el orden con `depende_de:` (la API antes que el front). En yolo, ninguna tarea pide crear rama, hacer `git switch` ni commit, ni modificar `definitions/`, y su *Verificación* no depende de la rama actual.
 3. Escribe cada tarea en `features/Fxx-nombre/task-NN-nombre.md` con la plantilla de abajo, estado `borrador`.
 4. Pasa la lista «completa» y la «acotada» a cada tarea. Si falla, corrígela o pártela.
@@ -40,6 +40,13 @@ repo: …   depende_de: …   estado: borrador
 
 Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `hecha`, `bloqueada`. Tú solo escribes `borrador`. `depende_de:` lleva el ID de otra tarea o `—`.
 
+## Tarea que se basta sola
+
+- En *Contexto*, cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita (archivo y rango de líneas, o la firma).
+- Cita cada sección de `definitions/` con su ruta y título (por ejemplo `definitions/WORKFLOW.md` §6), no el documento entero.
+- De `depende_de:` indica leer solo las *Notas* de esa tarea.
+- No pidas leer tareas `hecha` ajenas a `depende_de:`.
+
 ## Completa (cumplir antes de la puerta 3)
 
 - Las rutas del contexto las leíste en el repo. Los comandos los ejecutaste si no tienen efectos sobre archivos versionados (pruebas, lint, `--help`); los demás están marcados «no ejecutado, inferido» en el *Contexto*.
@@ -51,7 +58,8 @@ Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `h
 ## Acotada (cifras de partida, a calibrar con la primera feature real)
 
 - Un solo repo y un solo objetivo verificable.
-- Hasta ~8 pasos, ~5 archivos tocados y 5 criterios de aceptación.
+- Hasta ~8 pasos, ~3 archivos tocados y 5 criterios de aceptación.
+- Hasta 6 KB (aviso) / 8 KB (error); *Evidencia* hasta 1,5 KB.
 - Al terminar, el repo queda funcionando (nada a medias).
 - Si no cabe, pártela en dos tareas con `depende_de:`.
 

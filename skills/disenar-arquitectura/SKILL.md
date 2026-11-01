@@ -6,6 +6,7 @@ description: "Decide la estructura (uno o varios repos), dibuja el diagrama de a
 # Diseñar arquitectura
 
 Entradas: `definitions/PROJECT.md` y, si el proyecto existe, `definitions/REPOS.md`.
+Lee cada entrada una vez; si necesitas algo de nuevo, lee solo esa sección con `offset` y `limit`.
 
 ## Paso 1: elegir el modo
 

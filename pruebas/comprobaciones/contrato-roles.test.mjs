@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validarRoles, FRASES_COORDINADOR_F21 } from './contrato-roles.mjs';
+import { validarRoles, FRASES_COORDINADOR_F21, FRASES_LECTURA_F22 } from './contrato-roles.mjs';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -33,17 +33,23 @@ function muestra() {
   return {
     agentes: {
       arquitecto: FM('arquitecto', 'Diseña la arquitectura. Úsalo al iniciar un proyecto.') +
-        'Eres el arquitecto. Usa la skill `definir-proyecto`.\n',
+        'Eres el arquitecto. Usa la skill `definir-proyecto` y `disenar-arquitectura`.\n' +
+        'Lees el contexto una vez por sesión.\n' +
+        'No lees `features/` ni tareas.\n',
       planificador: FM('planificador', 'Ordena el backlog y descompone features.') +
         'Eres el planificador. Usa `crear-backlog` o `descomponer-feature`.\n' +
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n' +
         'Si te bloqueas, primera línea: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n' +
         'Si la feature requiere refinado, respondes `REFINAR: feature=Fxx; preguntas=<n>`.\n' +
         'Con el encargo «Modo yolo: activo», no preguntas: respondes REFINAR.\n' +
-        'No entras en `features/completed/`.\n',
+        'No entras en `features/completed/`.\n' +
+        'Solo lees de `definitions/` la sección que toca la feature.\n' +
+        'No lees tareas de otras features ni tareas `hecha`.\n',
       constructor: FM('constructor', 'Ejecuta una tarea aprobada.') +
         'Eres el constructor. Usa `ejecutar-tarea`.\n' +
-        'No llamas a otros agentes ni escribes en `STATUS.md`.\n',
+        'No llamas a otros agentes ni escribes en `STATUS.md`.\n' +
+        'De `depende_de:` lees solo las *Notas* de esa tarea.\n' +
+        'No lees tareas `hecha` ajenas a `depende_de:`.\n',
       coordinador: FM('coordinador', 'Decide el paso siguiente.',
         'Agent(arquitecto, planificador, constructor), Read, Grep, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*)') +
         'Eres el coordinador. Usa `crear-backlog` y `descomponer-feature`.\n' +
@@ -68,11 +74,17 @@ function muestra() {
     },
     skills: {
       'ejecutar-tarea': FM('ejecutar-tarea', 'Ejecuta una tarea aprobada.') +
-        'Si te bloqueas: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n',
+        'Si te bloqueas: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n' +
+        'Al leer, de `depende_de:` lee solo las *Notas* de esa tarea, y de `definitions/` solo la sección citada.\n' +
+        'La evidencia pegada es de hasta 1,5 KB.\n',
       'descomponer-feature': FM('descomponer-feature', 'Descompone la feature siguiente.') +
         '5. En `BACKLOG.md` solo puedes mover la marca `→`.\n' +
         'Si falta refinado, responde `REFINAR: feature=Fxx; preguntas=<n>` y cita `features/Fxx-nombre/refinado.md`.\n' +
-        'Modo yolo: activo: no hay ronda de refinado.\n',
+        'Modo yolo: activo: no hay ronda de refinado.\n' +
+        'Cada tarea sale con su ruta y título, y toca ~3 archivos tocados como máximo.\n' +
+        'Cada tarea cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita.\n',
+      'disenar-arquitectura': FM('disenar-arquitectura', 'Diseña la estructura y el diagrama.') +
+        'Lee cada entrada una vez y no releas lo ya leído.\n',
       'crear-backlog': FM('crear-backlog', 'Crea el backlog de features.') +
         'Lista ordenada de features.\n',
     },
@@ -282,6 +294,22 @@ for (const frase of FRASES_COORDINADOR_F21) {
     const errores = validarRoles(m);
     assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
   });
+}
+
+// Controles negativos de la regla 17: quitar cualquiera de las 12 frases de F22 debe nombrarla en el error.
+const AGENTES_F22 = ['planificador', 'constructor', 'arquitecto'];
+for (const [clave, frases] of Object.entries(FRASES_LECTURA_F22)) {
+  const esAgente = AGENTES_F22.includes(clave);
+  for (const frase of frases) {
+    test(`rechaza regla 17: ${esAgente ? 'el agente' : 'la skill'} «${clave}» pierde la frase «${frase}»`, () => {
+      const m = muestra();
+      const mapa = esAgente ? m.agentes : m.skills;
+      assert.ok(mapa[clave].includes(frase), `la muestra debe contener «${frase}»`);
+      mapa[clave] = mapa[clave].replace(frase, 'frase omitida');
+      const errores = validarRoles(m);
+      assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
+    });
+  }
 }
 
 test('los archivos reales de agentes, skills y modelos.json cumplen el contrato', () => {

@@ -1,5 +1,5 @@
 # task-01 — `planificador` y `descomponer-feature`: lectura acotada y tarea que se basta sola
-repo: Flucastr.AI   depende_de: —   estado: borrador
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 En la sesión medida (`definitions/CONTEXTO.md` §1) el `planificador` leyó `ARCHITECTURE.md` y `PROJECT.md` completos (69 % de lo que leyó). Esta tarea fija en `agentes/planificador.md` la regla de §2.2 (solo la sección que toca la feature) y, en `skills/descomponer-feature/SKILL.md`, la regla de que cada tarea se baste sola: cita las líneas o firmas exactas y las secciones de definición con ruta, para que el `constructor` no tenga que leer documentos enteros. Corrige además una cifra desfasada de la skill (`~5 archivos`; `WORKFLOW.md` §6 dice `~3`).
@@ -56,4 +56,43 @@ Fuera de alcance: `crear-backlog` y las demás skills; `constructor`, `arquitect
 
 ## Evidencia
 
+```
+$ git switch -c feature/F22-lectura-acotada-roles
+Switched to a new branch 'feature/F22-lectura-acotada-roles'
+$ grep -cF <3 frases> agentes/planificador.md
+1
+1
+1
+$ grep -cF <6 frases> skills/descomponer-feature/SKILL.md
+1
+1
+1
+1
+1
+1
+$ grep -c '~5 archivos' skills/descomponer-feature/SKILL.md
+0
+$ wc -c agentes/planificador.md skills/descomponer-feature/SKILL.md
+    4235 agentes/planificador.md
+    5254 skills/descomponer-feature/SKILL.md
+$ node --test contrato-roles.test.mjs higiene-contexto.test.mjs formato-tarea.test.mjs
+ℹ tests 59
+ℹ pass 59
+ℹ fail 0
+$ bash pruebas/rapida.sh
+ℹ tests 335
+ℹ pass 335
+ℹ fail 0
+rapida: 29 archivos en 17 s (tope 30 s)
+exit=0
+```
+
+Criterios: 1 cumplido (cada frase en una línea); 2 cumplido (planificador 4235 ≤ 4600 bytes, sin la frase de la línea 52 original; skill 5254 ≤ 5600, sin `~5 archivos`); 3 cumplido (contrato, higiene y formato en `fail 0`); 4 cumplido (`rapida.sh` código 0, 17 s ≤ 30 s).
+
 ## Notas
+
+- Rama creada con `git switch -c` (no existía; actual era `main`). Sin commit, push ni merge.
+- Huecos menores: ninguno.
+- `rapida.sh` se corrió dos veces: la primera pasada completa (19 s) y una segunda solo para capturar el código de salida (17 s); ambas en `fail 0`.
+- `definitions/BACKLOG.md` y `definitions/STATUS.md` ya venían modificados antes de empezar; no se tocaron.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

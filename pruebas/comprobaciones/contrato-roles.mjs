@@ -22,6 +22,34 @@ export const FRASES_COORDINADOR_F21 = [
   'no uses `contact_supervisor` para preguntar: ante falta de información responde `BLOQUEO:` o `REFINAR:`',
 ];
 
+// Frases de F22 (tareas 01 a 03) de lectura acotada. Las claves planificador, constructor y arquitecto son agentes; el resto, skills.
+export const FRASES_LECTURA_F22 = {
+  planificador: [
+    'Solo lees de `definitions/` la sección que toca la feature',
+    'No lees tareas de otras features ni tareas `hecha`',
+  ],
+  constructor: [
+    'De `depende_de:` lees solo las *Notas* de esa tarea',
+    'No lees tareas `hecha` ajenas a `depende_de:`',
+  ],
+  arquitecto: [
+    'una vez por sesión',
+    'No lees `features/` ni tareas',
+  ],
+  'descomponer-feature': [
+    'cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita',
+    'con su ruta y título',
+    '~3 archivos tocados',
+  ],
+  'ejecutar-tarea': [
+    'de `depende_de:` lee solo las *Notas* de esa tarea',
+    'hasta 1,5 KB',
+  ],
+  'disenar-arquitectura': [
+    'Lee cada entrada una vez',
+  ],
+};
+
 // Lee el front matter `---` y devuelve { clave: valor } (sin comillas dobles externas), o null si no hay.
 function frontMatter(texto) {
   const coincide = /^---\n([\s\S]*?)\n---/.exec(String(texto).replace(/\r\n?/g, '\n'));
@@ -243,6 +271,20 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
   for (const frase of FRASES_COORDINADOR_F21) {
     if (!(agentes.coordinador ?? '').includes(frase)) {
       errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
+    }
+  }
+
+  // Regla 17: planificador, constructor, arquitecto y las skills de lectura acotada conservan sus frases de F22.
+  const CLAVES_AGENTES_F22 = ['planificador', 'constructor', 'arquitecto'];
+  for (const [clave, frases] of Object.entries(FRASES_LECTURA_F22)) {
+    const esAgente = CLAVES_AGENTES_F22.includes(clave);
+    const texto = esAgente ? (agentes[clave] ?? '') : (skills[clave] ?? '');
+    for (const frase of frases) {
+      if (!texto.includes(frase)) {
+        errores.push(esAgente
+          ? `El agente «${clave}» debe contener la frase «${frase}».`
+          : `La skill «${clave}» debe contener la frase «${frase}».`);
+      }
     }
   }
 

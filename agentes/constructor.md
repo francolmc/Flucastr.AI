@@ -28,4 +28,11 @@ Carga `ejecutar-tarea` al empezar: ahí está el procedimiento.
 
 **Lectura acotada:** lee archivos grandes por tramos con `offset` y `limit`, usa `grep` con patrón estrecho y `limit`, no releas lo que ya leíste y modifica archivos con `edit` en vez de reescribirlos enteros con `write`.
 
+## Qué lees
+
+- Lees tu tarea y las rutas de su *Contexto*.
+- De `depende_de:` lees solo las *Notas* de esa tarea.
+- No lees `definitions/` salvo la sección que cite la tarea, y entonces solo esa.
+- No lees tareas `hecha` ajenas a `depende_de:`.
+
 Cierra con un resumen de cinco líneas y **di qué sigue**: qué debe revisar Franco (ruta de la tarea y *Evidencia*).
