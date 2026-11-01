@@ -3,7 +3,13 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { analizarSesionPi, analizarSubagentesPi, unirPi } from '../../scripts/consumo.mjs';
+import {
+  analizarSesionPi,
+  analizarSubagentesPi,
+  unirPi,
+  analizarSesionClaude,
+  analizarSubagentesClaude,
+} from '../../scripts/consumo.mjs';
 import {
   CENTINELA_TEXTO,
   registroSesionPi,
@@ -12,6 +18,10 @@ import {
   unirJsonl,
   metaSubagentePi,
   transcriptSubagentePi,
+  registroAgentSettingClaude,
+  turnoClaude,
+  resultadoReadClaude,
+  metaSubagenteClaude,
 } from './consumo-fixtures.mjs';
 
 const T1 = '2026-10-30T10:00:00.000Z';
@@ -363,4 +373,128 @@ test('subagentes: ni el resultado de subagentes ni el de unirPi contienen el cen
   const subagentes = conCarpeta(escenarioTresCorridas(), (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }));
   const unido = unirPi(analizarSesionPi(tresTurnos()), subagentes);
   assert.equal(JSON.stringify(unido).includes(CENTINELA_TEXTO), false);
+});
+
+// ---- task-04: Claude Code ----
+
+const sesionClaude = (...registros) => unirJsonl(registros);
+
+test('claude (1): el mismo message.id en 3 registros cuenta 1 turno y sus tokens una sola vez', () => {
+  const r = analizarSesionClaude(
+    sesionClaude(
+      turnoClaude({ id: 'm1', ts: T1, input: 100, output: 50 }),
+      turnoClaude({ id: 'm1', ts: T1, input: 100, output: 50 }),
+      turnoClaude({ id: 'm1', ts: T1, input: 100, output: 50 }),
+    ),
+  );
+  assert.equal(r.turnos, 1);
+  assert.deepEqual(r.tokens, { input: 100, output: 50, cacheRead: 0, cacheWrite: 0 });
+});
+
+test('claude (2): <synthetic> no cuenta', () => {
+  const r = analizarSesionClaude(
+    sesionClaude(
+      turnoClaude({ id: 'm1', ts: T1, input: 100 }),
+      turnoClaude({ id: 'm2', ts: T1, model: '<synthetic>', input: 999 }),
+    ),
+  );
+  assert.equal(r.turnos, 1);
+  assert.equal(r.tokens.input, 100);
+});
+
+test('claude (3): tramos con contexto 20k, 45k y 70k; costo null en todo', () => {
+  const r = analizarSesionClaude(
+    sesionClaude(
+      turnoClaude({ id: 'a', ts: T1, input: 20000 }),
+      turnoClaude({ id: 'b', ts: T2, input: 20000, cacheRead: 25000 }),
+      turnoClaude({ id: 'c', ts: T3, input: 30000, cacheRead: 40000 }),
+    ),
+  );
+  assert.deepEqual(r.tramos, {
+    menos30k: { turnos: 1, costo: null },
+    de30a60k: { turnos: 1, costo: null },
+    mas60k: { turnos: 1, costo: null },
+  });
+  assert.equal(r.costo, null);
+  assert.deepEqual(r.tiposDeTurno, { texto: { turnos: 3, costo: null } });
+});
+
+test('claude (4): Read de 2048 bytes en definitions/PROJECT.md suma kbPorCategoria.definiciones 2', () => {
+  const r = analizarSesionClaude(
+    sesionClaude(
+      turnoClaude({
+        id: 'a',
+        ts: T1,
+        input: 1000,
+        llamadas: [{ id: 'tu1', name: 'Read', input: { file_path: 'definitions/PROJECT.md' } }],
+      }),
+      resultadoReadClaude({ ts: T2, toolUseId: 'tu1', ruta: 'definitions/PROJECT.md', bytes: 2048 }),
+    ),
+  );
+  assert.deepEqual(r.lecturas.porArchivo, { 'definitions/PROJECT.md': { lecturas: 1, kb: 2 } });
+  assert.equal(r.lecturas.kbPorCategoria.definiciones, 2);
+  assert.equal(r.lecturas.kbTotal, 2);
+});
+
+test('claude (5): Agent → llamadasSubagente 1 y tipo de turno delegar', () => {
+  const r = analizarSesionClaude(
+    sesionClaude(
+      turnoClaude({
+        id: 'a',
+        ts: T1,
+        input: 1000,
+        llamadas: [{ id: 'tu1', name: 'Agent', input: { subagent_type: 'constructor' } }],
+      }),
+    ),
+  );
+  assert.equal(r.llamadasSubagente, 1);
+  assert.equal(r.herramientas.subagent, 1);
+  assert.deepEqual(r.tiposDeTurno, { delegar: { turnos: 1, costo: null } });
+});
+
+test('claude (6): rol desde agent-setting; sin ese registro, "desconocido"', () => {
+  const con = analizarSesionClaude(sesionClaude(registroAgentSettingClaude('coordinador'), turnoClaude({ id: 'a', ts: T1 })));
+  const sin = analizarSesionClaude(sesionClaude(turnoClaude({ id: 'a', ts: T1 })));
+  assert.equal(con.rol, 'coordinador');
+  assert.equal(sin.rol, 'desconocido');
+});
+
+test('claude (7): subagentes: dos metas constructor suman corridas 2 y turnos por message.id', () => {
+  const transcript = sesionClaude(turnoClaude({ id: 'x', ts: T1, input: 100 }));
+  const r = conCarpeta(
+    {
+      'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })),
+      'agent-a1.jsonl': transcript,
+      'agent-a2.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })),
+      'agent-a2.jsonl': transcript,
+    },
+    (dir) => analizarSubagentesClaude(dir),
+  );
+  assert.equal(r.porRol.constructor.corridas, 2);
+  assert.equal(r.porRol.constructor.turnos, 2);
+  assert.equal(r.porRol.constructor.tokens.input, 200);
+});
+
+test('claude (8): carpeta de subagentes inexistente → porRol {}', () => {
+  const r = analizarSubagentesClaude(join(tmpdir(), `consumo-inexistente-${Date.now()}`));
+  assert.deepEqual(r.porRol, {});
+});
+
+test('claude: el texto de los mensajes y la description del meta no aparecen en los resultados', () => {
+  const sesion = analizarSesionClaude(
+    sesionClaude(
+      registroAgentSettingClaude('coordinador'),
+      turnoClaude({ id: 'a', ts: T1, input: 100, llamadas: [{ id: 'tu1', name: 'Read', input: { file_path: 'definitions/PROJECT.md' } }] }),
+      resultadoReadClaude({ ts: T2, toolUseId: 'tu1', ruta: 'definitions/PROJECT.md', bytes: 2048 }),
+    ),
+  );
+  const subagentes = conCarpeta(
+    {
+      'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })),
+      'agent-a1.jsonl': sesionClaude(turnoClaude({ id: 'x', ts: T1, input: 100 })),
+    },
+    (dir) => analizarSubagentesClaude(dir),
+  );
+  assert.equal(JSON.stringify(sesion).includes(CENTINELA_TEXTO), false);
+  assert.equal(JSON.stringify(subagentes).includes(CENTINELA_TEXTO), false);
 });

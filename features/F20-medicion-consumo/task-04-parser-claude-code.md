@@ -1,5 +1,5 @@
 # task-04 — Parser de sesión de Claude Code: turnos, tokens, tipos de turno y KB leídos
-repo: Flucastr.AI   depende_de: task-03   estado: aprobada
+repo: Flucastr.AI   depende_de: task-03   estado: lista para revisión
 
 ## Descripción
 Misma medición que task-01 a 03 para los logs de Claude Code (`~/.claude/projects/<proyecto>/`): sesión principal y subagentes. Claude Code no registra costo por mensaje, así que el costo queda «no disponible» y la comparación usa tokens, turnos y KB leídos. Reutiliza la clasificación de turnos y el cálculo de tramos de Pi.
@@ -42,7 +42,26 @@ Fuera de alcance: estimar costo con precios (no hay fuente confirmada); CLI e in
 `node --test pruebas/comprobaciones/consumo.test.mjs` → `fail 0`.
 
 ## Evidencia
-(lo llena el constructor; solo la cola relevante, ≤1,5 KB)
+Comando: `node --test pruebas/comprobaciones/consumo.test.mjs` (salida final)
+```
+✔ claude: el texto de los mensajes y la description del meta no aparecen en los resultados (0.792542ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.196792
+```
+Criterios: 1 (dedupe por message.id y `<synthetic>`: pruebas claude 1 y 2), 2 (tokens y tramos 20k/45k/70k: claude 3), 3 (KB y subagentes por rol: claude 4, 5, 7, 8), 4 (`costo` null: claude 3), 5 (las 27 pruebas de Pi siguen en verde: pruebas a, b, c, d, e, f, tipos 1 a 9, lecturas, subagentes 1 a 3, unirPi).
 
 ## Notas
-(lo llena el constructor)
+- Refactor: en vez de «extraer» de `analizarSesionPi`, la lógica ya estaba en funciones internas; se renombraron a `clasificarTurno` (antes `tipoDeTurno`) y `tramoDeContexto` (antes `tramoDe`) y las usan ambos parsers. Resultados de Pi sin cambio (pruebas a a subagentes 3 siguen pasando).
+- Hueco menor: `analizarSesionClaude` añade `subagentsEnable: 0` para tener la misma forma que Pi. Decisión conservadora.
+- Hueco menor: `analizarSubagentesClaude` devuelve `{ porRol: {}, modelos: {} }` si la carpeta no existe; la tarea solo pedía `porRol:{}`.
+- Hueco menor: en `porArchivo` de subagentes se usa `{ lecturas, kb }`, igual que en Pi. Y las corridas no llevan `costo` (Claude Code no lo registra).
+- Turno sin `message.id`: se cuenta por registro con id sintético `sin-id-N` (no ocurre en los logs vistos; caso defensivo).
+- Logs de Claude Code: se inspeccionaron solo los campos del `.jsonl` de la sesión indicada (sin contenido de mensajes ni credenciales).
+- Huecos: 4. Sin commit, push ni merge. En `definitions/STATUS.md` no se escribió nada.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=4; resultado=lista; causa=ninguna

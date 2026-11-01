@@ -86,8 +86,7 @@ export function metaSubagentePi({
 // llamada `read` por cada entrada de `lecturas` ({ ruta, bytes, error }), su resultado (texto de exactamente
 // `bytes` bytes, con CENTINELA_TEXTO al inicio; bytes >= 24) y un registro tool_start que el parser ignora.
 export function transcriptSubagentePi({ lecturas = [] } = {}) {
-  const llamadas = lecturas.map((l, i) => ({ type: 'toolCall', id: `s${i}`, name: 'read', arguments: { path: l.ruta } }));
-  const registros = [
+  const llamadas = lecturas.map((l, i) => ({ type: 'toolCall', id: `s${i}`, name: 'read', arguments: { path: l.ruta } }));  const registros = [
     {
       recordType: 'message',
       sourceEventType: 'message_end',
@@ -112,4 +111,68 @@ export function transcriptSubagentePi({ lecturas = [] } = {}) {
     });
   });
   return unirJsonl(registros);
+}
+
+// ---- task-04: logs de Claude Code (solo campos; el texto de los bloques es CENTINELA_TEXTO) ----
+
+export function registroAgentSettingClaude(agentSetting = 'coordinador') {
+  return { type: 'agent-setting', agentSetting, sessionId: 'sesion-sintetica' };
+}
+
+// Registro del asistente de Claude Code. Un message.id puede repetirse en varios registros (uno por bloque).
+// `llamadas`: [{ id, name, input }] con los nombres originales de Claude Code (Read, Agent, ...).
+export function turnoClaude({
+  id = 'msg-sintetico',
+  ts = TS_POR_DEFECTO,
+  model = 'modelo-sintetico',
+  input = 0,
+  output = 0,
+  cacheRead = 0,
+  cacheWrite = 0,
+  llamadas = [],
+} = {}) {
+  return {
+    type: 'assistant',
+    timestamp: ts,
+    sessionId: 'sesion-sintetica',
+    isSidechain: false,
+    message: {
+      id,
+      model,
+      role: 'assistant',
+      content: [
+        { type: 'text', text: CENTINELA_TEXTO },
+        ...llamadas.map((l) => ({ type: 'tool_use', id: l.id, name: l.name, input: l.input ?? {} })),
+      ],
+      usage: {
+        input_tokens: input,
+        output_tokens: output,
+        cache_read_input_tokens: cacheRead,
+        cache_creation_input_tokens: cacheWrite,
+      },
+    },
+  };
+}
+
+// Resultado de Read: registro `user` con tool_result y toolUseResult.file.content de exactamente `bytes` bytes
+// (bytes >= 29, largo de CENTINELA_TEXTO). Con error, el tool_result lleva is_error:true.
+export function resultadoReadClaude({ ts = TS_POR_DEFECTO, toolUseId, ruta, bytes, error = false } = {}) {
+  const contenido = CENTINELA_TEXTO + 'a'.repeat(Math.max(0, bytes - CENTINELA_TEXTO.length));
+  return {
+    type: 'user',
+    timestamp: ts,
+    sessionId: 'sesion-sintetica',
+    isSidechain: false,
+    message: {
+      role: 'user',
+      content: [{ type: 'tool_result', tool_use_id: toolUseId, content: contenido, is_error: Boolean(error) }],
+    },
+    toolUseResult: { file: { filePath: ruta, content: contenido, numLines: 1 } },
+  };
+}
+
+// Meta de una corrida de subagente de Claude Code (agent-<id>.meta.json). `description` lleva CENTINELA_TEXTO
+// para comprobar que el parser lo ignora.
+export function metaSubagenteClaude({ agentType = 'constructor' } = {}) {
+  return { agentType, description: CENTINELA_TEXTO };
 }

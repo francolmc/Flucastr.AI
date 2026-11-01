@@ -11,7 +11,7 @@
 // Solo analizarSubagentesPi lee archivos (los meta y transcripts de una carpeta, sin escribir). No hace red
 // ni llama a ningún modelo. Las líneas que no son JSON y los registros que no son turnos del asistente se ignoran.
 
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // Tramos de contexto por turno (contexto = input + cacheRead + cacheWrite).
@@ -22,7 +22,7 @@ const TRAMO_60K = 60000;
 // Redondeo para evitar ruido de coma flotante en los costos sumados.
 const redondear = (x) => Math.round(x * 1e10) / 1e10;
 
-function tramoDe(contexto) {
+function tramoDeContexto(contexto) {
   if (contexto < TRAMO_30K) return "menos30k";
   if (contexto <= TRAMO_60K) return "de30a60k";
   return "mas60k";
@@ -37,7 +37,7 @@ const FORMA_TAREA = /task-\d{2}-[^/]*\.md$/;
 
 // Tipo de turno (task-02): primera coincidencia en este orden, mirando todas las llamadas del turno.
 // llamadas: [{ name, ruta }]; ruta es "" si la llamada no trae `path`.
-function tipoDeTurno(llamadas) {
+function clasificarTurno(llamadas) {
   if (llamadas.length === 0) return "texto";
   const alguna = (pred) => llamadas.some(pred);
   if (alguna((l) => l.name === "subagents_enable")) return "subagents_enable";
@@ -142,7 +142,7 @@ export function analizarSesionPi(texto, { hasta } = {}) {
     const cacheWrite = numero(uso.cacheWrite);
     const costo = numero(uso.cost?.total);
     const contexto = input + cacheRead + cacheWrite;
-    const tramo = salida.tramos[tramoDe(contexto)];
+    const tramo = salida.tramos[tramoDeContexto(contexto)];
 
     salida.turnos += 1;
     salida.costo = redondear(salida.costo + costo);
@@ -164,7 +164,7 @@ export function analizarSesionPi(texto, { hasta } = {}) {
       if (item.name === "read" && item.id !== undefined) lecturasPorId.set(item.id, ruta);
     }
 
-    const tipo = tipoDeTurno(llamadas);
+    const tipo = clasificarTurno(llamadas);
     const sumaTipo = salida.tiposDeTurno[tipo] ?? { turnos: 0, costo: 0 };
     sumaTipo.turnos += 1;
     sumaTipo.costo = redondear(sumaTipo.costo + costo);
@@ -326,4 +326,218 @@ export function unirPi(principal, subagentes) {
   const llamadas = principal.llamadasSubagente;
   const turnosPorLlamada = llamadas > 0 ? Math.round((principal.turnos / llamadas) * 10) / 10 : null;
   return { ...principal, subagentes, turnosPorLlamada };
+}
+
+// ---- task-04: Claude Code (logs en ~/.claude/projects/<proyecto>/) ----
+
+// Nombres de Claude Code → nombres comunes con Pi (Agent es la delegación, subagent).
+const NOMBRES_CLAUDE = { Read: "read", Edit: "edit", Write: "write", Agent: "subagent" };
+const normalizarNombre = (nombre) => NOMBRES_CLAUDE[nombre] ?? nombre.toLowerCase();
+
+// Lee un .jsonl de Claude Code (sesión o subagente). Un turno es un message.id, aunque aparezca en varios
+// registros (uno por bloque de contenido); se omite model "<synthetic>" y los registros posteriores a `limite` (ms).
+// Devuelve { rol, turnos: Map<id, {model, usage, llamadas}>, lecturasPorId, bytesPorId }.
+function agruparClaude(texto, limite) {
+  let rol;
+  let sinId = 0;
+  const turnos = new Map();
+  const lecturasPorId = new Map();
+  const bytesPorId = new Map();
+  const llamadasVistas = new Set();
+
+  for (const linea of String(texto).split("\n")) {
+    if (linea.trim() === "") continue;
+    const registro = parsearLinea(linea);
+    if (!registro) continue;
+    if (rol === undefined && registro.type === "agent-setting" && typeof registro.agentSetting === "string") {
+      rol = registro.agentSetting;
+    }
+    if (limite !== Infinity && registro.timestamp !== undefined) {
+      const ts = Date.parse(registro.timestamp);
+      if (Number.isFinite(ts) && ts > limite) continue;
+    }
+    const mensaje = registro.message;
+    if (!mensaje || typeof mensaje !== "object") continue;
+
+    if (registro.type === "assistant") {
+      if (mensaje.model === "<synthetic>") continue;
+      const id = typeof mensaje.id === "string" ? mensaje.id : `sin-id-${sinId++}`;
+      if (!turnos.has(id)) turnos.set(id, { model: undefined, usage: {}, llamadas: [] });
+      const turno = turnos.get(id);
+      if (typeof mensaje.model === "string") turno.model = mensaje.model;
+      if (mensaje.usage && typeof mensaje.usage === "object") turno.usage = mensaje.usage;
+      for (const item of Array.isArray(mensaje.content) ? mensaje.content : []) {
+        if (item?.type !== "tool_use" || typeof item.name !== "string") continue;
+        if (typeof item.id === "string") {
+          if (llamadasVistas.has(item.id)) continue;
+          llamadasVistas.add(item.id);
+        }
+        const nombre = normalizarNombre(item.name);
+        const ruta = typeof item.input?.file_path === "string" ? item.input.file_path : "";
+        turno.llamadas.push({ name: nombre, ruta });
+        if (nombre === "read" && typeof item.id === "string") lecturasPorId.set(item.id, ruta);
+      }
+    } else if (registro.type === "user" && Array.isArray(mensaje.content)) {
+      const contenido = registro.toolUseResult?.file?.content;
+      if (typeof contenido !== "string") continue;
+      for (const item of mensaje.content) {
+        if (item?.type !== "tool_result" || typeof item.tool_use_id !== "string" || item.is_error === true) continue;
+        bytesPorId.set(item.tool_use_id, Buffer.byteLength(contenido));
+      }
+    }
+  }
+  return { rol, turnos, lecturasPorId, bytesPorId };
+}
+
+// Lecturas `read` con resultado (pareo por tool_use id): ruta → { lecturas, bytes }.
+function lecturasDeClaude(lecturasPorId, bytesPorId) {
+  const porRuta = new Map();
+  for (const [id, ruta] of lecturasPorId) {
+    if (!bytesPorId.has(id)) continue;
+    if (!porRuta.has(ruta)) porRuta.set(ruta, { lecturas: 0, bytes: 0 });
+    const entrada = porRuta.get(ruta);
+    entrada.lecturas += 1;
+    entrada.bytes += bytesPorId.get(id);
+  }
+  return porRuta;
+}
+
+// Tokens de un turno de Claude Code (usage del mensaje).
+function tokensDeTurnoClaude(usage) {
+  return {
+    input: numero(usage.input_tokens),
+    output: numero(usage.output_tokens),
+    cacheRead: numero(usage.cache_read_input_tokens),
+    cacheWrite: numero(usage.cache_creation_input_tokens),
+  };
+}
+
+// texto: contenido de una sesión de Claude Code (.jsonl). opciones.hasta: ISO opcional.
+// costo es null: Claude Code no registra costo por mensaje (no se estima con precios).
+export function analizarSesionClaude(texto, { hasta } = {}) {
+  const limite = hasta === undefined ? Infinity : Date.parse(hasta);
+  const { rol, turnos, lecturasPorId, bytesPorId } = agruparClaude(texto, limite);
+
+  const salida = {
+    herramienta: "claude-code",
+    rol: rol ?? "desconocido",
+    turnos: 0,
+    costo: null,
+    tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+    tramos: {
+      menos30k: { turnos: 0, costo: null },
+      de30a60k: { turnos: 0, costo: null },
+      mas60k: { turnos: 0, costo: null },
+    },
+    herramientas: {},
+    llamadasSubagente: 0,
+    subagentsEnable: 0,
+    tiposDeTurno: {},
+    lecturas: { porArchivo: {}, kbTotal: 0, kbPorCategoria: { definiciones: 0, tareas: 0, otros: 0 } },
+  };
+
+  for (const turno of turnos.values()) {
+    const tokens = tokensDeTurnoClaude(turno.usage);
+    const contexto = tokens.input + tokens.cacheRead + tokens.cacheWrite;
+    salida.turnos += 1;
+    salida.tokens.input += tokens.input;
+    salida.tokens.output += tokens.output;
+    salida.tokens.cacheRead += tokens.cacheRead;
+    salida.tokens.cacheWrite += tokens.cacheWrite;
+    salida.tramos[tramoDeContexto(contexto)].turnos += 1;
+
+    for (const llamada of turno.llamadas) {
+      salida.herramientas[llamada.name] = (salida.herramientas[llamada.name] ?? 0) + 1;
+      if (llamada.name === "subagent") salida.llamadasSubagente += 1;
+    }
+    const tipo = clasificarTurno(turno.llamadas);
+    salida.tiposDeTurno[tipo] = { turnos: (salida.tiposDeTurno[tipo]?.turnos ?? 0) + 1, costo: null };
+  }
+
+  const bytesPorCategoria = { definiciones: 0, tareas: 0, otros: 0 };
+  let bytesTotal = 0;
+  for (const [ruta, lectura] of lecturasDeClaude(lecturasPorId, bytesPorId)) {
+    salida.lecturas.porArchivo[ruta] = { lecturas: lectura.lecturas, kb: aKb(lectura.bytes) };
+    bytesPorCategoria[categoriaDeLectura(ruta)] += lectura.bytes;
+    bytesTotal += lectura.bytes;
+  }
+  for (const categoria of Object.keys(bytesPorCategoria)) {
+    salida.lecturas.kbPorCategoria[categoria] = aKb(bytesPorCategoria[categoria]);
+  }
+  salida.lecturas.kbTotal = aKb(bytesTotal);
+
+  return salida;
+}
+
+// dirSubagentes: carpeta subagents/ de una sesión de Claude Code (solo lectura). Por corrida:
+// agent-<id>.meta.json (agentType; el campo description se ignora) y su transcript agent-<id>.jsonl.
+// Devuelve { porRol: { <agentType>: { corridas, turnos, tokens, kbTotal, porArchivo } }, modelos }.
+// Si la carpeta no existe, porRol es {}.
+export function analizarSubagentesClaude(dirSubagentes) {
+  if (!existsSync(dirSubagentes)) return { porRol: {}, modelos: {} };
+
+  // Maps (no objetos planos) para que un rol como "constructor" no choque con Object.prototype.
+  const porRol = new Map();
+  const modelos = new Map();
+
+  for (const nombre of readdirSync(dirSubagentes).sort()) {
+    if (!nombre.startsWith("agent-") || !nombre.endsWith(".meta.json")) continue;
+    const agentId = nombre.slice("agent-".length, -".meta.json".length);
+    let meta;
+    try {
+      meta = JSON.parse(readFileSync(join(dirSubagentes, nombre), "utf8"));
+    } catch {
+      continue;
+    }
+    if (!meta || typeof meta.agentType !== "string") continue;
+    const rol = meta.agentType;
+    if (!porRol.has(rol)) {
+      porRol.set(rol, {
+        corridas: 0,
+        turnos: 0,
+        tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        lecturas: new Map(),
+      });
+      modelos.set(rol, new Set());
+    }
+    const r = porRol.get(rol);
+
+    let texto;
+    try {
+      texto = readFileSync(join(dirSubagentes, `agent-${agentId}.jsonl`), "utf8");
+    } catch {
+      texto = "";
+    }
+    const { turnos, lecturasPorId, bytesPorId } = agruparClaude(texto, Infinity);
+
+    r.corridas += 1;
+    for (const turno of turnos.values()) {
+      r.turnos += 1;
+      const tokens = tokensDeTurnoClaude(turno.usage);
+      for (const clave of Object.keys(r.tokens)) r.tokens[clave] += tokens[clave];
+      if (turno.model !== undefined) modelos.get(rol).add(turno.model);
+    }
+    for (const [ruta, lectura] of lecturasDeClaude(lecturasPorId, bytesPorId)) {
+      const acumulado = r.lecturas.get(ruta) ?? { lecturas: 0, bytes: 0 };
+      acumulado.lecturas += lectura.lecturas;
+      acumulado.bytes += lectura.bytes;
+      r.lecturas.set(ruta, acumulado);
+    }
+  }
+
+  const salidaPorRol = {};
+  for (const [rol, r] of porRol) {
+    const porArchivo = {};
+    let bytesTotal = 0;
+    for (const [ruta, lectura] of r.lecturas) {
+      porArchivo[ruta] = { lecturas: lectura.lecturas, kb: aKb(lectura.bytes) };
+      bytesTotal += lectura.bytes;
+    }
+    salidaPorRol[rol] = { corridas: r.corridas, turnos: r.turnos, tokens: r.tokens, kbTotal: aKb(bytesTotal), porArchivo };
+  }
+
+  const modelosPorRol = {};
+  for (const [rol, conjunto] of modelos) modelosPorRol[rol] = [...conjunto].sort();
+
+  return { porRol: salidaPorRol, modelos: modelosPorRol };
 }

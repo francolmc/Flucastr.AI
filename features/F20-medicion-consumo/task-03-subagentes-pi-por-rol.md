@@ -1,5 +1,5 @@
 # task-03 — Subagentes de Pi: turnos, costo y KB leídos por rol
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 Suma a la medición de Pi el trabajo de los subagentes (`arquitecto`, `planificador`, `constructor`): costo y turnos por rol, y KB leídos por rol y por archivo, para comprobar lo que cada rol lee (`definitions/CONTEXTO.md` §2.2). Calcula también los turnos del `coordinador` por llamada a subagente.
