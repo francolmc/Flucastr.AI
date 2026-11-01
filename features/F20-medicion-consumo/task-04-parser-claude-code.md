@@ -1,5 +1,5 @@
 # task-04 — Parser de sesión de Claude Code: turnos, tokens, tipos de turno y KB leídos
-repo: Flucastr.AI   depende_de: task-03   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
 Misma medición que task-01 a 03 para los logs de Claude Code (`~/.claude/projects/<proyecto>/`): sesión principal y subagentes. Claude Code no registra costo por mensaje, así que el costo queda «no disponible» y la comparación usa tokens, turnos y KB leídos. Reutiliza la clasificación de turnos y el cálculo de tramos de Pi.

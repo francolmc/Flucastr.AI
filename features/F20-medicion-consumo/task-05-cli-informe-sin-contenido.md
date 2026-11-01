@@ -1,5 +1,5 @@
 # task-05 — CLI `node scripts/consumo.mjs --raiz <dir>` e informe sin texto de mensajes
-repo: Flucastr.AI   depende_de: task-04   estado: aprobada
+repo: Flucastr.AI   depende_de: task-04   estado: lista para revisión
 
 ## Descripción
 Cierra `scripts/consumo.mjs`: descubre las sesiones bajo una carpeta, elige el parser por formato, imprime el informe (por sesión y por rol, normalizable por tarea construida) y garantiza que la salida no contiene texto de mensajes ni de encargos. Es solo lectura. Lo ejecuta Franco (no está en la lista de comandos del `coordinador`, `definitions/WORKFLOW.md` §3.1).
@@ -43,7 +43,24 @@ Fuera de alcance: comparar dos corridas o calcular la meta de §2.6 (lo hace Fra
 - Comprobación de Franco (no del constructor): `node scripts/consumo.mjs --raiz ~/.pi/agent/sessions/--Users-franco-Codes-flucastr-Flucastr.Cleaner-- --hasta 2026-11-01T00:48:34.046Z` → 216 turnos, 26 llamadas a subagente, costo ≈ US$2.09 (±5 % de 2.08).
 
 ## Evidencia
-(lo llena el constructor; solo la cola relevante, ≤1,5 KB)
+```
+$ node --test pruebas/comprobaciones/consumo.test.mjs
+ℹ tests 43
+ℹ pass 43
+ℹ fail 0
+
+$ bash pruebas/rapida.sh   (última línea; código 0)
+rapida: 28 archivos en 18 s (tope 30 s)
+
+$ node scripts/consumo.mjs   (sin --raiz)
+error: falta --raiz <dir>      código 1
+```
+Cifra de Franco (cortando en `--hasta 2026-11-01T00:48:34.046Z` sobre `~/.pi/...--Cleaner--`): no se ejecutó; la deja Franco.
 
 ## Notas
-(lo llena el constructor)
+- Huecos menores resueltos:
+  1. Sesión de Pi: rol fijo `coordinador` (como dice el comentario de `analizarSesionPi`; los logs de Pi no traen rol).
+  2. `--hasta` no se aplica a los subagentes de Claude Code: `analizarSubagentesClaude` no admite `hasta` y no se cambió el parser (solo se anota aquí).
+  3. Un `.jsonl` sin ninguna línea JSON válida se omite (no es sesión); un `.jsonl` con formato no reconocido se toma como Claude Code, según la tarea.
+- Formato: la «tabla por rol» se imprime como líneas con `|`; la línea `KB de definitions/ leídos por el coordinador: N` sale sin sangría para que el caso 0 sea la línea exacta.
+- Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=3; resultado=lista; causa=ninguna

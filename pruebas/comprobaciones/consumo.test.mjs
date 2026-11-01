@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   analizarSesionPi,
   analizarSubagentesPi,
@@ -497,4 +499,232 @@ test('claude: el texto de los mensajes y la description del meta no aparecen en 
   );
   assert.equal(JSON.stringify(sesion).includes(CENTINELA_TEXTO), false);
   assert.equal(JSON.stringify(subagentes).includes(CENTINELA_TEXTO), false);
+});
+
+// ---- task-05: CLI, informe y no-contenido ----
+
+const SCRIPT = fileURLToPath(new URL('../../scripts/consumo.mjs', import.meta.url));
+const NOMBRE_PI = '2026-10-30T10-00-00.000Z_sesion-cli.jsonl';
+
+const correr = (args) => spawnSync(process.execPath, [SCRIPT, ...args], { encoding: 'utf8' });
+
+// Crea los archivos (ruta relativa a raiz → contenido), con sus carpetas.
+function escribirArbol(raiz, archivos) {
+  for (const [ruta, contenido] of Object.entries(archivos)) {
+    const completa = join(raiz, ruta);
+    mkdirSync(dirname(completa), { recursive: true });
+    writeFileSync(completa, contenido);
+  }
+}
+
+// Nombres y tamaños de todo lo que hay bajo dir.
+function inventario(dir) {
+  const lista = [];
+  const recorrer = (carpeta) => {
+    for (const nombre of readdirSync(carpeta).sort()) {
+      const ruta = join(carpeta, nombre);
+      const st = statSync(ruta);
+      lista.push(`${relative(dir, ruta)} ${st.isDirectory() ? 'dir' : st.size}`);
+      if (st.isDirectory()) recorrer(ruta);
+    }
+  };
+  recorrer(dir);
+  return lista;
+}
+
+const sesionPiCli = () =>
+  unirJsonl([
+    registroSesionPi({ id: 'sesion-cli' }),
+    turnoPi({ ts: T1, contexto: 20000, output: 100, costo: 0.01, llamadas: [{ id: 'r1', name: 'read', arguments: { path: 'definitions/ARCHITECTURE.md' } }] }),
+    resultadoPi({ ts: T1, id: 'r1', name: 'read', texto: 'a'.repeat(2048) }),
+    turnoPi({ ts: T2, contexto: 45000, output: 200, costo: 0.02, llamadas: [{ id: 's1', name: 'subagent' }] }),
+    turnoPi({ ts: T3, contexto: 70000, output: 300, costo: 0.03, llamadas: [{ id: 's2', name: 'subagent' }] }),
+  ]);
+
+const sesionClaudeCli = () =>
+  unirJsonl([
+    registroAgentSettingClaude('coordinador'),
+    turnoClaude({ id: 'm1', ts: T1, input: 20000, llamadas: [{ id: 'tu1', name: 'Read', input: { file_path: 'definitions/PROJECT.md' } }] }),
+    resultadoReadClaude({ ts: T2, toolUseId: 'tu1', ruta: 'definitions/PROJECT.md', bytes: 2048 }),
+    turnoClaude({ id: 'm2', ts: T3, input: 30000, cacheRead: 40000, llamadas: [{ id: 'tu2', name: 'Agent', input: { subagent_type: 'constructor' } }] }),
+  ]);
+
+// Subagentes de la sesión Pi sesion-cli (dos corridas: constructor con 2048 bytes leídos, planificador sin lecturas).
+const archivosSubagentesPi = (prefijo) => ({
+  [`${prefijo}subagent-artifacts/r1_constructor_meta.json`]: JSON.stringify(
+    metaSubagentePi({ runId: 'r1', agent: 'constructor', parentSessionId: 'sesion-cli', model: 'm-c', timestamp: M1, turns: 4, cost: 0.1 }),
+  ),
+  [`${prefijo}subagent-artifacts/r1_constructor_transcript.jsonl`]: transcriptSubagentePi({
+    lecturas: [{ ruta: 'definitions/PROJECT.md', bytes: 2048 }],
+  }),
+  [`${prefijo}subagent-artifacts/r2_planificador_meta.json`]: JSON.stringify(
+    metaSubagentePi({ runId: 'r2', agent: 'planificador', parentSessionId: 'sesion-cli', model: 'm-p', timestamp: M2, turns: 2, cost: 0.05 }),
+  ),
+  [`${prefijo}subagent-artifacts/r2_planificador_transcript.jsonl`]: transcriptSubagentePi(),
+});
+
+// Raíz con una sesión de Pi (y subagent-artifacts/) y una de Claude Code (y su carpeta subagents/).
+function raizDePrueba() {
+  const raiz = mkdtempSync(join(tmpdir(), 'consumo-cli-'));
+  escribirArbol(raiz, {
+    [`pi/${NOMBRE_PI}`]: sesionPiCli(),
+    ...archivosSubagentesPi('pi/'),
+    'claude/proyecto/sesion-claude.jsonl': sesionClaudeCli(),
+    'claude/proyecto/sesion-claude/subagents/agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })),
+    'claude/proyecto/sesion-claude/subagents/agent-a1.jsonl': unirJsonl([turnoClaude({ id: 'x', ts: T1, input: 100 })]),
+  });
+  return raiz;
+}
+
+// La raíz de prueba más una sesión con thinking y un comando de bash, ambos con CENTINELA_TEXTO.
+function raizConCentinela() {
+  const raiz = raizDePrueba();
+  escribirArbol(raiz, {
+    'otro/sesion-centinela.jsonl': unirJsonl([
+      registroSesionPi({ id: 'sesion-centinela' }),
+      {
+        type: 'message',
+        timestamp: T1,
+        message: {
+          role: 'assistant',
+          model: 'modelo-sintetico',
+          content: [
+            { type: 'thinking', thinking: CENTINELA_TEXTO },
+            { type: 'toolCall', id: 'b1', name: 'bash', arguments: { command: CENTINELA_TEXTO } },
+          ],
+          usage: { input: 100, output: 10, cacheRead: 0, cacheWrite: 0, cost: { total: 0 } },
+        },
+      },
+    ]),
+  });
+  return raiz;
+}
+
+// Ejecuta fn(raiz) con una raíz creada por `crear` y la borra al final.
+const conRaiz = (fn, crear = raizDePrueba) => {
+  const raiz = crear();
+  try {
+    return fn(raiz);
+  } finally {
+    rmSync(raiz, { recursive: true, force: true });
+  }
+};
+
+test('cli (1): texto con las cifras de Pi y de Claude Code, subagentes y KB por rol', () => {
+  conRaiz((raiz) => {
+    const r = correr(['--raiz', raiz]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.equal(r.stderr, '');
+    for (const esperado of [
+      `pi | coordinador | ${NOMBRE_PI}`,
+      'turnos: 3',
+      'costo: US$0.060',
+      'llamadas a subagentes: 2',
+      'turnos por llamada: 1.5',
+      'KB de definitions/ leídos por el coordinador: 2',
+      'constructor | 1 | 4 | US$0.100 | 2 KB',
+      'planificador | 1 | 2 | US$0.050 | 0 KB',
+      'claude-code | coordinador | sesion-claude.jsonl',
+      'turnos: 2',
+      'costo: n/d',
+      'constructor | 1 | 1 | n/d | 0 KB',
+      'Solo se cuentan lecturas con la herramienta read; lo leído por bash no se mide.',
+    ]) {
+      assert.ok(r.stdout.includes(esperado), `falta en la salida: ${esperado}`);
+    }
+  });
+});
+
+test('cli (2): sin lecturas de definitions/ la línea es exactamente "…: 0"; sin subagentes, "ninguno"', () => {
+  conRaiz(
+    (raiz) => {
+      escribirArbol(raiz, {
+        'pi/sesion-sola.jsonl': unirJsonl([registroSesionPi({ id: 'sesion-sola' }), turnoPi({ ts: T1, contexto: 1000, costo: 0.01 })]),
+      });
+      const r = correr(['--raiz', raiz]);
+      assert.equal(r.status, 0, r.stderr);
+      assert.ok(r.stdout.split('\n').includes('KB de definitions/ leídos por el coordinador: 0'));
+      assert.ok(r.stdout.includes('subagentes por rol: ninguno'));
+    },
+    () => mkdtempSync(join(tmpdir(), 'consumo-cli-')),
+  );
+});
+
+test('cli (3): --tareas 2 divide el costo y los turnos por tarea (n/d sin costo)', () => {
+  conRaiz((raiz) => {
+    const r = correr(['--raiz', raiz, '--tareas', '2']);
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(r.stdout.includes('costo por tarea: US$0.03'));
+    assert.ok(r.stdout.includes('turnos por tarea: 1.50'));
+    assert.ok(r.stdout.includes('costo por tarea: n/d'));
+  });
+});
+
+test('cli (4): --hasta corta por timestamp (hasta 10:07 deja dos turnos de Pi y US$0.030)', () => {
+  conRaiz((raiz) => {
+    const r = correr(['--raiz', raiz, '--hasta', '2026-10-30T10:07:00.000Z']);
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(r.stdout.includes('turnos: 2'));
+    assert.ok(r.stdout.includes('costo: US$0.030'));
+    assert.ok(r.stdout.includes('llamadas a subagentes: 1'));
+  });
+});
+
+test('cli (5): --json es JSON válido con las cifras; con --tareas añade porTarea', () => {
+  conRaiz((raiz) => {
+    const r = correr(['--raiz', raiz, '--json', '--tareas', '2']);
+    assert.equal(r.status, 0, r.stderr);
+    const { sesiones } = JSON.parse(r.stdout);
+    assert.equal(sesiones.length, 2);
+    const pi = sesiones.find((s) => s.herramienta === 'pi');
+    const cc = sesiones.find((s) => s.herramienta === 'claude-code');
+    assert.equal(pi.turnos, 3);
+    assert.equal(pi.costo, 0.06);
+    assert.equal(pi.turnosPorLlamada, 1.5);
+    assert.deepEqual(pi.porTarea, { costo: 0.03, turnos: 1.5 });
+    assert.equal(pi.subagentes.porRol['constructor'].kbTotal, 2);
+    assert.equal(cc.costo, null);
+    assert.equal(cc.rol, 'coordinador');
+  });
+});
+
+test('cli (6): errores de argumentos: stderr "error: …", código 1 y sin salida', () => {
+  conRaiz((raiz) => {
+    const casos = [
+      [[], /^error: falta --raiz/],
+      [['--raiz', raiz, '--raiz', raiz], /^error: opción repetida '--raiz'/],
+      [['--raiz', raiz, '--tareas', '0'], /^error: --tareas/],
+      [['--raiz', raiz, '--tareas', 'abc'], /^error: --tareas/],
+      [['--raiz', raiz, '--foo'], /^error: argumento desconocido '--foo'/],
+    ];
+    for (const [args, patron] of casos) {
+      const r = correr(args);
+      assert.equal(r.status, 1, JSON.stringify(args));
+      assert.match(r.stderr, patron);
+      assert.equal(r.stdout, '');
+    }
+  });
+});
+
+test('no-contenido: el centinela no sale en el texto ni en --json (stdout ni stderr); el control negativo lo detecta', () => {
+  conRaiz((raiz) => {
+    for (const args of [['--raiz', raiz], ['--raiz', raiz, '--json', '--tareas', '2']]) {
+      const r = correr(args);
+      assert.equal(r.status, 0, r.stderr);
+      assert.equal(r.stdout.includes(CENTINELA_TEXTO), false);
+      assert.equal(r.stderr.includes(CENTINELA_TEXTO), false);
+    }
+    // Control negativo: una línea cruda del .jsonl sin filtrar sí contiene el centinela.
+    const lineaCruda = readFileSync(join(raiz, 'pi', NOMBRE_PI), 'utf8').split('\n')[1];
+    assert.equal(lineaCruda.includes(CENTINELA_TEXTO), true);
+  }, raizConCentinela);
+});
+
+test('solo lectura: la raíz no cambia (nombres y tamaños) tras ejecutar', () => {
+  conRaiz((raiz) => {
+    const antes = inventario(raiz);
+    assert.equal(correr(['--raiz', raiz]).status, 0);
+    assert.equal(correr(['--raiz', raiz, '--json']).status, 0);
+    assert.deepEqual(inventario(raiz), antes);
+  });
 });

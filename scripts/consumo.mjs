@@ -2,8 +2,10 @@
 // Medición de consumo de F20 (solo lectura sobre logs de sesiones).
 //
 // Uso:
-//   Esta versión todavía no tiene CLI (llega en una tarea posterior).
-//   import { analizarSesionPi, analizarSubagentesPi, unirPi } from "./scripts/consumo.mjs";
+//   node scripts/consumo.mjs --raiz <dir> [--hasta <ISO>] [--tareas <n>] [--json]
+//   --raiz es obligatorio (no hay valor por defecto). Solo lectura: no crea ni modifica archivos.
+//   Funciones exportadas: analizarSesionPi, analizarSubagentesPi, unirPi, analizarSesionClaude,
+//   analizarSubagentesClaude, descubrirSesiones, formatearInforme, informeJson, leerArgumentos.
 //   analizarSesionPi(textoJsonl, { hasta: "2026-10-30T12:00:00Z" })  → agregados del coordinador de Pi
 //   analizarSubagentesPi(carpetaSubagentArtifacts, { sesionId, hasta }) → agregados por rol (subagentes)
 //   (carpetaSubagentArtifacts = .../subagent-artifacts/)
@@ -11,8 +13,9 @@
 // Solo analizarSubagentesPi lee archivos (los meta y transcripts de una carpeta, sin escribir). No hace red
 // ni llama a ningún modelo. Las líneas que no son JSON y los registros que no son turnos del asistente se ignoran.
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Tramos de contexto por turno (contexto = input + cacheRead + cacheWrite).
 // menos30k: < 30000; de30a60k: 30000–60000 (incluido); mas60k: > 60000.
@@ -540,4 +543,190 @@ export function analizarSubagentesClaude(dirSubagentes) {
   for (const [rol, conjunto] of modelos) modelosPorRol[rol] = [...conjunto].sort();
 
   return { porRol: salidaPorRol, modelos: modelosPorRol };
+}
+
+// ---- task-05: CLI, descubrimiento e informe (sin texto de mensajes) ----
+
+const CARPETAS_SUBAGENTES = new Set(["subagent-artifacts", "subagents"]);
+const SIN_SUBAGENTES = { porRol: {}, modelos: {} };
+const TRAMOS = ["menos30k", "de30a60k", "mas60k"];
+
+const compararTexto = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const compararPorNombre = (a, b) => compararTexto(basename(a), basename(b)) || compararTexto(a, b);
+
+// Todos los .jsonl bajo dir, sin entrar en subagent-artifacts/ ni subagents/.
+function listarJsonl(dir) {
+  const rutas = [];
+  for (const entrada of readdirSync(dir, { withFileTypes: true })) {
+    const ruta = join(dir, entrada.name);
+    if (entrada.isDirectory()) {
+      if (!CARPETAS_SUBAGENTES.has(entrada.name)) rutas.push(...listarJsonl(ruta));
+    } else if (entrada.isFile() && entrada.name.endsWith(".jsonl")) {
+      rutas.push(ruta);
+    }
+  }
+  return rutas;
+}
+
+// Primer registro JSON válido del texto, o null.
+function primerRegistro(texto) {
+  for (const linea of String(texto).split("\n")) {
+    if (linea.trim() === "") continue;
+    const registro = parsearLinea(linea);
+    if (registro) return registro;
+  }
+  return null;
+}
+
+// Busca las sesiones bajo raiz (solo lectura). Formato por la primera línea JSON válida:
+// type:"session" → Pi (rol coordinador); si no, Claude Code. Un .jsonl sin líneas JSON se omite.
+// Pi: subagentes = subagent-artifacts/ de la misma carpeta, filtrados por el id de la sesión.
+// Claude Code: subagentes = <nombre sin extensión>/subagents/ (analizarSubagentesClaude no admite hasta).
+export function descubrirSesiones(raiz, { hasta } = {}) {
+  const sesiones = [];
+  for (const ruta of listarJsonl(raiz).sort(compararPorNombre)) {
+    const texto = readFileSync(ruta, "utf8");
+    const primero = primerRegistro(texto);
+    if (!primero) continue;
+    const archivo = basename(ruta);
+    if (primero.type === "session") {
+      const subDir = join(dirname(ruta), "subagent-artifacts");
+      const subagentes =
+        existsSync(subDir) && typeof primero.id === "string"
+          ? analizarSubagentesPi(subDir, { sesionId: primero.id, hasta })
+          : SIN_SUBAGENTES;
+      sesiones.push(unirPi({ archivo, rol: "coordinador", ...analizarSesionPi(texto, { hasta }) }, subagentes));
+    } else {
+      const subDir = join(dirname(ruta), basename(ruta, ".jsonl"), "subagents");
+      sesiones.push(unirPi({ archivo, ...analizarSesionClaude(texto, { hasta }) }, analizarSubagentesClaude(subDir)));
+    }
+  }
+  return sesiones;
+}
+
+const dinero = (valor) => (typeof valor === "number" ? `US$${valor.toFixed(3)}` : "n/d");
+
+// Por tarea: costo (null sin costo) y turnos, divididos por n y redondeados a 2 decimales.
+function porTareaDe(sesion, tareas) {
+  return {
+    costo: typeof sesion.costo === "number" ? Math.round((sesion.costo / tareas) * 100) / 100 : null,
+    turnos: Math.round((sesion.turnos / tareas) * 100) / 100,
+  };
+}
+
+// Líneas de una sesión. Solo números, nombres de rol/agente/modelo/herramienta y rutas leídas.
+function lineasDeSesion(s, tareas) {
+  const lineas = [];
+  lineas.push(`${s.herramienta} | ${s.rol} | ${s.archivo}`);
+  lineas.push(`turnos: ${s.turnos}`);
+  lineas.push(`costo: ${dinero(s.costo)}`);
+  lineas.push(
+    `tokens: entrada ${s.tokens.input}, salida ${s.tokens.output}, cache lectura ${s.tokens.cacheRead}, cache escritura ${s.tokens.cacheWrite}`,
+  );
+  lineas.push(`tramos de contexto: ${TRAMOS.map((t) => `${t} ${s.tramos[t].turnos} (${dinero(s.tramos[t].costo)})`).join(", ")}`);
+  const tipos = Object.entries(s.tiposDeTurno).map(([tipo, v]) => `${tipo} ${v.turnos}`);
+  lineas.push(`tipos de turno: ${tipos.length > 0 ? tipos.join(", ") : "ninguno"}`);
+  lineas.push(`llamadas a subagentes: ${s.llamadasSubagente}`);
+  lineas.push(`subagents_enable: ${s.subagentsEnable}`);
+  lineas.push(`turnos por llamada: ${s.turnosPorLlamada ?? "n/d"}`);
+
+  const roles = Object.entries(s.subagentes.porRol);
+  if (roles.length === 0) {
+    lineas.push("subagentes por rol: ninguno");
+  } else {
+    lineas.push("subagentes por rol (rol | corridas | turnos | costo | KB leídos):");
+    for (const [rol, r] of roles) {
+      const sinTranscript = r.sinTranscript ? " | sin transcript" : "";
+      lineas.push(`  ${rol} | ${r.corridas} | ${r.turnos} | ${dinero(r.costo)} | ${r.kbTotal} KB${sinTranscript}`);
+    }
+  }
+
+  const categorias = s.lecturas.kbPorCategoria;
+  lineas.push(`KB leídos por categoría: definiciones ${categorias.definiciones}, tareas ${categorias.tareas}, otros ${categorias.otros}`);
+  lineas.push(`KB de definitions/ leídos por el coordinador: ${categorias.definiciones}`);
+  const masLeidos = Object.entries(s.lecturas.porArchivo)
+    .sort(([ra, a], [rb, b]) => b.kb - a.kb || b.lecturas - a.lecturas || compararTexto(ra, rb))
+    .slice(0, 5);
+  if (masLeidos.length === 0) {
+    lineas.push("archivos más leídos por el coordinador: ninguno");
+  } else {
+    lineas.push("archivos más leídos por el coordinador (KB | lecturas | ruta):");
+    for (const [ruta, v] of masLeidos) lineas.push(`  ${v.kb} KB | ${v.lecturas} | ${ruta}`);
+  }
+
+  if (tareas !== undefined) {
+    const porTarea = porTareaDe(s, tareas);
+    lineas.push(`costo por tarea: ${porTarea.costo === null ? "n/d" : `US$${porTarea.costo.toFixed(2)}`}`);
+    lineas.push(`turnos por tarea: ${porTarea.turnos.toFixed(2)}`);
+  }
+  return lineas;
+}
+
+// Informe de texto por sesión, con la nota final de alcance.
+export function formatearInforme(sesiones, { tareas } = {}) {
+  const bloques = sesiones.map((s) => lineasDeSesion(s, tareas).join("\n"));
+  const cuerpo = bloques.length > 0 ? bloques.join("\n\n") : "No hay sesiones (*.jsonl) bajo la raíz.";
+  return `${cuerpo}\n\nSolo se cuentan lecturas con la herramienta read; lo leído por bash no se mide.\n`;
+}
+
+// Mismo contenido que el informe de texto, como { sesiones: [...] }; con tareas, cada sesión lleva porTarea.
+export function informeJson(sesiones, { tareas } = {}) {
+  const salida = sesiones.map((s) => (tareas === undefined ? s : { ...s, porTarea: porTareaDe(s, tareas) }));
+  return `${JSON.stringify({ sesiones: salida }, null, 2)}\n`;
+}
+
+// Lee los argumentos. Cualquier cosa desconocida, repetida o inválida es error (sin tocar nada).
+export function leerArgumentos(args) {
+  const opciones = { raiz: null, hasta: undefined, tareas: undefined, json: false };
+  const vistas = new Set();
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === "--json") {
+      if (vistas.has(a)) return { error: `opción repetida '${a}'` };
+      vistas.add(a);
+      opciones.json = true;
+    } else if (a === "--raiz" || a === "--hasta" || a === "--tareas") {
+      if (vistas.has(a)) return { error: `opción repetida '${a}'` };
+      vistas.add(a);
+      const valor = args[i + 1];
+      if (valor === undefined || valor.startsWith("--")) return { error: `falta el valor de ${a}` };
+      i++;
+      if (a === "--raiz") {
+        opciones.raiz = resolve(valor);
+      } else if (a === "--hasta") {
+        if (Number.isNaN(Date.parse(valor))) return { error: `--hasta no es una fecha ISO válida: '${valor}'` };
+        opciones.hasta = valor;
+      } else {
+        if (!/^\d+$/.test(valor) || Number(valor) < 1) return { error: "--tareas exige un entero ≥ 1" };
+        opciones.tareas = Number(valor);
+      }
+    } else {
+      return { error: `argumento desconocido '${a}'` };
+    }
+  }
+  if (opciones.raiz === null) return { error: "falta --raiz <dir>" };
+  return { opciones };
+}
+
+// Ejecuta la CLI y devuelve el código de salida.
+function ejecutarCli(args) {
+  const { error, opciones } = leerArgumentos(args);
+  if (error) {
+    process.stderr.write(`error: ${error}\n`);
+    return 1;
+  }
+  if (!existsSync(opciones.raiz) || !statSync(opciones.raiz).isDirectory()) {
+    process.stderr.write(`error: --raiz no es una carpeta: ${opciones.raiz}\n`);
+    return 1;
+  }
+  const sesiones = descubrirSesiones(opciones.raiz, { hasta: opciones.hasta });
+  const tareas = opciones.tareas;
+  const salida = opciones.json ? informeJson(sesiones, { tareas }) : formatearInforme(sesiones, { tareas });
+  process.stdout.write(salida);
+  return 0;
+}
+
+const RUTA_ESTE = fileURLToPath(import.meta.url);
+if (process.argv[1] && resolve(process.argv[1]) === RUTA_ESTE) {
+  process.exitCode = ejecutarCli(process.argv.slice(2));
 }
