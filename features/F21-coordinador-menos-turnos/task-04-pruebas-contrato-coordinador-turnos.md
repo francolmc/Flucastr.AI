@@ -1,5 +1,5 @@
 # task-04 — Pruebas de contrato: frases de F21 en el `coordinador` para Pi y Claude Code
-repo: Flucastr.AI   depende_de: task-03   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
 Las reglas de task-01 a 03 viven solo en texto; la prueba debe fallar si alguien las quita. Se agrega una regla 16 al validador `validarRoles` con las frases literales de F21, sus controles negativos, y una prueba nueva que genera el agente del `coordinador` para Pi y para Claude Code con `scripts/resolver.mjs` y comprueba las mismas frases y un tope de tamaño. Verifican el **texto**, no el comportamiento (`definitions/CONTEXTO.md` §3).
