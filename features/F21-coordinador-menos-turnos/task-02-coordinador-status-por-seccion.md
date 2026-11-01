@@ -1,5 +1,5 @@
 # task-02 — `coordinador`: `STATUS.md` solo en puertas y cambios de rol, con `Edit` por sección
-repo: Flucastr.AI   depende_de: task-01   estado: aprobada
+repo: Flucastr.AI   depende_de: task-01   estado: lista para revisión
 
 ## Descripción
 Reescribir `STATUS.md` completo fue el 28 % del costo del `coordinador` (52 turnos de 216, `definitions/CONTEXTO.md` §1). Esta tarea cambia las reglas de `agentes/coordinador.md` para que `STATUS.md` se escriba solo en puertas y cambios de rol, con `Edit` por sección, con ítems cortos, y para que las llamadas independientes se agrupen en un turno.
@@ -42,7 +42,25 @@ Fuera de alcance: reglas de lectura (task-01); `subagents_enable`, plantilla de 
 - `wc -c agentes/coordinador.md` → ≤ 17300.
 
 ## Evidencia
-(lo llena el constructor)
+```
+$ grep -cF -e 'Reescribes `STATUS.md` solo en puertas y en cambios de rol' -e 'con `Edit` por sección, no con `Write` completo' -e 'cada ítem ≤150 caracteres' -e 'Agrupa en un mismo turno las llamadas independientes' agentes/coordinador.md
+4
+$ grep -c 'Reescribe el archivo completo cada vez' agentes/coordinador.md
+0
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/coordinador-status.test.mjs
+ℹ tests 34
+ℹ pass 34
+ℹ fail 0
+$ wc -c agentes/coordinador.md
+17152 agentes/coordinador.md
+$ git diff --stat -- agentes/coordinador.md
+ agentes/coordinador.md | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+```
+Criterio 4: el diff de `agentes/coordinador.md` es el único de código de esta tarea. Además aparecen `definitions/STATUS.md` y task-01 (cambios previos sin commitear, no tocados) y esta tarea (solo `estado` y esta sección).
 
 ## Notas
-(lo llena el constructor)
+- Hueco menor: la regla de agrupar llamadas se añadió como párrafo después del paso 5 de «Cómo avanzas», no como paso numerado nuevo (para no renumerar). Decisión: conservadora.
+- Hueco menor: las tres reglas de `STATUS.md` van en una lista, una frase por línea, porque `grep -c` cuenta líneas; con las cuatro frases en una sola línea daba 2, no 4.
+- Presupuesto: +550 bytes netos (16 602 → 17 152), un poco por encima de «~500»; sigue bajo el tope de 17 300.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=3; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

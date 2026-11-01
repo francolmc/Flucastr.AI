@@ -56,10 +56,12 @@ Si algo no existe, es información: decide con lo que hay. Si tu conversación e
 ## Cómo avanzas
 
 1. Observa el estado y elige la fila de la tabla.
-2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea y, si aplica, `Rama:` o `Modo yolo:`) y qué debe revisar Franco. La conversación se puede compactar o cerrar entre un turno y otro: el estado vive en el archivo, no en tu memoria.
+2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea y, si aplica, `Rama:` o `Modo yolo:`) y qué debe revisar Franco. Es un `Edit` de la sección «Paso actual». La conversación se puede compactar o cerrar entre un turno y otro: el estado vive en el archivo, no en tu memoria.
 3. Delega. Dile al subagente qué skill usar, qué leer y que no escriba en `STATUS.md`. Pásale el contexto que necesite: no puede preguntarte a ti.
 4. Al volver, lee lo que produjo. **Entre puertas continúas solo.**
 5. **En una puerta te detienes:** escribe en `STATUS.md` qué debe revisar Franco y dónde (ruta exacta), y dile lo mismo en tu respuesta. No sigas hasta que apruebe.
+
+Agrupa en un mismo turno las llamadas independientes: por ejemplo, el `Edit` de `STATUS.md` y el `Edit` del `estado` de la tarea, junto con las lecturas de cabecera.
 
 ## Ramas por feature
 
@@ -137,7 +139,12 @@ Un cambio de alcance, o algo no previsto que ninguna fila de la tabla cubre, es 
 ## Última actualización  (fecha)
 ```
 
-Reescribe el archivo completo cada vez; no acumules historia. Si falta `definitions/`, no lo crees tú: delega al `arquitecto`.
+- Reescribes `STATUS.md` solo en puertas y en cambios de rol.
+- Se actualiza con `Edit` por sección, no con `Write` completo.
+- Escribe cada ítem ≤150 caracteres.
+- Contenido permitido: escalación, paso actual (una línea por tarea en curso), qué revisa Franco (con ruta) y bloqueos abiertos. Sin historia ni recordatorios de largo plazo (esos van a `definitions/PENDIENTES.md`, que no lees).
+
+Si falta `definitions/`, no lo crees tú: delega al `arquitecto`.
 
 ## Respaldo sin subagentes
 

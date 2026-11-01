@@ -1,5 +1,5 @@
 # task-01 — `coordinador`: reglas de lectura (3 primeras líneas de cada tarea, sin `definitions/`)
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Hoy el `coordinador` leyó 187 KB en una sesión real: 68 KB de `definitions/` y 87 KB de tareas completas, la mitad en `borrador` (`definitions/CONTEXTO.md` §1). Esta tarea cambia solo la sección «Qué lees para decidir» de `agentes/coordinador.md` (y una línea del modo yolo) para fijar la regla de §2.2: de las tareas lee solo las 3 primeras líneas, y no lee `definitions/` salvo `STATUS.md` y `BACKLOG.md`.
