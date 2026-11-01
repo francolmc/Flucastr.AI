@@ -1,5 +1,5 @@
 # task-02 — Tipos de turno y KB leídos por archivo (sesión principal de Pi)
-repo: Flucastr.AI   depende_de: task-01   estado: aprobada
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Amplía `analizarSesionPi` con las dos métricas que explican el costo del `coordinador`: cuántos turnos (y cuánto costo) gasta en cada tipo de acción, y cuántos KB lee por archivo (lo que devuelve cada `read`), con total por categoría (definiciones, tareas, otros). Permite comprobar luego «0 KB de `definitions/`» (`definitions/CONTEXTO.md` §5).
@@ -38,7 +38,35 @@ Fuera de alcance: lecturas de subagentes (task-03); distinguir tareas `hecha` o 
 `node --test pruebas/comprobaciones/consumo.test.mjs` → `fail 0`.
 
 ## Evidencia
-(lo llena el constructor; solo la cola relevante, ≤1,5 KB)
+`node --test pruebas/comprobaciones/consumo.test.mjs` (cola de la salida real):
+```
+✔ tipos de turno (1): subagents_enable (0.251708ms)
+✔ tipos de turno (2): delegar (llamada subagent) (0.608042ms)
+✔ tipos de turno (3): reescribir_status (write sobre definitions/STATUS.md) (0.356459ms)
+✔ tipos de turno (4): cambiar_estado (edit sobre una tarea) (3.840125ms)
+✔ tipos de turno (5): leer_tarea (read de una tarea) (0.576333ms)
+✔ tipos de turno (6): leer_status_backlog (read de BACKLOG.md) (3.14725ms)
+✔ tipos de turno (7): leer_definiciones (read de definitions/ARCHITECTURE.md) (3.886541ms)
+✔ tipos de turno (8): texto (turno sin llamadas) (4.915875ms)
+✔ tipos de turno (9): otro (bash) (0.131167ms)
+✔ tipos de turno (orden): delegar gana a leer_definiciones en el mismo turno (0.077667ms)
+✔ lecturas: KB por archivo y por categoría (3072 + 1024 bytes en definitions/, 512 en una tarea) (0.185416ms)
+✔ lecturas: dos lecturas de definitions/ARCHITECTURE.md de 3072 y 1024 bytes suman lecturas:2, kb:4 (0.095459ms)
+✔ lecturas: un read con isError:true no suma (0.09525ms)
+✔ lecturas, control negativo: sin lecturas de definitions/, kbPorCategoria.definiciones es 0 (0.057208ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+```
+Criterios: 1 (9 tipos + orden) pasa; 2 (lecturas 4 KB / 0.5 KB, definiciones 4) pasa; 3 (isError no suma) pasa; 4 (task-01 a, b, c, d, e, f y centinela) pasa; 5 (sin red, modelo ni `~/.pi`: solo funciones puras sobre texto) cumplido por diseño, el módulo no importa nada ni lee archivos.
 
 ## Notas
-(lo llena el constructor)
+- Hueco menor 1: la prueba (a) fija la forma exacta con `deepEqual`; le añadí los campos nuevos (`tiposDeTurno` con `texto`, y `lecturas` vacío). Sus valores de task-01 no cambian.
+- Hueco menor 2: `resultadoPi` (fixtures) acepta un `texto` opcional, con el centinela por defecto. Es el único helper tocado (permitido por la tarea).
+- Hueco menor 3: añadí un caso extra de orden (`delegar` gana a `leer_definiciones` en el mismo turno) y un control negativo de lecturas. Los KB se suman en bytes y se redondean una sola vez al final, para que 3072 + 1024 dé 4 exacto.
+- Una llamada `read` sin `path` de texto cuenta como ruta `""`: categoría `otros` y tipo `otro`.
+- Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=3; resultado=lista; causa=ninguna

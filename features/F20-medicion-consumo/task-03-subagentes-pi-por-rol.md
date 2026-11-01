@@ -1,5 +1,5 @@
 # task-03 — Subagentes de Pi: turnos, costo y KB leídos por rol
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
 
 ## Descripción
 Suma a la medición de Pi el trabajo de los subagentes (`arquitecto`, `planificador`, `constructor`): costo y turnos por rol, y KB leídos por rol y por archivo, para comprobar lo que cada rol lee (`definitions/CONTEXTO.md` §2.2). Calcula también los turnos del `coordinador` por llamada a subagente.
@@ -38,7 +38,29 @@ Fuera de alcance: CLI e informe; Claude Code (task-04); descubrir carpetas de se
 `node --test pruebas/comprobaciones/consumo.test.mjs` → `fail 0`.
 
 ## Evidencia
-(lo llena el constructor; solo la cola relevante, ≤1,5 KB)
+$ node --test pruebas/comprobaciones/consumo.test.mjs   (desde la raíz del repo; pasada final, tras corregir un fallo propio)
+✔ subagentes (1): tres corridas de S1 suman por rol; la de S2 se excluye
+✔ subagentes (2): transcript ausente: KB 0 y sinTranscript:true
+✔ subagentes (3): hasta descarta las corridas con timestamp posterior
+✔ unirPi: 30 turnos y 6 llamadas dan turnosPorLlamada 5; sin llamadas, null
+✔ subagentes: ni el resultado de subagentes ni el de unirPi contienen el centinela
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
 
 ## Notas
-(lo llena el constructor)
+- Primera pasada de la Verificación: 3 pruebas fallaron con `conjuntoModelos.add is not a function`. Causa: `porRol` y `modelos` eran objetos planos y el rol `constructor` cae en `Object.prototype`. Corregido usando `Map` internamente y devolviendo objetos planos (intentos=2 en el registro).
+- Huecos menores (decisiones):
+  - `sinTranscript`: la tarea lo describe por corrida; en `porRol[rol]` se expone como `true` si al menos una corrida del rol no tiene transcript.
+  - Campos del transcript: `recordType`, `message.role`, `message.toolCallId`, `message.isError` y `message.content`; comprobado solo con las claves de un artefacto real (sin leer valores ni texto).
+  - Corridas sin `timestamp` numérico con `hasta` se descartan (criterio conservador).
+  - Una carpeta inexistente hace fallar `readdirSync` (la tarea no lo define).
+  - La cabecera de `scripts/consumo.mjs` decía «solo funciones puras / no lee archivos»; se actualizó porque `analizarSubagentesPi` lee la carpeta.
+  - La lectura de `read` por `toolCallId` se reimplementó en `lecturasDeTranscript` (misma regla que task-02) en vez de extraerla de `analizarSesionPi`, para no tocar task-02.
+- Señal: la tarea estaba incompleta. Faltaban: forma de `sinTranscript` por rol, qué campos del transcript leer y el comportamiento con carpeta inexistente o corridas sin timestamp.
+- Fuera de alcance, no tocado: CLI, Claude Code, descubrimiento de carpetas, `acceptance`, `definitions/STATUS.md`, `registro/`, `features/completed/`, `.env`. Sin commit, push ni merge.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=6; resultado=lista; causa=ninguna

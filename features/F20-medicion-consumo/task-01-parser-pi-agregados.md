@@ -1,5 +1,5 @@
 # task-01 — Parser de sesión de Pi: turnos, costo y tramos de contexto
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Primera pieza de `scripts/consumo.mjs` (F20, solo lectura sobre logs): una función pura que, dada la sesión principal de Pi (texto `.jsonl`), devuelve los agregados del `coordinador`: turnos, costo, tokens y costo por tramo de contexto (<30k, 30–60k, >60k), llamadas por herramienta, llamadas a subagentes y `subagents_enable`. Incluye el generador de logs sintéticos que usarán las pruebas de las tareas siguientes (sin modelo ni red).

@@ -1,12 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { analizarSesionPi } from '../../scripts/consumo.mjs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { analizarSesionPi, analizarSubagentesPi, unirPi } from '../../scripts/consumo.mjs';
 import {
   CENTINELA_TEXTO,
   registroSesionPi,
   turnoPi,
   resultadoPi,
   unirJsonl,
+  metaSubagentePi,
+  transcriptSubagentePi,
 } from './consumo-fixtures.mjs';
 
 const T1 = '2026-10-30T10:00:00.000Z';
@@ -36,6 +41,8 @@ test('(a) tres turnos: forma exacta, costo total y un turno por tramo', () => {
     herramientas: {},
     llamadasSubagente: 0,
     subagentsEnable: 0,
+    tiposDeTurno: { texto: { turnos: 3, costo: 0.06 } },
+    lecturas: { porArchivo: {}, kbTotal: 0, kbPorCategoria: { definiciones: 0, tareas: 0, otros: 0 } },
   });
 });
 
@@ -109,4 +116,251 @@ test('(f) control negativo: otro costo produce otro costo agregado', () => {
 test('el texto de los mensajes no aparece en el resultado', () => {
   const r = JSON.stringify(analizarSesionPi(tresTurnos()));
   assert.equal(r.includes(CENTINELA_TEXTO), false);
+});
+
+// Un turno con una sola llamada (o ninguna) y costo 0.01: para comprobar el tipo asignado.
+const tipoDe = (llamadas) =>
+  analizarSesionPi(unirJsonl([turnoPi({ ts: T1, contexto: 1000, costo: 0.01, llamadas })])).tiposDeTurno;
+
+test('tipos de turno (1): subagents_enable', () => {
+  assert.deepEqual(tipoDe([{ id: 'a', name: 'subagents_enable', arguments: {} }]), {
+    subagents_enable: { turnos: 1, costo: 0.01 },
+  });
+});
+
+test('tipos de turno (2): delegar (llamada subagent)', () => {
+  assert.deepEqual(tipoDe([{ id: 'a', name: 'subagent', arguments: { task: 'x' } }]), {
+    delegar: { turnos: 1, costo: 0.01 },
+  });
+});
+
+test('tipos de turno (3): reescribir_status (write sobre definitions/STATUS.md)', () => {
+  assert.deepEqual(tipoDe([{ id: 'a', name: 'write', arguments: { path: 'definitions/STATUS.md', content: 'x' } }]), {
+    reescribir_status: { turnos: 1, costo: 0.01 },
+  });
+});
+
+test('tipos de turno (4): cambiar_estado (edit sobre una tarea)', () => {
+  assert.deepEqual(
+    tipoDe([{ id: 'a', name: 'edit', arguments: { path: 'features/F20-medicion-consumo/task-02-x.md' } }]),
+    { cambiar_estado: { turnos: 1, costo: 0.01 } },
+  );
+});
+
+test('tipos de turno (5): leer_tarea (read de una tarea)', () => {
+  assert.deepEqual(
+    tipoDe([{ id: 'a', name: 'read', arguments: { path: 'features/F20-medicion-consumo/task-02-x.md' } }]),
+    { leer_tarea: { turnos: 1, costo: 0.01 } },
+  );
+});
+
+test('tipos de turno (6): leer_status_backlog (read de BACKLOG.md)', () => {
+  assert.deepEqual(tipoDe([{ id: 'a', name: 'read', arguments: { path: 'definitions/BACKLOG.md' } }]), {
+    leer_status_backlog: { turnos: 1, costo: 0.01 },
+  });
+});
+
+test('tipos de turno (7): leer_definiciones (read de definitions/ARCHITECTURE.md)', () => {
+  assert.deepEqual(tipoDe([{ id: 'a', name: 'read', arguments: { path: 'definitions/ARCHITECTURE.md' } }]), {
+    leer_definiciones: { turnos: 1, costo: 0.01 },
+  });
+});
+
+test('tipos de turno (8): texto (turno sin llamadas)', () => {
+  assert.deepEqual(tipoDe([]), { texto: { turnos: 1, costo: 0.01 } });
+});
+
+test('tipos de turno (9): otro (bash)', () => {
+  assert.deepEqual(tipoDe([{ id: 'a', name: 'bash', arguments: { command: 'ls' } }]), {
+    otro: { turnos: 1, costo: 0.01 },
+  });
+});
+
+test('tipos de turno (orden): delegar gana a leer_definiciones en el mismo turno', () => {
+  assert.deepEqual(
+    tipoDe([
+      { id: 'a', name: 'read', arguments: { path: 'definitions/ARCHITECTURE.md' } },
+      { id: 'b', name: 'subagent', arguments: { task: 'x' } },
+    ]),
+    { delegar: { turnos: 1, costo: 0.01 } },
+  );
+});
+
+// Dos lecturas de definitions/ARCHITECTURE.md (3072 y 1024 bytes) y una de una tarea (512 bytes).
+// Con errorEnDefiniciones, se añade una tercera lectura de definitions/ de 9999 bytes que devuelve isError:true.
+const sesionConLecturas = ({ errorEnDefiniciones = false } = {}) => {
+  const conError = errorEnDefiniciones
+    ? [
+        { id: 'r4', name: 'read', arguments: { path: 'definitions/ARCHITECTURE.md' } },
+      ]
+    : [];
+  return unirJsonl([
+    turnoPi({
+      ts: T1,
+      contexto: 1000,
+      llamadas: [
+        { id: 'r1', name: 'read', arguments: { path: 'definitions/ARCHITECTURE.md' } },
+        { id: 'r2', name: 'read', arguments: { path: 'definitions/ARCHITECTURE.md' } },
+        { id: 'r3', name: 'read', arguments: { path: 'features/F20-medicion-consumo/task-02-x.md' } },
+        ...conError,
+      ],
+    }),
+    resultadoPi({ ts: T2, id: 'r1', name: 'read', texto: 'a'.repeat(3072) }),
+    resultadoPi({ ts: T2, id: 'r2', name: 'read', texto: 'a'.repeat(1024) }),
+    resultadoPi({ ts: T2, id: 'r3', name: 'read', texto: 'a'.repeat(512) }),
+    ...(errorEnDefiniciones
+      ? [resultadoPi({ ts: T2, id: 'r4', name: 'read', texto: 'a'.repeat(9999), error: true })]
+      : []),
+  ]);
+};
+
+test('lecturas: KB por archivo y por categoría (3072 + 1024 bytes en definitions/, 512 en una tarea)', () => {
+  const r = analizarSesionPi(sesionConLecturas());
+  assert.deepEqual(r.lecturas.porArchivo, {
+    'definitions/ARCHITECTURE.md': { lecturas: 2, kb: 4 },
+    'features/F20-medicion-consumo/task-02-x.md': { lecturas: 1, kb: 0.5 },
+  });
+  assert.equal(r.lecturas.kbTotal, 4.5);
+  assert.equal(r.lecturas.kbPorCategoria.definiciones, 4);
+  assert.equal(r.lecturas.kbPorCategoria.tareas, 0.5);
+  assert.equal(r.lecturas.kbPorCategoria.otros, 0);
+});
+
+test('lecturas: dos lecturas de definitions/ARCHITECTURE.md de 3072 y 1024 bytes suman lecturas:2, kb:4', () => {
+  const r = analizarSesionPi(
+    unirJsonl([
+      turnoPi({
+        ts: T1,
+        contexto: 1000,
+        llamadas: [
+          { id: 'r1', name: 'read', arguments: { path: 'definitions/ARCHITECTURE.md' } },
+          { id: 'r2', name: 'read', arguments: { path: 'definitions/ARCHITECTURE.md' } },
+        ],
+      }),
+      resultadoPi({ ts: T2, id: 'r1', name: 'read', texto: 'a'.repeat(3072) }),
+      resultadoPi({ ts: T2, id: 'r2', name: 'read', texto: 'a'.repeat(1024) }),
+    ]),
+  );
+  assert.deepEqual(r.lecturas.porArchivo, { 'definitions/ARCHITECTURE.md': { lecturas: 2, kb: 4 } });
+  assert.equal(r.lecturas.kbPorCategoria.definiciones, 4);
+});
+
+test('lecturas: un read con isError:true no suma', () => {
+  const r = analizarSesionPi(sesionConLecturas({ errorEnDefiniciones: true }));
+  // La lectura r4 (9999 bytes, con error) no cuenta: quedan 2 lecturas de definitions/ por 4096 bytes.
+  assert.deepEqual(r.lecturas.porArchivo['definitions/ARCHITECTURE.md'], { lecturas: 2, kb: 4 });
+  assert.equal(r.lecturas.kbPorCategoria.definiciones, 4);
+});
+
+test('lecturas, control negativo: sin lecturas de definitions/, kbPorCategoria.definiciones es 0', () => {
+  const r = analizarSesionPi(
+    unirJsonl([
+      turnoPi({
+        ts: T1,
+        contexto: 1000,
+        llamadas: [{ id: 'r1', name: 'read', arguments: { path: 'features/F20-medicion-consumo/task-02-x.md' } }],
+      }),
+      resultadoPi({ ts: T2, id: 'r1', name: 'read', texto: 'a'.repeat(512) }),
+    ]),
+  );
+  assert.equal(r.lecturas.kbPorCategoria.definiciones, 0);
+  assert.equal(Object.keys(r.lecturas.porArchivo).some((ruta) => ruta.includes('definitions/')), false);
+});
+
+// ---- task-03: subagentes de Pi ----
+
+const M1 = Date.parse(T1);
+const M2 = Date.parse(T2);
+const M3 = Date.parse(T3);
+
+// Carpeta de artefactos: los nombres siguen <runId>_<agente>_meta.json y <runId>_<agente>_transcript.jsonl.
+// Sin transcript, no se crea el archivo.
+const corrida = (meta, transcript) => ({
+  [`${meta.runId}_${meta.agent}_meta.json`]: JSON.stringify(meta),
+  ...(transcript === undefined ? {} : { [`${meta.runId}_${meta.agent}_transcript.jsonl`]: transcript }),
+});
+
+// Tres corridas de la sesión S1 (constructor ×2, planificador ×1) y una de otra sesión (S2) que debe excluirse.
+const escenarioTresCorridas = () =>
+  Object.assign(
+    {},
+    corrida(
+      metaSubagentePi({ runId: 'r1', agent: 'constructor', parentSessionId: 'S1', model: 'm-c', timestamp: M1, turns: 10, cost: 0.1 }),
+      transcriptSubagentePi(),
+    ),
+    corrida(
+      metaSubagentePi({ runId: 'r2', agent: 'constructor', parentSessionId: 'S1', model: 'm-c', timestamp: M2, turns: 20, cost: 0.25 }),
+      transcriptSubagentePi(),
+    ),
+    corrida(
+      metaSubagentePi({ runId: 'r3', agent: 'planificador', parentSessionId: 'S1', model: 'm-p', timestamp: M2, turns: 5, cost: 0.05 }),
+      transcriptSubagentePi({ lecturas: [{ ruta: 'definitions/PROJECT.md', bytes: 2048 }] }),
+    ),
+    corrida(
+      metaSubagentePi({ runId: 'r4', agent: 'constructor', parentSessionId: 'S2', timestamp: M2, turns: 99, cost: 9 }),
+      transcriptSubagentePi(),
+    ),
+  );
+
+// Crea una carpeta temporal con los archivos dados, ejecuta fn(dir) y la borra.
+const conCarpeta = (archivos, fn) => {
+  const dir = mkdtempSync(join(tmpdir(), 'consumo-subagentes-'));
+  try {
+    for (const [nombre, contenido] of Object.entries(archivos)) writeFileSync(join(dir, nombre), contenido);
+    return fn(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+};
+
+test('subagentes (1): tres corridas de S1 suman por rol; la de S2 se excluye', () => {
+  const r = conCarpeta(escenarioTresCorridas(), (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }));
+  assert.deepEqual(r.porRol, {
+    constructor: { corridas: 2, turnos: 30, costo: 0.35, kbTotal: 0, sinTranscript: false, porArchivo: {} },
+    planificador: {
+      corridas: 1,
+      turnos: 5,
+      costo: 0.05,
+      kbTotal: 2,
+      sinTranscript: false,
+      porArchivo: { 'definitions/PROJECT.md': { lecturas: 1, kb: 2 } },
+    },
+  });
+  assert.deepEqual(r.modelos, { constructor: ['m-c'], planificador: ['m-p'] });
+});
+
+test('subagentes (2): transcript ausente: KB 0 y sinTranscript:true', () => {
+  const r = conCarpeta(
+    corrida(metaSubagentePi({ runId: 'r5', agent: 'arquitecto', parentSessionId: 'S1', timestamp: M1, turns: 3, cost: 0.2 })),
+    (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }),
+  );
+  assert.deepEqual(r.porRol.arquitecto, { corridas: 1, turnos: 3, costo: 0.2, kbTotal: 0, sinTranscript: true, porArchivo: {} });
+});
+
+test('subagentes (3): hasta descarta las corridas con timestamp posterior', () => {
+  const archivos = Object.assign(
+    {},
+    corrida(metaSubagentePi({ runId: 'h1', agent: 'constructor', parentSessionId: 'S1', timestamp: M1, turns: 1, cost: 0.01 }), transcriptSubagentePi()),
+    corrida(metaSubagentePi({ runId: 'h2', agent: 'constructor', parentSessionId: 'S1', timestamp: M3, turns: 7, cost: 0.07 }), transcriptSubagentePi()),
+  );
+  const r = conCarpeta(archivos, (dir) => analizarSubagentesPi(dir, { sesionId: 'S1', hasta: '2026-10-30T10:07:00.000Z' }));
+  assert.equal(r.porRol.constructor.corridas, 1);
+  assert.equal(r.porRol.constructor.turnos, 1);
+});
+
+test('unirPi: 30 turnos y 6 llamadas dan turnosPorLlamada 5; sin llamadas, null', () => {
+  assert.equal(unirPi({ turnos: 30, llamadasSubagente: 6 }, {}).turnosPorLlamada, 5);
+  assert.equal(unirPi({ turnos: 30, llamadasSubagente: 0 }, {}).turnosPorLlamada, null);
+  assert.deepEqual(unirPi({ turnos: 30, llamadasSubagente: 6 }, { porRol: {} }), {
+    turnos: 30,
+    llamadasSubagente: 6,
+    subagentes: { porRol: {} },
+    turnosPorLlamada: 5,
+  });
+});
+
+test('subagentes: ni el resultado de subagentes ni el de unirPi contienen el centinela', () => {
+  const subagentes = conCarpeta(escenarioTresCorridas(), (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }));
+  const unido = unirPi(analizarSesionPi(tresTurnos()), subagentes);
+  assert.equal(JSON.stringify(unido).includes(CENTINELA_TEXTO), false);
 });

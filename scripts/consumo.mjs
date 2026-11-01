@@ -2,12 +2,17 @@
 // Medición de consumo de F20 (solo lectura sobre logs de sesiones).
 //
 // Uso:
-//   Esta versión solo exporta funciones puras; todavía no tiene CLI (llega en una tarea posterior).
-//   import { analizarSesionPi } from "./scripts/consumo.mjs";
+//   Esta versión todavía no tiene CLI (llega en una tarea posterior).
+//   import { analizarSesionPi, analizarSubagentesPi, unirPi } from "./scripts/consumo.mjs";
 //   analizarSesionPi(textoJsonl, { hasta: "2026-10-30T12:00:00Z" })  → agregados del coordinador de Pi
+//   analizarSubagentesPi(carpetaSubagentArtifacts, { sesionId, hasta }) → agregados por rol (subagentes)
+//   (carpetaSubagentArtifacts = .../subagent-artifacts/)
 //
-// No lee archivos, no hace red ni llama a ningún modelo. Las líneas que no son JSON y los registros
-// que no son turnos del asistente se ignoran.
+// Solo analizarSubagentesPi lee archivos (los meta y transcripts de una carpeta, sin escribir). No hace red
+// ni llama a ningún modelo. Las líneas que no son JSON y los registros que no son turnos del asistente se ignoran.
+
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 // Tramos de contexto por turno (contexto = input + cacheRead + cacheWrite).
 // menos30k: < 30000; de30a60k: 30000–60000 (incluido); mas60k: > 60000.
@@ -26,6 +31,46 @@ function tramoDe(contexto) {
 function numero(valor) {
   return typeof valor === "number" && Number.isFinite(valor) ? valor : 0;
 }
+
+// Forma de ruta de una tarea de F20 (features/Fxx-nombre/task-NN-nombre.md).
+const FORMA_TAREA = /task-\d{2}-[^/]*\.md$/;
+
+// Tipo de turno (task-02): primera coincidencia en este orden, mirando todas las llamadas del turno.
+// llamadas: [{ name, ruta }]; ruta es "" si la llamada no trae `path`.
+function tipoDeTurno(llamadas) {
+  if (llamadas.length === 0) return "texto";
+  const alguna = (pred) => llamadas.some(pred);
+  if (alguna((l) => l.name === "subagents_enable")) return "subagents_enable";
+  if (alguna((l) => l.name === "subagent")) return "delegar";
+  if (alguna((l) => (l.name === "write" || l.name === "edit") && l.ruta.endsWith("definitions/STATUS.md"))) {
+    return "reescribir_status";
+  }
+  if (alguna((l) => l.name === "edit" && FORMA_TAREA.test(l.ruta))) return "cambiar_estado";
+  if (alguna((l) => l.name === "read" && FORMA_TAREA.test(l.ruta))) return "leer_tarea";
+  if (alguna((l) => l.name === "read" && (l.ruta.endsWith("definitions/STATUS.md") || l.ruta.endsWith("definitions/BACKLOG.md")))) {
+    return "leer_status_backlog";
+  }
+  if (alguna((l) => l.name === "read" && l.ruta.includes("definitions/"))) return "leer_definiciones";
+  return "otro";
+}
+
+// Categoría de una lectura (task-02): definiciones, tareas u otros.
+function categoriaDeLectura(ruta) {
+  if (ruta.includes("definitions/")) return "definiciones";
+  if (FORMA_TAREA.test(ruta)) return "tareas";
+  return "otros";
+}
+
+// Bytes UTF-8 de los `content[].text` de un resultado de herramienta.
+function bytesDeTexto(contenido) {
+  return (Array.isArray(contenido) ? contenido : []).reduce(
+    (suma, item) => suma + (typeof item?.text === "string" ? Buffer.byteLength(item.text) : 0),
+    0,
+  );
+}
+
+// Bytes a KB con un decimal.
+const aKb = (bytes) => Math.round((bytes / 1024) * 10) / 10;
 
 // Devuelve el registro como objeto, o null si la línea no es JSON.
 function parsearLinea(linea) {
@@ -55,7 +100,17 @@ export function analizarSesionPi(texto, { hasta } = {}) {
     herramientas: {},
     llamadasSubagente: 0,
     subagentsEnable: 0,
+    tiposDeTurno: {},
+    lecturas: {
+      porArchivo: {},
+      kbTotal: 0,
+      kbPorCategoria: { definiciones: 0, tareas: 0, otros: 0 },
+    },
   };
+
+  // Pareo de llamadas `read` con su resultado (task-02): id de llamada → ruta; id de resultado → bytes y error.
+  const lecturasPorId = new Map();
+  const resultadosPorId = new Map();
 
   for (const linea of String(texto).split("\n")) {
     if (linea.trim() === "") continue;
@@ -69,6 +124,15 @@ export function analizarSesionPi(texto, { hasta } = {}) {
 
     if (registro.type !== "message") continue;
     const mensaje = registro.message;
+    if (mensaje?.role === "toolResult") {
+      if (typeof mensaje.toolCallId === "string") {
+        resultadosPorId.set(mensaje.toolCallId, {
+          bytes: bytesDeTexto(mensaje.content),
+          error: mensaje.isError === true,
+        });
+      }
+      continue;
+    }
     if (!mensaje || mensaje.role !== "assistant") continue;
 
     const uso = mensaje.usage ?? {};
@@ -89,13 +153,177 @@ export function analizarSesionPi(texto, { hasta } = {}) {
     tramo.turnos += 1;
     tramo.costo = redondear(tramo.costo + costo);
 
+    const llamadas = [];
     for (const item of Array.isArray(mensaje.content) ? mensaje.content : []) {
       if (item?.type !== "toolCall" || typeof item.name !== "string") continue;
       salida.herramientas[item.name] = (salida.herramientas[item.name] ?? 0) + 1;
       if (item.name === "subagent") salida.llamadasSubagente += 1;
       if (item.name === "subagents_enable") salida.subagentsEnable += 1;
+      const ruta = typeof item.arguments?.path === "string" ? item.arguments.path : "";
+      llamadas.push({ name: item.name, ruta });
+      if (item.name === "read" && item.id !== undefined) lecturasPorId.set(item.id, ruta);
+    }
+
+    const tipo = tipoDeTurno(llamadas);
+    const sumaTipo = salida.tiposDeTurno[tipo] ?? { turnos: 0, costo: 0 };
+    sumaTipo.turnos += 1;
+    sumaTipo.costo = redondear(sumaTipo.costo + costo);
+    salida.tiposDeTurno[tipo] = sumaTipo;
+  }
+
+  // Lecturas (task-02): solo `read` con resultado sin error; se suma en bytes y se pasa a KB al final.
+  const bytesPorArchivo = {};
+  const bytesPorCategoria = { definiciones: 0, tareas: 0, otros: 0 };
+  let bytesTotal = 0;
+  for (const [id, ruta] of lecturasPorId) {
+    const resultado = resultadosPorId.get(id);
+    if (!resultado || resultado.error) continue;
+    const entrada = salida.lecturas.porArchivo[ruta] ?? { lecturas: 0, kb: 0 };
+    entrada.lecturas += 1;
+    salida.lecturas.porArchivo[ruta] = entrada;
+    bytesPorArchivo[ruta] = (bytesPorArchivo[ruta] ?? 0) + resultado.bytes;
+    bytesPorCategoria[categoriaDeLectura(ruta)] += resultado.bytes;
+    bytesTotal += resultado.bytes;
+  }
+  for (const ruta of Object.keys(salida.lecturas.porArchivo)) {
+    salida.lecturas.porArchivo[ruta].kb = aKb(bytesPorArchivo[ruta]);
+  }
+  for (const categoria of Object.keys(bytesPorCategoria)) {
+    salida.lecturas.kbPorCategoria[categoria] = aKb(bytesPorCategoria[categoria]);
+  }
+  salida.lecturas.kbTotal = aKb(bytesTotal);
+
+  return salida;
+}
+
+// Lecturas `read` de un transcript de subagente (task-03): por ruta, { lecturas, bytes }.
+// Misma regla que task-02: solo resultados sin error, bytes del texto del resultado, pareo por toolCallId.
+function lecturasDeTranscript(texto) {
+  const lecturasPorId = new Map();
+  const resultadosPorId = new Map();
+
+  for (const linea of String(texto).split("\n")) {
+    if (linea.trim() === "") continue;
+    const registro = parsearLinea(linea);
+    if (registro?.recordType !== "message") continue;
+    const mensaje = registro.message;
+    if (mensaje?.role === "toolResult") {
+      if (typeof mensaje.toolCallId === "string") {
+        resultadosPorId.set(mensaje.toolCallId, {
+          bytes: bytesDeTexto(mensaje.content),
+          error: mensaje.isError === true,
+        });
+      }
+      continue;
+    }
+    if (mensaje?.role !== "assistant" || !Array.isArray(mensaje.content)) continue;
+    for (const item of mensaje.content) {
+      if (item?.type === "toolCall" && item.name === "read" && item.id !== undefined) {
+        lecturasPorId.set(item.id, typeof item.arguments?.path === "string" ? item.arguments.path : "");
+      }
     }
   }
 
-  return salida;
+  // Map (no objeto): una ruta como "constructor" caería en Object.prototype con un objeto plano.
+  const porRuta = new Map();
+  for (const [id, ruta] of lecturasPorId) {
+    const resultado = resultadosPorId.get(id);
+    if (!resultado || resultado.error) continue;
+    if (!porRuta.has(ruta)) porRuta.set(ruta, { lecturas: 0, bytes: 0 });
+    const entrada = porRuta.get(ruta);
+    entrada.lecturas += 1;
+    entrada.bytes += resultado.bytes;
+  }
+  return porRuta;
+}
+
+// dirArtefactos: carpeta subagent-artifacts de una sesión de Pi (solo lectura).
+// opciones.sesionId: si se da, solo corridas con parentSessionId igual a ese id.
+// opciones.hasta: ISO opcional; descarta las corridas con meta.timestamp (ms) posterior.
+// Por corrida: turnos y costo del meta; KB leídos del transcript hermano (<runId>_<agente>_transcript.jsonl).
+// Si falta el transcript, la corrida cuenta con KB 0 y sinTranscript:true en su rol.
+export function analizarSubagentesPi(dirArtefactos, { sesionId, hasta } = {}) {
+  const limite = hasta === undefined ? Infinity : Date.parse(hasta);
+  // Maps (no objetos planos) para que un rol como "constructor" no choque con Object.prototype.
+  const porRol = new Map();
+  const modelos = new Map();
+  const bytesPorRol = new Map();
+
+  for (const nombre of readdirSync(dirArtefactos).sort()) {
+    if (!nombre.endsWith("_meta.json")) continue;
+    let meta;
+    try {
+      meta = JSON.parse(readFileSync(join(dirArtefactos, nombre), "utf8"));
+    } catch {
+      continue;
+    }
+    if (!meta || typeof meta !== "object") continue;
+    if (typeof meta.runId !== "string" || typeof meta.agent !== "string") continue;
+    if (sesionId !== undefined && meta.parentSessionId !== sesionId) continue;
+    if (limite !== Infinity && !(meta.timestamp <= limite)) continue;
+
+    const rol = meta.agent;
+    if (!porRol.has(rol)) {
+      porRol.set(rol, { corridas: 0, turnos: 0, costo: 0, sinTranscript: false, porArchivo: new Map() });
+    }
+    if (!bytesPorRol.has(rol)) bytesPorRol.set(rol, { total: 0, porArchivo: new Map() });
+    if (!modelos.has(rol)) modelos.set(rol, new Set());
+    const r = porRol.get(rol);
+    const bytes = bytesPorRol.get(rol);
+    const conjuntoModelos = modelos.get(rol);
+    if (typeof meta.model === "string") conjuntoModelos.add(meta.model);
+
+    const uso = meta.usage ?? {};
+    r.corridas += 1;
+    r.turnos += numero(uso.turns);
+    r.costo = redondear(r.costo + numero(uso.cost));
+
+    let texto;
+    try {
+      texto = readFileSync(join(dirArtefactos, `${meta.runId}_${rol}_transcript.jsonl`), "utf8");
+    } catch {
+      texto = undefined;
+    }
+    if (texto === undefined) {
+      r.sinTranscript = true;
+      continue;
+    }
+    for (const [ruta, lectura] of lecturasDeTranscript(texto)) {
+      if (!r.porArchivo.has(ruta)) r.porArchivo.set(ruta, { lecturas: 0 });
+      r.porArchivo.get(ruta).lecturas += lectura.lecturas;
+      bytes.porArchivo.set(ruta, (bytes.porArchivo.get(ruta) ?? 0) + lectura.bytes);
+      bytes.total += lectura.bytes;
+    }
+  }
+
+  // Salida como objetos planos; los KB se calculan desde los bytes sumados (como en task-02).
+  const salidaPorRol = {};
+  for (const [rol, r] of porRol) {
+    const bytesRol = bytesPorRol.get(rol);
+    const porArchivo = {};
+    for (const [ruta, archivo] of r.porArchivo) {
+      porArchivo[ruta] = { lecturas: archivo.lecturas, kb: aKb(bytesRol.porArchivo.get(ruta)) };
+    }
+    salidaPorRol[rol] = {
+      corridas: r.corridas,
+      turnos: r.turnos,
+      costo: r.costo,
+      kbTotal: aKb(bytesRol.total),
+      sinTranscript: r.sinTranscript,
+      porArchivo,
+    };
+  }
+
+  const modelosPorRol = {};
+  for (const [rol, conjunto] of modelos) modelosPorRol[rol] = [...conjunto].sort();
+
+  return { porRol: salidaPorRol, modelos: modelosPorRol };
+}
+
+// Une el análisis de la sesión principal con el de sus subagentes (task-03).
+// turnosPorLlamada: turnos del coordinador por llamada a subagente (1 decimal); null sin llamadas.
+export function unirPi(principal, subagentes) {
+  const llamadas = principal.llamadasSubagente;
+  const turnosPorLlamada = llamadas > 0 ? Math.round((principal.turnos / llamadas) * 10) / 10 : null;
+  return { ...principal, subagentes, turnosPorLlamada };
 }
