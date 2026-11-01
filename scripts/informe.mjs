@@ -7,6 +7,7 @@
 //   node scripts/informe.mjs --raiz <dir>        igual, sobre otra raíz (lo usan las pruebas)
 //   node scripts/informe.mjs --minimo <n>        umbral de tareas propio (entero ≥ 1)
 //   node scripts/informe.mjs --json              imprime el JSON (y escribe igual el Markdown)
+//   node scripts/informe.mjs --consumo <dir>     añade el bloque «Consumo (aproximado)» con las sesiones de <dir> (consumo.mjs)
 //
 // No abre features/, STATUS.md, .env*, ni git. No corre registrar.mjs.
 
@@ -14,12 +15,13 @@ import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validarEvento } from "./registrar.mjs";
+import { descubrirSesiones } from "./consumo.mjs";
 
 export const UMBRAL_TAREAS = 10;
 export const UMBRAL_CORTE = 5;
 const Z = 1.96;
 const MENSAJE_FALTA = "falta registro/eventos.jsonl; corre antes `node scripts/registrar.mjs`";
-const OPCIONES_CONOCIDAS = ["--raiz", "--minimo", "--json"];
+const OPCIONES_CONOCIDAS = ["--raiz", "--minimo", "--json", "--consumo"];
 
 const round1 = (x) => (x === null || x === undefined ? null : Math.round(x * 10) / 10);
 const media = (valores) => (valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null);
@@ -204,8 +206,64 @@ const LIMITES = [
   "- Con n pequeño los intervalos son anchos; decidir si bastan es cosa de Franco.",
 ];
 
+// Bloque de consumo (aproximado). `sesiones` son las de descubrirSesiones; `n` son las tareas hechas del informe.
+// Totales = sesiones principales + sus subagentes (la tabla por rol suma lo mismo). Sin costo numérico: null (n/d).
+// Solo se usan rol, corridas, turnos y costo: nunca archivo ni rutas. Un rol que no sea nombre simple sale como «otro».
+const ROL_SIMPLE = /^[a-z][a-z0-9-]{0,39}$/;
+const sumaCosto = (actual, valor) => (typeof valor === "number" ? (actual ?? 0) + valor : actual);
+const numero = (x) => (typeof x === "number" && Number.isFinite(x) ? x : 0);
+
+export function bloqueConsumo(sesiones, n) {
+  const filas = new Map();
+  let turnos = 0;
+  let costo = null;
+  const sumarFila = (rol, corridas, t, c) => {
+    const nombre = ROL_SIMPLE.test(rol) ? rol : "otro";
+    if (!filas.has(nombre)) filas.set(nombre, { rol: nombre, corridas: 0, turnos: 0, costo: null });
+    const f = filas.get(nombre);
+    f.corridas += corridas;
+    f.turnos += numero(t);
+    f.costo = sumaCosto(f.costo, c);
+  };
+  for (const s of sesiones) {
+    sumarFila(s.rol, 1, s.turnos, s.costo);
+    turnos += numero(s.turnos);
+    costo = sumaCosto(costo, s.costo);
+    for (const [rol, r] of Object.entries(s.subagentes?.porRol ?? {})) {
+      sumarFila(rol, numero(r.corridas), r.turnos, r.costo);
+      turnos += numero(r.turnos);
+      costo = sumaCosto(costo, r.costo);
+    }
+  }
+  const porTarea = n > 0
+    ? { n, turnos: Math.round((turnos / n) * 10) / 10, costo: costo === null ? null : costo / n }
+    : { n, turnos: null, costo: null };
+  const filasOrdenadas = [...filas.values()].sort((a, b) => (a.rol < b.rol ? -1 : a.rol > b.rol ? 1 : 0));
+  return { turnos, costo, filas: filasOrdenadas, porTarea };
+}
+
+const dinero = (x) => (x === null ? "n/d" : `US$${x.toFixed(3)}`);
+
+function lineasConsumo(c) {
+  const L = ["## Consumo (aproximado)", `Total: turnos ${c.turnos} · costo ${dinero(c.costo)}`];
+  L.push("F20 mide sesiones, no tareas: el costo por tarea es un promedio, no una atribución.");
+  const p = c.porTarea;
+  L.push(
+    p.n === 0
+      ? "por tarea (promedio): n/d"
+      : `por tarea (promedio, n=${p.n}): turnos ${p.turnos === null ? "n/d" : p.turnos.toFixed(1)} · costo ${dinero(p.costo)}`,
+    "",
+    "| Rol | Corridas | Turnos | Costo |",
+    "|---|---|---|---|",
+  );
+  for (const f of c.filas) L.push(`| ${f.rol} | ${f.corridas} | ${f.turnos} | ${dinero(f.costo)} |`);
+  L.push("");
+  return L;
+}
+
 // Markdown del informe. Sin títulos de feature ni de tarea: solo Fxx y NN, y nunca el contenido de una línea descartada.
-export function formatearMarkdown(informe) {
+// `consumo` (opcional): el bloque de bloqueConsumo; si no es objeto, no hay bloque.
+export function formatearMarkdown(informe, consumo = null) {
   const L = [];
   if (!informe.suficiente) {
     L.push(`DATOS INSUFICIENTES: n=${informe.tareas} de ${informe.minimo}; no se calculan porcentajes ni medianas`, "");
@@ -247,21 +305,24 @@ export function formatearMarkdown(informe) {
     L.push("");
   }
 
+  if (consumo) L.push(...lineasConsumo(consumo));
   L.push("## Límites de esta lectura", ...LIMITES, "");
   return L.join("\n");
 }
 
 // JSON con las claves acordadas (sin el umbral, que es parámetro de la corrida).
-export function informeJson(informe) {
+// `consumo` solo sale si se pasó --consumo (objeto, o null si no se calculó por n < minimo).
+export function informeJson(informe, consumo = undefined) {
   const { eventosHasta, lineasNoValidas, tareas, ejecuciones, suficiente, entrega, calidad, fiabilidad, ritmo, cortes } =
     informe;
   const salida = { eventosHasta, lineasNoValidas, tareas, ejecuciones, suficiente, entrega, calidad, fiabilidad, ritmo, cortes };
+  if (consumo !== undefined) salida.consumo = consumo;
   return `${JSON.stringify(salida, null, 2)}\n`;
 }
 
 // Lee los argumentos. Cualquier cosa desconocida, repetida o inválida es error (sin tocar nada).
 export function leerArgumentos(args) {
-  const opciones = { raiz: null, minimo: UMBRAL_TAREAS, json: false };
+  const opciones = { raiz: null, minimo: UMBRAL_TAREAS, json: false, consumo: null };
   const vistas = new Set();
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -277,6 +338,8 @@ export function leerArgumentos(args) {
     i++;
     if (a === "--raiz") {
       opciones.raiz = resolve(valor);
+    } else if (a === "--consumo") {
+      opciones.consumo = resolve(valor);
     } else {
       if (!/^\d+$/.test(valor) || Number(valor) < 1) return { error: "--minimo exige un entero ≥ 1" };
       opciones.minimo = Number(valor);
@@ -293,6 +356,10 @@ function ejecutarCli(args) {
     process.stderr.write(`error: ${error}\n`);
     return 1;
   }
+  if (opciones.consumo !== null && !(existsSync(opciones.consumo) && statSync(opciones.consumo).isDirectory())) {
+    process.stderr.write("error: --consumo exige una carpeta existente\n");
+    return 1;
+  }
   const ruta = join(opciones.raiz, "registro", "eventos.jsonl");
   if (!existsSync(ruta) || !statSync(ruta).isFile()) {
     process.stderr.write(`error: ${MENSAJE_FALTA}\n`);
@@ -300,9 +367,12 @@ function ejecutarCli(args) {
   }
   const { eventos, lineasNoValidas } = leerEventos(readFileSync(ruta, "utf8"));
   const informe = calcularInforme(eventos, { minimo: opciones.minimo, lineasNoValidas });
-  const markdown = formatearMarkdown(informe);
+  // Sin --consumo no hay bloque ni clave (salida idéntica a la de task-01). Con n < minimo no se calcula (null).
+  const consumo =
+    opciones.consumo === null ? undefined : informe.suficiente ? bloqueConsumo(descubrirSesiones(opciones.consumo), informe.entrega.n) : null;
+  const markdown = formatearMarkdown(informe, consumo ?? null);
   writeFileSync(join(opciones.raiz, "registro", "informe.md"), markdown);
-  process.stdout.write(opciones.json ? informeJson(informe) : markdown);
+  process.stdout.write(opciones.json ? informeJson(informe, consumo) : markdown);
   return 0;
 }
 

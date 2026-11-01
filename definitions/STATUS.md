@@ -5,12 +5,13 @@
 ## Paso actual
 
 F22 y F23 `hecha`. F11 `en curso`: diseño aprobado, task-01 y task-02 `aprobada` (Franco, 2026-11-01).
-task-01: lista para revisión | features/F11-informe-resultados/task-01-nucleo-informe.md
+task-01: hecha (Franco, 2026-11-01).
+task-02: lista para revisión | features/F11-informe-resultados/task-02-consumo-documentacion.md
 Rama: feature/F11-informe-resultados
 
 ## Espera a Franco
 
-- **Puerta 4 (task-01):** revisa *Evidencia* y *Notas* (7 huecos menores) y `git diff scripts/` (nuevo `informe.mjs`), `git diff pruebas/`; commitea y pásala a `hecha`.
+- **Puerta 4 (task-02):** revisa *Evidencia* y *Notas* (5 huecos menores), `git diff scripts/` (`informe.mjs`) y `git diff pruebas/ README.md`; commitea y pásala a `hecha`. Luego confirma F11.
 
 - La sección F11 de `ARCHITECTURE.md` sigue rotulada BORRADOR: pide al `arquitecto` quitar el rótulo (yo no escribo ahí).
 

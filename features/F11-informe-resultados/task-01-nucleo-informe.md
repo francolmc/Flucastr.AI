@@ -1,5 +1,5 @@
 # task-01 — Núcleo de `scripts/informe.mjs` y sus pruebas
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Crear `scripts/informe.mjs`: script de solo lectura sobre `registro/eventos.jsonl` que escribe `registro/informe.md` (y lo imprime) con cifras de entrega, calidad, fiabilidad, ritmo y cortes, con umbral mínimo e intervalo de Wilson. Sin bloque de consumo (task-02).
