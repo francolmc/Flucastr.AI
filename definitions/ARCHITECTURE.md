@@ -414,6 +414,123 @@ Franco aprobó las seis con la recomendación indicada; solo la 4 queda pendient
 5. ¿Probar `showCacheMissNotices: true` una semana antes de decidir sobre caché larga? (pregunta 2) *Recomiendo sí; no cuesta nada.*
 6. Claude Code: ¿verifico en una sesión corta el archivo de proyecto y la precedencia de `autoCompactWindow` (y `/context`, `/cost`) antes de documentar un fragmento? *Recomiendo sí, como primera tarea de F18.*
 
+## Informe de resultados del flujo (BORRADOR, F11)
+
+> **Borrador, por aprobar en la puerta 1 de F11** (2026-11-01). Diseño del `arquitecto` antes de descomponer. *Confirmado* = leído en `BACKLOG.md`, `REGISTRO.md`, `scripts/registrar.mjs` y `scripts/consumo.mjs` (cabeceras y exportaciones; no se leyó `registro/`). *Inferido* = deducido de eso. *Propuesta* = mía, por aprobar. **No se sabe cuántas tareas tienen hoy línea `Registro:`** (no se leyó el log): no condiciona el diseño, porque el propio script lo cuenta y se niega a calcular por debajo del umbral.
+
+### Qué es y qué no es
+
+Un script de **solo lectura sobre `registro/eventos.jsonl`** que produce un informe corto en Markdown con los resultados del flujo. No es una puerta, no es un rol y no cambia ningún contrato de agente. El log sigue siendo un índice derivado (`REGISTRO.md`); el informe es un derivado del derivado: se puede borrar y regenerar. *Origen:* cometido aclarado por Franco para F10 («el informe es una etapa posterior», `REGISTRO.md` §7) y fila F11 de `BACKLOG.md`.
+
+```mermaid
+flowchart LR
+  F["Franco"]
+  RG["scripts/registrar.mjs (F10)"]
+  EV[("registro/eventos.jsonl")]
+  IN["scripts/informe.mjs (F11)"]
+  RP[("registro/informe.md (ignorado por git)")]
+  CS["scripts/consumo.mjs (F20, opcional)"]
+  SE[("logs de sesiones de Claude Code y Pi, fuera del repo")]
+  AGT["agentes del flujo"]
+
+  F -->|"1. node scripts/registrar.mjs"| RG
+  RG -->|"añade eventos validados"| EV
+  F -->|"2. node scripts/informe.mjs [--consumo dir]"| IN
+  IN -->|"lee, solo lectura"| EV
+  IN -->|"solo con --consumo: totales por rol"| CS
+  CS -->|"lee, solo lectura"| SE
+  IN -->|"escribe, determinista"| RP
+  F -->|"lee"| RP
+  AGT -. "no lo leen salvo pedido de Franco" .-> RP
+```
+
+### Qué mide (propuesta)
+
+Las preguntas son las candidatas de `REGISTRO.md` §9.1; **no consta que Franco las haya confirmado** (*supuesto*; pregunta 1 abajo). Cada cifra sale con su `n`.
+
+| Bloque | Cifra | Evento y campo | Cuidado |
+|---|---|---|---|
+| Entrega | % de tareas `hecha` sin devolución en la puerta 4; devoluciones por tarea | `puerta` (`n=4`, `resultado`) | El `n` son tareas, no ejecuciones |
+| Calidad de la tarea | Huecos menores por tarea (media, mediana y máximo) | `ejecucion.huecos` | Sirve para juzgar al `planificador`, no al `constructor` |
+| Fiabilidad del constructor | Intentos por ejecución; % `verificacion=pasa`; bloqueos y escalaciones por `causa` | `ejecucion.intentos`, `.verificacion`, `.resultado`, `.causa` | Una ejecución por línea `Registro:` |
+| Ritmo | Mediana de `aprobada` a `hecha` (tarea) y de `pendiente` a `hecha` (feature) | `tarea_estado`, `feature_estado` (`t` del commit) | Es el reloj del commit de Franco, no tiempo de trabajo; en yolo todo cae en un mismo commit |
+| Cortes | Lo anterior por `modelo`, `herramienta` y `modo` (normal frente a yolo) | `ejecucion.modelo`, `.herramienta`, `.modo` | `modelo` es el *configurado* al correr `registrar.mjs` (`REGISTRO.md` §3); solo se muestra un grupo con 5 tareas o más |
+| Consumo (opcional) | Costo y turnos totales, por rol, y por tarea aproximado | `consumo.mjs --json --tareas <n>`, con `n` = tareas `hecha` del periodo | F20 mide **sesiones**, no tareas: el costo por tarea es un promedio, no una atribución. No se copia ninguna ruta de archivo del informe de consumo |
+
+**No mide** (ya dicho en `REGISTRO.md` §1): tiempo real de trabajo, motivo de devoluciones, puertas 1 y 2, ni nada con texto libre.
+
+### Fuentes
+
+1. **Obligatoria:** `registro/eventos.jsonl`. Se valida cada línea con `validarEvento` y `ESQUEMA` de `scripts/registrar.mjs` (ambas exportadas, *confirmado*); la línea inválida se descarta y se cuenta («líneas no válidas: N»). Así el informe hereda la lista cerrada de claves y no puede emitir texto libre.
+2. **Opcional (`--consumo <dir>`):** `descubrirSesiones` e `informeJson` de `scripts/consumo.mjs` (exportadas, *confirmado*). Es la única fuente fuera de `registro/` y solo si Franco la pide con la bandera, porque `consumo.mjs` exige una `--raiz` con logs de sesión que están fuera del repo.
+3. **Nada más.** No abre `features/`, tareas, `STATUS.md`, `.env*` ni git. Si falta el log, sale con código 1 y el mensaje «corre antes `node scripts/registrar.mjs`».
+
+### Formato y lugar
+
+- **Archivo:** `registro/informe.md`, sobrescrito en cada corrida. Queda dentro de `registro/`, que ya se ignora a sí mismo (`registro/.gitignore` con `*`, F10): no va a git ni a `instalar-remoto.sh`. Además se imprime por la salida estándar. *Descartado:* escribirlo en `definitions/` (lo leerían los agentes y engordaría el contexto; contradice F08/F21) y versionarlo (publica datos de trabajo en un repo público).
+- **Determinista:** sin hora de «generado en»; la cabecera lleva «eventos hasta `<t máx>`», tomada de los datos. Dos corridas con el mismo log dan el mismo archivo byte a byte.
+- **Corto:** unas 60 líneas, tablas con `n` en cada fila, y una sección final «Límites de esta lectura» con los avisos de arriba. Sin títulos de feature ni de tarea: solo `Fxx` y `NN`.
+- **Opciones:** `--raiz <dir>` (por defecto el directorio actual), `--minimo <n>` (por defecto el umbral, abajo), `--consumo <dir>`, `--json` (mismo contenido como JSON, para `jq`). Sin banderas desconocidas (error, como `consumo.mjs`).
+
+### Umbral mínimo y calibración (propuesta)
+
+- **Unidad:** tarea con **al menos un evento `ejecucion`** (es decir, con línea `Registro:` válida). Las tareas que solo tienen estados de git no cuentan, porque sin `Registro:` no hay huecos, intentos ni bloqueos.
+- **Umbral global: 10 tareas** (la cifra de la fila de `BACKLOG.md`, *a calibrar*). Por debajo, el informe sale igual pero **solo con conteos crudos** (tareas, ejecuciones, líneas no válidas) y una primera línea «DATOS INSUFICIENTES: n=X de 10; no se calculan porcentajes ni medianas». No devuelve error: quien lo corre ve cuánto falta.
+- **Umbral por corte: 5 tareas** por modelo, herramienta o modo; bajo eso, la fila dice «n insuficiente» y no muestra cifra.
+- **Incertidumbre visible:** cada porcentaje lleva su `n` y un intervalo de Wilson al 95 % (fórmula cerrada, sin dependencias). Con n=10 el intervalo es ancho, y eso es lo que debe notarse: el informe no pretende más certeza de la que tiene.
+- **Cómo se calibra:** (1) la primera corrida con n≥10 la lee Franco con el `arquitecto` o el `coordinador` a su pedido; (2) se juzga si los intervalos bastan para decidir algo concreto (por ejemplo tocar la skill `descomponer-feature` por los huecos); (3) si no, sube `--minimo` y el umbral por corte, y la cifra definitiva se anota con fecha en `REGISTRO.md` §7 y en esta sección; (4) la constante vive en un solo lugar del script. *Qué la cambiaría:* intervalos demasiado anchos para decidir (subir), o que `n` crezca tan lento que nunca se alcance (bajar y aceptar el intervalo). *Descartado:* fijar 10 como verdad (es la cifra heredada de F10, sin datos) y calibrar con simulación (no hay datos reales con los que validarla).
+
+### Comandos y uso
+
+```
+node scripts/registrar.mjs                         # primero: deja el log al día
+node scripts/informe.mjs                           # escribe registro/informe.md y lo imprime
+node scripts/informe.mjs --consumo <dir de logs>   # añade el bloque de consumo (F20)
+node scripts/informe.mjs --minimo 15 --json
+```
+
+El script **no corre `registrar.mjs` por su cuenta** (una sola responsabilidad por script, y `registrar.mjs` escribe en `registro/`). Avisa si el último evento es anterior al último `t` de su propio log. Quién lo corre: **Franco** (recomendado, sin permisos nuevos). Ampliar el permiso del `coordinador` (`WORKFLOW.md` §3.1, patrones de `tools:` en Claude Code) sería una decisión aparte de Franco (pregunta 4).
+
+### Pruebas (sin modelo, sin red, sin git)
+
+Archivo `pruebas/comprobaciones/informe.test.mjs`, con `eventos.jsonl` armado a mano en una carpeta temporal; segundos, dentro de `rapida.sh` (30 s). Cada caso, con control negativo:
+
+1. **Umbral:** 9 tareas con `ejecucion` dan «DATOS INSUFICIENTES» y ningún porcentaje; 10 dan cifras. Control: `--minimo 9` calcula con 9.
+2. **Cifras conocidas:** un log con respuestas calculadas a mano (devolución, huecos, causas, mediana de `aprobada`→`hecha`) da exactamente esos números y los intervalos de Wilson esperados.
+3. **Cortes:** un modelo con 4 tareas aparece como «n insuficiente»; con 5 muestra cifra.
+4. **Líneas no válidas:** una línea corrupta y otra con clave fuera del `ESQUEMA` se descartan y se cuentan; el resto se calcula igual.
+5. **Determinismo:** dos corridas, mismo `informe.md` byte a byte; el contenido no cambia con la hora de la máquina.
+6. **Privacidad:** el log de prueba lleva claves y valores canario (título, autor, ruta absoluta) que `validarEvento` rechaza; ninguno aparece en el informe. En el bloque de consumo, ninguna ruta de archivo del informe de `consumo.mjs` aparece.
+7. **Aislamiento:** no escribe fuera de `registro/informe.md`; no abre `.env*` (un `.env` canario no figura en los accesos); sin `eventos.jsonl` sale con 1 y no crea nada.
+8. **Consumo opcional:** con una carpeta de sesiones de `pruebas/comprobaciones/consumo-fixtures.mjs` el bloque aparece con totales y por rol; sin la bandera no aparece.
+
+Lo que **no** se prueba y queda para el primer uso real: que los intervalos sirvan para decidir (es la calibración, arriba).
+
+### Partición recomendada (el `planificador` decide)
+
+1. **task-01, núcleo:** `scripts/informe.mjs` (lectura y validación, bloques Entrega, Calidad, Fiabilidad, Ritmo y Cortes, umbrales, Wilson, salida Markdown y `--json`), pruebas 1 a 5 y 7. Sale con un informe de «DATOS INSUFICIENTES» si hoy hay menos de 10.
+2. **task-02, consumo y documentación:** bloque opcional `--consumo`, pruebas 6 y 8, README y `pruebas/README.md`, y el comando en «Espera a Franco» (`WORKFLOW.md` §10.5) si Franco lo aprueba. Depende de 1. La calibración final **no es una tarea**: es una lectura posterior de Franco.
+
+### Decisiones (F11)
+
+| Decisión | Por qué | Descartado y por qué | Qué la cambiaría |
+|---|---|---|---|
+| Script aparte `informe.mjs`, de solo lectura sobre el log | Una responsabilidad por script; el informe se puede rehacer sin tocar el registro | Ampliar `registrar.mjs` (mezcla escritura del log con análisis); agente que redacte el informe (consume contexto, sin determinismo) | Que el informe necesite datos que el log no tiene |
+| `registro/informe.md`, ignorado por git y no leído por agentes | Misma privacidad y misma regla de lectura que el log | `definitions/` (los agentes lo leerían); versionarlo | Que Franco quiera compartirlo; entonces se publica una copia a mano |
+| Umbral de 10 tareas con `Registro:` más 5 por corte, con intervalo de Wilson visible | El informe no afirma más de lo que los datos permiten, y la calibración queda a la vista | Un número sin intervalo; sin umbral (cifras engañosas con n=3) | Intervalos inútiles con n=10, o n que no crece |
+| Consumo opcional y agregado | F20 mide sesiones, no tareas; evita presentar una atribución falsa | Consumo siempre incluido (obliga a una `--raiz` externa); costo por tarea exacto (no existe) | Que se mida el consumo por tarea (otra feature) |
+| Corre Franco, no un agente | Cero permisos nuevos | Dar permiso al `coordinador` (cambia `WORKFLOW.md` §3.1 para un script que Franco corre pocas veces) | Que Franco lo quiera en cada cierre de feature |
+
+### Preguntas abiertas para Franco (puerta 1 de F11)
+
+1. ¿Son estas las preguntas que quieres responder (tabla «Qué mide»)? ¿Falta alguna o sobra alguna? (supuesto: vienen de `REGISTRO.md` §9.1, sin confirmar).
+2. ¿Aceptas `registro/informe.md`, ignorado por git y regenerable, como único destino?
+3. ¿Aceptas umbral 10 / 5 con intervalo de Wilson y la calibración tras la primera lectura, o prefieres otra cifra?
+4. ¿Lo corres tú (recomendado) o ampliamos el permiso del `coordinador` en `WORKFLOW.md` §3.1?
+5. ¿El bloque de consumo entra como opcional en F11 (recomendado) o queda fuera y se usa `consumo.mjs` aparte?
+
+**Estado: borrador.** No cambia el estado de ninguna definición ni de `BACKLOG.md`. F11 sigue `pendiente`.
+
 ## Supuestos y pendientes
 
 - **Pendiente (F09):** Franco revisa que el repo y su historial no tengan credenciales ni datos personales **antes** de hacerlo público, y lo publica él (ver `PROJECT.md`, «Repo público»). Hasta entonces el flujo de descarga no puede probarse de punta a punta.
