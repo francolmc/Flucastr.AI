@@ -1,5 +1,5 @@
 # task-05 — Corrida con modelo en Pi: llamadas en orden y `Read` con `limit: 3` en el `coordinador`
-repo: Flucastr.AI   depende_de: task-03   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
 `definitions/CONTEXTO.md` §2.4 y §4 (riesgo 5) dejan dos supuestos para F21: (a) Pi ejecuta en el orden indicado varias llamadas de un mismo turno; (b) `Read` con `limit` funciona en el `coordinador`. Segunda corrida (decidida por Franco, 2026-11-01): una sola invocación nueva con modelo, solo para el supuesto (a), con un prompt que fuerza dos `edit` dependientes entre sí. Sea cual sea el resultado, se acepta e informa tal cual. La meta de consumo (≤4 turnos por llamada a subagente, 0 KB de `definitions/`) NO se mide aquí: la corre Franco con `node scripts/consumo.mjs`.

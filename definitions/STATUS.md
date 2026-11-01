@@ -4,23 +4,17 @@
 
 ## Paso actual
 
-F20 `hecha` (Franco, 2026-10-31): las 6 tareas `hecha` en `features/F20-medicion-consumo/`. F19 `hecha` (PR #16 fusionado). Rol: ninguno (esperando a Franco, puerta 4). F21 «`coordinador` con menos turnos» `en curso`. task-01 a task-04: hecha (en `features/F21-coordinador-menos-turnos/`). task-05 `lista para revisión`: 2.ª corrida en Pi, veredicto NO CONCLUYENTE (1 invocación, `gpt-6.1-sol`, ~US$0,03); no se repite.
-Rama: feature/F21-coordinador-menos-turnos F21 se construye encima de la rama de F20 (PR de F20 sin fusionar).
-Rama: feature/F21-coordinador-menos-turnos
-Rama de F20: feature/F20-medicion-consumo (sin PR todavía). Rama de F21 al pasar a `en curso`: la propondré al aprobar sus tareas.
+F21 `hecha` (Franco, 2026-11-01; PR y merge a cargo de Franco). F19 y F20 `hecha`. Rol: planificador, `descomponer-feature` de F22 «Lectura acotada de planificador, constructor y arquitecto» (mueve la marca `→` de F21 a F22). Siguiente: puerta 3 (tareas de F22 en `borrador`).
+Rama de F22 al pasar a `en curso`: la propondré al aprobar sus tareas.
 
 ## Espera a Franco
 
-- **Puerta 4, F21 task-05 (2.ª corrida, NO CONCLUYENTE):** los dos `edit` salieron correctos y en orden, pero en turnos distintos, no agrupados; la tarea lo clasifica así. Revisa su evidencia y el informe `pruebas/resultados/2026-11-01-coordinador-menos-turnos-pi-2.md`; y el anterior en `pruebas/resultados/2026-11-01-coordinador-menos-turnos-pi.md`. Vigila `rapida.sh` (una pasada tardó 60 s, tope 30 s). Revisa también `git diff agentes/coordinador.md` (archivo sensible, tope 17 920 bytes). La rama de F21 arrastra los commits de F20: fusiona primero el PR de F20.
-- **Task-05 de F21** (corrida con modelo en Pi): antes de delegarla te confirmaré el gasto.
-- Feature F20 completa en feature/F20-medicion-consumo: cierra la rama, haz el PR y despliega.
+- Feature F21 completa en feature/F21-coordinador-menos-turnos: cierra la rama, haz el PR y despliega. Antes de F22, corre `bash instalar.sh` para que Pi use el prompt nuevo del coordinador.
 - Chequeo de contexto: `node scripts/archivar.mjs` (sugerencia, no bloquea).
-- Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea). Ya corrido hoy: 368 eventos.
-- Feature F20 archivable: `node scripts/archivar.mjs --aplicar F20` (lo corre Franco o, si lo pide, tú, después del PR y en su propio commit `chore/`).
-- Feature F19 archivable: `node scripts/archivar.mjs --aplicar F19` (igual, en commit `chore/`).
-- Pendiente tuyo: la cifra de la task-05 sobre el log de Cleaner (`node scripts/consumo.mjs --raiz ~/.pi/agent/sessions/--Users-franco-Codes-flucastr-Flucastr.Cleaner-- --hasta 2026-11-01T00:48:34.046Z` → ~216 turnos, 26 llamadas, ~US$2.09).
-- Pendiente tuyo: texto de `BACKLOG.md`, viñeta «Siguiente (`→`)» de «Base de la prioridad»: el planificador la actualiza en esta descomposición.
-- **Tras instalar F19 (tuyo):** abre un Pi nuevo y confirma que compacta al pasar de ~100 k.
+- Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea).
+- Features archivables, tras el PR y cada una en su propio commit `chore/`: `node scripts/archivar.mjs --aplicar F19`, `--aplicar F20` y `--aplicar F21` (las corre Franco o, si lo pide, tú).
+- Pendiente tuyo: cifra de la task-05 de F20 sobre el log de Cleaner: `node scripts/consumo.mjs --raiz ~/.pi/agent/sessions/--Users-franco-Codes-flucastr-Flucastr.Cleaner-- --hasta 2026-11-01T00:48:34.046Z` (~216 turnos, 26 llamadas, ~US$2.09).
+- Pendiente tuyo: tras instalar F19, abre un Pi nuevo y confirma que compacta al pasar de ~100 k.
 - **Urgente (tuyo):** el repo ya es público; revisa secretos en el historial (detalle en `definitions/PENDIENTES.md`).
 
 ## Bloqueos abiertos
@@ -29,4 +23,4 @@ Ninguno.
 
 ## Última actualización
 
-2026-10-31
+2026-11-01
