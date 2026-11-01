@@ -1,5 +1,5 @@
 # task-03 — `coordinador`: `subagents_enable` una vez, plantilla de encargo y sin `contact_supervisor`
-repo: Flucastr.AI   depende_de: task-02   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 En Pi, el `coordinador` activó `subagents_enable` 18 veces en una sesión, y sus encargos incompletos obligaron a reintentos (`definitions/CONTEXTO.md` §1 y §2.5). Esta tarea ajusta «Autorización de delegar» y el paso de delegar de `agentes/coordinador.md`: activar la herramienta una vez por sesión, una plantilla fija de encargo y la prohibición de `contact_supervisor`.

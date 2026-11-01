@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validarRoles } from './contrato-roles.mjs';
+import { validarRoles, FRASES_COORDINADOR_F21 } from './contrato-roles.mjs';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -63,6 +63,7 @@ function muestra() {
         'Al listar `features/` no entres en `features/completed/`.\n' +
         'Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco).\n' +
         'Tampoco entres en `registro/`.\n\n' +
+        FRASES_COORDINADOR_F21.join('\n') + '\n' +
         ESTADOS_TABLA.join('\n') + '\n',
     },
     skills: {
@@ -270,6 +271,16 @@ for (const [nombre, elemento, agente, alterar] of variantesF11) {
       errores.some((e) => e.includes(`«${agente}»`) && e.includes(elemento)),
       `se esperaba un error que nombre «${agente}» y «${elemento}»`,
     );
+  });
+}
+
+// Controles negativos de la regla 16: quitar cualquiera de las 11 frases de F21 debe nombrarla en el error.
+for (const frase of FRASES_COORDINADOR_F21) {
+  test(`rechaza regla 16: el coordinador pierde la frase «${frase}»`, () => {
+    const m = muestra();
+    m.agentes.coordinador = m.agentes.coordinador.replace(frase, 'frase omitida');
+    const errores = validarRoles(m);
+    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
   });
 }
 

@@ -1,5 +1,5 @@
 # task-04 — Pruebas de contrato: frases de F21 en el `coordinador` para Pi y Claude Code
-repo: Flucastr.AI   depende_de: task-03   estado: aprobada
+repo: Flucastr.AI   depende_de: task-03   estado: lista para revisión
 
 ## Descripción
 Las reglas de task-01 a 03 viven solo en texto; la prueba debe fallar si alguien las quita. Se agrega una regla 16 al validador `validarRoles` con las frases literales de F21, sus controles negativos, y una prueba nueva que genera el agente del `coordinador` para Pi y para Claude Code con `scripts/resolver.mjs` y comprueba las mismas frases y un tope de tamaño. Verifican el **texto**, no el comportamiento (`definitions/CONTEXTO.md` §3).
@@ -39,7 +39,32 @@ Fuera de alcance: cambiar texto de `agentes/*.md` o `skills/` (si falta una fras
 - `bash pruebas/rapida.sh` → código 0 y `rapida: … (tope 30 s)` con S ≤ 30.
 
 ## Evidencia
-(lo llena el constructor)
+```
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/coordinador-turnos.test.mjs
+✔ el coordinador generado para Claude Code conserva las 11 frases de F21 (36.59 ms)
+✔ el coordinador generado para Pi conserva las 11 frases de F21 (31.65 ms)
+✔ el coordinador no supera el tope de 17920 bytes (0.14 ms)
+✔ rechaza una salida generada a la que le falta una frase de F21 (29.11 ms)
+ℹ tests 44
+ℹ pass 44
+ℹ fail 0
+
+$ node --test pruebas/comprobaciones/coordinador-status.test.mjs pruebas/comprobaciones/higiene-contexto.test.mjs
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0
+
+$ bash pruebas/rapida.sh
+ℹ pass 335
+ℹ fail 0
+rapida: 29 archivos en 20 s (tope 30 s)
+(exit 0)
+```
 
 ## Notas
-(lo llena el constructor)
+- Las 11 frases de F21 ya estaban en `agentes/coordinador.md` (no hubo hueco en task-01 a 03). Ese archivo no se tocó.
+- Huecos menores: el control negativo de `coordinador-turnos.test.mjs` quita la frase de la salida generada (cadena en memoria) en vez de escribir un archivo temporal; la comprobación es la misma.
+- Una pasada anterior de `rapida.sh` tardó 60 s (superó el tope de 30 s; `exit 1`) con todas las pruebas en `pass`; la siguiente tardó 20 s y pasó. Sin cambio entre ambas. Se cuenta como intento fallido por variación de tiempo, no por una prueba. Hubo además una corrida sin medir tiempo con exit 0.
+- Escribí por error un archivo en `/tmp` (`/tmp/unused`) y lo borré. Desde ahí usé el scratchpad.
+- `definitions/STATUS.md` y `registro/` no se tocaron.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

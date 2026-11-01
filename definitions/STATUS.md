@@ -4,13 +4,13 @@
 
 ## Paso actual
 
-F20 `hecha` (Franco, 2026-10-31): las 6 tareas `hecha` en `features/F20-medicion-consumo/`. F19 `hecha` (PR #16 fusionado). Rol: ninguno (esperando a Franco, puerta 4). F21 «`coordinador` con menos turnos» `en curso` (Franco: «dale», 2026-10-31). task-01 y task-02: hecha (en `features/F21-coordinador-menos-turnos/`). task-03 `lista para revisión`; 04 y 05 `aprobada`. F21 se construye encima de la rama de F20 (PR de F20 sin fusionar).
+F20 `hecha` (Franco, 2026-10-31): las 6 tareas `hecha` en `features/F20-medicion-consumo/`. F19 `hecha` (PR #16 fusionado). Rol: ninguno (esperando a Franco, puerta 4). F21 «`coordinador` con menos turnos» `en curso` (Franco: «dale», 2026-10-31). task-01 a task-03: hecha (en `features/F21-coordinador-menos-turnos/`). task-04 `lista para revisión`; 05 `aprobada` (corrida con modelo: confirmar gasto antes de delegarla). F21 se construye encima de la rama de F20 (PR de F20 sin fusionar).
 Rama: feature/F21-coordinador-menos-turnos
 Rama de F20: feature/F20-medicion-consumo (sin PR todavía). Rama de F21 al pasar a `en curso`: la propondré al aprobar sus tareas.
 
 ## Espera a Franco
 
-- **Puerta 4, F21 task-03** (`features/F21-coordinador-menos-turnos/task-03-coordinador-delegacion.md`): revisa su evidencia (40 pruebas pasan; `coordinador.md` mide 17 687 bytes, tope 17 920) y `git diff agentes/coordinador.md` (archivo sensible, tope 17 920 bytes). La rama de F21 arrastra los commits de F20: fusiona primero el PR de F20.
+- **Puerta 4, F21 task-04** (`features/F21-coordinador-menos-turnos/task-04-pruebas-contrato-coordinador-turnos.md`): revisa su evidencia (44 pruebas de contrato y `rapida.sh` en 20 s pasan según el constructor; una pasada previa tardó 60 s y falló el tope, anotado en Notas) y `git diff agentes/coordinador.md` (archivo sensible, tope 17 920 bytes). La rama de F21 arrastra los commits de F20: fusiona primero el PR de F20.
 - **Task-05 de F21** (corrida con modelo en Pi): antes de delegarla te confirmaré el gasto.
 - Feature F20 completa en feature/F20-medicion-consumo: cierra la rama, haz el PR y despliega.
 - Chequeo de contexto: `node scripts/archivar.mjs` (sugerencia, no bloquea).
