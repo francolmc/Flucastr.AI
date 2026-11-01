@@ -1,5 +1,5 @@
 # task-06 — Documentar `scripts/consumo.mjs` en README y pruebas
-repo: Flucastr.AI   depende_de: task-05   estado: aprobada
+repo: Flucastr.AI   depende_de: task-05   estado: lista para revisión
 
 ## Descripción
 Deja escrito cómo se usa la medición de consumo: una entrada en el árbol del README, una sección corta con el comando y lo que mide, y las pruebas nuevas en `pruebas/README.md`. Sin cambio de comportamiento.
@@ -39,7 +39,45 @@ Fuera de alcance: `definitions/WORKFLOW.md` (incluida la lista de §3.1: el `coo
 - `bash pruebas/rapida.sh` → código 0 y `rapida: … (tope 30 s)` con S ≤ 30.
 
 ## Evidencia
-(lo llena el constructor; solo la cola relevante, ≤1,5 KB)
+```
+$ grep -n 'consumo.mjs' README.md pruebas/README.md
+README.md:92:│   ├── consumo.mjs     # mide consumo de tokens, turnos y KB leídos por rol desde los logs de Pi y Claude Code (solo lectura; lo corre Franco)
+README.md:259:`node scripts/consumo.mjs --raiz <carpeta de logs> [--hasta <ISO>] [--tareas <n>] [--json]`
+pruebas/README.md:30:- Consumo (F20): `node --test pruebas/comprobaciones/consumo.test.mjs` (43 pruebas, sin modelo ni red; fuera de `rapida.sh`). ...
+
+$ grep -n '^## Medición de consumo\|^## Registro de eventos' README.md
+255:## Medición de consumo
+263:## Registro de eventos
+
+$ node --test pruebas/comprobaciones/readme-estructura.test.mjs
+ℹ pass 7
+ℹ fail 0
+
+$ bash pruebas/rapida.sh; echo codigo=$?
+rapida: 28 archivos en 17 s (tope 30 s)
+codigo=0
+
+$ node --test pruebas/comprobaciones/consumo.test.mjs   (cifra para la viñeta)
+ℹ tests 43
+ℹ pass 43
+ℹ fail 0
+
+$ node scripts/consumo.mjs --raiz <carpeta vacía del scratchpad>; echo codigo=$?
+No hay sesiones (*.jsonl) bajo la raíz.
+
+Solo se cuentan lecturas con la herramienta read; lo leído por bash no se mide.
+codigo=0
+
+$ node scripts/consumo.mjs; echo codigo=$?
+error: falta --raiz <dir>
+codigo=1
+```
+(La línea de `pruebas/README.md` se recorta aquí; el texto completo está en el archivo.)
 
 ## Notas
-(lo llena el constructor)
+- Huecos menores resueltos:
+  1. La Evidencia de task-05 no trae la salida de `--raiz <fixture>` (solo el error sin `--raiz`). Se corrió `--raiz` sobre una carpeta vacía del scratchpad y se citó esa salida real.
+  2. Árbol: la decisión dice que `registrar.mjs` pasa a `├──`, pero el criterio 1 pide que siga como último hijo. Se dejó `consumo.mjs` con `├──` antes de `registrar.mjs` y `registrar.mjs` con `└──`.
+  3. Sección: se anotó que `--hasta` no se aplica a los subagentes de Claude Code (limitación ya anotada en task-05).
+- Pruebas: `consumo.test.mjs` no está dentro de `rapida.sh`; la viñeta lo dice.
+- Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=3; resultado=lista; causa=ninguna

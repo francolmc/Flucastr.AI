@@ -89,6 +89,7 @@ Flucastr.AI/
 ├── scripts/
 │   ├── resolver.mjs    # resuelve el modelo de cada agente, genera los archivos por herramienta y la compactación
 │   ├── archivar.mjs    # chequea el contexto y, con --aplicar Fxx (Fxx explícito; lo corre Franco o el coordinador a su pedido, WORKFLOW.md §3.1), mueve esa feature hecha a features/completed/
+│   ├── consumo.mjs     # mide consumo de tokens, turnos y KB leídos por rol desde los logs de Pi y Claude Code (solo lectura; lo corre Franco)
 │   └── registrar.mjs   # registra los eventos del flujo en registro/eventos.jsonl (lo corre Franco)
 ├── pruebas/         # comprobaciones del kit y arnés de pruebas del arquitecto (ver pruebas/README.md)
 ├── instalar.sh      # instala agentes y skills en Claude Code y Pi
@@ -250,6 +251,14 @@ Escribe con un bloqueo `settings.json.lock` y con escritura atómica. `bash inst
 - Compactar pierde el razonamiento intermedio y las salidas de subagentes que no quedaron anotadas. Por eso el `coordinador` escribe `STATUS.md` antes de delegar: el estado del flujo sobrevive a la compactación.
 - Un `modelos.json` personal antiguo, sin `compactar_en` ni `ventanas`, no instala nada. Al actualizar, el comparador de `modelos.json` avisa «campo nuevo».
 - Un modelo sin ventana declarada, o con `ventana − compactar_en` menor que 16384, se omite con aviso; Pi usa entonces su valor por defecto.
+
+## Medición de consumo
+
+Mido cuánto consume cada rol (tokens, turnos y KB leídos) a partir de los logs que dejan Pi y Claude Code. Lo corro yo, desde la raíz del proyecto:
+
+`node scripts/consumo.mjs --raiz <carpeta de logs> [--hasta <ISO>] [--tareas <n>] [--json]`
+
+Los logs de Pi están en `~/.pi/agent/sessions/--<proyecto>--/` y los de Claude Code en `~/.claude/projects/<proyecto>/`. Mido el costo, los turnos por tipo y por tramo de contexto, las llamadas a subagentes (`subagents_enable`) y los KB leídos por rol. En Claude Code el costo sale `n/d`. Solo cuento lecturas hechas con la herramienta `read`; lo que se leyó con `bash` no se mide. No imprimo el texto de los mensajes y no escribo ni modifico archivos. `--hasta` no se aplica a los subagentes de Claude Code.
 
 ## Registro de eventos
 

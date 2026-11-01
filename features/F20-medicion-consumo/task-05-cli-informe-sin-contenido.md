@@ -1,5 +1,5 @@
 # task-05 — CLI `node scripts/consumo.mjs --raiz <dir>` e informe sin texto de mensajes
-repo: Flucastr.AI   depende_de: task-04   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
 ## Descripción
 Cierra `scripts/consumo.mjs`: descubre las sesiones bajo una carpeta, elige el parser por formato, imprime el informe (por sesión y por rol, normalizable por tarea construida) y garantiza que la salida no contiene texto de mensajes ni de encargos. Es solo lectura. Lo ejecuta Franco (no está en la lista de comandos del `coordinador`, `definitions/WORKFLOW.md` §3.1).
