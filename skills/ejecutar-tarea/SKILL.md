@@ -15,13 +15,13 @@ Entrada: la ruta del archivo de la tarea.
    - Si el encargo contiene la frase ``Franco confirmó `git switch <rama>` ``: corre `git switch <rama>` (sin `-c`, solo esa rama), verifica con `git branch --show-current` y sigue la tarea. Sin esa frase, no ejecutas `git switch <rama>`. La confirmación vale solo para esa rama y esa tarea. Si el switch falla (por ejemplo, cambios sin commit que chocan), `BLOQUEO: rol=arquitecto; motivo=<salida del comando>` y no reintentes.
    - Si no hay confirmación: (a) corre `git branch --show-current`; si ya es la rama del encargo, no hagas nada más. (b) Si no, corre `git switch -c <rama>`. (c) Si falla porque la rama ya existe, no hagas nada más y tu respuesta final empieza con la línea exacta `CONFIRMAR: accion=git switch <rama>; motivo=la rama ya existe y la actual es <actual>`. (d) Si falla por otra causa, `BLOQUEO: rol=arquitecto; motivo=<salida del comando>`.
 3. Cambia `estado` a `en curso`.
-4. Lee las rutas de *Contexto*. Trabaja solo en el repo del campo `repo:`.
+4. Lee las rutas de *Contexto*; de `depende_de:` lee solo las *Notas* de esa tarea, y de `definitions/` solo la sección que la tarea cite. Trabaja solo en el repo del campo `repo:`.
 
 ## Ejecución
 
 1. Haz **todos** los *Pasos*, en orden, respetando *Decisiones ya tomadas* y sin salir de *Alcance* (lo de *Fuera de alcance* no se toca).
 2. **Ante un hueco menor** (algo no cubierto por la tarea): elige la opción más conservadora y coherente con la tarea, anótala en *Notas* y sigue. No preguntes.
-3. Corre la *Verificación* tal cual está escrita. Pega en *Evidencia* la salida **real** (comando y salida), nunca una versión resumida o inventada.
+3. Corre la *Verificación* tal cual está escrita. Pega en *Evidencia* la cola relevante de la salida **real** (comando y salida), hasta 1,5 KB; nunca una versión inventada.
 4. Comprueba cada criterio de aceptación contra esa evidencia.
 5. **Lectura acotada:** lee archivos grandes por tramos con `offset` y `limit`, usa `grep` con patrón estrecho y `limit`, no releas lo que ya leíste y modifica archivos con `edit` en vez de reescribirlos enteros con `write`.
 

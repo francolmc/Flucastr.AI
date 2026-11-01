@@ -5,12 +5,13 @@
 ## Paso actual
 
 F22 `en curso`; tareas 01–04 `aprobada` (Franco, 2026-11-01).
-task-01: lista para revisión | features/F22-lectura-acotada-roles/task-01-planificador-lectura-acotada.md
+task-01: hecha (Franco, 2026-11-01).
+task-02: lista para revisión | features/F22-lectura-acotada-roles/task-02-constructor-lectura-acotada.md
 Rama: feature/F22-lectura-acotada-roles
 
 ## Espera a Franco
 
-- **Puerta 4 (task-01):** revisa *Evidencia* y *Notas* de la tarea y `git diff agentes/planificador.md skills/descomponer-feature/SKILL.md`; commitea en la rama y pásala a `hecha`. Luego sigue task-02.
+- **Puerta 4 (task-02):** revisa *Evidencia* y *Notas* de la tarea y `git diff agentes/constructor.md skills/ejecutar-tarea/SKILL.md`; commitea y pásala a `hecha`.
 
 - `BACKLOG.md` línea 39 (nota «Siguiente (`→`)») aún dice F21; actualízala (el planificador no pudo).
 

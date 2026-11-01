@@ -1,5 +1,5 @@
 # task-01 — `planificador` y `descomponer-feature`: lectura acotada y tarea que se basta sola
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 En la sesión medida (`definitions/CONTEXTO.md` §1) el `planificador` leyó `ARCHITECTURE.md` y `PROJECT.md` completos (69 % de lo que leyó). Esta tarea fija en `agentes/planificador.md` la regla de §2.2 (solo la sección que toca la feature) y, en `skills/descomponer-feature/SKILL.md`, la regla de que cada tarea se baste sola: cita las líneas o firmas exactas y las secciones de definición con ruta, para que el `constructor` no tenga que leer documentos enteros. Corrige además una cifra desfasada de la skill (`~5 archivos`; `WORKFLOW.md` §6 dice `~3`).

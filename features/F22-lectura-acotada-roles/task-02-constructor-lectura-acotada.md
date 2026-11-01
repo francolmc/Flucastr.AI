@@ -1,5 +1,5 @@
 # task-02 — `constructor` y `ejecutar-tarea`: qué lee y evidencia corta
-repo: Flucastr.AI   depende_de: —   estado: aprobada
+repo: Flucastr.AI   depende_de: —   estado: lista para revisión
 
 ## Descripción
 `definitions/CONTEXTO.md` §2.2 fija que el `constructor` lee solo su tarea, las rutas de su *Contexto* y, de `depende_de:`, únicamente las *Notas* de esa tarea; no lee `definitions/` salvo la sección que la tarea cite, ni tareas `hecha` ajenas. Hoy `agentes/constructor.md` y `skills/ejecutar-tarea/SKILL.md` solo tienen la regla de lectura por tramos. Esta tarea agrega la regla de qué se lee y el tope de *Evidencia* de §2.3 (≤1,5 KB, cola relevante).
@@ -49,4 +49,36 @@ Fuera de alcance: `planificador`, `arquitecto`, `coordinador` y sus skills; prue
 
 ## Evidencia
 
+```
+$ grep -cF -- <4 viñetas de Qué lees> agentes/constructor.md
+1
+1
+1
+1
+$ grep -cF -- 'hasta 1,5 KB' / 'de `depende_de:` lee solo las *Notas* de esa tarea' skills/ejecutar-tarea/SKILL.md
+1
+1
+$ grep -c 'una versión resumida' skills/ejecutar-tarea/SKILL.md
+0
+$ wc -c agentes/constructor.md skills/ejecutar-tarea/SKILL.md
+    2478 agentes/constructor.md
+    5486 skills/ejecutar-tarea/SKILL.md
+    7964 total
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/higiene-contexto.test.mjs pruebas/comprobaciones/contrato-constructor.test.mjs
+ℹ tests 64
+ℹ pass 64
+ℹ fail 0
+$ bash pruebas/rapida.sh; echo "exit=$?"   (cola)
+✔ lanzar-constructor-claude.sh: el control negativo rechaza una lista autorizada con git commit (14.049792ms)
+ℹ tests 335
+ℹ pass 335
+ℹ fail 0
+rapida: 29 archivos en 17 s (tope 30 s)
+exit=0
+```
+
 ## Notas
+- Sin huecos menores. La rama `feature/F22-lectura-acotada-roles` ya era la actual: no se corrió ningún `git switch`.
+- Tamaños: `agentes/constructor.md` 2478 B (tope 2900), `skills/ejecutar-tarea/SKILL.md` 5486 B (tope 5700).
+- Verificación pasó en la primera pasada completa.
+Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna
