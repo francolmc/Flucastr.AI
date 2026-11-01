@@ -1,5 +1,5 @@
 # task-06 — Documentar `scripts/consumo.mjs` en README y pruebas
-repo: Flucastr.AI   depende_de: task-05   estado: lista para revisión
+repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
 ## Descripción
 Deja escrito cómo se usa la medición de consumo: una entrada en el árbol del README, una sección corta con el comando y lo que mide, y las pruebas nuevas en `pruebas/README.md`. Sin cambio de comportamiento.
