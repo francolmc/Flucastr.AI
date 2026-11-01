@@ -6,12 +6,13 @@
 
 F22 `en curso`; tareas 01–04 `aprobada` (Franco, 2026-11-01).
 task-01: hecha (Franco, 2026-11-01).
-task-02: lista para revisión | features/F22-lectura-acotada-roles/task-02-constructor-lectura-acotada.md
+task-02: hecha (Franco, 2026-11-01).
+task-03: lista para revisión | features/F22-lectura-acotada-roles/task-03-arquitecto-lectura-acotada.md
 Rama: feature/F22-lectura-acotada-roles
 
 ## Espera a Franco
 
-- **Puerta 4 (task-02):** revisa *Evidencia* y *Notas* de la tarea y `git diff agentes/constructor.md skills/ejecutar-tarea/SKILL.md`; commitea y pásala a `hecha`.
+- **Puerta 4 (task-03):** revisa *Evidencia* y *Notas* de la tarea y `git diff agentes/arquitecto.md skills/disenar-arquitectura/SKILL.md`; commitea y pásala a `hecha`.
 
 - `BACKLOG.md` línea 39 (nota «Siguiente (`→`)») aún dice F21; actualízala (el planificador no pudo).
 

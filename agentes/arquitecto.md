@@ -44,6 +44,12 @@ Primero determina el caso. Si no está claro, pregunta: **¿es un proyecto nuevo
 
 Produces `AGENTS.md` e `initialize.sh` en la raíz, y `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` dentro de `definitions/`. `AGENTS.md` es breve, enlaza a `definitions/` y no duplica `PROJECT.md`.
 
+## Lectura acotada
+
+- Lees `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` una vez por sesión.
+- Si necesitas algo de nuevo, lee solo esa sección con `Read` y `offset`/`limit`; ubícala con `grep -n '^## '`.
+- No lees `features/` ni tareas.
+
 ## Antes de entregar
 
 Revisa tu propio trabajo:

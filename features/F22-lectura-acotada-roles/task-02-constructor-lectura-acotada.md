@@ -1,5 +1,5 @@
 # task-02 — `constructor` y `ejecutar-tarea`: qué lee y evidencia corta
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 `definitions/CONTEXTO.md` §2.2 fija que el `constructor` lee solo su tarea, las rutas de su *Contexto* y, de `depende_de:`, únicamente las *Notas* de esa tarea; no lee `definitions/` salvo la sección que la tarea cite, ni tareas `hecha` ajenas. Hoy `agentes/constructor.md` y `skills/ejecutar-tarea/SKILL.md` solo tienen la regla de lectura por tramos. Esta tarea agrega la regla de qué se lee y el tope de *Evidencia* de §2.3 (≤1,5 KB, cola relevante).

@@ -1,5 +1,5 @@
 # task-03 — `arquitecto` y `disenar-arquitectura`: cada definición una vez por sesión
-repo: Flucastr.AI   depende_de: —   estado: aprobada
+repo: Flucastr.AI   depende_de: —   estado: lista para revisión
 
 ## Descripción
 `definitions/CONTEXTO.md` §2.2 fija que el `arquitecto` lee `PROJECT`, `REPOS` y `ARCHITECTURE` una vez por sesión (si necesita algo de nuevo, lee la sección con `offset`/`limit`) y que no lee `features/` ni tareas. Hoy `agentes/arquitecto.md` y `skills/disenar-arquitectura/SKILL.md` no dicen nada de lectura. Esta tarea agrega esa regla en ambos.
@@ -44,4 +44,43 @@ Fuera de alcance: `planificador`, `constructor`, `coordinador` y las demás skil
 
 ## Evidencia
 
+Comando: `for f in ...; do grep -cF -- "$f" agentes/arquitecto.md; done`
+Salida: `1` `1` `1`
+
+Comando: `grep -cF 'Lee cada entrada una vez' skills/disenar-arquitectura/SKILL.md`
+Salida: `1`
+
+Comando: `wc -c agentes/arquitecto.md skills/disenar-arquitectura/SKILL.md`
+Salida:
+```
+    3723 agentes/arquitecto.md
+    2294 skills/disenar-arquitectura/SKILL.md
+    6017 total
+```
+(3723 ≤ 4100; 2294 ≤ 2500)
+
+Comando: `node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/higiene-contexto.test.mjs`
+Salida (cola):
+```
+ℹ tests 46
+ℹ pass 46
+ℹ fail 0
+ℹ duration_ms 71.199
+```
+
+Comando: `bash pruebas/rapida.sh`
+Salida (cola):
+```
+ℹ tests 335
+ℹ pass 335
+ℹ fail 0
+rapida: 29 archivos en 22 s (tope 30 s)
+```
+Código de salida: 0; S = 22 ≤ 30.
+
+Criterios: 1 cumplido (tres viñetas, una línea cada una); 2 cumplido; 3 cumplido; 4 cumplido (contrato y higiene, `fail 0`); 5 cumplido (código 0, S = 22).
+
 ## Notas
+
+- Decisión: los reemplazos se hicieron con un `Edit` por archivo, con el texto literal de la tarea. Sin huecos menores.
+- Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna
