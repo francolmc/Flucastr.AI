@@ -7,6 +7,21 @@ const ESTADOS_TAREA = ['borrador', 'aprobada', 'en curso', 'lista para revisión
 const RE_BLOQUEO = /BLOQUEO: rol=<[^>]+>; motivo=<[^>]+>/;
 const FRASE_STATUS = 'escribes en `STATUS.md`';
 
+// Frases de F21 (tareas 01 a 03) que el agente «coordinador» debe conservar, para Pi y Claude Code.
+export const FRASES_COORDINADOR_F21 = [
+  'Lectura de tareas: con `Read` y `limit: 3` lees solo las 3 primeras líneas',
+  'No lees `definitions/` salvo `STATUS.md` y `BACKLOG.md`',
+  'No lees tareas `hecha`',
+  'Tarea completa solo en la revisión del modo yolo',
+  'Reescribes `STATUS.md` solo en puertas y en cambios de rol',
+  'con `Edit` por sección, no con `Write` completo',
+  'cada ítem ≤150 caracteres',
+  'Agrupa en un mismo turno las llamadas independientes',
+  'actívala una vez por sesión; si `subagent` ya funcionó, no la repitas',
+  'Plantilla de encargo',
+  'no uses `contact_supervisor` para preguntar: ante falta de información responde `BLOQUEO:` o `REFINAR:`',
+];
+
 // Lee el front matter `---` y devuelve { clave: valor } (sin comillas dobles externas), o null si no hay.
 function frontMatter(texto) {
   const coincide = /^---\n([\s\S]*?)\n---/.exec(String(texto).replace(/\r\n?/g, '\n'));
@@ -221,6 +236,13 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     const tools = frontMatter(agentes[nombre])?.tools ?? '';
     if (tools.includes('Bash(node scripts/')) {
       errores.push(`El agente «${nombre}» no debe tener «Bash(node scripts/» en «tools:»; solo el coordinador corre scripts.`);
+    }
+  }
+
+  // Regla 16: el coordinador conserva las frases de F21 (lectura, estado, plantillas y bloqueos).
+  for (const frase of FRASES_COORDINADOR_F21) {
+    if (!(agentes.coordinador ?? '').includes(frase)) {
+      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
     }
   }
 

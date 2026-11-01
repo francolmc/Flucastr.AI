@@ -4,20 +4,17 @@
 
 ## Paso actual
 
-F19 `hecha` (Franco, 2026-10-31; PR #16 ya fusionado en `main`, `da1c075`). Backlog con F20–F23 aprobado (puerta 2). Rol: ninguno (esperando a Franco, puerta 4). F20 «Medición de consumo desde logs» `en curso`. task-01 a task-05: hecha (en `features/F20-medicion-consumo/`). task-06 `lista para revisión` (última de F20).
-Rama: feature/F20-medicion-consumo
-Sin commits de agentes: los cambios de contexto (CONTEXTO, PENDIENTES, WORKFLOW, ARCHITECTURE, AGENTS.md, BACKLOG, STATUS) están sin commitear en `main`.
+F21 `hecha` (Franco, 2026-11-01; PR y merge a cargo de Franco). F19 y F20 `hecha`. Rol: planificador, `descomponer-feature` de F22 «Lectura acotada de planificador, constructor y arquitecto» (mueve la marca `→` de F21 a F22). Siguiente: puerta 3 (tareas de F22 en `borrador`).
+Rama de F22 al pasar a `en curso`: la propondré al aprobar sus tareas.
 
 ## Espera a Franco
 
-- **Puerta 4, F20 task-06:** revisa su evidencia (43 pruebas, `readme-estructura` 7/7 y `rapida.sh` en 17 s pasan según el constructor; 2 huecos en Notas) y la documentación (`git diff README.md pruebas/README.md`). Pendiente tuyo: la cifra de la task-05 sobre el log de Cleaner (216 turnos, 26 llamadas, US$2.088) no la corrió el constructor. Revisa también `scripts/consumo.mjs` (`git diff scripts/`), y commitea. Pendiente de commit: las definiciones de contexto y los archivos de task-01 (commits separados por archivo).
-- **Texto de `BACKLOG.md` sin actualizar:** la viñeta «Siguiente (`→`)» de «Base de la prioridad» aún dice F19. Pide al planificador que la corrija (no la edito yo).
-- **Rama:** estás en `main` con cambios sin commitear. Antes de commitear, crea rama (`chore/` para la definición de contexto) o confirma que commiteas en `main`.
-- **Revisa y commitea:** `definitions/CONTEXTO.md`, `definitions/PENDIENTES.md`, `definitions/WORKFLOW.md`, `definitions/ARCHITECTURE.md`, `definitions/BACKLOG.md`, `AGENTS.md`.
+- Feature F21 completa en feature/F21-coordinador-menos-turnos: cierra la rama, haz el PR y despliega. Antes de F22, corre `bash instalar.sh` para que Pi use el prompt nuevo del coordinador.
 - Chequeo de contexto: `node scripts/archivar.mjs` (sugerencia, no bloquea).
 - Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco o, si lo pide, tú, antes de archivar; no bloquea).
-- Feature F19 archivable: `node scripts/archivar.mjs --aplicar F19` (lo corre Franco o, si lo pide, tú, en su propio commit `chore/`).
-- **Tras instalar F19 (tuyo):** abre un Pi nuevo y confirma que compacta al pasar de ~100 k.
+- Features archivables, tras el PR y cada una en su propio commit `chore/`: `node scripts/archivar.mjs --aplicar F19`, `--aplicar F20` y `--aplicar F21` (las corre Franco o, si lo pide, tú).
+- Pendiente tuyo: cifra de la task-05 de F20 sobre el log de Cleaner: `node scripts/consumo.mjs --raiz ~/.pi/agent/sessions/--Users-franco-Codes-flucastr-Flucastr.Cleaner-- --hasta 2026-11-01T00:48:34.046Z` (~216 turnos, 26 llamadas, ~US$2.09).
+- Pendiente tuyo: tras instalar F19, abre un Pi nuevo y confirma que compacta al pasar de ~100 k.
 - **Urgente (tuyo):** el repo ya es público; revisa secretos en el historial (detalle en `definitions/PENDIENTES.md`).
 
 ## Bloqueos abiertos
@@ -26,4 +23,4 @@ Ninguno.
 
 ## Última actualización
 
-2026-10-31
+2026-11-01

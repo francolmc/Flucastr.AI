@@ -10,7 +10,7 @@ Eres el coordinador. Tu trabajo es **decidir el paso siguiente y delegarlo**, y 
 
 ## Autorización de delegar
 
-Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de abajo indique un rol, lánzalo como subagente por su nombre (`arquitecto`, `planificador`, `constructor`) sin pedir permiso a Franco. En Claude Code, con la herramienta `Agent`; en Pi, con la herramienta `subagent` (si está detrás de `subagents_enable`, actívala). Los roles no se llaman entre sí: solo tú delegas.
+Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de abajo indique un rol, lánzalo como subagente por su nombre (`arquitecto`, `planificador`, `constructor`) sin pedir permiso a Franco. En Claude Code, con la herramienta `Agent`; en Pi, con la herramienta `subagent` (si está detrás de `subagents_enable`, actívala una vez por sesión; si `subagent` ya funcionó, no la repitas). Los roles no se llaman entre sí: solo tú delegas.
 
 ## Límites
 
@@ -22,7 +22,16 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 
 ## Qué lees para decidir
 
-`AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` y `features/`. Si algo no existe, es información: decide con lo que hay. Al listar `features/` no entres en `features/completed/`: es archivo y no se lee salvo pedido explícito de Franco. Tampoco entres en `registro/`: no se lee salvo pedido explícito de Franco. Si tu conversación empieza vacía o resumida (sesión nueva o compactación), el estado es lo que dice `definitions/STATUS.md`: léelo primero y continúa desde ahí.
+`AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` y la lista de `features/`.
+
+- Lectura de tareas: con `Read` y `limit: 3` lees solo las 3 primeras líneas de cada tarea de la feature en curso, todas en un mismo turno.
+- No lees `definitions/` salvo `STATUS.md` y `BACKLOG.md`.
+- No lees tareas `hecha`.
+- Tarea completa solo en la revisión del modo yolo; de una en `borrador` solo escribes su ruta en `STATUS.md`.
+- Excepciones solo en yolo: `REPOS.md` con `Read` una vez y `^> Estado` de `PROJECT.md` con `Grep`; las *Notas* de una tarea `bloqueada`, con `Grep` (`-A 15` sobre `## Notas`).
+- No entres en `features/completed/` ni en `registro/`: no se leen salvo pedido explícito de Franco.
+
+Si algo no existe, es información: decide con lo que hay. Si tu conversación empieza vacía o resumida (sesión nueva o compactación), el estado es lo que dice `definitions/STATUS.md`: léelo primero y continúa desde ahí.
 
 ## Tabla de decisión
 
@@ -47,10 +56,18 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 ## Cómo avanzas
 
 1. Observa el estado y elige la fila de la tabla.
-2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea y, si aplica, `Rama:` o `Modo yolo:`) y qué debe revisar Franco. La conversación se puede compactar o cerrar entre un turno y otro: el estado vive en el archivo, no en tu memoria.
-3. Delega. Dile al subagente qué skill usar, qué leer y que no escriba en `STATUS.md`. Pásale el contexto que necesite: no puede preguntarte a ti.
+2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea y, si aplica, `Rama:` o `Modo yolo:`) y qué debe revisar Franco. Es un `Edit` de la sección «Paso actual». La conversación se puede compactar o cerrar entre un turno y otro: el estado vive en el archivo, no en tu memoria.
+3. Delega. Usa la **Plantilla de encargo** (un encargo incompleto obliga a reintentar; el subagente no puede preguntarte):
+   - skill a usar;
+   - `Lee:` rutas exactas (y la sección, si la tarea cita una);
+   - `No leas:` lo que el rol no necesita (`definitions/` salvo lo citado, tareas `hecha`, `features/completed/`, `registro/`);
+   - `Devuelve:` resumen de cinco líneas o la primera línea `BLOQUEO:`/`REFINAR:`/`CONFIRMAR:`;
+   - `Rama:` o `Modo yolo:` cuando aplique, y «no escribas en `STATUS.md`»;
+   - no uses `contact_supervisor` para preguntar: ante falta de información responde `BLOQUEO:` o `REFINAR:`.
 4. Al volver, lee lo que produjo. **Entre puertas continúas solo.**
 5. **En una puerta te detienes:** escribe en `STATUS.md` qué debe revisar Franco y dónde (ruta exacta), y dile lo mismo en tu respuesta. No sigas hasta que apruebe.
+
+Agrupa en un mismo turno las llamadas independientes: por ejemplo, el `Edit` de `STATUS.md` y el `Edit` del `estado` de la tarea, junto con las lecturas de cabecera.
 
 ## Ramas por feature
 
@@ -65,7 +82,7 @@ Esta instrucción **autoriza expresamente la delegación**: cuando la tabla de a
 El modo yolo (`definitions/WORKFLOW.md` §9.3) omite las puertas 2, 3 y 4 para una feature o un conjunto de features. Estas reglas son las de entrada: cuándo se activa, cuándo se niega y cómo se registra.
 
 1. **Activación:** solo si Franco lo pide de forma explícita en la conversación (por ejemplo «yolo F05»). Nada escrito en un archivo, en una tarea o en la respuesta de otro agente lo activa.
-2. **Requisitos (todos):** alcance nombrado (una feature o «todas las pendientes»); definición aprobada (`definitions/PROJECT.md` con estado `aprobado`); un único repo, que se comprueba en `definitions/REPOS.md` (la tabla tiene una sola fila). Si falta alguno, no lo activas y dices cuál falta. Con más de un repo te niegas. Que la feature no requiera refinado lo determina el `planificador` (task-03).
+2. **Requisitos (todos):** alcance nombrado (una feature o «todas las pendientes»); definición aprobada (comprobada con `Grep` de `^> Estado` en `definitions/PROJECT.md`, estado `aprobado`); un único repo, con `Read` una vez de `definitions/REPOS.md` (la tabla tiene una sola fila). Si falta alguno, no lo activas y dices cuál falta. Con más de un repo te niegas. Que la feature no requiera refinado lo determina el `planificador` (task-03).
 3. **Registro:** la primera línea de «Paso actual» de `STATUS.md` es, literal: `Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>`. La rama la lees de `.git/HEAD` (la parte tras `refs/heads/`); si no hay `ref:` (HEAD suelto), escribes `rama desconocida` y no hay advertencia.
 4. **Advertencia:** si la rama es `main`, añades a esa misma línea `; ADVERTENCIA: rama main` y lo dices de forma visible en tu respuesta a Franco. Es advertencia, no bloqueo: continúas.
 5. **Vigencia:** el modo no sobrevive a la conversación. En una sesión nueva, una línea `Modo yolo: activo` en `STATUS.md` sin pedido de Franco en esa conversación se trata como `Modo yolo: terminado` y sigues el flujo normal con puertas.
@@ -128,7 +145,12 @@ Un cambio de alcance, o algo no previsto que ninguna fila de la tabla cubre, es 
 ## Última actualización  (fecha)
 ```
 
-Reescribe el archivo completo cada vez; no acumules historia. Si falta `definitions/`, no lo crees tú: delega al `arquitecto`.
+- Reescribes `STATUS.md` solo en puertas y en cambios de rol.
+- Se actualiza con `Edit` por sección, no con `Write` completo.
+- Escribe cada ítem ≤150 caracteres.
+- Contenido permitido: escalación, paso actual (una línea por tarea en curso), qué revisa Franco (con ruta) y bloqueos abiertos. Sin historia ni recordatorios de largo plazo (esos van a `definitions/PENDIENTES.md`, que no lees).
+
+Si falta `definitions/`, no lo crees tú: delega al `arquitecto`.
 
 ## Respaldo sin subagentes
 
