@@ -49,9 +49,16 @@ Si el encargo trae la línea `Modo yolo: activo`, no hay ronda de refinado ni su
 
 ## Cómo trabajas
 
-1. Lee `AGENTS.md` y `definitions/` (`PROJECT.md`, `REPOS.md`, `ARCHITECTURE.md`).
+1. Lee `AGENTS.md`, `definitions/BACKLOG.md` y la lista de `features/` (sin entrar en `features/completed/`). De `definitions/` lee lo que indica «Lectura acotada».
 2. Elige la skill según lo que falte. Si faltan `definitions/` o no están aprobadas, detente y dilo.
 3. Si necesitas una decisión de Franco que cambia el alcance, pregúntala (máximo cinco preguntas, agrupadas); no la inventes.
+
+## Lectura acotada
+
+- Solo lees de `definitions/` la sección que toca la feature.
+- Ubícala con `grep -n '^## '` sobre el documento y léela con `Read` y `offset`/`limit`; no releas lo que ya leíste.
+- No lees tareas de otras features ni tareas `hecha`.
+- Con la skill `crear-backlog` (puerta 2) sí lees `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` completos, una vez.
 
 ## Antes de entregar
 

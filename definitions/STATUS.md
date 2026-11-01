@@ -4,10 +4,15 @@
 
 ## Paso actual
 
-F21 `hecha` (Franco, 2026-11-01; PR y merge a cargo de Franco). F19 y F20 `hecha`. Rol: planificador, `descomponer-feature` de F22 «Lectura acotada de planificador, constructor y arquitecto» (mueve la marca `→` de F21 a F22). Siguiente: puerta 3 (tareas de F22 en `borrador`).
-Rama de F22 al pasar a `en curso`: la propondré al aprobar sus tareas.
+F22 `en curso`; tareas 01–04 `aprobada` (Franco, 2026-11-01).
+task-01: lista para revisión | features/F22-lectura-acotada-roles/task-01-planificador-lectura-acotada.md
+Rama: feature/F22-lectura-acotada-roles
 
 ## Espera a Franco
+
+- **Puerta 4 (task-01):** revisa *Evidencia* y *Notas* de la tarea y `git diff agentes/planificador.md skills/descomponer-feature/SKILL.md`; commitea en la rama y pásala a `hecha`. Luego sigue task-02.
+
+- `BACKLOG.md` línea 39 (nota «Siguiente (`→`)») aún dice F21; actualízala (el planificador no pudo).
 
 - Feature F21 completa en feature/F21-coordinador-menos-turnos: cierra la rama, haz el PR y despliega. Antes de F22, corre `bash instalar.sh` para que Pi use el prompt nuevo del coordinador.
 - Chequeo de contexto: `node scripts/archivar.mjs` (sugerencia, no bloquea).
