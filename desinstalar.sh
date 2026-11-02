@@ -266,6 +266,15 @@ while IFS=$'\t' read -r tipo ruta extra; do
           ;;
       esac
       ;;
+    raiz)
+      # raíz del kit y lanzador fijo: solo se borran los dos archivos de ~/.flucastr-ai, si son archivos regulares
+      if { [ "$ruta" = "$ESTADO_DIR/raiz" ] || [ "$ruta" = "$ESTADO_DIR/validar-tarea.mjs" ]; } && [ -f "$ruta" ] && [ ! -L "$ruta" ]; then
+        if [ "$SIMULAR" = 0 ]; then rm -f "$ruta"; fi
+        decir "  quitado: $ruta"
+      else
+        decir "  omitido (no es un archivo de la instalación): $ruta"
+      fi
+      ;;
     ajuste)
       # agente predeterminado de un proyecto: solo se quita si sigue siendo el que fijamos
       if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi

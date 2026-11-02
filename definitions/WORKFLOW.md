@@ -119,6 +119,7 @@ repo: …   depende_de: …   estado: borrador | aprobada | en curso | lista par
 ## Descripción      Qué y por qué, 3–5 líneas.
 ## Contexto         Rutas exactas a leer y a tocar; convenciones del repo; cómo se ejecuta y se prueba.
 ## Decisiones ya tomadas   Lo que el ejecutor NO debe volver a decidir (librería, nombres, formato…).
+## Decisiones abiertas   OBLIGATORIA. «Ninguna» o cada decisión con su resolución (decidido 2026-11-01).
 ## Alcance / Fuera de alcance   Fuera de alcance no puede quedar vacío.
 ## Pasos            Numerados. Cada uno: archivo, qué cambia, resultado observable.
 ## Criterios de aceptación   Máximo 5, observables, cada uno con cómo se comprueba.
@@ -147,6 +148,7 @@ repo: …   depende_de: …   estado: borrador | aprobada | en curso | lista par
 
 1. Solo trabaja sobre una tarea `aprobada`.
 2. **Ante un hueco menor** (no cubierto por la tarea): elige la opción más conservadora y coherente con la tarea, la anota en *Notas* y **sigue**. No pregunta.
+2 bis. **Ante una decisión abierta** (sección «Decisiones abiertas» con algo sin resolver): no empieza a probar; responde con este texto (definitivo): primera línea `DECISION: tarea=task-NN; abiertas=<n>`; debajo `Pregunta:`, `Motivo:`, `Opciones:` (2 o 3, `A) B) C)`, cerradas) y `Recomendada: <letra>`. Para continuar, el encargo trae la línea `Decisión de Franco:`. El `coordinador` la trata como `REFINAR:` (ni puerta ni bloqueo); en yolo es escalación y no reabre al `arquitecto`. F26 la adoptará como su estado `interaction_required` (un solo formato).
 3. **Se detiene solo por:** falta de credenciales o acceso, una decisión que cambia el alcance, o la misma verificación fallando dos veces por la misma causa (queda `bloqueada`). Un cambio de alcance es **escalación**.
 4. Ejecuta toda la lista de pasos y la verificación, pega la salida en *Evidencia* y deja `lista para revisión`. Nunca `hecha`.
 5. Si hay muchos huecos menores en una tarea, es señal de que el planificador la redactó incompleta: se anota para mejorar la plantilla.

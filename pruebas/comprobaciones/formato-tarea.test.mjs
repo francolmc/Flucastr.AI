@@ -16,9 +16,13 @@ const muestra = [
   '',
   '## Contexto',
   '- Repo: este.',
+  '- Tocar: `archivo.mjs`',
   '',
   '## Decisiones ya tomadas',
   '- Se usa `node:test`.',
+  '',
+  '## Decisiones abiertas',
+  'Ninguna.',
   '',
   '## Alcance / Fuera de alcance',
   'Alcance: un archivo nuevo.',
@@ -54,6 +58,11 @@ const variantes = [
   ['regla 7: seis criterios', (t) => t.replace('1. Pasa la prueba.', Array.from({ length: 6 }, (_, i) => `${i + 1}. Criterio ${i + 1}.`).join('\n'))],
   ['regla 8: marcador de pendiente', (t) => t.replace('Texto que describe el objetivo de la tarea.', 'Texto con un TBD sin resolver.')],
   ['regla 9: más de 8192 caracteres', (t) => t.replace('Texto que describe el objetivo de la tarea.', 'x'.repeat(MAX_CARACTERES))],
+  ['regla 11: cuatro rutas a tocar', (t) => t.replace('- Tocar: `archivo.mjs`', '- Tocar: `a.mjs`, `b.mjs`, `c.mjs`, `d.mjs`')],
+  ['regla 11: ruta con «*»', (t) => t.replace('- Tocar: `archivo.mjs`', '- Tocar: `*.mjs`')],
+  ['regla 11: sin línea «Tocar»', (t) => t.replace('- Tocar: `archivo.mjs`\n', '')],
+  ['regla 10: decisión abierta sin resolver', (t) => t.replace('## Decisiones abiertas\nNinguna.', '## Decisiones abiertas\n- ¿Qué librería usar?')],
+  ['regla 10: sección «Decisiones abiertas» vacía', (t) => t.replace('## Decisiones abiertas\nNinguna.', '## Decisiones abiertas')],
 ];
 
 test('la muestra válida no produce errores', () => {
@@ -74,6 +83,11 @@ test('una tarea de exactamente MAX_CARACTERES caracteres es válida', () => {
   const justa = muestra.replace(textoOriginal, relleno);
   assert.equal(justa.length, MAX_CARACTERES);
   assert.deepEqual(validarTarea(justa), []);
+});
+
+test('acepta una decisión abierta con «Resuelta: »', () => {
+  const resuelta = muestra.replace('## Decisiones abiertas\nNinguna.', '## Decisiones abiertas\n- Elegir librería — Resuelta: node:test');
+  assert.deepEqual(validarTarea(resuelta), []);
 });
 
 test('exige Evidencia no vacía con estado «lista para revisión»', () => {

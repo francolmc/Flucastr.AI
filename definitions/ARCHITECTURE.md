@@ -189,6 +189,15 @@ flowchart LR
 - **Desinstalar:** `desinstalar.sh` quita las carpetas con marca, los agentes generados, el lanzador, `kit/`, `version` y el manifiesto; **conserva `~/.flucastr-ai/modelos.json`** salvo `--todo`.
 - *Descartado:* mantener enlaces apuntando a `kit/` (Franco pidió copiar; además un enlace roto tras un `kit/` a medio reemplazar deja las herramientas sin skills).
 
+### Raíz del kit y puerta previa de tarea (F24; decidido por Franco 2026-11-01; aprobado en la puerta 1)
+
+- **`~/.flucastr-ai/raiz`:** archivo fijo con la ruta de la raíz del kit (el clon en modo repo; `~/.flucastr-ai/kit` en modo descarga). `instalar.sh` lo escribe en ambos modos y lo registra en el manifiesto (`raiz<TAB>ruta`); `desinstalar.sh` lo quita solo si el manifiesto lo registra. Así el `coordinador` llega a `scripts/` en proyectos sin `scripts/` propio. *Descartado:* copiar `scripts/` a cada proyecto.
+- **Lanzador fijo:** la regla de permisos compara el texto del comando y una sustitución `$(…)` puede no coincidir (no probado). Por eso `instalar.sh` escribe, en ambos modos, `~/.flucastr-ai/validar-tarea.mjs` (pocas líneas): lee `~/.flucastr-ai/raiz`, importa `<raiz>/scripts/validar-tarea.mjs` y le pasa `process.argv` tal cual; la salida y el código (0/1/2) son los del script, sin duplicar lógica (el script real debe ejecutarse al importarlo, o el lanzador llama a su `main` exportada). Se registra en el manifiesto como `raiz` (junto al archivo `raiz`); `desinstalar.sh` lo quita solo si el manifiesto lo registra.
+- **Invocación:** `node ~/.flucastr-ai/validar-tarea.mjs <ruta-tarea>...`; el `tools` del `coordinador` permite SOLO `Bash(node ~/.flucastr-ai/validar-tarea.mjs *)`, sin `$(…)`. *Descartado:* `$(cat …)` en la regla (riesgo de no coincidir).
+- **Verificación obligatoria:** con el arnés `pruebas/lanzar-coordinador-claude.sh` (no a mano): el comando del lanzador debe ser aceptado y uno distinto, rechazado (control negativo).
+- **Contrato de `validar-tarea.mjs`:** una o varias rutas; salida 0 si todas son válidas, 1 si alguna es inválida (otro error de uso: 2); salida corta, una línea por rechazo con ruta y motivo.
+- **Núcleo:** vive en `scripts/formato-tarea.mjs` (se instala con `scripts/`; exporta `validarTarea`, `SECCIONES`, `MAX_CARACTERES`); `pruebas/comprobaciones/formato-tarea.mjs` es un re-export (`export * from '../../scripts/formato-tarea.mjs'`). Gana dos chequeos: rutas a tocar (máximo 3 archivos, exactas) y «Decisiones abiertas» vacía («Ninguna») o resuelta.
+
 ### `modelos.json` local del usuario
 
 - **Dónde:** `~/.flucastr-ai/modelos.json`, fuera de `kit/`, así que reemplazar `kit/` nunca lo toca. En la primera instalación se crea copiando el publicado; después **jamás se sobrescribe ni se edita**.

@@ -1,0 +1,1125 @@
+pi | coordinador | 2026-10-31T22-25-43-632Z_01a19411-98ce-727e-b0a7-7abde609f8c7.jsonl
+turnos: 803
+costo: US$9.256
+tokens: entrada 1038679, salida 213155, cache lectura 50468992, cache escritura 0
+tramos de contexto: menos30k 46 (US$0.289), de30a60k 294 (US$3.048), mas60k 463 (US$5.919)
+tipos de turno: texto 242, leer_status_backlog 36, otro 42, subagents_enable 18, delegar 131, leer_definiciones 8, reescribir_status 219, leer_tarea 68, cambiar_estado 39
+llamadas a subagentes: 131
+subagents_enable: 18
+turnos por llamada: 6.1
+subagentes por rol (rol | corridas | turnos | costo | KB leídos):
+  constructor | 62 | 990 | US$0.734 | 3285.6 KB
+  planificador | 17 | 166 | US$2.539 | 1230.5 KB
+  arquitecto | 38 | 249 | US$3.086 | 1116.8 KB
+KB leídos por categoría: definiciones 218.3, tareas 151.6, otros 73.2
+KB de definitions/ leídos por el coordinador: 218.3
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  111.1 KB | 42 | definitions/STATUS.md
+  32.4 KB | 9 | definitions/BACKLOG.md
+  32.2 KB | 2 | definitions/ARCHITECTURE.md
+  28.3 KB | 7 | features/F02-barreras-seguridad/task-08-coordinacion-inerte.md
+  28.3 KB | 3 | definitions/PROJECT.md
+
+pi | coordinador | session.jsonl
+turnos: 7
+costo: US$0.077
+tokens: entrada 29457, salida 1058, cache lectura 72320, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.077), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 4, leer_tarea 1, leer_status_backlog 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 31.7, tareas 7.9, otros 63.1
+KB de definitions/ leídos por el coordinador: 31.7
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  16.5 KB | 1 | definitions/ARCHITECTURE.md
+  15.5 KB | 2 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  15.5 KB | 1 | src/PrivilegeAuthorization.psm1
+  12.7 KB | 1 | definitions/PROJECT.md
+  9.6 KB | 1 | docs/privilege-boundary.md
+
+pi | coordinador | session.jsonl
+turnos: 61
+costo: US$0.061
+tokens: entrada 128516, salida 31748, cache lectura 3193088, cache escritura 0
+tramos de contexto: menos30k 5 (US$0.004), de30a60k 29 (US$0.027), mas60k 27 (US$0.030)
+tipos de turno: otro 58, texto 3
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 49.1
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  11.5 KB | 2 | src/PrivilegeAuthorization.psm1
+  10.5 KB | 2 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  10.2 KB | 1 | features/F02-barreras-seguridad/task-05c-contexto-privilegios.md
+  6.9 KB | 1 | src/ExecutionSession.psm1
+  6.3 KB | 1 | tests/unit/ExecutionSession.Tests.ps1
+
+pi | coordinador | session.jsonl
+turnos: 29
+costo: US$0.013
+tokens: entrada 35426, salida 6937, cache lectura 553728, cache escritura 0
+tramos de contexto: menos30k 26 (US$0.011), de30a60k 3 (US$0.002), mas60k 0 (US$0.000)
+tipos de turno: otro 17, cambiar_estado 4, leer_tarea 5, texto 2, leer_status_backlog 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 2.5, tareas 25.8, otros 30.8
+KB de definitions/ leídos por el coordinador: 2.5
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  14.9 KB | 1 | features/F02-barreras-seguridad/task-08-coordinacion-inerte.md
+  10.9 KB | 2 | features/F02-barreras-seguridad/task-09-validacion-matriz.md
+  7.2 KB | 1 | src/PrivilegeAuthorization.psm1
+  5.9 KB | 2 | tests/integration/Environment.Tests.ps1
+  4.7 KB | 1 | docs/development.md
+
+pi | coordinador | session.jsonl
+turnos: 10
+costo: US$0.070
+tokens: entrada 23187, salida 1331, cache lectura 99072, cache escritura 0
+tramos de contexto: menos30k 10 (US$0.070), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 5, leer_status_backlog 2, leer_definiciones 2, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 63.8, tareas 0, otros 18.1
+KB de definitions/ leídos por el coordinador: 63.8
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  43.2 KB | 1 | definitions/ARCHITECTURE.md
+  12.8 KB | 1 | definitions/PROJECT.md
+  7.1 KB | 1 | docs/safety-contract.md
+  5.4 KB | 1 | definitions/BACKLOG.md
+  5.1 KB | 1 | /Users/franco/.pi/agent/skills/descomponer-feature/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 21
+costo: US$0.008
+tokens: entrada 22292, salida 5804, cache lectura 279424, cache escritura 0
+tramos de contexto: menos30k 21 (US$0.008), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 14, leer_tarea 3, cambiar_estado 3, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 1.6, tareas 14.7, otros 17.6
+KB de definitions/ leídos por el coordinador: 1.6
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  8.3 KB | 1 | features/F01-base-ejecutable/task-04-capacidades-sin-mutaciones.md
+  6.4 KB | 1 | features/F01-base-ejecutable/task-02-contrato-versionado.md
+  6.2 KB | 1 | src/Contracts.psm1
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+  2.4 KB | 1 | tests/unit/Capabilities.Tests.ps1
+
+pi | coordinador | session.jsonl
+turnos: 9
+costo: US$0.111
+tokens: entrada 31045, salida 3500, cache lectura 140032, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.076), de30a60k 2 (US$0.035), mas60k 0 (US$0.000)
+tipos de turno: otro 4, leer_tarea 1, texto 2, leer_status_backlog 1, leer_definiciones 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 33.2, tareas 8.8, otros 62.6
+KB de definitions/ leídos por el coordinador: 33.2
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  30.3 KB | 2 | definitions/ARCHITECTURE.md
+  23.5 KB | 1 | src/PrivilegeAuthorization.psm1
+  12.6 KB | 1 | docs/privilege-boundary.md
+  12.1 KB | 1 | src/WindowsPrivilege.psm1
+  8.8 KB | 1 | features/F02-barreras-seguridad/task-07-limite-sudo.md
+
+pi | coordinador | session.jsonl
+turnos: 20
+costo: US$0.418
+tokens: entrada 85482, salida 17866, cache lectura 688640, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.135), de30a60k 9 (US$0.189), mas60k 4 (US$0.094)
+tipos de turno: otro 11, leer_status_backlog 2, leer_definiciones 1, texto 2, leer_tarea 2, cambiar_estado 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 63.6, tareas 42.3, otros 88.7
+KB de definitions/ leídos por el coordinador: 63.6
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  36.8 KB | 1 | definitions/ARCHITECTURE.md
+  16.5 KB | 2 | features/F03-diagnostico/task-04-menu-e-informe.md
+  14.5 KB | 1 | docs/privilege-boundary.md
+  12.9 KB | 3 | definitions/BACKLOG.md
+  12.4 KB | 2 | features/F03-diagnostico/task-01-contrato-y-windows.md
+
+pi | coordinador | session.jsonl
+turnos: 75
+costo: US$0.043
+tokens: entrada 92124, salida 17414, cache lectura 2470528, cache escritura 0
+tramos de contexto: menos30k 37 (US$0.014), de30a60k 28 (US$0.019), mas60k 10 (US$0.009)
+tipos de turno: otro 57, leer_tarea 4, leer_status_backlog 4, texto 6, cambiar_estado 4
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 8.3, tareas 32.4, otros 89.2
+KB de definitions/ leídos por el coordinador: 8.3
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  26.8 KB | 5 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  26.7 KB | 3 | src/Diagnostics.psm1
+  24.6 KB | 3 | features/F03-diagnostico/task-01-contrato-y-windows.md
+  14.9 KB | 3 | tests/unit/Diagnostics.Tests.ps1
+  8.3 KB | 4 | definitions/STATUS.md
+
+pi | coordinador | session.jsonl
+turnos: 6
+costo: US$0.049
+tokens: entrada 19340, salida 873, cache lectura 16896, cache escritura 0
+tramos de contexto: menos30k 6 (US$0.049), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 3, leer_status_backlog 1, leer_tarea 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 2.8, tareas 8.3, otros 15.3
+KB de definitions/ leídos por el coordinador: 2.8
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  8.3 KB | 1 | features/F03-diagnostico/task-03-transporte-diagnostic.md
+  8.3 KB | 1 | src/ProcessTransport.psm1
+  5.2 KB | 1 | tests/unit/DiagnosticTransport.Tests.ps1
+  2.8 KB | 1 | definitions/STATUS.md
+  1.9 KB | 1 | AGENTS.md
+
+pi | coordinador | session.jsonl
+turnos: 12
+costo: US$0.156
+tokens: entrada 15588, salida 10951, cache lectura 157312, cache escritura 0
+tramos de contexto: menos30k 12 (US$0.156), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 11, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 4.6
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  4.6 KB | 1 | .pi/skills/descomponer-feature/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 11
+costo: US$0.005
+tokens: entrada 27389, salida 1616, cache lectura 144000, cache escritura 0
+tramos de contexto: menos30k 11 (US$0.005), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 8, leer_status_backlog 1, leer_tarea 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 2, tareas 11, otros 73.4
+KB de definitions/ leídos por el coordinador: 2
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  31.3 KB | 2 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/src/PrivilegeAuthorization.psm1
+  24 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/tests/unit/PrivilegeAuthorization.Tests.ps1
+  11 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/features/F02-barreras-seguridad/task-08-coordinacion-inerte.md
+  6.6 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/docs/safety-contract.md
+  5.4 KB | 1 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 5
+costo: US$0.002
+tokens: entrada 11571, salida 660, cache lectura 14720, cache escritura 0
+tramos de contexto: menos30k 5 (US$0.002), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 2, leer_tarea 1, leer_status_backlog 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 1.6, tareas 6.2, otros 5.2
+KB de definitions/ leídos por el coordinador: 1.6
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  6.2 KB | 1 | features/F01-base-ejecutable/task-01-arranque-y-pruebas.md
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+  1.6 KB | 1 | definitions/STATUS.md
+
+pi | coordinador | session.jsonl
+turnos: 17
+costo: US$0.010
+tokens: entrada 26515, salida 8500, cache lectura 285824, cache escritura 0
+tramos de contexto: menos30k 17 (US$0.010), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 9, leer_tarea 3, leer_status_backlog 1, cambiar_estado 3, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 1.5, tareas 20.4, otros 35
+KB de definitions/ leídos por el coordinador: 1.5
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  8.4 KB | 1 | features/F02-barreras-seguridad/task-02-elegibilidad.md
+  6.8 KB | 1 | features/F02-barreras-seguridad/task-01-harness-portable.md
+  6.2 KB | 1 | src/Contracts.psm1
+  5.3 KB | 1 | features/F02-barreras-seguridad/task-03-consentimiento.md
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 27
+costo: US$0.013
+tokens: entrada 35456, salida 8940, cache lectura 519424, cache escritura 0
+tramos de contexto: menos30k 23 (US$0.011), de30a60k 4 (US$0.002), mas60k 0 (US$0.000)
+tipos de turno: otro 19, leer_tarea 3, texto 2, cambiar_estado 3
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 1.3, tareas 26.8, otros 37.2
+KB de definitions/ leídos por el coordinador: 1.3
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  16.6 KB | 2 | features/F01-base-ejecutable/task-05-validacion-local-y-matriz.md
+  10.5 KB | 2 | .pi/skills/ejecutar-tarea/SKILL.md
+  10.2 KB | 1 | features/F01-base-ejecutable/task-04-capacidades-sin-mutaciones.md
+  6.2 KB | 1 | src/Contracts.psm1
+  3.8 KB | 1 | src/ProcessTransport.psm1
+
+pi | coordinador | session.jsonl
+turnos: 7
+costo: US$0.103
+tokens: entrada 38481, salida 1739, cache lectura 88320, cache escritura 0
+tramos de contexto: menos30k 6 (US$0.074), de30a60k 1 (US$0.029), mas60k 0 (US$0.000)
+tipos de turno: otro 4, leer_definiciones 1, leer_status_backlog 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 101.2, tareas 0, otros 39.2
+KB de definitions/ leídos por el coordinador: 101.2
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  42 KB | 1 | definitions/ARCHITECTURE.md
+  37.7 KB | 1 | definitions/F04-PROPOSAL.md
+  12.8 KB | 1 | definitions/PROJECT.md
+  7.8 KB | 1 | src/DiagnosticMenu.psm1
+  6.9 KB | 1 | src/ExecutionSession.psm1
+
+pi | coordinador | session.jsonl
+turnos: 6
+costo: US$0.037
+tokens: entrada 11216, salida 1150, cache lectura 26240, cache escritura 0
+tramos de contexto: menos30k 6 (US$0.037), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 3, leer_status_backlog 1, leer_tarea 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 2.4, tareas 9.1, otros 16.5
+KB de definitions/ leídos por el coordinador: 2.4
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  9.1 KB | 1 | features/F03-diagnostico/task-01-contrato-y-windows.md
+  9 KB | 1 | src/Diagnostics.psm1
+  5.7 KB | 1 | tests/unit/Diagnostics.Tests.ps1
+  2.4 KB | 1 | definitions/STATUS.md
+  1.9 KB | 1 | AGENTS.md
+
+pi | coordinador | session.jsonl
+turnos: 9
+costo: US$0.079
+tokens: entrada 15079, salida 4177, cache lectura 70784, cache escritura 0
+tramos de contexto: menos30k 9 (US$0.079), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 7, leer_status_backlog 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 31.5, tareas 0, otros 3.4
+KB de definitions/ leídos por el coordinador: 31.5
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  15.7 KB | 1 | definitions/ARCHITECTURE.md
+  12.7 KB | 1 | definitions/PROJECT.md
+  2.1 KB | 1 | .pi/skills/disenar-arquitectura/SKILL.md
+  1.7 KB | 1 | definitions/REPOS.md
+  1.4 KB | 1 | definitions/STATUS.md
+
+pi | coordinador | session.jsonl
+turnos: 47
+costo: US$0.032
+tokens: entrada 76545, salida 18611, cache lectura 1517184, cache escritura 0
+tramos de contexto: menos30k 13 (US$0.010), de30a60k 34 (US$0.023), mas60k 0 (US$0.000)
+tipos de turno: otro 44, leer_tarea 1, texto 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 8.8, otros 76.6
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  12.2 KB | 3 | features/F02-barreras-seguridad/task-05b-autoridad-sesion.md
+  9.7 KB | 1 | features/F02-barreras-seguridad/task-05a-composicion-consent.md
+  8.8 KB | 1 | features/F02-barreras-seguridad/task-05-autorizacion-inerte.md
+  8.3 KB | 1 | features/F02-barreras-seguridad/replanteo-task-05.md
+  7.2 KB | 2 | src/ExecutionSession.psm1
+
+pi | coordinador | session.jsonl
+turnos: 97
+costo: US$1.487
+tokens: entrada 245775, salida 45239, cache lectura 5428096, cache escritura 0
+tramos de contexto: menos30k 16 (US$0.197), de30a60k 35 (US$0.566), mas60k 46 (US$0.725)
+tipos de turno: otro 78, leer_status_backlog 2, texto 4, leer_definiciones 13
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 323.6, tareas 0, otros 8.6
+KB de definitions/ leídos por el coordinador: 323.6
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  210.7 KB | 10 | definitions/F04-TECHNICAL-ADDENDUM.md
+  104.8 KB | 3 | definitions/F04-PROPOSAL.md
+  8 KB | 2 | definitions/STATUS.md
+  6.7 KB | 3 | /Users/franco/.pi/agent/skills/disenar-arquitectura/SKILL.md
+  1.9 KB | 1 | AGENTS.md
+
+pi | coordinador | session.jsonl
+turnos: 58
+costo: US$0.033
+tokens: entrada 69318, salida 14150, cache lectura 1875584, cache escritura 0
+tramos de contexto: menos30k 22 (US$0.009), de30a60k 32 (US$0.020), mas60k 4 (US$0.003)
+tipos de turno: otro 33, leer_tarea 7, leer_status_backlog 2, cambiar_estado 11, texto 5
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 3.8, tareas 41, otros 88.2
+KB de definitions/ leídos por el coordinador: 3.8
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  41 KB | 6 | features/F02-barreras-seguridad/task-05-autorizacion-inerte.md
+  26.1 KB | 5 | .pi/skills/ejecutar-tarea/SKILL.md
+  20.1 KB | 3 | src/Consent.psm1
+  13.2 KB | 3 | src/ExecutionSession.psm1
+  8.8 KB | 2 | src/PrivilegeAuthorization.psm1
+
+pi | coordinador | session.jsonl
+turnos: 12
+costo: US$0.300
+tokens: entrada 88701, salida 7248, cache lectura 503680, cache escritura 0
+tramos de contexto: menos30k 4 (US$0.065), de30a60k 3 (US$0.074), mas60k 5 (US$0.161)
+tipos de turno: otro 3, leer_tarea 3, leer_definiciones 2, texto 2, cambiar_estado 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 51.9, tareas 25.8, otros 222
+KB de definitions/ leídos por el coordinador: 51.9
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  61.6 KB | 3 | src/PrivilegeAuthorization.psm1
+  51.7 KB | 2 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  48.8 KB | 3 | definitions/ARCHITECTURE.md
+  28.9 KB | 2 | docs/privilege-boundary.md
+  25.8 KB | 3 | features/F02-barreras-seguridad/task-08-coordinacion-inerte.md
+
+pi | coordinador | session.jsonl
+turnos: 8
+costo: US$0.165
+tokens: entrada 51226, salida 4707, cache lectura 155264, cache escritura 0
+tramos de contexto: menos30k 4 (US$0.075), de30a60k 4 (US$0.090), mas60k 0 (US$0.000)
+tipos de turno: otro 3, leer_tarea 2, leer_definiciones 1, cambiar_estado 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 26.1, tareas 22.5, otros 103.4
+KB de definitions/ leídos por el coordinador: 26.1
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  30.7 KB | 2 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  22.8 KB | 1 | definitions/ARCHITECTURE.md
+  22.5 KB | 2 | features/F02-barreras-seguridad/task-06-limite-windows.md
+  15.5 KB | 1 | src/PrivilegeAuthorization.psm1
+  9.6 KB | 1 | docs/privilege-boundary.md
+
+pi | coordinador | session.jsonl
+turnos: 9
+costo: US$0.083
+tokens: entrada 7460, salida 6003, cache lectura 75776, cache escritura 0
+tramos de contexto: menos30k 9 (US$0.083), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 8, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 7
+costo: US$0.054
+tokens: entrada 12707, salida 2359, cache lectura 48896, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.054), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 5, leer_status_backlog 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 32.8, tareas 0, otros 3.9
+KB de definitions/ leídos por el coordinador: 32.8
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  16.5 KB | 1 | definitions/ARCHITECTURE.md
+  12.7 KB | 1 | definitions/PROJECT.md
+  2.3 KB | 1 | definitions/REPOS.md
+  2.1 KB | 1 | .pi/skills/crear-backlog/SKILL.md
+  1.9 KB | 1 | AGENTS.md
+
+pi | coordinador | session.jsonl
+turnos: 51
+costo: US$0.048
+tokens: entrada 96437, salida 24241, cache lectura 2644736, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.003), de30a60k 20 (US$0.019), mas60k 24 (US$0.026)
+tipos de turno: otro 47, texto 3, leer_tarea 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 2, tareas 8.8, otros 167.2
+KB de definitions/ leídos por el coordinador: 2
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  46.2 KB | 7 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  36.6 KB | 4 | src/PrivilegeAuthorization.psm1
+  20.2 KB | 4 | features/F02-barreras-seguridad/task-05e-esquema-matriz.md
+  16.8 KB | 4 | docs/privilege-boundary.md
+  10.7 KB | 2 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 33
+costo: US$0.386
+tokens: entrada 91719, salida 8016, cache lectura 1220096, cache escritura 0
+tramos de contexto: menos30k 10 (US$0.106), de30a60k 14 (US$0.173), mas60k 9 (US$0.107)
+tipos de turno: otro 17, leer_status_backlog 5, leer_tarea 1, leer_definiciones 4, texto 6
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 96.6, tareas 13.3, otros 111.8
+KB de definitions/ leídos por el coordinador: 96.6
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  76.9 KB | 4 | definitions/ARCHITECTURE.md
+  37.7 KB | 2 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  23.5 KB | 1 | src/PrivilegeAuthorization.psm1
+  19.7 KB | 5 | definitions/STATUS.md
+  13.3 KB | 1 | features/F02-barreras-seguridad/task-07-limite-sudo.md
+
+pi | coordinador | session.jsonl
+turnos: 5
+costo: US$0.031
+tokens: entrada 5138, salida 1947, cache lectura 16640, cache escritura 0
+tramos de contexto: menos30k 5 (US$0.031), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 3, leer_definiciones 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 3.7, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 3.7
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  3.7 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/definitions/PROJECT.md
+
+pi | coordinador | session.jsonl
+turnos: 180
+costo: US$0.202
+tokens: entrada 432808, salida 117801, cache lectura 9960832, cache escritura 0
+tramos de contexto: menos30k 26 (US$0.017), de30a60k 70 (US$0.066), mas60k 84 (US$0.118)
+tipos de turno: otro 151, leer_tarea 13, cambiar_estado 6, texto 7, leer_definiciones 3
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 41.3, tareas 106.8, otros 522.8
+KB de definitions/ leídos por el coordinador: 41.3
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  123.6 KB | 11 | src/PrivilegeAuthorization.psm1
+  105.4 KB | 8 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  100.4 KB | 9 | features/F02-barreras-seguridad/task-06-limite-windows.md
+  65.4 KB | 6 | docs/privilege-boundary.md
+  48.5 KB | 7 | src/WindowsPrivilege.psm1
+
+pi | coordinador | session.jsonl
+turnos: 13
+costo: US$0.006
+tokens: entrada 19188, salida 4712, cache lectura 144768, cache escritura 0
+tramos de contexto: menos30k 13 (US$0.006), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 9, cambiar_estado 3, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 5.2
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 53
+costo: US$0.047
+tokens: entrada 97863, salida 23081, cache lectura 2537344, cache escritura 0
+tramos de contexto: menos30k 10 (US$0.006), de30a60k 26 (US$0.021), mas60k 17 (US$0.020)
+tipos de turno: otro 34, leer_tarea 9, texto 5, cambiar_estado 5
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 15.1, tareas 36.8, otros 129.3
+KB de definitions/ leídos por el coordinador: 15.1
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  32.3 KB | 5 | features/F03-diagnostico/task-03-transporte-diagnostic.md
+  26.8 KB | 5 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  17.3 KB | 3 | src/ProcessTransport.psm1
+  16.2 KB | 5 | tests/unit/DiagnosticTransport.Tests.ps1
+  16 KB | 3 | docs/process-contract.md
+
+pi | coordinador | session.jsonl
+turnos: 53
+costo: US$0.043
+tokens: entrada 140235, salida 14846, cache lectura 2174464, cache escritura 0
+tramos de contexto: menos30k 8 (US$0.008), de30a60k 37 (US$0.025), mas60k 8 (US$0.011)
+tipos de turno: otro 34, leer_tarea 9, cambiar_estado 7, texto 3
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 71.4, tareas 113, otros 222.7
+KB de definitions/ leídos por el coordinador: 71.4
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  78.5 KB | 4 | src/PrivilegeAuthorization.psm1
+  62.5 KB | 2 | definitions/ARCHITECTURE.md
+  59.5 KB | 5 | features/F02-barreras-seguridad/task-07-limite-sudo.md
+  55.7 KB | 4 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  53.5 KB | 3 | features/F02-barreras-seguridad/task-06-limite-windows.md
+
+pi | coordinador | session.jsonl
+turnos: 18
+costo: US$0.006
+tokens: entrada 18535, salida 4592, cache lectura 183168, cache escritura 0
+tramos de contexto: menos30k 18 (US$0.006), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 13, leer_tarea 1, cambiar_estado 3, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 1.5, tareas 4.4, otros 26.3
+KB de definitions/ leídos por el coordinador: 1.5
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+  4.4 KB | 1 | features/F02-barreras-seguridad/task-01-harness-portable.md
+  4.2 KB | 1 | docs/development.md
+  4.2 KB | 1 | tests/Run-Tests.ps1
+  3.2 KB | 1 | features/F02-barreras-seguridad/refinado.md
+
+pi | coordinador | session.jsonl
+turnos: 2
+costo: US$0.023
+tokens: entrada 8108, salida 686, cache lectura 0, cache escritura 0
+tramos de contexto: menos30k 2 (US$0.023), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: texto 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 21
+costo: US$0.011
+tokens: entrada 32570, salida 6310, cache lectura 442112, cache escritura 0
+tramos de contexto: menos30k 21 (US$0.011), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 17, cambiar_estado 3, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 1.2
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  1.2 KB | 1 | tests/integration/SessionConcurrency.Tests.ps1
+
+pi | coordinador | session.jsonl
+turnos: 40
+costo: US$0.516
+tokens: entrada 112742, salida 12813, cache lectura 1622400, cache escritura 0
+tramos de contexto: menos30k 11 (US$0.085), de30a60k 17 (US$0.253), mas60k 12 (US$0.179)
+tipos de turno: otro 21, leer_status_backlog 3, leer_tarea 3, leer_definiciones 5, cambiar_estado 5, texto 3
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 94.9, tareas 35.5, otros 129.2
+KB de definitions/ leídos por el coordinador: 94.9
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  80.6 KB | 5 | definitions/ARCHITECTURE.md
+  35.5 KB | 3 | features/F02-barreras-seguridad/task-07-limite-sudo.md
+  34.9 KB | 3 | docs/privilege-boundary.md
+  31 KB | 3 | src/PrivilegeAuthorization.psm1
+  26.2 KB | 3 | tests/unit/PrivilegeAuthorization.Tests.ps1
+
+pi | coordinador | session.jsonl
+turnos: 74
+costo: US$0.066
+tokens: entrada 148965, salida 27286, cache lectura 3717504, cache escritura 0
+tramos de contexto: menos30k 15 (US$0.008), de30a60k 32 (US$0.025), mas60k 27 (US$0.032)
+tipos de turno: otro 52, leer_tarea 10, leer_status_backlog 3, cambiar_estado 4, texto 4, leer_definiciones 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 91.1, tareas 60.9, otros 161.8
+KB de definitions/ leídos por el coordinador: 91.1
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  60.8 KB | 2 | definitions/ARCHITECTURE.md
+  40.2 KB | 9 | tests/unit/WslDiagnostic.Tests.ps1
+  32.9 KB | 5 | features/F03-diagnostico/task-02-adaptador-raiz-wsl.md
+  26.8 KB | 5 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  24.1 KB | 4 | docs/process-contract.md
+
+pi | coordinador | session.jsonl
+turnos: 72
+costo: US$0.066
+tokens: entrada 161782, salida 24895, cache lectura 3732480, cache escritura 0
+tramos de contexto: menos30k 17 (US$0.009), de30a60k 27 (US$0.024), mas60k 28 (US$0.032)
+tipos de turno: otro 60, leer_tarea 3, leer_status_backlog 2, cambiar_estado 5, texto 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 7, tareas 24.6, otros 122.8
+KB de definitions/ leídos por el coordinador: 7
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  17.9 KB | 2 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/src/Diagnostics.psm1
+  16.9 KB | 2 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/features/F03-diagnostico/task-04-menu-e-informe.md
+  16.5 KB | 2 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/src/ProcessTransport.psm1
+  15.4 KB | 5 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/tests/unit/Startup.Tests.ps1
+  10.7 KB | 2 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 7
+costo: US$0.116
+tokens: entrada 46542, salida 1673, cache lectura 64768, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.116), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 6, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 6
+costo: US$0.047
+tokens: entrada 5903, salida 3246, cache lectura 24448, cache escritura 0
+tramos de contexto: menos30k 6 (US$0.047), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 3, leer_status_backlog 1, texto 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 5.4, tareas 0, otros 1.8
+KB de definitions/ leídos por el coordinador: 5.4
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  3.7 KB | 1 | definitions/PROJECT.md
+  1.8 KB | 1 | .pi/skills/definir-proyecto/SKILL.md
+  1.6 KB | 1 | definitions/STATUS.md
+
+pi | coordinador | session.jsonl
+turnos: 5
+costo: US$0.022
+tokens: entrada 4963, salida 1072, cache lectura 12800, cache escritura 0
+tramos de contexto: menos30k 5 (US$0.022), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 3, leer_status_backlog 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 5.4, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 5.4
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  3.7 KB | 1 | definitions/PROJECT.md
+  1.7 KB | 1 | definitions/STATUS.md
+
+pi | coordinador | session.jsonl
+turnos: 8
+costo: US$0.213
+tokens: entrada 45681, salida 10488, cache lectura 172032, cache escritura 0
+tramos de contexto: menos30k 4 (US$0.045), de30a60k 4 (US$0.168), mas60k 0 (US$0.000)
+tipos de turno: otro 5, leer_status_backlog 1, texto 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 66.5, tareas 0, otros 96.6
+KB de definitions/ leídos por el coordinador: 66.5
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  43.2 KB | 1 | definitions/ARCHITECTURE.md
+  32.3 KB | 1 | src/PrivilegeAuthorization.psm1
+  14.5 KB | 1 | docs/privilege-boundary.md
+  12.8 KB | 1 | definitions/PROJECT.md
+  12.1 KB | 1 | src/WindowsPrivilege.psm1
+
+pi | coordinador | session.jsonl
+turnos: 23
+costo: US$0.017
+tokens: entrada 70272, salida 9162, cache lectura 547200, cache escritura 0
+tramos de contexto: menos30k 10 (US$0.007), de30a60k 13 (US$0.010), mas60k 0 (US$0.000)
+tipos de turno: otro 16, leer_tarea 3, leer_status_backlog 1, cambiar_estado 2, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 38.4, tareas 12.4, otros 41.9
+KB de definitions/ leídos por el coordinador: 38.4
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  16.5 KB | 1 | definitions/ARCHITECTURE.md
+  12.7 KB | 1 | definitions/PROJECT.md
+  6.8 KB | 1 | features/F02-barreras-seguridad/task-01-harness-portable.md
+  6.2 KB | 1 | src/Contracts.psm1
+  5.7 KB | 1 | features/F02-barreras-seguridad/task-02-elegibilidad.md
+
+pi | coordinador | session.jsonl
+turnos: 10
+costo: US$0.035
+tokens: entrada 11490, salida 789, cache lectura 39808, cache escritura 0
+tramos de contexto: menos30k 10 (US$0.035), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 4, leer_definiciones 3, leer_status_backlog 1, texto 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 10.7, tareas 0, otros 1.9
+KB de definitions/ leídos por el coordinador: 10.7
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  8.1 KB | 3 | definitions/PROJECT.md
+  2.6 KB | 1 | definitions/STATUS.md
+  1.9 KB | 1 | AGENTS.md
+
+pi | coordinador | session.jsonl
+turnos: 10
+costo: US$0.005
+tokens: entrada 23231, salida 2557, cache lectura 112256, cache escritura 0
+tramos de contexto: menos30k 10 (US$0.005), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 5, leer_tarea 1, leer_status_backlog 1, cambiar_estado 2, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 2.1, tareas 9.5, otros 47.4
+KB de definitions/ leídos por el coordinador: 2.1
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  9.5 KB | 1 | features/F02-barreras-seguridad/task-05-autorizacion-inerte.md
+  6.7 KB | 1 | src/Consent.psm1
+  5.3 KB | 1 | src/ExecutionSession.psm1
+  5.3 KB | 1 | tests/unit/Consent.Tests.ps1
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 8
+costo: US$0.004
+tokens: entrada 12157, salida 3664, cache lectura 48896, cache escritura 0
+tramos de contexto: menos30k 8 (US$0.004), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 3, leer_tarea 1, leer_status_backlog 1, cambiar_estado 2, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 1.4, tareas 6.2, otros 12
+KB de definitions/ leídos por el coordinador: 1.4
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  6.2 KB | 1 | features/F01-base-ejecutable/task-01-arranque-y-pruebas.md
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+  2.2 KB | 1 | docs/development.md
+  1.9 KB | 1 | AGENTS.md
+  1.4 KB | 1 | definitions/STATUS.md
+
+pi | coordinador | session.jsonl
+turnos: 7
+costo: US$0.050
+tokens: entrada 18483, salida 1060, cache lectura 20736, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.050), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 4, leer_status_backlog 1, leer_tarea 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 3.3, tareas 8.3, otros 12.7
+KB de definitions/ leídos por el coordinador: 3.3
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  8.3 KB | 1 | features/F03-diagnostico/task-02-adaptador-raiz-wsl.md
+  5.5 KB | 1 | tests/unit/WslDiagnostic.Tests.ps1
+  5.3 KB | 1 | src/wsl/diagnostic.sh
+  3.3 KB | 1 | definitions/STATUS.md
+  1.9 KB | 1 | AGENTS.md
+
+pi | coordinador | session.jsonl
+turnos: 14
+costo: US$0.254
+tokens: entrada 53596, salida 9617, cache lectura 507392, cache escritura 0
+tramos de contexto: menos30k 5 (US$0.069), de30a60k 7 (US$0.164), mas60k 2 (US$0.022)
+tipos de turno: otro 13, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 17
+costo: US$0.008
+tokens: entrada 22832, salida 6348, cache lectura 247808, cache escritura 0
+tramos de contexto: menos30k 17 (US$0.008), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 13, cambiar_estado 3, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 47
+costo: US$0.041
+tokens: entrada 79613, salida 21557, cache lectura 2251392, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.004), de30a60k 27 (US$0.024), mas60k 13 (US$0.013)
+tipos de turno: otro 45, texto 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 32.1
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  23.2 KB | 3 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  4.9 KB | 2 | src/PrivilegeAuthorization.psm1
+  4 KB | 1 | features/F02-barreras-seguridad/task-05d-consumo-terminal.md
+
+pi | coordinador | session.jsonl
+turnos: 7
+costo: US$0.058
+tokens: entrada 7279, salida 4007, cache lectura 38528, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.058), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 5, leer_status_backlog 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 11.1, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 11.1
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  5.8 KB | 1 | definitions/PROPOSAL.md
+  3.7 KB | 1 | definitions/PROJECT.md
+  1.5 KB | 1 | definitions/STATUS.md
+
+pi | coordinador | session.jsonl
+turnos: 14
+costo: US$0.006
+tokens: entrada 20556, salida 4409, cache lectura 165248, cache escritura 0
+tramos de contexto: menos30k 14 (US$0.006), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 10, leer_status_backlog 1, cambiar_estado 2, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 36.9, tareas 0, otros 5.2
+KB de definitions/ leídos por el coordinador: 36.9
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  16.5 KB | 1 | definitions/ARCHITECTURE.md
+  12.7 KB | 1 | definitions/PROJECT.md
+  5.4 KB | 1 | definitions/BACKLOG.md
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+  2.3 KB | 1 | definitions/REPOS.md
+
+pi | coordinador | session.jsonl
+turnos: 11
+costo: US$0.233
+tokens: entrada 34235, salida 13685, cache lectura 278784, cache escritura 0
+tramos de contexto: menos30k 5 (US$0.076), de30a60k 6 (US$0.158), mas60k 0 (US$0.000)
+tipos de turno: otro 9, cambiar_estado 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 5
+costo: US$0.025
+tokens: entrada 9584, salida 433, cache lectura 10368, cache escritura 0
+tramos de contexto: menos30k 5 (US$0.025), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 2, leer_status_backlog 1, leer_tarea 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 1.9, tareas 7.8, otros 1.9
+KB de definitions/ leídos por el coordinador: 1.9
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  7.8 KB | 1 | features/F03-diagnostico/task-01-contrato-y-windows.md
+  1.9 KB | 1 | AGENTS.md
+  1.9 KB | 1 | definitions/STATUS.md
+
+pi | coordinador | session.jsonl
+turnos: 9
+costo: US$0.097
+tokens: entrada 14907, salida 6123, cache lectura 63360, cache escritura 0
+tramos de contexto: menos30k 9 (US$0.097), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 8, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 22
+costo: US$0.009
+tokens: entrada 35990, salida 6113, cache lectura 234240, cache escritura 0
+tramos de contexto: menos30k 22 (US$0.009), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 15, leer_tarea 2, leer_status_backlog 1, cambiar_estado 3, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 1.4, tareas 6.3, otros 24.3
+KB de definitions/ leídos por el coordinador: 1.4
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  6.3 KB | 1 | features/F01-base-ejecutable/task-04-capacidades-sin-mutaciones.md
+  6.2 KB | 1 | src/Contracts.psm1
+  5.2 KB | 1 | .pi/skills/ejecutar-tarea/SKILL.md
+  3.8 KB | 1 | src/ProcessTransport.psm1
+  3.1 KB | 1 | tests/unit/Transport.Tests.ps1
+
+pi | coordinador | session.jsonl
+turnos: 91
+costo: US$0.083
+tokens: entrada 193314, salida 37693, cache lectura 4524032, cache escritura 0
+tramos de contexto: menos30k 14 (US$0.010), de30a60k 43 (US$0.032), mas60k 34 (US$0.041)
+tipos de turno: otro 70, leer_tarea 8, leer_status_backlog 1, cambiar_estado 8, texto 4
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 5.6, tareas 89.9, otros 189.9
+KB de definitions/ leídos por el coordinador: 5.6
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  55.7 KB | 6 | features/F02-barreras-seguridad/task-08-coordinacion-inerte.md
+  54.6 KB | 3 | tests/unit/PrivilegeAuthorization.Tests.ps1
+  43.4 KB | 3 | docs/privilege-boundary.md
+  37.4 KB | 3 | src/PrivilegeAuthorization.psm1
+  34.2 KB | 2 | features/F02-barreras-seguridad/task-07-limite-sudo.md
+
+pi | coordinador | session.jsonl
+turnos: 30
+costo: US$0.017
+tokens: entrada 53769, salida 9560, cache lectura 674816, cache escritura 0
+tramos de contexto: menos30k 22 (US$0.011), de30a60k 8 (US$0.006), mas60k 0 (US$0.000)
+tipos de turno: otro 28, leer_tarea 1, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 8.8, otros 62.9
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  8.8 KB | 1 | features/F02-barreras-seguridad/task-05-autorizacion-inerte.md
+  8.3 KB | 1 | features/F02-barreras-seguridad/replanteo-task-05.md
+  7 KB | 1 | features/F02-barreras-seguridad/task-05a-composicion-consent.md
+  6.7 KB | 1 | src/Consent.psm1
+  5.8 KB | 2 | tests/unit/PrivilegeAuthorization.Tests.ps1
+
+pi | coordinador | session.jsonl
+turnos: 19
+costo: US$0.008
+tokens: entrada 22860, salida 5367, cache lectura 273664, cache escritura 0
+tramos de contexto: menos30k 19 (US$0.008), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: leer_tarea 3, otro 12, cambiar_estado 3, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 10.8, otros 10.1
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  7.4 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/features/F01-base-ejecutable/task-01-arranque-y-pruebas.md
+  5.2 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/.pi/skills/ejecutar-tarea/SKILL.md
+  3.4 KB | 1 | features/F01-base-ejecutable/task-01-arranque-y-pruebas.md
+  2.2 KB | 1 | docs/development.md
+  1.2 KB | 1 | tests/unit/Startup.Tests.ps1
+
+pi | coordinador | session.jsonl
+turnos: 8
+costo: US$0.167
+tokens: entrada 67145, salida 2523, cache lectura 78464, cache escritura 0
+tramos de contexto: menos30k 5 (US$0.067), de30a60k 3 (US$0.100), mas60k 0 (US$0.000)
+tipos de turno: otro 7, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 19
+costo: US$0.222
+tokens: entrada 34061, salida 10623, cache lectura 471552, cache escritura 0
+tramos de contexto: menos30k 10 (US$0.093), de30a60k 9 (US$0.128), mas60k 0 (US$0.000)
+tipos de turno: otro 14, texto 5
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 0, tareas 0, otros 0
+KB de definitions/ leídos por el coordinador: 0
+archivos más leídos por el coordinador: ninguno
+
+pi | coordinador | session.jsonl
+turnos: 18
+costo: US$0.153
+tokens: entrada 30104, salida 6382, cache lectura 285696, cache escritura 0
+tramos de contexto: menos30k 16 (US$0.120), de30a60k 2 (US$0.033), mas60k 0 (US$0.000)
+tipos de turno: otro 8, leer_status_backlog 1, leer_tarea 3, texto 2, leer_definiciones 2, cambiar_estado 2
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 38.4, tareas 23.4, otros 40.2
+KB de definitions/ leídos por el coordinador: 38.4
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  35.4 KB | 2 | definitions/ARCHITECTURE.md
+  23.4 KB | 3 | features/F02-barreras-seguridad/task-09-validacion-matriz.md
+  14.5 KB | 1 | docs/privilege-boundary.md
+  7.1 KB | 1 | docs/safety-contract.md
+  5.1 KB | 1 | /Users/franco/.pi/agent/skills/descomponer-feature/SKILL.md
+
+pi | coordinador | session.jsonl
+turnos: 7
+costo: US$0.100
+tokens: entrada 24273, salida 4592, cache lectura 57344, cache escritura 0
+tramos de contexto: menos30k 7 (US$0.100), de30a60k 0 (US$0.000), mas60k 0 (US$0.000)
+tipos de turno: otro 3, leer_status_backlog 1, leer_definiciones 2, texto 1
+llamadas a subagentes: 0
+subagents_enable: 0
+turnos por llamada: n/d
+subagentes por rol: ninguno
+KB leídos por categoría: definiciones 84.5, tareas 0, otros 4.1
+KB de definitions/ leídos por el coordinador: 84.5
+archivos más leídos por el coordinador (KB | lecturas | ruta):
+  43.2 KB | 1 | definitions/ARCHITECTURE.md
+  37.7 KB | 1 | definitions/F04-PROPOSAL.md
+  3.6 KB | 1 | definitions/STATUS.md
+  2.2 KB | 1 | /Users/franco/.pi/agent/skills/disenar-arquitectura/SKILL.md
+  1.9 KB | 1 | AGENTS.md
+
+Solo se cuentan lecturas con la herramienta read; lo leído por bash no se mide.

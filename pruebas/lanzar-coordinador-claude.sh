@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Lanza el agente coordinador en Claude Code con permisos explícitos (F12, task-05).
-# Los tres patrones de Bash para scripts/ se conceden aquí con --allowedTools por decisión de Franco
-# (2026-10-30): el tools: del agente no concede permiso en Claude Code. Son los únicos Bash permitidos.
+# Los cuatro patrones de Bash (tres para scripts/ y el de validar-tarea.mjs, cuarto, como puerta previa)
+# se conceden aquí con --allowedTools por decisión de Franco (2026-10-30; el cuarto, 2026-11-01):
+# el tools: del agente no concede permiso en Claude Code. Son los únicos Bash permitidos.
 # Uso: lanzar-coordinador-claude.sh "<prompt>"   (ejecutar desde el directorio del fixture)
 set -euo pipefail
 [[ $# == 1 ]] || { echo 'uso: lanzar-coordinador-claude.sh "<prompt>"' >&2; exit 2; }
@@ -21,6 +22,7 @@ if [[ "${FLUCASTR_PERSISTIR_SESION:-0}" != "1" ]]; then extra+=(--no-session-per
   'Bash(node scripts/registrar.mjs)' \
   'Bash(node scripts/archivar.mjs)' \
   'Bash(node scripts/archivar.mjs --aplicar F*)' \
+  'Bash(node ~/.flucastr-ai/validar-tarea.mjs *)' \
   --disallowedTools \
   'Read(./.env)' 'Read(.env)' \
   'Bash(cat ./.env)' 'Bash(cat .env)' \
