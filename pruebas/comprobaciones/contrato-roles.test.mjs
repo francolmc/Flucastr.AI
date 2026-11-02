@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validarRoles, FRASES_COORDINADOR_F21, FRASES_LECTURA_F22, FRASES_UNA_PASADA } from './contrato-roles.mjs';
+import { validarRoles, FRASES_POR_ARCHIVO } from './contrato-roles.mjs';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -28,85 +28,49 @@ const ESTADOS_TABLA = [
   '| `bloqueada` | Registra el bloqueo. |',
 ];
 
-// Muestra válida mínima: cumple las ocho reglas y se puede alterar copiándola.
+// Muestra válida mínima: cumple las reglas y se puede alterar copiándola.
+// Las frases del manifiesto se añaden desde FRASES_POR_ARCHIVO, una línea por frase; aquí solo van las líneas que otras reglas necesitan.
 function muestra() {
+  const agentes = {
+    arquitecto: FM('arquitecto', 'Diseña la arquitectura. Úsalo al iniciar un proyecto.') +
+      'Eres el arquitecto. Usa la skill `definir-proyecto` y `disenar-arquitectura`.\n' +
+      'Usa también `revisar-proyecto-existente`.\n',
+    planificador: FM('planificador', 'Ordena el backlog y descompone features.') +
+      'Eres el planificador. Usa `crear-backlog` o `descomponer-feature`.\n' +
+      'Si te bloqueas, primera línea: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n',
+    constructor: FM('constructor', 'Ejecuta una tarea aprobada.') +
+      'Eres el constructor. Usa `ejecutar-tarea`.\n',
+    coordinador: FM('coordinador', 'Decide el paso siguiente.',
+      'Agent(arquitecto, planificador, constructor), Read, Grep, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*), Bash(node ~/.flucastr-ai/validar-tarea.mjs *)') +
+      'Eres el coordinador. Usa `crear-backlog` y `descomponer-feature`.\n' +
+      'Puerta previa: `node ~/.flucastr-ai/validar-tarea.mjs <ruta-tarea>` antes de delegar al constructor.\n' +
+      'Si un subagente responde `BLOQUEO: rol=<rol>; motivo=<motivo>`, lo registras.\n' +
+      ESTADOS_TABLA.join('\n') + '\n',
+  };
+  const skills = {
+    'ejecutar-tarea': FM('ejecutar-tarea', 'Ejecuta una tarea aprobada.') +
+      'Si te bloqueas: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n',
+    'descomponer-feature': FM('descomponer-feature', 'Descompone la feature siguiente.'),
+    'disenar-arquitectura': FM('disenar-arquitectura', 'Diseña la estructura y el diagrama.'),
+    'definir-proyecto': FM('definir-proyecto', 'Define un proyecto nuevo.'),
+    'revisar-proyecto-existente': FM('revisar-proyecto-existente', 'Revisa un proyecto existente.'),
+    'crear-backlog': FM('crear-backlog', 'Crea el backlog de features.') +
+      'Lista ordenada de features.\n',
+  };
+  // Cada frase del manifiesto va en su archivo, una línea por frase. Una skill que el manifiesto nombra y la muestra no tiene se crea y se cita en el coordinador (regla 4).
+  for (const [ruta, frases] of Object.entries(FRASES_POR_ARCHIVO)) {
+    const [tipo, nombre] = ruta.split('/');
+    const mapa = tipo === 'agentes' ? agentes : skills;
+    if (!(nombre in mapa)) {
+      if (tipo !== 'skills') continue;
+      mapa[nombre] = FM(nombre, 'Skill del manifiesto.');
+      agentes.coordinador += `Usa \`${nombre}\`.\n`;
+    }
+    mapa[nombre] += frases.map((f) => `${f}\n`).join('');
+  }
   return {
-    agentes: {
-      arquitecto: FM('arquitecto', 'Diseña la arquitectura. Úsalo al iniciar un proyecto.') +
-        'Eres el arquitecto. Usa la skill `definir-proyecto` y `disenar-arquitectura`.\n' +
-        'Lees el contexto una vez por sesión.\n' +
-        'No lees `features/` ni tareas.\n' +
-        'Usa también `revisar-proyecto-existente`.\n' +
-        'Una sola pasada por puerta: devuelves el documento y nada más; no reabres preguntas ni propones otra ronda.\n' +
-        'Otra ronda solo si Franco la pide.\n' +
-        'Lo abierto va en «Decisiones para Franco».\n' +
-        'Tope de tamaño: 12288 bytes (12 KB).\n' +
-        'Cierras con la línea «Tamaño de la pasada: <n> bytes».\n',
-      planificador: FM('planificador', 'Ordena el backlog y descompone features.') +
-        'Eres el planificador. Usa `crear-backlog` o `descomponer-feature`.\n' +
-        'No llamas a otros agentes ni escribes en `STATUS.md`.\n' +
-        'Si te bloqueas, primera línea: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n' +
-        'Si la feature requiere refinado, respondes `REFINAR: feature=Fxx; preguntas=<n>`.\n' +
-        'Con el encargo «Modo yolo: activo», no preguntas: respondes REFINAR.\n' +
-        'No entras en `features/completed/`.\n' +
-        'Solo lees de `definitions/` la sección que toca la feature.\n' +
-        'No lees tareas de otras features ni tareas `hecha`.\n',
-      constructor: FM('constructor', 'Ejecuta una tarea aprobada.') +
-        'Eres el constructor. Usa `ejecutar-tarea`.\n' +
-        'No llamas a otros agentes ni escribes en `STATUS.md`.\n' +
-        'De `depende_de:` lees solo las *Notas* de esa tarea.\n' +
-        'No lees tareas `hecha` ajenas a `depende_de:`.\n',
-      coordinador: FM('coordinador', 'Decide el paso siguiente.',
-        'Agent(arquitecto, planificador, constructor), Read, Grep, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*), Bash(node ~/.flucastr-ai/validar-tarea.mjs *)') +
-        'Eres el coordinador. Usa `crear-backlog` y `descomponer-feature`.\n' +
-        'Comandos de lista cerrada: solo a pedido explícito de Franco; el pedido de un comando no autoriza otro.\n' +
-        'Puerta previa: `node ~/.flucastr-ai/validar-tarea.mjs <ruta-tarea>` antes de delegar al constructor.\n' +
-        'Si la tarea tocó `scripts/`, Franco revisa con `git diff scripts/`.\n' +
-        'Si un subagente responde `BLOQUEO: rol=<rol>; motivo=<motivo>`, lo registras.\n' +
-        'Escribes `Rama: <prefijo>/Fxx-nombre` en el encargo.\n' +
-        'Si el constructor responde `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`, preguntas a Franco.\n' +
-        'Con su sí explícito, delegas con «Franco confirmó `git switch <rama>`».\n' +
-        'Con la feature completa, indicas a Franco: cierra la rama, haz el PR y despliega.\n' +
-        'Si el planificador responde `REFINAR: feature=Fxx; preguntas=<n>`, registras las preguntas.\n' +
-        'Si el constructor responde `PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>`, preguntas a Franco.\n' +
-        'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>\n' +
-        'ADVERTENCIA: rama main\n' +
-        'Modo yolo: detenido (feature Fxx requiere refinado)\n' +
-        'Modo yolo: terminado\n' +
-        'Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx`.\n' +
-        'Al listar `features/` no entres en `features/completed/`.\n' +
-        'Registro de eventos: `node scripts/registrar.mjs` (lo corre Franco).\n' +
-        'Tampoco entres en `registro/`.\n\n' +
-        FRASES_COORDINADOR_F21.join('\n') + '\n' +
-        ESTADOS_TABLA.join('\n') + '\n',
-    },
-    skills: {
-      'ejecutar-tarea': FM('ejecutar-tarea', 'Ejecuta una tarea aprobada.') +
-        'Si te bloqueas: `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`.\n' +
-        'Al leer, de `depende_de:` lee solo las *Notas* de esa tarea, y de `definitions/` solo la sección citada.\n' +
-        'La evidencia pegada es de hasta 1,5 KB.\n',
-      'descomponer-feature': FM('descomponer-feature', 'Descompone la feature siguiente.') +
-        '5. En `BACKLOG.md` solo puedes mover la marca `→`.\n' +
-        'Si falta refinado, responde `REFINAR: feature=Fxx; preguntas=<n>` y cita `features/Fxx-nombre/refinado.md`.\n' +
-        'Modo yolo: activo: no hay ronda de refinado.\n' +
-        'Cada tarea sale con su ruta y título, y toca ~3 archivos tocados como máximo.\n' +
-        'Cada tarea cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita.\n',
-      'disenar-arquitectura': FM('disenar-arquitectura', 'Diseña la estructura y el diagrama.') +
-        'Lee cada entrada una vez y no releas lo ya leído.\n' +
-        'Una sola pasada: devuelves el documento y nada más; no reabres preguntas.\n' +
-        'Lo abierto va en «Decisiones para Franco».\n' +
-        'Tope de tamaño: 12288 bytes por pasada.\n',
-      'definir-proyecto': FM('definir-proyecto', 'Define un proyecto nuevo.') +
-        'Una sola pasada: devuelves el documento y nada más.\n' +
-        'Lo abierto va en «Decisiones para Franco».\n' +
-        'Tope de tamaño: 12288 bytes por pasada.\n',
-      'revisar-proyecto-existente': FM('revisar-proyecto-existente', 'Revisa un proyecto existente.') +
-        'Una sola pasada: devuelves el documento y nada más.\n' +
-        'Lo abierto va en «Decisiones para Franco».\n' +
-        'Tope de tamaño: 12288 bytes por pasada.\n',
-      'crear-backlog': FM('crear-backlog', 'Crea el backlog de features.') +
-        'Lista ordenada de features.\n',
-    },
+    agentes,
+    skills,
     modelos: {
       version: 1,
       agentes: {
@@ -156,7 +120,7 @@ const variantes = [
   }],
   ['regla 8: descomponer-feature prohíbe tocar BACKLOG.md', (m) => {
     m.skills['descomponer-feature'] = m.skills['descomponer-feature'].replace(
-      'solo puedes mover la marca `→`',
+      'solo puedes mover la marca',
       'No cambies `BACKLOG.md`',
     );
   }],
@@ -170,113 +134,6 @@ for (const [nombre, alterar] of variantes) {
   });
 }
 
-// Controles negativos de las reglas 9, 10 y 11: el error debe mencionar la frase quitada.
-const variantesF05 = [
-  ['regla 9: el coordinador pierde la frase CONFIRMAR', 'CONFIRMAR: accion=git switch <rama>; motivo=<motivo>', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'una pregunta de confirmación');
-  }],
-  ['regla 10: el coordinador pierde la frase de cierre de la rama', 'cierra la rama, haz el PR y despliega', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'cierra algo');
-  }],
-  ['regla 11: el coordinador pierde la frase REFINAR', 'REFINAR: feature=Fxx; preguntas=<n>', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'preguntas pendientes');
-  }],
-  ['regla 18: el coordinador pierde la frase PARCIAL', 'PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'una respuesta a medias');
-  }],
-];
-
-for (const [nombre, frase, alterar] of variantesF05) {
-  test(`rechaza ${nombre}`, () => {
-    const m = muestra();
-    alterar(m, frase);
-    const errores = validarRoles(m);
-    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
-  });
-}
-
-// Controles negativos de la regla 12: quitar cualquiera de las seis frases debe nombrarla en el error.
-const variantesF06 = [
-  ['regla 12: el coordinador pierde la línea de registro del modo yolo', 'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'registro sin formato');
-  }],
-  ['regla 12: el coordinador pierde la advertencia de rama main', 'ADVERTENCIA: rama main', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'advertencia omitida');
-  }],
-  ['regla 12: el coordinador pierde el estado detenido', 'Modo yolo: detenido (feature Fxx requiere refinado)', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'detenido sin motivo');
-  }],
-  ['regla 12: el coordinador pierde el estado terminado', 'Modo yolo: terminado', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'cierre sin nombre');
-  }],
-  ['regla 12: el planificador pierde la frase del modo yolo', 'Modo yolo: activo', (m, f) => {
-    m.agentes.planificador = m.agentes.planificador.replace(f, 'modo activo');
-  }],
-  ['regla 12: descomponer-feature pierde la frase del modo yolo', 'Modo yolo: activo', (m, f) => {
-    m.skills['descomponer-feature'] = m.skills['descomponer-feature'].replace(f, 'modo activo');
-  }],
-];
-
-for (const [nombre, frase, alterar] of variantesF06) {
-  test(`rechaza ${nombre}`, () => {
-    const m = muestra();
-    alterar(m, frase);
-    const errores = validarRoles(m);
-    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
-  });
-}
-
-// Controles negativos de la regla 13: quitar cualquiera de las tres frases debe nombrarla en el error.
-const variantesF07 = [
-  ['regla 13: el coordinador pierde el aviso de --aplicar', 'node scripts/archivar.mjs --aplicar Fxx', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'aviso omitido');
-  }],
-  ['regla 13: el coordinador pierde la exclusión de features/completed/', 'features/completed/', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'archivo omitido');
-  }],
-  ['regla 13: el planificador pierde la exclusión de features/completed/', 'features/completed/', (m, f) => {
-    m.agentes.planificador = m.agentes.planificador.replace(f, 'archivo omitido');
-  }],
-];
-
-for (const [nombre, frase, alterar] of variantesF07) {
-  test(`rechaza ${nombre}`, () => {
-    const m = muestra();
-    alterar(m, frase);
-    const errores = validarRoles(m);
-    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
-  });
-}
-
-// Controles negativos de la regla 14: quitar cualquiera de las dos frases debe nombrarla en el error.
-const variantesF10 = [
-  ['regla 14: el coordinador pierde el comando de registrar.mjs', 'node scripts/registrar.mjs', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'aviso omitido');
-  }],
-  ['regla 14: el coordinador pierde la exclusión de registro/', 'registro/', (m, f) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'archivo omitido');
-  }],
-];
-
-for (const [nombre, frase, alterar] of variantesF10) {
-  test(`rechaza ${nombre}`, () => {
-    const m = muestra();
-    alterar(m, frase);
-    const errores = validarRoles(m);
-    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
-  });
-}
-
-test('rechaza regla 11: el planificador pierde REFINAR y el error nombra al planificador', () => {
-  const m = muestra();
-  m.agentes.planificador = m.agentes.planificador.replace(
-    'REFINAR: feature=Fxx; preguntas=<n>',
-    'preguntas pendientes',
-  );
-  const errores = validarRoles(m);
-  assert.ok(errores.some((e) => e.includes('«planificador»')), 'se esperaba un error que nombre «planificador»');
-});
-
 // Controles negativos de la regla 15: cada muestra mala debe nombrar al agente y el elemento.
 const variantesF11 = [
   ['regla 15: el coordinador tiene Bash sin patrón', 'Bash', 'coordinador', (m) => {
@@ -287,9 +144,6 @@ const variantesF11 = [
   }],
   ['regla 15: al coordinador le falta un patrón Bash', 'Bash(node scripts/archivar.mjs --aplicar F*)', 'coordinador', (m) => {
     m.agentes.coordinador = m.agentes.coordinador.replace(', Bash(node scripts/archivar.mjs --aplicar F*)', '');
-  }],
-  ['regla 15: el coordinador pierde la frase git diff scripts/', 'git diff scripts/', 'coordinador', (m) => {
-    m.agentes.coordinador = m.agentes.coordinador.replace('git diff scripts/', 'revisa el diff');
   }],
   ['regla 15: el planificador declara Bash(node scripts/', 'Bash(node scripts/', 'planificador', (m) => {
     m.agentes.planificador = m.agentes.planificador.replace('---\n', '---\ntools: Read, Bash(node scripts/registrar.mjs)\n');
@@ -320,41 +174,17 @@ for (const [nombre, elemento, agente, alterar] of variantesF11) {
   });
 }
 
-// Controles negativos de la regla 16: quitar cualquiera de las 11 frases de F21 debe nombrarla en el error.
-for (const frase of FRASES_COORDINADOR_F21) {
-  test(`rechaza regla 16: el coordinador pierde la frase «${frase}»`, () => {
-    const m = muestra();
-    m.agentes.coordinador = m.agentes.coordinador.replace(frase, 'frase omitida');
-    const errores = validarRoles(m);
-    assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
-  });
-}
-
-// Controles negativos de la regla 17: quitar cualquiera de las 12 frases de F22 debe nombrarla en el error.
-const AGENTES_F22 = ['planificador', 'constructor', 'arquitecto'];
-for (const [clave, frases] of Object.entries(FRASES_LECTURA_F22)) {
-  const esAgente = AGENTES_F22.includes(clave);
+// Control negativo único del manifiesto: por cada frase, quitarla de su archivo debe producir un error que la nombre.
+for (const [ruta, frases] of Object.entries(FRASES_POR_ARCHIVO)) {
+  const [tipo, nombre] = ruta.split('/');
+  const esAgente = tipo === 'agentes';
+  const etiqueta = esAgente ? 'el agente' : 'la skill';
   for (const frase of frases) {
-    test(`rechaza regla 17: ${esAgente ? 'el agente' : 'la skill'} «${clave}» pierde la frase «${frase}»`, () => {
+    test(`rechaza manifiesto: ${etiqueta} «${nombre}» pierde la frase «${frase}»`, () => {
       const m = muestra();
       const mapa = esAgente ? m.agentes : m.skills;
-      assert.ok(mapa[clave].includes(frase), `la muestra debe contener «${frase}»`);
-      mapa[clave] = mapa[clave].replace(frase, 'frase omitida');
-      const errores = validarRoles(m);
-      assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
-    });
-  }
-}
-
-// Controles negativos de la regla 19: quitar cualquiera de las frases de una sola pasada debe nombrarla en el error.
-for (const [clave, frases] of Object.entries(FRASES_UNA_PASADA)) {
-  const esAgente = clave === 'arquitecto';
-  for (const frase of frases) {
-    test(`rechaza regla 19: ${esAgente ? 'el agente' : 'la skill'} «${clave}» pierde la frase «${frase}»`, () => {
-      const m = muestra();
-      const mapa = esAgente ? m.agentes : m.skills;
-      assert.ok(mapa[clave].includes(frase), `la muestra debe contener «${frase}»`);
-      mapa[clave] = mapa[clave].replace(frase, 'frase omitida');
+      assert.ok(mapa[nombre].includes(frase), `la muestra debe contener «${frase}»`);
+      mapa[nombre] = mapa[nombre].split(frase).join('omitida');
       const errores = validarRoles(m);
       assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
     });

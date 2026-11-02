@@ -1,6 +1,8 @@
 // Validadores deterministas de la estructura de BACKLOG.md y STATUS.md (definitions/WORKFLOW.md §3 y §4).
 // validarBacklog(texto) y validarStatus(texto) devuelven un arreglo de mensajes de error en español; vacío = válido. No lanzan.
 
+import { validarStatusCompacto } from '../../scripts/formato-presupuesto.mjs';
+
 const CABECERA_BACKLOG = [
   'ID',
   'Feature',
@@ -114,6 +116,9 @@ function seccionesStatus(lineas) {
 export function validarStatus(texto) {
   const errores = [];
   const lineas = String(texto).replace(/\r\n?/g, '\n').split('\n');
+
+  // Plantilla compacta (definitions/CONSUMO.md §2, (a)): solo se delega si la primera línea es exactamente «# Estado».
+  if (lineas[0] === '# Estado') return validarStatusCompacto(texto);
 
   // Regla 1: título.
   if (lineas[0] !== '# Estado del flujo') {

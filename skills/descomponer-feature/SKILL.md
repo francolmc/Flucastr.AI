@@ -28,7 +28,7 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
 repo: …   depende_de: …   estado: borrador
 
 ## Descripción      Qué y por qué, 3–5 líneas.
-## Contexto         Rutas exactas a leer y a tocar; convenciones del repo; cómo se ejecuta y se prueba.
+## Contexto         Rutas exactas a leer y a tocar; convenciones del repo; cómo se ejecuta y se prueba; viñeta Fuente.
 ## Decisiones ya tomadas   Lo que el ejecutor NO debe volver a decidir (librería, nombres, formato…).
 ## Alcance / Fuera de alcance   Fuera de alcance no puede quedar vacío.
 ## Pasos            Numerados. Cada uno: archivo, qué cambia, resultado observable.
@@ -43,6 +43,7 @@ Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `h
 ## Tarea que se basta sola
 
 - En *Contexto*, cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita (archivo y rango de líneas, o la firma).
+- En *Contexto*, una viñeta `- Fuente: <ruta> «<encabezado>»` con la sección de `definitions/` de la que sale el diseño (una por documento citado), o `- Fuente: ninguna` si la tarea no depende de ningún diseño. `node scripts/validar-tarea.mjs --fuente` comprueba que el encabezado existe.
 - Cita cada sección de `definitions/` con su ruta y título (por ejemplo `definitions/WORKFLOW.md` §6), no el documento entero.
 - De `depende_de:` indica leer solo las *Notas* de esa tarea.
 - No pidas leer tareas `hecha` ajenas a `depende_de:`.

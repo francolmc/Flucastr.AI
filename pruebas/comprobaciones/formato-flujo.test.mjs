@@ -156,6 +156,55 @@ test('status: fecha inválida se rechaza', () => {
   assert.ok(errores.some((e) => e.includes('YYYY-MM-DD')));
 });
 
+const STATUS_COMPACTO = [
+  '# Estado',
+  'Escalación: ninguna',
+  'Paso actual: constructor · F29 · task-03 · Rama/Modo yolo: yolo · revisa Franco: nada',
+  'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0',
+  'Espera a Franco: ninguno',
+  'Bloqueos abiertos: ninguno',
+  'Retomar: revisar task-03',
+  'Actualizado: 2026-11-02 10:00',
+  '',
+].join('\n');
+
+// Valor de «Escalación» de exactamente `bytes` B, hecho de ítems de como mucho 150 caracteres unidos por « | ».
+function valorDeTamano(bytes) {
+  let m = 1;
+  while (bytes - 3 * (m - 1) > 150 * m) m++;
+  let resto = bytes - 3 * (m - 1);
+  const piezas = [];
+  for (let i = 0; i < m; i++) {
+    const k = Math.ceil(resto / (m - i));
+    piezas.push('a'.repeat(k));
+    resto -= k;
+  }
+  return piezas.join(' | ');
+}
+
+test('status compacto: la muestra de siete líneas se acepta', () => {
+  assert.deepEqual(validarStatus(STATUS_COMPACTO), []);
+});
+
+test('status compacto: una línea quitada («Retomar») se rechaza', () => {
+  const t = STATUS_COMPACTO.replace('Retomar: revisar task-03\n', '');
+  const errores = validarStatus(t);
+  assert.ok(errores.some((e) => e.includes('Retomar')));
+});
+
+test('status compacto: un texto de 1537 B se rechaza con el tope de 1536', () => {
+  const B0 = Buffer.byteLength(STATUS_COMPACTO);
+  const valor = valorDeTamano('ninguna'.length + (1537 - B0));
+  const t = STATUS_COMPACTO.replace('Escalación: ninguna', `Escalación: ${valor}`);
+  assert.equal(Buffer.byteLength(t), 1537);
+  const errores = validarStatus(t);
+  assert.ok(errores.some((e) => e.includes('1536')));
+});
+
+test('status antiguo: STATUS_VALIDO sigue aceptado tras añadir la rama compacta', () => {
+  assert.deepEqual(validarStatus(STATUS_VALIDO), []);
+});
+
 test('definitions/BACKLOG.md real cumple el formato', (t) => {
   const ruta = `${RAIZ}definitions/BACKLOG.md`;
   if (!fs.existsSync(ruta)) return t.skip('definitions/BACKLOG.md no existe');

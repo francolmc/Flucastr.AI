@@ -165,3 +165,133 @@ test('--evidencia sin rutas sale con 2 y muestra el uso en stderr', () => {
   assert.equal(r.code, 2);
   assert.match(r.err, /Uso: node validar-tarea\.mjs \[--evidencia\] <ruta-tarea>\.\.\./);
 });
+
+// Opción --fuente (task-10 de F28): la viñeta «- Fuente:» de «## Contexto» apunta a un encabezado de definitions/.
+fs.mkdirSync(path.join(dir, 'definitions'), { recursive: true });
+fs.writeFileSync(path.join(dir, 'definitions', 'X.md'), '# Documento de prueba\n\n## Encabezado de prueba\nTexto.\n');
+const conFuente = (linea) => valida.replace('- Tocar: `archivo.mjs`', `- Tocar: \`archivo.mjs\`\n${linea}`);
+fs.writeFileSync(path.join(dir, 'fuente-ok.md'), conFuente('- Fuente: definitions/X.md «Encabezado de prueba»'));
+fs.writeFileSync(path.join(dir, 'fuente-ninguna.md'), conFuente('- Fuente: ninguna'));
+fs.writeFileSync(path.join(dir, 'fuente-encabezado.md'), conFuente('- Fuente: definitions/X.md «No existe»'));
+fs.writeFileSync(path.join(dir, 'fuente-archivo.md'), conFuente('- Fuente: definitions/no-existe.md «Encabezado de prueba»'));
+
+test('--fuente con una fuente con encabezado existente sale con 0', () => {
+  const r = correr('--fuente', 'fuente-ok.md');
+  assert.equal(r.code, 0);
+  assert.match(r.out, /OK: 1 tarea\(s\) válida\(s\)/);
+});
+
+test('--fuente con «ninguna» sale con 0', () => {
+  const r = correr('--fuente', 'fuente-ninguna.md');
+  assert.equal(r.code, 0);
+  assert.match(r.out, /OK: 1 tarea\(s\) válida\(s\)/);
+});
+
+test('--fuente sobre una tarea sin viñeta «- Fuente:» sale con 1 y la nombra', () => {
+  const r = correr('--fuente', 'valida.md');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /^valida\.md: .*Fuente/m);
+});
+
+test('--fuente con un encabezado inexistente sale con 1', () => {
+  const r = correr('--fuente', 'fuente-encabezado.md');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /^fuente-encabezado\.md: /m);
+});
+
+test('--fuente con un archivo de fuente inexistente sale con 1', () => {
+  const r = correr('--fuente', 'fuente-archivo.md');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /^fuente-archivo\.md: /m);
+});
+
+test('sin --fuente, una tarea sin viñeta «- Fuente:» sigue válida y sale con 0', () => {
+  const r = correr('valida.md');
+  assert.equal(r.code, 0);
+  assert.match(r.out, /OK: 1 tarea\(s\) válida\(s\)/);
+});
+
+// Opción --presupuesto (task-02 de F29): carpeta F90-prueba/ y definitions/STATUS.md bajo dir.
+const registroLista = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna';
+const registroBloqueada = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=falla; huecos=0; resultado=bloqueada; causa=verificacion_x2';
+const tareaCon = (registro) => `# task-01 — Prueba\nrepo: Flucastr.AI   depende_de: —   estado: hecha\n\n## Notas\n${registro}\n`;
+const statusValido = (presupuesto = 'Presupuesto: ninguna; rondas arq=0 plan=0; ampliado=0', retomar = 'Retomar: nada') =>
+  ['# Estado', 'Escalación: ninguna', 'Paso actual: F90 task-01', presupuesto, 'Espera a Franco: ninguna', 'Bloqueos abiertos: ninguno', retomar, 'Actualizado: 2026-11-02'].join('\n') + '\n';
+// Un STATUS.md de exactamente n bytes: la línea «Retomar» lleva ítems de 150 «x» unidos con « | ».
+function statusDeBytes(n) {
+  const sin = Buffer.byteLength(statusValido(undefined, 'Retomar: x'), 'utf8') - 1;
+  const necesario = n - sin;
+  const m = Math.floor((necesario - 1) / 153);
+  const r = necesario - 153 * m;
+  const items = [...Array.from({ length: m }, () => 'x'.repeat(150)), 'x'.repeat(r)];
+  return statusValido(undefined, `Retomar: ${items.join(' | ')}`);
+}
+const carpetaF90 = path.join(dir, 'F90-prueba');
+function prepararPresupuesto({ tareas, status }) {
+  fs.rmSync(carpetaF90, { recursive: true, force: true });
+  fs.mkdirSync(path.join(carpetaF90, 'completed'), { recursive: true });
+  for (const [nombre, texto] of Object.entries(tareas)) fs.writeFileSync(path.join(carpetaF90, nombre), texto);
+  // Control negativo: dos tareas en completed/ con Registro bloqueada no suman a E ni a K.
+  fs.writeFileSync(path.join(carpetaF90, 'completed', 'task-09.md'), tareaCon(registroBloqueada));
+  fs.writeFileSync(path.join(carpetaF90, 'completed', 'task-10.md'), tareaCon(registroBloqueada));
+  fs.mkdirSync(path.join(dir, 'definitions'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'definitions', 'STATUS.md'), status);
+}
+
+test('--presupuesto con una tarea lista y STATUS válido sale con 0 y estado=ok', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status: statusValido() });
+  const r = correr('--presupuesto', 'F90-prueba');
+  assert.equal(r.code, 0);
+  assert.equal(r.out.trim(), 'Presupuesto F90: D=1/6; E=1; I=1; K=0/2; rondas arq=0/2 plan=0/3; estado=ok');
+});
+
+test('--presupuesto con dos tareas no listas (K=2) sale con 0 y estado=aviso K2', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroBloqueada), 'task-02.md': tareaCon(registroBloqueada) }, status: statusValido() });
+  const r = correr('--presupuesto', 'F90-prueba');
+  assert.equal(r.code, 0);
+  assert.equal(r.out.trim(), 'Presupuesto F90: D=2/8; E=2; I=4; K=2/2; rondas arq=0/2 plan=0/3; estado=aviso K2');
+});
+
+test('--presupuesto con rondas de arquitecto por encima del tope sale con 1 y estado=excedido', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status: statusValido('Presupuesto: F90; rondas arq=3 plan=0; ampliado=0') });
+  const r = correr('--presupuesto', 'F90-prueba');
+  assert.equal(r.code, 1);
+  assert.equal(r.out.trim(), 'Presupuesto F90: D=4/6; E=1; I=1; K=0/2; rondas arq=3/2 plan=0/3; estado=excedido arq');
+});
+
+test('--presupuesto con un STATUS.md de 1537 B sale con 1 y lo nombra como motivo', () => {
+  const status = statusDeBytes(1537);
+  assert.equal(Buffer.byteLength(status, 'utf8'), 1537);
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status });
+  const r = correr('--presupuesto', 'F90-prueba');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /^definitions\/STATUS\.md: El STATUS\.md compacto ocupa 1537 B/m);
+  assert.equal(r.out.includes('Presupuesto F90'), false);
+});
+
+test('--presupuesto con un STATUS.md sin la línea «Retomar» sale con 1 y lo nombra como motivo', () => {
+  const status = statusValido().split('\n').filter((l) => !l.startsWith('Retomar: ')).join('\n');
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status });
+  const r = correr('--presupuesto', 'F90-prueba');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /^definitions\/STATUS\.md: Falta la línea «Retomar»\.$/m);
+  assert.equal(r.out.includes('Presupuesto F90'), false);
+});
+
+test('--presupuesto con una carpeta inexistente sale con 2 y lo indica en stderr', () => {
+  const r = correr('--presupuesto', 'F99-no-existe');
+  assert.equal(r.code, 2);
+  assert.match(r.err, /No se puede leer la carpeta: F99-no-existe/);
+});
+
+test('--presupuesto con un argumento extra sale con 2 y muestra el uso en stderr', () => {
+  const r = correr('--presupuesto', 'F90-prueba', 'extra');
+  assert.equal(r.code, 2);
+  assert.match(r.err, /^Uso: node validar-tarea\.mjs --presupuesto features\/Fxx-nombre/m);
+});
+
+test('--presupuesto sin carpeta sale con 2 y muestra el uso en stderr', () => {
+  const r = correr('--presupuesto');
+  assert.equal(r.code, 2);
+  assert.match(r.err, /^Uso: node validar-tarea\.mjs --presupuesto features\/Fxx-nombre/m);
+});

@@ -3,80 +3,13 @@
 // agentes y skills son objetos { <clave>: <texto> } (para skills, la clave es el nombre de la carpeta).
 // modelos es el objeto de modelos.json ya parseado. No lanza excepciones.
 
+import { FRASES_POR_ARCHIVO, FRASES_COORDINADOR_F21, FRASES_LECTURA_F22, FRASES_UNA_PASADA } from './frases-por-archivo.mjs';
+
+// Las listas de frases viven en frases-por-archivo.mjs; se reexportan para quien las importa desde aquí.
+export { FRASES_POR_ARCHIVO, FRASES_COORDINADOR_F21, FRASES_LECTURA_F22, FRASES_UNA_PASADA };
+
 const ESTADOS_TAREA = ['borrador', 'aprobada', 'en curso', 'lista para revisión', 'hecha', 'bloqueada'];
 const RE_BLOQUEO = /BLOQUEO: rol=<[^>]+>; motivo=<[^>]+>/;
-const FRASE_STATUS = 'escribes en `STATUS.md`';
-
-// Frases de F21 (tareas 01 a 03) que el agente «coordinador» debe conservar, para Pi y Claude Code.
-export const FRASES_COORDINADOR_F21 = [
-  'Lectura de tareas: con `Read` y `limit: 3` lees solo las 3 primeras líneas',
-  'No lees `definitions/` salvo `STATUS.md` y `BACKLOG.md`',
-  'No lees tareas `hecha`',
-  'Tarea completa solo en la revisión del modo yolo',
-  'Reescribes `STATUS.md` solo en puertas y en cambios de rol',
-  'con `Edit` por sección, no con `Write` completo',
-  'cada ítem ≤150 caracteres',
-  'Agrupa en un mismo turno las llamadas independientes',
-  'actívala una vez por sesión; si `subagent` ya funcionó, no la repitas',
-  'Plantilla de encargo',
-  'no uses `contact_supervisor` para preguntar: ante falta de información responde `BLOQUEO:` o `REFINAR:`',
-];
-
-// Frases de F22 (tareas 01 a 03) de lectura acotada. Las claves planificador, constructor y arquitecto son agentes; el resto, skills.
-export const FRASES_LECTURA_F22 = {
-  planificador: [
-    'Solo lees de `definitions/` la sección que toca la feature',
-    'No lees tareas de otras features ni tareas `hecha`',
-  ],
-  constructor: [
-    'De `depende_de:` lees solo las *Notas* de esa tarea',
-    'No lees tareas `hecha` ajenas a `depende_de:`',
-  ],
-  arquitecto: [
-    'una vez por sesión',
-    'No lees `features/` ni tareas',
-  ],
-  'descomponer-feature': [
-    'cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita',
-    'con su ruta y título',
-    '~3 archivos tocados',
-  ],
-  'ejecutar-tarea': [
-    'de `depende_de:` lee solo las *Notas* de esa tarea',
-    'hasta 1,5 KB',
-  ],
-  'disenar-arquitectura': [
-    'Lee cada entrada una vez',
-  ],
-};
-
-// Frases de F27 (tareas 01 a 03) de una sola pasada. La clave arquitecto es agente; el resto, skills.
-export const FRASES_UNA_PASADA = {
-  arquitecto: [
-    'Una sola pasada por puerta',
-    'devuelves el documento y nada más',
-    'no reabres preguntas ni propones otra ronda',
-    'Otra ronda solo si Franco la pide',
-    'Decisiones para Franco',
-    'Tope de tamaño: 12288 bytes',
-    'Tamaño de la pasada: <n> bytes',
-  ],
-  'definir-proyecto': [
-    'devuelves el documento y nada más',
-    'Decisiones para Franco',
-    'Tope de tamaño: 12288 bytes',
-  ],
-  'disenar-arquitectura': [
-    'devuelves el documento y nada más',
-    'Decisiones para Franco',
-    'Tope de tamaño: 12288 bytes',
-  ],
-  'revisar-proyecto-existente': [
-    'devuelves el documento y nada más',
-    'Decisiones para Franco',
-    'Tope de tamaño: 12288 bytes',
-  ],
-};
 
 // Lee el front matter `---` y devuelve { clave: valor } (sin comillas dobles externas), o null si no hay.
 function frontMatter(texto) {
@@ -166,13 +99,6 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     }
   }
 
-  // Regla 6: planificador y constructor declaran que no escriben en STATUS.md.
-  for (const nombre of ['planificador', 'constructor']) {
-    if (!(agentes[nombre] ?? '').includes(FRASE_STATUS)) {
-      errores.push(`El agente «${nombre}» debe contener la frase «${FRASE_STATUS}».`);
-    }
-  }
-
   // Regla 7: la tabla del coordinador (líneas que empiezan por «|») menciona los seis estados de tarea.
   const tablaCoordinador = (agentes.coordinador ?? '')
     .split('\n')
@@ -184,85 +110,10 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     }
   }
 
-  // Regla 8: descomponer-feature permite solo mover la marca de BACKLOG.md y no la prohíbe.
+  // Regla 8: descomponer-feature no prohíbe tocar BACKLOG.md (la frase «solo puedes mover la marca» va en el manifiesto).
   const descomponer = skills['descomponer-feature'] ?? '';
-  if (!descomponer.includes('solo puedes mover la marca')) {
-    errores.push('La skill «descomponer-feature» debe decir que solo puedes mover la marca en BACKLOG.md.');
-  }
   if (descomponer.includes('No cambies `BACKLOG.md`')) {
     errores.push('La skill «descomponer-feature» contiene «No cambies `BACKLOG.md`», que contradice la marca «→».');
-  }
-
-  // Regla 9: el coordinador traza la rama de la feature y pide CONFIRMAR antes de cambiar de rama.
-  const frasesRama = [
-    'Rama: <prefijo>/Fxx-nombre',
-    'CONFIRMAR: accion=git switch <rama>; motivo=<motivo>',
-    'Franco confirmó `git switch <rama>`',
-  ];
-  for (const frase of frasesRama) {
-    if (!(agentes.coordinador ?? '').includes(frase)) {
-      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
-    }
-  }
-
-  // Regla 10: el coordinador indica a Franco el cierre de la rama de la feature (sin ejecutarlo).
-  if (!(agentes.coordinador ?? '').includes('cierra la rama, haz el PR y despliega')) {
-    errores.push('El agente «coordinador» debe contener la frase «cierra la rama, haz el PR y despliega».');
-  }
-
-  // Regla 11: REFINAR en coordinador, planificador y descomponer-feature; la skill cita refinado.md.
-  const FRASE_REFINAR = 'REFINAR: feature=Fxx; preguntas=<n>';
-  for (const nombre of ['coordinador', 'planificador']) {
-    if (!(agentes[nombre] ?? '').includes(FRASE_REFINAR)) {
-      errores.push(`El agente «${nombre}» debe contener la frase «${FRASE_REFINAR}».`);
-    }
-  }
-  if (!descomponer.includes(FRASE_REFINAR)) {
-    errores.push(`La skill «descomponer-feature» debe contener la frase «${FRASE_REFINAR}».`);
-  }
-  if (!descomponer.includes('features/Fxx-nombre/refinado.md')) {
-    errores.push('La skill «descomponer-feature» debe citar «features/Fxx-nombre/refinado.md».');
-  }
-
-  // Regla 12: el modo yolo está descrito en coordinador, planificador y descomponer-feature.
-  const FRASES_YOLO_COORDINADOR = [
-    'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>',
-    'ADVERTENCIA: rama main',
-    'Modo yolo: detenido (feature Fxx requiere refinado)',
-    'Modo yolo: terminado',
-  ];
-  const FRASE_YOLO = 'Modo yolo: activo';
-  for (const frase of FRASES_YOLO_COORDINADOR) {
-    if (!(agentes.coordinador ?? '').includes(frase)) {
-      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
-    }
-  }
-  if (!(agentes.planificador ?? '').includes(FRASE_YOLO)) {
-    errores.push(`El agente «planificador» debe contener la frase «${FRASE_YOLO}».`);
-  }
-  if (!descomponer.includes(FRASE_YOLO)) {
-    errores.push(`La skill «descomponer-feature» debe contener la frase «${FRASE_YOLO}».`);
-  }
-
-  // Regla 13: el coordinador avisa del archivo sin ejecutarlo; coordinador y planificador no entran en features/completed/.
-  const FRASE_APLICAR = 'node scripts/archivar.mjs --aplicar Fxx';
-  const FRASE_ARCHIVO = 'features/completed/';
-  if (!(agentes.coordinador ?? '').includes(FRASE_APLICAR)) {
-    errores.push(`El agente «coordinador» debe contener la frase «${FRASE_APLICAR}».`);
-  }
-  for (const nombre of ['coordinador', 'planificador']) {
-    if (!(agentes[nombre] ?? '').includes(FRASE_ARCHIVO)) {
-      errores.push(`El agente «${nombre}» debe contener la frase «${FRASE_ARCHIVO}».`);
-    }
-  }
-
-  // Regla 14: el coordinador deja el comando de registrar.mjs en «Espera a Franco» y no entra en registro/.
-  const FRASE_REGISTRAR = 'node scripts/registrar.mjs';
-  const FRASE_REGISTRO = 'registro/';
-  for (const frase of [FRASE_REGISTRAR, FRASE_REGISTRO]) {
-    if (!(agentes.coordinador ?? '').includes(frase)) {
-      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
-    }
   }
 
   // Regla 15: el coordinador tiene exactamente los cuatro comandos Bash(...) en «tools:», sin Bash desnudo; su cuerpo fija la lista cerrada, la revisión de scripts/ y el validador de tareas; ningún otro agente tiene Bash(node scripts/ en «tools:».
@@ -284,11 +135,6 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
       errores.push(`El agente «coordinador» tiene «${bash}» en «tools:»; solo puede tener los cuatro patrones «Bash(...)» de la lista cerrada, y ningún «Bash» sin patrón.`);
     }
   }
-  for (const frase of ['lista cerrada', 'pedido explícito', 'no autoriza', 'git diff scripts/']) {
-    if (!(agentes.coordinador ?? '').includes(frase)) {
-      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
-    }
-  }
   const cuerpoCoordinador = (agentes.coordinador ?? '').replace(/^---\n[\s\S]*?\n---/, '');
   if (!cuerpoCoordinador.includes('validar-tarea.mjs')) {
     errores.push('El agente «coordinador» debe nombrar «validar-tarea.mjs» en el cuerpo (puerta previa).');
@@ -300,42 +146,16 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     }
   }
 
-  // Regla 16: el coordinador conserva las frases de F21 (lectura, estado, plantillas y bloqueos).
-  for (const frase of FRASES_COORDINADOR_F21) {
-    if (!(agentes.coordinador ?? '').includes(frase)) {
-      errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
-    }
-  }
-
-  // Regla 17: planificador, constructor, arquitecto y las skills de lectura acotada conservan sus frases de F22.
-  const CLAVES_AGENTES_F22 = ['planificador', 'constructor', 'arquitecto'];
-  for (const [clave, frases] of Object.entries(FRASES_LECTURA_F22)) {
-    const esAgente = CLAVES_AGENTES_F22.includes(clave);
-    const texto = esAgente ? (agentes[clave] ?? '') : (skills[clave] ?? '');
+  // Regla 6 a 19 (manifiesto): cada frase de FRASES_POR_ARCHIVO debe estar en su agente o skill.
+  for (const [ruta, frases] of Object.entries(FRASES_POR_ARCHIVO)) {
+    const [tipo, nombre] = ruta.split('/');
+    const esAgente = tipo === 'agentes';
+    const texto = esAgente ? (agentes[nombre] ?? '') : (skills[nombre] ?? '');
     for (const frase of frases) {
       if (!texto.includes(frase)) {
         errores.push(esAgente
-          ? `El agente «${clave}» debe contener la frase «${frase}».`
-          : `La skill «${clave}» debe contener la frase «${frase}».`);
-      }
-    }
-  }
-
-  // Regla 18: el coordinador trata PARCIAL: tarea=task-NN; hecho=<n>; falta=<n> como pregunta a Franco.
-  const FRASE_PARCIAL = 'PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>';
-  if (!(agentes.coordinador ?? '').includes(FRASE_PARCIAL)) {
-    errores.push(`El agente «coordinador» debe contener la frase «${FRASE_PARCIAL}».`);
-  }
-
-  // Regla 19: arquitecto y sus skills de una sola pasada conservan sus frases y el tope de tamaño.
-  for (const [clave, frases] of Object.entries(FRASES_UNA_PASADA)) {
-    const esAgente = clave === 'arquitecto';
-    const texto = esAgente ? (agentes[clave] ?? '') : (skills[clave] ?? '');
-    for (const frase of frases) {
-      if (!texto.includes(frase)) {
-        errores.push(esAgente
-          ? `El agente «${clave}» debe contener la frase «${frase}».`
-          : `La skill «${clave}» debe contener la frase «${frase}».`);
+          ? `El agente «${nombre}» debe contener la frase «${frase}».`
+          : `La skill «${nombre}» debe contener la frase «${frase}».`);
       }
     }
   }

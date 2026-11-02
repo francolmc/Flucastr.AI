@@ -85,6 +85,10 @@ Flucastr.AI/
 │   ├── generar-clonar/
 │   ├── crear-backlog/
 │   ├── descomponer-feature/
+│   ├── modo-yolo/
+│   ├── ramas-feature/
+│   ├── comandos-coordinador/
+│   ├── control-consumo/
 │   └── ejecutar-tarea/
 ├── scripts/
 │   ├── resolver.mjs    # resuelve el modelo de cada agente, genera los archivos por herramienta y la compactación

@@ -13,6 +13,7 @@ const COMANDO = 'validar-tarea.mjs';
 const SALIDA_1 = 'salida 1';
 const DECISION = 'DECISION: tarea=task-NN; abiertas=<n>';
 const RECOMENDADA = 'Recomendada:';
+const MODULO_YOLO = 'skills/modo-yolo/SKILL.md';
 const REGLA_2_YOLO = '2. **Revisión de «completa»';
 const PENDIENTE = 'RE_PENDIENTE';
 
@@ -27,7 +28,7 @@ const REQUISITOS = [
 
 const de = (texto) => (typeof texto === 'string' ? texto : '');
 const leer = (ruta) => fs.readFileSync(path.join(RAIZ, ruta), 'utf8');
-const reales = () => ({ [COORDINADOR]: leer(COORDINADOR), [CONSTRUCTOR]: leer(CONSTRUCTOR) });
+const reales = () => ({ [COORDINADOR]: leer(COORDINADOR), [CONSTRUCTOR]: leer(CONSTRUCTOR), [MODULO_YOLO]: leer(MODULO_YOLO) });
 
 // Devuelve los mensajes de error en español; vacío = válido. No lanza.
 function validarPuertaPrevia(textos) {
@@ -37,11 +38,11 @@ function validarPuertaPrevia(textos) {
       errores.push(`${archivo} no tiene ${nombre} («${frase}»)`);
     }
   }
-  const regla2 = de(textos[COORDINADOR]).split('\n').find((l) => l.startsWith(REGLA_2_YOLO)) ?? '';
+  const regla2 = de(textos[MODULO_YOLO]).split('\n').find((l) => l.startsWith(REGLA_2_YOLO)) ?? '';
   if (!regla2) {
-    errores.push(`${COORDINADOR} no tiene la regla 2 de yolo («${REGLA_2_YOLO}»)`);
+    errores.push(`${MODULO_YOLO} no tiene la regla 2 de yolo («${REGLA_2_YOLO}»)`);
   } else if (regla2.includes(PENDIENTE)) {
-    errores.push(`${COORDINADOR}: la regla 2 de yolo todavía contiene «${PENDIENTE}»`);
+    errores.push(`${MODULO_YOLO}: la regla 2 de yolo todavía contiene «${PENDIENTE}»`);
   }
   return errores;
 }
@@ -66,7 +67,7 @@ for (const [archivo, frase, nombre] of REQUISITOS) {
 
 test(`falla si la regla 2 de yolo vuelve a contener ${PENDIENTE}`, () => {
   const textos = reales();
-  textos[COORDINADOR] = textos[COORDINADOR].replace(REGLA_2_YOLO, `${REGLA_2_YOLO} ${PENDIENTE}`);
+  textos[MODULO_YOLO] = textos[MODULO_YOLO].replace(REGLA_2_YOLO, `${REGLA_2_YOLO} ${PENDIENTE}`);
   const errores = validarPuertaPrevia(textos);
   assert.ok(
     errores.some((e) => e.includes(PENDIENTE)),
