@@ -34,6 +34,8 @@ const variantes = [
   ['regla 13: falta «Modo yolo: activo», «no creas rama», «no emites `CONFIRMAR:`» o «ni local» en el constructor', 'constructor', ['Modo yolo: activo', 'no creas rama', 'no emites `CONFIRMAR:`', 'ni local']],
   ['regla 14: falta «Modo yolo: activo», «salta este paso entero», «no emites `CONFIRMAR:`» o «ni local» en la skill', 'skill', ['Modo yolo: activo', 'salta este paso entero', 'no emites `CONFIRMAR:`', 'ni local']],
   ['regla 15: falta la plantilla «Registro: n=<n>; herramienta=…» o «una línea por ejecución» en la skill', 'skill', ['Registro: n=<n>; herramienta=<herramienta>; modo=<modo>; intentos=<n>; verificacion=<resultado>; huecos=<n>; resultado=<resultado>; causa=<causa>', 'una línea por ejecución']],
+  ['regla 16: falta la cota («como máximo 2 pasadas completas», «no corres una tercera») o los estados de retorno en la skill', 'skill', ['como máximo 2 pasadas completas', 'no corres una tercera', 'completed | partial | blocked | interaction_required', 'PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>', 'causa=parcial']],
+  ['regla 17: falta la línea de estados «completed | partial | blocked | interaction_required» o «PARCIAL: tarea=task-NN» en el constructor', 'constructor', ['completed | partial | blocked | interaction_required', 'PARCIAL: tarea=task-NN']],
 ];
 
 for (const [nombre, sobre, frases] of variantes) {

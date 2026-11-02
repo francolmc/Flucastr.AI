@@ -293,5 +293,11 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     }
   }
 
+  // Regla 18: el coordinador trata PARCIAL: tarea=task-NN; hecho=<n>; falta=<n> como pregunta a Franco.
+  const FRASE_PARCIAL = 'PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>';
+  if (!(agentes.coordinador ?? '').includes(FRASE_PARCIAL)) {
+    errores.push(`El agente «coordinador» debe contener la frase «${FRASE_PARCIAL}».`);
+  }
+
   return errores;
 }

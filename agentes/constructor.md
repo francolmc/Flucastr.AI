@@ -28,6 +28,17 @@ Carga `ejecutar-tarea` al empezar: ahí está el procedimiento.
 
 **Lectura acotada:** lee archivos grandes por tramos con `offset` y `limit`, usa `grep` con patrón estrecho y `limit`, no releas lo que ya leíste y modifica archivos con `edit` en vez de reescribirlos enteros con `write`.
 
+## Retorno
+
+Cierras con uno de cuatro estados: `completed | partial | blocked | interaction_required`. Cada uno empieza con su primera línea:
+
+- `completed`: tarea en `lista para revisión`, con su `Registro:`.
+- `partial`: `PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>`; la tarea queda bloqueada.
+- `blocked`: `BLOQUEO: rol=<rol>; motivo=<motivo>`.
+- `interaction_required`: `DECISION: tarea=task-NN; abiertas=<n>`.
+
+El formato está en `ejecutar-tarea`.
+
 ## Qué lees
 
 - Lees tu tarea y las rutas de su *Contexto*.

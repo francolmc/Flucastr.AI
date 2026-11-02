@@ -175,6 +175,30 @@ test('Registro incoherente: verificacion=falla con estado lista para revisión',
   assert.ok(motivos.some((m) => m.includes('verificacion=pasa')), motivos.join('\n'));
 });
 
+test('Registro bloqueada con causa=verificacion_x2 e intentos=2 no produce motivos de Registro', () => {
+  const notas = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=falla; huecos=0; resultado=bloqueada; causa=verificacion_x2';
+  const motivos = validarEvidencia(tarea({ estado: 'bloqueada', notas })).filter((m) => m.includes('Registro'));
+  assert.deepEqual(motivos, [], motivos.join('\n'));
+});
+
+test('Registro bloqueada con causa=parcial y resultado=bloqueada no produce motivos de Registro', () => {
+  const notas = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=falla; huecos=0; resultado=bloqueada; causa=parcial';
+  const motivos = validarEvidencia(tarea({ estado: 'bloqueada', notas })).filter((m) => m.includes('Registro'));
+  assert.deepEqual(motivos, [], motivos.join('\n'));
+});
+
+test('Registro incoherente: causa=verificacion_x2 con intentos=1 cita intentos=2', () => {
+  const notas = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=falla; huecos=0; resultado=bloqueada; causa=verificacion_x2';
+  const motivos = validarEvidencia(tarea({ estado: 'bloqueada', notas })).filter((m) => m.includes('Registro'));
+  assert.ok(motivos.some((m) => m.includes('intentos=2')), motivos.join('\n'));
+});
+
+test('Registro incoherente: causa=parcial con resultado=escalada cita causa=parcial', () => {
+  const notas = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=falla; huecos=0; resultado=escalada; causa=parcial';
+  const motivos = validarEvidencia(tarea({ estado: 'bloqueada', notas })).filter((m) => m.includes('Registro'));
+  assert.ok(motivos.some((m) => m.includes('causa=parcial')), motivos.join('\n'));
+});
+
 test('estado aprobada se rechaza: la tarea no está terminada', () => {
   const motivos = validarEvidencia(tarea({ estado: 'aprobada' }));
   assert.ok(motivos.some((m) => m.includes('no está terminada')), motivos.join('\n'));

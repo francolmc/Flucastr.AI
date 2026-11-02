@@ -30,6 +30,7 @@ Entrada: la ruta del archivo de la tarea.
 - **Falta de credenciales o acceso.**
 - **Una decisión que cambia el alcance:** es una escalación; infórmala, no la resuelvas.
 - **La misma verificación falla dos veces por la misma causa:** pon `estado: bloqueada`.
+- **Cota de verificación:** corres como máximo 2 pasadas completas de *Verificación*; si la segunda no pasa, no corres una tercera, aunque la causa haya cambiado entre pasadas. La tarea queda bloqueada, `Registro:` con `causa=verificacion_x2` e `intentos=2`, y tu respuesta final empieza con `BLOQUEO:`.
 - **La rama de la feature ya existe y no es la actual:** pide confirmación (`CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`), no es un bloqueo ni una escalación; su primera línea es `CONFIRMAR:`, no `BLOQUEO:`. Al emitirla no tocas código, ni la tarea, ni la rama. En modo yolo esta causa no aplica.
 
 En cualquiera: anota el motivo en *Notas* y termina tu respuesta final con la **primera línea exacta**:
@@ -43,6 +44,15 @@ En cualquiera: anota el motivo en *Notas* y termina tu respuesta final con la **
 - `estado: lista para revisión`. **Nunca `hecha`.**
 - *Notas*: los huecos menores resueltos y su decisión. Si fueron **muchos**, agrega la frase «Señal: la tarea estaba incompleta» y cuáles faltaban, para mejorar la plantilla.
 - En la tarea solo tocaste *Evidencia*, *Notas* y `estado`. Sin commit, push, PR, merge ni despliegue.
+
+## Retorno
+
+Cierras con uno de cuatro estados: `completed | partial | blocked | interaction_required`. Cada uno tiene su primera línea:
+
+- `completed`: `estado: lista para revisión`, con su `Registro:` (ver «Línea de registro») y un resumen en tu respuesta final.
+- `blocked`: primera línea `BLOQUEO: rol=<rol>; motivo=<motivo>`, con la tarea bloqueada. La cota de verificación usa siempre este estado.
+- `interaction_required`: primera línea `DECISION: tarea=task-NN; abiertas=<n>`, luego `Pregunta:`, `Motivo:`, `Opciones:` (2 o 3, `A) B) C)`) y `Recomendada: <letra>`, según `definitions/WORKFLOW.md` §6, regla 2 bis. No tocas la tarea ni escribes `Registro:`.
+- `partial`: primera línea `PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>`, luego `Hecho:`, `Falta:` (qué falta exactamente), `Opciones:` (2 o 3 cerradas) y `Recomendada: <letra>`. Aplica cuando parte del trabajo está hecha y verificada y lo que falta se cierra con una opción de Franco. Dejas la tarea bloqueada con el `Registro:` de «Línea de registro».
 
 ## Línea de registro
 
@@ -61,6 +71,6 @@ Significados, en este orden y separados por `; `:
 - `verificacion`: `pasa` si todos los comandos pasaron en la última pasada; `parcial` si algunos pasaron y otros no se pudieron correr; `falla` si falló, o si no se corrió ninguno (con `intentos=0`).
 - `huecos`: huecos menores anotados en *Notas* en esta ejecución.
 - `resultado`: `lista` si dejas `lista para revisión`; `bloqueada` si la tarea queda bloqueada; `escalada` si terminas con `BLOQUEO:` por cambio de alcance.
-- `causa`: `ninguna` con `lista`; `alcance` con `escalada`; con `bloqueada`, la que corresponda: `credenciales`, `verificacion_x2`, `rama` (falló un `git switch`) u `otra`.
+- `causa`: `ninguna` con `lista`; `alcance` con `escalada`; con `bloqueada`, la que corresponda: `credenciales`, `verificacion_x2`, `rama` (falló un `git switch`), `parcial` (estado `partial`, con `resultado=bloqueada; causa=parcial`) u `otra`.
 
 No escribes la línea si rechazas una tarea que no está `aprobada` ni si terminas con `CONFIRMAR:`: en esos casos no tocas la tarea.

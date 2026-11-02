@@ -62,6 +62,7 @@ function muestra() {
         'Con su sí explícito, delegas con «Franco confirmó `git switch <rama>`».\n' +
         'Con la feature completa, indicas a Franco: cierra la rama, haz el PR y despliega.\n' +
         'Si el planificador responde `REFINAR: feature=Fxx; preguntas=<n>`, registras las preguntas.\n' +
+        'Si el constructor responde `PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>`, preguntas a Franco.\n' +
         'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>\n' +
         'ADVERTENCIA: rama main\n' +
         'Modo yolo: detenido (feature Fxx requiere refinado)\n' +
@@ -162,6 +163,9 @@ const variantesF05 = [
   }],
   ['regla 11: el coordinador pierde la frase REFINAR', 'REFINAR: feature=Fxx; preguntas=<n>', (m, f) => {
     m.agentes.coordinador = m.agentes.coordinador.replace(f, 'preguntas pendientes');
+  }],
+  ['regla 18: el coordinador pierde la frase PARCIAL', 'PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>', (m, f) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(f, 'una respuesta a medias');
   }],
 ];
 

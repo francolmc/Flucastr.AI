@@ -163,6 +163,12 @@ export function validarEvidencia(texto) {
     } else if (estado === 'bloqueada' && !['bloqueada', 'escalada'].includes(resultado)) {
       errores.push(`«Registro» incoherente con el estado «bloqueada»: exige resultado=bloqueada o escalada; hay resultado=${resultado}.`);
     }
+    if (causa === 'verificacion_x2' && (resultado !== 'bloqueada' || Number(intentos) !== 2)) {
+      errores.push(`«Registro» incoherente: causa=verificacion_x2 exige resultado=bloqueada e intentos=2; hay resultado=${resultado} e intentos=${intentos}.`);
+    }
+    if (causa === 'parcial' && resultado !== 'bloqueada') {
+      errores.push(`«Registro» incoherente: causa=parcial exige resultado=bloqueada; hay resultado=${resultado}.`);
+    }
   }
 
   return errores;
