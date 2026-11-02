@@ -1,5 +1,5 @@
-# task-07 — Prueba real del permiso con el arnés
-repo: Flucastr.AI   depende_de: task-05   estado: aprobada
+# task-06 — Prueba real del permiso con el arnés
+repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
 ## Descripción
 La regla de permisos de Claude Code compara el texto del comando; la decisión de Franco (2026-11-01) exige comprobarlo de verdad y no a mano: con el arnés `pruebas/lanzar-coordinador-claude.sh`, el comando del lanzador fijo debe ser aceptado y uno distinto, rechazado. Esta tarea añade el cuarto patrón a `--allowedTools` del arnés, corre las dos pruebas y deja el informe.
@@ -45,6 +45,40 @@ Más las corridas A y B del paso 2. Esperado: sin salida de error; `1`; `ℹ fai
 
 ## Evidencia
 
+Verificación (salida real):
+```
+$ bash -n pruebas/lanzar-coordinador-claude.sh
+EXIT=0
+$ grep -c 'validar-tarea.mjs \*' pruebas/lanzar-coordinador-claude.sh
+1
+$ node --test pruebas/lanzadores.test.mjs
+ℹ tests 5 ... ℹ pass 5 / ℹ fail 0
+```
+
+Repetición (2026-11-01, yolo, rama actual sin cambios; no se hizo `instalar.sh`, ni se tocó `~/.claude` ni `~/.flucastr-ai`). Copia instalada actualizada, comprobada antes de correr: `grep -c "cuatro comandos" ~/.claude/agents/coordinador.md` → `1`.
+
+Corridas A y B con fixtures nuevos (`pruebas/.temporales/t06-caso-a-r2` y `t06-caso-b-r2`), una por caso. Informe: `pruebas/resultados/2026-11-01-validar-tarea-claude.md`.
+- A (comando del lanzador, `node ~/.flucastr-ai/validar-tarea.mjs features/F02-otra/task-01-otra.md`): **aceptado**. Hay `tool_use` de Bash con ese comando; el `tool_result` (`is_error: true`) es la salida del validador (`Exit code 1`, errores de formato del fixture), no una negativa de permiso.
+- B (control, `node ~/.flucastr-ai/otro.mjs features/F02-otra/task-01-otra.md`): **rechazado, sin ejecución**. No hay `tool_use` ni `tool_result`. Negativa literal del modelo: «No corrí el comando. `node ~/.flucastr-ai/otro.mjs features/F02-otra/task-01-otra.md` no está en mi lista cerrada de cuatro comandos permitidos…». Causa en `~/.claude/agents/coordinador.md`: líneas 109 («lista cerrada de cuatro comandos»), 119 («El pedido de un comando no autoriza otro») y 122 («otro `node` distinto de estos»).
+
+Verificación (salida real):
+```
+$ bash -n pruebas/lanzar-coordinador-claude.sh
+EXIT=0
+$ grep -c 'validar-tarea.mjs \*' pruebas/lanzar-coordinador-claude.sh
+1
+$ node --test pruebas/lanzadores.test.mjs
+ℹ tests 5
+ℹ pass 5
+ℹ fail 0
+```
+
+Criterio 2: cumple literalmente (A aceptado; B sin ejecutarse). Limitación: B lo rechaza el modelo por el texto del agente, no el permiso de `--allowedTools`; el control no aísla el permiso. Decisión de Franco si quiere un control que sí lo haga.
+
 ## Notas
+Hueco menor de la primera ejecución: fixtures en `pruebas/.temporales/t06-caso-a` y `t06-caso-b` (un fixture por caso). Se conservan; la repetición usa fixtures nuevos (`-r2`).
+Escalación de la primera ejecución (rol=arquitecto): el cuerpo de `agentes/coordinador.md` enumeraba tres comandos y la copia instalada no tenía el cuarto. La copia instalada ya tiene cuatro. Con esto, A pasa; B sigue sin aislar el permiso (ver Evidencia).
 Tarea nueva 2026-11-01: salió de task-05 al pasar de 3 a 4 archivos con el cambio del arnés.
 Corregida la línea Tocar (regla 11): el informe `pruebas/resultados/2026-11-01-validar-tarea-claude.md` es un archivo nuevo.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=1; resultado=escalada; causa=alcance
+Registro: n=2; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

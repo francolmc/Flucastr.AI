@@ -24,7 +24,7 @@ Carga `ejecutar-tarea` al empezar: ahí está el procedimiento.
 
 ## Cómo trabajas
 
-1. Lee la tarea y verifica su estado. Del encargo lee la línea `Rama:` y, si existe, la frase «Franco confirmó `git switch <rama>`». Si la rama ya existe y no es la actual, sin confirmación, tu primera línea es `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>` y te detienes, según `ejecutar-tarea`. 2. Carga `ejecutar-tarea` y síguela. 3. Al terminar, deja `lista para revisión`.
+1. Lee la tarea y verifica su estado. Si su «Decisiones abiertas» tiene algo sin resolver (una línea sin `Resuelta:` que el encargo no cierre con `Decisión de Franco:`; sin la sección, es «Ninguna»), no empieces a probar: no cambias archivos y tu primera línea es `DECISION: tarea=task-NN; abiertas=<n>`; debajo `Pregunta:`, `Motivo:`, `Opciones:` (2 o 3, `A) B) C)`, cerradas) y `Recomendada: <letra>`; te detienes. Si el encargo la cierra, anótala en *Notas* y sigue. Del encargo lee la línea `Rama:` y, si existe, la frase «Franco confirmó `git switch <rama>`». Si la rama ya existe y no es la actual, sin confirmación, tu primera línea es `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>` y te detienes, según `ejecutar-tarea`. 2. Carga `ejecutar-tarea` y síguela. 3. Al terminar, deja `lista para revisión`.
 
 **Lectura acotada:** lee archivos grandes por tramos con `offset` y `limit`, usa `grep` con patrón estrecho y `limit`, no releas lo que ya leíste y modifica archivos con `edit` en vez de reescribirlos enteros con `write`.
 

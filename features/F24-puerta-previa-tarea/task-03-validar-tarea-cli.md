@@ -1,5 +1,5 @@
 # task-03 — Script validar-tarea.mjs
-repo: Flucastr.AI   depende_de: task-02   estado: aprobada
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 La puerta previa necesita un comando que el `coordinador` pueda correr sobre una o varias tareas y que responda con un código de salida, sin que el modelo lea la tarea para decidir si está completa (S7: en yolo nadie revisaba tamaño ni secciones). Esta tarea crea `scripts/validar-tarea.mjs`, un CLI delgado sobre `validarTarea`, y su prueba.
@@ -45,6 +45,35 @@ node scripts/validar-tarea.mjs; echo "salida=$?"
 Esperado: `ℹ fail 0`; luego `OK: 6 tarea(s) válida(s)` y `salida=0`; luego `Uso: node validar-tarea.mjs <ruta-tarea>...` y `salida=2`.
 
 ## Evidencia
+`node --test pruebas/comprobaciones/validar-tarea.test.mjs` (cola):
+```
+✔ una tarea válida sola sale con 0 y OK: 1
+✔ una tarea inválida sola sale con 1, con su ruta y el motivo sobre «Tocar»
+✔ válida más inválida sale con 1 y una sola línea de rechazo
+✔ decisiones abiertas sin resolver se rechazan
+✔ sin argumentos sale con 2 y muestra el uso en stderr
+✔ ruta inexistente sale con 2 y lo indica en stderr
+✔ una ruta ilegible sale con 2 aunque otra sea inválida
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+```
+`node scripts/validar-tarea.mjs features/F24-puerta-previa-tarea/task-*.md; echo "salida=$?"`:
+```
+OK: 7 tarea(s) válida(s)
+salida=0
+```
+`node scripts/validar-tarea.mjs; echo "salida=$?"`:
+```
+Uso: node validar-tarea.mjs <ruta-tarea>...
+salida=2
+```
+`bash pruebas/rapida.sh` (cola): `ℹ fail 7`, los 7 fallos ajenos previos (ninguno en `validar-tarea`); salida=1, igual que antes de la tarea.
+
+Criterios: 1 cumplido (tests 7/7, `fail 0`). 2 cumplido (la prueba corre con `cwd` en una carpeta temporal sin `scripts/`). 3 cumplido en código de salida y reglas (las siete tareas F24 son válidas); el conteo esperado «6» no coincide con el real «7» (ver Notas).
 
 ## Notas
-Corrección 2026-11-01: el script se ejecuta al importarse (lo carga el lanzador fijo de task-04); `process.exitCode` en vez de `process.exit`.
+- Corrección 2026-11-01: el script se ejecuta al importarse (lo carga el lanzador fijo de task-04); `process.exitCode` en vez de `process.exit`.
+- Decisión menor: «una línea por rechazo» se implementó como una línea por motivo devuelto por `validarTarea` (formato `<ruta>: <motivo>`), no una línea por archivo.
+- Hueco menor: la *Verificación* espera `OK: 6` y el glob `task-*.md` de F24 da 7 archivos (task-01 a task-07; task-06 y task-07 se renumeraron en el árbol de trabajo). Las siete son válidas y el código es 0. No se cambió la tarea ni el validador; el «6» parece estar desactualizado y conviene que Franco lo corrija al revisar.
+- Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

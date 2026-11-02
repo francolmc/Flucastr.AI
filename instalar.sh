@@ -439,6 +439,39 @@ fi
 
 if [ "$SIMULAR" = 1 ]; then echo "SIMULACIÓN: no se escribe nada."; fi
 
+# Raíz del kit y lanzador fijo: el coordinador los usa para llegar a scripts/ desde cualquier proyecto.
+# Se escriben en ambos modos; el lanzador no tiene lógica propia (importa scripts/validar-tarea.mjs de la raíz).
+if [ "$SIMULAR" = 1 ]; then
+  echo "SIMULACIÓN: se escribirá $ESTADO_DIR/raiz y $ESTADO_DIR/validar-tarea.mjs"
+else
+  mkdir -p "$ESTADO_DIR"
+  printf '%s\n' "$RAIZ" > "$ESTADO_DIR/raiz"
+  cat > "$ESTADO_DIR/validar-tarea.mjs" <<'EOF'
+// Lanzador fijo de validar-tarea: lo escribe instalar.sh. Lee la raíz del kit y carga su script.
+import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+let raiz;
+try {
+  raiz = readFileSync(join(homedir(), '.flucastr-ai', 'raiz'), 'utf8').trim();
+} catch {
+  process.stderr.write('No se puede leer ~/.flucastr-ai/raiz; reinstala el kit.\n');
+  process.exitCode = 2;
+}
+if (raiz !== undefined) {
+  // el script se ejecuta al importarse: su salida y su código son los del lanzador
+  await import(pathToFileURL(join(raiz, 'scripts', 'validar-tarea.mjs')).href);
+}
+EOF
+  chmod +x "$ESTADO_DIR/validar-tarea.mjs"
+  registrar raiz "$ESTADO_DIR/raiz"
+  registrar raiz "$ESTADO_DIR/validar-tarea.mjs"
+  echo "  raíz del kit: $ESTADO_DIR/raiz ($RAIZ)"
+  echo "  lanzador de validar-tarea: $ESTADO_DIR/validar-tarea.mjs"
+fi
+
 if [ "$INSTALAR_CLAUDE" = 1 ]; then
   echo "Claude Code ($CLAUDE_DIR)"
   instalar_skills "$CLAUDE_DIR/skills"

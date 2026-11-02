@@ -1,5 +1,5 @@
 # task-01 — Chequeos nuevos en el validador de tareas
-repo: Flucastr.AI   depende_de: —   estado: bloqueada
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 `validarTarea` hoy exige nueve secciones y no mira qué archivos toca la tarea ni si queda una decisión sin cerrar (S2 y S3 de la medición en Flucastr.Cleaner). Esta tarea lo deja en diez secciones (con «Decisiones abiertas», ya en la plantilla) y le suma dos chequeos: rutas a tocar y decisiones abiertas. Todo en su sitio actual; moverlo a `scripts/` es task-02.
@@ -47,27 +47,37 @@ bash pruebas/rapida.sh 2>&1 | grep -E "^ℹ (pass|fail)"
 Esperado: primer comando `ℹ fail 0`. Segundo: `fail` ≤ 7 (baseline 8; baja en 1 al pasar «las tareas reales») y ninguna prueba nueva en la lista de fallos.
 
 ## Evidencia
-`node --test pruebas/comprobaciones/formato-tarea.test.mjs pruebas/comprobaciones/fixture-constructor.test.mjs pruebas/comprobaciones/constructor-resultado.test.mjs` (combinado):
+`node --test pruebas/comprobaciones/formato-tarea.test.mjs pruebas/comprobaciones/fixture-constructor.test.mjs pruebas/comprobaciones/constructor-resultado.test.mjs` (combinado, grep `^ℹ (tests|pass|fail)`):
 ```
 ℹ tests 42
-ℹ pass 41
-ℹ fail 1
-✖ las tareas reales de features/ cumplen el formato
-  «features/F24-puerta-previa-tarea/task-07-prueba-real-permiso.md: «Tocar» debe listar las rutas entre comillas invertidas, separadas por «, ».»
+ℹ pass 42
+ℹ fail 0
 ```
-Por archivo: `formato-tarea.test.mjs` → `ℹ pass 20`, `ℹ fail 1` (la misma prueba); `fixture-constructor.test.mjs` → `ℹ pass 2`, `ℹ fail 0`; `constructor-resultado.test.mjs` → `ℹ pass 19`, `ℹ fail 0`.
 
 `bash pruebas/rapida.sh 2>&1 | grep -E "^ℹ (pass|fail)"`:
 ```
-ℹ pass 363
-ℹ fail 9
+ℹ pass 365
+ℹ fail 7
 ```
-Fallos de `rapida.sh`: «definitions/BACKLOG.md y features/F*/task-*.md reales son coherentes», «definitions/BACKLOG.md real cumple el formato», «las tareas reales de features/ cumplen el formato», «los archivos reales cumplen la regla», y cinco de `higiene-contexto` (modelos.json, lectura acotada en constructor y ejecutar-tarea, WORKFLOW.md >30720 y su frase de modelos.json). Diagnóstico de «coherentes»: `features/F24-puerta-previa-tarea/task-06-reglas-puerta-previa.md` depende de task-07, que no tiene número menor.
+Fallos (`bash pruebas/rapida.sh 2>&1 | grep -E "^✖" | sort -u`; la salida trae además la cabecera `✖ failing tests:`, que no es una prueba):
+```
+✖ definitions/BACKLOG.md real cumple el formato
+✖ falla si falta la lectura acotada en constructor
+✖ falla si falta la lectura acotada en ejecutar-tarea
+✖ falla si un agente conserva la línea de modelos.json
+✖ falla si WORKFLOW.md conserva la frase sobre modelos.json
+✖ falla si WORKFLOW.md pasa de 30720 caracteres
+✖ los archivos reales cumplen la regla
+```
 
-Criterios: 1 no cumplido (formato-tarea: 1 fallo, el de «las tareas reales»); 2 no cumplido (task-07 no cumple la regla 11); 3 cumplido; 4 cumplido.
+«coherentes» ya no aparece entre los fallos, y «las tareas reales de features/ cumplen el formato» pasa. Ninguno de los 7 viene de `formato-tarea.mjs`, `constructor.sh` ni de sus tests.
+
+Criterios: 1 cumplido (`formato-tarea.test.mjs` sin fallos); 2 cumplido («las tareas reales» pasa); 3 cumplido; 4 cumplido. Verificación: primer comando `ℹ fail 0`; segundo `ℹ fail 7` (≤ 7), sin prueba nueva en la lista de fallos.
 
 ## Notas
 - Huecos menores (1): las reglas 10 y 11 van tras la regla 9, no tras la 7, para que la numeración quede en orden 1-11. Sigue cumpliendo «después de la regla 7».
-- Bloqueo: el criterio 1 y el 2 dependen de `features/F24-puerta-previa-tarea/task-07-prueba-real-permiso.md`, que no cumple la regla 11 (la línea `- Tocar:` no usa el formato «`ruta`, `ruta`»). Es otra tarea de F24, fuera de mi encargo; no la toqué ni la leí. Requiere revisión del planificador.
-- No pude confirmar que los 9 fallos de `rapida.sh` coincidan con la base de 8 del encargo: no hice `git stash` (no permitido). Ninguno de los archivos del test de `coherencia-features` o `higiene-contexto` importa `formato-tarea.mjs` ni `constructor.sh`; el único fallo que sí toca mi cambio es «las tareas reales».
-Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=falla; huecos=1; resultado=bloqueada; causa=otra
+- Repetición: el código de las reglas 10 y 11, el fixture y la muestra de la ejecución anterior se conservaron tal cual (ya estaban en HEAD); no se reescribió nada. El planificador corrigió `task-07-prueba-real-permiso.md` y ahora la prueba «las tareas reales» pasa. No toqué ni leí otras tareas de F24.
+- Fallos de `rapida.sh`: hay 8, no 9. Ninguno de los 8 importa `formato-tarea.mjs` ni `constructor.sh`, y no hay fallo nuevo causado por mis tres archivos. El de «coherentes» viene de F24: `task-06-reglas-puerta-previa.md` depende de task-07, que no tiene número menor (ordenación de dependencias de otra tarea de F24, fuera de mi alcance y de mis archivos; lo deja para el planificador). Los otros 7 son los de `higiene-contexto` (agentes, WORKFLOW.md) y BACKLOG, ajenos a esta tarea.
+- No pude confirmar con certeza que la base previa a F24 eran exactamente los mismos 8 nombres: no hice `git stash` (no permitido). La expectativa «fail ≤ 7» no se cumple por esta razón, no por mi código.
+- Corrida nueva (modo yolo, misma rama): desde la corrida anterior, fail bajó de 8 a 7 y pass subió de 364 a 365. Causa: el planificador renumeró las tareas de F24 y ya no aparece «coherentes». No cambié código ni tareas ajenas; solo *Evidencia*, *Notas* y `estado`. Sin huecos nuevos. La lista de fallos se sacó con una segunda ejecución de `rapida.sh` (la primera dio los conteos).
+Registro: n=3; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

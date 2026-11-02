@@ -51,9 +51,10 @@ function muestra() {
         'De `depende_de:` lees solo las *Notas* de esa tarea.\n' +
         'No lees tareas `hecha` ajenas a `depende_de:`.\n',
       coordinador: FM('coordinador', 'Decide el paso siguiente.',
-        'Agent(arquitecto, planificador, constructor), Read, Grep, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*)') +
+        'Agent(arquitecto, planificador, constructor), Read, Grep, Bash(node scripts/registrar.mjs), Bash(node scripts/archivar.mjs), Bash(node scripts/archivar.mjs --aplicar F*), Bash(node ~/.flucastr-ai/validar-tarea.mjs *)') +
         'Eres el coordinador. Usa `crear-backlog` y `descomponer-feature`.\n' +
         'Comandos de lista cerrada: solo a pedido explícito de Franco; el pedido de un comando no autoriza otro.\n' +
+        'Puerta previa: `node ~/.flucastr-ai/validar-tarea.mjs <ruta-tarea>` antes de delegar al constructor.\n' +
         'Si la tarea tocó `scripts/`, Franco revisa con `git diff scripts/`.\n' +
         'Si un subagente responde `BLOQUEO: rol=<rol>; motivo=<motivo>`, lo registras.\n' +
         'Escribes `Rama: <prefijo>/Fxx-nombre` en el encargo.\n' +
@@ -271,6 +272,18 @@ const variantesF11 = [
   }],
   ['regla 15: el planificador declara Bash(node scripts/', 'Bash(node scripts/', 'planificador', (m) => {
     m.agentes.planificador = m.agentes.planificador.replace('---\n', '---\ntools: Read, Bash(node scripts/registrar.mjs)\n');
+  }],
+  ['regla 15: al coordinador le falta el patrón del validador', 'validar-tarea.mjs', 'coordinador', (m) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(', Bash(node ~/.flucastr-ai/validar-tarea.mjs *)', '');
+  }],
+  ['regla 15: el cuerpo del coordinador pierde validar-tarea.mjs', 'validar-tarea.mjs', 'coordinador', (m) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace('validar-tarea.mjs <ruta-tarea>', 'revisión de tareas');
+  }],
+  ['regla 15: el coordinador tiene un Bash extra no permitido', 'Bash(node otro.mjs)', 'coordinador', (m) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace(', Bash(node ~/.flucastr-ai/validar-tarea.mjs *)', ', Bash(node ~/.flucastr-ai/validar-tarea.mjs *), Bash(node otro.mjs)');
+  }],
+  ['regla 15: el coordinador usa la forma antigua con $(…)', 'Bash(node "$(cat ~/.flucastr-ai/raiz)', 'coordinador', (m) => {
+    m.agentes.coordinador = m.agentes.coordinador.replace('Bash(node ~/.flucastr-ai/validar-tarea.mjs *)', 'Bash(node "$(cat ~/.flucastr-ai/raiz)/scripts/validar-tarea.mjs" *)');
   }],
 ];
 

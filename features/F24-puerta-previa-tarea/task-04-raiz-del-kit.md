@@ -1,5 +1,5 @@
 # task-04 — Raíz del kit y lanzador fijo en la instalación
-repo: Flucastr.AI   depende_de: task-03   estado: aprobada
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
 Los proyectos instalados (como Flucastr.Cleaner) no tienen `scripts/`, así que el `coordinador` no puede llegar a `scripts/validar-tarea.mjs`. Decisión de Franco (2026-11-01): `instalar.sh` escribe, en modo repo y en modo descarga, `~/.flucastr-ai/raiz` (ruta de la raíz del kit) y un lanzador fijo `~/.flucastr-ai/validar-tarea.mjs`; `desinstalar.sh` los quita solo si el manifiesto los registra. El lanzador permite un permiso de `Bash` literal, sin `$(…)` (task-05). Esta tarea implementa eso y su prueba aislada.
@@ -49,5 +49,28 @@ Esperado: ambos terminan con `ℹ fail 0`.
 
 ## Evidencia
 
+Comando: `node --test pruebas/comprobaciones/raiz-kit.test.mjs`
+```
+ℹ tests 7
+ℹ pass 7
+ℹ fail 0
+```
+(Casos: (a) modo repo y (b) modo descarga, ambos ok; (c) lanzador con cwd sin `scripts/`, salida 1 con la ruta y salida 2 con ruta inexistente; (d) desinstalar borra ambos; (e) `--simular` no crea nada; control (i) archivos sin registro no se borran; control (ii) sin `raiz`, salida 2 con «reinstala el kit».)
+
+Comando: `node --test pruebas/capa1/copia.test.mjs pruebas/capa1/instalacion.test.mjs pruebas/capa1/skills-proyecto.test.mjs pruebas/capa1/compactacion.test.mjs`
+```
+ℹ tests 32
+ℹ pass 32
+ℹ fail 0
+```
+
+Suite rápida (`bash pruebas/rapida.sh`, criterio de no sumar fallos): `ℹ tests 386`, `ℹ pass 379`, `ℹ fail 7`. Los 7 fallos son los de antes (BACKLOG real, reglas de constructor/ejecutar-tarea, modelos.json en agente y WORKFLOW.md, límite de caracteres de WORKFLOW.md, «los archivos reales cumplen la regla»); ninguno de `raiz-kit`, `instalacion` ni `copia`.
+
+Archivos tocados: `instalar.sh` (+33: escribe `raiz` y `validar-tarea.mjs` tras el mensaje de simulación, con registro `raiz`), `desinstalar.sh` (+9: rama `raiz)`), `pruebas/comprobaciones/raiz-kit.test.mjs` (nuevo). Los instaladores no se ejecutaron contra el HOME real: solo con HOME temporal o `--simular`.
+
 ## Notas
+- Hueco menor: el lanzador no lleva la marca `flucastr-ai:generado` (la tarea no la pide). `desinstalar.sh` lo borra solo por la línea `raiz` del manifiesto, así que la marca no hace falta; la prueba (control i) lo cubre.
+- Decisión menor: el bloque va justo después del mensaje «SIMULACIÓN: no se escribe nada.» y antes de instalar Claude/Pi, en ambos modos. El lanzador hace `chmod +x` por costumbre; `node` no lo necesita.
+- Lo escrito en `raiz` es `$RAIZ` tal cual (ruta de la carpeta del script), y el lanzador recorta el salto de línea con `trim()`.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna
 Corrección 2026-11-01: se añade el lanzador fijo `~/.flucastr-ai/validar-tarea.mjs` (sin `$(…)` en el permiso) y se cierra que el script real se ejecuta al importarse. El manifiesto registra rutas de archivo, no el valor de `RAIZ`.

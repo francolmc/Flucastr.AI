@@ -237,11 +237,12 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
     }
   }
 
-  // Regla 15: el coordinador tiene exactamente los tres comandos Bash(...) en «tools:», sin Bash desnudo; su cuerpo fija la lista cerrada y la revisión de scripts/; ningún otro agente tiene Bash(node scripts/ en «tools:».
+  // Regla 15: el coordinador tiene exactamente los cuatro comandos Bash(...) en «tools:», sin Bash desnudo; su cuerpo fija la lista cerrada, la revisión de scripts/ y el validador de tareas; ningún otro agente tiene Bash(node scripts/ en «tools:».
   const PATRONES_BASH_COORDINADOR = [
     'Bash(node scripts/registrar.mjs)',
     'Bash(node scripts/archivar.mjs)',
     'Bash(node scripts/archivar.mjs --aplicar F*)',
+    'Bash(node ~/.flucastr-ai/validar-tarea.mjs *)',
   ];
   const toolsCoordinador = frontMatter(agentes.coordinador ?? '')?.tools ?? '';
   const bashCoordinador = toolsCoordinador.match(/Bash(\([^)]*\))?/g) ?? [];
@@ -252,13 +253,17 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
   }
   for (const bash of bashCoordinador) {
     if (!PATRONES_BASH_COORDINADOR.includes(bash)) {
-      errores.push(`El agente «coordinador» tiene «${bash}» en «tools:»; solo puede tener los tres patrones «Bash(...)» de la lista cerrada, y ningún «Bash» sin patrón.`);
+      errores.push(`El agente «coordinador» tiene «${bash}» en «tools:»; solo puede tener los cuatro patrones «Bash(...)» de la lista cerrada, y ningún «Bash» sin patrón.`);
     }
   }
   for (const frase of ['lista cerrada', 'pedido explícito', 'no autoriza', 'git diff scripts/']) {
     if (!(agentes.coordinador ?? '').includes(frase)) {
       errores.push(`El agente «coordinador» debe contener la frase «${frase}».`);
     }
+  }
+  const cuerpoCoordinador = (agentes.coordinador ?? '').replace(/^---\n[\s\S]*?\n---/, '');
+  if (!cuerpoCoordinador.includes('validar-tarea.mjs')) {
+    errores.push('El agente «coordinador» debe nombrar «validar-tarea.mjs» en el cuerpo (puerta previa).');
   }
   for (const nombre of nombresAgentes.filter((n) => n !== 'coordinador')) {
     const tools = frontMatter(agentes[nombre])?.tools ?? '';

@@ -1,5 +1,5 @@
 # task-02 — Núcleo del validador en scripts/
-repo: Flucastr.AI   depende_de: task-01   estado: aprobada
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 El `coordinador` correrá el validador desde proyectos instalados, que no tienen `pruebas/`; solo reciben `scripts/` con el kit. Esta tarea mueve el núcleo de `pruebas/comprobaciones/formato-tarea.mjs` a `scripts/formato-tarea.mjs` y deja el archivo antiguo como re-export, para que las pruebas y `constructor-resultado.mjs` sigan importando igual.
@@ -44,4 +44,27 @@ Esperado: `MAX_CARACTERES,SECCIONES,validarTarea`; luego `2`; luego `ℹ fail 0`
 
 ## Evidencia
 
+```
+$ node -e "import('./scripts/formato-tarea.mjs').then(m=>console.log(Object.keys(m).sort().join(',')))"
+MAX_CARACTERES,SECCIONES,validarTarea
+
+$ wc -l < pruebas/comprobaciones/formato-tarea.mjs | tr -d " "
+2
+
+$ node --test pruebas/comprobaciones/formato-tarea.test.mjs pruebas/comprobaciones/fixture-constructor.test.mjs pruebas/comprobaciones/constructor-resultado.test.mjs
+...
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+```
+
+Criterios: 1 cumple (exports en la salida); 2 cumple (`wc -l` = 2); 3 cumple (`ℹ fail 0`).
+
 ## Notas
+- Modo yolo: no se creó rama ni hubo `git switch`; se trabajó en `feature/F24-puerta-previa-tarea`. Sin commit.
+- Hueco menor: el *Contexto* pedía leer la subsección de `definitions/ARCHITECTURE.md`; no se leyó porque los *Pasos* y las *Decisiones ya tomadas* son explícitos. Sin cambio de resultado.
+- Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna
