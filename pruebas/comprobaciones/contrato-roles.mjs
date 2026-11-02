@@ -50,6 +50,34 @@ export const FRASES_LECTURA_F22 = {
   ],
 };
 
+// Frases de F27 (tareas 01 a 03) de una sola pasada. La clave arquitecto es agente; el resto, skills.
+export const FRASES_UNA_PASADA = {
+  arquitecto: [
+    'Una sola pasada por puerta',
+    'devuelves el documento y nada más',
+    'no reabres preguntas ni propones otra ronda',
+    'Otra ronda solo si Franco la pide',
+    'Decisiones para Franco',
+    'Tope de tamaño: 12288 bytes',
+    'Tamaño de la pasada: <n> bytes',
+  ],
+  'definir-proyecto': [
+    'devuelves el documento y nada más',
+    'Decisiones para Franco',
+    'Tope de tamaño: 12288 bytes',
+  ],
+  'disenar-arquitectura': [
+    'devuelves el documento y nada más',
+    'Decisiones para Franco',
+    'Tope de tamaño: 12288 bytes',
+  ],
+  'revisar-proyecto-existente': [
+    'devuelves el documento y nada más',
+    'Decisiones para Franco',
+    'Tope de tamaño: 12288 bytes',
+  ],
+};
+
 // Lee el front matter `---` y devuelve { clave: valor } (sin comillas dobles externas), o null si no hay.
 function frontMatter(texto) {
   const coincide = /^---\n([\s\S]*?)\n---/.exec(String(texto).replace(/\r\n?/g, '\n'));
@@ -297,6 +325,19 @@ export function validarRoles({ agentes = {}, skills = {}, modelos = {} } = {}) {
   const FRASE_PARCIAL = 'PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>';
   if (!(agentes.coordinador ?? '').includes(FRASE_PARCIAL)) {
     errores.push(`El agente «coordinador» debe contener la frase «${FRASE_PARCIAL}».`);
+  }
+
+  // Regla 19: arquitecto y sus skills de una sola pasada conservan sus frases y el tope de tamaño.
+  for (const [clave, frases] of Object.entries(FRASES_UNA_PASADA)) {
+    const esAgente = clave === 'arquitecto';
+    const texto = esAgente ? (agentes[clave] ?? '') : (skills[clave] ?? '');
+    for (const frase of frases) {
+      if (!texto.includes(frase)) {
+        errores.push(esAgente
+          ? `El agente «${clave}» debe contener la frase «${frase}».`
+          : `La skill «${clave}» debe contener la frase «${frase}».`);
+      }
+    }
   }
 
   return errores;

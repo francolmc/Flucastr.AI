@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validarRoles, FRASES_COORDINADOR_F21, FRASES_LECTURA_F22 } from './contrato-roles.mjs';
+import { validarRoles, FRASES_COORDINADOR_F21, FRASES_LECTURA_F22, FRASES_UNA_PASADA } from './contrato-roles.mjs';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -35,7 +35,13 @@ function muestra() {
       arquitecto: FM('arquitecto', 'Diseña la arquitectura. Úsalo al iniciar un proyecto.') +
         'Eres el arquitecto. Usa la skill `definir-proyecto` y `disenar-arquitectura`.\n' +
         'Lees el contexto una vez por sesión.\n' +
-        'No lees `features/` ni tareas.\n',
+        'No lees `features/` ni tareas.\n' +
+        'Usa también `revisar-proyecto-existente`.\n' +
+        'Una sola pasada por puerta: devuelves el documento y nada más; no reabres preguntas ni propones otra ronda.\n' +
+        'Otra ronda solo si Franco la pide.\n' +
+        'Lo abierto va en «Decisiones para Franco».\n' +
+        'Tope de tamaño: 12288 bytes (12 KB).\n' +
+        'Cierras con la línea «Tamaño de la pasada: <n> bytes».\n',
       planificador: FM('planificador', 'Ordena el backlog y descompone features.') +
         'Eres el planificador. Usa `crear-backlog` o `descomponer-feature`.\n' +
         'No llamas a otros agentes ni escribes en `STATUS.md`.\n' +
@@ -86,7 +92,18 @@ function muestra() {
         'Cada tarea sale con su ruta y título, y toca ~3 archivos tocados como máximo.\n' +
         'Cada tarea cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita.\n',
       'disenar-arquitectura': FM('disenar-arquitectura', 'Diseña la estructura y el diagrama.') +
-        'Lee cada entrada una vez y no releas lo ya leído.\n',
+        'Lee cada entrada una vez y no releas lo ya leído.\n' +
+        'Una sola pasada: devuelves el documento y nada más; no reabres preguntas.\n' +
+        'Lo abierto va en «Decisiones para Franco».\n' +
+        'Tope de tamaño: 12288 bytes por pasada.\n',
+      'definir-proyecto': FM('definir-proyecto', 'Define un proyecto nuevo.') +
+        'Una sola pasada: devuelves el documento y nada más.\n' +
+        'Lo abierto va en «Decisiones para Franco».\n' +
+        'Tope de tamaño: 12288 bytes por pasada.\n',
+      'revisar-proyecto-existente': FM('revisar-proyecto-existente', 'Revisa un proyecto existente.') +
+        'Una sola pasada: devuelves el documento y nada más.\n' +
+        'Lo abierto va en «Decisiones para Franco».\n' +
+        'Tope de tamaño: 12288 bytes por pasada.\n',
       'crear-backlog': FM('crear-backlog', 'Crea el backlog de features.') +
         'Lista ordenada de features.\n',
     },
@@ -319,6 +336,21 @@ for (const [clave, frases] of Object.entries(FRASES_LECTURA_F22)) {
   const esAgente = AGENTES_F22.includes(clave);
   for (const frase of frases) {
     test(`rechaza regla 17: ${esAgente ? 'el agente' : 'la skill'} «${clave}» pierde la frase «${frase}»`, () => {
+      const m = muestra();
+      const mapa = esAgente ? m.agentes : m.skills;
+      assert.ok(mapa[clave].includes(frase), `la muestra debe contener «${frase}»`);
+      mapa[clave] = mapa[clave].replace(frase, 'frase omitida');
+      const errores = validarRoles(m);
+      assert.ok(errores.some((e) => e.includes(frase)), `se esperaba un error que mencione «${frase}»`);
+    });
+  }
+}
+
+// Controles negativos de la regla 19: quitar cualquiera de las frases de una sola pasada debe nombrarla en el error.
+for (const [clave, frases] of Object.entries(FRASES_UNA_PASADA)) {
+  const esAgente = clave === 'arquitecto';
+  for (const frase of frases) {
+    test(`rechaza regla 19: ${esAgente ? 'el agente' : 'la skill'} «${clave}» pierde la frase «${frase}»`, () => {
       const m = muestra();
       const mapa = esAgente ? m.agentes : m.skills;
       assert.ok(mapa[clave].includes(frase), `la muestra debe contener «${frase}»`);

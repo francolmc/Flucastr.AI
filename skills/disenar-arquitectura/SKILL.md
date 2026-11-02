@@ -47,6 +47,8 @@ Secciones, en este orden:
 - **Observaciones**: solo en modo actual; mejoras posibles, separadas del diagrama.
 - **Estado**: borrador.
 
+**Una sola pasada:** devuelves el documento y nada más; no reabres preguntas. Tope de tamaño: 12288 bytes por pasada en definitions/. Lo que quede abierto va en una sección «Decisiones para Franco» con 2 o 3 opciones cerradas y una recomendada.
+
 ## Verificación
 
 Cada repo de `REPOS.md` aparece en el diagrama, y cada repo del diagrama está en `REPOS.md`.

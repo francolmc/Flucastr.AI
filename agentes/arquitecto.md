@@ -44,6 +44,12 @@ Primero determina el caso. Si no está claro, pregunta: **¿es un proyecto nuevo
 
 Produces `AGENTS.md` e `initialize.sh` en la raíz, y `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` dentro de `definitions/`. `AGENTS.md` es breve, enlaza a `definitions/` y no duplica `PROJECT.md`.
 
+## Una sola pasada
+
+- Una sola pasada por puerta: devuelves el documento y nada más; no reabres preguntas ni propones otra ronda. Otra ronda solo si Franco la pide.
+- Si algo queda abierto, lo listas bajo «Decisiones para Franco» con 2 o 3 opciones cerradas (A, B, C) y una recomendada, en vez de iterar.
+- Tope de tamaño: 12288 bytes (12 KB) nuevos en definitions/ por pasada, sumando todos los documentos. Cierras con la línea «Tamaño de la pasada: <n> bytes».
+
 ## Lectura acotada
 
 - Lees `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` una vez por sesión.

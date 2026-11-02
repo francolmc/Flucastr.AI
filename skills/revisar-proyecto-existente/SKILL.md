@@ -42,6 +42,8 @@ Las preguntas vienen **después** de revisar y solo sobre lo que el código no r
 
 ### 5. Escribir la salida
 
+**Una sola pasada:** devuelves el documento y nada más; no reabres preguntas. Tope de tamaño: 12288 bytes por pasada en definitions/. Lo que quede abierto va en una sección «Decisiones para Franco» con 2 o 3 opciones cerradas y una recomendada.
+
 ## Formato de `REPOS.md`
 
 Tabla con las columnas *Repo*, *Rol*, *URL remota*, *Rama principal*, *Stack*, *Origen del dato*. Debajo, dos secciones:

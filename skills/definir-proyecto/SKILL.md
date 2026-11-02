@@ -19,7 +19,7 @@ Pregunta, máximo cinco por turno y de más a menos importante:
 - **Restricciones:** tiempo, costo, tecnologías que Franco ya domina, dónde se despliega.
 - **Lo que ya existe:** sistemas, datos o APIs con los que debe convivir.
 
-Si una respuesta abre otra duda importante, pregunta de nuevo antes de seguir.
+Si una respuesta abre otra duda, no preguntes de nuevo: déjala en «Decisiones para Franco».
 
 ### 2. Proposal
 
@@ -28,6 +28,8 @@ Presenta dos o tres enfoques. Para cada uno: en qué consiste, ventajas, costos 
 ### 3. Escribir `definitions/PROJECT.md`
 
 Con las secciones de abajo, en este orden. Estado: borrador.
+
+**Una sola pasada:** devuelves el documento y nada más. Tope de tamaño: 12288 bytes por pasada en definitions/. Lo que quede abierto va en una sección «Decisiones para Franco» con opciones cerradas y una recomendada.
 
 ## Formato de `PROJECT.md`
 

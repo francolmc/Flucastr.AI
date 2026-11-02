@@ -4,15 +4,15 @@
 
 ## Paso actual
 
-Modo yolo: terminado — alcance F26 completo; 4 tareas hechas; rama main (sin commit)
-task-01: hecha | features/F26-cota-y-retorno-constructor/task-01-coherencia-causas-registro.md
-task-02: hecha | features/F26-cota-y-retorno-constructor/task-02-skill-cota-y-estados.md
-task-03: hecha | features/F26-cota-y-retorno-constructor/task-03-constructor-retorno.md
-task-04: hecha | features/F26-cota-y-retorno-constructor/task-04-coordinador-estados.md
+Modo yolo: terminado — alcance F27 completo; 4 tareas hechas; rama main (sin commit)
+task-01: hecha | features/F27-arquitecto-una-pasada/task-01-texto-arquitecto-y-definir.md
+task-02: hecha | features/F27-arquitecto-una-pasada/task-02-texto-skills-arquitectura-y-revisar.md
+task-03: hecha | features/F27-arquitecto-una-pasada/task-03-control-frases-una-pasada.md
+task-04: hecha | features/F27-arquitecto-una-pasada/task-04-script-crecimiento-definiciones.md
 
 ## Espera a Franco
 
-- Yolo en main, sin commits: crea `feature/F26-cota-y-retorno-constructor`, revisa `git diff scripts/ agentes/ skills/` y commitea.
+- Yolo en main, sin commits: crea `feature/F27-arquitecto-una-pasada`, revisa `git diff scripts/ agentes/ skills/` y commitea. Siguiente: F28 y F29 (piden arquitecto).
 - Reinstala (`./instalar.sh`): ~/.claude no tiene aún las reglas de F25 ni F26. Que `*` acepte `--evidencia` es inferido, no probado.
 - coordinador.md: 17897 de 17920 bytes (23 libres). Siguiente: F27; F28 y F29 piden al arquitecto.
 - Chequeo de contexto: `node scripts/archivar.mjs` (sugerencia, no bloquea).
