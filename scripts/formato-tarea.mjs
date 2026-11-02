@@ -27,7 +27,7 @@ const RE_PASO = /^\d+\. /;
 const RE_PENDIENTE = /\b(TBD|a definir|según corresponda)\b/i;
 
 // Divide las líneas en secciones `## `, ignorando las líneas dentro de bloques de código.
-function secciones(lineas) {
+export function secciones(lineas) {
   const resultado = [];
   let enCodigo = false;
   let actual = null;

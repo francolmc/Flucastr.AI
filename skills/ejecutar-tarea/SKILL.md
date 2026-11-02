@@ -21,7 +21,7 @@ Entrada: la ruta del archivo de la tarea.
 
 1. Haz **todos** los *Pasos*, en orden, respetando *Decisiones ya tomadas* y sin salir de *Alcance* (lo de *Fuera de alcance* no se toca).
 2. **Ante un hueco menor** (algo no cubierto por la tarea): elige la opción más conservadora y coherente con la tarea, anótala en *Notas* y sigue. No preguntes.
-3. Corre la *Verificación* tal cual está escrita. Pega en *Evidencia* la cola relevante de la salida **real** (comando y salida), hasta 1,5 KB; nunca una versión inventada.
+3. Corre la *Verificación* tal cual está escrita. En *Evidencia* pega cada comando como `$ <comando>`, idéntico al de *Verificación*, con su salida **real** (cola relevante, hasta 1,5 KB; nunca inventada) y una última línea `exit N` con el código real, aunque sea distinto de 0. Antes de `lista para revisión`, si existe `scripts/validar-tarea.mjs`, corre `node scripts/validar-tarea.mjs --evidencia <ruta-tarea>`; si sale 1, corrige la *Evidencia* corriendo lo que falte, sin inventarla.
 4. Comprueba cada criterio de aceptación contra esa evidencia.
 5. **Lectura acotada:** lee archivos grandes por tramos con `offset` y `limit`, usa `grep` con patrón estrecho y `limit`, no releas lo que ya leíste y modifica archivos con `edit` en vez de reescribirlos enteros con `write`.
 

@@ -62,6 +62,19 @@ fs.writeFileSync(path.join(dir, 'valida.md'), valida);
 fs.writeFileSync(path.join(dir, 'cuatro.md'), cuatroTocar);
 fs.writeFileSync(path.join(dir, 'abierta.md'), abiertas);
 
+// Tarea terminada con su evidencia completa: un comando de Verificación con su salida real y «exit 0».
+const registro = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna';
+const bloqueEvidencia = '$ node --test archivo.test.mjs\nℹ tests 1\nℹ fail 0\nexit 0\n';
+const evidenciaOk = valida
+  .replace('estado: aprobada', 'estado: lista para revisión')
+  .replace('## Evidencia\n', `## Evidencia\n\`\`\`\n${bloqueEvidencia}\`\`\`\n`)
+  .replace('## Notas\n', `## Notas\n${registro}\n`);
+// Control negativo: la misma tarea sin la salida del comando.
+const evidenciaFalta = evidenciaOk.replace(bloqueEvidencia, '');
+
+fs.writeFileSync(path.join(dir, 'evidencia-ok.md'), evidenciaOk);
+fs.writeFileSync(path.join(dir, 'evidencia-falta.md'), evidenciaFalta);
+
 function correr(...args) {
   const r = spawnSync(process.execPath, [script, ...args], { cwd: dir, encoding: 'utf8' });
   return { code: r.status, out: r.stdout, err: r.stderr };
@@ -97,7 +110,7 @@ test('decisiones abiertas sin resolver se rechazan', () => {
 test('sin argumentos sale con 2 y muestra el uso en stderr', () => {
   const r = correr();
   assert.equal(r.code, 2);
-  assert.match(r.err, /Uso: node validar-tarea\.mjs <ruta-tarea>\.\.\./);
+  assert.match(r.err, /Uso: node validar-tarea\.mjs (\[--evidencia\] )?<ruta-tarea>\.\.\./);
 });
 
 test('ruta inexistente sale con 2 y lo indica en stderr', () => {
@@ -110,4 +123,45 @@ test('una ruta ilegible sale con 2 aunque otra sea inválida', () => {
   const r = correr('cuatro.md', 'no-existe.md');
   assert.equal(r.code, 2);
   assert.match(r.err, /No se puede leer: no-existe\.md/);
+});
+
+test('--evidencia con una tarea de evidencia completa sale con 0 y OK de evidencia', () => {
+  const r = correr('--evidencia', 'evidencia-ok.md');
+  assert.equal(r.code, 0);
+  assert.match(r.out, /OK: 1 tarea\(s\) con evidencia completa/);
+});
+
+test('--evidencia con una tarea sin la salida del comando sale con 1 y su ruta al inicio de la línea', () => {
+  const r = correr('--evidencia', 'evidencia-falta.md');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /^evidencia-falta\.md: /m);
+  assert.equal(r.out.includes('OK:'), false);
+});
+
+test('--evidencia con una completa y una incompleta sale con 1 y solo rechaza la incompleta', () => {
+  const r = correr('--evidencia', 'evidencia-ok.md', 'evidencia-falta.md');
+  assert.equal(r.code, 1);
+  const lineas = r.out.split('\n').filter((l) => l !== '');
+  assert.ok(lineas.length >= 1);
+  assert.ok(lineas.every((l) => l.startsWith('evidencia-falta.md: ')));
+  assert.equal(r.out.includes('evidencia-ok.md'), false);
+  assert.equal(r.out.includes('OK:'), false);
+});
+
+test('una opción desconocida sale con 2 y la nombra en stderr', () => {
+  const r = correr('--otra', 'valida.md');
+  assert.equal(r.code, 2);
+  assert.match(r.err, /Opción desconocida: --otra/);
+});
+
+test('--evidencia fuera de la primera posición es una opción desconocida y sale con 2', () => {
+  const r = correr('valida.md', '--evidencia', 'evidencia-ok.md');
+  assert.equal(r.code, 2);
+  assert.match(r.err, /Opción desconocida: --evidencia/);
+});
+
+test('--evidencia sin rutas sale con 2 y muestra el uso en stderr', () => {
+  const r = correr('--evidencia');
+  assert.equal(r.code, 2);
+  assert.match(r.err, /Uso: node validar-tarea\.mjs \[--evidencia\] <ruta-tarea>\.\.\./);
 });

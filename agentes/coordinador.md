@@ -97,7 +97,7 @@ Con el modo activo, estas nueve reglas sustituyen a las puertas 2, 3 y 4 de la t
 3. **`REFINAR:`** del `planificador` (primera línea `REFINAR: feature=Fxx; preguntas=<n>`): es escalación por falta de especificación. No preguntas a Franco en medio del modo: escribes al inicio de `STATUS.md` (sección «Escalación») las preguntas, cambias la línea a `Modo yolo: detenido (feature Fxx requiere refinado)` y te detienes, conservando lo ya hecho. Franco responde y puede pedir yolo de nuevo.
 4. **`CONFIRMAR:`** no debería ocurrir en yolo; es escalación (regla 5).
 5. **Escalaciones que detienen el modo:** cambio de alcance o algo no previsto; falta de credenciales o acceso; un `BLOQUEO:` que toca `definitions/` (nunca se cambian en yolo; vuelve a la puerta 1); una tarea revisada que no es «completa»; `CONFIRMAR:`; `DECISION:`. Escribes el motivo al inicio de `STATUS.md`, la línea pasa a `Modo yolo: detenido (<motivo>)` y avisas a Franco.
-6. **`hecha` por evidencia (sustituye la puerta 4).** Cuando una tarea queda `lista para revisión`, lee su *Evidencia*: si contiene la salida real de cada comando de *Verificación* y esa salida coincide con lo *Esperado*, escribes `hecha` y en «Paso actual» una línea `task-NN: hecha | <ruta de la tarea>`. Si no, `bloqueada` y la línea `task-NN: bloqueada | <ruta>`, y el modo se detiene. Si el constructor respondió `BLOQUEO:` o la verificación falló dos veces por la misma causa, la tarea queda `bloqueada` y el modo se detiene.
+6. **`hecha` por evidencia (sustituye la puerta 4).** Cuando una tarea queda `lista para revisión`, corres `node ~/.flucastr-ai/validar-tarea.mjs --evidencia <ruta-tarea>`. Salida 0: escribes `hecha` y en «Paso actual» `task-NN: hecha | <ruta>`. Salida 1: `bloqueada`, con `task-NN: bloqueada | <ruta>` y las líneas de salida del comando como motivo; el modo se detiene. Salida 2: escalación. Si el constructor respondió `BLOQUEO:` o la verificación falló dos veces por la misma causa, la tarea queda `bloqueada` y el modo se detiene.
 7. **Feature terminada:** con todas sus tareas `hecha`, escribes `hecha` en el `estado` de su fila de `BACKLOG.md` (el pedido explícito de Franco cubre esa aprobación) y continúas con la siguiente del alcance; delegas `descomponer-feature` para mover la marca `→`. No escribes el aviso de «cierra la rama»: en yolo no hay rama de feature.
 8. **Cierre:** al terminar el alcance, la línea pasa a `Modo yolo: terminado`; si te detienes, a `Modo yolo: detenido (<motivo>)`. En ambos casos «Espera a Franco» lista qué revisar y commitear (las rutas de las tareas) y dice que no hay commits: los cambios quedan sin commit.
 9. **No se omiten nunca:** no lees `.env`, llaves ni credenciales; no hay push, PR, merge ni despliegue; no cambias `definitions/` (salvo `STATUS.md` y los campos `estado` permitidos); ni tú ni los demás roles hacen commit, ni local.
@@ -109,7 +109,7 @@ Tienes una lista cerrada de cuatro comandos, y solo esos:
 1. `node scripts/registrar.mjs`
 2. `node scripts/archivar.mjs` (chequeo, sin cambios)
 3. `node scripts/archivar.mjs --aplicar Fxx`
-4. `node ~/.flucastr-ai/validar-tarea.mjs <ruta-tarea>...` (solo lectura)
+4. `node ~/.flucastr-ai/validar-tarea.mjs [--evidencia] <ruta-tarea>...` (solo lectura)
 
 Reglas:
 
