@@ -5,6 +5,7 @@ export const SECCIONES = [
   'Descripción',
   'Contexto',
   'Decisiones ya tomadas',
+  'Decisiones abiertas',
   'Alcance / Fuera de alcance',
   'Pasos',
   'Criterios de aceptación',
@@ -62,12 +63,12 @@ export function validarTarea(texto) {
   }
   const estado = segunda?.[3];
 
-  // Regla 3: las nueve secciones `##`, exactas y en orden.
+  // Regla 3: las diez secciones `##`, exactas y en orden.
   const encontradas = secciones(lineas);
   const titulos = encontradas.map((s) => s.titulo);
   const enOrden = titulos.length === SECCIONES.length && titulos.every((t, i) => t === SECCIONES[i]);
   if (!enOrden) {
-    errores.push(`Las secciones «##» deben ser exactamente estas nueve, en este orden: ${SECCIONES.join(', ')}. Hay: ${titulos.join(', ') || 'ninguna'}.`);
+    errores.push(`Las secciones «##» deben ser exactamente estas ${SECCIONES.length}, en este orden: ${SECCIONES.join(', ')}. Hay: ${titulos.join(', ') || 'ninguna'}.`);
   }
 
   const bloque = (nombre) => encontradas.find((s) => s.titulo === nombre)?.lineas ?? [];
@@ -115,6 +116,38 @@ export function validarTarea(texto) {
   // Regla 9: largo máximo de la tarea en caracteres (8 KB).
   if (todo.length > MAX_CARACTERES) {
     errores.push(`La tarea mide ${todo.length} caracteres; el máximo es ${MAX_CARACTERES} (8 KB).`);
+  }
+
+  // Regla 10: «Decisiones abiertas» es «Ninguna» o solo decisiones con «Resuelta: texto».
+  if (titulos.includes('Decisiones abiertas')) {
+    const abiertas = cuerpo('Decisiones abiertas');
+    const lineasAbiertas = bloque('Decisiones abiertas').map((l) => l.trim()).filter((l) => l !== '');
+    const soloResueltas = lineasAbiertas.length > 0 && lineasAbiertas.every((l) => /^- .*Resuelta:\s+\S/.test(l));
+    if (abiertas !== 'Ninguna' && abiertas !== 'Ninguna.' && !soloResueltas) {
+      errores.push('«Decisiones abiertas» debe ser «Ninguna» o cada línea «- … Resuelta: texto»; hay decisiones sin resolver o la sección está vacía.');
+    }
+  }
+
+  // Regla 11: «Contexto» tiene exactamente una línea «- Tocar: », con 1 a 3 rutas relativas y exactas.
+  const lineasTocar = bloque('Contexto').filter((l) => l.startsWith('- Tocar: '));
+  if (lineasTocar.length !== 1) {
+    errores.push(`«Contexto» debe tener exactamente una línea «- Tocar: …»; tiene ${lineasTocar.length}.`);
+  } else {
+    const valor = lineasTocar[0].slice('- Tocar: '.length);
+    if (!/^`[^`\s]+`(, `[^`\s]+`)*$/.test(valor)) {
+      errores.push('«Tocar» debe listar las rutas entre comillas invertidas, separadas por «, ».');
+    } else {
+      const rutas = [...valor.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+      if (rutas.length < 1 || rutas.length > 3) {
+        errores.push(`«Tocar» debe tener entre 1 y 3 rutas; tiene ${rutas.length}.`);
+      }
+      for (const ruta of rutas) {
+        const valida = /^[A-Za-z0-9_.\-\/]+$/.test(ruta) && !ruta.includes('..') && !ruta.startsWith('/') && !ruta.endsWith('/');
+        if (!valida) {
+          errores.push(`«Tocar» tiene una ruta no válida: «${ruta}». Debe ser relativa al repo, sin «*» ni «..», sin «/» al inicio ni al final.`);
+        }
+      }
+    }
   }
 
   return errores;

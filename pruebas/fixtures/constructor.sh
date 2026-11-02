@@ -23,9 +23,13 @@ Crear el archivo `salida.txt` con una línea `hola`. Es la tarea que se puede co
 
 ## Contexto
 - Repo: demo. Solo este repo.
+- Tocar: `salida.txt`
 
 ## Decisiones ya tomadas
 - El archivo se llama `salida.txt` y su contenido es la línea `hola`.
+
+## Decisiones abiertas
+Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: crear `salida.txt` en la raíz del repo.
@@ -58,9 +62,13 @@ Crear el archivo `no-debe-existir.txt` con una línea `x`. Su estado es borrador
 
 ## Contexto
 - Repo: demo. Solo este repo.
+- Tocar: `no-debe-existir.txt`
 
 ## Decisiones ya tomadas
 - El archivo se llama `no-debe-existir.txt` y su contenido es la línea `x`.
+
+## Decisiones abiertas
+Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: crear `no-debe-existir.txt` en la raíz del repo.
@@ -93,9 +101,13 @@ Crear el archivo `salida-escalacion.txt` con `v=2`. El criterio 2 exige cambiar 
 
 ## Contexto
 - Repo: demo. Solo este repo.
+- Tocar: `salida-escalacion.txt`
 
 ## Decisiones ya tomadas
 - El archivo se llama `salida-escalacion.txt` y su contenido es `v=2`.
+
+## Decisiones abiertas
+Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: crear `salida-escalacion.txt` en la raíz del repo.
@@ -129,9 +141,13 @@ Crear el archivo `salida-bloqueada.txt` con `ok`. La verificación ejecuta `veri
 
 ## Contexto
 - Repo: demo. Solo este repo.
+- Tocar: `salida-bloqueada.txt`
 
 ## Decisiones ya tomadas
 - El archivo se llama `salida-bloqueada.txt` y su contenido es `ok`.
+
+## Decisiones abiertas
+Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: crear `salida-bloqueada.txt` en la raíz del repo.
