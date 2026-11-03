@@ -14,6 +14,7 @@ import {
   leerEstados,
   costoPorTarea,
   formatearPorTarea,
+  resumenLecturaExtra,
 } from '../../scripts/consumo.mjs';
 import {
   CENTINELA_TEXTO,
@@ -506,7 +507,16 @@ test('corridas (1): Pi: disparo, feature y tarea del encargo; turnos y costo del
     (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }),
   );
   assert.deepEqual(r.corridas, [
-    { rol: 'constructor', disparo: { origen: 'puerta', puerta: 4 }, feature: 'F31', tarea: '02', turnos: 10, costo: 0.1 },
+    {
+      rol: 'constructor',
+      disparo: { origen: 'puerta', puerta: 4 },
+      feature: 'F31',
+      tarea: '02',
+      turnos: 10,
+      costo: 0.1,
+      kb: 0,
+      lecturaExtra: { extras: [], declaradas: 0 },
+    },
   ]);
 });
 
@@ -522,9 +532,81 @@ test('corridas (2): Pi: Disparó BLOQUEO da la tarea; sin Disparó, los tres val
     (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }),
   );
   assert.deepEqual(r.corridas, [
-    { rol: 'planificador', disparo: { origen: 'bloqueo', tarea: '02' }, feature: null, tarea: '02', turnos: 5, costo: 0.05 },
-    { rol: 'constructor', disparo: null, feature: null, tarea: null, turnos: 1, costo: 0 },
+    {
+      rol: 'planificador',
+      disparo: { origen: 'bloqueo', tarea: '02' },
+      feature: null,
+      tarea: '02',
+      turnos: 5,
+      costo: 0.05,
+      kb: 0,
+      lecturaExtra: { extras: [], declaradas: 0 },
+    },
+    {
+      rol: 'constructor',
+      disparo: null,
+      feature: null,
+      tarea: null,
+      turnos: 1,
+      costo: 0,
+      kb: 0,
+      lecturaExtra: { extras: [], declaradas: 0 },
+    },
   ]);
+});
+
+// ---- task-02: kb y lecturaExtra por corrida de Pi ----
+
+const ENCARGO_EXTRA = 'Lee: features/F34-x/task-02-y.md\nEvita leer: `definitions/`\nDisparó: puerta 4';
+
+test('corridas Pi (task-02 a): lectura de Evita leer declarada sale como extra; kb de sus bytes', () => {
+  const r = conCarpeta(
+    corrida(
+      metaSubagentePi({ runId: 'r1', agent: 'constructor', parentSessionId: 'S1', timestamp: M1, task: ENCARGO_EXTRA }),
+      transcriptSubagentePi({
+        lecturas: [{ ruta: 'definitions/WORKFLOW.md', bytes: 2048 }],
+        textoFinal: 'Lectura extra: definitions/WORKFLOW.md; motivo=falta una regla',
+      }),
+    ),
+    (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }),
+  );
+  assert.equal(r.corridas[0].kb, 2);
+  assert.deepEqual(r.corridas[0].lecturaExtra, { extras: ['definitions/WORKFLOW.md'], declaradas: 1 });
+});
+
+test('corridas Pi (task-02 b): sin declaración, declaradas 0; una ruta de Lee no cuenta como extra', () => {
+  const r = conCarpeta(
+    corrida(
+      metaSubagentePi({
+        runId: 'r1',
+        agent: 'constructor',
+        parentSessionId: 'S1',
+        timestamp: M1,
+        task: 'Lee: definitions/PROJECT.md\nEvita leer: `definitions/`\nDisparó: puerta 4',
+      }),
+      transcriptSubagentePi({
+        lecturas: [
+          { ruta: 'definitions/WORKFLOW.md', bytes: 2048 },
+          { ruta: 'definitions/PROJECT.md', bytes: 1024 },
+        ],
+      }),
+    ),
+    (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }),
+  );
+  assert.equal(r.corridas[0].kb, 3);
+  assert.deepEqual(r.corridas[0].lecturaExtra, { extras: ['definitions/WORKFLOW.md'], declaradas: 0 });
+});
+
+test('corridas Pi (task-02 c): sin transcript, kb null; el motivo ni el texto no salen en corridas', () => {
+  const r = conCarpeta(
+    corrida(metaSubagentePi({ runId: 'r1', agent: 'constructor', parentSessionId: 'S1', timestamp: M1, task: ENCARGO_EXTRA })),
+    (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }),
+  );
+  assert.equal(r.corridas[0].kb, null);
+  assert.deepEqual(r.corridas[0].lecturaExtra, { extras: [], declaradas: 0 });
+  const json = JSON.stringify(r.corridas);
+  assert.ok(!json.includes('motivo='));
+  assert.ok(!json.includes(CENTINELA_TEXTO));
 });
 
 test('corridas (3): Claude: encargo del primer registro user; costo null', () => {
@@ -537,16 +619,85 @@ test('corridas (3): Claude: encargo del primer registro user; costo null', () =>
     (dir) => analizarSubagentesClaude(dir),
   );
   assert.deepEqual(r.corridas, [
-    { rol: 'constructor', disparo: { origen: 'puerta', puerta: 4 }, feature: 'F31', tarea: '02', turnos: 1, costo: null },
+    {
+      rol: 'constructor',
+      disparo: { origen: 'puerta', puerta: 4 },
+      feature: 'F31',
+      tarea: '02',
+      turnos: 1,
+      costo: null,
+      kb: 0,
+      lecturaExtra: { extras: [], declaradas: 0 },
+    },
   ]);
 });
 
-test('corridas (4): Claude sin transcript: los tres valores del encargo son null', () => {
+test('corridas (4): Claude sin transcript: los tres valores del encargo son null; kb 0 y sin extras', () => {
   const r = conCarpeta(
     { 'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })) },
     (dir) => analizarSubagentesClaude(dir),
   );
-  assert.deepEqual(r.corridas, [{ rol: 'constructor', disparo: null, feature: null, tarea: null, turnos: 0, costo: null }]);
+  assert.deepEqual(r.corridas, [
+    {
+      rol: 'constructor',
+      disparo: null,
+      feature: null,
+      tarea: null,
+      turnos: 0,
+      costo: null,
+      kb: 0,
+      lecturaExtra: { extras: [], declaradas: 0 },
+    },
+  ]);
+});
+
+// ---- task-03: kb y lecturaExtra por corrida de Claude Code ----
+
+// Transcript de un subagente de Claude Code con un Read de 2048 bytes en /ws/definitions/WORKFLOW.md y el
+// turno final `textoFinal` (con CENTINELA_TEXTO en el turno de apertura, para comprobar que no sale).
+const transcriptLecturaExtraClaude = (textoFinal) =>
+  unirJsonl([
+    registroPromptClaude(ENCARGO_EXTRA),
+    turnoClaude({ id: 'x', ts: T1, llamadas: [{ id: 'tu1', name: 'Read', input: { file_path: '/ws/definitions/WORKFLOW.md' } }] }),
+    resultadoReadClaude({ ts: T2, toolUseId: 'tu1', ruta: '/ws/definitions/WORKFLOW.md', bytes: 2048 }),
+    turnoClaude({ id: 'y', ts: T3, texto: textoFinal }),
+  ]);
+
+test('corridas Claude (task-03 a): lectura de Evita leer declarada sale como extra; kb de sus bytes', () => {
+  const r = conCarpeta(
+    {
+      'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })),
+      'agent-a1.jsonl': transcriptLecturaExtraClaude('Lectura extra: definitions/WORKFLOW.md; motivo=falta una regla'),
+    },
+    (dir) => analizarSubagentesClaude(dir),
+  );
+  assert.equal(r.corridas[0].kb, 2);
+  assert.deepEqual(r.corridas[0].lecturaExtra, { extras: ['definitions/WORKFLOW.md'], declaradas: 1 });
+});
+
+test('corridas Claude (task-03 b): sin declaración, declaradas 0', () => {
+  const r = conCarpeta(
+    {
+      'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })),
+      'agent-a1.jsonl': transcriptLecturaExtraClaude(CENTINELA_TEXTO),
+    },
+    (dir) => analizarSubagentesClaude(dir),
+  );
+  assert.equal(r.corridas[0].kb, 2);
+  assert.deepEqual(r.corridas[0].lecturaExtra, { extras: ['definitions/WORKFLOW.md'], declaradas: 0 });
+});
+
+test('corridas Claude (task-03 c): el motivo y el texto no salen en corridas', () => {
+  const r = conCarpeta(
+    {
+      'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })),
+      'agent-a1.jsonl': transcriptLecturaExtraClaude('Lectura extra: definitions/WORKFLOW.md; motivo=falta una regla'),
+    },
+    (dir) => analizarSubagentesClaude(dir),
+  );
+  const json = JSON.stringify(r.corridas);
+  assert.ok(!json.includes('motivo='));
+  assert.ok(!json.includes(CENTINELA_TEXTO));
 });
 
 test('corridas (5): el texto del encargo (Pi y Claude) no sale en corridas', () => {
@@ -940,4 +1091,49 @@ test('por-tarea (6): --eventos sin --por-tarea termina en 1 con el error antes d
   const sinRaiz = correr(['--eventos', 'x']);
   assert.equal(sinRaiz.status, 1);
   assert.equal(sinRaiz.stderr, 'error: --eventos exige --por-tarea\n');
+});
+
+// ---- task-04: resumen de lecturas extra y línea en el informe ----
+
+test('lecturas extra (task-04 a): resumenLecturaExtra con 3 corridas y con [] da los números exactos', () => {
+  const corridas = [
+    { lecturaExtra: { extras: ['definitions/WORKFLOW.md', 'definitions/PROJECT.md'], declaradas: 1 } },
+    { lecturaExtra: { extras: [], declaradas: 0 } },
+    {},
+  ];
+  assert.deepEqual(resumenLecturaExtra(corridas), { corridas: 3, extras: 2, declaradas: 1, cumplimiento: 50, porLlamada: 0.7 });
+  assert.deepEqual(resumenLecturaExtra([]), { corridas: 0, extras: 0, declaradas: 0, cumplimiento: null, porLlamada: null });
+});
+
+test('lecturas extra (task-04 b): CLI imprime la línea con una corrida extra declarada, y sin subagentes con n/d', () => {
+  const conExtra = mkdtempSync(join(tmpdir(), 'consumo-extra-'));
+  try {
+    escribirArbol(conExtra, {
+      'pi/2026-10-30T10-00-00.000Z_sesion-extra.jsonl': unirJsonl([registroSesionPi({ id: 'sesion-extra' }), turnoPi({ ts: T1, contexto: 1000, costo: 0.01 })]),
+      'pi/subagent-artifacts/r1_constructor_meta.json': JSON.stringify(
+        metaSubagentePi({ runId: 'r1', agent: 'constructor', parentSessionId: 'sesion-extra', model: 'm-c', timestamp: M1, turns: 2, cost: 0.02, task: ENCARGO_EXTRA }),
+      ),
+      'pi/subagent-artifacts/r1_constructor_transcript.jsonl': transcriptSubagentePi({
+        lecturas: [{ ruta: 'definitions/WORKFLOW.md', bytes: 2048 }],
+        textoFinal: 'Lectura extra: definitions/WORKFLOW.md; motivo=falta una regla',
+      }),
+    });
+    const r = correr(['--raiz', conExtra]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(r.stdout.includes('lecturas extra: 1 en 1 corrida(s); declaradas 1; cumplimiento 100 %'), r.stdout);
+  } finally {
+    rmSync(conExtra, { recursive: true, force: true });
+  }
+
+  const sinSubagentes = mkdtempSync(join(tmpdir(), 'consumo-sin-'));
+  try {
+    escribirArbol(sinSubagentes, {
+      'pi/sesion-sola.jsonl': unirJsonl([registroSesionPi({ id: 'sesion-sola' }), turnoPi({ ts: T1, contexto: 1000, costo: 0.01 })]),
+    });
+    const r = correr(['--raiz', sinSubagentes]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(r.stdout.includes('lecturas extra: 0 en 0 corrida(s); declaradas 0; cumplimiento n/d'), r.stdout);
+  } finally {
+    rmSync(sinSubagentes, { recursive: true, force: true });
+  }
 });

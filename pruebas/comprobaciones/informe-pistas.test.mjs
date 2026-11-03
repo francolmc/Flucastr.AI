@@ -279,6 +279,6 @@ test('CLI: --consumo <dir> --pistas evalúa la pista 2 y sin --consumo dice que 
 
   const sin = correr(raiz, ['--pistas']);
   assert.equal(sin.status, 0, sin.stderr);
-  assert.ok(sin.stdout.includes('(pistas 2 y 6 no evaluadas: falta --consumo <dir>)'));
+  assert.ok(sin.stdout.includes('(pistas 2, 6, 7, 8 y 9 no evaluadas: falta --consumo <dir>)'));
   assert.ok(!sin.stdout.includes('- Pista 2'));
 });

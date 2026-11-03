@@ -87,12 +87,15 @@ export function metaSubagentePi({
 // Transcript de una corrida de subagente (<runId>_<agente>_transcript.jsonl): un texto del asistente con una
 // llamada `read` por cada entrada de `lecturas` ({ ruta, bytes, error }), su resultado (texto de exactamente
 // `bytes` bytes, con CENTINELA_TEXTO al inicio; bytes >= 24) y un registro tool_start que el parser ignora.
-export function transcriptSubagentePi({ lecturas = [] } = {}) {
-  const llamadas = lecturas.map((l, i) => ({ type: 'toolCall', id: `s${i}`, name: 'read', arguments: { path: l.ruta } }));  const registros = [
+// textoFinal (task-02): si es string, va como segundo item `text` del mensaje del asistente (texto de la declaración).
+export function transcriptSubagentePi({ lecturas = [], textoFinal } = {}) {
+  const llamadas = lecturas.map((l, i) => ({ type: 'toolCall', id: `s${i}`, name: 'read', arguments: { path: l.ruta } }));
+  const textoExtra = typeof textoFinal === 'string' ? [{ type: 'text', text: textoFinal }] : [];
+  const registros = [
     {
       recordType: 'message',
       sourceEventType: 'message_end',
-      message: { role: 'assistant', content: [{ type: 'text', text: CENTINELA_TEXTO }, ...llamadas] },
+      message: { role: 'assistant', content: [{ type: 'text', text: CENTINELA_TEXTO }, ...llamadas, ...textoExtra] },
     },
   ];
   if (lecturas.length > 0) {
@@ -123,6 +126,7 @@ export function registroAgentSettingClaude(agentSetting = 'coordinador') {
 
 // Registro del asistente de Claude Code. Un message.id puede repetirse en varios registros (uno por bloque).
 // `llamadas`: [{ id, name, input }] con los nombres originales de Claude Code (Read, Agent, ...).
+// `texto` (task-03): si es string, reemplaza a CENTINELA_TEXTO en el item de texto (p. ej. una declaración).
 export function turnoClaude({
   id = 'msg-sintetico',
   ts = TS_POR_DEFECTO,
@@ -132,6 +136,7 @@ export function turnoClaude({
   cacheRead = 0,
   cacheWrite = 0,
   llamadas = [],
+  texto = CENTINELA_TEXTO,
 } = {}) {
   return {
     type: 'assistant',
@@ -143,7 +148,7 @@ export function turnoClaude({
       model,
       role: 'assistant',
       content: [
-        { type: 'text', text: CENTINELA_TEXTO },
+        { type: 'text', text: texto },
         ...llamadas.map((l) => ({ type: 'tool_use', id: l.id, name: l.name, input: l.input ?? {} })),
       ],
       usage: {

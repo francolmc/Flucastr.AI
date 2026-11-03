@@ -16,7 +16,7 @@ import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validarEvento } from "./registrar.mjs";
-import { descubrirSesiones } from "./consumo.mjs";
+import { descubrirSesiones, resumenLecturaExtra } from "./consumo.mjs";
 import { calcularPistas } from "./pistas.mjs";
 
 export const UMBRAL_TAREAS = 10;
@@ -241,7 +241,8 @@ export function bloqueConsumo(sesiones, n) {
     ? { n, turnos: Math.round((turnos / n) * 10) / 10, costo: costo === null ? null : costo / n }
     : { n, turnos: null, costo: null };
   const filasOrdenadas = [...filas.values()].sort((a, b) => (a.rol < b.rol ? -1 : a.rol > b.rol ? 1 : 0));
-  return { turnos, costo, filas: filasOrdenadas, porTarea };
+  const lecturaExtra = resumenLecturaExtra(sesiones.flatMap((s) => s.subagentes?.corridas ?? []));
+  return { turnos, costo, filas: filasOrdenadas, porTarea, lecturaExtra };
 }
 
 const dinero = (x) => (x === null ? "n/d" : `US$${x.toFixed(3)}`);
@@ -259,6 +260,10 @@ function lineasConsumo(c) {
     "|---|---|---|---|",
   );
   for (const f of c.filas) L.push(`| ${f.rol} | ${f.corridas} | ${f.turnos} | ${dinero(f.costo)} |`);
+  const le = c.lecturaExtra;
+  L.push(
+    `Lectura extra: ${le.extras} en ${le.corridas} corrida(s) · declaradas ${le.declaradas} · cumplimiento ${le.cumplimiento === null ? "n/d" : `${le.cumplimiento} %`}`,
+  );
   L.push("");
   return L;
 }
@@ -266,7 +271,7 @@ function lineasConsumo(c) {
 // Markdown del informe. Sin títulos de feature ni de tarea: solo Fxx y NN, y nunca el contenido de una línea descartada.
 // `consumo` (opcional): el bloque de bloqueConsumo; si no es objeto, no hay bloque.
 // `pistas` (opcional): arreglo de calcularPistas; null = sin sección «## Pistas».
-// `sinConsumo` (opcional): con pistas y sin --consumo, añade la línea de pistas 2 y 6 no evaluadas.
+// `sinConsumo` (opcional): con pistas y sin --consumo, añade la línea de pistas 2, 6, 7, 8 y 9 no evaluadas (dependen de los logs).
 export function formatearMarkdown(informe, consumo = null, pistas = null, { sinConsumo = false } = {}) {
   const L = [];
   if (!informe.suficiente) {
@@ -314,7 +319,7 @@ export function formatearMarkdown(informe, consumo = null, pistas = null, { sinC
     L.push("## Pistas");
     if (pistas.length === 0) L.push("Sin pistas: ninguna medición supera su umbral.");
     for (const p of pistas) L.push(`- Pista ${p.n}${p.feature ? ` [${p.feature}]` : ""}: ${p.medicion}. ${p.accion}`);
-    if (sinConsumo) L.push("(pistas 2 y 6 no evaluadas: falta --consumo <dir>)");
+    if (sinConsumo) L.push("(pistas 2, 6, 7, 8 y 9 no evaluadas: falta --consumo <dir>)");
     L.push("");
   }
   L.push("## Límites de esta lectura", ...LIMITES, "");
