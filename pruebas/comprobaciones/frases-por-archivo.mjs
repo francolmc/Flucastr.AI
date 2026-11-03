@@ -87,6 +87,13 @@ export const FRASES_ENTORNO = {
   coordinador: ['`rol=franco`', 'o `entorno:`'],
 };
 
+// Frases de F32 (telemetría de bloqueos). Las tareas 05 y 09 agregan sus claves a este objeto.
+export const FRASES_TELEMETRIA = {
+  'descomponer-feature': ['Cancelada: motivo=<replanificada|obsoleta|duplicada|fuera_de_alcance|otra>'],
+  'ejecutar-tarea': ['Bloqueo: tipo=<entorno|alcance|especificacion|decision_diseno|verificacion_x2|credenciales|otra>; falta='],
+  coordinador: ['`Disparó:` `puerta N`|`BLOQUEO task-NN`|`franco`|`reintento`'],
+};
+
 export const FRASES_POR_ARCHIVO = {
   'agentes/arquitecto': [
     ...FRASES_LECTURA_F22.arquitecto,
@@ -107,6 +114,7 @@ export const FRASES_POR_ARCHIVO = {
     ...FRASES_LECTURA_EXTRA.constructor,
   ],
   'agentes/coordinador': [
+    ...FRASES_TELEMETRIA.coordinador,
     ...FRASES_COORDINADOR_F21,
     ...FRASES_LECTURA_EXTRA.coordinador,
     ...FRASES_ENTORNO.coordinador,
@@ -153,10 +161,12 @@ export const FRASES_POR_ARCHIVO = {
     'Modo yolo: activo',
     ...FRASES_LECTURA_F22['descomponer-feature'],
     ...FRASES_ENTORNO['descomponer-feature'],
+    ...FRASES_TELEMETRIA['descomponer-feature'],
   ],
   'skills/ejecutar-tarea': [
     ...FRASES_LECTURA_F22['ejecutar-tarea'],
     ...FRASES_ENTORNO['ejecutar-tarea'],
+    ...FRASES_TELEMETRIA['ejecutar-tarea'],
   ],
   'skills/disenar-arquitectura': [
     ...FRASES_LECTURA_F22['disenar-arquitectura'],

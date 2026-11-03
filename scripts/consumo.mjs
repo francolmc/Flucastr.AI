@@ -3,6 +3,7 @@
 //
 // Uso:
 //   node scripts/consumo.mjs --raiz <dir> [--hasta <ISO>] [--tareas <n>] [--json]
+//   node scripts/consumo.mjs --raiz <dir> --por-tarea [--eventos <archivo.jsonl>] [--json]   (task-11)
 //   --raiz es obligatorio (no hay valor por defecto). Solo lectura: no crea ni modifica archivos.
 //   Funciones exportadas: analizarSesionPi, analizarSubagentesPi, unirPi, analizarSesionClaude,
 //   analizarSubagentesClaude, descubrirSesiones, formatearInforme, informeJson, leerArgumentos.
@@ -16,6 +17,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resumirEncargo } from "./formato-encargo.mjs";
 
 // Tramos de contexto por turno (contexto = input + cacheRead + cacheWrite).
 // menos30k: < 30000; de30a60k: 30000–60000 (incluido); mas60k: > 60000.
@@ -245,12 +247,15 @@ function lecturasDeTranscript(texto) {
 // opciones.hasta: ISO opcional; descarta las corridas con meta.timestamp (ms) posterior.
 // Por corrida: turnos y costo del meta; KB leídos del transcript hermano (<runId>_<agente>_transcript.jsonl).
 // Si falta el transcript, la corrida cuenta con KB 0 y sinTranscript:true en su rol.
+// corridas (task-10): una por subagente { rol, disparo, feature, tarea, turnos, costo }, con el encargo (meta.task)
+// leído por resumirEncargo; solo valores cerrados, nunca el texto del encargo.
 export function analizarSubagentesPi(dirArtefactos, { sesionId, hasta } = {}) {
   const limite = hasta === undefined ? Infinity : Date.parse(hasta);
   // Maps (no objetos planos) para que un rol como "constructor" no choque con Object.prototype.
   const porRol = new Map();
   const modelos = new Map();
   const bytesPorRol = new Map();
+  const corridas = [];
 
   for (const nombre of readdirSync(dirArtefactos).sort()) {
     if (!nombre.endsWith("_meta.json")) continue;
@@ -280,6 +285,8 @@ export function analizarSubagentesPi(dirArtefactos, { sesionId, hasta } = {}) {
     r.corridas += 1;
     r.turnos += numero(uso.turns);
     r.costo = redondear(r.costo + numero(uso.cost));
+    const { disparo, feature, tarea } = resumirEncargo(meta.task);
+    corridas.push({ rol, disparo, feature, tarea, turnos: numero(uso.turns), costo: redondear(numero(uso.cost)) });
 
     let texto;
     try {
@@ -320,7 +327,7 @@ export function analizarSubagentesPi(dirArtefactos, { sesionId, hasta } = {}) {
   const modelosPorRol = {};
   for (const [rol, conjunto] of modelos) modelosPorRol[rol] = [...conjunto].sort();
 
-  return { porRol: salidaPorRol, modelos: modelosPorRol };
+  return { porRol: salidaPorRol, modelos: modelosPorRol, corridas };
 }
 
 // Une el análisis de la sesión principal con el de sus subagentes (task-03).
@@ -336,6 +343,25 @@ export function unirPi(principal, subagentes) {
 // Nombres de Claude Code → nombres comunes con Pi (Agent es la delegación, subagent).
 const NOMBRES_CLAUDE = { Read: "read", Edit: "edit", Write: "write", Agent: "subagent" };
 const normalizarNombre = (nombre) => NOMBRES_CLAUDE[nombre] ?? nombre.toLowerCase();
+
+// Texto del encargo de un subagente de Claude Code: el del primer registro user con texto (task-10, inferido).
+// Devuelve undefined si no hay ninguno (p. ej. transcript ausente).
+function encargoClaude(texto) {
+  for (const linea of String(texto).split("\n")) {
+    if (linea.trim() === "") continue;
+    const registro = parsearLinea(linea);
+    if (registro?.type !== "user") continue;
+    const contenido = registro.message?.content;
+    const partes =
+      typeof contenido === "string"
+        ? [contenido]
+        : Array.isArray(contenido)
+          ? contenido.filter((b) => b?.type === "text" && typeof b.text === "string").map((b) => b.text)
+          : [];
+    if (partes.length > 0) return partes.join("\n");
+  }
+  return undefined;
+}
 
 // Lee un .jsonl de Claude Code (sesión o subagente). Un turno es un message.id, aunque aparezca en varios
 // registros (uno por bloque de contenido); se omite model "<synthetic>" y los registros posteriores a `limite` (ms).
@@ -474,14 +500,17 @@ export function analizarSesionClaude(texto, { hasta } = {}) {
 
 // dirSubagentes: carpeta subagents/ de una sesión de Claude Code (solo lectura). Por corrida:
 // agent-<id>.meta.json (agentType; el campo description se ignora) y su transcript agent-<id>.jsonl.
-// Devuelve { porRol: { <agentType>: { corridas, turnos, tokens, kbTotal, porArchivo } }, modelos }.
-// Si la carpeta no existe, porRol es {}.
+// Devuelve { porRol: { <agentType>: { corridas, turnos, tokens, kbTotal, porArchivo } }, modelos, corridas }.
+// corridas (task-10): una por subagente { rol, disparo, feature, tarea, turnos, costo: null }; el encargo es el
+// primer registro user con texto del transcript (inferido, sin log real en el repo).
+// Si la carpeta no existe, porRol es {} y corridas [].
 export function analizarSubagentesClaude(dirSubagentes) {
-  if (!existsSync(dirSubagentes)) return { porRol: {}, modelos: {} };
+  if (!existsSync(dirSubagentes)) return { porRol: {}, modelos: {}, corridas: [] };
 
   // Maps (no objetos planos) para que un rol como "constructor" no choque con Object.prototype.
   const porRol = new Map();
   const modelos = new Map();
+  const corridas = [];
 
   for (const nombre of readdirSync(dirSubagentes).sort()) {
     if (!nombre.startsWith("agent-") || !nombre.endsWith(".meta.json")) continue;
@@ -514,6 +543,8 @@ export function analizarSubagentesClaude(dirSubagentes) {
     const { turnos, lecturasPorId, bytesPorId } = agruparClaude(texto, Infinity);
 
     r.corridas += 1;
+    const { disparo, feature, tarea } = resumirEncargo(encargoClaude(texto));
+    corridas.push({ rol, disparo, feature, tarea, turnos: turnos.size, costo: null });
     for (const turno of turnos.values()) {
       r.turnos += 1;
       const tokens = tokensDeTurnoClaude(turno.usage);
@@ -542,13 +573,13 @@ export function analizarSubagentesClaude(dirSubagentes) {
   const modelosPorRol = {};
   for (const [rol, conjunto] of modelos) modelosPorRol[rol] = [...conjunto].sort();
 
-  return { porRol: salidaPorRol, modelos: modelosPorRol };
+  return { porRol: salidaPorRol, modelos: modelosPorRol, corridas };
 }
 
 // ---- task-05: CLI, descubrimiento e informe (sin texto de mensajes) ----
 
 const CARPETAS_SUBAGENTES = new Set(["subagent-artifacts", "subagents"]);
-const SIN_SUBAGENTES = { porRol: {}, modelos: {} };
+const SIN_SUBAGENTES = { porRol: {}, modelos: {}, corridas: [] };
 const TRAMOS = ["menos30k", "de30a60k", "mas60k"];
 
 const compararTexto = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
@@ -675,17 +706,107 @@ export function informeJson(sesiones, { tareas } = {}) {
   return `${JSON.stringify({ sesiones: salida }, null, 2)}\n`;
 }
 
+// ---- task-11: costo por tarea y vueltas por bloqueo (--por-tarea) ----
+
+// Estado final de cada tarea: el último evento tarea_estado (por t) del registro. El estado es el campo a.
+// Devuelve Map de "Fxx/NN" a estado. Ignora las líneas que no son JSON y los eventos que no son tarea_estado.
+export function leerEstados(textoEventos) {
+  const ultimos = new Map();
+  for (const linea of String(textoEventos).split("\n")) {
+    if (linea.trim() === "") continue;
+    let e;
+    try {
+      e = JSON.parse(linea);
+    } catch {
+      continue;
+    }
+    if (!e || typeof e !== "object" || e.evento !== "tarea_estado") continue;
+    if (typeof e.feature !== "string" || typeof e.tarea !== "string" || typeof e.a !== "string") continue;
+    const clave = `${e.feature}/${e.tarea}`;
+    const previo = ultimos.get(clave);
+    if (previo === undefined || Date.parse(e.t) >= Date.parse(previo.t)) ultimos.set(clave, { t: e.t, estado: e.a });
+  }
+  return new Map([...ultimos].map(([clave, v]) => [clave, v.estado]));
+}
+
+// Filas por tarea, ordenadas por clave. Una corrida con tarea y sin disparo de bloqueo suma a feature/tarea
+// (corridas, turnos, costo). Una con disparo.origen 'bloqueo' suma una vuelta a (feature ?? '?')/disparo.tarea.
+// costo y costoVueltas son null si ninguna corrida trae costo numérico. El estado sale de estados; sin dato, sin_dato.
+export function costoPorTarea(sesiones, { estados = new Map() } = {}) {
+  const filas = new Map();
+  const fila = (clave) => {
+    if (!filas.has(clave)) {
+      filas.set(clave, {
+        clave,
+        estado: estados.get(clave) ?? "sin_dato",
+        corridas: 0,
+        turnos: 0,
+        costo: 0,
+        tieneCosto: false,
+        vueltas: 0,
+        turnosVueltas: 0,
+        costoVueltas: 0,
+        tieneCostoVueltas: false,
+      });
+    }
+    return filas.get(clave);
+  };
+  for (const s of sesiones) {
+    for (const c of s.subagentes?.corridas ?? []) {
+      if (c.disparo?.origen === "bloqueo") {
+        const f = fila(`${c.feature ?? "?"}/${c.disparo.tarea}`);
+        f.vueltas += 1;
+        f.turnosVueltas += c.turnos;
+        if (typeof c.costo === "number") {
+          f.costoVueltas += c.costo;
+          f.tieneCostoVueltas = true;
+        }
+      } else if (c.tarea !== null) {
+        const f = fila(`${c.feature}/${c.tarea}`);
+        f.corridas += 1;
+        f.turnos += c.turnos;
+        if (typeof c.costo === "number") {
+          f.costo += c.costo;
+          f.tieneCosto = true;
+        }
+      }
+    }
+  }
+  return [...filas.values()]
+    .sort((a, b) => compararTexto(a.clave, b.clave))
+    .map((f) => ({
+      clave: f.clave,
+      estado: f.estado,
+      corridas: f.corridas,
+      turnos: redondear(f.turnos),
+      costo: f.tieneCosto ? redondear(f.costo) : null,
+      vueltas: f.vueltas,
+      turnosVueltas: redondear(f.turnosVueltas),
+      costoVueltas: f.tieneCostoVueltas ? redondear(f.costoVueltas) : null,
+    }));
+}
+
+// Una línea por fila: clave | estado | corridas | turnos | costo | vueltas | costo vueltas; n/d donde no hay costo.
+export function formatearPorTarea(filas) {
+  const lineas = filas.map(
+    (f) => `${f.clave} | ${f.estado} | ${f.corridas} | ${f.turnos} | ${dinero(f.costo)} | ${f.vueltas} | ${dinero(f.costoVueltas)}`,
+  );
+  const cuerpo = lineas.length > 0 ? lineas.join("\n") : "No hay tareas que listar.";
+  return `${cuerpo}\n\nEl costo del coordinador no se reparte entre tareas; la unión usa la ruta de la tarea en el encargo.\n`;
+}
+
 // Lee los argumentos. Cualquier cosa desconocida, repetida o inválida es error (sin tocar nada).
 export function leerArgumentos(args) {
-  const opciones = { raiz: null, hasta: undefined, tareas: undefined, json: false };
+  const opciones = { raiz: null, hasta: undefined, tareas: undefined, json: false, porTarea: false, eventos: null };
   const vistas = new Set();
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a === "--json") {
+    if (a === "--json" || a === "--por-tarea") {
       if (vistas.has(a)) return { error: `opción repetida '${a}'` };
       vistas.add(a);
-      opciones.json = true;
-    } else if (a === "--raiz" || a === "--hasta" || a === "--tareas") {
+      if (a === "--json") opciones.json = true;
+      else opciones.porTarea = true;
+    } else if (a === "--raiz" || a === "--hasta" || a === "--tareas" || a === "--eventos") {
       if (vistas.has(a)) return { error: `opción repetida '${a}'` };
       vistas.add(a);
       const valor = args[i + 1];
@@ -693,6 +814,8 @@ export function leerArgumentos(args) {
       i++;
       if (a === "--raiz") {
         opciones.raiz = resolve(valor);
+      } else if (a === "--eventos") {
+        opciones.eventos = resolve(valor);
       } else if (a === "--hasta") {
         if (Number.isNaN(Date.parse(valor))) return { error: `--hasta no es una fecha ISO válida: '${valor}'` };
         opciones.hasta = valor;
@@ -704,6 +827,7 @@ export function leerArgumentos(args) {
       return { error: `argumento desconocido '${a}'` };
     }
   }
+  if (opciones.eventos !== null && !opciones.porTarea) return { error: "--eventos exige --por-tarea" };
   if (opciones.raiz === null) return { error: "falta --raiz <dir>" };
   return { opciones };
 }
@@ -720,6 +844,24 @@ function ejecutarCli(args) {
     return 1;
   }
   const sesiones = descubrirSesiones(opciones.raiz, { hasta: opciones.hasta });
+  if (opciones.porTarea) {
+    let estados = new Map();
+    if (opciones.eventos !== null) {
+      let texto;
+      try {
+        texto = readFileSync(opciones.eventos, "utf8");
+      } catch {
+        process.stderr.write(`error: no se puede leer --eventos: ${opciones.eventos}\n`);
+        return 1;
+      }
+      estados = leerEstados(texto);
+    }
+    const filas = costoPorTarea(sesiones, { estados });
+    // Con --eventos se listan las hechas y las que tienen vueltas; sin --eventos, todas.
+    const listadas = opciones.eventos !== null ? filas.filter((f) => f.estado === "hecha" || f.vueltas > 0) : filas;
+    process.stdout.write(opciones.json ? `${JSON.stringify({ tareas: listadas }, null, 2)}\n` : formatearPorTarea(listadas));
+    return 0;
+  }
   const tareas = opciones.tareas;
   const salida = opciones.json ? informeJson(sesiones, { tareas }) : formatearInforme(sesiones, { tareas });
   process.stdout.write(salida);

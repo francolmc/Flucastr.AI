@@ -7,13 +7,13 @@ import { validarTarea } from '../../scripts/formato-tarea.mjs';
 import { validarEvidencia } from '../../scripts/formato-evidencia.mjs';
 import { validarFuente } from '../../scripts/formato-fuente.mjs';
 
-// Regresión de los validadores sobre las tareas de F24–F29, F30 y F33 (features/ y features/completed/).
+// Regresión de los validadores sobre las tareas de F24–F31 y F33 (features/ y features/completed/).
 // La base pruebas/fixtures/regresion-f24-f29.json la escribe esta misma prueba con FLUCASTR_GENERAR_BASE=1.
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 const BASE = path.join(RAIZ, 'pruebas/fixtures/regresion-f24-f29.json');
 const CARPETAS = ['features', 'features/completed'];
-const CARPETA_FEATURE = /^F(2[4-9]|3[03])-/;
+const CARPETA_FEATURE = /^F(2[4-9]|3[013])-/;
 const ARCHIVO_TAREA = /^task-\d{2}-.+\.md$/;
 
 const leer = (ruta) => {
@@ -60,7 +60,7 @@ export function diferencias(base, actual) {
     .filter((clave) => JSON.stringify(base[clave]) !== JSON.stringify(actual[clave]));
 }
 
-test('regresion: los validadores responden igual que la base de F24–F29', () => {
+test('regresion: los validadores responden igual que la base de F24–F31 y F33', () => {
   const actual = calcularTodas();
   if (process.env.FLUCASTR_GENERAR_BASE === '1') {
     fs.writeFileSync(BASE, JSON.stringify(actual, null, 2) + '\n');
@@ -154,4 +154,30 @@ test('borde (d): una línea Requiere en Contexto no cambia validarEvidencia ni v
   assert.notEqual(conRequiere, base, 'la línea Requiere debe insertarse en Contexto');
   assert.deepEqual(validarEvidencia(conRequiere), validarEvidencia(base));
   assert.deepEqual(validarFuente(conRequiere, leer), validarFuente(base, leer));
+});
+
+// Bordes de F32 (task-14): Bloqueo: y cancelada. Armado copiado de tareaTerminada, sin Evidencia en la cancelada.
+test('borde (e): tarea bloqueada con Bloqueo: tipo=entorno y causa=ninguna da un motivo que menciona «Bloqueo»', () => {
+  const notas = [
+    'Bloqueo: tipo=entorno; falta=docker',
+    'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=0; verificacion=falla; huecos=0; resultado=bloqueada; causa=ninguna',
+  ].join('\n');
+  const motivos = validarEvidencia(tareaTerminada(notas, 'bloqueada')).filter((m) => m.includes('Bloqueo'));
+  assert.ok(motivos.length >= 1, 'debe haber al menos un motivo que mencione «Bloqueo»');
+});
+
+function tareaCancelada(notas) {
+  return tareaTerminada(notas, 'cancelada').replace(EVIDENCIA_REGRESION, '');
+}
+
+test('borde (f): tarea cancelada con Cancelada: motivo=obsoleta y sin Evidencia no da motivos en validarTarea ni validarEvidencia', () => {
+  const texto = tareaCancelada('Cancelada: motivo=obsoleta');
+  assert.deepEqual(validarTarea(texto), []);
+  assert.deepEqual(validarEvidencia(texto), []);
+});
+
+test('borde (g): la misma tarea cancelada sin la línea Cancelada: da un motivo en validarTarea y en validarEvidencia', () => {
+  const texto = tareaCancelada('');
+  assert.ok(validarTarea(texto).length >= 1, 'validarTarea debe dar al menos un motivo');
+  assert.ok(validarEvidencia(texto).length >= 1, 'validarEvidencia debe dar al menos un motivo');
 });

@@ -297,3 +297,50 @@ test('validarEvidencia: estado lista con verificacion=parcial cita resultado=blo
   const motivos = validarEvidencia(tarea({ estado: 'lista para revisión', notas }));
   assert.ok(motivos.some((m) => m.includes('resultado=bloqueada; causa=parcial')), motivos.join('\n'));
 });
+
+const REGISTRO_BLOQUEADA_OTRA = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=falla; huecos=0; resultado=bloqueada; causa=otra';
+
+test('cancelada válida con Cancelada: motivo=obsoleta y sin evidencia de verificación da []', () => {
+  const motivos = validarEvidencia(tarea({ estado: 'cancelada', evidencia: '', notas: 'Cancelada: motivo=obsoleta' }));
+  assert.deepEqual(motivos, [], motivos.join('\n'));
+});
+
+test('cancelada sin línea Cancelada: da el motivo exacto', () => {
+  const motivos = validarEvidencia(tarea({ estado: 'cancelada', evidencia: '', notas: '' }));
+  assert.deepEqual(motivos, ['Una tarea «cancelada» exige una línea «Cancelada: motivo=…» en «Notas».']);
+});
+
+test('cancelada con motivo fuera de la lista se rechaza citando el motivo', () => {
+  const motivos = validarEvidencia(tarea({ estado: 'cancelada', evidencia: '', notas: 'Cancelada: motivo=nueva' }));
+  assert.ok(motivos.some((m) => m.includes('«nueva»')), motivos.join('\n'));
+});
+
+test('cancelada con dos líneas Cancelada: se rechaza', () => {
+  const notas = 'Cancelada: motivo=obsoleta\nCancelada: motivo=duplicada';
+  const motivos = validarEvidencia(tarea({ estado: 'cancelada', evidencia: '', notas }));
+  assert.ok(motivos.some((m) => m.includes('hay 2')), motivos.join('\n'));
+});
+
+test('Bloqueo: válida antes de Registro: con causa=otra no da motivos', () => {
+  const notas = `Bloqueo: tipo=entorno; falta=docker\n${REGISTRO_BLOQUEADA_OTRA}`;
+  const motivos = validarEvidencia(tarea({ estado: 'bloqueada', notas }));
+  assert.deepEqual(motivos, [], motivos.join('\n'));
+});
+
+test('Bloqueo: mal formada (tipo fuera de la lista) se rechaza citando el tipo', () => {
+  const notas = `Bloqueo: tipo=desconocido; falta=docker\n${REGISTRO_BLOQUEADA_OTRA}`;
+  const motivos = validarEvidencia(tarea({ estado: 'bloqueada', notas }));
+  assert.ok(motivos.some((m) => m.includes('«desconocido»')), motivos.join('\n'));
+});
+
+test('Bloqueo: después de Registro: se rechaza', () => {
+  const notas = `${REGISTRO_BLOQUEADA_OTRA}\nBloqueo: tipo=entorno; falta=docker`;
+  const motivos = validarEvidencia(tarea({ estado: 'bloqueada', notas }));
+  assert.ok(motivos.some((m) => m.includes('debe ir antes de «Registro:»')), motivos.join('\n'));
+});
+
+test('Bloqueo: tipo=entorno con causa=ninguna se rechaza por coherencia', () => {
+  const notas = `Bloqueo: tipo=entorno; falta=docker\n${NOTAS_BASE}`;
+  const motivos = validarEvidencia(tarea({ estado: 'lista para revisión', notas }));
+  assert.ok(motivos.some((m) => m.includes('tipo=entorno exige causa=otra')), motivos.join('\n'));
+});

@@ -3,10 +3,11 @@
 // Función pura: no escribe archivos, no usa red ni git.
 
 import { secciones } from './formato-tarea.mjs';
+import { lineasDeNotas, parsearBloqueo, parsearCancelada, coherenciaBloqueo } from './formato-bloqueo.mjs';
 
 const ESTADOS_NO_TERMINADOS = ['borrador', 'aprobada', 'en curso'];
 const ESTADOS_TERMINADOS = ['lista para revisión', 'hecha'];
-const RE_ESTADO = /estado: (borrador|aprobada|en curso|lista para revisión|hecha|bloqueada)\s*$/;
+const RE_ESTADO = /estado: (borrador|aprobada|en curso|lista para revisión|hecha|bloqueada|cancelada)\s*$/;
 // TBD, TODO y PENDIENTE: solo en mayúsculas y como palabra completa («todo» es palabra común y node:test imprime «ℹ todo 0»).
 const RE_PENDIENTE_MAYUSCULAS = /(?<![\p{L}\p{N}_])(TBD|TODO|PENDIENTE)(?![\p{L}\p{N}_])/gu;
 // Estas tres sin distinguir mayúsculas, como palabra completa.
@@ -139,6 +140,22 @@ export function validarEvidencia(texto) {
   const evidencia = bloque('Evidencia');
   const notas = bloque('Notas');
 
+  // Cancelada (F32, task-02): estado final sin evidencia de verificación; solo exige su línea «Cancelada:».
+  if (estado === 'cancelada') {
+    const lineasCancelada = lineasDeNotas(todo, 'Cancelada:');
+    if (lineasCancelada.length !== 1) {
+      if (lineasCancelada.length === 0) {
+        errores.push('Una tarea «cancelada» exige una línea «Cancelada: motivo=…» en «Notas».');
+      } else {
+        errores.push(`Una tarea «cancelada» exige una sola línea «Cancelada: motivo=…» en «Notas»; hay ${lineasCancelada.length}.`);
+      }
+    } else {
+      const cancelada = parsearCancelada(lineasCancelada[0]);
+      if (!cancelada.ok) errores.push(cancelada.error);
+    }
+    return [...new Set(errores)];
+  }
+
   // Comandos de Verificación: líneas no vacías, sin «#», dentro de bloques de código.
   const comandos = bloquesDeCodigo(verificacion)
     .flat()
@@ -190,6 +207,25 @@ export function validarEvidencia(texto) {
     errores.push(`«Evidencia» contiene el marcador pendiente «${marcador}».`);
   }
 
+  // Líneas «Bloqueo:» (F32, task-02; opcionales): formato, posición antes de «Registro:» y coherencia con su causa.
+  // lineasDeNotas(todo, '') da las líneas de Notas fuera de código, en orden, con sus vacías.
+  const enNotas = lineasDeNotas(todo, '');
+  const indiceUltimoRegistro = enNotas.reduce((ultimo, l, i) => (l.startsWith('Registro:') ? i : ultimo), -1);
+  enNotas.forEach((linea, i) => {
+    if (!linea.startsWith('Bloqueo:')) return;
+    const bloqueo = parsearBloqueo(linea);
+    if (!bloqueo.ok) {
+      errores.push(bloqueo.error);
+      return;
+    }
+    if (indiceUltimoRegistro !== -1 && i > indiceUltimoRegistro) {
+      errores.push('La línea «Bloqueo:» debe ir antes de «Registro:».');
+    }
+    const siguiente = enNotas.slice(i + 1).find((l) => l.startsWith('Registro:'));
+    const causaSiguiente = RE_REGISTRO.exec(siguiente ?? '')?.[8];
+    errores.push(...coherenciaBloqueo({ tipo: bloqueo.tipo, causa: causaSiguiente }));
+  });
+
   // Línea de registro: última línea no vacía de «Notas».
   const noVacias = notas.map((l) => l.trim()).filter((l) => l !== '');
   const ultima = noVacias.at(-1) ?? '';
@@ -207,5 +243,5 @@ export function validarEvidencia(texto) {
     errores.push(...coherenciaRegistro({ estado, verificacion: verif, resultado, causa, intentos }));
   }
 
-  return errores;
+  return [...new Set(errores)];
 }

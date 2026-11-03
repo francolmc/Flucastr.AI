@@ -8,6 +8,7 @@
 //   node scripts/informe.mjs --minimo <n>        umbral de tareas propio (entero ≥ 1)
 //   node scripts/informe.mjs --json              imprime el JSON (y escribe igual el Markdown)
 //   node scripts/informe.mjs --consumo <dir>     añade el bloque «Consumo (aproximado)» con las sesiones de <dir> (consumo.mjs)
+//   node scripts/informe.mjs --pistas            añade la sección «## Pistas» (pistas.mjs; con --json, la clave «pistas»)
 //
 // No abre features/, STATUS.md, .env*, ni git. No corre registrar.mjs.
 
@@ -16,12 +17,13 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validarEvento } from "./registrar.mjs";
 import { descubrirSesiones } from "./consumo.mjs";
+import { calcularPistas } from "./pistas.mjs";
 
 export const UMBRAL_TAREAS = 10;
 export const UMBRAL_CORTE = 5;
 const Z = 1.96;
 const MENSAJE_FALTA = "falta registro/eventos.jsonl; corre antes `node scripts/registrar.mjs`";
-const OPCIONES_CONOCIDAS = ["--raiz", "--minimo", "--json", "--consumo"];
+const OPCIONES_CONOCIDAS = ["--raiz", "--minimo", "--json", "--consumo", "--pistas"];
 
 const round1 = (x) => (x === null || x === undefined ? null : Math.round(x * 10) / 10);
 const media = (valores) => (valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null);
@@ -263,7 +265,9 @@ function lineasConsumo(c) {
 
 // Markdown del informe. Sin títulos de feature ni de tarea: solo Fxx y NN, y nunca el contenido de una línea descartada.
 // `consumo` (opcional): el bloque de bloqueConsumo; si no es objeto, no hay bloque.
-export function formatearMarkdown(informe, consumo = null) {
+// `pistas` (opcional): arreglo de calcularPistas; null = sin sección «## Pistas».
+// `sinConsumo` (opcional): con pistas y sin --consumo, añade la línea de pistas 2 y 6 no evaluadas.
+export function formatearMarkdown(informe, consumo = null, pistas = null, { sinConsumo = false } = {}) {
   const L = [];
   if (!informe.suficiente) {
     L.push(`DATOS INSUFICIENTES: n=${informe.tareas} de ${informe.minimo}; no se calculan porcentajes ni medianas`, "");
@@ -306,23 +310,32 @@ export function formatearMarkdown(informe, consumo = null) {
   }
 
   if (consumo) L.push(...lineasConsumo(consumo));
+  if (pistas) {
+    L.push("## Pistas");
+    if (pistas.length === 0) L.push("Sin pistas: ninguna medición supera su umbral.");
+    for (const p of pistas) L.push(`- Pista ${p.n}${p.feature ? ` [${p.feature}]` : ""}: ${p.medicion}. ${p.accion}`);
+    if (sinConsumo) L.push("(pistas 2 y 6 no evaluadas: falta --consumo <dir>)");
+    L.push("");
+  }
   L.push("## Límites de esta lectura", ...LIMITES, "");
   return L.join("\n");
 }
 
 // JSON con las claves acordadas (sin el umbral, que es parámetro de la corrida).
 // `consumo` solo sale si se pasó --consumo (objeto, o null si no se calculó por n < minimo).
-export function informeJson(informe, consumo = undefined) {
+// `pistas` solo sale si se pasó --pistas (arreglo, también vacío).
+export function informeJson(informe, consumo = undefined, pistas = undefined) {
   const { eventosHasta, lineasNoValidas, tareas, ejecuciones, suficiente, entrega, calidad, fiabilidad, ritmo, cortes } =
     informe;
   const salida = { eventosHasta, lineasNoValidas, tareas, ejecuciones, suficiente, entrega, calidad, fiabilidad, ritmo, cortes };
   if (consumo !== undefined) salida.consumo = consumo;
+  if (pistas !== undefined) salida.pistas = pistas;
   return `${JSON.stringify(salida, null, 2)}\n`;
 }
 
 // Lee los argumentos. Cualquier cosa desconocida, repetida o inválida es error (sin tocar nada).
 export function leerArgumentos(args) {
-  const opciones = { raiz: null, minimo: UMBRAL_TAREAS, json: false, consumo: null };
+  const opciones = { raiz: null, minimo: UMBRAL_TAREAS, json: false, consumo: null, pistas: false };
   const vistas = new Set();
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -331,6 +344,10 @@ export function leerArgumentos(args) {
     vistas.add(a);
     if (a === "--json") {
       opciones.json = true;
+      continue;
+    }
+    if (a === "--pistas") {
+      opciones.pistas = true;
       continue;
     }
     const valor = args[i + 1];
@@ -367,12 +384,26 @@ function ejecutarCli(args) {
   }
   const { eventos, lineasNoValidas } = leerEventos(readFileSync(ruta, "utf8"));
   const informe = calcularInforme(eventos, { minimo: opciones.minimo, lineasNoValidas });
+  // Las sesiones se descubren una sola vez: para el bloque de consumo y, con --pistas, para las pistas 2 y 6.
+  const sesiones = opciones.consumo === null ? null : descubrirSesiones(opciones.consumo);
   // Sin --consumo no hay bloque ni clave (salida idéntica a la de task-01). Con n < minimo no se calcula (null).
-  const consumo =
-    opciones.consumo === null ? undefined : informe.suficiente ? bloqueConsumo(descubrirSesiones(opciones.consumo), informe.entrega.n) : null;
-  const markdown = formatearMarkdown(informe, consumo ?? null);
+  const consumo = sesiones === null ? undefined : informe.suficiente ? bloqueConsumo(sesiones, informe.entrega.n) : null;
+  // Con --pistas se evalúan aunque suficiente sea falso. Sin --pistas no hay sección ni clave.
+  // Pistas 2 y 6 necesitan --consumo: sin él se pasan vacíos y el Markdown lo dice.
+  const pistas = opciones.pistas
+    ? calcularPistas(
+        eventos,
+        sesiones === null
+          ? {}
+          : {
+              corridas: sesiones.flatMap((s) => s.subagentes?.corridas ?? []),
+              consumo: bloqueConsumo(sesiones, informe.suficiente ? informe.entrega.n : 0),
+            },
+      )
+    : undefined;
+  const markdown = formatearMarkdown(informe, consumo ?? null, pistas ?? null, { sinConsumo: opciones.pistas && sesiones === null });
   writeFileSync(join(opciones.raiz, "registro", "informe.md"), markdown);
-  process.stdout.write(opciones.json ? informeJson(informe, consumo) : markdown);
+  process.stdout.write(opciones.json ? informeJson(informe, consumo, pistas) : markdown);
   return 0;
 }
 

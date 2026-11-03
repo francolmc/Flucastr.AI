@@ -2,6 +2,7 @@
 // validarTarea(texto) devuelve un arreglo de mensajes de error en español; vacío = válida.
 
 import { extraerRequiere, parsearRequiere } from './formato-requiere.mjs';
+import { lineasDeNotas, parsearCancelada } from './formato-bloqueo.mjs';
 
 export const SECCIONES = [
   'Descripción',
@@ -22,7 +23,7 @@ const SECCIONES_LIBRES = ['Evidencia', 'Notas'];
 const ESTADOS_QUE_EXIGEN_EVIDENCIA = ['lista para revisión', 'hecha'];
 
 const RE_PRIMERA = /^# task-\d{2} — \S/;
-const RE_SEGUNDA = /^repo: (\S.*?) {2,}depende_de: (\S.*?) {2,}estado: (borrador|aprobada|en curso|lista para revisión|hecha|bloqueada)\s*$/;
+const RE_SEGUNDA = /^repo: (\S.*?) {2,}depende_de: (\S.*?) {2,}estado: (borrador|aprobada|en curso|lista para revisión|hecha|bloqueada|cancelada)\s*$/;
 const RE_DEPENDE = /^(—|task-\d{2}(, task-\d{2})*)$/;
 const RE_ALCANCE = /Fuera de alcance:\s*\S/;
 const RE_PASO = /^\d+\. /;
@@ -160,6 +161,21 @@ export function validarTarea(texto) {
     const analisis = parsearRequiere(requiere.valor);
     if (!analisis.ok) {
       errores.push(analisis.error);
+    }
+  }
+
+  // Regla 13: «cancelada» exige exactamente una línea «Cancelada: motivo=…» en «Notas», con motivo válido.
+  if (estado === 'cancelada') {
+    const lineasCancelada = lineasDeNotas(todo, 'Cancelada:');
+    if (lineasCancelada.length === 0) {
+      errores.push('Una tarea «cancelada» exige una línea «Cancelada: motivo=…» en «Notas».');
+    } else if (lineasCancelada.length > 1) {
+      errores.push(`Una tarea «cancelada» debe tener exactamente una línea «Cancelada:» en «Notas»; tiene ${lineasCancelada.length}.`);
+    } else {
+      const analisis = parsearCancelada(lineasCancelada[0]);
+      if (!analisis.ok) {
+        errores.push(analisis.error);
+      }
     }
   }
 

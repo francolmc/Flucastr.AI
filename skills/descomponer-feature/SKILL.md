@@ -38,7 +38,7 @@ repo: …   depende_de: …   estado: borrador
 ## Notas            (lo llena el constructor)
 ```
 
-Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `hecha`, `bloqueada`. Tú solo escribes `borrador`. `depende_de:` lleva el ID de otra tarea o `—`.
+Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `hecha`, `bloqueada`, `cancelada`. Tú solo escribes `borrador`; `cancelada` solo si Franco lo pide, con `Cancelada: motivo=<replanificada|obsoleta|duplicada|fuera_de_alcance|otra>` en *Notas*. `depende_de:` lleva el ID de otra tarea o `—`.
 
 ## Tarea que se basta sola
 
