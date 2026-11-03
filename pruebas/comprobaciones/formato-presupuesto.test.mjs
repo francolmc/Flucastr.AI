@@ -204,3 +204,110 @@ test('Espera a Franco con más de tres ítems no es válida', () => {
   const motivos = validarStatusCompacto(texto);
   assert.ok(motivos.some((m) => m.includes('4 ítems')));
 });
+
+test('amp_arq=1 evita el excedido con arq=3', () => {
+  const r = calcularPresupuesto({
+    feature: 'F29',
+    tareas: [tareaListas(1)],
+    status: statusCompacto({ presupuesto: 'Presupuesto: F29; rondas arq=3 plan=0; ampliado=0; amp_arq=1' }),
+  });
+  assert.equal(r.estado, 'ok');
+  assert.ok(r.linea.includes('rondas arq=3/3'));
+});
+
+test('amp_arq=1 mantiene el excedido con arq=4', () => {
+  const r = calcularPresupuesto({
+    feature: 'F29',
+    tareas: [tareaListas(1)],
+    status: statusCompacto({ presupuesto: 'Presupuesto: F29; rondas arq=4 plan=0; ampliado=0; amp_arq=1' }),
+  });
+  assert.equal(r.estado, 'excedido');
+  assert.deepEqual(r.causas, ['arq']);
+});
+
+test('amp_plan=1 evita el excedido con plan=4', () => {
+  const r = calcularPresupuesto({
+    feature: 'F29',
+    tareas: [tareaListas(1)],
+    status: statusCompacto({ presupuesto: 'Presupuesto: F29; rondas arq=0 plan=4; ampliado=0; amp_plan=1' }),
+  });
+  assert.equal(r.estado, 'ok');
+  assert.ok(r.linea.includes('plan=4/4'));
+});
+
+test('amp_k=1 con tres tareas no listas da aviso K3', () => {
+  const r = calcularPresupuesto({
+    feature: 'F29',
+    tareas: [tareaCon('bloqueada'), tareaCon('bloqueada'), tareaCon('bloqueada')],
+    status: statusCompacto({ presupuesto: 'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0; amp_k=1' }),
+  });
+  assert.equal(r.estado, 'aviso');
+  assert.deepEqual(r.causas, ['K3']);
+});
+
+test('amp_k=1 con dos tareas no listas queda ok', () => {
+  const r = calcularPresupuesto({
+    feature: 'F29',
+    tareas: [tareaCon('bloqueada'), tareaCon('bloqueada')],
+    status: statusCompacto({ presupuesto: 'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0; amp_k=1' }),
+  });
+  assert.equal(r.estado, 'ok');
+  assert.ok(r.linea.includes('K=2/3'));
+});
+
+test('amp_arq y amp_plan suben el tope de D', () => {
+  const r = calcularPresupuesto({
+    feature: 'F29',
+    tareas: [tareaListas(1)],
+    status: statusCompacto({ presupuesto: 'Presupuesto: F29; rondas arq=3 plan=0; ampliado=0; amp_arq=1; amp_plan=2; amp_k=1' }),
+  });
+  assert.ok(r.linea.startsWith('Presupuesto F29: D=4/9;'));
+  assert.equal(r.estado, 'ok');
+});
+
+test('sin sufijos la línea de salida es la de siempre', () => {
+  const r = calcularPresupuesto({
+    feature: 'F29',
+    tareas: [tareaListas(0)],
+    status: statusCompacto({ presupuesto: 'Presupuesto: F29; rondas arq=3 plan=0; ampliado=0' }),
+  });
+  assert.equal(
+    r.linea,
+    'Presupuesto F29: D=3/6; E=0; I=0; K=0/2; rondas arq=3/2 plan=0/3; estado=excedido arq',
+  );
+});
+
+test('una línea de otra feature con sufijos no cuenta', () => {
+  const r = calcularPresupuesto({
+    feature: 'F29',
+    tareas: [tareaListas(1)],
+    status: statusCompacto({
+      presupuesto: 'Presupuesto: F28; rondas arq=3 plan=4; ampliado=2; amp_arq=1; amp_plan=1; amp_k=1',
+    }),
+  });
+  assert.ok(r.linea.includes('rondas arq=0/2 plan=0/3'));
+  assert.equal(r.estado, 'ok');
+});
+
+test('validarStatusCompacto acepta los tres sufijos juntos', () => {
+  const texto = statusCompacto({
+    presupuesto: 'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0; amp_arq=1; amp_plan=2; amp_k=1',
+  });
+  assert.deepEqual(validarStatusCompacto(texto), []);
+});
+
+test('validarStatusCompacto rechaza los sufijos en otro orden', () => {
+  const texto = statusCompacto({
+    presupuesto: 'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0; amp_plan=1; amp_arq=1',
+  });
+  const motivos = validarStatusCompacto(texto);
+  assert.ok(motivos.some((m) => m.includes('forma inválida')));
+});
+
+test('validarStatusCompacto rechaza un sufijo sin valor', () => {
+  const texto = statusCompacto({
+    presupuesto: 'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0; amp_arq=',
+  });
+  const motivos = validarStatusCompacto(texto);
+  assert.ok(motivos.some((m) => m.includes('forma inválida')));
+});

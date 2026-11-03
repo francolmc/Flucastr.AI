@@ -259,6 +259,20 @@ test('--presupuesto con rondas de arquitecto por encima del tope sale con 1 y es
   assert.equal(r.out.trim(), 'Presupuesto F90: D=4/6; E=1; I=1; K=0/2; rondas arq=3/2 plan=0/3; estado=excedido arq');
 });
 
+test('--presupuesto con amp_arq=1 y arq=3 dentro de tope sale con 0 y estado=ok', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status: statusValido('Presupuesto: F90; rondas arq=3 plan=0; ampliado=0; amp_arq=1') });
+  const r = correr('--presupuesto', 'F90-prueba');
+  assert.equal(r.code, 0);
+  assert.equal(r.out.trim(), 'Presupuesto F90: D=4/7; E=1; I=1; K=0/2; rondas arq=3/3 plan=0/3; estado=ok');
+});
+
+test('--presupuesto con arq=4 y amp_arq=1 sobre el tope ampliado sale con 1 y estado=excedido arq', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status: statusValido('Presupuesto: F90; rondas arq=4 plan=0; ampliado=0; amp_arq=1') });
+  const r = correr('--presupuesto', 'F90-prueba');
+  assert.equal(r.code, 1);
+  assert.equal(r.out.trim(), 'Presupuesto F90: D=5/7; E=1; I=1; K=0/2; rondas arq=4/3 plan=0/3; estado=excedido arq');
+});
+
 test('--presupuesto con un STATUS.md de 1537 B sale con 1 y lo nombra como motivo', () => {
   const status = statusDeBytes(1537);
   assert.equal(Buffer.byteLength(status, 'utf8'), 1537);

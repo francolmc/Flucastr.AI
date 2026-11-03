@@ -147,6 +147,9 @@ export const FRASES_POR_ARCHIVO = {
     'estado=excedido',
     'ampliado=N',
     'abre sesión nueva',
+    'amp_arq=N',
+    'no ofrezcas B',
+    'rol=constructor; motivo=codigo:',
   ],
   'skills/modo-yolo': [
     'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>',
@@ -159,6 +162,7 @@ export const FRASES_POR_ARCHIVO = {
     'REFINAR: feature=Fxx; preguntas=<n>',
     'features/Fxx-nombre/refinado.md',
     'Modo yolo: activo',
+    'escribe solo una tarea de corrección nueva',
     ...FRASES_LECTURA_F22['descomponer-feature'],
     ...FRASES_ENTORNO['descomponer-feature'],
     ...FRASES_TELEMETRIA['descomponer-feature'],
@@ -167,6 +171,7 @@ export const FRASES_POR_ARCHIVO = {
     ...FRASES_LECTURA_F22['ejecutar-tarea'],
     ...FRASES_ENTORNO['ejecutar-tarea'],
     ...FRASES_TELEMETRIA['ejecutar-tarea'],
+    'rol=constructor; motivo=codigo: <causa>',
   ],
   'skills/disenar-arquitectura': [
     ...FRASES_LECTURA_F22['disenar-arquitectura'],

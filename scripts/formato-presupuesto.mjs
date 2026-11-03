@@ -17,7 +17,7 @@ const CLAVES = [
   'Actualizado: ',
 ];
 const CON_LIMITE_ITEMS = ['Espera a Franco: ', 'Bloqueos abiertos: '];
-const RE_PRESUPUESTO = /^Presupuesto: (F\d+|ninguna); rondas arq=(\d+) plan=(\d+); ampliado=(\d+)$/;
+const RE_PRESUPUESTO = /^Presupuesto: (F\d+|ninguna); rondas arq=(\d+) plan=(\d+); ampliado=(\d+)(?:; amp_arq=(\d+))?(?:; amp_plan=(\d+))?(?:; amp_k=(\d+))?$/;
 
 function normalizar(texto) {
   return String(texto ?? '').replace(/\r\n?/g, '\n');
@@ -104,24 +104,34 @@ export function calcularPresupuesto({ feature, tareas = [], status = '' }) {
   let arq = 0;
   let plan = 0;
   let ampliado = 0;
+  let ampArq = 0;
+  let ampPlan = 0;
+  let ampK = 0;
   const lineaPresupuesto = normalizar(status)
     .split('\n')
     .find((l) => l.startsWith('Presupuesto: '));
-  const m = lineaPresupuesto && /^Presupuesto: ([^;\s]+); rondas arq=(\d+) plan=(\d+); ampliado=(\d+)$/.exec(lineaPresupuesto);
+  const m = lineaPresupuesto && RE_PRESUPUESTO.exec(lineaPresupuesto);
   if (m && m[1] === feature) {
     arq = Number(m[2]);
     plan = Number(m[3]);
     ampliado = Number(m[4]);
+    ampArq = Number(m[5] ?? 0);
+    ampPlan = Number(m[6] ?? 0);
+    ampK = Number(m[7] ?? 0);
   }
 
+  const topeArq = 2 + ampArq;
+  const topePlan = 3 + ampPlan;
+  const topeK = 2 + ampK;
+
   const D = E + arq + plan;
-  const tope = 2 * T + 4 + ampliado;
+  const tope = 2 * T + 4 + ampliado + ampArq + ampPlan;
 
   const excedido = [];
   if (D > tope) excedido.push('D');
-  if (K > 2) excedido.push('K');
-  if (arq > 2) excedido.push('arq');
-  if (plan > 3) excedido.push('plan');
+  if (K > topeK) excedido.push('K');
+  if (arq > topeArq) excedido.push('arq');
+  if (plan > topePlan) excedido.push('plan');
 
   let estado;
   let causas;
@@ -131,12 +141,12 @@ export function calcularPresupuesto({ feature, tareas = [], status = '' }) {
   } else {
     causas = [];
     if (D * 4 >= tope * 3) causas.push('D75');
-    if (K === 2) causas.push('K2');
+    if (K === topeK) causas.push(`K${topeK}`);
     estado = causas.length > 0 ? 'aviso' : 'ok';
   }
 
   const cola = causas.length > 0 ? ` ${causas.join('+')}` : '';
-  const linea = `Presupuesto ${feature}: D=${D}/${tope}; E=${E}; I=${I}; K=${K}/2; rondas arq=${arq}/2 plan=${plan}/3; estado=${estado}${cola}`;
+  const linea = `Presupuesto ${feature}: D=${D}/${tope}; E=${E}; I=${I}; K=${K}/${topeK}; rondas arq=${arq}/${topeArq} plan=${plan}/${topePlan}; estado=${estado}${cola}`;
 
   return { linea, estado, causas };
 }

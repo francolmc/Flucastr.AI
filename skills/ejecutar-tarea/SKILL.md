@@ -38,7 +38,7 @@ En cualquiera: anota el motivo en *Notas*; antes de `Registro:` escribe `Bloqueo
 
 `BLOQUEO: rol=<rol requerido>; motivo=<motivo>`
 
-(para una escalación de alcance, `rol=planificador` o `rol=arquitecto` según toque), y debajo qué dejaste hecho. No sigas.
+(alcance: `rol=planificador` o `rol=arquitecto`; defecto de código o verificación, con `verificacion_x2`: `rol=constructor; motivo=codigo: <causa>`), y debajo qué dejaste hecho. No sigas.
 
 ## Al terminar bien
 
@@ -51,7 +51,7 @@ En cualquiera: anota el motivo en *Notas*; antes de `Registro:` escribe `Bloqueo
 Cierras con uno de cuatro estados: `completed | partial | blocked | interaction_required`. Cada uno tiene su primera línea:
 
 - `completed`: `estado: lista para revisión`, con su `Registro:` (ver «Línea de registro») y un resumen en tu respuesta final.
-- `blocked`: primera línea `BLOQUEO: rol=<rol>; motivo=<motivo>`, con la tarea bloqueada. La cota de verificación usa siempre este estado.
+- `blocked`: primera línea `BLOQUEO: rol=<rol>; motivo=<motivo>`, con la tarea bloqueada.
 - `interaction_required`: primera línea `DECISION: tarea=task-NN; abiertas=<n>`, luego `Pregunta:`, `Motivo:`, `Opciones:` (2 o 3, `A) B) C)`) y `Recomendada: <letra>`, según `definitions/WORKFLOW.md` §6, regla 2 bis. No tocas la tarea ni escribes `Registro:`.
 - `partial`: primera línea `PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>`, luego `Hecho:`, `Falta:` (qué falta exactamente), `Opciones:` (2 o 3 cerradas) y `Recomendada: <letra>`. Aplica cuando parte del trabajo está hecha y verificada y lo que falta se cierra con una opción de Franco. Dejas la tarea bloqueada con el `Registro:` de «Línea de registro».
 
