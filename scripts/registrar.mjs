@@ -32,6 +32,7 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { coherenciaRegistro } from "./formato-evidencia.mjs";
 
 export const ESTADOS_TAREA = ["borrador", "aprobada", "en curso", "lista para revisión", "hecha", "bloqueada"];
 export const ESTADOS_FEATURE = ["pendiente", "en curso", "hecha"];
@@ -261,6 +262,12 @@ function registrosDeNotas(texto) {
     if (!linea.startsWith("Registro:")) continue;
     const m = RE_REGISTRO.exec(linea.replace(/\s+$/, ""));
     if (!m) {
+      invalidas++;
+      continue;
+    }
+    // Coherencia (task-03 de F30): sin estado ni intentos, para que LINEA_2 de las pruebas siga válida.
+    const motivos = coherenciaRegistro({ verificacion: m[5], resultado: m[7], causa: m[8] });
+    if (motivos.length > 0) {
       invalidas++;
       continue;
     }

@@ -369,6 +369,31 @@ test('(8) repetir la corrida no duplica; una línea nueva añade solo su n; --re
   });
 });
 
+test('(11) coherencia: Registro con verificacion distinta de pasa y resultado=lista no genera evento; --reconstruir igual', () => {
+  conModelosPrueba(() => {
+    const raiz = nuevoRepo();
+    const archivo = path.join(raiz, 'registro', 'eventos.jsonl');
+    const incoherente2 = 'Registro: n=2; herramienta=claude-code; modo=normal; intentos=1; verificacion=parcial; huecos=0; resultado=lista; causa=ninguna';
+    const incoherente3 = 'Registro: n=3; herramienta=claude-code; modo=normal; intentos=1; verificacion=falla; huecos=0; resultado=lista; causa=ninguna';
+    escribir(raiz, RUTA_TAREA, tareaConRegistros(`${LINEA_1}\n${incoherente2}\n${incoherente3}\n`));
+    commit(raiz, 'c1', 0);
+
+    const res = correr(raiz);
+    assert.equal(res.status, 0, res.stderr);
+    assert.equal(res.stdout, 'registrar: 2 eventos nuevos; 2 en total; 0 descartados; 2 líneas Registro: no válidas\n');
+    assert.deepEqual(leerEventos(raiz).filter((e) => e.evento === 'ejecucion').map((e) => e.n), [1]);
+    const bytes1 = fs.readFileSync(archivo);
+
+    const reconstruida = correr(raiz, ['--reconstruir']);
+    assert.equal(reconstruida.status, 0, reconstruida.stderr);
+    assert.ok(fs.readFileSync(archivo).equals(bytes1), '--reconstruir reproduce el mismo contenido');
+    assert.ok(
+      !leerEventos(raiz).some((e) => e.evento === 'ejecucion' && e.resultado === 'lista' && e.verificacion !== 'pasa'),
+      'ningún evento con resultado=lista y verificacion distinta de pasa',
+    );
+  });
+});
+
 test('(10) argumentos inválidos: opción repetida, opción desconocida y argumento suelto terminan en 1 sin crear registro/', () => {
   const raiz = nuevoRepo();
   escribir(raiz, RUTA_TAREA, tareaMd('borrador'));
