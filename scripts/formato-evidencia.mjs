@@ -13,6 +13,64 @@ const RE_PENDIENTE_MAYUSCULAS = /(?<![\p{L}\p{N}_])(TBD|TODO|PENDIENTE)(?![\p{L}
 const RE_PENDIENTE_LIBRE = /(?<![\p{L}\p{N}_])(a definir|según corresponda|no ejecutado)(?![\p{L}\p{N}_])/giu;
 const RE_REGISTRO = /^Registro: n=(\d+); herramienta=(\S+); modo=(\S+); intentos=(\d+); verificacion=(\S+); huecos=(\d+); resultado=(\S+); causa=(\S+)$/;
 
+// Coherencia de las claves de «Registro:» (task-02 de F30). Función pura: devuelve motivos en español; vacío = coherente.
+// Cada regla se omite si sus claves vienen undefined, así que la puede llamar registrar.mjs sin estado ni intentos.
+export function coherenciaRegistro({ estado, verificacion, resultado, causa, intentos } = {}) {
+  const motivos = [];
+  const definido = (valor) => valor !== undefined;
+  const v = (valor) => (valor === undefined ? '(sin dato)' : valor);
+
+  // Regla 1: con estado terminado, resultado=lista, causa=ninguna, verificacion=pasa e intentos>=1.
+  if (ESTADOS_TERMINADOS.includes(estado)) {
+    const exigidos = [
+      ['resultado', resultado, 'lista'],
+      ['causa', causa, 'ninguna'],
+      ['verificacion', verificacion, 'pasa'],
+    ];
+    for (const [campo, valor, esperado] of exigidos) {
+      if (definido(valor) && valor !== esperado) {
+        motivos.push(`«Registro» incoherente con el estado «${estado}»: exige ${campo}=${esperado}; hay ${campo}=${valor}.`);
+      }
+    }
+    if (definido(intentos) && Number(intentos) < 1) {
+      motivos.push(`«Registro» incoherente con el estado «${estado}»: exige intentos≥1; hay intentos=${intentos}.`);
+    }
+  } else if (estado === 'bloqueada' && definido(resultado) && !['bloqueada', 'escalada'].includes(resultado)) {
+    // Regla 2: con estado bloqueada, resultado es bloqueada o escalada.
+    motivos.push(`«Registro» incoherente con el estado «bloqueada»: exige resultado=bloqueada o escalada; hay resultado=${resultado}.`);
+  }
+
+  // Regla 3: causa=verificacion_x2 exige resultado=bloqueada e intentos=2.
+  if (causa === 'verificacion_x2' && ((definido(resultado) && resultado !== 'bloqueada') || (definido(intentos) && Number(intentos) !== 2))) {
+    motivos.push(`«Registro» incoherente: causa=verificacion_x2 exige resultado=bloqueada e intentos=2; hay resultado=${v(resultado)} e intentos=${v(intentos)}.`);
+  }
+
+  // Regla 4: causa=parcial exige resultado=bloqueada.
+  if (causa === 'parcial' && definido(resultado) && resultado !== 'bloqueada') {
+    motivos.push(`«Registro» incoherente: causa=parcial exige resultado=bloqueada; hay resultado=${resultado}.`);
+  }
+
+  // Regla 5: sin estado, resultado=lista exige verificacion=pasa y causa=ninguna.
+  if (estado === undefined && resultado === 'lista') {
+    if (definido(verificacion) && verificacion !== 'pasa') {
+      motivos.push(`«Registro» incoherente: resultado=lista exige verificacion=pasa; hay verificacion=${verificacion}.`);
+    }
+    if (definido(causa) && causa !== 'ninguna') {
+      motivos.push(`«Registro» incoherente: resultado=lista exige causa=ninguna; hay causa=${causa}.`);
+    }
+  }
+
+  // Mensajes: dicen el valor correcto cuando verificacion no es pasa.
+  if (verificacion === 'parcial' && definido(resultado) && resultado !== 'bloqueada') {
+    motivos.push('«Registro» incoherente: con verificacion=parcial usa resultado=bloqueada; causa=parcial.');
+  }
+  if (verificacion === 'falla' && resultado === 'lista') {
+    motivos.push('«Registro» incoherente: con verificacion=falla usa resultado=bloqueada.');
+  }
+
+  return [...new Set(motivos)];
+}
+
 // Líneas dentro de cada bloque de código (sin las cercas ```).
 function bloquesDeCodigo(lineas) {
   const bloques = [];
@@ -146,29 +204,7 @@ export function validarEvidencia(texto) {
     if (Number(n) !== total) {
       errores.push(`«Registro» dice n=${n}, pero «Notas» tiene ${total} línea(s) «Registro:».`);
     }
-    if (ESTADOS_TERMINADOS.includes(estado)) {
-      const exigidos = [
-        ['resultado', resultado, 'lista'],
-        ['causa', causa, 'ninguna'],
-        ['verificacion', verif, 'pasa'],
-      ];
-      for (const [campo, valor, esperado] of exigidos) {
-        if (valor !== esperado) {
-          errores.push(`«Registro» incoherente con el estado «${estado}»: exige ${campo}=${esperado}; hay ${campo}=${valor}.`);
-        }
-      }
-      if (Number(intentos) < 1) {
-        errores.push(`«Registro» incoherente con el estado «${estado}»: exige intentos≥1; hay intentos=${intentos}.`);
-      }
-    } else if (estado === 'bloqueada' && !['bloqueada', 'escalada'].includes(resultado)) {
-      errores.push(`«Registro» incoherente con el estado «bloqueada»: exige resultado=bloqueada o escalada; hay resultado=${resultado}.`);
-    }
-    if (causa === 'verificacion_x2' && (resultado !== 'bloqueada' || Number(intentos) !== 2)) {
-      errores.push(`«Registro» incoherente: causa=verificacion_x2 exige resultado=bloqueada e intentos=2; hay resultado=${resultado} e intentos=${intentos}.`);
-    }
-    if (causa === 'parcial' && resultado !== 'bloqueada') {
-      errores.push(`«Registro» incoherente: causa=parcial exige resultado=bloqueada; hay resultado=${resultado}.`);
-    }
+    errores.push(...coherenciaRegistro({ estado, verificacion: verif, resultado, causa, intentos }));
   }
 
   return errores;

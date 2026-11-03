@@ -1,0 +1,261 @@
+{
+  "F24-puerta-previa-tarea/task-01-chequeos-nuevos.md": {
+    "evidencia": [
+      "Falta la salida del comando «node --test pruebas/comprobaciones/formato-tarea.test.mjs pruebas/comprobaciones/fixture-constructor.test.mjs pruebas/comprobaciones/constructor-resultado.test.mjs» en «Evidencia» (línea «$ node --test pruebas/comprobaciones/formato-tarea.test.mjs pruebas/comprobaciones/fixture-constructor.test.mjs pruebas/comprobaciones/constructor-resultado.test.mjs» dentro de un bloque de código).",
+      "Falta la salida del comando «bash pruebas/rapida.sh 2>&1 | grep -E \"^ℹ (pass|fail)\"» en «Evidencia» (línea «$ bash pruebas/rapida.sh 2>&1 | grep -E \"^ℹ (pass|fail)\"» dentro de un bloque de código).",
+      "«Registro» dice n=3, pero «Notas» tiene 1 línea(s) «Registro:»."
+    ],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F24-puerta-previa-tarea/task-02-nucleo-en-scripts.md": {
+    "evidencia": [
+      "Falta la línea «exit N» del comando «node -e \"import('./scripts/formato-tarea.mjs').then(m=>console.log(Object.keys(m).sort().join(',')))\"» en «Evidencia».",
+      "Falta la línea «exit N» del comando «wc -l < pruebas/comprobaciones/formato-tarea.mjs | tr -d \" \"» en «Evidencia».",
+      "Falta la línea «exit N» del comando «node --test pruebas/comprobaciones/formato-tarea.test.mjs pruebas/comprobaciones/fixture-constructor.test.mjs pruebas/comprobaciones/constructor-resultado.test.mjs» en «Evidencia».",
+      "La última línea no vacía de «Notas» debe ser «Registro: …»."
+    ],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F24-puerta-previa-tarea/task-03-validar-tarea-cli.md": {
+    "evidencia": [
+      "Falta la salida del comando «node --test pruebas/comprobaciones/validar-tarea.test.mjs» en «Evidencia» (línea «$ node --test pruebas/comprobaciones/validar-tarea.test.mjs» dentro de un bloque de código).",
+      "Falta la salida del comando «node scripts/validar-tarea.mjs features/F24-puerta-previa-tarea/task-*.md; echo \"salida=$?\"» en «Evidencia» (línea «$ node scripts/validar-tarea.mjs features/F24-puerta-previa-tarea/task-*.md; echo \"salida=$?\"» dentro de un bloque de código).",
+      "Falta la salida del comando «node scripts/validar-tarea.mjs; echo \"salida=$?\"» en «Evidencia» (línea «$ node scripts/validar-tarea.mjs; echo \"salida=$?\"» dentro de un bloque de código).",
+      "El fragmento esperado «OK: 6 tarea(s) válida(s)» no aparece literal en «Evidencia».",
+      "La última línea no vacía de «Notas» debe ser «Registro: …»."
+    ],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F24-puerta-previa-tarea/task-04-raiz-del-kit.md": {
+    "evidencia": [
+      "Falta la salida del comando «node --test pruebas/comprobaciones/raiz-kit.test.mjs» en «Evidencia» (línea «$ node --test pruebas/comprobaciones/raiz-kit.test.mjs» dentro de un bloque de código).",
+      "Falta la salida del comando «node --test pruebas/capa1/copia.test.mjs pruebas/capa1/instalacion.test.mjs pruebas/capa1/skills-proyecto.test.mjs pruebas/capa1/compactacion.test.mjs» en «Evidencia» (línea «$ node --test pruebas/capa1/copia.test.mjs pruebas/capa1/instalacion.test.mjs pruebas/capa1/skills-proyecto.test.mjs pruebas/capa1/compactacion.test.mjs» dentro de un bloque de código).",
+      "La última línea no vacía de «Notas» debe ser «Registro: …»."
+    ],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F24-puerta-previa-tarea/task-05-permiso-coordinador.md": {
+    "evidencia": [
+      "Falta la salida del comando «node --test pruebas/comprobaciones/contrato-roles.test.mjs» en «Evidencia» (línea «$ node --test pruebas/comprobaciones/contrato-roles.test.mjs» dentro de un bloque de código).",
+      "Falta la salida del comando «grep -c 'Bash(node ~/.flucastr-ai/validar-tarea.mjs \\*)' agentes/coordinador.md» en «Evidencia» (línea «$ grep -c 'Bash(node ~/.flucastr-ai/validar-tarea.mjs \\*)' agentes/coordinador.md» dentro de un bloque de código).",
+      "Falta la salida del comando «grep -c 'cuatro comandos' agentes/coordinador.md» en «Evidencia» (línea «$ grep -c 'cuatro comandos' agentes/coordinador.md» dentro de un bloque de código)."
+    ],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F24-puerta-previa-tarea/task-06-prueba-real-permiso.md": {
+    "evidencia": [
+      "Falta la línea «exit N» del comando «bash -n pruebas/lanzar-coordinador-claude.sh» en «Evidencia».",
+      "Falta la línea «exit N» del comando «grep -c 'validar-tarea.mjs \\*' pruebas/lanzar-coordinador-claude.sh» en «Evidencia».",
+      "Falta la línea «exit N» del comando «node --test pruebas/lanzadores.test.mjs» en «Evidencia»."
+    ],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F24-puerta-previa-tarea/task-07-reglas-puerta-previa.md": {
+    "evidencia": [
+      "Falta la salida del comando «node --test pruebas/comprobaciones/puerta-previa.test.mjs» en «Evidencia» (línea «$ node --test pruebas/comprobaciones/puerta-previa.test.mjs» dentro de un bloque de código).",
+      "Falta la salida del comando «node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/coordinador-status.test.mjs» en «Evidencia» (línea «$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/coordinador-status.test.mjs» dentro de un bloque de código).",
+      "Falta la salida del comando «bash pruebas/rapida.sh 2>&1 | grep -E \"^ℹ (pass|fail)\"» en «Evidencia» (línea «$ bash pruebas/rapida.sh 2>&1 | grep -E \"^ℹ (pass|fail)\"» dentro de un bloque de código)."
+    ],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F25-evidencia-comprobable/task-01-nucleo-evidencia.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F25-evidencia-comprobable/task-02-cli-evidencia.md": {
+    "evidencia": [
+      "«Registro» dice n=2, pero «Notas» tiene 1 línea(s) «Registro:»."
+    ],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F25-evidencia-comprobable/task-03-reglas-coordinador-constructor.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F26-cota-y-retorno-constructor/task-01-coherencia-causas-registro.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F26-cota-y-retorno-constructor/task-02-skill-cota-y-estados.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F26-cota-y-retorno-constructor/task-03-constructor-retorno.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F26-cota-y-retorno-constructor/task-04-coordinador-estados.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F27-arquitecto-una-pasada/task-01-texto-arquitecto-y-definir.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F27-arquitecto-una-pasada/task-02-texto-skills-arquitectura-y-revisar.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F27-arquitecto-una-pasada/task-03-control-frases-una-pasada.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F27-arquitecto-una-pasada/task-04-script-crecimiento-definiciones.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": [
+      "Falta la viñeta «- Fuente:» en «## Contexto»."
+    ]
+  },
+  "F28-contratos-y-prompts-cortos/task-01-manifiesto-de-frases.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-02-topes-de-bytes.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-03-modulo-modo-yolo.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-04-mover-yolo-al-modulo.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-05-modulo-ramas-feature.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-06-mover-ramas-al-modulo.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-07-modulo-comandos-coordinador.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-08-mover-comandos-al-modulo.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-09-cierre-del-nucleo-coordinador.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-10-fuente-comprobada-por-script.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-11-plantilla-y-puerta-con-fuente.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-12-recorte-planificador.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-13-recorte-constructor.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F28-contratos-y-prompts-cortos/task-14-recorte-arquitecto.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F29-control-de-consumo/task-01-modulo-formato-presupuesto.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F29-control-de-consumo/task-02-opcion-presupuesto-en-validar-tarea.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F29-control-de-consumo/task-03-validar-status-acepta-formato-compacto.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F29-control-de-consumo/task-04-skill-control-consumo.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F29-control-de-consumo/task-05-tope-y-frases-de-control-consumo.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  },
+  "F29-control-de-consumo/task-06-nucleo-coordinador-y-comandos.md": {
+    "evidencia": [],
+    "formato": [],
+    "fuente": []
+  }
+}

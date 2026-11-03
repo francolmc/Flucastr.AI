@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validarEvidencia } from '../../scripts/formato-evidencia.mjs';
+import { validarEvidencia, coherenciaRegistro } from '../../scripts/formato-evidencia.mjs';
 
 const CMD_X = 'node --test pruebas/comprobaciones/x.test.mjs';
 const CMD_Y = 'node --test pruebas/comprobaciones/y.test.mjs';
@@ -253,4 +253,47 @@ test('TODO en mayúsculas en Evidencia se rechaza y el motivo cita TODO', () => 
   const evidencia = `${EVIDENCIA_BASE}\n\nFalta revisar el caso borde. TODO\n`;
   const motivos = validarEvidencia(tarea({ evidencia }));
   assert.ok(motivos.some((m) => m.includes('«TODO»')), motivos.join('\n'));
+});
+
+test('coherenciaRegistro: registro coherente (pasa, lista, ninguna) no da motivos', () => {
+  const motivos = coherenciaRegistro({ estado: 'lista para revisión', verificacion: 'pasa', resultado: 'lista', causa: 'ninguna', intentos: 1 });
+  assert.deepEqual(motivos, [], motivos.join('\n'));
+});
+
+test('coherenciaRegistro: parcial con lista y estado cita resultado=bloqueada; causa=parcial', () => {
+  const motivos = coherenciaRegistro({ estado: 'lista para revisión', verificacion: 'parcial', resultado: 'lista', causa: 'ninguna', intentos: 1 });
+  assert.ok(motivos.some((m) => m.includes('resultado=bloqueada; causa=parcial')), motivos.join('\n'));
+});
+
+test('coherenciaRegistro: parcial con lista sin estado cita resultado=bloqueada; causa=parcial', () => {
+  const motivos = coherenciaRegistro({ verificacion: 'parcial', resultado: 'lista', causa: 'ninguna' });
+  assert.ok(motivos.some((m) => m.includes('resultado=bloqueada; causa=parcial')), motivos.join('\n'));
+});
+
+test('coherenciaRegistro: falla con lista sin estado da motivo', () => {
+  const motivos = coherenciaRegistro({ verificacion: 'falla', resultado: 'lista', causa: 'ninguna' });
+  assert.ok(motivos.length > 0, 'debe haber al menos un motivo');
+  assert.ok(motivos.some((m) => m.includes('verificacion=falla')), motivos.join('\n'));
+});
+
+test('coherenciaRegistro: parcial con bloqueada y causa parcial no da motivos', () => {
+  const motivos = coherenciaRegistro({ verificacion: 'parcial', resultado: 'bloqueada', causa: 'parcial' });
+  assert.deepEqual(motivos, [], motivos.join('\n'));
+});
+
+test('coherenciaRegistro: claves undefined omiten sus reglas', () => {
+  assert.deepEqual(coherenciaRegistro({ verificacion: 'pasa', resultado: 'lista', causa: 'ninguna' }), []);
+  assert.deepEqual(coherenciaRegistro({ estado: 'lista para revisión', verificacion: 'pasa', resultado: 'lista', causa: 'ninguna' }), []);
+  assert.deepEqual(coherenciaRegistro({}), []);
+});
+
+test('coherenciaRegistro: causa=verificacion_x2 con intentos=1 cita intentos=2', () => {
+  const motivos = coherenciaRegistro({ estado: 'bloqueada', verificacion: 'falla', resultado: 'bloqueada', causa: 'verificacion_x2', intentos: 1 });
+  assert.ok(motivos.some((m) => m.includes('intentos=2')), motivos.join('\n'));
+});
+
+test('validarEvidencia: estado lista con verificacion=parcial cita resultado=bloqueada; causa=parcial', () => {
+  const notas = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=parcial; huecos=0; resultado=lista; causa=ninguna';
+  const motivos = validarEvidencia(tarea({ estado: 'lista para revisión', notas }));
+  assert.ok(motivos.some((m) => m.includes('resultado=bloqueada; causa=parcial')), motivos.join('\n'));
 });

@@ -61,3 +61,16 @@ test('rechaza la regla 14 si «Modo yolo: activo» aparece después de «git swi
   const errores = validarConstructor(textos);
   assert.ok(errores.some((e) => e.startsWith('Regla 14 ')), `se esperaba error de la regla 14, llegó: ${JSON.stringify(errores)}`);
 });
+
+// Paso 3 de «Ejecución»: la ruta del lanzador y la frase que ata `lista` a `verificacion=pasa`.
+const frasesPaso3 = ['~/.flucastr-ai/validar-tarea.mjs --evidencia', '`lista` exige `verificacion=pasa`'];
+const faltanPaso3 = (texto) => frasesPaso3.filter((frase) => !texto.includes(frase));
+
+test('la skill real trae las dos frases literales del paso 3', () => {
+  assert.deepEqual(faltanPaso3(leer('skills/ejecutar-tarea/SKILL.md')), []);
+});
+
+test('control negativo: sin la frase de verificacion=pasa la comprobación falla', () => {
+  const sinFrase = leer('skills/ejecutar-tarea/SKILL.md').replace('`lista` exige `verificacion=pasa`', '');
+  assert.notDeepEqual(faltanPaso3(sinFrase), []);
+});
