@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: Modo yolo: terminado — alcance F34 completo; F34 hecha por Franco (opción B); 10 features archivadas (sin commit)
-Presupuesto: F34; rondas arq=0 plan=1; ampliado=0
-Espera a Franco: registrar.mjs corrido (27 nuevos, sin commit); commit chore/ del archivo; PR F34 mergeado; ./instalar.sh; medir sesión real. F26: tareas hechas, fila sin cerrar
+Paso actual: planificador: añadir fila F35 al BACKLOG (tope por rol en presupuesto); sin descomponer
+Presupuesto: ninguna; rondas arq=0 plan=0; ampliado=0
+Espera a Franco: puerta 2: aprobar la fila F35 en definitions/BACKLOG.md antes de descomponerla; commit chore/ de F26 ya hecho
 Bloqueos abiertos: ninguno
-Retomar: F26 archivada (sin commit chore/); sin feature pendiente en el backlog; revisar F26 y pendientes de puerta 1 (definitions/); abre sesión nueva
+Retomar: pendiente tuyo: merge PR F34, instalar.sh, medir sesión real; F35 solo fila; abre sesión nueva
 Actualizado: 2026-11-03
