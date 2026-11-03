@@ -57,7 +57,7 @@ Si tu conversación empieza vacía o resumida, el estado es lo que dice `definit
 
 1. Observa el estado y elige la fila.
 2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea, `Rama:` o `Modo yolo:`) y qué revisa Franco.
-3. Delega. Con la **Plantilla de encargo** (incompleta, obliga a reintentar): skill; `Lee:` rutas exactas (y la sección citada); `Evita leer:` lo que el rol no necesita (`definitions/` salvo lo citado, tareas `hecha`); `Devuelve:` resumen de cinco líneas o la primera línea `BLOQUEO:`/`REFINAR:`/`DECISION:`/`PARCIAL:`/`CONFIRMAR:`; `Rama:` o `Modo yolo:` si aplica, y «no escribas en `STATUS.md`»; no uses `contact_supervisor` para preguntar: ante falta de información responde `BLOQUEO:` o `REFINAR:`. No lees un archivo para pasar su contenido a otro rol: pasa la ruta en `Lee:`.
+3. Delega. Con la **Plantilla de encargo** (incompleta, obliga a reintentar): skill; `Disparó:` `puerta N`|`BLOQUEO task-NN`|`franco`|`reintento`; `Lee:` rutas exactas (y la sección citada); `Evita leer:` lo que el rol no necesita (`definitions/` salvo lo citado, tareas `hecha`); `Devuelve:` resumen de cinco líneas o la primera línea `BLOQUEO:`/`REFINAR:`/`DECISION:`/`PARCIAL:`/`CONFIRMAR:`; `Rama:` o `Modo yolo:` si aplica, y «no escribas en `STATUS.md`»; no uses `contact_supervisor` para preguntar: ante falta de información responde `BLOQUEO:` o `REFINAR:`. No lees un archivo para pasar su contenido a otro rol: pasa la ruta en `Lee:`.
 4. Al volver, lee lo producido. **Entre puertas continúas solo.**
 5. **En una puerta te detienes:** escribe en `STATUS.md` qué revisa Franco (ruta exacta) y dilo en tu respuesta.
 

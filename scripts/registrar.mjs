@@ -33,8 +33,15 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { coherenciaRegistro } from "./formato-evidencia.mjs";
+import {
+  MOTIVOS_CANCELADA,
+  TIPOS_BLOQUEO,
+  lineasDeNotas,
+  parsearBloqueo,
+  parsearCancelada,
+} from "./formato-bloqueo.mjs";
 
-export const ESTADOS_TAREA = ["borrador", "aprobada", "en curso", "lista para revisión", "hecha", "bloqueada"];
+export const ESTADOS_TAREA = ["borrador", "aprobada", "en curso", "lista para revisión", "hecha", "bloqueada", "cancelada"];
 export const ESTADOS_FEATURE = ["pendiente", "en curso", "hecha"];
 const POR = ["franco", "constructor", "planificador"];
 const POR_DE_ESTADO = {
@@ -44,6 +51,7 @@ const POR_DE_ESTADO = {
   "lista para revisión": "constructor",
   hecha: "franco",
   bloqueada: "constructor",
+  cancelada: "franco",
 };
 const FUENTES = ["git", "notas", "status"];
 const CLAVES_COMUNES = ["v", "id", "t", "fuente", "evento"];
@@ -58,6 +66,8 @@ const RE_CARPETA = /^F\d{2}-/;
 const RE_ARCHIVO_TAREA = /^task-(\d{2})-.+\.md$/;
 const LIMITE_AVISO_BYTES = 1048576;
 const RE_MODELO = /^[A-Za-z0-9._/:-]{1,80}$/;
+// Qué falta de una línea «Bloqueo:»: «-» o hasta 8 items de vocabulario cerrado separados por «,».
+const RE_FALTA = /^(-|[a-z0-9:@.]{1,40}(,[a-z0-9:@.]{1,40}){0,7})$/;
 const MODELO_SIN_CONFIGURAR = "sin-configurar";
 const RUTA_RESOLVER = join(dirname(fileURLToPath(import.meta.url)), "resolver.mjs");
 
@@ -129,6 +139,22 @@ export const ESQUEMA = {
       resultado: { valores: EJECUCION.resultado },
       causa: { valores: EJECUCION.causa },
       modelo: { patron: RE_MODELO },
+    },
+  },
+  bloqueo: {
+    fuente: "notas",
+    requeridos: ["feature", "tarea", "sha"],
+    campos: {
+      n: { tipo: "entero", rango: [1, 99] },
+      tipo: { valores: TIPOS_BLOQUEO },
+      falta: { patron: RE_FALTA },
+    },
+  },
+  cancelacion: {
+    fuente: "notas",
+    requeridos: ["feature", "tarea", "sha"],
+    campos: {
+      motivo: { valores: MOTIVOS_CANCELADA },
     },
   },
 };
@@ -327,6 +353,8 @@ function claveDe(evento, propios) {
   }
   if (evento === "puerta") return `${propios.n}|${propios.resultado}`;
   if (evento === "ejecucion") return String(propios.n);
+  if (evento === "bloqueo") return String(propios.n);
+  if (evento === "cancelacion") return propios.motivo;
   return "";
 }
 
@@ -369,7 +397,7 @@ export function extraer(raiz) {
     return modelos.get(herramienta);
   };
 
-  // tarea_estado, puerta y ejecucion: historial de cada tarea presente hoy (sigue renombres con --follow).
+  // tarea_estado, puerta, ejecucion y bloqueo: historial de cada tarea presente hoy (sigue renombres con --follow).
   for (const tarea of listarTareas(raiz)) {
     // Sin --reverse: con --follow, git 2.54 corta el historial de un renombre si se pide --reverse.
     // El orden cronológico se invierte aquí.
@@ -377,6 +405,10 @@ export function extraer(raiz) {
     let previo = null;
     // ejecucion: el primer commit donde aparece una línea válida con ese n gana.
     const ejecucionesVistas = new Set();
+    // bloqueo: la posición n de la línea «Bloqueo:» entre las de Notas; el primer commit donde aparece ese n gana.
+    const bloqueosVistos = new Set();
+    // cancelacion: la primera versión con una línea «Cancelada:» válida gana; una tarea sin ninguna no emite evento.
+    let cancelacionVista = false;
     let invalidasUltima = 0;
     for (const reg of registros(log.salida).reverse()) {
       const rutaEseCommit = reg.lineas[0];
@@ -398,6 +430,32 @@ export function extraer(raiz) {
         }
         ejecucionesVistas.add(propios.n);
         crudos.push(ev);
+      }
+      // bloqueo: las líneas inválidas se omiten sin contarlas en invalidas (esa cuenta es solo de Registro:).
+      lineasDeNotas(show.salida, "Bloqueo:").forEach((linea, i) => {
+        const n = i + 1;
+        if (bloqueosVistos.has(n)) return;
+        const r = parsearBloqueo(linea);
+        if (!r.ok) return;
+        const ev = construir("bloqueo", tEjec, shaEjec, ubicacion, {
+          n,
+          tipo: r.tipo,
+          falta: r.falta.length > 0 ? r.falta.join(",") : "-",
+        });
+        if (validarEvento(ev).length > 0) return;
+        bloqueosVistos.add(n);
+        crudos.push(ev);
+      });
+      if (!cancelacionVista) {
+        for (const linea of lineasDeNotas(show.salida, "Cancelada:")) {
+          const r = parsearCancelada(linea);
+          if (!r.ok) continue;
+          const ev = construir("cancelacion", tEjec, shaEjec, ubicacion, { motivo: r.motivo });
+          if (validarEvento(ev).length > 0) continue;
+          cancelacionVista = true;
+          crudos.push(ev);
+          break;
+        }
       }
       invalidasUltima = invalidasVersion;
 

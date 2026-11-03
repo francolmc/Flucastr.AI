@@ -88,6 +88,34 @@ test('una tarea de exactamente MAX_CARACTERES caracteres es válida', () => {
   assert.deepEqual(validarTarea(justa), []);
 });
 
+const cancelada = muestra
+  .replace('estado: aprobada', 'estado: cancelada')
+  .replace('## Notas\n', '## Notas\nCancelada: motivo=replanificada\n');
+
+test('acepta una tarea «cancelada» con su línea «Cancelada: motivo=replanificada» y sin Evidencia', () => {
+  const sinEvidencia = cancelada.replace('## Evidencia\n\n', '## Evidencia\n');
+  assert.deepEqual(validarTarea(sinEvidencia), []);
+});
+
+test('rechaza una tarea «cancelada» sin línea «Cancelada:»', () => {
+  const sinLinea = cancelada.replace('Cancelada: motivo=replanificada\n', '');
+  const errores = validarTarea(sinLinea);
+  assert.equal(errores.length, 1);
+  assert.match(errores[0], /exige una línea «Cancelada: motivo=…»/);
+});
+
+test('rechaza una tarea «cancelada» con motivo fuera de la lista', () => {
+  const motivoNuevo = cancelada.replace('motivo=replanificada', 'motivo=nueva');
+  const errores = validarTarea(motivoNuevo);
+  assert.equal(errores.length, 1);
+  assert.match(errores[0], /«nueva» no está en el vocabulario/);
+});
+
+test('una tarea «hecha» no exige línea «Cancelada:»', () => {
+  const hecha = muestra.replace('estado: aprobada', 'estado: hecha').replace('## Evidencia\n\n', '## Evidencia\n$ node --test\nexit 0\n');
+  assert.deepEqual(validarTarea(hecha), []);
+});
+
 test('acepta una decisión abierta con «Resuelta: »', () => {
   const resuelta = muestra.replace('## Decisiones abiertas\nNinguna.', '## Decisiones abiertas\n- Elegir librería — Resuelta: node:test');
   assert.deepEqual(validarTarea(resuelta), []);

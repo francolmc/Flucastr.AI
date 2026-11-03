@@ -431,3 +431,78 @@ test('(9) canarios en el resto de Notas y una clave extra (titulo=) no llegan a 
     assert.equal(leerEventos(raiz).filter((e) => e.evento === 'ejecucion').length, 1);
   });
 });
+
+test('(12) Bloqueo: en Notas da un bloqueo por n válido; tipo fuera de lista o texto extra no generan evento; repetir y --reconstruir no duplican', () => {
+  conModelosPrueba(() => {
+    const raiz = nuevoRepo();
+    const archivo = path.join(raiz, 'registro', 'eventos.jsonl');
+    const notas = 'Bloqueo: tipo=entorno; falta=docker,puerto:55432\nBloqueo: tipo=alcance; falta=-\nBloqueo: tipo=entorno; falta=docker; nota=sk-CANARIO-B\nBloqueo: tipo=nuevo; falta=-\n';
+    escribir(raiz, RUTA_TAREA, tareaConRegistros(notas));
+    commit(raiz, 'c1', 0);
+
+    const res = correr(raiz);
+    assert.equal(res.status, 0, res.stderr);
+    assert.equal(res.stdout, 'registrar: 3 eventos nuevos; 3 en total; 0 descartados; 0 líneas Registro: no válidas\n');
+
+    const bloqueos = leerEventos(raiz).filter((e) => e.evento === 'bloqueo').sort((a, b) => a.n - b.n);
+    assert.deepEqual(
+      bloqueos.map((e) => [e.n, e.tipo, e.falta]),
+      [
+        [1, 'entorno', 'docker,puerto:55432'],
+        [2, 'alcance', '-'],
+      ],
+    );
+    for (const e of bloqueos) assert.deepEqual(validarEvento(e), []);
+    assert.notDeepEqual(validarEvento({ ...bloqueos[0], tipo: 'nuevo' }), [], 'un tipo fuera de lista se rechaza');
+    assert.equal(fs.readFileSync(archivo, 'utf8').includes('sk-CANARIO-B'), false, 'el canario no llega al log');
+
+    const bytes1 = fs.readFileSync(archivo);
+    const segunda = correr(raiz);
+    assert.equal(segunda.stdout, 'registrar: 0 eventos nuevos; 3 en total; 0 descartados; 0 líneas Registro: no válidas\n');
+    assert.ok(fs.readFileSync(archivo).equals(bytes1), 'la segunda corrida deja el archivo idéntico');
+
+    const reconstruida = correr(raiz, ['--reconstruir']);
+    assert.equal(reconstruida.status, 0, reconstruida.stderr);
+    assert.ok(fs.readFileSync(archivo).equals(bytes1), '--reconstruir reproduce el mismo contenido');
+  });
+});
+
+test('(13) Cancelada: en Notas da cancelacion con motivo de la lista; cancelada sin línea o con motivo fuera de lista no genera cancelacion; repetir y --reconstruir no duplican', () => {
+  const raiz = nuevoRepo();
+  const archivo = path.join(raiz, 'registro', 'eventos.jsonl');
+  // Contenidos muy distintos entre sí (y en commits separados): git log --follow no los empareja como renombre.
+  const md = (n, titulo, cuerpo, estado, notas = '') =>
+    `# task-${n} — ${titulo}\n\nrepo: Flucastr.AI   depende_de: —   estado: ${estado}\n\n## Descripción\n${cuerpo}\n\n## Evidencia\n\n## Notas\n${notas}`;
+  const t1 = 'features/F01-prueba/task-01-tarea.md';
+  const t2 = 'features/F01-prueba/task-02-otra.md';
+  const t3 = 'features/F01-prueba/task-03-nueva.md';
+  escribir(raiz, t1, md('01', 'Migrar la base de datos', 'Mover las tablas de usuarios al nuevo esquema con índices por correo y por fecha de alta.', 'aprobada'));
+  commit(raiz, 'c1', 0);
+  escribir(raiz, t1, md('01', 'Migrar la base de datos', 'Mover las tablas de usuarios al nuevo esquema con índices por correo y por fecha de alta.', 'cancelada', 'Cancelada: motivo=obsoleta\n'));
+  commit(raiz, 'c2', 1);
+  escribir(raiz, t2, md('02', 'Pantalla de ayuda', 'Dibujar la ventana de ayuda con atajos de teclado, capturas y un buscador local.\n\nSin relación alguna con otras piezas del sistema.\nIncluye textos largos para alejarse de cualquier otra tarea.', 'cancelada'));
+  commit(raiz, 'c3', 2);
+  escribir(raiz, t3, md('03', 'Exportar informes', 'Generar un reporte trimestral en hoja de cálculo con gráficos y totales por región.\n\nOtro cuerpo totalmente propio, sin frases compartidas.', 'cancelada', 'Cancelada: motivo=nuevo\n'));
+  commit(raiz, 'c4', 3);
+
+  const res = correr(raiz);
+  assert.equal(res.status, 0, res.stderr);
+
+  const eventos = leerEventos(raiz);
+  const cancelados = eventos.filter((e) => e.evento === 'tarea_estado' && e.a === 'cancelada');
+  assert.deepEqual(cancelados.map((e) => e.tarea).sort(), ['01', '02', '03']);
+  assert.ok(cancelados.every((e) => e.por === 'franco'), 'cancelada lo pone Franco');
+  assert.equal(cancelados.find((e) => e.tarea === '01').de, 'aprobada');
+
+  const cancelaciones = eventos.filter((e) => e.evento === 'cancelacion');
+  assert.deepEqual(cancelaciones.map((e) => [e.tarea, e.motivo]), [['01', 'obsoleta']]);
+  for (const e of eventos) assert.deepEqual(validarEvento(e), []);
+
+  const bytes1 = fs.readFileSync(archivo);
+  const segunda = correr(raiz);
+  assert.equal(segunda.status, 0, segunda.stderr);
+  assert.ok(fs.readFileSync(archivo).equals(bytes1), 'la segunda corrida deja el archivo idéntico');
+  const reconstruida = correr(raiz, ['--reconstruir']);
+  assert.equal(reconstruida.status, 0, reconstruida.stderr);
+  assert.ok(fs.readFileSync(archivo).equals(bytes1), '--reconstruir reproduce el mismo contenido');
+});

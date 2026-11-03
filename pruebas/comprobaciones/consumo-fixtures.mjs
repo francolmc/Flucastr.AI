@@ -58,7 +58,8 @@ export function unirJsonl(registros) {
 }
 
 // Meta de una corrida de subagente (<runId>_<agente>_meta.json). `task` lleva CENTINELA_TEXTO para comprobar
-// que el encargo no sale en el resultado. `timestamp` son milisegundos, como en el meta real.
+// que el encargo no sale en el resultado (`task` lo sobreescribe, p. ej. con 'Disparó: puerta 4'). `timestamp` son
+// milisegundos, como en el meta real.
 export function metaSubagentePi({
   runId,
   parentSessionId = 'sesion-sintetica',
@@ -67,12 +68,13 @@ export function metaSubagentePi({
   timestamp = Date.parse(TS_POR_DEFECTO),
   turns = 0,
   cost = 0,
+  task = CENTINELA_TEXTO,
 } = {}) {
   return {
     runId,
     parentSessionId,
     agent,
-    task: CENTINELA_TEXTO,
+    task,
     exitCode: 0,
     model,
     requestedModel: model,
@@ -175,4 +177,15 @@ export function resultadoReadClaude({ ts = TS_POR_DEFECTO, toolUseId, ruta, byte
 // para comprobar que el parser lo ignora.
 export function metaSubagenteClaude({ agentType = 'constructor' } = {}) {
   return { agentType, description: CENTINELA_TEXTO };
+}
+
+// Registro `user` que abre el transcript de un subagente de Claude Code: su encargo (`texto`, string).
+export function registroPromptClaude(texto = CENTINELA_TEXTO) {
+  return {
+    type: 'user',
+    timestamp: TS_POR_DEFECTO,
+    sessionId: 'sesion-sintetica',
+    isSidechain: true,
+    message: { role: 'user', content: texto },
+  };
 }

@@ -11,6 +11,9 @@ import {
   unirPi,
   analizarSesionClaude,
   analizarSubagentesClaude,
+  leerEstados,
+  costoPorTarea,
+  formatearPorTarea,
 } from '../../scripts/consumo.mjs';
 import {
   CENTINELA_TEXTO,
@@ -24,6 +27,7 @@ import {
   turnoClaude,
   resultadoReadClaude,
   metaSubagenteClaude,
+  registroPromptClaude,
 } from './consumo-fixtures.mjs';
 
 const T1 = '2026-10-30T10:00:00.000Z';
@@ -480,6 +484,84 @@ test('claude (7): subagentes: dos metas constructor suman corridas 2 y turnos po
 test('claude (8): carpeta de subagentes inexistente → porRol {}', () => {
   const r = analizarSubagentesClaude(join(tmpdir(), `consumo-inexistente-${Date.now()}`));
   assert.deepEqual(r.porRol, {});
+  assert.deepEqual(r.corridas, []);
+});
+
+// ---- task-10: corridas por subagente (rol, disparo, feature, tarea, turnos, costo) ----
+
+test('corridas (1): Pi: disparo, feature y tarea del encargo; turnos y costo del meta', () => {
+  const r = conCarpeta(
+    corrida(
+      metaSubagentePi({
+        runId: 'r1',
+        agent: 'constructor',
+        parentSessionId: 'S1',
+        timestamp: M1,
+        turns: 10,
+        cost: 0.1,
+        task: 'Lee: features/F31-x/task-02-y.md\nDisparó: puerta 4',
+      }),
+      transcriptSubagentePi(),
+    ),
+    (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }),
+  );
+  assert.deepEqual(r.corridas, [
+    { rol: 'constructor', disparo: { origen: 'puerta', puerta: 4 }, feature: 'F31', tarea: '02', turnos: 10, costo: 0.1 },
+  ]);
+});
+
+test('corridas (2): Pi: Disparó BLOQUEO da la tarea; sin Disparó, los tres valores son null', () => {
+  const r = conCarpeta(
+    {
+      ...corrida(
+        metaSubagentePi({ runId: 'r1', agent: 'planificador', parentSessionId: 'S1', timestamp: M1, turns: 5, cost: 0.05, task: 'Disparó: BLOQUEO task-02' }),
+        transcriptSubagentePi(),
+      ),
+      ...corrida(metaSubagentePi({ runId: 'r2', agent: 'constructor', parentSessionId: 'S1', timestamp: M1, turns: 1, cost: 0 }), transcriptSubagentePi()),
+    },
+    (dir) => analizarSubagentesPi(dir, { sesionId: 'S1' }),
+  );
+  assert.deepEqual(r.corridas, [
+    { rol: 'planificador', disparo: { origen: 'bloqueo', tarea: '02' }, feature: null, tarea: '02', turnos: 5, costo: 0.05 },
+    { rol: 'constructor', disparo: null, feature: null, tarea: null, turnos: 1, costo: 0 },
+  ]);
+});
+
+test('corridas (3): Claude: encargo del primer registro user; costo null', () => {
+  const transcript = unirJsonl([
+    registroPromptClaude('Lee: features/F31-x/task-02-y.md\nDisparó: puerta 4'),
+    turnoClaude({ id: 'x', ts: T1, input: 100 }),
+  ]);
+  const r = conCarpeta(
+    { 'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })), 'agent-a1.jsonl': transcript },
+    (dir) => analizarSubagentesClaude(dir),
+  );
+  assert.deepEqual(r.corridas, [
+    { rol: 'constructor', disparo: { origen: 'puerta', puerta: 4 }, feature: 'F31', tarea: '02', turnos: 1, costo: null },
+  ]);
+});
+
+test('corridas (4): Claude sin transcript: los tres valores del encargo son null', () => {
+  const r = conCarpeta(
+    { 'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })) },
+    (dir) => analizarSubagentesClaude(dir),
+  );
+  assert.deepEqual(r.corridas, [{ rol: 'constructor', disparo: null, feature: null, tarea: null, turnos: 0, costo: null }]);
+});
+
+test('corridas (5): el texto del encargo (Pi y Claude) no sale en corridas', () => {
+  const pi = conCarpeta(corrida(metaSubagentePi({ runId: 'r1', agent: 'constructor', parentSessionId: 'S1', timestamp: M1 }), transcriptSubagentePi()), (dir) =>
+    analizarSubagentesPi(dir, { sesionId: 'S1' }),
+  );
+  const claude = conCarpeta(
+    {
+      'agent-a1.meta.json': JSON.stringify(metaSubagenteClaude({ agentType: 'constructor' })),
+      'agent-a1.jsonl': unirJsonl([registroPromptClaude(), turnoClaude({ id: 'x', ts: T1 })]),
+    },
+    (dir) => analizarSubagentesClaude(dir),
+  );
+  assert.equal(JSON.stringify(pi.corridas).includes(CENTINELA_TEXTO), false);
+  assert.equal(JSON.stringify(claude.corridas).includes(CENTINELA_TEXTO), false);
 });
 
 test('claude: el texto de los mensajes y la description del meta no aparecen en los resultados', () => {
@@ -727,4 +809,135 @@ test('solo lectura: la raíz no cambia (nombres y tamaños) tras ejecutar', () =
     assert.equal(correr(['--raiz', raiz, '--json']).status, 0);
     assert.deepEqual(inventario(raiz), antes);
   });
+});
+
+// ---- task-11: --por-tarea, --eventos y leerEstados / costoPorTarea / formatearPorTarea ----
+
+const evento = (o) => JSON.stringify({ v: 1, id: 'x', fuente: 'git', evento: 'tarea_estado', sha: 'abc', de: null, por: 'constructor', ...o });
+
+test('por-tarea (1): leerEstados toma el último tarea_estado por t e ignora líneas que no son JSON', () => {
+  const texto = [
+    evento({ t: T3, feature: 'F32', tarea: '01', a: 'hecha' }),
+    'esto no es JSON',
+    evento({ t: T1, feature: 'F32', tarea: '01', a: 'en curso' }),
+    evento({ t: T2, feature: 'F32', tarea: '02', a: 'bloqueada' }),
+    JSON.stringify({ v: 1, evento: 'bloqueo', t: T3, feature: 'F32', tarea: '03' }),
+  ].join('\n');
+  const estados = leerEstados(texto);
+  assert.equal(estados.size, 2);
+  assert.equal(estados.get('F32/01'), 'hecha');
+  assert.equal(estados.get('F32/02'), 'bloqueada');
+  assert.equal(estados.has('F32/03'), false);
+});
+
+// Dos corridas de constructor (una sin costo), una vuelta del planificador sobre F32/02 y otra sin feature.
+const corridasPorTarea = () => [
+  {
+    subagentes: {
+      corridas: [
+        { rol: 'constructor', disparo: { origen: 'puerta', puerta: 4 }, feature: 'F32', tarea: '01', turnos: 4, costo: 0.1 },
+        { rol: 'constructor', disparo: null, feature: 'F32', tarea: '01', turnos: 2, costo: 0.2 },
+        { rol: 'constructor', disparo: null, feature: 'F32', tarea: '02', turnos: 3, costo: null },
+        { rol: 'planificador', disparo: { origen: 'bloqueo', tarea: '02' }, feature: 'F32', tarea: '02', turnos: 5, costo: 0.05 },
+        { rol: 'planificador', disparo: { origen: 'bloqueo', tarea: '03' }, feature: null, tarea: '03', turnos: 1, costo: null },
+      ],
+    },
+  },
+];
+
+test('por-tarea (2): costoPorTarea separa tareas y vueltas; costo null sin costo numérico; estado sin_dato sin eventos', () => {
+  const filas = costoPorTarea(corridasPorTarea(), { estados: new Map([['F32/01', 'hecha'], ['F32/02', 'bloqueada']]) });
+  assert.deepEqual(filas, [
+    { clave: '?/03', estado: 'sin_dato', corridas: 0, turnos: 0, costo: null, vueltas: 1, turnosVueltas: 1, costoVueltas: null },
+    { clave: 'F32/01', estado: 'hecha', corridas: 2, turnos: 6, costo: 0.3, vueltas: 0, turnosVueltas: 0, costoVueltas: null },
+    { clave: 'F32/02', estado: 'bloqueada', corridas: 1, turnos: 3, costo: null, vueltas: 1, turnosVueltas: 5, costoVueltas: 0.05 },
+  ]);
+  assert.equal(costoPorTarea(corridasPorTarea())[1].estado, 'sin_dato');
+});
+
+test('por-tarea (3): formatearPorTarea escribe una línea por fila con n/d y la nota final', () => {
+  const texto = formatearPorTarea(costoPorTarea(corridasPorTarea(), { estados: new Map([['F32/01', 'hecha']]) }));
+  assert.ok(texto.includes('F32/01 | hecha | 2 | 6 | US$0.300 | 0 | n/d\n'));
+  assert.ok(texto.includes('F32/02 | sin_dato | 1 | 3 | n/d | 1 | US$0.050\n'));
+  assert.ok(texto.includes('El costo del coordinador no se reparte entre tareas; la unión usa la ruta de la tarea en el encargo.'));
+  assert.equal(formatearPorTarea([]).startsWith('No hay tareas que listar.'), true);
+});
+
+// Raíz Pi con la sesión de sesionPiCli() y subagentes con encargo: F32/01 (hecha), F32/02 (bloqueada, con una
+// vuelta del planificador por BLOQUEO task-02) y F32/03 (sin estado ni vueltas).
+function raizPorTarea() {
+  const raiz = mkdtempSync(join(tmpdir(), 'consumo-tarea-'));
+  const corrida = (runId, agent, task, turns, cost) => ({
+    [`pi/subagent-artifacts/${runId}_${agent}_meta.json`]: JSON.stringify(
+      metaSubagentePi({ runId, agent, parentSessionId: 'sesion-cli', model: 'm-t', timestamp: M1, turns, cost, task }),
+    ),
+    [`pi/subagent-artifacts/${runId}_${agent}_transcript.jsonl`]: transcriptSubagentePi(),
+  });
+  escribirArbol(raiz, {
+    [`pi/${NOMBRE_PI}`]: sesionPiCli(),
+    ...corrida('r1', 'constructor', 'Lee: features/F32-x/task-01-y.md', 4, 0.1),
+    ...corrida('r2', 'constructor', 'Lee: features/F32-x/task-02-z.md', 3, 0.2),
+    ...corrida('r3', 'planificador', 'Lee: features/F32-x/task-02-z.md\nDisparó: BLOQUEO task-02', 5, 0.05),
+    ...corrida('r4', 'constructor', 'Lee: features/F32-x/task-03-w.md', 1, 0),
+  });
+  return raiz;
+}
+
+// Ejecuta fn(raiz, rutaEventos) con un archivo de eventos fuera de la raíz (que solo se escanea por .jsonl).
+function conRaizYEventos(fn) {
+  const dir = mkdtempSync(join(tmpdir(), 'consumo-ev-'));
+  const rutaEventos = join(dir, 'eventos.jsonl');
+  writeFileSync(
+    rutaEventos,
+    [
+      evento({ t: T1, feature: 'F32', tarea: '01', a: 'en curso' }),
+      evento({ t: T3, feature: 'F32', tarea: '01', a: 'hecha' }),
+      evento({ t: T2, feature: 'F32', tarea: '02', a: 'bloqueada' }),
+    ].join('\n') + '\n',
+  );
+  try {
+    return conRaiz((raiz) => fn(raiz, rutaEventos), raizPorTarea);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+test('por-tarea (4): CLI con --eventos lista solo las hechas y las con vueltas; costo de F32/01 y vuelta de F32/02', () => {
+  conRaizYEventos((raiz, eventos) => {
+    const r = correr(['--raiz', raiz, '--por-tarea', '--eventos', eventos]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.equal(r.stderr, '');
+    assert.ok(r.stdout.includes('F32/01 | hecha | 1 | 4 | US$0.100 | 0 | n/d\n'));
+    assert.ok(r.stdout.includes('F32/02 | bloqueada | 1 | 3 | US$0.200 | 1 | US$0.050\n'));
+    assert.equal(r.stdout.includes('F32/03'), false);
+  });
+});
+
+test('por-tarea (5): sin --eventos lista todas las tareas con sin_dato; --json da { tareas } con las cifras', () => {
+  conRaiz((raiz) => {
+    const texto = correr(['--raiz', raiz, '--por-tarea']);
+    assert.equal(texto.status, 0, texto.stderr);
+    assert.ok(texto.stdout.includes('F32/03 | sin_dato | 1 | 1 | US$0.000 | 0 | n/d\n'));
+
+    const r = correr(['--raiz', raiz, '--por-tarea', '--json']);
+    assert.equal(r.status, 0, r.stderr);
+    const { tareas } = JSON.parse(r.stdout);
+    assert.equal(Object.keys(JSON.parse(r.stdout)).join(), 'tareas');
+    assert.equal(tareas.length, 3);
+    const f2 = tareas.find((f) => f.clave === 'F32/02');
+    assert.equal(f2.estado, 'sin_dato');
+    assert.equal(f2.vueltas, 1);
+    assert.equal(f2.costoVueltas, 0.05);
+    assert.equal(tareas.find((f) => f.clave === 'F32/01').costoVueltas, null);
+  }, raizPorTarea);
+});
+
+test('por-tarea (6): --eventos sin --por-tarea termina en 1 con el error antes de comprobar --raiz', () => {
+  const r = correr(['--raiz', '/no/existe', '--eventos', 'x']);
+  assert.equal(r.status, 1);
+  assert.equal(r.stderr, 'error: --eventos exige --por-tarea\n');
+  assert.equal(r.stdout, '');
+  const sinRaiz = correr(['--eventos', 'x']);
+  assert.equal(sinRaiz.status, 1);
+  assert.equal(sinRaiz.stderr, 'error: --eventos exige --por-tarea\n');
 });
