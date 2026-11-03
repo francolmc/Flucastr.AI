@@ -17,6 +17,7 @@ const muestra = [
   '## Contexto',
   '- Repo: este.',
   '- Tocar: `archivo.mjs`',
+  '- Requiere: docker, puerto:55432',
   '',
   '## Decisiones ya tomadas',
   '- Se usa `node:test`.',
@@ -61,6 +62,8 @@ const variantes = [
   ['regla 11: cuatro rutas a tocar', (t) => t.replace('- Tocar: `archivo.mjs`', '- Tocar: `a.mjs`, `b.mjs`, `c.mjs`, `d.mjs`')],
   ['regla 11: ruta con «*»', (t) => t.replace('- Tocar: `archivo.mjs`', '- Tocar: `*.mjs`')],
   ['regla 11: sin línea «Tocar»', (t) => t.replace('- Tocar: `archivo.mjs`\n', '')],
+  ['regla 12: Requiere inválido', (t) => t.replace('- Requiere: docker, puerto:55432', '- Requiere: Docker')],
+  ['regla 12: dos líneas Requiere', (t) => t.replace('- Requiere: docker, puerto:55432', '- Requiere: docker, puerto:55432\n- Requiere: ninguno')],
   ['regla 10: decisión abierta sin resolver', (t) => t.replace('## Decisiones abiertas\nNinguna.', '## Decisiones abiertas\n- ¿Qué librería usar?')],
   ['regla 10: sección «Decisiones abiertas» vacía', (t) => t.replace('## Decisiones abiertas\nNinguna.', '## Decisiones abiertas')],
 ];

@@ -10,6 +10,7 @@ Entrada: la ruta del archivo de la tarea.
 ## Antes de empezar
 
 1. Lee la tarea completa. Si `estado` no es `aprobada`, **detente** y dilo; no cambies nada.
+   - **Entorno:** corre `node ~/.flucastr-ai/entorno.mjs <ruta-tarea>`. Si imprime `falta=<lista>`: `bloqueada`, en *Notas* `Bloqueo: tipo=entorno; falta=<lista>` y termina con `BLOQUEO: rol=franco; motivo=entorno: falta=<lista>`.
 2. **Rama de la feature.** Solo si el encargo trae la línea `Rama: <prefijo>/Fxx-nombre`. Si no la trae, no ejecutes ningún comando git de rama y sigue con el paso 3.
    - **Modo yolo:** si el encargo trae la línea `Modo yolo: activo`, salta este paso entero: no corres ningún comando git de rama, no creas rama, no haces `git switch` y no emites `CONFIRMAR:`; trabajas en la rama actual. Sigue sin haber commit, ni local, y la tarea termina en `lista para revisión` (el coordinador decide `hecha`).
    - Si el encargo contiene la frase ``Franco confirmó `git switch <rama>` ``: corre `git switch <rama>` (sin `-c`, solo esa rama), verifica con `git branch --show-current` y sigue la tarea. Sin esa frase, no ejecutas `git switch <rama>`. La confirmación vale solo para esa rama y esa tarea. Si el switch falla (por ejemplo, cambios sin commit que chocan), `BLOQUEO: rol=arquitecto; motivo=<salida del comando>` y no reintentes.

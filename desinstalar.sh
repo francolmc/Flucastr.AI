@@ -267,8 +267,8 @@ while IFS=$'\t' read -r tipo ruta extra; do
       esac
       ;;
     raiz)
-      # raíz del kit y lanzador fijo: solo se borran los dos archivos de ~/.flucastr-ai, si son archivos regulares
-      if { [ "$ruta" = "$ESTADO_DIR/raiz" ] || [ "$ruta" = "$ESTADO_DIR/validar-tarea.mjs" ]; } && [ -f "$ruta" ] && [ ! -L "$ruta" ]; then
+      # raíz del kit y lanzadores fijos: solo se borran los tres archivos de ~/.flucastr-ai, si son archivos regulares
+      if { [ "$ruta" = "$ESTADO_DIR/raiz" ] || [ "$ruta" = "$ESTADO_DIR/validar-tarea.mjs" ] || [ "$ruta" = "$ESTADO_DIR/entorno.mjs" ]; } && [ -f "$ruta" ] && [ ! -L "$ruta" ]; then
         if [ "$SIMULAR" = 0 ]; then rm -f "$ruta"; fi
         decir "  quitado: $ruta"
       else

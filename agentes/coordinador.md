@@ -71,7 +71,7 @@ Carga `comandos-coordinador` al pedirte Franco un comando, antes de `descomponer
 
 ## Bloqueos
 
-Ante `BLOQUEO: rol=<rol>; motivo=<motivo>` de un subagente: regístralo en *Bloqueos abiertos* de `STATUS.md`, enrútalo (si toca `definitions/`, puerta 1 y avisa a Franco) y quítalo al resolverse. Con `motivo=lectura:` no delegues la lectura: pregunta a Franco.
+Ante `BLOQUEO: rol=<rol>; motivo=<motivo>` de un subagente: regístralo en *Bloqueos abiertos* de `STATUS.md`, enrútalo (si toca `definitions/`, puerta 1 y avisa a Franco) y quítalo al resolverse. Con `rol=franco` (`motivo=lectura:` o `entorno:`) no delegues: pregunta a Franco.
 
 ## STATUS.md
 

@@ -7,13 +7,13 @@ import { validarTarea } from '../../scripts/formato-tarea.mjs';
 import { validarEvidencia } from '../../scripts/formato-evidencia.mjs';
 import { validarFuente } from '../../scripts/formato-fuente.mjs';
 
-// Regresión de los validadores sobre las tareas de F24–F29 (features/ y features/completed/).
+// Regresión de los validadores sobre las tareas de F24–F29, F30 y F33 (features/ y features/completed/).
 // La base pruebas/fixtures/regresion-f24-f29.json la escribe esta misma prueba con FLUCASTR_GENERAR_BASE=1.
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 const BASE = path.join(RAIZ, 'pruebas/fixtures/regresion-f24-f29.json');
 const CARPETAS = ['features', 'features/completed'];
-const CARPETA_FEATURE = /^F2[4-9]-/;
+const CARPETA_FEATURE = /^F(2[4-9]|3[03])-/;
 const ARCHIVO_TAREA = /^task-\d{2}-.+\.md$/;
 
 const leer = (ruta) => {
@@ -82,10 +82,10 @@ test('control negativo: una base alterada produce al menos una diferencia', () =
 const CMD_REGRESION = 'node --test pruebas/comprobaciones/x.test.mjs';
 const EVIDENCIA_REGRESION = ['```', `$ ${CMD_REGRESION}`, 'ℹ fail 0', 'exit 0', '```', '', 'Pasó con `ℹ fail 0`.'].join('\n');
 
-function tareaTerminada(notas) {
+function tareaTerminada(notas, estado = 'lista para revisión') {
   return [
     '# task-01 — Caso de borde de regresión',
-    'repo: Flucastr.AI   depende_de: —   estado: lista para revisión',
+    `repo: Flucastr.AI   depende_de: —   estado: ${estado}`,
     '',
     '## Descripción',
     'Texto breve que describe el objetivo.',
@@ -136,4 +136,22 @@ test('borde (b): una línea Registro coherente de 8 claves no produce motivos de
   const coherente = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna';
   const motivos = validarEvidencia(tareaTerminada(coherente)).filter((m) => m.includes('Registro'));
   assert.deepEqual(motivos, []);
+});
+
+test('borde (c): tarea bloqueada con Bloqueo: antes de Registro: validarEvidencia no produce motivos de Registro', () => {
+  const notas = [
+    'Bloqueo: tipo=entorno; falta=docker',
+    'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=0; verificacion=falla; huecos=0; resultado=bloqueada; causa=otra',
+  ].join('\n');
+  const motivos = validarEvidencia(tareaTerminada(notas, 'bloqueada')).filter((m) => m.includes('Registro'));
+  assert.deepEqual(motivos, []);
+});
+
+test('borde (d): una línea Requiere en Contexto no cambia validarEvidencia ni validarFuente de una tarea válida', () => {
+  const coherente = 'Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna';
+  const base = tareaTerminada(coherente);
+  const conRequiere = base.replace('- Tocar: `scripts/x.mjs`', '- Tocar: `scripts/x.mjs`\n- Requiere: docker, puerto:55432');
+  assert.notEqual(conRequiere, base, 'la línea Requiere debe insertarse en Contexto');
+  assert.deepEqual(validarEvidencia(conRequiere), validarEvidencia(base));
+  assert.deepEqual(validarFuente(conRequiere, leer), validarFuente(base, leer));
 });

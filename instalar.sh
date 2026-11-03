@@ -442,7 +442,7 @@ if [ "$SIMULAR" = 1 ]; then echo "SIMULACIÓN: no se escribe nada."; fi
 # Raíz del kit y lanzador fijo: el coordinador los usa para llegar a scripts/ desde cualquier proyecto.
 # Se escriben en ambos modos; el lanzador no tiene lógica propia (importa scripts/validar-tarea.mjs de la raíz).
 if [ "$SIMULAR" = 1 ]; then
-  echo "SIMULACIÓN: se escribirá $ESTADO_DIR/raiz y $ESTADO_DIR/validar-tarea.mjs"
+  echo "SIMULACIÓN: se escribirá $ESTADO_DIR/raiz, $ESTADO_DIR/validar-tarea.mjs y $ESTADO_DIR/entorno.mjs"
 else
   mkdir -p "$ESTADO_DIR"
   printf '%s\n' "$RAIZ" > "$ESTADO_DIR/raiz"
@@ -470,6 +470,37 @@ EOF
   registrar raiz "$ESTADO_DIR/validar-tarea.mjs"
   echo "  raíz del kit: $ESTADO_DIR/raiz ($RAIZ)"
   echo "  lanzador de validar-tarea: $ESTADO_DIR/validar-tarea.mjs"
+  # lanzador de entorno: carga scripts/entorno.mjs de la raíz y llama a su CLI (ejecutarCli) con los argumentos
+  cat > "$ESTADO_DIR/entorno.mjs" <<'EOF'
+// Lanzador fijo de entorno: lo escribe instalar.sh. Lee la raíz del kit, carga su módulo y ejecuta su CLI.
+import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+let raiz;
+try {
+  raiz = readFileSync(join(homedir(), '.flucastr-ai', 'raiz'), 'utf8').trim();
+} catch {
+  process.stderr.write('No se puede leer ~/.flucastr-ai/raiz; reinstala el kit.\n');
+  process.exitCode = 2;
+}
+if (raiz !== undefined) {
+  let modulo;
+  try {
+    modulo = await import(pathToFileURL(join(raiz, 'scripts', 'entorno.mjs')).href);
+  } catch (error) {
+    process.stderr.write(`No se puede cargar scripts/entorno.mjs: ${error.message}\n`);
+    process.exitCode = 2;
+  }
+  if (modulo !== undefined) {
+    process.exitCode = await modulo.ejecutarCli(process.argv.slice(2));
+  }
+}
+EOF
+  chmod +x "$ESTADO_DIR/entorno.mjs"
+  registrar raiz "$ESTADO_DIR/entorno.mjs"
+  echo "  lanzador de entorno: $ESTADO_DIR/entorno.mjs"
 fi
 
 if [ "$INSTALAR_CLAUDE" = 1 ]; then

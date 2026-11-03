@@ -19,6 +19,8 @@ export const TOPES = [
   { ruta: 'skills/comandos-coordinador/SKILL.md', tope: 5120, opcional: false },
   { ruta: 'skills/control-consumo/SKILL.md', tope: 4096, opcional: false },
   { ruta: 'skills/lectura-extra/SKILL.md', tope: 5120, opcional: false },
+  { ruta: 'skills/ejecutar-tarea/SKILL.md', tope: 7623, opcional: false },
+  { ruta: 'skills/descomponer-feature/SKILL.md', tope: 6400, opcional: false },
 ];
 
 // Devuelve true si el tamaño supera el tope. Igual al tope no excede.
