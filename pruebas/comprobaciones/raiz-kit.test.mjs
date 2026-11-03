@@ -38,6 +38,7 @@ function entorno() {
     instalar: (...args) => correr('bash', [join(repo, 'instalar.sh'), ...args]),
     desinstalar: (...args) => correr('bash', [join(repo, 'desinstalar.sh'), ...args]),
     lanzador: (...args) => correr(process.execPath, [join(estado, 'validar-tarea.mjs'), ...args], sinScripts),
+    lanzadorEntorno: (...args) => correr(process.execPath, [join(estado, 'entorno.mjs'), ...args], sinScripts),
   };
 }
 
@@ -95,9 +96,10 @@ test('(e) --simular no crea raiz ni lanzador', () => {
   const e = entorno();
   const r = e.instalar('--simular', '--solo', 'claude');
   assert.equal(r.status, 0, r.stderr + r.stdout);
-  assert.match(r.stdout, /SIMULACIÓN: se escribirá .*raiz y .*validar-tarea\.mjs/);
+  assert.match(r.stdout, /SIMULACIÓN: se escribirá .*raiz, .*validar-tarea\.mjs y .*entorno\.mjs/);
   assert.equal(existsSync(join(e.estado, 'raiz')), false);
   assert.equal(existsSync(join(e.estado, 'validar-tarea.mjs')), false);
+  assert.equal(existsSync(join(e.estado, 'entorno.mjs')), false);
 });
 
 test('control (i): desinstalar.sh no borra raiz ni lanzador que el manifiesto no registra', () => {
@@ -122,3 +124,49 @@ test('control (ii): con raiz borrada, el lanzador sale 2 y pide reinstalar', () 
   assert.equal(r.status, 2, r.stdout + r.stderr);
   assert.match(r.stderr, /reinstala el kit/);
 });
+
+function tareaConRequiere(e, valor) {
+  const archivo = join(e.sinScripts, 'tarea-requiere.md');
+  writeFileSync(archivo, `# task\n\n## Contexto\n- Tocar: x\n- Requiere: ${valor}\n`);
+  return archivo;
+}
+
+for (const extra of [[], ['--copiar']]) {
+  const modo = extra.length ? 'descarga' : 'repo';
+
+  test(`(a) modo ${modo}: instalar.sh escribe entorno.mjs y lo registra en el manifiesto`, () => {
+    const e = entorno();
+    const r = e.instalar(...extra, '--solo', 'claude');
+    assert.equal(r.status, 0, r.stderr + r.stdout);
+    assert.ok(existsSync(join(e.estado, 'entorno.mjs')));
+    assert.ok(manifiesto(e).includes(`raiz\t${join(e.estado, 'entorno.mjs')}\t`), manifiesto(e).join('\n'));
+  });
+
+  test(`(b) modo ${modo}: entorno.mjs sin scripts/ en el cwd sale 0 con ninguno y 1 con falta=`, () => {
+    const e = entorno();
+    assert.equal(e.instalar(...extra, '--solo', 'claude').status, 0);
+    const ok = e.lanzadorEntorno(tareaConRequiere(e, 'ninguno'));
+    assert.equal(ok.status, 0, ok.stdout + ok.stderr);
+    const falta = e.lanzadorEntorno(tareaConRequiere(e, 'runtime:node@999'));
+    assert.equal(falta.status, 1, falta.stdout + falta.stderr);
+    assert.match(falta.stdout, /falta=runtime:node@999/);
+  });
+
+  test(`(c) modo ${modo}: la puerta validar-tarea instalada sigue cargando con Requiere: docker`, () => {
+    const e = entorno();
+    assert.equal(e.instalar(...extra, '--solo', 'claude').status, 0);
+    const r = e.lanzador(tareaConRequiere(e, 'docker'));
+    const salida = r.stdout + r.stderr;
+    assert.doesNotMatch(salida, /ERR_MODULE_NOT_FOUND|Cannot find|Error \[/, salida);
+    assert.notEqual(r.status, 2, salida);
+  });
+
+  test(`(d) modo ${modo}: desinstalar.sh quita entorno.mjs`, () => {
+    const e = entorno();
+    assert.equal(e.instalar(...extra, '--solo', 'claude').status, 0);
+    assert.ok(existsSync(join(e.estado, 'entorno.mjs')));
+    const r = e.desinstalar();
+    assert.equal(r.status, 0, r.stderr + r.stdout);
+    assert.equal(existsSync(join(e.estado, 'entorno.mjs')), false);
+  });
+}

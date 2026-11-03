@@ -28,7 +28,7 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
 repo: …   depende_de: …   estado: borrador
 
 ## Descripción      Qué y por qué, 3–5 líneas.
-## Contexto         Rutas exactas a leer y a tocar; convenciones del repo; cómo se ejecuta y se prueba; viñeta Fuente.
+## Contexto         Rutas exactas a leer y a tocar; convenciones del repo; cómo se ejecuta y se prueba; viñeta Fuente; `- Requiere:`.
 ## Decisiones ya tomadas   Lo que el ejecutor NO debe volver a decidir (librería, nombres, formato…).
 ## Alcance / Fuera de alcance   Fuera de alcance no puede quedar vacío.
 ## Pasos            Numerados. Cada uno: archivo, qué cambia, resultado observable.
@@ -55,6 +55,7 @@ Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `h
 - Todo lo que el ejecutor tendría que elegir está en *Decisiones ya tomadas*.
 - Cada paso termina en algo que se puede ver o ejecutar.
 - La verificación se puede correr tal cual está escrita.
+- `- Requiere:` en *Contexto*: `ninguno` o lista separada por «, » de `docker`, `navegador`, `red`, `puerto:<n>`, `runtime:<nombre>@<versión>` (nombre: `node`, `npm`, `python`, `python3`, `go`, `java`, `deno`, `bun`, `dotnet`), `largo:<segundos>`; dedúcela de los comandos de *Verificación*. Cada comando de *Verificación* debe correr en ≤180 s; si una suite no cabe, pártela en comandos por subconjunto. `largo:<s>` solo documenta un comando que no se puede partir.
 
 ## Acotada (cifras de partida, a calibrar con la primera feature real)
 

@@ -1,6 +1,8 @@
 // Núcleo del validador de la plantilla de tarea (definitions/WORKFLOW.md §6); lo usa scripts/validar-tarea.mjs y lo re-exporta pruebas/comprobaciones/formato-tarea.mjs.
 // validarTarea(texto) devuelve un arreglo de mensajes de error en español; vacío = válida.
 
+import { extraerRequiere, parsearRequiere } from './formato-requiere.mjs';
+
 export const SECCIONES = [
   'Descripción',
   'Contexto',
@@ -147,6 +149,17 @@ export function validarTarea(texto) {
           errores.push(`«Tocar» tiene una ruta no válida: «${ruta}». Debe ser relativa al repo, sin «*» ni «..», sin «/» al inicio ni al final.`);
         }
       }
+    }
+  }
+
+  // Regla 12: «- Requiere:» es opcional (ausente = «ninguno»); si aparece, una sola línea bien formada en «Contexto».
+  const requiere = extraerRequiere(todo);
+  if (requiere.estado === 'multiple') {
+    errores.push('«Contexto» tiene más de una línea «- Requiere: …»; debe tener como máximo una.');
+  } else if (requiere.estado === 'presente') {
+    const analisis = parsearRequiere(requiere.valor);
+    if (!analisis.ok) {
+      errores.push(analisis.error);
     }
   }
 

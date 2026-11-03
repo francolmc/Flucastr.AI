@@ -80,6 +80,13 @@ export const FRASES_LECTURA_EXTRA = {
   'lectura-extra': ['15 KB', 'Lectura extra: <ruta>; motivo=', 'rol=franco', 'no aplica al `coordinador`'],
 };
 
+// Frases de F31 (puerta de entorno). La clave ejecutar-tarea es skill; no cambia FRASES_LECTURA_EXTRA.
+export const FRASES_ENTORNO = {
+  'ejecutar-tarea': ['entorno.mjs', 'BLOQUEO: rol=franco; motivo=entorno:'],
+  'descomponer-feature': ['- Requiere:', '≤180 s'],
+  coordinador: ['`rol=franco`', 'o `entorno:`'],
+};
+
 export const FRASES_POR_ARCHIVO = {
   'agentes/arquitecto': [
     ...FRASES_LECTURA_F22.arquitecto,
@@ -102,6 +109,7 @@ export const FRASES_POR_ARCHIVO = {
   'agentes/coordinador': [
     ...FRASES_COORDINADOR_F21,
     ...FRASES_LECTURA_EXTRA.coordinador,
+    ...FRASES_ENTORNO.coordinador,
     'REFINAR: feature=Fxx; preguntas=<n>',
     'features/completed/',
     'registro/',
@@ -144,9 +152,11 @@ export const FRASES_POR_ARCHIVO = {
     'features/Fxx-nombre/refinado.md',
     'Modo yolo: activo',
     ...FRASES_LECTURA_F22['descomponer-feature'],
+    ...FRASES_ENTORNO['descomponer-feature'],
   ],
   'skills/ejecutar-tarea': [
     ...FRASES_LECTURA_F22['ejecutar-tarea'],
+    ...FRASES_ENTORNO['ejecutar-tarea'],
   ],
   'skills/disenar-arquitectura': [
     ...FRASES_LECTURA_F22['disenar-arquitectura'],
