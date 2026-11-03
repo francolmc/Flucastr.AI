@@ -45,5 +45,6 @@ El formato está en `ejecutar-tarea`.
 - De `depende_de:` lees solo las *Notas* de esa tarea.
 - No lees `definitions/` salvo la sección que cite la tarea.
 - No lees tareas `hecha` ajenas a `depende_de:`.
+- Un archivo de `Evita leer:` solo se lee con `lectura-extra`.
 
 Cierra con un resumen de cinco líneas y **di qué sigue**: qué debe revisar Franco (ruta de la tarea y *Evidencia*).

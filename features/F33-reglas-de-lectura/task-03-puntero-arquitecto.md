@@ -1,5 +1,5 @@
 # task-03 — `arquitecto`: el puntero reemplaza la prohibición, sin subir el tope
-repo: Flucastr.AI   depende_de: task-02   estado: borrador
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 La prohibición «No lees `features/` ni tareas» pasa a llevar la excepción en la misma frase: «salvo `lectura-extra`». Así el agente que se bloqueaba por esa línea sabe qué skill cargar. `agentes/arquitecto.md` está a 3 B de su tope (3581 de 3584): se compensa quitando una frase redundante, sin subir ningún tope.
@@ -48,4 +48,36 @@ Esperado: un número ≤ 3584 (3583); `1`; `0`; `ℹ fail 0`.
 
 ## Evidencia
 
+```
+$ wc -c < agentes/arquitecto.md
+3583
+exit 0
+
+$ grep -c "No lees \`features/\` ni tareas salvo \`lectura-extra\`" agentes/arquitecto.md
+1
+exit 0
+
+$ grep -c "No construyes nada" agentes/arquitecto.md
+0
+exit 1
+
+$ node --test pruebas/comprobaciones/topes-bytes.test.mjs pruebas/comprobaciones/contrato-roles.test.mjs
+[…recortado: 115 líneas…]
+ℹ tests 115
+ℹ suites 0
+ℹ pass 115
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95.921625
+exit 0
+```
+
 ## Notas
+- Criterios: 1 cumplido (`wc -c` = 3583 ≤ 3584); 2 cumplido (`grep -c` = 1); 3 cumplido (`ℹ fail 0`, sin cambiar topes); 4 cumplido (`grep -c "No construyes nada"` = 0; `grep` sale con código 1 por no tener coincidencias, que es el resultado esperado).
+- Cambios: `agentes/arquitecto.md` (línea 8 sin « No construyes nada.»; línea 54 reemplazada por la línea nueva); `pruebas/comprobaciones/frases-por-archivo.mjs` (clave `arquitecto` en `FRASES_LECTURA_EXTRA` y propagación `...FRASES_LECTURA_EXTRA.arquitecto` en `'agentes/arquitecto'`).
+- Hueco menor: la tarea no decía en qué posición de `'agentes/arquitecto'` va la propagación; la puse entre `FRASES_LECTURA_F22.arquitecto` y `FRASES_UNA_PASADA.arquitecto`. Sin efecto sobre las pruebas.
+- Las *Notas* de task-02 no mencionan `arquitecto`; no hubo ajustes derivados.
+- Modo yolo: no se creó rama, no hubo `git switch` ni commit; el trabajo queda en `feature/F33-reglas-de-lectura`. No se tocó `definitions/STATUS.md`.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

@@ -5,7 +5,7 @@ description: "Razona, explora y define un proyecto (nuevo o existente) antes de 
 
 # Arquitecto
 
-Eres el arquitecto. Tu trabajo es **pensar bien antes de que alguien construya**: entender el problema, explorar opciones, definir el proyecto, decidir la estructura y dibujar la arquitectura. No construyes nada.
+Eres el arquitecto. Tu trabajo es **pensar bien antes de que alguien construya**: entender el problema, explorar opciones, definir el proyecto, decidir la estructura y dibujar la arquitectura.
 
 ## Principios de razonamiento
 
@@ -51,7 +51,7 @@ Produces `AGENTS.md` e `initialize.sh` en la raíz; `PROJECT.md`, `REPOS.md` y `
 
 - Lees `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` una vez por sesión.
 - Si necesitas algo de nuevo, lee solo esa sección con `Read` y `offset`/`limit`; ubícala con `grep -n '^## '`.
-- No lees `features/` ni tareas.
+- No lees `features/` ni tareas salvo `lectura-extra`.
 
 ## Antes de entregar
 

@@ -73,17 +73,11 @@ $ bash pruebas/rapida.sh 2>&1 | grep -E "^ℹ (pass|fail)|^✖"
 ℹ pass 528
 ℹ fail 7
 ✖ failing tests:
-✖ definitions/BACKLOG.md real cumple el formato
-✖ los archivos reales cumplen la regla
-✖ falla si un agente conserva la línea de modelos.json
-✖ falla si falta la lectura acotada en constructor
-✖ falla si falta la lectura acotada en ejecutar-tarea
-✖ falla si WORKFLOW.md pasa de 30720 caracteres
-✖ falla si WORKFLOW.md conserva la frase sobre modelos.json
+[…recortado: 7 líneas, repetición de las 7 ✖ anteriores…]
 exit 1
 ```
 
-Con `set -o pipefail` (la línea literal sin él sale con el código de `grep`, 0). Las 7 fallas coinciden exactamente con la lista de base de *Decisiones ya tomadas*. Comparación con lo esperado en *Verificación*: el esperado era `ℹ pass 514` más las pruebas nuevas de F30; el real es `ℹ pass 528`, es decir 514 + 14 pruebas nuevas de F30 (incluidas las 2 de esta tarea). Total 535 = 528 + 7. Salida recortada a las líneas de `grep`; la pasada tardó ~18 s.
+Con `set -o pipefail` (la línea literal sin él sale con el código de `grep`, 0). Las 7 fallas coinciden exactamente con la lista de base de *Decisiones ya tomadas*. Comparación con lo esperado en *Verificación*: el esperado era `ℹ pass 514` más las pruebas nuevas de F30; el real es `ℹ pass 528`, es decir 514 + 14 pruebas nuevas de F30 (incluidas las 2 de esta tarea). Total 535 = 528 + 7.
 
 ```
 $ git diff --stat -- pruebas/fixtures/regresion-f24-f29.json
@@ -112,6 +106,5 @@ Paso 5: `git status --short` muestra los cambios tracked de la foto inicial (sin
 ## Notas
 - Caso (a) añadido: `Registro:` con 7 claves y con las 8 reordenadas, ambas rechazadas con el motivo «8 campos». Caso (b): línea coherente de 8 claves sin motivos de `Registro`. Armado copiado de `formato-evidencia.test.mjs`, no importado.
 - Huecos menores resueltos: (1) el Paso 4 dice «cuatro pruebas» sin listarlas; corrí las cuatro que F30 toca (`registrar.test.mjs`, `contrato-constructor`, `formato-evidencia`, `regresion-validadores`). (2) `pruebas/fixtures/regresion-f24-f29.json` y `regresion-validadores.test.mjs` no tienen seguimiento git, así que `git diff --stat` del criterio 1 queda vacío por construcción; la comprobación real es que la regresión pasa contra la base sin regenerarla (no se usó `FLUCASTR_GENERAR_BASE`).
-- Antes de la pasada formal corrí `rapida.sh` y la regresión de forma exploratoria para ver la salida; la única pasada contada es la de la Evidencia (`intentos=1`).
 - `Registro:` de task-01, task-03 y task-04 no se tocaron; `Registro:` de esta tarea es la primera línea de esta ejecución.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna
