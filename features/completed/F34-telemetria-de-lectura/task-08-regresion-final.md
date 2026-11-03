@@ -1,5 +1,5 @@
 # task-08 — Regresión final de F34: rápida, topes y contratos sin empeorar
-repo: Flucastr.AI   depende_de: task-07   estado: bloqueada
+repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
 ## Descripción
 Cierre de F34 sin cambios de código: se comprueba que los topes de bytes no se movieron (F34 no toca agentes ni skills) y que `pruebas/rapida.sh` no empeora: 7 fallos preexistentes y 24 pruebas nuevas.
