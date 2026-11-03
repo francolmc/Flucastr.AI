@@ -1,5 +1,5 @@
 # task-08 — Regresión final de F34: rápida, topes y contratos sin empeorar
-repo: Flucastr.AI   depende_de: task-07   estado: en curso
+repo: Flucastr.AI   depende_de: task-07   estado: bloqueada
 
 ## Descripción
 Cierre de F34 sin cambios de código: se comprueba que los topes de bytes no se movieron (F34 no toca agentes ni skills) y que `pruebas/rapida.sh` no empeora: 7 fallos preexistentes y 24 pruebas nuevas.
@@ -45,4 +45,38 @@ Esperado: `ℹ fail 0` (primer comando); `ℹ tests 102` y `ℹ fail 0` (13 + 62
 
 ## Evidencia
 
+Pasada 1 y pasada 2 (idénticas en conteos y títulos).
+
+$ node --test pruebas/comprobaciones/topes-bytes.test.mjs 2>&1 | grep -E "^ℹ (tests|fail)"
+ℹ tests 23
+ℹ fail 0
+exit 0
+
+$ node --test pruebas/comprobaciones/formato-encargo.test.mjs pruebas/comprobaciones/consumo.test.mjs pruebas/comprobaciones/informe-pistas-lectura.test.mjs pruebas/comprobaciones/informe-pistas.test.mjs pruebas/comprobaciones/informe-consumo.test.mjs pruebas/comprobaciones/informe-lectura-cli.test.mjs 2>&1 | grep -E "^ℹ (tests|fail)"
+ℹ tests 102
+ℹ fail 0
+exit 0
+
+$ bash pruebas/rapida.sh 2>&1 | grep -E "^ℹ (tests|pass|fail)|^✖"
+ℹ tests 682
+ℹ pass 674
+ℹ fail 8
+✖ definitions/BACKLOG.md real cumple el formato
+✖ definitions/STATUS.md real cumple el formato
+✖ los archivos reales cumplen la regla
+✖ falla si un agente conserva la línea de modelos.json
+✖ falla si falta la lectura acotada en constructor
+✖ falla si falta la lectura acotada en ejecutar-tarea
+✖ falla si WORKFLOW.md pasa de 30720 caracteres
+✖ falla si WORKFLOW.md conserva la frase sobre modelos.json
+exit 1
+
 ## Notas
+- Rápida: empeora. Base: `ℹ tests 658`, `ℹ pass 651`, `ℹ fail 7`. Medido: `ℹ tests 682` (cumple), `ℹ pass 674` (se esperaban 675), `ℹ fail 8` (se esperaban 7).
+- Título nuevo: «definitions/STATUS.md real cumple el formato» (`pruebas/comprobaciones/formato-flujo.test.mjs:217`): «La línea «Presupuesto» tiene una forma inválida.». El archivo `definitions/STATUS.md` aparece `M` en git desde antes de F34 (lo escribe el coordinador). F34 no lo toca. Causa probable: la línea «Presupuesto» de ese archivo, no el código de F34.
+- No se corrigió nada (fuera de alcance: `definitions/` y `pruebas/`). Tampoco se editó `STATUS.md`.
+- Criterios: 1 cumple (topes-bytes `fail 0`); 2 cumple (102 tests, `fail 0`); 3 no cumple (`fail 8` y título nuevo).
+- Huecos menores: 0.
+- Bloqueo: la regresión viene de fuera de F34 (estado de `definitions/STATUS.md`). Franco decide si se corrige ese archivo o se acepta la base nueva.
+Bloqueo: tipo=verificacion_x2; falta=-
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=falla; huecos=0; resultado=bloqueada; causa=verificacion_x2
