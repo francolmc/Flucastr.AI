@@ -186,6 +186,23 @@ test('status compacto: la muestra de siete líneas se acepta', () => {
   assert.deepEqual(validarStatus(STATUS_COMPACTO), []);
 });
 
+test('status compacto: Presupuesto con sufijos amp_* en orden se acepta', () => {
+  const t = STATUS_COMPACTO.replace(
+    'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0',
+    'Presupuesto: F29; rondas arq=3 plan=0; ampliado=0; amp_arq=1; amp_plan=2; amp_k=1',
+  );
+  assert.deepEqual(validarStatus(t), []);
+});
+
+test('status compacto: Presupuesto con sufijos amp_* fuera de orden se rechaza', () => {
+  const t = STATUS_COMPACTO.replace(
+    'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0',
+    'Presupuesto: F29; rondas arq=3 plan=0; ampliado=0; amp_plan=2; amp_arq=1',
+  );
+  const errores = validarStatus(t);
+  assert.ok(errores.some((e) => e.includes('Presupuesto')));
+});
+
 test('status compacto: una línea quitada («Retomar») se rechaza', () => {
   const t = STATUS_COMPACTO.replace('Retomar: revisar task-03\n', '');
   const errores = validarStatus(t);

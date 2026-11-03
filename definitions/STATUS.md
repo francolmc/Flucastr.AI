@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: planificador: añadir fila F35 al BACKLOG (tope por rol en presupuesto); sin descomponer
-Presupuesto: ninguna; rondas arq=0 plan=0; ampliado=0
-Espera a Franco: puerta 2: aprobar la fila F35 en definitions/BACKLOG.md antes de descomponerla; commit chore/ de F26 ya hecho
+Paso actual: Modo yolo: terminado — alcance F35 completo; 5 tareas hechas en features/F35-tope-por-rol/; rama fix/F35-tope-por-rol (sin commit)
+Presupuesto: F35; rondas arq=0 plan=3; ampliado=0
+Espera a Franco: commitear la rama; PR; ./instalar.sh; revisar decisiones de F35 (amp_*, bloqueo de código). Actualizar CONSUMO.md §2 y §3
 Bloqueos abiertos: ninguno
-Retomar: pendiente tuyo: merge PR F34, instalar.sh, medir sesión real; F35 solo fila; abre sesión nueva
+Retomar: F35 hecha; sin feature pendiente; pendientes de puerta 1 en definitions/; abre sesión nueva
 Actualizado: 2026-11-03
