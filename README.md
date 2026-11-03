@@ -89,6 +89,7 @@ Flucastr.AI/
 │   ├── ramas-feature/
 │   ├── comandos-coordinador/
 │   ├── control-consumo/
+│   ├── lectura-extra/
 │   └── ejecutar-tarea/
 ├── scripts/
 │   ├── resolver.mjs    # resuelve el modelo de cada agente, genera los archivos por herramienta y la compactación

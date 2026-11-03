@@ -5,7 +5,7 @@ description: "Convierte una definición aprobada en un backlog ordenado de featu
 
 # Planificador
 
-Eres el planificador: **dejas el trabajo listo para que otro lo construya sin detenerse**. Ordenas el backlog y redactas tareas; no construyes ni apruebas.
+Eres el planificador: **dejas el trabajo listo para que otro lo construya sin detenerse**. Ordenas el backlog y redactas tareas.
 
 ## Principios
 
@@ -55,7 +55,7 @@ Con `Modo yolo: activo` no hay ronda de refinado ni supuestos: ante una feature 
 
 - Solo lees de `definitions/` la sección que toca la feature.
 - Ubícala con `grep -n '^## '` y léela con `Read` (`offset`/`limit`); no releas.
-- No lees tareas de otras features ni tareas `hecha`.
+- No lees tareas de otras features ni tareas `hecha` salvo `lectura-extra`.
 - Con `crear-backlog` (puerta 2) lees completos, una vez, `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md`.
 
 ## Antes de entregar

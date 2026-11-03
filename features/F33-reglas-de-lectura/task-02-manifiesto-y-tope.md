@@ -1,5 +1,5 @@
 # task-02 — Manifiesto de frases y tope de bytes de `lectura-extra`
-repo: Flucastr.AI   depende_de: task-01   estado: borrador
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 La skill y el puntero de `constructor` quedan protegidos: el manifiesto exige sus frases y `topes-bytes` fija el tope de la skill. Se crea `FRASES_LECTURA_EXTRA`, la lista que las tareas 03 a 05 ampliarán con `arquitecto`, `planificador` y `coordinador`.
@@ -48,4 +48,48 @@ Esperado: `ℹ fail 0`; `9`; `skills/lectura-extra/SKILL.md:1` y `pruebas/compro
 
 ## Evidencia
 
+Pasada 2 de Verificación (comandos idénticos a *Verificación*, salida real; la pasada 1 dio el mismo resultado).
+
+```
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/topes-bytes.test.mjs
+✔ muestra válida mínima no tiene errores (1.727166ms)
+✔ rechaza regla 1: name no coincide con la clave del agente (0.240291ms)
+[…recortado: 111 líneas…]
+✔ control negativo sintético: skills/lectura-extra/SKILL.md con tope+1 excede y con tope no excede (0.020792ms)
+ℹ tests 114
+ℹ suites 0
+ℹ pass 114
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 71.4585
+exit 0
+```
+
+```
+$ grep -c "ruta:" pruebas/comprobaciones/topes-bytes.test.mjs
+9
+exit 0
+```
+
+```
+$ grep -c "15 KB" skills/lectura-extra/SKILL.md pruebas/comprobaciones/frases-por-archivo.mjs
+skills/lectura-extra/SKILL.md:1
+pruebas/comprobaciones/frases-por-archivo.mjs:1
+exit 0
+```
+
+```
+$ grep -c "tope: 7168\|tope: 3584\|tope: 3072\|tope: 5120\|tope: 4096" pruebas/comprobaciones/topes-bytes.test.mjs
+9
+exit 0
+```
+
 ## Notas
+- Criterios: 1 cumplido (`fail 0` en el node --test); 2 cumplido (`15 KB` en skill y manifiesto, ambos con 1); 3 cumplido (9 entradas `ruta:`, el test pasa); 4 cumplido (9 líneas con los cinco topes, los anteriores sin cambio).
+- Cambios: `pruebas/comprobaciones/frases-por-archivo.mjs` (bloque `FRASES_LECTURA_EXTRA` antes de `FRASES_POR_ARCHIVO`, propagación en `agentes/constructor`, entrada `skills/lectura-extra`); `pruebas/comprobaciones/topes-bytes.test.mjs` (entrada `skills/lectura-extra/SKILL.md` con tope 5120 al final de `TOPES`).
+- La frase «no aplica al `coordinador`» coincide con la skill de task-01; no hizo falta corregir el manifiesto.
+- Pasada 1 de Verificación se corrió con redirección a un archivo de la carpeta temporal, así que no era idéntica a *Verificación*; la pasada 2 se corrió tal cual y es la que está en *Evidencia*. Luego se repitió el `node --test` solo para contar las líneas de salida (122); mismo resultado.
+- Modo yolo: no se creó rama, no hubo `git switch` ni commit; el trabajo queda en `feature/F33-reglas-de-lectura`. No se tocó `definitions/STATUS.md`.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

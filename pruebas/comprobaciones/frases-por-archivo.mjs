@@ -71,9 +71,19 @@ export const FRASES_UNA_PASADA = {
   ],
 };
 
+// Frases de F33 (reglas de lectura). Las claves arquitecto, planificador y constructor son agentes; lectura-extra es skill.
+export const FRASES_LECTURA_EXTRA = {
+  arquitecto: ['No lees `features/` ni tareas salvo `lectura-extra`'],
+  planificador: ['No lees tareas de otras features ni tareas `hecha` salvo `lectura-extra`'],
+  constructor: ['solo se lee con `lectura-extra`'],
+  coordinador: ['Evita leer:', 'pasar su contenido a otro rol', 'motivo=lectura:'],
+  'lectura-extra': ['15 KB', 'Lectura extra: <ruta>; motivo=', 'rol=franco', 'no aplica al `coordinador`'],
+};
+
 export const FRASES_POR_ARCHIVO = {
   'agentes/arquitecto': [
     ...FRASES_LECTURA_F22.arquitecto,
+    ...FRASES_LECTURA_EXTRA.arquitecto,
     ...FRASES_UNA_PASADA.arquitecto,
   ],
   'agentes/planificador': [
@@ -82,13 +92,16 @@ export const FRASES_POR_ARCHIVO = {
     'Modo yolo: activo',
     'features/completed/',
     ...FRASES_LECTURA_F22.planificador,
+    ...FRASES_LECTURA_EXTRA.planificador,
   ],
   'agentes/constructor': [
     'escribes en `STATUS.md`',
     ...FRASES_LECTURA_F22.constructor,
+    ...FRASES_LECTURA_EXTRA.constructor,
   ],
   'agentes/coordinador': [
     ...FRASES_COORDINADOR_F21,
+    ...FRASES_LECTURA_EXTRA.coordinador,
     'REFINAR: feature=Fxx; preguntas=<n>',
     'features/completed/',
     'registro/',
@@ -145,4 +158,5 @@ export const FRASES_POR_ARCHIVO = {
   'skills/revisar-proyecto-existente': [
     ...FRASES_UNA_PASADA['revisar-proyecto-existente'],
   ],
+  'skills/lectura-extra': [...FRASES_LECTURA_EXTRA['lectura-extra']],
 };

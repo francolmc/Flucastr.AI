@@ -1,5 +1,5 @@
 # task-01 — Skill `lectura-extra` y puntero en `constructor`
-repo: Flucastr.AI   depende_de: —   estado: borrador
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Nace la skill `lectura-extra`: la excepción blanda para leer un archivo de `Evita leer:` (o de «No lees…» del agente), con tope y declaración. Se crea junto con el puntero en `agentes/constructor.md` porque `contrato-roles` exige que toda skill aparezca entre comillas invertidas en algún agente. También se anota la base de la verificación rápida, para comparar en task-06.
@@ -64,4 +64,43 @@ Esperado: `ℹ fail 0`; luego un número ≤ 3072; luego un número ≤ 2048; lu
 
 ## Evidencia
 
+```
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/readme-estructura.test.mjs pruebas/comprobaciones/contrato-constructor.test.mjs pruebas/comprobaciones/topes-bytes.test.mjs
+✔ control negativo sintético: skills/control-consumo/SKILL.md con tope+1 excede y con tope no excede (0.092833ms)
+ℹ tests 136
+ℹ suites 0
+ℹ pass 136
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 246.253583
+exit 0
+```
+
+```
+$ wc -c < agentes/constructor.md
+    3008
+exit 0
+```
+
+```
+$ wc -c < skills/lectura-extra/SKILL.md
+     925
+exit 0
+```
+
+```
+$ grep -c "lectura-extra" agentes/constructor.md README.md
+agentes/constructor.md:1
+README.md:1
+exit 0
+```
+
 ## Notas
+- Base rápida: tests=535; pass=527; fail=8; segundos=22; fallos=definitions/BACKLOG.md real cumple el formato; las tareas reales de features/ cumplen el formato; los archivos reales cumplen la regla; falla si un agente conserva la línea de modelos.json; falla si falta la lectura acotada en constructor; falla si falta la lectura acotada en ejecutar-tarea; falla si WORKFLOW.md pasa de 30720 caracteres; falla si WORKFLOW.md conserva la frase sobre modelos.json
+- Hueco menor: la base escrita en la tarea (521 pruebas, 514 pasan, 7 fallan, unos 18 s) no coincide con la medida hoy; se anotó la medida real. Los 8 fallos ocurren antes de tocar archivos y no los causa esta tarea.
+- Modo yolo: no se creó rama, no hubo `git switch` ni commit; el trabajo quedó en `feature/F33-reglas-de-lectura`.
+- Pasada 1 de verificación: `node --test` iba con `| tail`, así que el `exit` no se capturó; pasada 2 completa sin pipe, con el código real. Ambas pasadas dan `fail 0`.
+- Cambios: `skills/lectura-extra/SKILL.md` (nueva, contenido literal), viñeta en «Qué lees» de `agentes/constructor.md`, línea `│   ├── lectura-extra/` en el árbol de `README.md`.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna
