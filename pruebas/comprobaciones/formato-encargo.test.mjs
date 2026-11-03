@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parsearDisparo, rutaDeTarea, resumirEncargo } from '../../scripts/formato-encargo.mjs';
+import {
+  parsearDisparo,
+  rutaDeTarea,
+  resumirEncargo,
+  listaDeRutas,
+  normalizarRuta,
+  rutaCalza,
+  declaracionesLecturaExtra,
+  resumirLecturaExtra,
+} from '../../scripts/formato-encargo.mjs';
 
 test('parsearDisparo reconoce las cuatro formas válidas', () => {
   assert.deepEqual(parsearDisparo('Disparó: puerta 3'), { origen: 'puerta', puerta: 3 });
@@ -50,4 +59,54 @@ test('resumirEncargo no devuelve texto del encargo', () => {
   const salida = JSON.stringify(resumirEncargo(texto));
   assert.equal(salida.includes('CENTINELA-ENCARGO'), false);
   assert.deepEqual(JSON.parse(salida), { disparo: { origen: 'franco' }, feature: 'F31', tarea: '03' });
+});
+
+test('listaDeRutas saca rutas de backticks y de prosa, y descarta lo que no es ruta', () => {
+  assert.deepEqual(
+    listaDeRutas('Evita leer: `definitions/` salvo lo citado, tareas `hecha`', 'Evita leer'),
+    ['definitions/'],
+  );
+  assert.deepEqual(
+    listaDeRutas('Lee: a/b.md «## 2», c/d.md', 'Lee'),
+    ['a/b.md', 'c/d.md'],
+  );
+  assert.deepEqual(listaDeRutas('sin línea', 'Lee'), []);
+  assert.deepEqual(listaDeRutas(42, 'Lee'), []);
+});
+
+test('normalizarRuta unifica separadores y recorta hasta la raíz conocida', () => {
+  assert.equal(normalizarRuta('/ws/definitions/X.md'), 'definitions/X.md');
+  assert.equal(normalizarRuta('.\\features/F1-x/t.md'), 'features/F1-x/t.md');
+});
+
+test('rutaCalza compara carpeta contra archivo y archivo contra otro archivo', () => {
+  assert.equal(rutaCalza('/ws/definitions/PROJECT.md', 'definitions/'), true);
+  assert.equal(rutaCalza('/ws/definitions/PROJECT.md', 'definitions/WORKFLOW.md'), false);
+  assert.equal(rutaCalza('/ws/definitions/PROJECT.md', 'definitions/PROJECT.md'), true);
+});
+
+test('declaracionesLecturaExtra ignora el motivo y normaliza rutas absolutas', () => {
+  const declaradas = declaracionesLecturaExtra([
+    'Resultado.\nLectura extra: /ws/definitions/WORKFLOW.md; motivo=CENTINELA-MOTIVO\n',
+    42,
+  ]);
+  assert.deepEqual([...declaradas], ['definitions/WORKFLOW.md']);
+  assert.equal(JSON.stringify([...declaradas]).includes('CENTINELA-MOTIVO'), false);
+});
+
+test('resumirLecturaExtra cuenta extras y declaradas, y no marca como extra lo que está en Lee', () => {
+  const resultado = resumirLecturaExtra({
+    encargo: 'Lee: definitions/PROJECT.md\nEvita leer: `definitions/`\n',
+    rutas: [
+      '/ws/definitions/PROJECT.md',
+      '/ws/definitions/WORKFLOW.md',
+      '/ws/features/F33-a/task-01-b.md',
+    ],
+    textos: ['Lectura extra: definitions/WORKFLOW.md; motivo=x'],
+  });
+  assert.deepEqual(resultado, { extras: ['definitions/WORKFLOW.md'], declaradas: 1 });
+  assert.deepEqual(
+    resumirLecturaExtra({ encargo: undefined, rutas: ['a'], textos: [] }),
+    { extras: [], declaradas: 0 },
+  );
 });

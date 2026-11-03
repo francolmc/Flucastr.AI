@@ -220,3 +220,51 @@ test('(8c) --consumo con carpeta inexistente o que es archivo: código 1 y no es
   assert.equal(leerArgumentos(['--consumo']).error, 'falta el valor de --consumo');
   fs.rmSync(raiz, { recursive: true, force: true });
 });
+
+// ---- task-06: bloque «Lectura extra» en Consumo ----
+// Sesión Pi con un constructor que lee de más definitions/WORKFLOW.md (Evita leer: definitions/) y lo declara en textoFinal.
+const ENCARGO_LECTURA_EXTRA = 'Lee: features/F34-x/task-06-y.md\nEvita leer: `definitions/`\nDisparó: puerta 4';
+function carpetaLecturaExtra() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'consumo-lectura-extra-'));
+  escribirArbol(dir, {
+    [`pi/${NOMBRE_PI}`]: unirJsonl([
+      registroSesionPi({ id: 'sesion-cli', cwd: CANARIO_RUTA }),
+      turnoPi({ ts: T1, contexto: 20000, output: 100, costo: 0.5 }),
+    ]),
+    'pi/subagent-artifacts/r1_constructor_meta.json': JSON.stringify(
+      metaSubagentePi({
+        runId: 'r1',
+        agent: 'constructor',
+        parentSessionId: 'sesion-cli',
+        model: 'm-c',
+        turns: 4,
+        cost: 0.1,
+        task: ENCARGO_LECTURA_EXTRA,
+      }),
+    ),
+    'pi/subagent-artifacts/r1_constructor_transcript.jsonl': transcriptSubagentePi({
+      lecturas: [{ ruta: 'definitions/WORKFLOW.md', bytes: 2048 }],
+      textoFinal: 'Lectura extra: definitions/WORKFLOW.md; motivo=falta una regla',
+    }),
+  });
+  return dir;
+}
+
+test('(6a) --consumo con lectura extra declarada: la línea «Lectura extra» sale en el Markdown', () => {
+  const raiz = raizCon(aJsonl(escenario(10)));
+  const consumo = carpetaLecturaExtra();
+  const r = correr(['--raiz', raiz, '--consumo', consumo]);
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /Lectura extra: 1 en 1 corrida\(s\) · declaradas 1 · cumplimiento 100 %/);
+  for (const d of [raiz, consumo]) fs.rmSync(d, { recursive: true, force: true });
+});
+
+test('(6b) --consumo --json: la clave consumo.lecturaExtra trae las cifras de la lectura extra', () => {
+  const raiz = raizCon(aJsonl(escenario(10)));
+  const consumo = carpetaLecturaExtra();
+  const r = correr(['--raiz', raiz, '--consumo', consumo, '--json']);
+  assert.equal(r.status, 0, r.stderr);
+  const json = JSON.parse(r.stdout);
+  assert.deepEqual(json.consumo.lecturaExtra, { corridas: 1, extras: 1, declaradas: 1, cumplimiento: 100, porLlamada: 1 });
+  for (const d of [raiz, consumo]) fs.rmSync(d, { recursive: true, force: true });
+});

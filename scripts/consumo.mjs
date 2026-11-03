@@ -17,7 +17,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { resumirEncargo } from "./formato-encargo.mjs";
+import { resumirEncargo, resumirLecturaExtra } from "./formato-encargo.mjs";
 
 // Tramos de contexto por turno (contexto = input + cacheRead + cacheWrite).
 // menos30k: < 30000; de30a60k: 30000–60000 (incluido); mas60k: > 60000.
@@ -242,12 +242,30 @@ function lecturasDeTranscript(texto) {
   return porRuta;
 }
 
+// Textos del asistente de un transcript de subagente (task-02): items type 'text' de cada mensaje del asistente.
+// Se busca la declaración de lectura extra en todos ellos, no solo en el último.
+function textosDeTranscript(texto) {
+  const textos = [];
+  for (const linea of String(texto).split("\n")) {
+    if (linea.trim() === "") continue;
+    const registro = parsearLinea(linea);
+    if (registro?.recordType !== "message") continue;
+    const mensaje = registro.message;
+    if (mensaje?.role !== "assistant" || !Array.isArray(mensaje.content)) continue;
+    for (const item of mensaje.content) {
+      if (item?.type === "text" && typeof item.text === "string") textos.push(item.text);
+    }
+  }
+  return textos;
+}
+
 // dirArtefactos: carpeta subagent-artifacts de una sesión de Pi (solo lectura).
 // opciones.sesionId: si se da, solo corridas con parentSessionId igual a ese id.
 // opciones.hasta: ISO opcional; descarta las corridas con meta.timestamp (ms) posterior.
 // Por corrida: turnos y costo del meta; KB leídos del transcript hermano (<runId>_<agente>_transcript.jsonl).
 // Si falta el transcript, la corrida cuenta con KB 0 y sinTranscript:true en su rol.
-// corridas (task-10): una por subagente { rol, disparo, feature, tarea, turnos, costo }, con el encargo (meta.task)
+// corridas (task-10): una por subagente { rol, disparo, feature, tarea, turnos, costo, kb, lecturaExtra } (task-02),
+// con el encargo (meta.task)
 // leído por resumirEncargo; solo valores cerrados, nunca el texto del encargo.
 export function analizarSubagentesPi(dirArtefactos, { sesionId, hasta } = {}) {
   const limite = hasta === undefined ? Infinity : Date.parse(hasta);
@@ -286,7 +304,18 @@ export function analizarSubagentesPi(dirArtefactos, { sesionId, hasta } = {}) {
     r.turnos += numero(uso.turns);
     r.costo = redondear(r.costo + numero(uso.cost));
     const { disparo, feature, tarea } = resumirEncargo(meta.task);
-    corridas.push({ rol, disparo, feature, tarea, turnos: numero(uso.turns), costo: redondear(numero(uso.cost)) });
+    // Sin transcript quedan los valores por defecto; con transcript se completan tras leerlo (misma posición).
+    const corridaActual = {
+      rol,
+      disparo,
+      feature,
+      tarea,
+      turnos: numero(uso.turns),
+      costo: redondear(numero(uso.cost)),
+      kb: null,
+      lecturaExtra: { extras: [], declaradas: 0 },
+    };
+    corridas.push(corridaActual);
 
     let texto;
     try {
@@ -298,12 +327,21 @@ export function analizarSubagentesPi(dirArtefactos, { sesionId, hasta } = {}) {
       r.sinTranscript = true;
       continue;
     }
-    for (const [ruta, lectura] of lecturasDeTranscript(texto)) {
+    const lecturasRuta = lecturasDeTranscript(texto);
+    let bytesCorrida = 0;
+    for (const [ruta, lectura] of lecturasRuta) {
       if (!r.porArchivo.has(ruta)) r.porArchivo.set(ruta, { lecturas: 0 });
       r.porArchivo.get(ruta).lecturas += lectura.lecturas;
       bytes.porArchivo.set(ruta, (bytes.porArchivo.get(ruta) ?? 0) + lectura.bytes);
       bytes.total += lectura.bytes;
+      bytesCorrida += lectura.bytes;
     }
+    corridaActual.kb = aKb(bytesCorrida);
+    corridaActual.lecturaExtra = resumirLecturaExtra({
+      encargo: meta.task,
+      rutas: [...lecturasRuta.keys()],
+      textos: textosDeTranscript(texto),
+    });
   }
 
   // Salida como objetos planos; los KB se calculan desde los bytes sumados (como en task-02).
@@ -365,7 +403,8 @@ function encargoClaude(texto) {
 
 // Lee un .jsonl de Claude Code (sesión o subagente). Un turno es un message.id, aunque aparezca en varios
 // registros (uno por bloque de contenido); se omite model "<synthetic>" y los registros posteriores a `limite` (ms).
-// Devuelve { rol, turnos: Map<id, {model, usage, llamadas}>, lecturasPorId, bytesPorId }.
+// Devuelve { rol, turnos: Map<id, {model, usage, llamadas}>, lecturasPorId, bytesPorId, textos }.
+// textos (task-03): los `text` de los items de los registros assistant (sin <synthetic>), para leer declaraciones.
 function agruparClaude(texto, limite) {
   let rol;
   let sinId = 0;
@@ -373,6 +412,7 @@ function agruparClaude(texto, limite) {
   const lecturasPorId = new Map();
   const bytesPorId = new Map();
   const llamadasVistas = new Set();
+  const textos = [];
 
   for (const linea of String(texto).split("\n")) {
     if (linea.trim() === "") continue;
@@ -396,6 +436,7 @@ function agruparClaude(texto, limite) {
       if (typeof mensaje.model === "string") turno.model = mensaje.model;
       if (mensaje.usage && typeof mensaje.usage === "object") turno.usage = mensaje.usage;
       for (const item of Array.isArray(mensaje.content) ? mensaje.content : []) {
+        if (item?.type === "text" && typeof item.text === "string") textos.push(item.text);
         if (item?.type !== "tool_use" || typeof item.name !== "string") continue;
         if (typeof item.id === "string") {
           if (llamadasVistas.has(item.id)) continue;
@@ -415,7 +456,7 @@ function agruparClaude(texto, limite) {
       }
     }
   }
-  return { rol, turnos, lecturasPorId, bytesPorId };
+  return { rol, turnos, lecturasPorId, bytesPorId, textos };
 }
 
 // Lecturas `read` con resultado (pareo por tool_use id): ruta → { lecturas, bytes }.
@@ -501,8 +542,8 @@ export function analizarSesionClaude(texto, { hasta } = {}) {
 // dirSubagentes: carpeta subagents/ de una sesión de Claude Code (solo lectura). Por corrida:
 // agent-<id>.meta.json (agentType; el campo description se ignora) y su transcript agent-<id>.jsonl.
 // Devuelve { porRol: { <agentType>: { corridas, turnos, tokens, kbTotal, porArchivo } }, modelos, corridas }.
-// corridas (task-10): una por subagente { rol, disparo, feature, tarea, turnos, costo: null }; el encargo es el
-// primer registro user con texto del transcript (inferido, sin log real en el repo).
+// corridas (task-10): una por subagente { rol, disparo, feature, tarea, turnos, costo: null, kb, lecturaExtra } (task-03);
+// el encargo es el primer registro user con texto del transcript (inferido, sin log real en el repo).
 // Si la carpeta no existe, porRol es {} y corridas [].
 export function analizarSubagentesClaude(dirSubagentes) {
   if (!existsSync(dirSubagentes)) return { porRol: {}, modelos: {}, corridas: [] };
@@ -540,18 +581,31 @@ export function analizarSubagentesClaude(dirSubagentes) {
     } catch {
       texto = "";
     }
-    const { turnos, lecturasPorId, bytesPorId } = agruparClaude(texto, Infinity);
+    const { turnos, lecturasPorId, bytesPorId, textos } = agruparClaude(texto, Infinity);
+    const lecturas = lecturasDeClaude(lecturasPorId, bytesPorId);
 
     r.corridas += 1;
-    const { disparo, feature, tarea } = resumirEncargo(encargoClaude(texto));
-    corridas.push({ rol, disparo, feature, tarea, turnos: turnos.size, costo: null });
+    const encargo = encargoClaude(texto);
+    const { disparo, feature, tarea } = resumirEncargo(encargo);
+    // task-03: kb y lecturaExtra con la misma forma que en Pi (task-02); sin lecturas o sin transcript, kb 0.
+    const bytesCorrida = [...lecturas.values()].reduce((suma, lectura) => suma + lectura.bytes, 0);
+    corridas.push({
+      rol,
+      disparo,
+      feature,
+      tarea,
+      turnos: turnos.size,
+      costo: null,
+      kb: aKb(bytesCorrida),
+      lecturaExtra: resumirLecturaExtra({ encargo, rutas: [...lecturas.keys()], textos }),
+    });
     for (const turno of turnos.values()) {
       r.turnos += 1;
       const tokens = tokensDeTurnoClaude(turno.usage);
       for (const clave of Object.keys(r.tokens)) r.tokens[clave] += tokens[clave];
       if (turno.model !== undefined) modelos.get(rol).add(turno.model);
     }
-    for (const [ruta, lectura] of lecturasDeClaude(lecturasPorId, bytesPorId)) {
+    for (const [ruta, lectura] of lecturas) {
       const acumulado = r.lecturas.get(ruta) ?? { lecturas: 0, bytes: 0 };
       acumulado.lecturas += lectura.lecturas;
       acumulado.bytes += lectura.bytes;
@@ -645,6 +699,25 @@ function porTareaDe(sesion, tareas) {
   };
 }
 
+// Resumen de lecturas extra por corridas (task-04). Una corrida sin lecturaExtra cuenta como 0 extras.
+// cumplimiento: % entero de declaradas sobre extras, o null si extras es 0. porLlamada: extras por corrida (1 decimal), o null si no hay corridas.
+export function resumenLecturaExtra(corridas) {
+  const n = corridas.length;
+  let extras = 0;
+  let declaradas = 0;
+  for (const c of corridas) {
+    extras += c.lecturaExtra?.extras?.length ?? 0;
+    declaradas += c.lecturaExtra?.declaradas ?? 0;
+  }
+  return {
+    corridas: n,
+    extras,
+    declaradas,
+    cumplimiento: extras === 0 ? null : Math.round((declaradas * 100) / extras),
+    porLlamada: n === 0 ? null : Math.round((extras / n) * 10) / 10,
+  };
+}
+
 // Líneas de una sesión. Solo números, nombres de rol/agente/modelo/herramienta y rutas leídas.
 function lineasDeSesion(s, tareas) {
   const lineas = [];
@@ -671,6 +744,10 @@ function lineasDeSesion(s, tareas) {
       lineas.push(`  ${rol} | ${r.corridas} | ${r.turnos} | ${dinero(r.costo)} | ${r.kbTotal} KB${sinTranscript}`);
     }
   }
+
+  const extra = resumenLecturaExtra(s.subagentes.corridas ?? []);
+  const cumple = extra.cumplimiento === null ? "n/d" : `${extra.cumplimiento} %`;
+  lineas.push(`lecturas extra: ${extra.extras} en ${extra.corridas} corrida(s); declaradas ${extra.declaradas}; cumplimiento ${cumple}`);
 
   const categorias = s.lecturas.kbPorCategoria;
   lineas.push(`KB leídos por categoría: definiciones ${categorias.definiciones}, tareas ${categorias.tareas}, otros ${categorias.otros}`);

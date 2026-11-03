@@ -1,10 +1,17 @@
 #!/usr/bin/env node
-// Pistas accionables del informe (`informe.mjs --pistas`), pistas 1 a 6 de definitions/DIAGNOSTICO-BLOQUEOS.md (§5).
+// Pistas accionables del informe (`informe.mjs --pistas`), pistas 1 a 9.
+// Pistas 1 a 6: definitions/DIAGNOSTICO-BLOQUEOS.md (§5). Pistas 7 a 9: lectura extra (definitions/LECTURA-PRESUPUESTO.md, §5).
 // Función pura: recibe eventos ya validados y no lee archivos ni git. Los umbrales son supuestos a calibrar.
 // Pistas 2 y 6: usan `corridas` (sesion.subagentes.corridas) y `consumo` (bloqueConsumo); sin ellos no se evalúan.
+// Pistas 7 a 9: usan `corridas` con `lecturaExtra` y `kb`; sin `corridas` no se evalúan.
 
 export const UMBRAL_CANCELADAS = 0.3;
 export const UMBRAL_DEFINIR = 0.6;
+export const UMBRAL_PROMOCION_CORRIDAS = 3;
+export const UMBRAL_PROMOCION_FEATURES = 2;
+export const UMBRAL_EXTRAS_POR_LLAMADA = 1;
+export const UMBRAL_KB = 1.25;
+export const UMBRAL_CUMPLIMIENTO = 0.9;
 
 const ACCION = {
   1: "Añade `Requiere:` a sus tareas o arregla el entorno antes de aprobar.",
@@ -13,6 +20,9 @@ const ACCION = {
   4: "Corre la validación con el lanzador; falta aplicar §3.",
   5: "El planificador omite decisiones: revisa `Fuente:` y *Decisiones ya tomadas*.",
   6: "Pocos bloques de ejecución para el costo de definir: junta features chicas.",
+  7: "Pásala a `Lee:` del rol o a su lista de «Qué lees» (decide Franco).",
+  8: "Lecturas extra por encima del límite: si se repite en una segunda feature, vuelve ese rol a «No leas» duro (decide Franco).",
+  9: "Declara cada lectura extra con `Lectura extra:` en el retorno.",
 };
 
 const TIPOS_ALCANCE = ["alcance", "especificacion"];
@@ -100,6 +110,52 @@ export function calcularPistas(eventos, { corridas = null, consumo = null } = {}
     const definir = consumo.filas.filter((fila) => ROLES_DEFINIR.includes(fila.rol)).reduce((suma, fila) => suma + peso(fila), 0);
     if (total > 0 && definir / total > UMBRAL_DEFINIR) {
       emitir(6, null, `arquitecto+planificador = ${Math.round((definir * 100) / total)} % del total`);
+    }
+  }
+
+  // Pistas 7 a 9 (globales, feature null). Una corrida sin lecturaExtra cuenta como 0 extras.
+  if (corridas) {
+    const extrasDe = (c) => c.lecturaExtra?.extras ?? [];
+
+    // Pistas 7 y 8 por rol (orden alfabético de rol y de ruta).
+    const roles = [...new Set(corridas.map((c) => c.rol))].sort();
+    for (const rol of roles) {
+      const delRol = corridas.filter((c) => c.rol === rol);
+
+      // Pista 7, por par (rol, ruta): >= 3 corridas con esa ruta en extras y >= 2 features no nulas.
+      const rutas = [...new Set(delRol.flatMap(extrasDe))].sort();
+      for (const ruta of rutas) {
+        const con = delRol.filter((c) => extrasDe(c).includes(ruta));
+        const features = new Set(con.map((c) => c.feature).filter((f) => typeof f === "string"));
+        if (con.length >= UMBRAL_PROMOCION_CORRIDAS && features.size >= UMBRAL_PROMOCION_FEATURES) {
+          emitir(7, null, `${rol} lee de más \`${ruta}\` en ${con.length} corridas y ${features.size} features`);
+        }
+      }
+
+      // Pista 8, forma a: lecturas extra por llamada del rol > 1 (estricto).
+      const extrasRol = delRol.reduce((suma, c) => suma + extrasDe(c).length, 0);
+      if (delRol.length > 0 && extrasRol / delRol.length > UMBRAL_EXTRAS_POR_LLAMADA) {
+        emitir(8, null, `${rol}: ${(extrasRol / delRol.length).toFixed(1)} lecturas extra por llamada`);
+      }
+
+      // Pista 8, forma b: media de kb con extras > 1,25 x media de kb sin extras (solo kb numérico).
+      const kbConExtras = delRol.filter((c) => extrasDe(c).length > 0 && typeof c.kb === "number").map((c) => c.kb);
+      const kbSinExtras = delRol.filter((c) => extrasDe(c).length === 0 && typeof c.kb === "number").map((c) => c.kb);
+      if (kbConExtras.length > 0 && kbSinExtras.length > 0) {
+        const media = (lista) => lista.reduce((suma, x) => suma + x, 0) / lista.length;
+        const sin = media(kbSinExtras);
+        if (sin > 0 && media(kbConExtras) / sin > UMBRAL_KB) {
+          const p = Math.round((media(kbConExtras) / sin - 1) * 100);
+          emitir(8, null, `${rol}: ${p} % más KB por corrida con lectura extra que sin ella`);
+        }
+      }
+    }
+
+    // Pista 9: lecturas extra declaradas < 90 % de las lecturas extra (estricto).
+    const extrasTotal = corridas.reduce((suma, c) => suma + extrasDe(c).length, 0);
+    const declaradas = corridas.reduce((suma, c) => suma + (c.lecturaExtra?.declaradas ?? 0), 0);
+    if (extrasTotal >= 1 && declaradas / extrasTotal < UMBRAL_CUMPLIMIENTO) {
+      emitir(9, null, `${declaradas} de ${extrasTotal} lecturas extra declaradas (${Math.round((declaradas * 100) / extrasTotal)} %)`);
     }
   }
 
