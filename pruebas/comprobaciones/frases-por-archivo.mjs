@@ -164,11 +164,12 @@ export const FRASES_POR_ARCHIVO = {
   ],
   'skills/modo-yolo': [
     'Modo yolo: activo — alcance <…>; pedido por Franco el <fecha>; rama <…>',
-    'ADVERTENCIA: rama main',
     'Modo yolo: detenido (feature Fxx requiere refinado)',
     'Modo yolo: terminado',
+    'Fxx completa: commitea y cierra la rama',
   ],
   'skills/descomponer-feature': [
+    'git branch --show-current',
     'solo puedes mover la marca',
     'REFINAR: feature=Fxx; preguntas=<n>',
     'features/Fxx-nombre/refinado.md',

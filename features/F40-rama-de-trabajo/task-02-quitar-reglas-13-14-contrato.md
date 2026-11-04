@@ -1,5 +1,5 @@
 # task-02 — Quitar las reglas 13 y 14 del contrato del constructor y sus pruebas
-repo: Flucastr.AI   depende_de: task-01   estado: borrador
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Las reglas 13 y 14 de `pruebas/comprobaciones/contrato-constructor.mjs` exigen que el constructor y `ejecutar-tarea` digan que en yolo no se crea rama. F40 revierte esa decisión (yolo usa la misma regla de rama que el modo normal). Esta tarea borra las dos reglas y sus pruebas para que las tareas siguientes puedan quitar esas frases de los textos sin romper la suite. Las reglas 11 y 12 quedan igual.
@@ -63,7 +63,26 @@ git diff --stat -- pruebas/comprobaciones
 Esperado: solo `contrato-constructor.mjs` y `contrato-constructor.test.mjs`.
 
 ## Evidencia
-(lo llena el constructor: la cola relevante de cada salida, hasta 1,5 KB)
+```
+$ git branch --show-current
+fix/F40-rama-de-trabajo
+exit 0
+$ grep -n -E 'n: 1[34],|regla 1[34]' pruebas/comprobaciones/contrato-constructor.mjs pruebas/comprobaciones/contrato-constructor.test.mjs
+
+exit 1
+$ node --test pruebas/comprobaciones/contrato-constructor.test.mjs 2>&1 | grep -E '^ℹ (pass|fail)'
+ℹ pass 19
+ℹ fail 0
+exit 0
+$ git diff --stat -- pruebas/comprobaciones
+ pruebas/comprobaciones/contrato-constructor.mjs      | 2 --
+ pruebas/comprobaciones/contrato-constructor.test.mjs | 9 ---------
+ 2 files changed, 11 deletions(-)
+exit 0
+```
 
 ## Notas
-(lo llena el constructor)
+- Hueco menor: ninguno. Se borraron exactamente las líneas 24-25 de `REGLAS` en `contrato-constructor.mjs`, las dos filas `regla 13`/`regla 14` de `variantes` y la prueba «rechaza la regla 14 …» con su línea en blanco, como indica *Pasos*.
+- Verificación: los cuatro comandos pasan (comando 2 sin salida, `exit 1` de grep = sin coincidencias, esperado). Suite del contrato: `pass 19`, `fail 0`.
+- Modo yolo: no se creó rama ni se hizo `git switch`; se trabajó en `fix/F40-rama-de-trabajo`, sin commit.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

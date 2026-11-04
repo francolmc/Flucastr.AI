@@ -16,7 +16,7 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
    - **Modo yolo:** si el encargo trae la línea `Modo yolo: activo`, no hay ronda de refinado ni supuestos. Si el refinado se requiere y no hay `features/Fxx-nombre/refinado.md`, responde con la primera línea `REFINAR: feature=Fxx; preguntas=<n>` y no crees tareas: el coordinador lo trata como escalación y detiene el modo. Si no se requiere, descompón con normalidad.
 
 1. Lee la feature y el código real de cada repo que toca. Ejecuta únicamente comandos sin efectos sobre archivos versionados (pruebas, lint, `--help`) para confirmar que los comandos de *Verificación* existen. Los que no puedas ejecutar así se marcan «no ejecutado, inferido» en el *Contexto* de la tarea. De `definitions/` lee solo la sección que toca la feature, nunca el documento entero.
-2. Define tareas: un solo repo y un solo objetivo verificable cada una. Con varios repos, fija el orden con `depende_de:` (la API antes que el front). En yolo, ninguna tarea pide crear rama, hacer `git switch` ni commit, ni modificar `definitions/`, y su *Verificación* no depende de la rama actual.
+2. Define tareas: un solo repo y un solo objetivo verificable cada una. Con varios repos, fija el orden con `depende_de:` (la API antes que el front). En yolo, ninguna tarea pide commit ni modificar `definitions/`.
 3. Escribe cada tarea en `features/Fxx-nombre/task-NN-nombre.md` con la plantilla de abajo, estado `borrador`. Con `Disparó: BLOQUEO task-NN` y `motivo=codigo:` escribe solo una tarea de corrección nueva en la misma feature, sin tocar la bloqueada.
 4. Pasa la lista «completa» y la «acotada» a cada tarea. Si falla, corrígela o pártela.
 5. En `BACKLOG.md` solo puedes mover la marca `→`: si está en una feature `hecha`, pásala a la primera feature que no esté `hecha` (deja vacía la celda de la anterior). No cambies ningún otro campo ni fila. No muevas nada a `completed/`.
@@ -33,7 +33,7 @@ repo: …   depende_de: …   estado: borrador
 ## Alcance / Fuera de alcance   Fuera de alcance no puede quedar vacío.
 ## Pasos            Numerados. Cada uno: archivo, qué cambia, resultado observable.
 ## Criterios de aceptación   Máximo 5, observables, cada uno con cómo se comprueba.
-## Verificación     Comandos exactos y salida esperada.
+## Verificación     Comandos exactos y salida esperada; el primero, `git branch --show-current` con la rama esperada (prefijo de la fila del backlog + `Fxx-nombre`).
 ## Evidencia        (lo llena el constructor)
 ## Notas            (lo llena el constructor)
 ```

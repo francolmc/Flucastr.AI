@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: ninguno; F37 archivada en features/completed/ (sin commit); puerta 3 de F40 pendiente
-Presupuesto: F40; rondas arq=2 plan=2; ampliado=0
-Espera a Franco: commit chore/ del movimiento de F37 (git status); aprobar las 8 tareas de features/F40-rama-de-trabajo/ (puerta 3)
+Paso actual: ninguno; «→» movido a F41 (no iniciada); Franco hace el PR de fix/F40-rama-de-trabajo
+Presupuesto: F41; rondas arq=0 plan=1; ampliado=0
+Espera a Franco: hacer el PR de F40; luego archivar F40, bash instalar.sh y pedirme seguir con F41
 Bloqueos abiertos: ninguno
-Retomar: con task-01 de F40 aprobada, Rama: fix/F40-rama-de-trabajo y delegar al constructor; luego redactar la tarea de orden rama/entorno
+Retomar: tras el PR: archivar.mjs --aplicar F40; sesión nueva; F41 con el arquitecto si cambia WORKFLOW §2 (puerta 1); luego F38 y F39
 Actualizado: 2026-11-04

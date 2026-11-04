@@ -1,5 +1,5 @@
 # task-03 — Quitar la excepción de yolo sobre la rama en el constructor y en ejecutar-tarea
-repo: Flucastr.AI   depende_de: task-02   estado: borrador
+repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
 ## Descripción
 `agentes/constructor.md` y `skills/ejecutar-tarea/SKILL.md` dicen que en yolo no se crea rama ni se emite `CONFIRMAR:`. Con la nueva regla (`definitions/WORKFLOW.md` §9.1 y §9.3) el constructor aplica en yolo la misma regla de rama que en el modo normal, así que esas frases se borran. El texto restante ya cubre el caso: crea la rama solo si el encargo trae `Rama:`, y `CONFIRMAR:` si existe y no es la actual. No se reordena nada (el orden entorno/rama se decide tras el diagnóstico de task-01).
@@ -69,7 +69,35 @@ node --test pruebas/comprobaciones/contrato-constructor.test.mjs 2>&1 | grep -E 
 Esperado: `ℹ fail 0`.
 
 ## Evidencia
-(lo llena el constructor: la cola relevante de cada salida, hasta 1,5 KB)
+```
+$ git branch --show-current
+fix/F40-rama-de-trabajo
+exit 0
+```
+```
+$ grep -n -E 'no creas rama|salta este paso entero|esta causa no aplica' agentes/constructor.md skills/ejecutar-tarea/SKILL.md
+(sin salida)
+exit 1
+```
+```
+$ wc -c agentes/constructor.md
+2836 agentes/constructor.md
+exit 0
+```
+```
+$ wc -c skills/ejecutar-tarea/SKILL.md
+7366 skills/ejecutar-tarea/SKILL.md
+exit 0
+```
+```
+$ node --test pruebas/comprobaciones/contrato-constructor.test.mjs 2>&1 | grep -E '^ℹ (pass|fail)'
+ℹ pass 19
+ℹ fail 0
+exit 0
+```
 
 ## Notas
-(lo llena el constructor)
+- Hueco menor: ninguno. Se borraron exactamente la viñeta «Modo yolo» de `agentes/constructor.md` (línea 19), la viñeta «Modo yolo» del paso 2 de `skills/ejecutar-tarea/SKILL.md` (línea 15) y la frase « En modo yolo esta causa no aplica.» de `skills/ejecutar-tarea/SKILL.md` (línea 35), como indica *Pasos*.
+- Topes en bytes: `agentes/constructor.md` 3008 antes, 2836 después (tope 3072); `skills/ejecutar-tarea/SKILL.md` 7619 antes, 7366 después (tope 7623).
+- Modo yolo: no se creó rama, no hubo `git switch` ni `CONFIRMAR:`; el encargo no trae línea `Rama:`, así que no se ejecutó ningún comando git de rama. Sin commit.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna
