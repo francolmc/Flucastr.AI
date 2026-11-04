@@ -1,5 +1,5 @@
 # task-04 — modo-yolo: la rama es la de la feature y se quita la advertencia de main
-repo: Flucastr.AI   depende_de: task-03   estado: borrador
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
 `skills/modo-yolo/SKILL.md` lee la rama actual de `.git/HEAD`, advierte si es `main`, no pasa `Rama:` al constructor y trata `CONFIRMAR:` como escalación. Con la nueva regla, la línea `Modo yolo:` de `STATUS.md` lleva la rama de la feature, el encargo al constructor lleva `Rama:` junto a `Modo yolo:`, `CONFIRMAR:` sigue el flujo de `ramas-feature` y desaparece la advertencia.
@@ -67,7 +67,31 @@ node --test pruebas/comprobaciones/contrato-roles.test.mjs 2>&1 | grep -E '^ℹ 
 Esperado: `ℹ fail 0`.
 
 ## Evidencia
-(lo llena el constructor: la cola relevante de cada salida, hasta 1,5 KB)
+```
+$ git branch --show-current
+fix/F40-rama-de-trabajo
+exit 0
+```
+```
+$ grep -n -E 'ADVERTENCIA|\.git/HEAD|no le pasas' skills/modo-yolo/SKILL.md pruebas/comprobaciones/frases-por-archivo.mjs
+(sin salida)
+exit 1
+```
+```
+$ wc -c skills/modo-yolo/SKILL.md
+4767 skills/modo-yolo/SKILL.md
+exit 0
+```
+```
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs 2>&1 | grep -E '^ℹ (pass|fail)'
+ℹ pass 124
+ℹ fail 0
+exit 0
+```
 
 ## Notas
-(lo llena el constructor)
+- Estado previo: la ejecución cortada ya había dejado hechos los cambios de `skills/modo-yolo/SKILL.md` (entradas 3 y 4, reglas 1, 4 y 5) y borrada la frase `'ADVERTENCIA: rama main'`. Se comprobaron contra *Pasos* y se conservaron; no se rehizo nada.
+- Bytes: `skills/modo-yolo/SKILL.md` 5006 antes, 4767 después (tope 5120). `pruebas/comprobaciones/frases-por-archivo.mjs` 7399 antes, 7369 después.
+- Rama: el encargo no trae línea `Rama:`; no se ejecutó ningún comando git de rama ni `git switch`. Sin commit.
+- Hueco menor: ninguno.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

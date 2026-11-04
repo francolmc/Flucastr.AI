@@ -1,5 +1,5 @@
 # task-01 — Diagnóstico: por qué en modo normal la rama a veces no se crea al empezar la tarea 1
-repo: Flucastr.AI   depende_de: —   estado: borrador
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 Franco observó que, en el modo normal, la rama de la feature a veces no existe al empezar la tarea 1. La hipótesis de `definitions/F40-RAMAS.md` §D es que `ejecutar-tarea` comprueba el entorno antes de crear la rama y que el paso de rama solo corre si el encargo trae `Rama:`. Esta tarea verifica la hipótesis leyendo los textos y deja un informe corto con lo confirmado, lo inferido y una recomendación sobre el orden rama/entorno. No cambia ninguna regla: la decisión del orden se toma después, con el informe.
@@ -66,7 +66,21 @@ git diff --stat -- agentes skills definitions/WORKFLOW.md pruebas/comprobaciones
 Esperado: salida vacía.
 
 ## Evidencia
-(lo llena el constructor: la cola relevante de cada salida, hasta 1,5 KB)
+```
+$ git branch --show-current
+fix/F40-rama-de-trabajo
+exit 0
+$ grep -c -E '^## (Confirmado|Inferido|Recomendación)$' pruebas/resultados/2026-11-04-f40-diagnostico-rama.md
+3
+exit 0
+$ wc -c pruebas/resultados/2026-11-04-f40-diagnostico-rama.md
+2989 pruebas/resultados/2026-11-04-f40-diagnostico-rama.md
+exit 0
+$ git diff --stat -- agentes skills definitions/WORKFLOW.md pruebas/comprobaciones
+
+exit 0
+```
 
 ## Notas
-(lo llena el constructor)
+- Hueco menor: la *Contexto* cita el dato de F37 (n=1 bloqueada por entorno, n=2 con `git switch -c`) sin abrir sus Notas; no lo leí, porque las reglas de lectura excluyen tareas `hecha` ajenas. Lo marqué como *inferido* en el informe, no como *confirmado*.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

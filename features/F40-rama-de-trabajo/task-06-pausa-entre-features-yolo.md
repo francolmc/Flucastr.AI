@@ -1,5 +1,5 @@
 # task-06 — Yolo se detiene al terminar cada feature si quedan más en el alcance
-repo: Flucastr.AI   depende_de: task-05   estado: borrador
+repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
 ## Descripción
 Hoy `skills/modo-yolo/SKILL.md` regla 7 dice «continúas con la siguiente del alcance» y «en yolo no hay rama de feature». Con rama por feature y sin commits de agentes, la feature siguiente heredaría el trabajo sin commitear y no aislaría nada. Decisión de Franco (2026-11-04): al terminar una feature, si quedan features en el alcance, yolo se detiene con `Modo yolo: detenido (Fxx completa: commitea y cierra la rama)`; si era la última, `Modo yolo: terminado`.
@@ -67,7 +67,27 @@ node --test pruebas/comprobaciones/contrato-roles.test.mjs 2>&1 | grep -E '^ℹ 
 Esperado: `ℹ fail 0`.
 
 ## Evidencia
-(lo llena el constructor: la cola relevante de cada salida, hasta 1,5 KB)
+```
+$ git branch --show-current
+fix/F40-rama-de-trabajo
+exit 0
+$ grep -c 'Fxx completa: commitea y cierra la rama' skills/modo-yolo/SKILL.md
+1
+exit 0
+$ grep -c 'no hay rama de feature' skills/modo-yolo/SKILL.md
+0
+exit 1
+$ wc -c skills/modo-yolo/SKILL.md
+4860 skills/modo-yolo/SKILL.md
+exit 0
+$ node --test pruebas/comprobaciones/contrato-roles.test.mjs 2>&1 | grep -E '^ℹ (pass|fail)'
+ℹ pass 125
+ℹ fail 0
+exit 0
+```
 
 ## Notas
-(lo llena el constructor)
+- Hecho: `skills/modo-yolo/SKILL.md` 4767 -> 4860 bytes (regla 7: desde «y continúas» hasta el final, sustituido por la pausa; regla 8 sin cambios). `pruebas/comprobaciones/frases-por-archivo.mjs`: frase `'Fxx completa: commitea y cierra la rama',` añadida a `'skills/modo-yolo'`.
+- Rama: modo yolo, en `fix/F40-rama-de-trabajo`; sin `git switch` ni rama nueva; sin commit.
+- Huecos menores en esta ejecución: 0.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

@@ -16,7 +16,6 @@ Eres el constructor. Terminas una tarea aprobada, completa, sin preguntar. No de
 - Git permitido: `git switch -c <rama>`; `git switch <rama>` solo con la confirmación de `ejecutar-tarea`; `git branch --show-current`. Nunca `commit`, `push`, `merge`, `reset`, `rebase` ni `checkout`.
 - No lees ni imprimes `.env`, llaves ni credenciales (`.env.example` sí).
 - No llamas a otros agentes ni escribes en `STATUS.md`.
-- Modo yolo: si el encargo trae `Modo yolo: activo`, no creas rama, no haces `git switch`, no emites `CONFIRMAR:` y trabajas en la rama actual. Sigue sin commit, ni local.
 
 ## Skill
 
