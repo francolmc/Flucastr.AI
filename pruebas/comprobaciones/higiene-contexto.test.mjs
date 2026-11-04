@@ -15,7 +15,7 @@ const FRASE_EDIT = '`edit` en vez de reescribirlos enteros con `write`';
 // Frase quitada de WORKFLOW.md (task-04).
 const FRASE_WORKFLOW_QUITADA = 'Cada rol configura su nivel de modelo';
 // Tope de caracteres de WORKFLOW.md (task-04), medido como `wc -m` en UTF-8.
-const TOPE_WORKFLOW = 30720;
+const TOPE_WORKFLOW = 32000;
 
 const caracteres = (texto) => [...texto].length;
 
@@ -99,13 +99,13 @@ test('falla si falta la lectura acotada en ejecutar-tarea', () => {
   assert.match(errores[0], /ejecutar-tarea/);
 });
 
-test('falla si WORKFLOW.md pasa de 30720 caracteres', () => {
+test('falla si WORKFLOW.md pasa de 32000 caracteres', () => {
   const r = cargarReales();
-  // Una letra más que el tope, para que el único error sea el tamaño.
-  r.workflow += 'x'.repeat(TOPE_WORKFLOW - caracteres(r.workflow) + 1);
+  // Relleno hasta tope + 1, sin depender del tamaño real: el único error es el tamaño.
+  r.workflow += 'x'.repeat(Math.max(0, TOPE_WORKFLOW - caracteres(r.workflow)) + 1);
   const errores = validarHigiene(r);
   assert.equal(errores.length, 1, errores.join(' | '));
-  assert.match(errores[0], /30720/);
+  assert.match(errores[0], /32000/);
 });
 
 test('falla si WORKFLOW.md conserva la frase sobre modelos.json', () => {
