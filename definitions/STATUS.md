@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: Modo yolo: terminado — F40: las 8 tareas hechas en fix/F40-rama-de-trabajo; sin commits; falta tu cierre de la feature
-Presupuesto: F40; rondas arq=2 plan=3; ampliado=0
-Espera a Franco: commitear fix/F40-rama-de-trabajo (git status); decidir el orden rama/entorno; confirmar si F40 queda hecha sin corrida con modelo
+Paso actual: ninguno; «→» movido a F41 (no iniciada); Franco hace el PR de fix/F40-rama-de-trabajo
+Presupuesto: F41; rondas arq=0 plan=1; ampliado=0
+Espera a Franco: hacer el PR de F40; luego archivar F40, bash instalar.sh y pedirme seguir con F41
 Bloqueos abiertos: ninguno
-Retomar: con F40 hecha: bash instalar.sh y mover el «→» con el planificador (rapida lo exige); luego F41, F38 y F39
+Retomar: tras el PR: archivar.mjs --aplicar F40; sesión nueva; F41 con el arquitecto si cambia WORKFLOW §2 (puerta 1); luego F38 y F39
 Actualizado: 2026-11-04
