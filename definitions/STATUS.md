@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: ninguno; F37 task-01 lista para revisión (puerta 4); Rama: chore/F37-base-verde-verificacion-rapida
+Paso actual: ninguno; F37 con todas sus tareas hechas; falta tu confirmación de feature hecha; Rama: chore/F37-base-verde-verificacion-rapida
 Presupuesto: F37; rondas arq=0 plan=2; ampliado=0
-Espera a Franco: puerta 4: revisa features/F37-base-verde-verificacion-rapida/task-01-tope-workflow-higiene.md y commitea; confirma si sigue pendiente el commit chore/ de F35 y F36
+Espera a Franco: Feature F37 completa en chore/F37-base-verde-verificacion-rapida: cierra la rama, haz el PR y despliega; confirma que F37 está hecha
 Bloqueos abiertos: ninguno
-Retomar: sesión nueva: con task-01 hecha, delegar task-02 de F37 al constructor con Rama: chore/F37-base-verde-verificacion-rapida; al cerrar F37, F40 (arquitecto antes)
+Retomar: con F37 hecha: registrar.mjs y archivar.mjs --aplicar F37 (los corres tú o me lo pides); luego F40: arquitecto antes de descomponer
 Actualizado: 2026-11-04

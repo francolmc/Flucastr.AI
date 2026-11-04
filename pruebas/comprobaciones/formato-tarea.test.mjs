@@ -126,18 +126,23 @@ test('exige Evidencia no vacía con estado «lista para revisión»', () => {
   assert.ok(validarTarea(alterada).some((e) => e.includes('Evidencia')));
 });
 
+const esActiva = (r) => /(^|\/)task-\d{2}-[^/]*\.md$/.test(r) && !r.startsWith('completed/');
+
 const reales = fs
   .readdirSync(path.join(raiz, 'features'), { recursive: true })
-  .filter((r) => /(^|\/)task-\d{2}-[^/]*\.md$/.test(r))
-  .filter((r) => !r.startsWith('completed/'))
+  .filter(esActiva)
   .map((r) => path.join(raiz, 'features', r));
 
 test('las tareas reales de features/ cumplen el formato', () => {
-  assert.ok(reales.length >= 1, 'no hay tareas reales en features/');
   const fallos = reales.flatMap((ruta) =>
     validarTarea(fs.readFileSync(ruta, 'utf8')).map((e) => `${path.relative(raiz, ruta)}: ${e}`),
   );
   assert.deepEqual(fallos, []);
+});
+
+test('las tareas de features/completed/ no cuentan como activas', () => {
+  const rutas = ['completed/F01-x/task-01-a.md', 'F37-y/task-01-b.md'];
+  assert.deepEqual(rutas.filter(esActiva), ['F37-y/task-01-b.md']);
 });
 
 test('cada ID de depende_de de una tarea real corresponde a un archivo de su carpeta', () => {

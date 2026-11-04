@@ -1,5 +1,5 @@
 # task-01 — Subir el tope de WORKFLOW.md en la prueba de higiene
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 `pruebas/comprobaciones/higiene-contexto.test.mjs` limita `definitions/WORKFLOW.md` a 30 720 caracteres y hoy el archivo mide 31 793, así que fallan sus 6 pruebas: la de «los archivos reales» por el tamaño, y las otras 5 porque esperan exactamente 1 error y reciben 2 (el del tamaño más el simulado). El control negativo «falla si WORKFLOW.md pasa de 30720 caracteres» además no puede armarse (`'x'.repeat` con cuenta negativa lanza `RangeError: Invalid count value`). Decisión de Franco: subir el tope a 32 000 sin tocar `WORKFLOW.md`, y dejar el control negativo vivo.
