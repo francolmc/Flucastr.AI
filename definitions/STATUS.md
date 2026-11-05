@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: F39 hecha en BACKLOG.md (confirmó Franco); espera su commit y PR; Rama: feature/F39-corte-por-repeticion
+Paso actual: Puerta 2: filas F42 y F43 agregadas a definitions/BACKLOG.md (pendiente); F39 hecha, espera su commit
 Presupuesto: F39; rondas arq=0 plan=3; ampliado=0
-Espera a Franco: Feature F39 completa en feature/F39-corte-por-repeticion: commitea 01 a 06, cierra la rama, haz el PR y despliega; aprobar F42
+Espera a Franco: aprobar F42 y F43 en definitions/BACKLOG.md; commit y PR de F39 en feature/F39-corte-por-repeticion
 Bloqueos abiertos: ninguno
-Retomar: sesión nueva tras commit y PR de F39: mover → a F42 (planificador; arquitecto antes de descomponer, Franco edita WORKFLOW.md)
+Retomar: sesión nueva tras commit y PR de F39: mover → a F42 (planificador); F42 y F43 requieren arquitecto antes de descomponer
 Actualizado: 2026-11-05
