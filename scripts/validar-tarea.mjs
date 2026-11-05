@@ -6,6 +6,7 @@
 //   node scripts/validar-tarea.mjs --evidencia <ruta-tarea>...
 //   node scripts/validar-tarea.mjs --fuente <ruta-tarea>...
 //   node scripts/validar-tarea.mjs --presupuesto features/Fxx-nombre
+//   node scripts/validar-tarea.mjs --hook   (JSON de PostToolUse por stdin; modo estructural, F38 task-04)
 //
 // Con --presupuesto (debe ser el primer argumento, con exactamente una carpeta de feature) es solo lectura:
 // lee las task-*.md de esa carpeta y definitions/STATUS.md (desde el directorio actual), valida el STATUS.md
@@ -27,18 +28,20 @@
 // y usa process.exitCode, no process.exit, para no cortar la salida pendiente.
 
 import { readFileSync, readdirSync } from "node:fs";
-import { basename, join } from "node:path";
-import { validarTarea } from "./formato-tarea.mjs";
+import { basename, join, resolve } from "node:path";
+import { validarEstructura, validarTarea } from "./formato-tarea.mjs";
 import { validarEvidencia } from "./formato-evidencia.mjs";
 import { validarFuente } from "./formato-fuente.mjs";
 import { calcularPresupuesto, validarStatusCompacto } from "./formato-presupuesto.mjs";
+import { firma } from "./firma.mjs";
 
 const argumentos = process.argv.slice(2);
 const conPresupuesto = argumentos[0] === "--presupuesto";
 const conEvidencia = argumentos[0] === "--evidencia";
 const conFuente = argumentos[0] === "--fuente";
+const conHook = argumentos[0] === "--hook";
 const rutas = conEvidencia || conFuente ? argumentos.slice(1) : argumentos;
-const opcionDesconocida = argumentos.find((a, i) => a.startsWith("--") && !(i === 0 && (a === "--evidencia" || a === "--fuente" || a === "--presupuesto")));
+const opcionDesconocida = argumentos.find((a, i) => a.startsWith("--") && !(i === 0 && (a === "--evidencia" || a === "--fuente" || a === "--presupuesto" || a === "--hook")));
 const leerTexto = (ruta) => {
   try {
     return readFileSync(ruta, "utf8");
@@ -88,8 +91,39 @@ function presupuesto(args) {
   return estado === "excedido" ? 1 : 0;
 }
 
+// --hook (F38, task-04): lee por stdin el JSON del evento PostToolUse de Claude Code. Solo lee; no escribe, no usa red ni git.
+// Si el archivo escrito es una tarea activa (features/Fxx/task-*.md, fuera de features/completed/) y su estructura
+// falla, escribe por stderr «<ruta>: <motivo>» por motivo y la línea «Firma:», y sale con 2. En cualquier otro caso sale con 0 en silencio.
+const RE_TAREA_ACTIVA = /\/features\/[^/]+\/task-[^/]*\.md$/;
+function hook(args) {
+  if (args.length !== 0) {
+    console.error("Uso: node validar-tarea.mjs --hook (sin argumentos; el JSON del evento va por stdin)");
+    return 2;
+  }
+  let evento;
+  try {
+    evento = JSON.parse(readFileSync(0, "utf8"));
+  } catch {
+    return 0;
+  }
+  const ruta = evento?.tool_input?.file_path;
+  if (typeof ruta !== "string" || ruta === "") return 0;
+  const absoluta = resolve(typeof evento.cwd === "string" ? evento.cwd : process.cwd(), ruta);
+  const normal = absoluta.replace(/\\/g, "/");
+  if (!RE_TAREA_ACTIVA.test(normal) || normal.includes("/features/completed/")) return 0;
+  const texto = leerTexto(absoluta);
+  if (texto === null) return 0;
+  const motivos = validarEstructura(texto);
+  if (motivos.length === 0) return 0;
+  for (const motivo of motivos) console.error(`${absoluta}: ${motivo}`);
+  console.error(firma({ motivo: motivos[0], ruta: absoluta, texto }));
+  return 2;
+}
+
 if (conPresupuesto) {
   process.exitCode = presupuesto(argumentos.slice(1));
+} else if (conHook) {
+  process.exitCode = hook(argumentos.slice(1));
 } else if (opcionDesconocida !== undefined) {
   console.error(`Opción desconocida: ${opcionDesconocida}`);
   process.exitCode = 2;
@@ -101,6 +135,8 @@ if (conPresupuesto) {
   let invalidas = 0;
   let validas = 0;
   const rechazos = [];
+  // Primer rechazo (F38, task-03): ruta, texto exacto y primer motivo del primer archivo inválido.
+  let primerRechazo = null;
 
   for (const ruta of rutas) {
     let texto;
@@ -117,6 +153,7 @@ if (conPresupuesto) {
       validas += 1;
     } else {
       invalidas += 1;
+      if (primerRechazo === null) primerRechazo = { ruta, texto, motivo: motivos[0] };
       for (const motivo of motivos) rechazos.push(`${ruta}: ${motivo}`);
     }
   }
@@ -126,6 +163,8 @@ if (conPresupuesto) {
   if (errorDeUso) {
     process.exitCode = 2;
   } else if (invalidas > 0) {
+    // Última línea de la salida estándar, solo con código 1 (F38, task-03).
+    console.log(firma(primerRechazo));
     process.exitCode = 1;
   } else {
     console.log(conEvidencia ? `OK: ${validas} tarea(s) con evidencia completa` : `OK: ${validas} tarea(s) válida(s)`);

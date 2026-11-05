@@ -29,28 +29,73 @@ const RE_ALCANCE = /Fuera de alcance:\s*\S/;
 const RE_PASO = /^\d+\. /;
 const RE_PENDIENTE = /\b(TBD|a definir|según corresponda)\b/i;
 
-// Divide las líneas en secciones `## `, ignorando las líneas dentro de bloques de código.
-export function secciones(lineas) {
-  const resultado = [];
-  let enCodigo = false;
+// Cerca de bloque de código: 0 a 3 espacios, luego 3 o más «`» o 3 o más «~».
+const RE_CERCA = /^ {0,3}(`{3,}|~{3,})(.*)$/;
+
+function cercaDeApertura(linea) {
+  const m = RE_CERCA.exec(linea);
+  if (!m) return null;
+  // Una apertura con «`» no puede traer «`» en el resto de la línea.
+  if (m[1][0] === '`' && m[2].includes('`')) return null;
+  return { caracter: m[1][0], longitud: m[1].length };
+}
+
+function esCercaDeCierre(linea, cerca) {
+  const m = /^ {0,3}(`{3,}|~{3,})\s*$/.exec(linea);
+  return m !== null && m[1][0] === cerca.caracter && m[1].length >= cerca.longitud;
+}
+
+// Recorre las líneas una sola vez: secciones `## ` (fuera de bloques de código) y el bloque abierto, si queda uno.
+function escanear(lineas) {
+  const encontradas = [];
+  let cerca = null;
   let actual = null;
-  for (const linea of lineas) {
-    if (/^```/.test(linea)) {
-      enCodigo = !enCodigo;
-    } else if (!enCodigo && linea.startsWith('## ')) {
-      actual = { titulo: linea.slice(3).trim(), lineas: [] };
-      resultado.push(actual);
-      continue;
+  for (let i = 0; i < lineas.length; i++) {
+    const linea = lineas[i];
+    if (cerca) {
+      if (esCercaDeCierre(linea, cerca)) cerca = null;
+    } else {
+      const apertura = cercaDeApertura(linea);
+      if (apertura) {
+        cerca = { ...apertura, linea: i + 1, seccion: actual?.titulo ?? null };
+      } else if (linea.startsWith('## ')) {
+        actual = { titulo: linea.slice(3).trim(), lineas: [] };
+        encontradas.push(actual);
+        continue;
+      }
     }
     if (actual) actual.lineas.push(linea);
   }
-  return resultado;
+  return {
+    secciones: encontradas,
+    abierta: cerca ? { linea: cerca.linea, seccion: cerca.seccion } : null,
+  };
 }
 
-export function validarTarea(texto) {
+// Divide las líneas en secciones `## `, ignorando las líneas dentro de bloques de código.
+export function secciones(lineas) {
+  return escanear(lineas).secciones;
+}
+
+// null si todas las cercas cierran; si no, la línea de apertura y la sección vigente (null antes de la primera).
+export function bloqueSinCerrar(lineas) {
+  return escanear(lineas).abierta;
+}
+
+// Texto del error único para un bloque sin cerrar, o null.
+export function mensajeBloqueSinCerrar(lineas) {
+  const abierta = bloqueSinCerrar(lineas);
+  if (!abierta) return null;
+  if (abierta.seccion === null) {
+    return `Hay un bloque de código abierto en línea ${abierta.linea}, antes de la primera sección: falta la cerca de cierre.`;
+  }
+  const quien = SECCIONES_LIBRES.includes(abierta.seccion) ? 'el constructor' : 'el planificador';
+  return `Hay un bloque de código abierto en línea ${abierta.linea}, en «## ${abierta.seccion}» (la escribe ${quien}): falta la cerca de cierre.`;
+}
+
+// Reglas 1 a 3 (primera línea, segunda línea y secciones `##` en orden), compartidas por validarTarea y validarEstructura.
+function revisarCabeceraYSecciones(lineas) {
   const errores = [];
-  const todo = String(texto).replace(/\r\n?/g, '\n');
-  const lineas = todo.split('\n');
 
   // Regla 1: primera línea.
   if (!RE_PRIMERA.test(lineas[0] ?? '')) {
@@ -64,7 +109,6 @@ export function validarTarea(texto) {
   } else if (!RE_DEPENDE.test(segunda[2])) {
     errores.push(`«depende_de» debe ser «—» o una lista «task-NN» separada por «, »; hay «${segunda[2]}».`);
   }
-  const estado = segunda?.[3];
 
   // Regla 3: las diez secciones `##`, exactas y en orden.
   const encontradas = secciones(lineas);
@@ -73,6 +117,29 @@ export function validarTarea(texto) {
   if (!enOrden) {
     errores.push(`Las secciones «##» deben ser exactamente estas ${SECCIONES.length}, en este orden: ${SECCIONES.join(', ')}. Hay: ${titulos.join(', ') || 'ninguna'}.`);
   }
+
+  return { errores, estado: segunda?.[3], encontradas, titulos };
+}
+
+// Modo estructural (F38, task-04): solo bloque sin cerrar y reglas 1 a 3. Pensado para ejecutarse a mitad de edición:
+// no evalúa cuerpos vacíos, pasos, criterios, «Tocar», tamaño ni pendientes.
+export function validarEstructura(texto) {
+  const lineas = String(texto).replace(/\r\n?/g, '\n').split('\n');
+  const abierto = mensajeBloqueSinCerrar(lineas);
+  if (abierto) return [abierto];
+  return revisarCabeceraYSecciones(lineas).errores;
+}
+
+export function validarTarea(texto) {
+  const todo = String(texto).replace(/\r\n?/g, '\n');
+  const lineas = todo.split('\n');
+
+  // Bloque de código sin cerrar: es el único error; el resto de reglas no se evalúa.
+  const abierto = mensajeBloqueSinCerrar(lineas);
+  if (abierto) return [abierto];
+
+  // Reglas 1 a 3.
+  const { errores, estado, encontradas, titulos } = revisarCabeceraYSecciones(lineas);
 
   const bloque = (nombre) => encontradas.find((s) => s.titulo === nombre)?.lineas ?? [];
   const cuerpo = (nombre) => bloque(nombre).join('\n').trim();
