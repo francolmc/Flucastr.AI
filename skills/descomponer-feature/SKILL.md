@@ -28,8 +28,9 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
 repo: …   depende_de: …   estado: borrador
 
 ## Descripción      Qué y por qué, 3–5 líneas.
-## Contexto         Una línea `- Leer:` y otra `- Tocar:`, con rutas entre comillas invertidas separadas por «, »; convenciones del repo; cómo se ejecuta y se prueba; viñeta Fuente; `- Requiere:`.
+## Contexto         Una línea `- Leer:` y otra `- Tocar:`, con rutas entre comillas invertidas separadas por «, », sin punto final; convenciones del repo; cómo se ejecuta y se prueba; viñeta Fuente; `- Requiere:`.
 ## Decisiones ya tomadas   Lo que el ejecutor NO debe volver a decidir (librería, nombres, formato…).
+## Decisiones abiertas   OBLIGATORIA: «Ninguna» o cada decisión con «Resuelta: texto».
 ## Alcance / Fuera de alcance   Fuera de alcance no puede quedar vacío.
 ## Pasos            Numerados. Cada uno: archivo, qué cambia, resultado observable.
 ## Criterios de aceptación   Máximo 5, observables, cada uno con cómo se comprueba.
@@ -43,14 +44,14 @@ Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `h
 ## Tarea que se basta sola
 
 - En *Contexto*, cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita (archivo y rango de líneas, o la firma).
-- En *Contexto*, una viñeta `- Fuente: <ruta> «<encabezado>»` con la sección de `definitions/` de la que sale el diseño (una por documento citado), o `- Fuente: ninguna` si la tarea no depende de ningún diseño. `node scripts/validar-tarea.mjs --fuente` comprueba que el encabezado existe.
-- Cita cada sección de `definitions/` con su ruta y título (por ejemplo `definitions/WORKFLOW.md` §6), no el documento entero.
+- En *Contexto*, una viñeta `- Fuente: <ruta> «<encabezado>»` con la sección de `definitions/` de la que sale el diseño (una por documento, sin comillas invertidas), o `- Fuente: ninguna` si la tarea no depende de ningún diseño. `node scripts/validar-tarea.mjs --fuente` comprueba que el encabezado existe.
+- Cita cada sección de `definitions/` con su ruta y título, no el documento entero.
 - De `depende_de:` indica leer solo las *Notas* de esa tarea.
 - No pidas leer tareas `hecha` ajenas a `depende_de:`.
 
 ## Completa (cumplir antes de la puerta 3)
 
-- Las rutas del contexto las leíste en el repo. Los comandos los ejecutaste si no tienen efectos sobre archivos versionados (pruebas, lint, `--help`); los demás están marcados «no ejecutado, inferido» en el *Contexto*.
+- Rutas leídas en el repo; comandos sin efectos sobre archivos versionados ejecutados, los demás marcados «no ejecutado, inferido» en el *Contexto*.
 - No quedan «TBD», «a definir» ni «según corresponda».
 - Todo lo que el ejecutor tendría que elegir está en *Decisiones ya tomadas*.
 - Cada paso termina en algo que se puede ver o ejecutar.
@@ -63,7 +64,7 @@ Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `h
 - Topes: `WORKFLOW.md` §6 (~3 archivos tocados); los mide el validador.
 - Hasta 6 KB (aviso) / 8 KB (error); *Evidencia* hasta 1,5 KB.
 - Al terminar, el repo queda funcionando (nada a medias).
-- Si no cabe, pártela en dos tareas con `depende_de:`.
+- Si no cabe, pártela con `depende_de:`.
 
 ## Al terminar
 

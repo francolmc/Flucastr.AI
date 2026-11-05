@@ -17,7 +17,7 @@ export function validarFuente(texto, leer) {
 
   const coincide = RE_FUENTE.exec(vinetas[0]);
   if (!coincide) {
-    return ['La viñeta «- Fuente:» tiene formato inválido: debe ser «ninguna» o «<ruta> «<encabezado>»».'];
+    return ['La viñeta «- Fuente:» tiene formato inválido: debe ser «ninguna» o «<ruta> «<encabezado>»», una viñeta por documento y sin comillas invertidas en la ruta.'];
   }
   if (coincide[1] === 'ninguna') return [];
 
