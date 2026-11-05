@@ -13,6 +13,8 @@
 //   node scripts/resolver.mjs quitar-compactacion pi <settings.json> <modelo> <reserve> [creado]  deshace lo anterior, solo si el valor es ese
 //   node scripts/resolver.mjs fijar-compactacion claude <settings.json> [--simular]  pone autoCompactWindow (Claude Code) en los ajustes del proyecto
 //   node scripts/resolver.mjs quitar-compactacion claude <settings.json> <valor>  deshace lo anterior, solo si el valor es ese
+//   node scripts/resolver.mjs fijar-hook claude <settings.local.json> [--simular]  agrega el hook PostToolUse del validador (no pisa lo ajeno)
+//   node scripts/resolver.mjs quitar-hook claude <settings.local.json>  deshace lo anterior, solo la entrada exacta del validador
 //
 // Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
 // si no, se lee el modelos.json del repo. Lo usa instalar.sh --copiar con el modelos.json personal.
@@ -418,6 +420,78 @@ function quitarCompactacionClaude(ruta, valor) {
   }
 }
 
+// --- Hook del validador en Claude Code (fijar-hook / quitar-hook, F38) ---
+
+const COMANDO_HOOK_CLAUDE = "node ~/.flucastr-ai/validar-tarea.mjs --hook";
+const ENTRADA_HOOK_CLAUDE = { matcher: "Write|Edit|MultiEdit", hooks: [{ type: "command", command: COMANDO_HOOK_CLAUDE }] };
+
+// Solo settings.local.json: nunca se toca ~/.claude/settings.json.
+function comprobarNombreHookClaude(ruta) {
+  if (basename(ruta) !== "settings.local.json") {
+    fallar(`${ruta}: solo se toca settings.local.json (nunca ~/.claude/settings.json)`);
+  }
+}
+
+// Entrada que contiene nuestro command exacto (entre sus hooks).
+function tieneNuestroHook(entrada) {
+  return esObjeto(entrada) && Array.isArray(entrada.hooks) && entrada.hooks.some((h) => esObjeto(h) && h.command === COMANDO_HOOK_CLAUDE);
+}
+
+// Entrada cuyo único hook es nuestro command exacto: es la que quitar-hook borra.
+function esSoloNuestraHookClaude(entrada) {
+  return tieneNuestroHook(entrada) && entrada.hooks.length === 1;
+}
+
+function fijarHookClaude(ruta, simular) {
+  comprobarNombreHookClaude(ruta);
+  const ajustes = ajustesDeObjeto(ruta);
+  const hooks = tiene(ajustes, "hooks") ? ajustes.hooks : {};
+  if (!esObjeto(hooks)) fallar(`${ruta}: 'hooks' no es un objeto; no lo toco`);
+  const postToolUse = tiene(hooks, "PostToolUse") ? hooks.PostToolUse : [];
+  if (!Array.isArray(postToolUse)) fallar(`${ruta}: 'hooks.PostToolUse' no es un arreglo; no lo toco`);
+  if (postToolUse.some(tieneNuestroHook)) {
+    console.log("ya-estaba");
+    return;
+  }
+  if (!simular) {
+    mkdirSync(dirname(ruta), { recursive: true });
+    escribirAtomico(ruta, { ...ajustes, hooks: { ...hooks, PostToolUse: [...postToolUse, ENTRADA_HOOK_CLAUDE] } });
+  }
+  console.log("fijado");
+}
+
+function quitarHookClaude(ruta) {
+  comprobarNombreHookClaude(ruta);
+  if (!existsSync(ruta)) {
+    console.log("omitido");
+    return;
+  }
+  const ajustes = ajustesDeObjeto(ruta);
+  const hooks = tiene(ajustes, "hooks") ? ajustes.hooks : undefined;
+  if (!esObjeto(hooks) || !Array.isArray(hooks.PostToolUse)) {
+    console.log("omitido");
+    return;
+  }
+  const restantes = hooks.PostToolUse.filter((e) => !esSoloNuestraHookClaude(e));
+  if (restantes.length === hooks.PostToolUse.length) {
+    console.log("omitido");
+    return;
+  }
+  const nuevosHooks = { ...hooks };
+  if (restantes.length) nuevosHooks.PostToolUse = restantes;
+  else delete nuevosHooks.PostToolUse;
+  const nuevos = { ...ajustes };
+  if (Object.keys(nuevosHooks).length) nuevos.hooks = nuevosHooks;
+  else delete nuevos.hooks;
+  if (Object.keys(nuevos).length === 0) {
+    rmSync(ruta);
+    console.log("archivo-quitado");
+  } else {
+    escribirAtomico(ruta, nuevos);
+    console.log("quitado");
+  }
+}
+
 const [orden, ...args] = process.argv.slice(2);
 
 if (orden === "modelo" && args.length === 2) {
@@ -498,10 +572,14 @@ if (orden === "modelo" && args.length === 2) {
   fijarCompactacionClaude(args[1], args.length === 3);
 } else if (orden === "quitar-compactacion" && args[0] === "claude" && args.length === 3 && /^\d+$/.test(args[2])) {
   quitarCompactacionClaude(args[1], args[2]);
+} else if (orden === "fijar-hook" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+  fijarHookClaude(args[1], args.length === 3);
+} else if (orden === "quitar-hook" && args[0] === "claude" && args.length === 2) {
+  quitarHookClaude(args[1]);
 } else if (orden === "fijar-compactacion" && args[0] === "pi" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
   fijarCompactacionPi(args[1], args.length === 3);
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json>");
 }

@@ -96,7 +96,7 @@ test('una tarea inválida sola sale con 1, con su ruta y el motivo sobre «Tocar
 test('válida más inválida sale con 1 y una sola línea de rechazo', () => {
   const r = correr('valida.md', 'cuatro.md');
   assert.equal(r.code, 1);
-  const rechazos = r.out.split('\n').filter((l) => l.startsWith('cuatro.md: '));
+  const rechazos = r.out.split('\n').filter((l) => !l.startsWith('Firma:')).filter((l) => l.startsWith('cuatro.md: '));
   assert.equal(rechazos.length, 1);
   assert.equal(r.out.includes('OK:'), false);
 });
@@ -141,7 +141,7 @@ test('--evidencia con una tarea sin la salida del comando sale con 1 y su ruta a
 test('--evidencia con una completa y una incompleta sale con 1 y solo rechaza la incompleta', () => {
   const r = correr('--evidencia', 'evidencia-ok.md', 'evidencia-falta.md');
   assert.equal(r.code, 1);
-  const lineas = r.out.split('\n').filter((l) => l !== '');
+  const lineas = r.out.split('\n').filter((l) => l !== '' && !l.startsWith('Firma:'));
   assert.ok(lineas.length >= 1);
   assert.ok(lineas.every((l) => l.startsWith('evidencia-falta.md: ')));
   assert.equal(r.out.includes('evidencia-ok.md'), false);
@@ -308,4 +308,57 @@ test('--presupuesto sin carpeta sale con 2 y muestra el uso en stderr', () => {
   const r = correr('--presupuesto');
   assert.equal(r.code, 2);
   assert.match(r.err, /^Uso: node validar-tarea\.mjs --presupuesto features\/Fxx-nombre/m);
+});
+
+// F38, task-03: línea «Firma:» del primer rechazo.
+const lineas = (salida) => salida.split('\n').filter((l) => l !== '');
+const ultimaLinea = (salida) => lineas(salida).at(-1);
+
+// Tarea dañada: un bloque de código sin cerrar al final de «Notas».
+const bloqueAbierto = valida.replace('## Notas\n', '## Notas\n```\n');
+fs.writeFileSync(path.join(dir, 'bloque.md'), bloqueAbierto);
+fs.writeFileSync(path.join(dir, 'cambio.md'), bloqueAbierto);
+
+test('una tarea inválida sale con 1 y su última línea es «Firma: <regla>|<ruta>|<12 hex>»', () => {
+  const r = correr('bloque.md');
+  assert.equal(r.code, 1);
+  assert.match(ultimaLinea(r.out), /^Firma: bloque-abierto\|bloque\.md\|[0-9a-f]{12}$/);
+});
+
+test('el mismo archivo dos veces da la misma firma', () => {
+  const a = ultimaLinea(correr('bloque.md').out);
+  const b = ultimaLinea(correr('bloque.md').out);
+  assert.equal(a, b);
+});
+
+test('cambiar un carácter del archivo cambia el hash y mantiene la regla', () => {
+  const antes = ultimaLinea(correr('cambio.md').out);
+  fs.writeFileSync(path.join(dir, 'cambio.md'), bloqueAbierto.replace('Texto que', 'Texto Que'));
+  const despues = ultimaLinea(correr('cambio.md').out);
+  assert.notEqual(antes, despues);
+  assert.equal(antes.split('|')[0], despues.split('|')[0]);
+});
+
+test('dos reglas distintas dan identificadores distintos', () => {
+  const dañada = ultimaLinea(correr('bloque.md').out);
+  const conTocar = ultimaLinea(correr('cuatro.md').out);
+  assert.match(dañada, /^Firma: bloque-abierto\|/);
+  assert.match(conTocar, /^Firma: otra\|/);
+});
+
+test('una tarea válida (código 0) no imprime línea «Firma:»', () => {
+  const r = correr('valida.md');
+  assert.equal(r.code, 0);
+  assert.equal(r.out.includes('Firma:'), false);
+});
+
+test('un uso con error (código 2) no imprime línea «Firma:»', () => {
+  const r = correr('cuatro.md', 'no-existe.md');
+  assert.equal(r.code, 2);
+  assert.equal(r.out.includes('Firma:'), false);
+});
+
+test('reglaDe clasifica un motivo desconocido como «otra»', async () => {
+  const { reglaDe } = await import('../../scripts/firma.mjs');
+  assert.equal(reglaDe('algo raro'), 'otra');
 });

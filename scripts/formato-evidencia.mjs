@@ -2,10 +2,11 @@
 // validarEvidencia(texto) devuelve un arreglo de motivos de rechazo en español; vacío = válida.
 // Función pura: no escribe archivos, no usa red ni git.
 
-import { secciones } from './formato-tarea.mjs';
+import { secciones, mensajeBloqueSinCerrar, MAX_CARACTERES } from './formato-tarea.mjs';
 import { lineasDeNotas, parsearBloqueo, parsearCancelada, coherenciaBloqueo } from './formato-bloqueo.mjs';
 
-const ESTADOS_NO_TERMINADOS = ['borrador', 'aprobada', 'en curso'];
+const ESTADOS_NO_TERMINADOS = ['borrador', 'aprobada'];
+const MAX_EVIDENCIA = 1536;
 const ESTADOS_TERMINADOS = ['lista para revisión', 'hecha'];
 const RE_ESTADO = /estado: (borrador|aprobada|en curso|lista para revisión|hecha|bloqueada|cancelada)\s*$/;
 // TBD, TODO y PENDIENTE: solo en mayúsculas y como palabra completa («todo» es palabra común y node:test imprime «ℹ todo 0»).
@@ -125,6 +126,10 @@ export function validarEvidencia(texto) {
   const todo = String(texto).replace(/\r\n?/g, '\n');
   const lineas = todo.split('\n');
 
+  // Bloque de código sin cerrar (task-01 de F38): es el único error.
+  const abierto = mensajeBloqueSinCerrar(lineas);
+  if (abierto) return [abierto];
+
   const estado = lineas[1]?.match(RE_ESTADO)?.[1];
   if (!estado) {
     errores.push('La segunda línea debe terminar en un «estado:» válido.');
@@ -154,6 +159,17 @@ export function validarEvidencia(texto) {
       if (!cancelada.ok) errores.push(cancelada.error);
     }
     return [...new Set(errores)];
+  }
+
+  // Tamaños (task-02 de F38): solo con «en curso» o «lista para revisión».
+  if (estado === 'en curso' || estado === 'lista para revisión') {
+    if (todo.length > MAX_CARACTERES) {
+      errores.push(`La tarea mide ${todo.length} caracteres; el máximo es ${MAX_CARACTERES}.`);
+    }
+    const tamanoEvidencia = evidencia.join('\n').trim().length;
+    if (tamanoEvidencia > MAX_EVIDENCIA) {
+      errores.push(`«Evidencia» mide ${tamanoEvidencia} caracteres; el máximo es ${MAX_EVIDENCIA}.`);
+    }
   }
 
   // Comandos de Verificación: líneas no vacías, sin «#», dentro de bloques de código.

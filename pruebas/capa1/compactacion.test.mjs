@@ -179,6 +179,14 @@ test('b: Pi con settings.json del usuario', () => {
   assert.deepEqual(trasDesinstalar, original);
 });
 
+// settings.local.json del proyecto tras instalar: agente, compactación y el hook PostToolUse del validador.
+function comprobarAjustesLocales(json) {
+  assert.equal(json.agent, 'arquitecto');
+  assert.equal(json.autoCompactWindow, 133000);
+  assert.deepEqual(Object.keys(json).sort(), ['agent', 'autoCompactWindow', 'hooks']);
+  assert.deepEqual(Object.keys(json.hooks), ['PostToolUse']);
+}
+
 // c. Proyecto: settings.local.json con el agente y la compactación de Claude Code; simetría al desinstalar.
 test('c: proyecto con Claude Code', () => {
   const e = entorno('proyecto');
@@ -187,13 +195,13 @@ test('c: proyecto con Claude Code', () => {
   const ajustesLocales = join(p, '.claude', 'settings.local.json');
 
   exito(e.instalar('--proyecto', p));
-  assert.deepEqual(leerJson(ajustesLocales), { agent: 'arquitecto', autoCompactWindow: 133000 });
+  comprobarAjustesLocales(leerJson(ajustesLocales));
   const claude = compactaciones(e).filter((l) => l[2] === 'claude:133000');
   assert.equal(claude.length, 1, 'falta la línea claude:133000');
 
   // Instalar sin --proyecto conserva la línea y el archivo del proyecto.
   exito(e.instalar());
-  assert.deepEqual(leerJson(ajustesLocales), { agent: 'arquitecto', autoCompactWindow: 133000 });
+  comprobarAjustesLocales(leerJson(ajustesLocales));
   assert.equal(compactaciones(e).filter((l) => l[2] === 'claude:133000').length, 1, 'se perdió la línea claude:');
 
   // Desinstalar el proyecto borra el archivo y la carpeta .claude, y quita la línea claude (las de pi siguen).

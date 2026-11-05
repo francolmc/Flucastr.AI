@@ -126,6 +126,48 @@ test('exige Evidencia no vacía con estado «lista para revisión»', () => {
   assert.ok(validarTarea(alterada).some((e) => e.includes('Evidencia')));
 });
 
+test('un bloque «```sh» sin cerrar en Evidencia da un solo error con línea, sección y autor', () => {
+  const dañada = muestra.replace('## Evidencia\n', '## Evidencia\nSalida del paso 2:\n```sh\n$ ls\n');
+  const errores = validarTarea(dañada);
+  assert.equal(errores.length, 1);
+  assert.match(errores[0], /bloque de código abierto en línea \d+, en «## Evidencia» \(la escribe el constructor\)/);
+  assert.ok(!errores[0].includes('Falta la sección'));
+});
+
+test('una cerca «~~~» sin cerrar se rechaza y la escribe el planificador', () => {
+  const alterada = muestra.replace('Texto que describe el objetivo de la tarea.', 'Texto\n~~~\ncódigo sin cerrar');
+  const errores = validarTarea(alterada);
+  assert.equal(errores.length, 1);
+  assert.match(errores[0], /en «## Descripción» \(la escribe el planificador\)/);
+});
+
+test('una cerca «````» cerrada con «```» sigue abierta', () => {
+  const alterada = muestra.replace('```\nnode --test archivo.test.mjs\n```', '````\nnode --test archivo.test.mjs\n```');
+  const errores = validarTarea(alterada);
+  assert.equal(errores.length, 1);
+  assert.match(errores[0], /en «## Verificación»/);
+});
+
+test('una cerca «```» cerrada con «````» queda cerrada', () => {
+  const alterada = muestra.replace('```\nnode --test archivo.test.mjs\n```', '```\nnode --test archivo.test.mjs\n````');
+  assert.deepEqual(validarTarea(alterada), []);
+});
+
+test('una cerca «```» a mitad de línea no abre bloque', () => {
+  const alterada = muestra.replace('Texto que describe el objetivo de la tarea.', 'Texto con ``` a mitad de línea.');
+  assert.deepEqual(validarTarea(alterada), []);
+});
+
+test('un bloque abierto antes de la primera sección da error sin sección', () => {
+  // Sin otras cercas en la muestra, la cerca abierta antes de «## Descripción» no se cierra nunca.
+  const alterada = muestra
+    .replace('```\nnode --test archivo.test.mjs\n```', 'node --test archivo.test.mjs')
+    .replace('## Descripción\n', '```\n## Descripción\n');
+  const errores = validarTarea(alterada);
+  assert.equal(errores.length, 1);
+  assert.match(errores[0], /bloque de código abierto en línea 4, antes de la primera sección: falta la cerca de cierre\./);
+});
+
 const esActiva = (r) => /(^|\/)task-\d{2}-[^/]*\.md$/.test(r) && !r.startsWith('completed/');
 
 const reales = fs

@@ -152,6 +152,20 @@ if [ -n "$PROYECTO" ]; then
           decir "  AVISO: el proyecto ya no es un repo git; no se quita la exclusión (sigue registrada): $extra"
         fi
         ;;
+      hook)
+        # hook del validador de Claude Code de este proyecto: solo su línea settings.local.json
+        if [ "$ruta" = "$AJUSTES" ] && [ "${extra:-}" = claude ]; then
+          quitar=1
+          hallados=$((hallados + 1))
+          if [ "$SIMULAR" = 1 ]; then
+            decir "SIMULACIÓN: quitaría el hook de Claude Code de: $AJUSTES"
+          else
+            resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-hook claude "$AJUSTES" < /dev/null)" || resultado="error"
+            decir "  hook de Claude Code ($resultado): $AJUSTES"
+            rmdir "$PROYECTO/.claude" 2>/dev/null || true # solo si quedó vacía
+          fi
+        fi
+        ;;
       skills-proyecto)
         if [ "$ruta" = "$PROYECTO" ]; then
           quitar=1
@@ -229,6 +243,17 @@ while IFS=$'\t' read -r tipo ruta extra; do
         fi
       else
         decir "  omitido (no está la exclusión): $ruta"
+      fi
+      ;;
+    hook)
+      # hook del validador de Claude Code de un proyecto (settings.local.json), salvo --conservar-ajustes
+      if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
+      if [ "$SIMULAR" = 1 ]; then
+        decir "  quitaría el hook de Claude Code de: $ruta"
+      else
+        resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-hook claude "$ruta" < /dev/null)" || resultado="error"
+        decir "  hook de Claude Code ($resultado): $ruta"
+        rmdir "$(dirname "$ruta")" 2>/dev/null || true # .claude del proyecto, solo si quedó vacía
       fi
       ;;
     skills-proyecto)

@@ -414,6 +414,28 @@ instalar_compactacion_claude() {
   return 0
 }
 
+# Hook del validador de tareas en Claude Code (ajuste personal del proyecto, settings.local.json; no se sube a git).
+# Si el resolver falla (JSON inválido, hooks con otro tipo), avisa y sigue: no aborta la instalación.
+instalar_hook_claude() {
+  local ajustes="$PROYECTO/.claude/settings.local.json" salida prefijo=""
+  local extra=()
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" fijar-hook claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+    echo "  AVISO: no se tocó $ajustes ($salida)"
+    return 0
+  fi
+  case "$salida" in
+    fijado) echo "  ${prefijo}hook de Claude Code fijado: $ajustes" ;;
+    ya-estaba) echo "  ${prefijo}hook de Claude Code ya estaba fijado: $ajustes" ;;
+    *) echo "  AVISO: resultado inesperado de fijar-hook claude ($salida)"; return 0 ;;
+  esac
+  # Una sola línea hook por proyecto: se registra solo si aún no está en el registro nuevo.
+  if [ "$SIMULAR" = 0 ] && ! grep -qxF "$(printf 'hook\t%s\tclaude' "$ajustes")" "$NUEVO"; then
+    registrar hook "$ajustes" claude
+  fi
+  return 0
+}
+
 # Primera línea del manifiesto: el modo con el que se instaló (lo leen desinstalar.sh y la comprobación de modo).
 registrar modo "$MODO"
 
@@ -434,6 +456,7 @@ if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
   echo "Quitando la instalación anterior..."
   grep -E "^ajuste$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^compactacion$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude:" "$MANIFIESTO" >> "$NUEVO" || true
+  grep -E "^hook$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude$" "$MANIFIESTO" >> "$NUEVO" || true
   bash "$RAIZ/desinstalar.sh" --silencioso --conservar-ajustes
 fi
 
@@ -513,6 +536,7 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
     echo "Proyecto ($PROYECTO)"
     fijar_agente_proyecto
     instalar_compactacion_claude
+    instalar_hook_claude
   fi
 else
   echo "Claude Code: no encontrado, se omite."

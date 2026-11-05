@@ -204,6 +204,40 @@ test('estado aprobada se rechaza: la tarea no está terminada', () => {
   assert.ok(motivos.some((m) => m.includes('no está terminada')), motivos.join('\n'));
 });
 
+test('estado borrador se rechaza: la tarea no está terminada', () => {
+  const motivos = validarEvidencia(tarea({ estado: 'borrador' }));
+  assert.ok(motivos.some((m) => m.includes('no está terminada')), motivos.join('\n'));
+});
+
+test('estado en curso con evidencia completa pasa', () => {
+  assert.deepEqual(validarEvidencia(tarea({ estado: 'en curso' })), []);
+});
+
+test('Evidencia de 1536 caracteres pasa y de 1537 se rechaza', () => {
+  const conLargo = (n) => `${EVIDENCIA_BASE}\n${'x'.repeat(n - EVIDENCIA_BASE.length - 1)}`;
+  assert.equal(conLargo(1536).length, 1536);
+  assert.deepEqual(validarEvidencia(tarea({ evidencia: conLargo(1536) })), []);
+  const motivos = validarEvidencia(tarea({ evidencia: conLargo(1537) }));
+  assert.ok(motivos.includes('«Evidencia» mide 1537 caracteres; el máximo es 1536.'), motivos.join('\n'));
+});
+
+test('total de la tarea de 8192 caracteres pasa y de 8193 se rechaza', () => {
+  const base = tarea().length;
+  const conTotal = (n) => tarea({ notas: `${'x'.repeat(n - base - 1)}\n${NOTAS_BASE}` });
+  assert.equal(conTotal(8192).length, 8192);
+  assert.deepEqual(validarEvidencia(conTotal(8192)), []);
+  const motivos = validarEvidencia(conTotal(8193));
+  assert.ok(motivos.includes('La tarea mide 8193 caracteres; el máximo es 8192.'), motivos.join('\n'));
+});
+
+test('bloque de código abierto en Evidencia da un único error y no pide la salida', () => {
+  const evidencia = ['```sh', `$ ${CMD_X}`, 'ℹ fail 0', 'exit 0'].join('\n');
+  const motivos = validarEvidencia(tarea({ evidencia }));
+  assert.equal(motivos.length, 1, motivos.join('\n'));
+  assert.ok(motivos[0].includes('bloque de código abierto en línea'), motivos[0]);
+  assert.ok(!motivos.some((m) => m.includes('Falta la salida')), motivos.join('\n'));
+});
+
 test('control negativo: dos comandos en Verificación y uno en Evidencia da exactamente un motivo que cita el faltante', () => {
   const evidencia = [
     '```',
