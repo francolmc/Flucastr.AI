@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: Modo yolo: detenido (pausa antes de task-06, modelo real) — F41; Rama: fix/F41-coordinador-delega-su-rol; 01 a 05 hechas
+Paso actual: Modo yolo: terminado — F41 completa (01 a 06 hechas); Rama: fix/F41-coordinador-delega-su-rol; sin commits
 Presupuesto: F41; rondas arq=0 plan=2; ampliado=0
-Espera a Franco: decidir si corro la task-06 (gasta créditos). Sin commits: revisar y commitear 01 a 05 en features/F41-coordinador-delega-su-rol/
+Espera a Franco: Feature F41 completa en fix/F41-coordinador-delega-su-rol: commitea 01 a 06, cierra la rama, haz el PR. Marca → en F41: pendiente
 Bloqueos abiertos: ninguno
-Retomar: F41: pedir yolo para la task-06 (corridas con modelo real, Claude Code y Pi); rama fix/F41-coordinador-delega-su-rol
+Retomar: sesión nueva tras el commit/PR de F41: mover la marca → a F38 (planificador, descomponer-feature) y seguir con F38, rama fix/
 Actualizado: 2026-11-04

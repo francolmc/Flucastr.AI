@@ -1,5 +1,5 @@
 # task-06 — Corridas con modelo real de la regla de rol (Claude Code y Pi)
-repo: Flucastr.AI   depende_de: task-05   estado: aprobada
+repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
 ## Descripción
 Última tarea de F41 y la única que gasta créditos: corre `pruebas/correr-rol.sh` una vez por herramienta, con los dos escenarios (mover el `→` tras cerrar una feature y editar una definición), y deja los informes en `pruebas/resultados/`. Solo se ejecuta con el visto bueno expreso de Franco.
@@ -62,7 +62,46 @@ grep -H 'Veredicto:' pruebas/resultados/*-rol-claude-code-*.md pruebas/resultado
 Esperado: una línea `Veredicto: OK` por cada informe de esta corrida.
 
 ## Evidencia
-(El ejecutor pega aquí la cola relevante de cada salida, hasta 1,5 KB.)
+```
+$ git branch --show-current
+fix/F41-coordinador-delega-su-rol
+exit 0
+```
+
+```
+$ bash pruebas/correr-rol.sh claude-code
+modelos de agentes instalados vigentes
+informe: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-04-rol-claude-code-1.md
+Veredicto: OK
+exit 0
+```
+
+```
+$ bash pruebas/correr-rol.sh pi
+modelos de agentes instalados vigentes
+]777;notify;Pi;Ready for input]777;notify;Pi;Ready for inputinforme: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-04-rol-pi-1.md
+Veredicto: OK
+exit 0
+```
+
+```
+$ grep -H 'Veredicto:' pruebas/resultados/*-rol-claude-code-*.md pruebas/resultados/*-rol-pi-*.md
+pruebas/resultados/2026-11-04-rol-claude-code-1.md:Veredicto: OK
+pruebas/resultados/2026-11-04-rol-pi-1.md:Veredicto: OK
+exit 0
+```
+
+Informes de esta corrida: `pruebas/resultados/2026-11-04-rol-claude-code-1.md` y `pruebas/resultados/2026-11-04-rol-pi-1.md`.
+
+Forma de la línea `informe: <ruta>` de los comandos 2 y 3: la salida real trae la ruta absoluta del informe en lugar del marcador `<ruta>`; el texto impreso es `informe: ` seguido de esa ruta (ver salidas arriba).
 
 ## Notas
-(Vacío hasta ejecutar.)
+- Corrida única por herramienta; no se repitió nada. Ambas salidas dieron `Veredicto: OK`.
+- claude-code (modelo claude-sonnet-5-5), escenario «flecha»: delegó en `planificador` para trasladar la marca `→` de F01 a F02. El `planificador` devolvió `BLOQUEO` con `rol=arquitecto` porque faltan `definitions/PROJECT.md` y `definitions/REPOS.md`; el coordinador se detuvo en la puerta 1 y pidió aprobar esos borradores y elegir el alcance de F02. No editó `BACKLOG.md` por sí mismo.
+- claude-code (modelo claude-sonnet-5-5), escenario «definicion»: delegó en `arquitecto` y no editó `definitions/WORKFLOW.md`. El `arquitecto` devolvió `BLOQUEO` porque el archivo no tiene sección 2; el coordinador pidió la ruta o el texto a corregir.
+- pi (modelo gpt-6.1-sol), escenario «flecha»: delegó en `planificador`; la marca `→` quedó en F02 en `definitions/BACKLOG.md` con el backlog en `borrador`. No creó tareas ni hizo commit.
+- pi (modelo gpt-6.1-sol), escenario «definicion»: delegó en `arquitecto`; el archivo no tiene sección 2, no se modificó nada y se pidió precisión a Franco.
+- Diferencia observada: en claude-code el `planificador` no pudo mover la marca por falta de `PROJECT.md`/`REPOS.md`; en pi sí la movió. Dato para Franco, no se ajustó ningún prompt ni umbral.
+- Señal de escenario: el fixture deja `definitions/WORKFLOW.md` sin sección 2 y el `→` en F01, así que ambas herramientas se detuvieron o pidieron aclaración; el veredicto mide solo delegación y ausencia de edición propia.
+- Nota de proceso: la salida de cada corrida se guardó en un archivo del scratchpad mientras se revisaba; no afecta a los archivos del repo.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna
