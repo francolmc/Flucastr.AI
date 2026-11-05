@@ -1,5 +1,5 @@
 # task-08 — Corrida con modelo real: el hook bloquea una escritura dañada
-repo: Flucastr.AI   depende_de: task-07   estado: bloqueada
+repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
 ## Descripción
 Aceptación de F38: una prueba real en Claude Code muestra que el hook bloquea una escritura dañada y deja pasar una válida (con control negativo sin hook), y que corre también dentro de un subagente. Se ejecuta `pruebas/correr-hook.sh` con el `claude` real y se deja el informe en `pruebas/resultados/`. No se cambia código de producto.
@@ -49,63 +49,46 @@ Esperado: primera salida `fix/F38-validador-causal-tareas`; el último comando i
 
 ## Evidencia
 
-Dos pasadas completas de la Verificación (cota de 2). Informes: `pruebas/resultados/2026-11-05-hook-claude-code-1.md` (pasada 1, FALLA) y `pruebas/resultados/2026-11-05-hook-claude-code-2.md` (pasada 2, FALLA).
+Una pasada completa (intentos=1). Informe: `pruebas/resultados/2026-11-05-hook-claude-code-3.md`, Veredicto: OK.
 
+```
 $ git branch --show-current
 fix/F38-validador-causal-tareas
 exit 0
 
 $ bash pruebas/correr-hook.sh claude-code danada
 fijado
-escenario: danada; salida: .../pruebas/.temporales/hook-claude-code/danada.jsonl
+escenario: danada; salida: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/danada.jsonl
 exit 0
 
 $ bash pruebas/correr-hook.sh claude-code valida
 fijado
-escenario: valida; salida: .../pruebas/.temporales/hook-claude-code/valida.jsonl
+escenario: valida; salida: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/valida.jsonl
 exit 0
 
 $ bash pruebas/correr-hook.sh claude-code sin-hook
-escenario: sin-hook; salida: .../pruebas/.temporales/hook-claude-code/sin-hook.jsonl
+escenario: sin-hook; salida: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/sin-hook.jsonl
 exit 0
 
 $ bash pruebas/correr-hook.sh claude-code subagente
 fijado
-escenario: subagente; salida: .../pruebas/.temporales/hook-claude-code/subagente.jsonl
+escenario: subagente; salida: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/subagente.jsonl
 exit 0
 
 $ bash pruebas/correr-hook.sh claude-code informe
-informe: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-05-hook-claude-code-1.md
-Veredicto: FALLA
+informe: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-05-hook-claude-code-3.md
+Veredicto: OK
 exit 0
+```
 
-Pasada 2 (los cuatro escenarios de nuevo, idénticos a los de arriba, con `exit 0` cada uno), luego:
-
-$ bash pruebas/correr-hook.sh claude-code informe
-informe: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-05-hook-claude-code-2.md
-Veredicto: FALLA
-exit 0
-
-Veredicto por escenario en la pasada 2 (`...-hook-claude-code-2.md`):
-- danada — FALLA: «sin mención del bloque de código abierto». El modelo describe el bloqueo del hook («bloque de código abierto en la línea 32», firma `bloque-abierto|…|7e8eb467ab13`), pero la frase literal «bloque de código abierto en línea» no aparece en `danada.jsonl`.
-- valida — OK.
-- subagente — OK («llamó a la herramienta de subagente», y el mensaje literal del hook sí aparece en el resultado: «Hay un bloque de código abierto en línea 32…»).
-- sin-hook — OK.
-
-Pasada 1 de `subagente` dio FALLA por la misma frase literal ausente; la pasada 2 dio OK. No fue por el nombre de la herramienta (llamó a Write por subagente en ambas).
-
-Criterios: 1 no cumplido (danada sin la frase literal); 2 cumplido en la pasada 2; 3 no cumplido (ningún informe con «Veredicto: OK»).
+Criterios: 1 cumplido (`danada` con el mensaje del hook; `valida` y `sin-hook` sin él); 2 cumplido (`subagente` con el mensaje y la llamada al subagente); 3 cumplido (informe `-3` con «Veredicto: OK»).
 
 ## Notas
 
-Bloqueo: tipo=verificacion_x2; falta=-
+Reintento: *Evidencia* y *Notas* del intento previo se borraron (instrucción del encargo). Las pasadas 1 y 2 de la corrida anterior quedan en sus informes `2026-11-05-hook-claude-code-1.md` y `-2.md` (FALLA por la frase literal ausente). La corrida nueva pasó en la primera pasada; no hizo falta una segunda.
 
-Decisiones de *Decisiones ya tomadas* evaluadas: ninguna aplica. El evento de `danada` sí trae `tool_input.file_path`, y el nombre de la herramienta de subagente (`Agent`/`Task`) no es la causa: la llamada ocurrió en las dos pasadas. Por eso no hay `BLOQUEO` de esas dos decisiones; el bloqueo es por verificación.
+Decisiones de *Decisiones ya tomadas* evaluadas: ninguna aplica. El evento de `danada` trajo `tool_input.file_path` y la herramienta de subagente funcionó sin cambios.
 
-Causa observada, no resuelta: el hook sí se dispara en `danada` (el modelo cita la firma y la línea 32), pero el texto literal del hook no queda en `danada.jsonl` en ninguna de las dos pasadas. En `subagente` sí queda. El comprobador `pruebas/comprobaciones/hook-resultado.mjs` exige la frase literal en el registro, así que `danada` falla siempre. No se modificó el comprobador ni el script (fuera de alcance). Hace falta que Franco decida si el hook debe volcar su mensaje al registro del `Write` del agente principal o si el comprobador debe aceptar la paráfrasis del modelo.
+Huecos menores resueltos: (1) `pruebas/resultados/README.md` no existía; se creó como índice de los tres informes de F38 (uno por línea, con su veredicto), no solo con la línea del informe nuevo. (2) Se borró `pruebas/.temporales/hook-claude-code/` (temporales de esta corrida), igual que en la corrida anterior; el resto de `pruebas/.temporales/` no se tocó. Los informes en `pruebas/resultados/` se conservan.
 
-Huecos menores: ninguno. No se creó `pruebas/resultados/README.md` porque el veredicto no es OK (paso 2 solo con OK).
-
-Limpieza: se borró `pruebas/.temporales/hook-claude-code/` (temporales de la corrida). Los informes en `pruebas/resultados/` se conservan.
-
-Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=falla; huecos=0; resultado=bloqueada; causa=verificacion_x2
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

@@ -4,6 +4,8 @@ import path from 'node:path';
 import { analyzeRecord } from './registro.mjs';
 
 const MENSAJE_BLOQUE = 'bloque de código abierto en línea';
+const FIRMA_BLOQUE = /bloque-abierto/;
+const NUMERO_LINEA = /(l[ií]nea|line)\s*\d+/i;
 const ESCENARIOS = ['danada', 'valida', 'subagente', 'sin-hook'];
 const ARCHIVO_TAREA = path.join('features', 'F99-demo', 'task-01-x.md');
 const COLA = 600;
@@ -21,12 +23,17 @@ function modeloDe(registro) {
   return null;
 }
 
+// Señal de que el hook disparó: la frase literal, o la firma `bloque-abierto` más un número de línea en el registro.
+function disparoHook(registro) {
+  return registro.includes(MENSAJE_BLOQUE) || (FIRMA_BLOQUE.test(registro) && NUMERO_LINEA.test(registro));
+}
+
 // Evalúa un escenario: `dir` es el directorio de los escenarios (con `<escenario>/` y `<escenario>.jsonl`).
 export function evaluarEscenario({ escenario, dir, registro }) {
   if (registro === null) {
     return { ok: false, modelo: null, hallazgos: ['sin .jsonl: el escenario no se corrió'], finalText: '' };
   }
-  const bloqueo = registro.includes(MENSAJE_BLOQUE);
+  const bloqueo = disparoHook(registro);
   const modelo = modeloDe(registro);
   const { finalText } = analyzeRecord(registro, 'claude-code');
   const hallazgos = [`modelo: ${modelo ?? 'desconocido'}`,

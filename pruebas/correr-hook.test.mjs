@@ -22,7 +22,8 @@ after(() => {
 });
 
 // Claude simulado: escribe la tarea en el cwd (el escenario es el nombre del cwd) y emite líneas JSON fijas.
-// SIM_MODO: correcto | sin-bloqueo (danada y subagente no mencionan el bloqueo) | con-bloqueo (valida lo menciona).
+// SIM_MODO: correcto | sin-bloqueo (danada y subagente no mencionan el bloqueo) | con-bloqueo (valida lo menciona)
+// | parafrasis (danada y subagente parafrasean la firma y la línea, sin la frase literal) | firma-sin-linea (solo la firma, sin línea ni frase).
 const CLAUDE_SIMULADO = `#!/usr/bin/env bash
 set -euo pipefail
 escenario="$(basename "$PWD")"
@@ -39,6 +40,12 @@ case "$escenario:$modo" in
 esac
 if (( mostrar )); then
   printf '%s\\n' '{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","is_error":true,"content":"Hay un bloque de código abierto en línea 27, en «## Evidencia» (la escribe el constructor): falta la cerca de cierre."}]}}'
+fi
+if [[ "$modo" == parafrasis && ( "$escenario" == danada || "$escenario" == subagente ) ]]; then
+  printf '%s\\n' '{"type":"assistant","message":{"model":"modelo-simulado","content":[{"type":"text","text":"El hook bloqueó: firma bloque-abierto|x|abc123 en la línea 32"}]}}'
+fi
+if [[ "$modo" == firma-sin-linea && ( "$escenario" == danada || "$escenario" == subagente ) ]]; then
+  printf '%s\\n' '{"type":"assistant","message":{"model":"modelo-simulado","content":[{"type":"text","text":"El hook bloqueó: firma bloque-abierto|x|abc123"}]}}'
 fi
 printf '%s\\n' '{"type":"assistant","message":{"model":"modelo-simulado","content":[{"type":"text","text":"Listo en '"$escenario"'."}]}}'
 printf '%s\\n' '{"type":"result","subtype":"success","result":"Listo en '"$escenario"'."}'
@@ -114,4 +121,18 @@ test('(5) un escenario desconocido sale con 2', () => {
 test('(6) una herramienta desconocida sale con 2', () => {
   const r = correr(['danada'], { herramienta: 'pi' });
   assert.equal(r.status, 2);
+});
+
+test('(7) con el simulado parafrasis (firma y línea, sin la frase literal), informe imprime Veredicto: OK', () => {
+  correrTodos('parafrasis');
+  const { r } = informe();
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /Veredicto: OK/);
+});
+
+test('(8) control negativo: con firma-sin-linea (sin línea ni frase), danada da FALLA', () => {
+  correrTodos('firma-sin-linea');
+  const { r, texto } = informe();
+  assert.match(r.stdout, /Veredicto: FALLA/);
+  assert.match(texto, /## danada — FALLA/);
 });
