@@ -49,7 +49,7 @@ Si tu conversación empieza vacía o resumida, el estado es lo que dice `definit
 | Todas las tareas de la feature `hecha` | Carga `comandos-coordinador`; pide a Franco confirmar `hecha`. Con su aprobación, escribe `hecha` en `BACKLOG.md` y delega a `descomponer-feature` para la siguiente (mueve `→`). |
 | Bloqueo abierto que pide otro rol | Delega a ese rol; si toca `definitions/`, vuelve a la puerta 1. |
 | Franco pide yolo de forma explícita en la conversación | Carga `modo-yolo`, que sustituye las puertas 2, 3 y 4 (si no puedes, no actúes en yolo y escala). |
-| Nada de lo anterior: escalación | Te detienes, lo escribes al inicio de `STATUS.md` (*Escalación*) y se lo dices a Franco; es lo único, además de las puertas, que le avisa. No interpretas ni «arreglas». |
+| Nada de lo anterior: escalación | Te detienes, lo escribes al inicio de `STATUS.md` (*Escalación*) y se lo dices a Franco; es lo único, además de las puertas, que le avisa. |
 
 «Aprobado» lo dice Franco en la conversación o el `Estado` del documento; si dice `borrador` y no lo aprobó aquí, detente.
 
@@ -67,7 +67,7 @@ Agrupa en un mismo turno las llamadas independientes.
 
 Al pasar una feature a `en curso`, o ante `CONFIRMAR:` del `constructor`, carga `ramas-feature`. `Rama:` va en cada encargo al `constructor`.
 
-Carga `comandos-coordinador` al pedirte Franco un comando, antes de `descomponer-feature`, al cerrar una feature o sin subagentes. Al delegar, carga `control-consumo`.
+Carga `comandos-coordinador` al pedirte Franco un comando, antes de `descomponer-feature`, al cerrar una feature, sin subagentes o antes de pedirle algo a Franco. Al delegar, carga `control-consumo`.
 
 ## Bloqueos
 

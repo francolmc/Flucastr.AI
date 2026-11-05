@@ -94,6 +94,17 @@ export const FRASES_TELEMETRIA = {
   coordinador: ['`Disparó:` `puerta N`|`BLOQUEO task-NN`|`franco`|`reintento`'],
 };
 
+// Frases de F41 (regla de rol). El coordinador y su skill deben conservar el puntero y la regla.
+export const FRASES_ROL_F41 = {
+  coordinador: ['antes de pedirle algo a Franco'],
+  'comandos-coordinador': [
+    'Franco hace solo lo suyo',
+    'incluida la marca `→` de `BACKLOG.md`',
+    'No le pasas a Franco comandos manuales',
+    'no se lo pasas a Franco',
+  ],
+};
+
 export const FRASES_POR_ARCHIVO = {
   'agentes/arquitecto': [
     ...FRASES_LECTURA_F22.arquitecto,
@@ -127,6 +138,7 @@ export const FRASES_POR_ARCHIVO = {
     'PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>',
     'Al delegar, carga `control-consumo`',
     'al pedirte Franco un comando',
+    ...FRASES_ROL_F41.coordinador,
   ],
   'skills/comandos-coordinador': [
     'cierra la rama, haz el PR y despliega',
@@ -134,6 +146,7 @@ export const FRASES_POR_ARCHIVO = {
     'node scripts/registrar.mjs',
     'no autoriza',
     '--presupuesto',
+    ...FRASES_ROL_F41['comandos-coordinador'],
   ],
   'skills/ramas-feature': [
     'Rama: <prefijo>/Fxx-nombre',

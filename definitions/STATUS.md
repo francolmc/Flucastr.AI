@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: ninguno; F40 archivada en features/completed/ (sin commit); F41 es la siguiente (sin iniciar)
-Presupuesto: F41; rondas arq=0 plan=1; ampliado=0
-Espera a Franco: commit chore/ del movimiento de F40 (git status); bash instalar.sh; pedirme seguir con F41
+Paso actual: Modo yolo: detenido (pausa antes de task-06, modelo real) — F41; Rama: fix/F41-coordinador-delega-su-rol; 01 a 05 hechas
+Presupuesto: F41; rondas arq=0 plan=2; ampliado=0
+Espera a Franco: decidir si corro la task-06 (gasta créditos). Sin commits: revisar y commitear 01 a 05 en features/F41-coordinador-delega-su-rol/
 Bloqueos abiertos: ninguno
-Retomar: sesión nueva; F41 con el arquitecto si cambia WORKFLOW §2 (puerta 1); luego F38 y F39; pendiente el orden rama/entorno
+Retomar: F41: pedir yolo para la task-06 (corridas con modelo real, Claude Code y Pi); rama fix/F41-coordinador-delega-su-rol
 Actualizado: 2026-11-04

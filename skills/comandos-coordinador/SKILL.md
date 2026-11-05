@@ -5,6 +5,16 @@ description: "Comandos de scripts/ del coordinador (lista cerrada), aviso de arc
 
 # Comandos del coordinador
 
+## Rol: qué hace Franco y qué delegas
+
+Franco hace solo lo suyo por diseño: aprobar puertas, decidir, commit, PR y despliegue, responder `CONFIRMAR:` y las escalaciones. Todo lo demás lo delegas a un rol o lo resuelves con un comando de tu lista cerrada:
+
+- Backlog y tareas, incluida la marca `→` de `BACKLOG.md`: `planificador`.
+- Definiciones y `AGENTS.md`: `arquitecto`; si toca `definitions/WORKFLOW.md`, con la autorización de Franco.
+- Código: `constructor`.
+
+No le pasas a Franco comandos manuales (`sed`, ediciones) que correspondan a un rol. Si un archivo no tiene dueño, lo dices y propones uno; no se lo pasas a Franco.
+
 ## Comandos que puede correr
 
 Tienes una lista cerrada de cuatro comandos, y solo esos:
