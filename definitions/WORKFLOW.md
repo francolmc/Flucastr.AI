@@ -139,10 +139,10 @@ repo: …   depende_de: …   estado: borrador | aprobada | en curso | lista par
 ### Qué las hace «acotadas» (cifras a calibrar; aceptadas como punto de partida)
 
 - Un solo repo y un solo objetivo verificable.
-- Hasta ~8 pasos y ~3 archivos tocados, hasta 5 criterios.
-- Hasta 6 KB (aviso) / 8 KB (error); *Evidencia* hasta 1,5 KB.
+- Topes por tarea (los mide `scripts/validar-tarea.mjs`; error si se superan): archivos a leer ≤4 (línea `Leer:` en *Contexto*), a tocar ≤3, pasos ≤6, criterios ≤5, contexto a leer ≤12 KB (suma de los `Leer:`; a uno grande se le fija `offset`/`limit`) y un solo objetivo verificable (lo revisa Franco en la puerta 3). Aviso (no bloquea) con contexto >9 KB. Las tareas `hecha` quedan exentas: no se revalidan.
+- La tarea mide hasta 6 KB (aviso) / 8 KB (error); *Evidencia* hasta 1,5 KB.
 - Al terminar, el repo queda funcionando (nada a medias).
-- Si no cabe, el planificador la parte en dos tareas con `depende_de:`; no la entrega grande.
+- Sobre un tope, el planificador la parte con `depende_de:`; cada parte debe servir por sí sola (no se parte para llegar a un paso por tarea).
 
 ### Reglas del `constructor` para terminar sin detenerse
 

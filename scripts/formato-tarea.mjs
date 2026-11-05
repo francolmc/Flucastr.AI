@@ -19,6 +19,11 @@ export const SECCIONES = [
 
 export const MAX_CARACTERES = 8192;
 
+// Regla 6: tope de pasos numerados. Las tareas `hecha` y `cancelada` conservan el tope anterior.
+export const MAX_PASOS = 6;
+export const MAX_PASOS_EXENTAS = 8;
+const ESTADOS_EXENTOS_DE_TOPE_PASOS = ['hecha', 'cancelada'];
+
 const SECCIONES_LIBRES = ['Evidencia', 'Notas'];
 const ESTADOS_QUE_EXIGEN_EVIDENCIA = ['lista para revisión', 'hecha'];
 
@@ -165,10 +170,11 @@ export function validarTarea(texto) {
     errores.push('«Alcance / Fuera de alcance» debe contener «Fuera de alcance:» seguido de texto.');
   }
 
-  // Regla 6: entre 1 y 8 pasos numerados.
+  // Regla 6: entre 1 y MAX_PASOS pasos numerados (MAX_PASOS_EXENTAS en hecha y cancelada).
+  const maxPasos = ESTADOS_EXENTOS_DE_TOPE_PASOS.includes(estado) ? MAX_PASOS_EXENTAS : MAX_PASOS;
   const pasos = bloque('Pasos').filter((l) => RE_PASO.test(l)).length;
-  if (pasos < 1 || pasos > 8) {
-    errores.push(`«Pasos» debe tener entre 1 y 8 líneas numeradas; tiene ${pasos}.`);
+  if (pasos < 1 || pasos > maxPasos) {
+    errores.push(`«Pasos» debe tener entre 1 y ${maxPasos} líneas numeradas; tiene ${pasos}.`);
   }
 
   // Regla 7: entre 1 y 5 criterios numerados.

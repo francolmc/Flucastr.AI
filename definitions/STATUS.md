@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: F39 hecha en BACKLOG.md (confirmó Franco); espera su commit y PR; Rama: feature/F39-corte-por-repeticion
-Presupuesto: F39; rondas arq=0 plan=3; ampliado=0
-Espera a Franco: Feature F39 completa en feature/F39-corte-por-repeticion: commitea 01 a 06, cierra la rama, haz el PR y despliega; aprobar F42
+Paso actual: Modo yolo: terminado — F42 completa en feature/F42-tareas-acotadas-topes
+Presupuesto: F42; rondas arq=2 plan=8; ampliado=0; amp_plan=5
+Espera a Franco: commitear F42 (sin commits de agentes), PR y cerrar rama; revisar git diff scripts/ pruebas/ skills/ definitions/; decidir plantilla sin «## Decisiones abiertas»
 Bloqueos abiertos: ninguno
-Retomar: sesión nueva tras commit y PR de F39: mover → a F42 (planificador; arquitecto antes de descomponer, Franco edita WORKFLOW.md)
+Retomar: F43 (hecha F42): mover → (planificador) y arquitecto antes de descomponer; sesión nueva tras commit y PR de F42
 Actualizado: 2026-11-05

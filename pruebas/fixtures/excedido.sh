@@ -11,7 +11,7 @@ git -C "$out" switch -qc fix/F01-demo
 mkdir -p "$out/scripts" "$out/definitions" "$out/features/F01-demo"
 cp "$REPO/scripts/validar-tarea.mjs" "$REPO/scripts/formato-tarea.mjs" "$REPO/scripts/formato-evidencia.mjs" \
   "$REPO/scripts/formato-fuente.mjs" "$REPO/scripts/formato-presupuesto.mjs" "$REPO/scripts/formato-bloqueo.mjs" \
-  "$REPO/scripts/formato-requiere.mjs" "$REPO/scripts/firma.mjs" "$out/scripts/"
+  "$REPO/scripts/formato-requiere.mjs" "$REPO/scripts/formato-topes.mjs" "$REPO/scripts/firma.mjs" "$out/scripts/"
 
 cat > "$out/features/F01-demo/task-01-base.md" <<'EOF'
 # task-01 — Demo base

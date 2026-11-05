@@ -88,6 +88,34 @@ test('una tarea de exactamente MAX_CARACTERES caracteres es válida', () => {
   assert.deepEqual(validarTarea(justa), []);
 });
 
+function conPasos(n, estado = 'aprobada') {
+  const pasos = Array.from({ length: n }, (_, i) => `${i + 1}. Paso ${i + 1}.`).join('\n');
+  return muestra
+    .replace('1. Crear el archivo.\n2. Probarlo.', pasos)
+    .replace('estado: aprobada', `estado: ${estado}`);
+}
+
+const errorPasos = (errores) => errores.filter((e) => e.includes('«Pasos»'));
+
+test('regla 6: seis pasos en aprobada pasa', () => {
+  assert.deepEqual(validarTarea(conPasos(6)), []);
+});
+
+test('regla 6: siete pasos en aprobada y borrador fallan con «entre 1 y 6»', () => {
+  for (const estado of ['aprobada', 'borrador']) {
+    const errores = errorPasos(validarTarea(conPasos(7, estado)));
+    assert.equal(errores.length, 1, estado);
+    assert.match(errores[0], /entre 1 y 6 líneas numeradas; tiene 7\./, estado);
+  }
+});
+
+test('regla 6: siete pasos en hecha pasa el tope; nueve sigue rechazado', () => {
+  assert.deepEqual(errorPasos(validarTarea(conPasos(7, 'hecha'))), []);
+  const nueve = errorPasos(validarTarea(conPasos(9, 'hecha')));
+  assert.equal(nueve.length, 1);
+  assert.match(nueve[0], /entre 1 y 8 líneas numeradas; tiene 9\./);
+});
+
 const cancelada = muestra
   .replace('estado: aprobada', 'estado: cancelada')
   .replace('## Notas\n', '## Notas\nCancelada: motivo=replanificada\n');

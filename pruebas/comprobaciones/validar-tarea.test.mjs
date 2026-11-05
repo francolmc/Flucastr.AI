@@ -167,6 +167,67 @@ test('--evidencia sin rutas sale con 2 y muestra el uso en stderr', () => {
   assert.match(r.err, /Uso: node validar-tarea\.mjs \[--evidencia\] <ruta-tarea>\.\.\./);
 });
 
+// Topes de F42 (task-03): archivos de «Leer» creados en el directorio temporal de la prueba.
+fs.writeFileSync(path.join(dir, 'pequeno.txt'), 'línea de prueba\n');
+fs.writeFileSync(path.join(dir, 'aviso.txt'), 'x'.repeat(10240));
+fs.writeFileSync(path.join(dir, 'grande.txt'), 'x'.repeat(13312));
+
+const conLeer = (lista) => valida.replace('- Tocar: `archivo.mjs`', `- Tocar: \`archivo.mjs\`\n- Leer: ${lista}`);
+const cinco = conLeer(Array.from({ length: 5 }, () => '`pequeno.txt`').join(', '));
+const trece = conLeer('`grande.txt`');
+const diez = conLeer('`aviso.txt`');
+const dentro = conLeer('`pequeno.txt`');
+const siete = valida.replace('1. Crear el archivo.\n2. Probarlo.', Array.from({ length: 7 }, (_, i) => `${i + 1}. Paso ${i + 1}.`).join('\n'));
+const sieteHecha = evidenciaOk.replace('estado: lista para revisión', 'estado: hecha').replace('1. Crear el archivo.\n2. Probarlo.', Array.from({ length: 7 }, (_, i) => `${i + 1}. Paso ${i + 1}.`).join('\n'));
+
+fs.writeFileSync(path.join(dir, 'cinco-leer.md'), cinco);
+fs.writeFileSync(path.join(dir, 'trece-kb.md'), trece);
+fs.writeFileSync(path.join(dir, 'diez-kb.md'), diez);
+fs.writeFileSync(path.join(dir, 'dentro-topes.md'), dentro);
+fs.writeFileSync(path.join(dir, 'siete-pasos.md'), siete);
+fs.writeFileSync(path.join(dir, 'siete-hecha.md'), sieteHecha);
+
+test('cinco archivos a leer se rechazan: sale 1, nombra el tope y termina en Firma:', () => {
+  const r = correr('cinco-leer.md');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /cinco-leer\.md: .*el tope es 4/);
+  assert.match(r.out.trimEnd(), /(^|\n)Firma: [^\n]*$/);
+});
+
+test('13 KB de contexto se rechazan: sale 1, nombra el tope y termina en Firma:', () => {
+  const r = correr('trece-kb.md');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /trece-kb\.md: .*12 KB/);
+  assert.match(r.out.trimEnd(), /(^|\n)Firma: [^\n]*$/);
+});
+
+test('siete pasos en aprobada se rechazan: sale 1, nombra el tope y termina en Firma:', () => {
+  const r = correr('siete-pasos.md');
+  assert.equal(r.code, 1);
+  assert.match(r.out, /siete-pasos\.md: .*entre 1 y 6/);
+  assert.match(r.out.trimEnd(), /(^|\n)Firma: [^\n]*$/);
+});
+
+test('10 KB de contexto dan AVISO: y salen con 0', () => {
+  const r = correr('diez-kb.md');
+  assert.equal(r.code, 0);
+  assert.match(r.out, /^AVISO: diez-kb\.md: .*9 KB/m);
+  assert.match(r.out, /OK: 1 tarea\(s\) válida\(s\)/);
+});
+
+test('una tarea dentro de los topes sale con 0 y sin AVISO:', () => {
+  const r = correr('dentro-topes.md');
+  assert.equal(r.code, 0);
+  assert.equal(r.out.includes('AVISO:'), false);
+  assert.match(r.out, /OK: 1 tarea\(s\) válida\(s\)/);
+});
+
+test('siete pasos en hecha salen con 0 (control negativo de la exención)', () => {
+  const r = correr('siete-hecha.md');
+  assert.equal(r.code, 0);
+  assert.match(r.out, /OK: 1 tarea\(s\) válida\(s\)/);
+});
+
 // Opción --fuente (task-10 de F28): la viñeta «- Fuente:» de «## Contexto» apunta a un encabezado de definitions/.
 fs.mkdirSync(path.join(dir, 'definitions'), { recursive: true });
 fs.writeFileSync(path.join(dir, 'definitions', 'X.md'), '# Documento de prueba\n\n## Encabezado de prueba\nTexto.\n');
