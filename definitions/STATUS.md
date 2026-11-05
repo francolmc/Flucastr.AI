@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: F44 archivada en features/completed/ (archivar.mjs --aplicar F44, pedido por Franco); sin feature en curso
-Presupuesto: F44; rondas arq=0 plan=3; ampliado=0
-Espera a Franco: revisar y commitear el archivo de F44 en su propio commit chore/ (cambio sin commit, tras el PR)
+Paso actual: Modo yolo: terminado — F45 hecha (tasks 01 a 04); rama fix/F45-leer-solo-archivos-existentes
+Presupuesto: F45; rondas arq=0 plan=2; ampliado=0
+Espera a Franco: commitear todo F45 (sin commits) y PR. Feature F45 completa en fix/F45-leer-solo-archivos-existentes: cierra la rama, haz el PR y despliega.
 Bloqueos abiertos: ninguno
-Retomar: elegir la siguiente feature del backlog; BACKLOG tiene avisos de tamaño (tras congelar el kit, vie 2026-11-13)
+Retomar: F45 hecha; Franco commitea y hace PR; archivar F45 solo a su pedido; backlog sin pendientes
 Actualizado: 2026-11-05

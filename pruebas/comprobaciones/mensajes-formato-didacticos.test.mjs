@@ -109,3 +109,26 @@ test('(4) «- Tocar:» bien formado no produce error sobre Tocar', () => {
   const motivos = validarTarea(tareaCompleta('- Tocar: `a.js`'));
   assert.equal(motivos.some((m) => m.includes('Tocar')), false, `motivos: ${JSON.stringify(motivos)}`);
 });
+
+test('(5) la skill dice que en Leer solo van archivos que existen', () => {
+  const texto = fs.readFileSync(SKILL, 'utf8');
+  assert.ok(texto.includes('solo archivos que existen'), 'falta «solo archivos que existen» en la skill');
+  assert.ok(texto.includes('va en Tocar'), 'falta «va en Tocar» en la skill');
+});
+
+test('(5) control negativo: sin esas frases, el texto no las contiene', () => {
+  const texto = fs.readFileSync(SKILL, 'utf8');
+  const sin = texto.replaceAll('solo archivos que existen', '').replaceAll('va en Tocar', '');
+  assert.equal(sin.includes('solo archivos que existen'), false);
+  assert.equal(sin.includes('va en Tocar'), false);
+});
+
+test('(6) un archivo de Leer inexistente se rechaza con la pista de Tocar', () => {
+  const { errores } = medirTopes(tareaConContexto('- Leer: `a.js`'), () => null);
+  assert.ok(errores.some((e) => e.includes('ponlo en Tocar')), `errores: ${JSON.stringify(errores)}`);
+});
+
+test('(6) un archivo de Leer existente no produce esa pista', () => {
+  const { errores } = medirTopes(tareaConContexto('- Leer: `a.js`'), leerOk);
+  assert.equal(errores.some((e) => e.includes('ponlo en Tocar')), false, `errores: ${JSON.stringify(errores)}`);
+});

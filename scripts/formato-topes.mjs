@@ -60,7 +60,7 @@ export function medirTopes(texto, leer) {
     }
     const texto = leer(ruta);
     if (texto === null || texto === undefined) {
-      errores.push(`El archivo de Leer no se puede leer: ${ruta}.`);
+      errores.push(`El archivo de Leer no se puede leer: ${ruta}. Si la tarea lo crea, ponlo en Tocar, no en Leer.`);
       continue;
     }
     total += bytesDe(String(texto), offset, limit);
