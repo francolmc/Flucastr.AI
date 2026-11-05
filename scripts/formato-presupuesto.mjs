@@ -1,7 +1,10 @@
 // Presupuesto por feature (definitions/CONSUMO.md §3, (b)) y validación del STATUS.md compacto (§2, (a)).
 // Función pura: no toca el disco ni git. Motivos en español; vacío = válido.
-// validarStatusCompacto(texto) devuelve motivos; calcularPresupuesto({ feature, tareas, status }) devuelve { linea, estado, causas }.
+// validarStatusCompacto(texto) devuelve motivos; calcularPresupuesto({ feature, tareas, status, firma }) devuelve { linea, estado, causas }.
 // tareas = arreglo de textos de tarea (task-*.md); status = texto de definitions/STATUS.md.
+// firma (opcional, 12 hex) = resumen de la última firma rechazada. Si coincide con el «; firma=» guardado en la
+// línea Presupuesto de la misma feature, estado = repetido (manda sobre excedido, aviso y ok). Con firma dada, la
+// línea de salida termina en «; firma=<hex>» para que el coordinador lo guarde.
 
 export const TOPE_STATUS = 1536;
 
@@ -17,7 +20,7 @@ const CLAVES = [
   'Actualizado: ',
 ];
 const CON_LIMITE_ITEMS = ['Espera a Franco: ', 'Bloqueos abiertos: '];
-const RE_PRESUPUESTO = /^Presupuesto: (F\d+|ninguna); rondas arq=(\d+) plan=(\d+); ampliado=(\d+)(?:; amp_arq=(\d+))?(?:; amp_plan=(\d+))?(?:; amp_k=(\d+))?$/;
+const RE_PRESUPUESTO = /^Presupuesto: (F\d+|ninguna); rondas arq=(\d+) plan=(\d+); ampliado=(\d+)(?:; amp_arq=(\d+))?(?:; amp_plan=(\d+))?(?:; amp_k=(\d+))?(?:; firma=([0-9a-f]{12}))?$/;
 
 function normalizar(texto) {
   return String(texto ?? '').replace(/\r\n?/g, '\n');
@@ -79,7 +82,7 @@ export function validarStatusCompacto(texto) {
   return motivos;
 }
 
-export function calcularPresupuesto({ feature, tareas = [], status = '' }) {
+export function calcularPresupuesto({ feature, tareas = [], status = '', firma = null }) {
   const T = tareas.length;
   let E = 0;
   let I = 0;
@@ -107,6 +110,7 @@ export function calcularPresupuesto({ feature, tareas = [], status = '' }) {
   let ampArq = 0;
   let ampPlan = 0;
   let ampK = 0;
+  let firmaGuardada = null;
   const lineaPresupuesto = normalizar(status)
     .split('\n')
     .find((l) => l.startsWith('Presupuesto: '));
@@ -118,6 +122,7 @@ export function calcularPresupuesto({ feature, tareas = [], status = '' }) {
     ampArq = Number(m[5] ?? 0);
     ampPlan = Number(m[6] ?? 0);
     ampK = Number(m[7] ?? 0);
+    firmaGuardada = m[8] ?? null;
   }
 
   const topeArq = 2 + ampArq;
@@ -135,7 +140,10 @@ export function calcularPresupuesto({ feature, tareas = [], status = '' }) {
 
   let estado;
   let causas;
-  if (excedido.length > 0) {
+  if (firma && firma === firmaGuardada) {
+    estado = 'repetido';
+    causas = ['firma'];
+  } else if (excedido.length > 0) {
     estado = 'excedido';
     causas = excedido;
   } else {
@@ -146,7 +154,8 @@ export function calcularPresupuesto({ feature, tareas = [], status = '' }) {
   }
 
   const cola = causas.length > 0 ? ` ${causas.join('+')}` : '';
-  const linea = `Presupuesto ${feature}: D=${D}/${tope}; E=${E}; I=${I}; K=${K}/${topeK}; rondas arq=${arq}/${topeArq} plan=${plan}/${topePlan}; estado=${estado}${cola}`;
+  const sufijoFirma = firma ? `; firma=${firma}` : '';
+  const linea = `Presupuesto ${feature}: D=${D}/${tope}; E=${E}; I=${I}; K=${K}/${topeK}; rondas arq=${arq}/${topeArq} plan=${plan}/${topePlan}; estado=${estado}${cola}${sufijoFirma}`;
 
   return { linea, estado, causas };
 }

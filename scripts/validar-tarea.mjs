@@ -5,13 +5,15 @@
 //   node scripts/validar-tarea.mjs <ruta-tarea>...
 //   node scripts/validar-tarea.mjs --evidencia <ruta-tarea>...
 //   node scripts/validar-tarea.mjs --fuente <ruta-tarea>...
-//   node scripts/validar-tarea.mjs --presupuesto features/Fxx-nombre
+//   node scripts/validar-tarea.mjs --presupuesto features/Fxx-nombre [--firma <valor>]
 //   node scripts/validar-tarea.mjs --hook   (JSON de PostToolUse por stdin; modo estructural, F38 task-04)
 //
 // Con --presupuesto (debe ser el primer argumento, con exactamente una carpeta de feature) es solo lectura:
 // lee las task-*.md de esa carpeta y definitions/STATUS.md (desde el directorio actual), valida el STATUS.md
 // compacto con validarStatusCompacto y, si es válido, imprime la línea de calcularPresupuesto
-// (scripts/formato-presupuesto.mjs). Sale 0 con ok o aviso; 1 con excedido o STATUS.md inválido; 2 por uso o lectura.
+// (scripts/formato-presupuesto.mjs). Con «--firma <valor>» (<valor> sin «Firma: »), calcula digestFirma(valor) y lo pasa
+// como firma: si coincide con el «; firma=» guardado en STATUS.md, estado=repetido. Sale 0 con ok o aviso; 1 con excedido,
+// repetido o STATUS.md inválido; 2 por uso o lectura.
 // Con --evidencia (debe ser el primer argumento) comprueba la sección «Evidencia» con validarEvidencia
 // (scripts/formato-evidencia.mjs) en vez de la puerta previa.
 // Con --fuente (también primer argumento; no se combina con --evidencia) hace la puerta previa y, además,
@@ -33,7 +35,7 @@ import { validarEstructura, validarTarea } from "./formato-tarea.mjs";
 import { validarEvidencia } from "./formato-evidencia.mjs";
 import { validarFuente } from "./formato-fuente.mjs";
 import { calcularPresupuesto, validarStatusCompacto } from "./formato-presupuesto.mjs";
-import { firma } from "./firma.mjs";
+import { digestFirma, firma } from "./firma.mjs";
 
 const argumentos = process.argv.slice(2);
 const conPresupuesto = argumentos[0] === "--presupuesto";
@@ -52,8 +54,9 @@ const leerTexto = (ruta) => {
 
 // --presupuesto (task-02 de F29): devuelve el código de salida. No escribe nada.
 function presupuesto(args) {
-  const uso = "Uso: node validar-tarea.mjs --presupuesto features/Fxx-nombre";
-  if (args.length !== 1) {
+  const uso = "Uso: node validar-tarea.mjs --presupuesto features/Fxx-nombre [--firma <valor>]";
+  const conFirma = args.length === 3 && args[1] === "--firma" && args[2] !== "";
+  if (args.length !== 1 && !conFirma) {
     console.error(uso);
     return 2;
   }
@@ -86,9 +89,10 @@ function presupuesto(args) {
     for (const motivo of motivos) console.log(`definitions/STATUS.md: ${motivo}`);
     return 1;
   }
-  const { linea, estado } = calcularPresupuesto({ feature, tareas, status });
+  const firmaValor = conFirma ? digestFirma(args[2]) : null;
+  const { linea, estado } = calcularPresupuesto({ feature, tareas, status, firma: firmaValor });
   console.log(linea);
-  return estado === "excedido" ? 1 : 0;
+  return estado === "excedido" || estado === "repetido" ? 1 : 0;
 }
 
 // --hook (F38, task-04): lee por stdin el JSON del evento PostToolUse de Claude Code. Solo lee; no escribe, no usa red ni git.

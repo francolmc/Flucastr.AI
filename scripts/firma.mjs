@@ -27,7 +27,11 @@ export function reglaDe(motivo) {
   return "otra";
 }
 
+export function digestFirma(texto) {
+  return createHash("sha256").update(String(texto), "utf8").digest("hex").slice(0, 12);
+}
+
 export function firma({ motivo, ruta, texto }) {
-  const hash = createHash("sha256").update(String(texto), "utf8").digest("hex").slice(0, 12);
+  const hash = digestFirma(texto);
   return `Firma: ${reglaDe(motivo)}|${ruta}|${hash}`;
 }
