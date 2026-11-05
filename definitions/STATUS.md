@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: Modo yolo: terminado — F43 completa en chore/F43-auditoria-contexto
-Presupuesto: F43; rondas arq=1 plan=2; ampliado=0
-Espera a Franco: commitear F43 (sin commits de agentes), PR y cerrar rama; leer features/F43-auditoria-contexto/informe.md (recomendación: no vale la pena); decidir el caché
+Paso actual: F38, F39, F41, F42 y F43 archivadas en features/completed/ (archivar.mjs --aplicar, pedido por Franco el 2026-11-05)
+Presupuesto: ninguna feature activa
+Espera a Franco: revisar con git status y commitear el archivo en su propio commit chore/ (sin commit de agentes)
 Bloqueos abiertos: ninguno
-Retomar: backlog sin features pendientes; F43 cerrada: tras commit y PR de Franco, archivar F42 y F43; sesión nueva
+Retomar: backlog sin pendientes; plantilla de descomponer-feature sin «## Decisiones abiertas» por decidir; sesión nueva
 Actualizado: 2026-11-05
