@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: F46 archivada en features/completed/ (archivar.mjs --aplicar F46, pedido por Franco); sin feature en curso
-Presupuesto: F46; rondas arq=0 plan=2; ampliado=0
-Espera a Franco: revisar y commitear el archivo de F46 en su propio commit chore/ (cambio sin commit, tras el PR)
+Paso actual: Modo yolo: terminado — F47 hecha (tasks 01 a 08); rama chore/F47-readme-para-cualquier-usuario
+Presupuesto: F47; rondas arq=0 plan=2; ampliado=0
+Espera a Franco: commitear F47 (sin commits): README.md, LICENSE, tareas. Comparar LICENSE con opensource.org/license/mit; revisar mermaid. Feature F47 completa: cierra la rama, haz el PR y despliega.
 Bloqueos abiertos: ninguno
-Retomar: backlog sin pendientes; revisar ~/.pi/agent/settings.json (JSON inválido); nuevas features tras congelar el kit (vie 2026-11-13)
+Retomar: F47 hecha; Franco commitea y hace PR; archivar F47 solo a su pedido; backlog sin pendientes
 Actualizado: 2026-11-05
