@@ -139,3 +139,19 @@ test('falla si el paso 10 pierde «INCOMPLETA» en la opción D', () => {
   assert.match(errores[0], /paso 10/);
   assert.match(errores[0], /INCOMPLETA/);
 });
+
+test('el paso 3 menciona --firma para reintentar tras un rechazo con firma', () => {
+  assert.ok(paso(leer(RUTA), 3).includes('--firma'), 'falta «--firma» en el paso 3');
+});
+
+test('el paso 11 ofrece solo C) y D) ante una repetición, sin delegar', () => {
+  const p11 = paso(leer(RUTA), 11);
+  for (const frase of ['repetido', 'esta causa se repite', 'C)', 'D)', 'solo']) {
+    assert.ok(p11.includes(frase), `falta «${frase}» en el paso 11`);
+  }
+});
+
+test('SKILL.md ocupa como máximo 4096 bytes', () => {
+  const bytes = Buffer.byteLength(leer(RUTA), 'utf8');
+  assert.ok(bytes <= 4096, `SKILL.md ocupa ${bytes} B (tope 4096)`);
+});

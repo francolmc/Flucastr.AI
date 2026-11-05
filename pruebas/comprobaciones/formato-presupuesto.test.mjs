@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TOPE_STATUS, validarStatusCompacto, calcularPresupuesto } from '../../scripts/formato-presupuesto.mjs';
+import { digestFirma } from '../../scripts/firma.mjs';
 
 // Textos sintéticos: no leen definitions/ ni features/.
 
@@ -310,4 +311,49 @@ test('validarStatusCompacto rechaza un sufijo sin valor', () => {
   });
   const motivos = validarStatusCompacto(texto);
   assert.ok(motivos.some((m) => m.includes('forma inválida')));
+});
+
+const FIRMA_A = 'abcdef012345';
+const FIRMA_B = '0123456789ab';
+const conFirma = (firma) =>
+  statusCompacto({ presupuesto: `Presupuesto: F29; rondas arq=0 plan=0; ampliado=0; firma=${firma}` });
+
+test('(a) misma firma guardada y recibida da estado=repetido', () => {
+  const r = calcularPresupuesto({ feature: 'F29', tareas: [tareaListas(1)], status: conFirma(FIRMA_A), firma: FIRMA_A });
+  assert.equal(r.estado, 'repetido');
+  assert.deepEqual(r.causas, ['firma']);
+  assert.match(r.linea, /estado=repetido firma; firma=abcdef012345$/);
+});
+
+test('(b) firma distinta de la guardada da ok', () => {
+  const r = calcularPresupuesto({ feature: 'F29', tareas: [tareaListas(1)], status: conFirma(FIRMA_A), firma: FIRMA_B });
+  assert.equal(r.estado, 'ok');
+  assert.deepEqual(r.causas, []);
+  assert.match(r.linea, /estado=ok; firma=0123456789ab$/);
+});
+
+test('(c) sin firma la línea es idéntica a la de hoy', () => {
+  const tareas = [tareaListas(1)];
+  const sinFirma = calcularPresupuesto({ feature: 'F29', tareas, status: statusCompacto() });
+  const conGuardada = calcularPresupuesto({ feature: 'F29', tareas, status: conFirma(FIRMA_A) });
+  assert.equal(conGuardada.linea, sinFirma.linea);
+  assert.equal(conGuardada.estado, 'ok');
+  assert.equal(sinFirma.linea, 'Presupuesto F29: D=1/6; E=1; I=1; K=0/2; rondas arq=0/2 plan=0/3; estado=ok');
+  assert.ok(!sinFirma.linea.includes('firma='));
+});
+
+test('(d) repetido manda sobre excedido', () => {
+  // T=1 → tope 6; E=7 → excedido por D; la firma repetida gana
+  const r = calcularPresupuesto({ feature: 'F29', tareas: [tareaListas(7)], status: conFirma(FIRMA_A), firma: FIRMA_A });
+  assert.equal(r.estado, 'repetido');
+  assert.deepEqual(r.causas, ['firma']);
+});
+
+test('(e) firma=ZZ es inválida y digestFirma es de 12 hex y estable', () => {
+  const texto = statusCompacto({ presupuesto: 'Presupuesto: F29; rondas arq=0 plan=0; ampliado=0; firma=ZZ' });
+  assert.ok(validarStatusCompacto(texto).some((m) => m.includes('forma inválida')));
+
+  const d = digestFirma('a');
+  assert.match(d, /^[0-9a-f]{12}$/);
+  assert.equal(digestFirma('a'), d);
 });

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const script = path.join(raiz, 'scripts', 'validar-tarea.mjs');
@@ -308,6 +309,48 @@ test('--presupuesto sin carpeta sale con 2 y muestra el uso en stderr', () => {
   const r = correr('--presupuesto');
   assert.equal(r.code, 2);
   assert.match(r.err, /^Uso: node validar-tarea\.mjs --presupuesto features\/Fxx-nombre/m);
+});
+
+// F39, task-02: --presupuesto con --firma <valor>. El digest es el mismo que digestFirma de task-01.
+const digestDe = (valor) => createHash('sha256').update(valor, 'utf8').digest('hex').slice(0, 12);
+const statusConFirma = (valor) => statusValido(`Presupuesto: F90; rondas arq=0 plan=0; ampliado=0; firma=${digestDe(valor)}`);
+
+test('--presupuesto --firma repetido (misma firma guardada) sale con 1 y estado=repetido', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status: statusConFirma('X') });
+  const r = correr('--presupuesto', 'F90-prueba', '--firma', 'X');
+  assert.equal(r.code, 1);
+  assert.match(r.out.trim(), /estado=repetido/);
+});
+
+test('--presupuesto --firma con otra firma distinta sale con 0 y termina en «; firma=<digest de Y>»', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status: statusConFirma('X') });
+  const r = correr('--presupuesto', 'F90-prueba', '--firma', 'Y');
+  assert.equal(r.code, 0);
+  assert.match(r.out.trim(), /estado=(ok|aviso)/);
+  assert.match(r.out.trim(), new RegExp(`; firma=${digestDe('Y')}$`));
+});
+
+test('--presupuesto --firma sin valor sale con 2 y muestra el uso en stderr', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status: statusValido() });
+  const r = correr('--presupuesto', 'F90-prueba', '--firma');
+  assert.equal(r.code, 2);
+  assert.match(r.err, /^Uso: node validar-tarea\.mjs --presupuesto features\/Fxx-nombre \[--firma <valor>\]/m);
+});
+
+test('--presupuesto --firma no escribe en la carpeta de la feature ni en definitions/STATUS.md', () => {
+  prepararPresupuesto({ tareas: { 'task-01.md': tareaCon(registroLista) }, status: statusConFirma('X') });
+  const estado = () => {
+    const entradas = fs.readdirSync(carpetaF90).map((n) => {
+      const st = fs.statSync(path.join(carpetaF90, n));
+      return [n, st.size, st.mtimeMs];
+    });
+    const st = fs.statSync(path.join(dir, 'definitions', 'STATUS.md'));
+    return { entradas, status: [st.size, st.mtimeMs] };
+  };
+  const antes = estado();
+  correr('--presupuesto', 'F90-prueba', '--firma', 'Y');
+  correr('--presupuesto', 'F90-prueba', '--firma', 'X');
+  assert.deepEqual(estado(), antes);
 });
 
 // F38, task-03: línea «Firma:» del primer rechazo.
