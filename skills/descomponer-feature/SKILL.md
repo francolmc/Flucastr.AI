@@ -15,7 +15,7 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
    - Si el encargo trae las respuestas de Franco, escríbelas en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea; una sección por pregunta con su respuesta) y descompón. Cada tarea cita `features/Fxx-nombre/refinado.md` en *Decisiones ya tomadas*.
    - **Modo yolo:** si el encargo trae la línea `Modo yolo: activo`, no hay ronda de refinado ni supuestos. Si el refinado se requiere y no hay `features/Fxx-nombre/refinado.md`, responde con la primera línea `REFINAR: feature=Fxx; preguntas=<n>` y no crees tareas: el coordinador lo trata como escalación y detiene el modo. Si no se requiere, descompón con normalidad.
 
-1. Lee la feature y el código real de cada repo que toca. Ejecuta únicamente comandos sin efectos sobre archivos versionados (pruebas, lint, `--help`) para confirmar que los comandos de *Verificación* existen. Los que no puedas ejecutar así se marcan «no ejecutado, inferido» en el *Contexto* de la tarea. De `definitions/` lee solo la sección que toca la feature, nunca el documento entero.
+1. Lee la feature y el código real de cada repo que toca. Ejecuta solo comandos sin efectos sobre archivos versionados (pruebas, lint, `--help`) para confirmar que los comandos de *Verificación* existen. Los demás se marcan «no ejecutado, inferido» en el *Contexto*. De `definitions/` lee solo la sección que toca la feature, nunca el documento entero.
 2. Define tareas: un solo repo y un solo objetivo verificable cada una. Con varios repos, fija el orden con `depende_de:` (la API antes que el front). En yolo, ninguna tarea pide commit ni modificar `definitions/`.
 3. Escribe cada tarea en `features/Fxx-nombre/task-NN-nombre.md` con la plantilla de abajo, estado `borrador`. Con `Disparó: BLOQUEO task-NN` y `motivo=codigo:` escribe solo una tarea de corrección nueva en la misma feature, sin tocar la bloqueada.
 4. Pasa la lista «completa» y la «acotada» a cada tarea. Si falla, corrígela o pártela.
@@ -28,7 +28,7 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
 repo: …   depende_de: …   estado: borrador
 
 ## Descripción      Qué y por qué, 3–5 líneas.
-## Contexto         Una línea `- Leer:` y otra `- Tocar:`, con rutas entre comillas invertidas separadas por «, », sin punto final; convenciones del repo; cómo se ejecuta y se prueba; viñeta Fuente; `- Requiere:`.
+## Contexto         Una línea `- Leer:` (solo archivos que existen; lo que la tarea crea va en Tocar) y otra `- Tocar:`, con rutas entre comillas invertidas separadas por «, », sin punto final; convenciones del repo; cómo se ejecuta y se prueba; viñeta Fuente; `- Requiere:`.
 ## Decisiones ya tomadas   Lo que el ejecutor NO debe volver a decidir (librería, nombres, formato…).
 ## Decisiones abiertas   OBLIGATORIA: «Ninguna» o cada decisión con «Resuelta: texto».
 ## Alcance / Fuera de alcance   Fuera de alcance no puede quedar vacío.
@@ -63,7 +63,7 @@ Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `h
 - Un solo repo y un solo objetivo verificable.
 - Topes: `WORKFLOW.md` §6 (~3 archivos tocados); los mide el validador.
 - Hasta 6 KB (aviso) / 8 KB (error); *Evidencia* hasta 1,5 KB.
-- Al terminar, el repo queda funcionando (nada a medias).
+- Al terminar, el repo queda funcionando.
 - Si no cabe, pártela con `depende_de:`.
 
 ## Al terminar
