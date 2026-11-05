@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: F38, F39, F41, F42 y F43 archivadas en features/completed/ (archivar.mjs --aplicar, pedido por Franco el 2026-11-05)
-Presupuesto: ninguna feature activa
-Espera a Franco: revisar con git status y commitear el archivo en su propio commit chore/ (sin commit de agentes)
+Paso actual: Modo yolo: terminado — F44 hecha (tasks 01 a 09); rama fix/F44-plantilla-diez-secciones
+Presupuesto: F44; rondas arq=0 plan=3; ampliado=0
+Espera a Franco: commitear todo F44 (sin commits) y PR; revisar claude-code-6 FALLA (Leer src/cli.js, no formato); Feature F44 completa en fix/F44-plantilla-diez-secciones: cierra la rama, haz el PR y despliega.
 Bloqueos abiertos: ninguno
-Retomar: backlog sin pendientes; plantilla de descomponer-feature sin «## Decisiones abiertas» por decidir; sesión nueva
+Retomar: F44 hecha; Franco commitea y hace PR; archivar F44 solo a su pedido; luego siguiente feature
 Actualizado: 2026-11-05

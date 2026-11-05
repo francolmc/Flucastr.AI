@@ -211,7 +211,7 @@ export function validarTarea(texto) {
   } else {
     const valor = lineasTocar[0].slice('- Tocar: '.length);
     if (!/^`[^`\s]+`(, `[^`\s]+`)*$/.test(valor)) {
-      errores.push('«Tocar» debe listar las rutas entre comillas invertidas, separadas por «, ».');
+      errores.push('«Tocar» debe listar las rutas entre comillas invertidas, separadas por «, », sin punto final ni texto extra (por ejemplo «- Tocar: `a.js`, `b.js`»).');
     } else {
       const rutas = [...valor.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
       if (rutas.length < 1 || rutas.length > 3) {

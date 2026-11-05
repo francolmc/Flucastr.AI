@@ -13,7 +13,7 @@ const ESTADOS_EXENTOS = ['hecha', 'cancelada'];
 const PREFIJO = '- Leer:';
 const RE_LEER = /^- Leer: (.+)$/;
 const RE_ITEM = /^`(.+?)(?:@(\d+)-(\d+))?`$/;
-const FORMATO = 'La línea «Leer» tiene formato inválido: debe ser «- Leer: `ruta`, `ruta@offset-limit`».';
+const FORMATO = 'La línea «Leer» tiene formato inválido: debe ser «- Leer: `ruta`, `ruta@offset-limit`», en una sola línea, sin punto final ni texto extra.';
 
 function sinMotivos() {
   return { errores: [], avisos: [] };
