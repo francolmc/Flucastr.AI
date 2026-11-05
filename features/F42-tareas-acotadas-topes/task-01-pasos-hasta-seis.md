@@ -1,5 +1,5 @@
 # task-01 — Tope de 6 pasos en el validador de formato
-repo: Flucastr.AI   depende_de: —   estado: lista para revisión
+repo: Flucastr.AI   depende_de: —   estado: hecha
 
 ## Descripción
 La regla 6 de `scripts/formato-tarea.mjs` acepta hoy de 1 a 8 pasos. Pasa a 1–6 para toda tarea vigente (no `hecha` ni `cancelada`); las `hecha` y `cancelada` conservan 1–8 y no se revalidan. Primera pieza de F42: es la única que no necesita leer archivos.

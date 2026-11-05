@@ -1,5 +1,5 @@
 # task-02 — Módulo que mide los topes de contexto (Leer)
-repo: Flucastr.AI   depende_de: task-01   estado: aprobada
+repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Descripción
 Crea `scripts/formato-topes.mjs`: lee la línea `- Leer:` de *Contexto* y mide archivos a leer (≤4) y bytes de contexto (aviso >9 KB, error >12 KB). Es una función pura, igual que `validarFuente`; el CLI la cablea en task-03.
@@ -46,4 +46,37 @@ Esperado: rama `feature/F42-tareas-acotadas-topes`; `fail 0`.
 
 ## Evidencia
 
+```
+$ git branch --show-current
+feature/F42-tareas-acotadas-topes
+exit 0
+```
+
+```
+$ node --test pruebas/comprobaciones/formato-topes.test.mjs
+✔ 12289 bytes fallan (0.068666ms)
+✔ 9217 bytes dan aviso sin error (0.067709ms)
+✔ un rango mide solo sus líneas (0.122459ms)
+✔ una tarea hecha con cinco archivos queda exenta (0.059166ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 53.137292
+exit 0
+```
+
 ## Notas
+- Código de salida: en la pasada 2 el `exit` no se capturó bien (el shell no dejó `PIPESTATUS`); el `exit 0` de arriba es el de `node --test` con `fail 0` en la salida real. No se repitió la pasada por la cota de dos pasadas.
+- Pasada 1 de la Verificación: `node --test` falló en «un rango mide solo sus líneas» (`f@2-3` leído como archivo inexistente). Causa: el regex de línea `Leer` ponía el rango fuera de las comillas; la tarea fija `` `ruta@offset-limit` ``. Corregido en `scripts/formato-topes.mjs` (`RE_ITEM = /^`(.+?)(?:@(\d+)-(\d+))?`$/`). Pasada 2: 8 de 8 pasan.
+- Hueco menor: el aviso (>9216) se emite solo si no hay error; con más de 12288 bytes solo sale el error. La tarea no lo fijaba. Elegido por ser lo más conservador.
+- Hueco menor: el total de bytes suma todos los archivos de `Leer`. La tarea no lo fijaba. Elegido por ser lo más conservador.
+- Medición de bytes sin rango: `Buffer.byteLength` del texto leído (tamaño en UTF-8). Con rango: líneas `offset`..`offset+limit-1` unidas con `\n` más `\n` final, como pide la tarea.
+- Módulo de la tarea: `scripts/formato-topes.mjs` exporta `MAX_LEER`, `MAX_BYTES_CONTEXTO`, `AVISO_BYTES_CONTEXTO` y `medirTopes(texto, leer)`. No se tocó el CLI ni `formato-tarea.mjs`.
+- No se hizo commit, push, PR ni merge. Rama no cambiada (`feature/F42-tareas-acotadas-topes`, actual).
+- Huecos menores: 2.
+
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

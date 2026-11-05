@@ -1,8 +1,8 @@
 # task-04 — La skill descomponer-feature apunta a los topes de WORKFLOW.md
-repo: Flucastr.AI   depende_de: task-03   estado: aprobada
+repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
 ## Descripción
-Reemplaza en `skills/descomponer-feature/SKILL.md` las cifras viejas («~8 pasos, ~3 archivos tocados») por un puntero a `WORKFLOW.md` §6, sin crecer en bytes (la skill está en 6363 de 6400). Así el planificador conoce los topes y el validador los mide.
+Reemplaza en `skills/descomponer-feature/SKILL.md` la cifra vieja «~8 pasos» por un puntero a `WORKFLOW.md` §6 (conserva «~3 archivos tocados», que exige la prueba de contrato), sin crecer en bytes (la skill está en 6363 de 6400). Así el planificador conoce los topes y el validador los mide.
 
 ## Contexto
 - Tocar: `skills/descomponer-feature/SKILL.md`
@@ -12,7 +12,7 @@ Reemplaza en `skills/descomponer-feature/SKILL.md` las cifras viejas («~8 pasos
 - Requiere: runtime:node@25
 
 ## Decisiones ya tomadas
-- Edición A (obligatoria): la línea 63 pasa a «- Topes: `WORKFLOW.md` §6; los mide el validador.»
+- Edición A (obligatoria): la línea 63 pasa a «- Topes: `WORKFLOW.md` §6 (~3 archivos tocados); los mide el validador.» Debe conservar la frase «~3 archivos tocados» (la exige `contrato-roles.test.mjs`; no se toca la prueba)
 - Edición B (condicionada): en la plantilla, «Rutas exactas a leer y a tocar» pasa a «Líneas `- Leer:` y `- Tocar:`». Se conserva solo si `wc -c` queda en 6400 o menos; si no, se revierte B y se queda con A.
 - Las demás líneas (incluida «Hasta 6 KB (aviso) / 8 KB (error)») no cambian. `agentes/planificador.md` no se toca.
 
@@ -44,5 +44,46 @@ node --test pruebas/comprobaciones/topes-bytes.test.mjs pruebas/comprobaciones/c
 Esperado: rama `feature/F42-tareas-acotadas-topes`; `1`; un número menor o igual a 6400; `fail 0`.
 
 ## Evidencia
+```
+$ git branch --show-current
+feature/F42-tareas-acotadas-topes
+exit 0
+
+$ node ~/.flucastr-ai/entorno.mjs features/F42-tareas-acotadas-topes/task-04-skill-apunta-a-los-topes.md
+ok
+exit 0
+
+$ grep -c "Topes: \`WORKFLOW.md\` §6" skills/descomponer-feature/SKILL.md
+1
+exit 0
+
+$ grep -c "~8 pasos" skills/descomponer-feature/SKILL.md
+0
+exit 1
+
+$ grep -c "~3 archivos tocados" skills/descomponer-feature/SKILL.md
+1
+exit 0
+
+$ wc -c skills/descomponer-feature/SKILL.md
+6368 skills/descomponer-feature/SKILL.md
+exit 0
+
+$ node --test pruebas/comprobaciones/topes-bytes.test.mjs pruebas/comprobaciones/contrato-roles.test.mjs
+ℹ tests 154
+ℹ suites 0
+ℹ pass 154
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+exit 0
+```
 
 ## Notas
+Reintento tras el BLOQUEO de la pasada anterior (ya resuelto: el planificador conservó «~3 archivos tocados» en la Edición A). Se aplicaron la Edición A y la Edición B tal como están en la tarea corregida; no se tocó la prueba de contrato ni `agentes/planificador.md`.
+Medición: tras la Edición A, 6368 bytes; tras la Edición B, 6368 bytes (la sustitución «Rutas exactas a leer y a tocar» por «Líneas `- Leer:` y `- Tocar:`» tiene el mismo tamaño en bytes). Como queda en 6400 o menos, la Edición B se conserva.
+Huecos menores: 0.
+Sin commit, push, PR ni merge. Rama no cambiada.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=falla; huecos=0; resultado=bloqueada; causa=otra
+Registro: n=2; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

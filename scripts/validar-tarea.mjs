@@ -34,6 +34,7 @@ import { basename, join, resolve } from "node:path";
 import { validarEstructura, validarTarea } from "./formato-tarea.mjs";
 import { validarEvidencia } from "./formato-evidencia.mjs";
 import { validarFuente } from "./formato-fuente.mjs";
+import { medirTopes } from "./formato-topes.mjs";
 import { calcularPresupuesto, validarStatusCompacto } from "./formato-presupuesto.mjs";
 import { digestFirma, firma } from "./firma.mjs";
 
@@ -139,6 +140,8 @@ if (conPresupuesto) {
   let invalidas = 0;
   let validas = 0;
   const rechazos = [];
+  // Avisos de topes (F42, task-03): no cuentan como inválida ni cambian el código de salida.
+  const avisos = [];
   // Primer rechazo (F38, task-03): ruta, texto exacto y primer motivo del primer archivo inválido.
   let primerRechazo = null;
 
@@ -153,6 +156,12 @@ if (conPresupuesto) {
     }
     const motivos = conEvidencia ? validarEvidencia(texto) : validarTarea(texto);
     if (conFuente) motivos.push(...validarFuente(texto, leerTexto));
+    // Topes de contexto (F42): el modo --evidencia no los mide.
+    if (!conEvidencia) {
+      const topes = medirTopes(texto, leerTexto);
+      motivos.push(...topes.errores);
+      for (const aviso of topes.avisos) avisos.push(`AVISO: ${ruta}: ${aviso}`);
+    }
     if (motivos.length === 0) {
       validas += 1;
     } else {
@@ -162,6 +171,7 @@ if (conPresupuesto) {
     }
   }
 
+  if (avisos.length > 0) console.log(avisos.join("\n"));
   if (rechazos.length > 0) console.log(rechazos.join("\n"));
 
   if (errorDeUso) {

@@ -1,8 +1,8 @@
 # task-06 — Lanzador y script de corrida del planificador (Claude Code y Pi)
-repo: Flucastr.AI   depende_de: task-05   estado: aprobada
+repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
 ## Descripción
-Crea el lanzador del `planificador` para las dos herramientas y el script que arma el fixture, lanza al planificador una vez y escribe el informe en `pruebas/resultados/`. Solo mide; la corrida con modelo real es task-07. Patrón de `correr-repetido.sh`.
+Crea el lanzador del `planificador` para las dos herramientas y el script que arma el fixture, lanza al planificador una vez y escribe el informe en `pruebas/resultados/`. Solo mide; la corrida con modelo real es task-10. Patrón de `correr-repetido.sh`.
 
 ## Contexto
 - Tocar: `pruebas/lanzar-planificador.sh`, `pruebas/correr-planificador.sh`, `pruebas/correr-planificador.test.mjs`
@@ -22,7 +22,7 @@ Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: los dos scripts y 3 pruebas con modelo simulado: tareas dentro de los topes dan OK; una tarea con 5 archivos a leer da FALLA (control negativo); herramienta inválida sale 2.
-Fuera de alcance: modelos reales (task-07), tocar los lanzadores existentes.
+Fuera de alcance: modelos reales (task-10), tocar los lanzadores existentes.
 
 ## Pasos
 1. Corre `git branch --show-current`.
@@ -46,4 +46,39 @@ Esperado: rama `feature/F42-tareas-acotadas-topes`; sin salida; `fail 0`.
 
 ## Evidencia
 
+```
+$ git branch --show-current
+feature/F42-tareas-acotadas-topes
+exit 0
+
+$ bash -n pruebas/lanzar-planificador.sh pruebas/correr-planificador.sh
+
+exit 0
+
+$ node --test pruebas/correr-planificador.test.mjs
+✔ (a) tareas dentro de los topes con modelo simulado dan Veredicto: OK (2805.656708ms)
+✔ (b) una tarea con cinco archivos a leer (control negativo) da Veredicto: FALLA (686.547916ms)
+✔ (c) herramienta inválida sale 2 con uso y sin informe (19.814666ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3612.387041
+exit 0
+```
+
+Informe de la prueba (b), motivo real: «el validador sale 1: features/F01-demo/task-01-rota.md: «Leer» tiene 5 archivos; el tope es 4 (WORKFLOW.md §6).»
+
 ## Notas
+- Huecos menores resueltos:
+  1. La prueba «con modelo simulado» de Pi no está en `correr-planificador.test.mjs` (las tres pruebas son las de Alcance: a, b, c). El lanzador de Pi se verificó solo con `bash -n`. Decisión: no añadir una cuarta prueba fuera de Alcance; queda para task-10 o una tarea posterior.
+  2. `lanzar-planificador.sh` exige `FLUCASTR_RECORD_FILE` (como los lanzadores existentes) y recibe `{herramienta} "<prompt>"` (dos argumentos), porque `correr-planificador.sh` le pasa la herramienta y el prompt.
+  3. Claude Code: se copió de `lanzar-coordinador-claude.sh` la guarda de `CLAUDE_CODE_SUBAGENT_MODEL` (no estaba en Decisiones); no cambia los permisos pedidos.
+  4. El prompt de la corrida se copió literal de task-05 (*Notas*: «Prompt de la corrida», que lo fija para task-06).
+- La verificación se corrió completa una vez, con `exit 0` en los tres comandos. Después se repitieron `bash -n` y `node --test` para confirmar el código de salida (`exit 0` en ambos, sin cambios de código entre pasadas).
+- Sin commit, push, PR ni merge. Rama no cambiada (`feature/F42-tareas-acotadas-topes`, actual). `STATUS.md` no tocado. No se hizo ninguna corrida con modelo real (eso es task-10).
+- Archivos nuevos: `pruebas/lanzar-planificador.sh`, `pruebas/correr-planificador.sh`, `pruebas/correr-planificador.test.mjs`. Ningún lanzador existente tocado.
+Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=3; resultado=lista; causa=ninguna
