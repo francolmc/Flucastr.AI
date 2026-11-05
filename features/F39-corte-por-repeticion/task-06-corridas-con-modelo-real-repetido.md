@@ -55,8 +55,8 @@ exit 0
 ```
 $ bash pruebas/correr-repetido.sh claude-code
 modelos de agentes instalados vigentes
-informe: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-05-repetido-claude-code-1.md
-Veredicto: FALLA
+informe: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-05-repetido-claude-code-2.md
+Veredicto: OK
 exit 0
 ```
 
@@ -71,15 +71,22 @@ exit 0
 ```
 $ grep -h "^Veredicto:" pruebas/resultados/*-repetido-*.md
 Veredicto: OK
+Veredicto: OK
 Veredicto: FALLA
 exit 0
 ```
 
-Informes: `pruebas/resultados/2026-11-05-repetido-claude-code-1.md` (Veredicto: FALLA) y `pruebas/resultados/2026-11-05-repetido-pi-1.md` (Veredicto: OK).
+Informes: `pruebas/resultados/2026-11-05-repetido-claude-code-2.md` (Veredicto: OK, corrida de este reintento; letras C y D) y `pruebas/resultados/2026-11-05-repetido-pi-1.md` (Veredicto: OK, primer intento, conservado). El informe `pruebas/resultados/2026-11-05-repetido-claude-code-1.md` (Veredicto: FALLA, primer intento de Claude Code por denegación de `Bash`) se conserva en disco y ya no es la evidencia de la tarea.
 
 ## Notas
 
 - Corrida de Claude Code: `Veredicto: FALLA`, modelo claude-sonnet-5-5. El informe dice que el coordinador no pudo seguir porque el entorno denegó `Bash` (modo «don't ask»), así que no llegó a delegar ni a escalar. No se ofreció ninguna letra. Hecho reportado tal cual; no se editó código, prompts ni reglas.
 - Corrida de Pi: `Veredicto: OK`, modelo gpt-6.1-sol. Letras ofrecidas por el coordinador: C) «Cerrar la sesión y revisar a mano», D) «Cerrar F01 como incompleta y abrir la siguiente con presupuesto propio».
 - Cada herramienta se corrió una sola vez. El veredicto FALLA no es un fallo de la tarea: los criterios de aceptación (rama, código 0 con informe, dos veredictos) se cumplen.
+- Reintento (Franco confirmó `git switch feature/F39-corte-por-repeticion`): rama existente, cambio con `git switch` sin `-c`; `git branch --show-current` devuelve `feature/F39-corte-por-repeticion`. Solo se repitió la corrida de Claude Code, una vez; la de Pi no se repitió.
+- Comandos denegados en el primer intento de Claude Code (informe `-1`): el modelo pidió `node ~/.flucastr-ai/validar-tarea.mjs --presupuesto features/F01-demo` y `node ~/.flucastr-ai/validar-tarea.mjs --fuente features/F01-demo/task-01-rota.md`, y el entorno los denegó (modo «don't ask»). En el reintento (`-2`) el informe no menciona denegación (búsqueda de «denegad» y «permission» sin coincidencias): el modelo llegó a escalar. No se cambiaron agentes, prompts, reglas, lanzadores ni código.
+- Corrida de Claude Code del reintento: `Veredicto: OK`, modelo claude-sonnet-5-5, escalación «se repite»: sí. Letras ofrecidas: C) «Cerrar la sesión y revisar a mano», D) «Cerrar F01 como incompleta y abrir la siguiente». El informe de `-1` (FALLA) queda en disco, pero la evidencia de la tarea usa `-2`.
+- Hueco menor: en la corrida de Claude Code la herramienta no devolvió el código de salida (la línea `exit` salió vacía). El `exit 0` de la *Evidencia* se deduce del flujo del script, que imprime `informe:` y `Veredicto:` solo justo antes de `exit 0`. No se repitió la corrida para no gastar más créditos; Franco puede confirmarlo.
+- Corrida de Pi (primer intento, conservada): `Veredicto: OK`, modelo gpt-6.1-sol, letras C) y D).
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna
+Registro: n=2; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna
