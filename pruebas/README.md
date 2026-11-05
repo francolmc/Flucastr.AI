@@ -13,6 +13,7 @@
   - Lanzador en Claude Code `pruebas/lanzar-coordinador-claude.sh`.
   - Lanzador en Pi `pruebas/lanzar-coordinador-pi.sh`.
 - Excedido + «A» (F36): `bash pruebas/correr-excedido.sh {claude-code|pi}`; solo con pedido de Franco; informe en `pruebas/resultados/`.
+- Rol del coordinador (F41): `bash pruebas/correr-rol.sh {claude-code|pi}`; solo con pedido de Franco; informe en `pruebas/resultados/`.
 - `pruebas/ejecutar.sh ESCENARIO HERRAMIENTA [N] [COMANDO [ARG...]]` crea una instantánea externa al fixture antes de invocar el modelo. La revisión conserva HEAD, rama y referencias Git. Los remotos locales se alojan fuera del workspace del agente.
 - Registro estructurado y pruebas de seguridad: `pruebas/comprobaciones/registro.mjs`; casos unitarios y E2E se conservan íntegros.
 - Capa 1: `node --test --test-concurrency=1 pruebas/capa1/instalacion.test.mjs`.

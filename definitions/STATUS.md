@@ -1,8 +1,8 @@
 # Estado
 Escalación: ninguna
-Paso actual: ninguno; F40 archivada en features/completed/ (sin commit); F41 es la siguiente (sin iniciar)
-Presupuesto: F41; rondas arq=0 plan=1; ampliado=0
-Espera a Franco: commit chore/ del movimiento de F40 (git status); bash instalar.sh; pedirme seguir con F41
+Paso actual: Modo yolo: terminado — F41 completa (01 a 06 hechas); Rama: fix/F41-coordinador-delega-su-rol; sin commits
+Presupuesto: F41; rondas arq=0 plan=2; ampliado=0
+Espera a Franco: Feature F41 completa en fix/F41-coordinador-delega-su-rol: commitea 01 a 06, cierra la rama, haz el PR. Marca → en F41: pendiente
 Bloqueos abiertos: ninguno
-Retomar: sesión nueva; F41 con el arquitecto si cambia WORKFLOW §2 (puerta 1); luego F38 y F39; pendiente el orden rama/entorno
+Retomar: sesión nueva tras el commit/PR de F41: mover la marca → a F38 (planificador, descomponer-feature) y seguir con F38, rama fix/
 Actualizado: 2026-11-04
