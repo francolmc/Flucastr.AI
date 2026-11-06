@@ -41,6 +41,21 @@ Para desinstalar: `bash desinstalar.sh`.
 
 Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instalar y desinstalar es válida, que los modelos se resuelven para Claude y Pi, que las skills están completas, que `instalar.sh --simular` no escribe nada y que las reglas deny del proyecto están bien.
 
+## Ejecutar un plan en ventana propia
+
+Un plan pesado (muchos pasos, builds, Compose) puede correrse en una ventana propia del constructor, para ver el avance en vivo:
+
+```bash
+claude --agent constructor   # Claude Code
+pi-constructor               # Pi
+```
+
+Primer mensaje: `Plan: <ruta>` y `Rama: <rama>` (por ejemplo `Plan: cambios/mi-cambio/plan.md`, `Rama: feature/mi-cambio`). Es el mismo plan, el mismo agente y el mismo retorno que al delegar desde el principal; solo cambia que se ve en vivo.
+
+## Plazos en Pi (opcional)
+
+El agente `constructor` declara `timeoutMs: 3600000` (60 min); Pi lo respeta (probado: con 60 s el subagente se corta; con 3 600 000 completa) y Claude Code lo ignora. Sin él, Pi corta a los 30 minutos. Para que Pi avise antes de cortar, `~/.pi/agent/extensions/subagent/config.json` admite `checkpointBeforeDeadlineMs` (solo corridas asíncronas de un agente); el kit no instala ni edita ese archivo. Para iterar rápido, `VERIFY_RAPIDO=1 ./verify` construye con caché; la corrida final va sin la variable.
+
 ## Estructura
 
 - `agentes/`: definiciones de `principal` y `constructor`.

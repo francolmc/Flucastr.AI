@@ -21,6 +21,7 @@ Crea `cambios/<nombre>/plan.md` (nombre corto en minúsculas con guiones):
 estado: borrador
 rama: feature/<nombre>
 repos: [<carpeta>, ...]
+ejecutor: constructor | principal
 ---
 # <Cambio>
 
@@ -62,7 +63,7 @@ El campo `estado:` del plan tiene solo estos valores, con su responsable:
 - `aprobado`: el principal lo pasa con el «sí» de Franco.
 - `en curso`: el constructor, al empezar.
 - `listo`: el constructor, si `verify` pasó.
-- `parcial`: el constructor, si devolvió `PARCIAL` o `PAUSA`.
+- `parcial`: el constructor, si devolvió `PAUSA`.
 
 Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `estado`**: la carpeta es la marca. No existe el estado `hecho` ni `cerrado`.
 
@@ -70,14 +71,16 @@ Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `esta
 
 1. **Alcance por camino, no por archivo.** Si el constructor encuentra un fallo relacionado dentro del alcance, lo corrige; no debe tener que parar por eso.
 2. **Un comando de verificación** que prueba el resultado final, no cada pieza. Si el proyecto aún no tiene `verify`, el primer plan es crearlo (`preparar-proyecto`).
-3. **De 3 a 10 pasos**, en orden, cada uno comprobable. Sin código completo salvo firmas o contratos que deban respetarse.
-4. **Corto.** Que un modelo pequeño lo lea entero sin esfuerzo. Orientación de tamaño, no límite duro: un cambio simple cabe en unos 5 KB; uno que investiga y toca varias piezas puede llegar a unos 8 KB. Si pasa de eso, probablemente son dos cambios. No hay herramienta que lo mida.
+3. **Paso atómico**: una línea, una acción, una comprobación, unas 20 palabras como máximo. Un paso con más de un requisito se parte. No hay tope de pasos (40 es válido), en orden, cada uno comprobable. Sin código completo salvo firmas o contratos que deban respetarse.
+4. **Corto.** Que un modelo pequeño lo lea entero sin esfuerzo. Orientación de tamaño, no límite duro: un cambio simple cabe en unos 5 KB; uno que investiga y toca varias piezas puede llegar a unos 8 KB. Si pasa de eso, se parte en tramos, cada uno con su verificación (o son dos cambios). No hay herramienta que lo mida.
 5. **Repos en el frontmatter.** `repos:` es obligatorio: la lista de carpetas (relativas a la raíz del proyecto) donde el cambio toca código o recibe la rama. Un proyecto de un repo escribe `repos: [.]`. Un workspace escribe solo las carpetas que el cambio toca (p. ej. `repos: [api]`). Si el cambio toca solo documentos o `verify` de la raíz, `repos: [.]`: la raíz cuenta como un repo más.
 6. **Decisiones cerradas.** Si falta una decisión de producto, pregúntala a Franco antes de pedir la aprobación; no la dejes abierta en el plan.
-7. **Supuestos explícitos.** Cada supuesto en `## Supuestos` va en una línea y dice qué pasa si Franco lo corrige (p. ej. «Validar email con regex simple; si Franco quiere DNS, cambian el alcance y un paso»). Lo que no sea supuesto, sino decisión que cambia el resultado, no va ahí: se pregunta.
+7. **Quién ejecuta (`ejecutor:`).** `ejecutor: constructor` para lo mecánico y acotado (configuración, renombrar, aplicar un patrón conocido). `ejecutor: principal` para lo que necesita diagnóstico o tiene piezas dependientes (builds, Compose, recorridos de punta a punta, pruebas negativas); el principal lo ejecuta él con `ejecutar-plan`, o el constructor con nivel `medio` en `modelos.json`. Si el plan es `principal`, una frase en `## Decisiones ya tomadas` dice por qué, para que Franco lo discuta en la puerta 1. Sin la línea, se trata como `constructor`.
+8. **Supuestos explícitos.** Cada supuesto en `## Supuestos` va en una línea y dice qué pasa si Franco lo corrige (p. ej. «Validar email con regex simple; si Franco quiere DNS, cambian el alcance y un paso»). Lo que no sea supuesto, sino decisión que cambia el resultado, no va ahí: se pregunta.
+9. **Duración en los pasos pesados.** Un paso que lanza un build, una instalación o una suite lleva su duración estimada entre paréntesis, p. ej. «(≈8 min)». Si la suma pasa de unos 20 minutos, parte el plan en tramos, cada uno con su verificación parcial. Los pasos intermedios usan `VERIFY_RAPIDO=1 ./verify` (build con caché); «sin caché» solo en la corrida final de aceptación.
 
 ## Antes de pedir la aprobación
 
 Relee el plan como si fueras el constructor sin contexto: ¿qué tendrías que adivinar? Corrige eso. Luego detente y di a Franco la ruta del plan. Con su «sí», cambia `estado: aprobado`.
 
-Si el constructor devuelve `parcial`, corriges el plan y lo vuelves a `estado: aprobado` antes de relanzar: el constructor solo arranca con `aprobado`.
+Si el constructor devuelve `parcial`, corriges el plan y lo vuelves a `estado: aprobado` antes de relanzar: el constructor solo arranca con `aprobado`. Al relanzar tras una `PAUSA` no agregues texto sobre condiciones de detención («límite real», «checkpoint»): solo cuál es el siguiente paso.

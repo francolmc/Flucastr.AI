@@ -36,7 +36,7 @@ Si el proyecto ya existe, explóralo antes y no repitas lo que el código ya dic
 
 Un único comando en la raíz (`./verify`) que **falla con código distinto de 0** en el primer escalón roto y no necesita nada de tu máquina:
 
-1. **Build limpio.** Instalación desde el lock (`npm ci`, `pnpm install --frozen-lockfile`) y build de las imágenes sin caché. Detecta dependencias sin declarar y contextos de build incompletos.
+1. **Build limpio.** Instalación desde el lock (`npm ci`, `pnpm install --frozen-lockfile`) y build de las imágenes sin caché. `VERIFY_RAPIDO=1 ./verify` hace el build con caché para iterar; la corrida final de aceptación va siempre sin la variable. Detecta dependencias sin declarar y contextos de build incompletos.
 2. **Arranque real.** Un `docker compose` con todo el sistema: web, API, base de datos y un buzón de correo de prueba (Mailpit). Las migraciones corren al arrancar y se espera a que los servicios respondan.
 3. **Recorrido real.** El flujo clave de punta a punta, sin mocks de base de datos ni de correo.
 4. **Mismo camino que producción.** Los mismos Dockerfiles y las mismas variables de `.env.example`; solo cambian los valores.

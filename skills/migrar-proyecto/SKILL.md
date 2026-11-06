@@ -31,10 +31,16 @@ Si `instalar.sh --migrar` imprimió «Workspace: repos hijos: …», la raíz es
 
 Lee `old/v1/definitions/PROJECT.md`, `ARCHITECTURE.md`, `BACKLOG.md` y `STATUS.md` (solo lo necesario; si alguno no existe, sigue sin él). Con eso escribe `AGENTS.md` en la raíz del proyecto, máximo unas 40 líneas, con el formato de `preparar-proyecto`: qué es, estructura y stack, comandos, la línea `Verificar todo desde cero: ./verify` y reglas (agentes sin commit, push, PR, merge ni despliegue; no leer `.env` ni llaves; ramas `feature/`, `fix/`, `chore/`, `docs/`).
 
+Qué se conserva del `AGENTS.md` viejo y de `old/v1/definitions/`: qué es el proyecto, su estructura, stack, comandos, restricciones propias del dominio y las reglas duras de la v2 (sin commit, push, PR, merge ni despliegue; no leer `.env` ni llaves).
+
+Qué se descarta: `STATUS.md` y `BACKLOG.md` como flujo, nombres de rama por feature (`Fxx`), confirmaciones de rama, coordinador, tareas, puertas, «yolo» y reglas parecidas del flujo de la v1. Descártalas: no las copies ni las reescribas en otras palabras, porque una regla de flujo copiada sigue dándole motivos al subagente para dudar. Si una regla de flujo de la v1 parece útil, no la traigas: Franco la decide (ver la lista de abajo).
+
+Al final de esta sección escribe la lista «Reglas de v1 que descarté»: cada regla de flujo que dejaste fuera, en una línea, o «ninguna» si no hubo. Muéstrala siempre, aunque esté vacía, porque Franco confirma, no tú. Si escribes `docs/proyecto.md` (sección 4), la misma lista va también en su «Descartado».
+
 Si el `AGENTS.md` de la raíz ya existía (el script avisa «AGENTS.md sigue siendo de v1» si menciona `definitions/`, `features/` o `registro/`), no lo reemplaces sin respuesta. Pregunta a Franco con opciones cerradas:
 
 1. AGENTS.md corto nuevo (recomendada): reemplaza el viejo tras su aprobación.
-2. Corregir los enlaces `definitions/`, `features/` y `registro/` a `old/v1/…` en el viejo.
+2. Conservar el viejo, solo corrigiendo los enlaces `definitions/`, `features/` y `registro/` a `old/v1/…`. Aquí no reescribes reglas: solo corriges enlaces y listas en «Reglas de v1 que descarté» las reglas de flujo que veas, sin modificarlas, para que Franco decida. Es la única excepción a «descartar».
 
 ## 4. docs/proyecto.md
 
@@ -52,6 +58,6 @@ Si un ítem es demasiado grande para un plan, no lo partas en silencio: anótalo
 
 ## 7. Puerta de Franco
 
-Al terminar, detente. Resume en pocas líneas: qué quedó en `AGENTS.md`, si `verify` existe o está pendiente, y la lista de planes en borrador. Franco aprueba los planes uno por uno (cambiar `estado: borrador` a `aprobado`); tú no los apruebas ni los ejecutas.
+Al terminar, detente. Resume en pocas líneas: qué quedó en `AGENTS.md`, si `verify` existe o está pendiente, y la lista de planes en borrador. Incluye la lista «Reglas de v1 que descarté» (o «ninguna») y pide a Franco que la confirme; si ve una regla útil ahí, la devuelve a mano. Franco aprueba los planes uno por uno (cambiar `estado: borrador` a `aprobado`); tú no los apruebas ni los ejecutas.
 
 Si esta skill la usa un subagente en Pi, la skill debe declararse en `skills:` del agente que la llama. Hoy ningún agente de `agentes/` la usa.

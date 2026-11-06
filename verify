@@ -520,4 +520,88 @@ sed '/VERIFY_TARGET/d' skills/preparar-proyecto/referencia.md > "$neg4/skills/pr
 if textos_clave "$neg4"; then fallo "8b: una copia sin VERIFY_TARGET en referencia.md pasó la comprobación de textos"; fi
 echo "ok 8b: textos clave presentes (incluido el modo remoto y Despliegue); copias sin repos:, sin «Descartado», sin definir-proyecto o sin VERIFY_TARGET fallan la comprobación"
 
+# 8c. contrato del constructor: cuenta externa, siguiente= y no_intentado=, 3 corridas, git diff --stat en el principal, sin PARCIAL:
+textos_contrato() { # $1: raíz del kit
+  local r=$1 f
+  for f in agentes/constructor.md skills/ejecutar-plan/SKILL.md; do
+    grep -qF "grep -c '^- \[ \]'" "$r/$f" || return 1
+    grep -qF 'siguiente=' "$r/$f" || return 1
+    grep -qF 'no_intentado=' "$r/$f" || return 1
+    grep -qF '3 corridas' "$r/$f" || return 1
+  done
+  grep -qF 'git diff --stat' "$r/agentes/principal.md" || return 1
+  if grep -qF 'PARCIAL:' "$r/agentes/constructor.md"; then return 1; fi
+}
+textos_contrato . || fallo "8c: falta algún texto del contrato del constructor"
+cneg="$T8/cneg"
+mkdir -p "$cneg/agentes" "$cneg/skills/ejecutar-plan"
+cp agentes/principal.md "$cneg/agentes/"
+cp skills/ejecutar-plan/SKILL.md "$cneg/skills/ejecutar-plan/"
+# copia del constructor sin la cuenta externa (grep -c): debe fallar
+sed '/grep -c/d' agentes/constructor.md > "$cneg/agentes/constructor.md"
+if textos_contrato "$cneg"; then fallo "8c: un constructor sin grep -c pasó la comprobación"; fi
+# copia de ejecutar-plan sin no_intentado=: debe fallar
+cp agentes/constructor.md "$cneg/agentes/"
+sed '/no_intentado=/d' skills/ejecutar-plan/SKILL.md > "$cneg/skills/ejecutar-plan/SKILL.md"
+if textos_contrato "$cneg"; then fallo "8c: un ejecutar-plan sin no_intentado= pasó la comprobación"; fi
+# copia del constructor con una línea PARCIAL: : debe fallar
+{ cat agentes/constructor.md; echo 'PARCIAL: plan=x; hecho=1/2; causa=y'; } > "$cneg/agentes/constructor.md"
+cp skills/ejecutar-plan/SKILL.md "$cneg/skills/ejecutar-plan/"
+if textos_contrato "$cneg"; then fallo "8c: un constructor con PARCIAL: pasó la comprobación"; fi
+# principal sin git diff --stat: debe fallar
+cp agentes/constructor.md "$cneg/agentes/"
+sed '/git diff --stat/d' agentes/principal.md > "$cneg/agentes/principal.md"
+if textos_contrato "$cneg"; then fallo "8c: un principal sin git diff --stat pasó la comprobación"; fi
+echo "ok 8c: contrato del constructor presente (grep -c, siguiente=, no_intentado=, 3 corridas, git diff --stat, sin PARCIAL:); copias sin esas frases fallan"
+
+# 8d. ejecutor y pasos atómicos: planificar-cambio, principal y README; una copia de planificar-cambio sin ejecutor: debe fallar
+textos_ejecutor() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'ejecutor:' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF '20 palabras' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  if grep -qF '60 palabras' "$r/skills/planificar-cambio/SKILL.md"; then return 1; fi
+  grep -qF 'ejecutor: principal' "$r/agentes/principal.md" || return 1
+  grep -qF 'claude --agent constructor' "$r/agentes/principal.md" || return 1
+  grep -qF 'pi-constructor' "$r/README.md" || return 1
+}
+textos_ejecutor . || fallo "8d: falta algún texto de ejecutor o de pasos atómicos"
+eneg="$T8/eneg"
+mkdir -p "$eneg/skills/planificar-cambio" "$eneg/agentes"
+cp agentes/principal.md "$eneg/agentes/"
+cp README.md "$eneg/"
+sed 's/ejecutor:/ejecutor/g' skills/planificar-cambio/SKILL.md > "$eneg/skills/planificar-cambio/SKILL.md"
+if textos_ejecutor "$eneg"; then fallo "8d: una copia de planificar-cambio sin ejecutor: pasó la comprobación"; fi
+echo "ok 8d: ejecutor:, 20 palabras (sin 60 palabras), ventana propia y pi-constructor presentes; copia sin ejecutor: falla"
+
+# 8e. plazos: VERIFY_RAPIDO en referencia.md, prohibición de docker system prune en principal.md, timeoutMs en constructor.md; una copia sin VERIFY_RAPIDO debe fallar
+textos_plazos() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'VERIFY_RAPIDO' "$r/skills/preparar-proyecto/referencia.md" || return 1
+  grep -qF 'docker system prune' "$r/agentes/principal.md" || return 1
+  grep -qF 'timeoutMs' "$r/agentes/constructor.md" || return 1
+}
+textos_plazos . || fallo "8e: falta algún texto de plazos"
+pneg="$T8/pneg"
+mkdir -p "$pneg/skills/preparar-proyecto" "$pneg/agentes"
+cp agentes/principal.md agentes/constructor.md "$pneg/agentes/"
+sed 's/VERIFY_RAPIDO/VERIFY_X/g' skills/preparar-proyecto/referencia.md > "$pneg/skills/preparar-proyecto/referencia.md"
+if textos_plazos "$pneg"; then fallo "8e: una copia sin VERIFY_RAPIDO pasó la comprobación"; fi
+node scripts/resolver.mjs agente-claude agentes/constructor.md | grep -q '^timeoutMs: ' || fallo "8e: el agente de Claude no resuelve con timeoutMs"
+echo "ok 8e: VERIFY_RAPIDO, docker system prune prohibido y timeoutMs presentes; el agente de Claude resuelve; copia sin VERIFY_RAPIDO falla"
+
+# 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
+paso 9a "migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas"
+T9=$(mktemp -d) || fallo "9a: no pude crear el temporal"
+trap '[ -n "${T6:-}" ] && rm -rf "$T6"; [ -n "${T7:-}" ] && rm -rf "$T7"; [ -n "${T8:-}" ] && rm -rf "$T8"; [ -n "${T9:-}" ] && rm -rf "$T9"' EXIT
+textos_migracion() { # $1: archivo SKILL.md de migrar-proyecto
+  local f=$1
+  grep -qF 'Reglas de v1 que descarté' "$f" || return 1
+  grep -qF 'no las copies' "$f" || return 1
+  grep -qF 'Fxx' "$f" || return 1
+}
+textos_migracion skills/migrar-proyecto/SKILL.md || fallo "9a: falta algún texto clave en migrar-proyecto"
+sed '/Reglas de v1 que descarté/d' skills/migrar-proyecto/SKILL.md > "$T9/SKILL.md"
+if textos_migracion "$T9/SKILL.md"; then fallo "9a: una copia de migrar-proyecto sin «Reglas de v1 que descarté» pasó la comprobación"; fi
+echo "ok 9a: migrar-proyecto trae «Reglas de v1 que descarté», «no las copies» y Fxx; una copia sin la lista falla"
+
 echo "VERIFY OK"
