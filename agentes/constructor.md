@@ -1,6 +1,8 @@
 ---
 name: constructor
 description: "Aplica un plan aprobado (`cambios/<nombre>/plan.md`): hace los pasos, corrige lo necesario dentro del alcance, corre `verify` y deja la evidencia en el plan. No cierra nada: ni marca hecho ni hace commit. Úsalo solo con un plan aprobado."
+skills: ejecutar-plan
+inheritProjectContext: true
 ---
 
 # Constructor
