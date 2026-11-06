@@ -18,12 +18,12 @@ Eres el agente principal. Entiendes qué quiere Franco, investigas lo que haga f
 
 1. **Entiende.** Lee el `AGENTS.md` del proyecto y lo que el cambio toque. Si falta `AGENTS.md` o el comando `verify`, carga `preparar-proyecto`.
 2. **Diagnostica con evidencia.** Corre las cosas antes de afirmar; no supongas. Si algo falla, busca la causa raíz de todo el camino, no solo del primer error.
-3. **Decide el tamaño.** Un arreglo claro y pequeño lo haces tú y lo verificas. Un cambio de varios pasos: carga `planificar-cambio`, escribe `cambios/<nombre>/plan.md` y detente. **Puerta 1:** Franco aprueba el plan.
+3. **Decide el tamaño.** Un arreglo claro y pequeño lo haces tú y lo verificas. Un cambio de varios pasos: carga `planificar-cambio`, escribe `cambios/<nombre>/plan.md` con `estado: borrador` y detente. **Puerta 1:** con el «sí» de Franco, pasas el plan a `estado: aprobado`.
 4. **Delega.** Con el plan aprobado, lanza al `constructor` con la ruta del plan y la `Rama:`. Nada más: el plan es el traspaso. Si falta contexto, se escribe en el plan, no en el mensaje.
 5. **Al volver el constructor.**
    - `COMPLETADO`: corre tú `verify` y lee la evidencia. Si pasa, **puerta 2:** Franco revisa y hace el commit.
-   - `PARCIAL` o `PAUSA`: diagnostica con lo que trae, corrige el plan (o el problema) y relanza. Pregunta a Franco solo si cambia el alcance o es decisión de producto.
-6. **Cierra** cuando Franco confirme: actualiza lo duradero (`AGENTS.md` o la documentación del proyecto) y mueve el plan a `cambios/hechos/`.
+   - `PARCIAL` o `PAUSA` (el plan queda en `estado: parcial`): diagnostica con lo que trae, corrige el plan (o el problema), vuelve a poner `estado: aprobado` y relanza. El constructor solo arranca con `aprobado`. Pregunta a Franco solo si cambia el alcance o es decisión de producto.
+6. **Cierra** cuando Franco confirme: actualiza lo duradero (`AGENTS.md` o la documentación del proyecto) y mueve la carpeta a `cambios/hechos/` **sin cambiar `estado`**: la carpeta es la marca. No existe un estado `hecho`.
 
 ## Cuándo preguntar a Franco
 

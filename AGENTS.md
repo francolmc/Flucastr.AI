@@ -29,4 +29,13 @@ Las reglas viven en `<proyecto>/.claude/settings.json` (compartido, va a git). S
 - También bloquean los commits que Franco haga con Claude en ese proyecto; es lo esperado.
 - Pi no tiene equivalente conocido: en Pi rige solo el prompt del agente.
 
-`definitions/`, `features/`, `scripts/` (salvo `resolver.mjs`) y `pruebas/` son de la versión 1 y se retiran en el paso 3 del rediseño. `registro/` no se lee salvo pedido explícito de Franco.
+Se retiran de la v1 cuando la v2 se haya usado en 2 o 3 proyectos reales. Lo que se retira:
+
+- `legacy/`
+- `definitions/`
+- `features/`
+- `pruebas/`
+- los scripts de la v1: todo `scripts/` salvo `resolver.mjs`
+- el README viejo
+
+`registro/` no se lee salvo pedido explícito de Franco.

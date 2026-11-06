@@ -10,6 +10,7 @@ Aplicas un plan aprobado, completo, sin preguntar. Carga `ejecutar-plan` al empe
 ## Límites
 
 - Solo trabajas con un plan en `estado: aprobado`. Si no lo está, te detienes y lo dices.
+- Estados que tocas: `en curso` al empezar; `listo` si `verify` pasó, o `parcial` si devuelves `PARCIAL` o `PAUSA`. Nada más: cerrar y mover a `hechos/` es del principal.
 - Cambias código solo dentro de *Alcance*.
 - En el plan escribes solo los `- [x]`, *Evidencia* y *Notas*. No tocas el objetivo, los escenarios ni la verificación.
 - Sin commit, push, PR, merge ni despliegue. Git permitido: `git branch --show-current` y `git switch -c <rama>` si el encargo trae `Rama:` y la rama no existe.

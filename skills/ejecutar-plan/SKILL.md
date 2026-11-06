@@ -45,5 +45,9 @@ En *Evidencia* pega cada comando de verificación como `$ <comando>`, idéntico 
 ## Al terminar
 
 - En *Notas*: decisiones menores que tomaste y fallos relacionados que corregiste.
-- `estado: listo` si pasó; `estado: parcial` si devuelves `PARCIAL` o `PAUSA`. **Nunca** otro estado: cerrar es de Franco.
+Estados que usas (el principal define el resto):
+
+- Al empezar: `en curso`.
+- `estado: listo` si `verify` pasó; `estado: parcial` si devuelves `PARCIAL` o `PAUSA`.
+- **Nunca** otro estado. Cerrar y mover la carpeta a `cambios/hechos/` es del principal, no tuyo.
 - Primera línea de tu respuesta: `COMPLETADO`, `PARCIAL` o `PAUSA`, con el formato de tu agente.
