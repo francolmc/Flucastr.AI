@@ -471,6 +471,10 @@ textos_clave() { # $1: raíz del kit
   grep -q 'REPOS.md' "$r/skills/migrar-proyecto/SKILL.md" || return 1
   grep -q 'Descartado' "$r/skills/migrar-proyecto/SKILL.md" || return 1
   grep -q 'repos:' "$r/skills/migrar-proyecto/SKILL.md" || return 1
+  grep -q 'definir-proyecto' "$r/agentes/principal.md" || return 1
+  grep -q 'repo o un workspace' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -q 'docs/proyecto.md' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -q 'Fuera de alcance' "$r/skills/definir-proyecto/SKILL.md" || return 1
 }
 textos_clave . || fallo "8b: falta algún texto clave en los archivos del cambio"
 neg="$T8/neg"
@@ -489,6 +493,15 @@ cp skills/preparar-proyecto/SKILL.md "$neg2/skills/preparar-proyecto/"
 cp agentes/constructor.md agentes/principal.md "$neg2/agentes/"
 sed '/Descartado/d' skills/migrar-proyecto/SKILL.md > "$neg2/skills/migrar-proyecto/SKILL.md"
 if textos_clave "$neg2"; then fallo "8b: una copia de migrar-proyecto sin «Descartado» pasó la comprobación de textos"; fi
-echo "ok 8b: textos clave presentes; copias sin repos: o sin «Descartado» fallan la comprobación"
+# copia completa pero sin la skill definir-proyecto: también debe fallar
+neg3="$T8/neg3"
+mkdir -p "$neg3/skills/planificar-cambio" "$neg3/skills/ejecutar-plan" "$neg3/skills/preparar-proyecto" "$neg3/skills/migrar-proyecto" "$neg3/agentes"
+cp skills/planificar-cambio/SKILL.md "$neg3/skills/planificar-cambio/"
+cp skills/ejecutar-plan/SKILL.md "$neg3/skills/ejecutar-plan/"
+cp skills/preparar-proyecto/SKILL.md "$neg3/skills/preparar-proyecto/"
+cp skills/migrar-proyecto/SKILL.md "$neg3/skills/migrar-proyecto/"
+cp agentes/constructor.md agentes/principal.md "$neg3/agentes/"
+if textos_clave "$neg3"; then fallo "8b: una copia sin la skill definir-proyecto pasó la comprobación de textos"; fi
+echo "ok 8b: textos clave presentes; copias sin repos:, sin «Descartado» o sin definir-proyecto fallan la comprobación"
 
 echo "VERIFY OK"

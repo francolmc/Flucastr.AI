@@ -1,5 +1,5 @@
 ---
-estado: borrador
+estado: listo
 rama: feature/definir-proyecto
 repos: [.]
 ---
@@ -38,14 +38,30 @@ Fuera de alcance: `instalar.sh`, `desinstalar.sh`, `agentes/constructor.md`, `pr
 `./verify` — el escalón 4 ya exige `SKILL.md` válido; en el escalón 8 se agregan textos clave (`definir-proyecto` en `agentes/principal.md`; «repo o un workspace», «docs/proyecto.md» y «Fuera de alcance» en la skill) con prueba negativa.
 
 ## Pasos
-- [ ] Crear `skills/definir-proyecto/SKILL.md` (nombre = carpeta, descripción de una frase, ≤ unos 4 KB) con los dos tiempos, las reglas de preguntas y las secciones de los dos documentos.
-- [ ] Editar `agentes/principal.md`: paso 1 y paso 6 según *Decisiones*.
-- [ ] `verify` escalón 8: sumar los textos clave a `textos_clave`; la copia negativa omite la skill y debe fallar.
-- [ ] `AGENTS.md`: añadir `definir-proyecto` a la lista de skills. `PENDIENTES.md`: una línea.
-- [ ] Correr `./verify` y pegar la cola en *Evidencia*. No hace la prueba real: la corre el principal.
+- [x] Crear `skills/definir-proyecto/SKILL.md` (nombre = carpeta, descripción de una frase, ≤ unos 4 KB) con los dos tiempos, las reglas de preguntas y las secciones de los dos documentos.
+- [x] Editar `agentes/principal.md`: paso 1 y paso 6 según *Decisiones*.
+- [x] `verify` escalón 8: sumar los textos clave a `textos_clave`; la copia negativa omite la skill y debe fallar.
+- [x] `AGENTS.md`: añadir `definir-proyecto` a la lista de skills. `PENDIENTES.md`: una línea.
+- [x] Correr `./verify` y pegar la cola en *Evidencia*. No hace la prueba real: la corre el principal.
 
 ## Evidencia
-(la escribe el constructor)
+$ ./verify
+...
+== 4. skills con SKILL.md, name y description ==
+ok definir-proyecto
+...
+== 7. migración a v2 (--migrar, --simular, repetición, sin v1) ==
+ok escenario 9: copia de Cleaner -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
+== 8. workspaces (detección con find, textos clave de los archivos del cambio) ==
+ok 8a: workspace con dos hijos con .git -> find devuelve 2
+grep: /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.3yQxDYdY0d/neg3/skills/definir-proyecto/SKILL.md: No such file or directory
+ok 8b: textos clave presentes; copias sin repos:, sin «Descartado» o sin definir-proyecto fallan la comprobación
+VERIFY OK
+exit 0
 
 ## Notas
-(la escribe el constructor)
+- Rama `feature/definir-proyecto` creada desde `feature/migrar-workspaces` (la rama activa al empezar), solo en `.` (`repos: [.]`). Sin commit.
+- `cambios/definir-proyecto/plan.md` ya traía una modificación sin confirmar al empezar; se conservó tal cual salvo el estado y las marcas.
+- El `grep: ... No such file` de la salida es el de la copia negativa `neg3` (sin la skill): ese error es lo que hace fallar la comprobación, como se espera.
+- En `AGENTS.md` la línea de skills quedó con `definir-proyecto (proyecto nuevo)`.
+- La prueba real (principal en una carpeta nueva) no se corrió: queda en `PENDIENTES.md`.
