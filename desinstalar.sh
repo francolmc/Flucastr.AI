@@ -70,6 +70,7 @@ if [ "${p_tipo:-}" = modo ]; then MODO_INSTALADO="${p_valor:-repo}"; fi
 # exclusión de git y la línea skills-proyecto) y deja el resto del manifiesto tal cual.
 if [ -n "$PROYECTO" ]; then
   AJUSTES="$PROYECTO/.claude/settings.local.json"
+  SETTINGS="$PROYECTO/.claude/settings.json"
   EXCL_GIT="$(exclusion_de_git "$PROYECTO")"
   MANTENER="$MANIFIESTO.tmp"
   hallados=0
@@ -150,6 +151,20 @@ if [ -n "$PROYECTO" ]; then
           fi
         elif [ -z "$EXCL_GIT" ] && case "$ruta" in "$PROYECTO"/*) true ;; *) false ;; esac; then
           decir "  AVISO: el proyecto ya no es un repo git; no se quita la exclusión (sigue registrada): $extra"
+        fi
+        ;;
+      deny)
+        # regla deny de Claude Code de este proyecto (settings.json): solo la regla exacta que el kit agregó
+        if [ "$ruta" = "$SETTINGS" ]; then
+          quitar=1
+          hallados=$((hallados + 1))
+          if [ "$SIMULAR" = 1 ]; then
+            decir "SIMULACIÓN: quitaría la regla deny '${extra:-}' de: $SETTINGS"
+          else
+            resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-deny claude "$SETTINGS" "${extra:-}" < /dev/null)" || resultado="error"
+            decir "  regla deny ($resultado): ${extra:-} en $SETTINGS"
+            rmdir "$PROYECTO/.claude" 2>/dev/null || true # solo si quedó vacía
+          fi
         fi
         ;;
       hook)
@@ -243,6 +258,17 @@ while IFS=$'\t' read -r tipo ruta extra; do
         fi
       else
         decir "  omitido (no está la exclusión): $ruta"
+      fi
+      ;;
+    deny)
+      # regla deny de Claude Code de un proyecto (settings.json), salvo --conservar-ajustes
+      if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
+      if [ "$SIMULAR" = 1 ]; then
+        decir "  quitaría la regla deny '${extra:-}' de: $ruta"
+      else
+        resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-deny claude "$ruta" "${extra:-}" < /dev/null)" || resultado="error"
+        decir "  regla deny ($resultado): ${extra:-} en $ruta"
+        rmdir "$(dirname "$ruta")" 2>/dev/null || true # .claude del proyecto, solo si quedó vacía
       fi
       ;;
     hook)

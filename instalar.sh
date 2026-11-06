@@ -436,6 +436,40 @@ instalar_hook_claude() {
   return 0
 }
 
+# Reglas deny del proyecto en Claude Code (<proyecto>/.claude/settings.json, compartido: va a git). Solo agrega las que faltan;
+# el manifiesto registra solo las que agrega (una línea deny por regla), así desinstalar.sh nunca quita lo que ya tenía el usuario.
+# Si el resolver falla (JSON inválido, permissions con otro tipo), avisa y sigue: no aborta la instalación.
+instalar_deny_claude() {
+  local ajustes="$PROYECTO/.claude/settings.json" salida linea regla prefijo=""
+  local extra=()
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" fijar-deny claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+    echo "  AVISO: no se tocó $ajustes ($salida)"
+    return 0
+  fi
+  if [ "$salida" = ya-estaba ]; then
+    echo "  ${prefijo}reglas deny de Claude Code ya estaban: $ajustes"
+    return 0
+  fi
+  while IFS= read -r linea; do
+    case "$linea" in
+      agregada:*)
+        regla="${linea#agregada:}"
+        if [ "$SIMULAR" = 1 ]; then
+          echo "  (simulación) agregaría: $regla ($ajustes)"
+        else
+          echo "  regla deny de Claude Code agregada: $regla ($ajustes)"
+          if ! grep -qxF "$(printf 'deny\t%s\t%s' "$ajustes" "$regla")" "$NUEVO"; then
+            registrar deny "$ajustes" "$regla"
+          fi
+        fi
+        ;;
+      *) echo "  AVISO: resultado inesperado de fijar-deny claude ($linea)" ;;
+    esac
+  done <<< "$salida"
+  return 0
+}
+
 # Primera línea del manifiesto: el modo con el que se instaló (lo leen desinstalar.sh y la comprobación de modo).
 registrar modo "$MODO"
 
@@ -457,6 +491,7 @@ if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
   grep -E "^ajuste$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^compactacion$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude:" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^hook$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude$" "$MANIFIESTO" >> "$NUEVO" || true
+  grep -E "^deny$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   bash "$RAIZ/desinstalar.sh" --silencioso --conservar-ajustes
 fi
 
@@ -535,6 +570,7 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
   if [ -n "$PROYECTO" ]; then
     echo "Proyecto ($PROYECTO)"
     fijar_agente_proyecto
+    instalar_deny_claude
     instalar_compactacion_claude
     # v2: sin hook del validador de tareas (era de v1; ver legacy/v1/).
   fi

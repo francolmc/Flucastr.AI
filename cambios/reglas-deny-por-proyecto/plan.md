@@ -1,5 +1,5 @@
 ---
-estado: aprobado
+estado: listo
 rama: feature/kit-v2
 ---
 # reglas-deny-por-proyecto
@@ -37,15 +37,52 @@ Escribirlos en `AGENTS.md`, sección «Límites de las reglas deny»:
 `./verify` — nuevo escalón 6: crea `T=$(mktemp -d)`, usa `HOME=$T`, `PI_CODING_AGENT_DIR` sin definir, `mkdir $T/.claude $T/proj`, y corre el `instalar.sh --solo claude --proyecto $T/proj` y `desinstalar.sh --proyecto $T/proj` reales; comprueba los 5 escenarios (con `node` para leer el JSON); borra `$T` con `trap`. Prueba negativa dentro del escalón: con `modelos.json` intacto, un `settings.json` previo con `deny` propio que coincide con una regla del kit debe sobrevivir a la desinstalación. `VERIFY OK`, código 0.
 
 ## Pasos
-- [ ] Resolver: `fijar-deny` y `quitar-deny` (+ línea de uso y cabecera de comentarios).
-- [ ] `instalar.sh`: función `instalar_deny_claude` (modelo: `instalar_hook_claude`), llamada en el bloque de proyecto; copiar líneas `deny` al reinstalar.
-- [ ] `desinstalar.sh`: caso `deny` en ambos bloques, saltado con `--conservar-ajustes`.
-- [ ] `verify`: escalón 6 con los 5 escenarios; confirmar con `ls -A ~/.flucastr-ai` antes/después que el home real no cambió.
-- [ ] Prueba negativa: quitar `Bash(git push *)` de la lista del resolver, correr `./verify`, confirmar que falla en el 6, restaurar.
-- [ ] `AGENTS.md`: límites conocidos (arriba), aviso de commits bloqueados, línea «Pi: solo el prompt», y el escalón 6 en la línea de `./verify`.
+- [x] Resolver: `fijar-deny` y `quitar-deny` (+ línea de uso y cabecera de comentarios).
+- [x] `instalar.sh`: función `instalar_deny_claude` (modelo: `instalar_hook_claude`), llamada en el bloque de proyecto; copiar líneas `deny` al reinstalar.
+- [x] `desinstalar.sh`: caso `deny` en ambos bloques, saltado con `--conservar-ajustes`.
+- [x] `verify`: escalón 6 con los 5 escenarios; confirmar con `ls -A ~/.flucastr-ai` antes/después que el home real no cambió.
+- [x] Prueba negativa: quitar `Bash(git push *)` de la lista del resolver, correr `./verify`, confirmar que falla en el 6, restaurar.
+- [x] `AGENTS.md`: límites conocidos (arriba), aviso de commits bloqueados, línea «Pi: solo el prompt», y el escalón 6 en la línea de `./verify`.
 
 ## Evidencia
-(la escribe el constructor)
+$ ./verify
+== 1. modelos.json parsea y agentes coinciden ==
+agentes: constructor, principal
+== 2. sintaxis de instalar.sh y desinstalar.sh ==
+ok instalar.sh
+ok desinstalar.sh
+== 3. resolver Claude Code y Pi por agente ==
+ok constructor Claude Code claude-haiku-5-5
+ok constructor Pi openai/gpt-6-luna
+ok principal Claude Code claude-sonnet-5-5
+ok principal Pi openai/gpt-6.1-sol
+== 4. skills con SKILL.md, name y description ==
+ok ejecutar-plan
+ok planificar-cambio
+ok preparar-proyecto
+== 5. instalar.sh --simular no escribe lo que instala ==
+ok autoprueba: reacciona a añadir y cambiar; ignora transcripts e history
+-- 5b. instalar.sh --simular sobre el home real
+ok instantánea sin cambios (585 líneas)
+== 6. reglas deny del proyecto (instalar, reinstalar, desinstalar, JSON roto) ==
+ok escenario 1: sin archivo -> 7 reglas y 7 líneas deny
+ok escenario 2: se conservan allow, otra clave y deny propios; solo se registran las agregadas
+ok escenario 3: reinstalar deja el archivo y las líneas deny iguales
+ok escenario 4: desinstalar devuelve el archivo original (con su Bash(git push *)) o no deja archivo
+ok escenario 5: JSON inválido -> no se toca, se avisa, no aborta
+VERIFY OK
+exit 0
+
+Prueba negativa (regla `Bash(git push *)` quitada del resolver): `./verify` salió con 1 y falló en el escalón 6 con `FALLO: escenario 1: las reglas deny no son exactamente las 7 del kit`. Resolver restaurado desde copia y comparado con `cmp`.
+
+Home real: `ls -A ~/.flucastr-ai` y el sha256 de `manifiesto.txt` iguales antes y después (instantánea en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/a7c6526a-2b3d-4428-8015-d97d2f480078/scratchpad/home-antes.txt`).
 
 ## Notas
-(la escribe el constructor)
+- Verify, escalón 6: cada escenario usa su propio HOME temporal (`$T6/<escenario>/home`, con `.claude`) y su proyecto (`$T6/<escenario>/proj`), en vez de un único `$T` compartido. Así la reinstalación y la desinstalación de cada caso no se mezclan. Se borra todo con `trap`.
+- «Con modelos.json intacto» lo interpreté así: el HOME temporal no tiene `modelos.json` personal (modo repo) y el del repo no se toca; la prueba negativa de deny propio que sobrevive a desinstalar es el escenario 4.
+- Decisión menor: `fijar-deny` rechaza el `~/.claude/settings.json` (además de exigir el nombre `settings.json`), calcado de la protección de `fijar-hook`. Sin esa comprobación, un `--proyecto ~` escribiría en el ajuste global.
+- `quitar-deny` quita una sola ocurrencia de la regla.
+- Al escribir, `settings.json` se reserializa con 2 espacios (formato de `escribirAtomico`, igual que en `fijar-hook`); el contenido queda igual, el formato puede cambiar.
+- `grep -P` no es portable en macOS: usé `grep "^deny"$'\t'`.
+- Fuera de alcance, sin tocar: `legacy/`, Pi, `cambios/verify-escalon-5/` (ya estaba borrado en el árbol al empezar y su carpeta está en `cambios/hechos/`).
+- Sin commit, push ni PR: lo hace Franco.
