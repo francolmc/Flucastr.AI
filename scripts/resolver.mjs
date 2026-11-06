@@ -6,7 +6,7 @@
 //   node scripts/resolver.mjs agente-claude <archivo.md>      imprime el agente con el campo `model` ya resuelto (Claude Code)
 //   node scripts/resolver.mjs agente-pi <archivo.md>          igual, con el modelo de Pi (para el paquete de subagentes)
 //   node scripts/resolver.mjs cuerpo <archivo.md>             imprime el agente sin encabezado, con la línea de identidad de Pi (para Pi)
-//   node scripts/resolver.mjs fijar-agente <ajustes.json> <agente>   deja `agent` en los ajustes de un proyecto (no pisa otro valor)
+//   node scripts/resolver.mjs fijar-agente <ajustes.json> <agente> [--sobrescribir]   deja `agent` en los ajustes de un proyecto (no pisa otro valor, salvo con --sobrescribir)
 //   node scripts/resolver.mjs quitar-agente <ajustes.json> <agente>  deshace lo anterior, solo si el valor es ese agente
 //   node scripts/resolver.mjs comparar-modelos <personal.json> <publicado.json>  imprime las diferencias que merecen aviso (nada si no hay)
 //   node scripts/resolver.mjs fijar-compactacion pi <settings.json> [--simular]  pone compaction.modelOverrides de Pi (no pisa lo del usuario)
@@ -15,12 +15,15 @@
 //   node scripts/resolver.mjs quitar-compactacion claude <settings.json> <valor>  deshace lo anterior, solo si el valor es ese
 //   node scripts/resolver.mjs fijar-hook claude <settings.local.json> [--simular]  agrega el hook PostToolUse del validador (no pisa lo ajeno)
 //   node scripts/resolver.mjs quitar-hook claude <settings.local.json>  deshace lo anterior, solo la entrada exacta del validador
+//   node scripts/resolver.mjs fijar-deny claude <proyecto/.claude/settings.json> [--simular]  agrega las reglas deny del kit que falten (una línea agregada:<regla> por cada una)
+//   node scripts/resolver.mjs quitar-deny claude <proyecto/.claude/settings.json> <regla>  quita esa regla exacta; borra lo que quede vacío
 //
 // Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
 // si no, se lee el modelos.json del repo. Lo usa instalar.sh --copiar con el modelos.json personal.
 
 import { existsSync, mkdirSync, readFileSync, renameSync, rmdirSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { homedir } from "node:os";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -492,6 +495,86 @@ function quitarHookClaude(ruta) {
   }
 }
 
+// --- Reglas deny del proyecto en Claude Code (fijar-deny / quitar-deny) ---
+
+// Reglas que el kit pone en <proyecto>/.claude/settings.json (compartido, va a git). El espacio antes de * es parte de la regla.
+const REGLAS_DENY_CLAUDE = [
+  "Read(./.env)",
+  "Read(./.env.*)",
+  "Bash(git commit *)",
+  "Bash(git push *)",
+  "Bash(git merge *)",
+  "Bash(gh pr create *)",
+  "Bash(gh pr merge *)",
+  "Bash(git * commit *)",
+  "Bash(git * push *)",
+  "Bash(bash -c *)",
+  "Bash(sh -c *)",
+  "Bash(zsh -c *)",
+];
+
+// Solo el settings.json de un proyecto: nunca ~/.claude/settings.json ni settings.local.json.
+function comprobarNombreDenyClaude(ruta) {
+  if (basename(ruta) !== "settings.json" || resolve(ruta) === join(homedir(), ".claude", "settings.json")) {
+    fallar(`${ruta}: solo se toca el .claude/settings.json de un proyecto (nunca el de ~/.claude)`);
+  }
+}
+
+// Lista 'permissions.deny' del ajuste (arreglo vacío si no existe); si el tipo no es el esperado, falla sin tocar nada.
+function denyDeAjustes(ruta, ajustes) {
+  const permisos = tiene(ajustes, "permissions") ? ajustes.permissions : {};
+  if (!esObjeto(permisos)) fallar(`${ruta}: 'permissions' no es un objeto; no lo toco`);
+  const deny = tiene(permisos, "deny") ? permisos.deny : [];
+  if (!Array.isArray(deny)) fallar(`${ruta}: 'permissions.deny' no es un arreglo; no lo toco`);
+  return deny;
+}
+
+function fijarDenyClaude(ruta, simular) {
+  comprobarNombreDenyClaude(ruta);
+  const ajustes = ajustesDeObjeto(ruta);
+  const deny = denyDeAjustes(ruta, ajustes);
+  const faltan = REGLAS_DENY_CLAUDE.filter((regla) => !deny.includes(regla));
+  if (faltan.length === 0) {
+    console.log("ya-estaba");
+    return;
+  }
+  if (!simular) {
+    mkdirSync(dirname(ruta), { recursive: true });
+    const permisos = tiene(ajustes, "permissions") ? ajustes.permissions : {};
+    escribirAtomico(ruta, { ...ajustes, permissions: { ...permisos, deny: [...deny, ...faltan] } });
+  }
+  for (const regla of faltan) console.log(`agregada:${regla}`);
+}
+
+function quitarDenyClaude(ruta, regla) {
+  comprobarNombreDenyClaude(ruta);
+  if (!existsSync(ruta)) {
+    console.log("omitido");
+    return;
+  }
+  const ajustes = ajustesDeObjeto(ruta);
+  const permisos = tiene(ajustes, "permissions") ? ajustes.permissions : undefined;
+  if (!esObjeto(permisos) || !Array.isArray(permisos.deny) || !permisos.deny.includes(regla)) {
+    console.log("omitido");
+    return;
+  }
+  const restantes = [...permisos.deny];
+  restantes.splice(restantes.indexOf(regla), 1);
+  const nuevosPermisos = { ...permisos };
+  if (restantes.length) nuevosPermisos.deny = restantes;
+  else delete nuevosPermisos.deny;
+  const nuevos = { ...ajustes };
+  if (Object.keys(nuevosPermisos).length) nuevos.permissions = nuevosPermisos;
+  else delete nuevos.permissions;
+  if (Object.keys(nuevos).length === 0) {
+    rmSync(ruta);
+    console.log("archivo-quitado");
+  } else {
+    escribirAtomico(ruta, nuevos);
+    console.log("quitado");
+  }
+}
+
 const [orden, ...args] = process.argv.slice(2);
 
 if (orden === "modelo" && args.length === 2) {
@@ -518,17 +601,19 @@ if (orden === "modelo" && args.length === 2) {
 } else if (orden === "cuerpo" && args.length === 1) {
   const agente = basename(args[0], ".md");
   process.stdout.write(`${lineaIdentidad("pi", agente)}\n\n` + partir(args[0]).cuerpo.replace(/^\s+/, ""));
-} else if (orden === "fijar-agente" && args.length === 2) {
+} else if (orden === "fijar-agente" && (args.length === 2 || (args.length === 3 && args[2] === "--sobrescribir"))) {
+  // Con --sobrescribir reemplaza otro agente ya fijado (lo usa --migrar) y dice cuál era.
   const [ruta, agente] = args;
   const ajustes = leerAjustes(ruta);
   if (ajustes.agent === agente) {
     console.log("ya-estaba");
-  } else if (ajustes.agent) {
+  } else if (ajustes.agent && args.length === 2) {
     console.log(`omitido:${ajustes.agent}`);
   } else {
+    const anterior = ajustes.agent;
     mkdirSync(dirname(ruta), { recursive: true });
     writeFileSync(ruta, JSON.stringify({ ...ajustes, agent: agente }, null, 2) + "\n");
-    console.log("fijado");
+    console.log(anterior ? `reemplazado:${anterior}` : "fijado");
   }
 } else if (orden === "quitar-agente" && args.length === 2) {
   const [ruta, agente] = args;
@@ -576,10 +661,14 @@ if (orden === "modelo" && args.length === 2) {
   fijarHookClaude(args[1], args.length === 3);
 } else if (orden === "quitar-hook" && args[0] === "claude" && args.length === 2) {
   quitarHookClaude(args[1]);
+} else if (orden === "fijar-deny" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+  fijarDenyClaude(args[1], args.length === 3);
+} else if (orden === "quitar-deny" && args[0] === "claude" && args.length === 3) {
+  quitarDenyClaude(args[1], args[2]);
 } else if (orden === "fijar-compactacion" && args[0] === "pi" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
   fijarCompactacionPi(args[1], args.length === 3);
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla>");
 }

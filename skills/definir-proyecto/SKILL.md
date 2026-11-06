@@ -1,43 +1,42 @@
 ---
 name: definir-proyecto
-description: "Explora y define un proyecto NUEVO (que todavía no existe). Úsala para entender el problema, comparar enfoques (proposal) y dejar escrito `definitions/PROJECT.md`. No sirve para proyectos existentes: para esos usa `revisar-proyecto-existente`."
+description: "Define un proyecto nuevo (repo vacío o casi): hace hasta 5 preguntas cerradas, escribe `AGENTS.md` y `docs/proyecto.md`, deja la raíz lista y se detiene a esperar a Franco. Úsala si la carpeta no tiene `AGENTS.md` ni código."
 ---
 
-# Definir proyecto (nuevo)
+# Definir un proyecto nuevo
 
-Objetivo: pasar de una idea a un proyecto definido, con cada decisión razonada.
+Un proyecto «nuevo» no tiene `AGENTS.md` y no tiene código: solo carpeta vacía, `README` o `.git`. Si ya hay código, dilo y usa `preparar-proyecto`.
 
-## Pasos
+Trabajas en dos tiempos. No los mezcles.
 
-### 1. Explorar
+## Primer tiempo: preguntar (no escribas nada)
 
-Pregunta, máximo cinco por turno y de más a menos importante:
+1. Lee lo que Franco dijo y lo que la carpeta ya tiene. No preguntes lo que el contexto ya responde.
+2. Haz hasta 5 preguntas cerradas, con 2 a 4 opciones cada una. La propuesta por defecto va primera y dice «(Recomendada)».
+3. La primera pregunta es siempre: «¿Es un repo o un workspace con varios repos?». Nunca decidas tú, aunque el contexto lo insinúe.
+4. Las demás salen solo de lo que falte: stack, quién usa el sistema, alcance del MVP, datos y acceso (p. ej. login o link por correo), dónde se despliega.
+5. Termina el turno esperando respuesta. Hasta entonces no creas archivos, ni `git init`, ni carpetas.
 
-- **Problema:** ¿qué duele hoy y a quién?
-- **Usuarios:** ¿quién lo usa y con qué frecuencia?
-- **«Funcionando»:** ¿qué se debería poder hacer, de forma observable, para decir que sirve?
-- **Restricciones:** tiempo, costo, tecnologías que Franco ya domina, dónde se despliega.
-- **Lo que ya existe:** sistemas, datos o APIs con los que debe convivir.
+## Segundo tiempo: escribir (con las respuestas)
 
-Si una respuesta abre otra duda, no preguntes de nuevo: déjala en «Decisiones para Franco».
+Escribe solo esto, en la raíz:
 
-### 2. Proposal
+- **`AGENTS.md`**: formato y límite (unas 40 líneas) de `preparar-proyecto`, sección 1. El comando `./verify` aparece marcado como pendiente: «(pendiente: lo crea el plan del esqueleto)». Las skills del kit se nombran en una sola línea, sin describirlas.
+- **`docs/proyecto.md`**: una página con estas secciones: Qué es, Para quién, MVP, Fuera de alcance, Decisiones (cada una con su porqué). En un workspace, añade «Repos» (carpeta y rol). Añade también «Despliegue» con sus cinco líneas (ver `preparar-proyecto`, sección 5); lo que no se sabe va como «pendiente», sin inventar valores.
+- **`cambios/`**: carpeta con un `.gitkeep`.
 
-Presenta dos o tres enfoques. Para cada uno: en qué consiste, ventajas, costos o riesgos, y en qué situación sería la mejor opción. Luego recomienda uno y explica por qué. **Espera la elección de Franco** antes de escribir el documento.
+No creas carpetas de repos hijos ni código: eso es el plan del esqueleto.
 
-### 3. Escribir `definitions/PROJECT.md`
+**Si es un repo:** los planes llevarán `repos: [.]`.
 
-Con las secciones de abajo, en este orden. Estado: borrador.
+**Si es un workspace** (raíz sin `.git` y hijos con `.git`; compruébalo con `find . -maxdepth 2 -name .git -not -path './.git'`): pregunta «¿Hacemos la raíz repo propio?» (la recomendada es «Sí»). Sin respuesta no hay `git init`; lo dices como pendiente. Con «Sí»: `git init` en la raíz y un `.gitignore` con `/<carpeta>/` por cada hijo con `.git`, más `.claude/settings.local.json`. Nunca haces commit.
 
-**Una sola pasada:** devuelves el documento y nada más. Tope de tamaño: 12288 bytes por pasada en definitions/. Lo que quede abierto va en una sección «Decisiones para Franco» con opciones cerradas y una recomendada.
+## Cierre
 
-## Formato de `PROJECT.md`
+Responde con:
 
-- **Problema**
-- **Para quién**
-- **Qué significa «funcionando»**: criterios observables, no deseos.
-- **Alcance**: *Dentro* y *Fuera*. La lista «Fuera» no puede quedar vacía: obliga a decidir qué no se hace.
-- **Restricciones**
-- **Decisiones**: tabla con las columnas *Decisión*, *Por qué*, *Descartado y por qué*, *Qué la cambiaría*.
-- **Preguntas abiertas**: lo que no se pudo responder, sin esconderlo como supuesto.
-- **Estado**: borrador.
+1. La lista de archivos escritos, con ruta exacta.
+2. «Espero tu aprobación».
+3. El siguiente paso: el plan del esqueleto (`./verify` con `preparar-proyecto`, con `repos:`). No lo escribes antes de la aprobación.
+
+Luego te detienes.

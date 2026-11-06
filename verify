@@ -1,0 +1,523 @@
+#!/usr/bin/env bash
+# verify: comprueba que la v2 del kit está coherente. Sin Docker, sin escribir fuera del repo.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+fallo() { echo "FALLO: $*" >&2; exit 1; }
+paso() { echo "== $1. $2 =="; }
+
+command -v node >/dev/null 2>&1 || fallo "falta node en el PATH"
+
+# Instantánea de lo que instalar.sh escribe: cada ruta vigilada (sin seguir enlaces),
+# el destino de cada enlace simbólico y el hash de cada archivo (siguiendo enlaces).
+# Las rutas salen de $HOME y PI_CODING_AGENT_DIR al llamarla. Las que no existen cuentan como vacías.
+instantanea() {
+  local base="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}" r lista=""
+  for r in "$HOME/.claude/agents" "$HOME/.claude/skills" "$base/agents" "$base/skills" "$HOME"/.local/bin/pi-*; do
+    if [ -e "$r" ] || [ -L "$r" ]; then lista="$lista$r"$'\n'; fi
+  done
+  {
+    printf '%s' "$lista" | while IFS= read -r r; do find "$r" -print; done | sed 's/^/ruta /'
+    printf '%s' "$lista" | while IFS= read -r r; do
+      find "$r" -type l -print0 | while IFS= read -r -d '' l; do echo "enlace $l -> $(readlink "$l")"; done
+    done
+    printf '%s' "$lista" | while IFS= read -r r; do find -L "$r" -type f -exec shasum {} +; done | sed 's/^/hash /'
+  } | sort
+}
+
+# 5a. autoprueba de la instantánea en un HOME temporal (siempre corre). Subshell: el temporal se borra al salir.
+autoprueba_5a() (
+  tmp=$(mktemp -d) || { echo "FALLO: no pude crear el temporal" >&2; exit 1; }
+  trap '[ -n "${tmp:-}" ] && rm -rf "$tmp"' EXIT
+  unset PI_CODING_AGENT_DIR
+  export HOME="$tmp"
+  mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.pi/agent/agents" "$HOME/.pi/agent/skills" "$HOME/.local/bin"
+
+  # (i) añadir un archivo en cada ruta vigilada, de a uno: la instantánea debe cambiar
+  previa=$(instantanea) || exit 1
+  for destino in .claude/agents .claude/skills .pi/agent/agents .pi/agent/skills .local/bin; do
+    f=prueba.md
+    if [ "$destino" = .local/bin ]; then f=pi-prueba; fi
+    echo a > "$HOME/$destino/$f"
+    nueva=$(instantanea) || exit 1
+    [ "$nueva" != "$previa" ] || { echo "FALLO: autoprueba: añadir $destino/$f no cambió la instantánea" >&2; exit 1; }
+    previa=$nueva
+  done
+
+  # (ii) cambiar el contenido de un archivo existente: la instantánea debe cambiar
+  echo b > "$HOME/.claude/agents/prueba.md"
+  nueva=$(instantanea) || exit 1
+  [ "$nueva" != "$previa" ] || { echo "FALLO: autoprueba: cambiar .claude/agents/prueba.md no cambió la instantánea" >&2; exit 1; }
+  previa=$nueva
+
+  # (iii) transcripts nuevos y history.jsonl modificado: la instantánea NO debe cambiar
+  echo '{}' > "$HOME/.claude/history.jsonl"
+  previa=$(instantanea) || exit 1
+  mkdir -p "$HOME/.claude/projects/x"
+  echo '{}' > "$HOME/.claude/projects/x/transcript.jsonl"
+  echo '{"n":2}' >> "$HOME/.claude/history.jsonl"
+  nueva=$(instantanea) || exit 1
+  [ "$nueva" = "$previa" ] || { echo "FALLO: autoprueba: transcripts o history.jsonl alteraron la instantánea" >&2; exit 1; }
+
+  echo "ok autoprueba: reacciona a añadir y cambiar; ignora transcripts e history"
+)
+
+# 1. modelos.json <-> agentes/*.md
+paso 1 "modelos.json parsea y agentes coinciden"
+node -e '
+const fs = require("fs");
+let m;
+try { m = JSON.parse(fs.readFileSync("modelos.json", "utf8")); }
+catch (e) { console.error("FALLO: modelos.json no es JSON válido: " + e.message); process.exit(1); }
+const claves = Object.keys(m.agentes || {}).sort();
+const archivos = fs.readdirSync("agentes").filter(f => f.endsWith(".md")).map(f => f.slice(0, -3)).sort();
+const sobran = claves.filter(c => !archivos.includes(c));
+const faltan = archivos.filter(a => !claves.includes(a));
+if (sobran.length || faltan.length) {
+  console.error("FALLO: agentes sin correspondencia. En modelos.json sin archivo: " + (sobran.join(", ") || "-") + "; archivo sin entrada en modelos.json: " + (faltan.join(", ") || "-"));
+  process.exit(1);
+}
+console.log("agentes: " + archivos.join(", "));
+'
+
+# 2. sintaxis de los instaladores
+paso 2 "sintaxis de instalar.sh y desinstalar.sh"
+for f in instalar.sh desinstalar.sh; do
+  bash -n "$f" || fallo "error de sintaxis en $f"
+  echo "ok $f"
+done
+
+# 3. resolver para cada agente y cada herramienta
+paso 3 "resolver Claude Code y Pi por agente"
+# tiene_skills: la salida generada debe traer la línea exacta 'skills: ejecutar-plan'
+tiene_skills() { grep -qxF "skills: ejecutar-plan" <<<"$1"; }
+
+chequear() {
+  local nombre="$1" ruta="$2" herr="$3" cmd="$4" etiqueta="$5" modelo salida
+  modelo=$(node scripts/resolver.mjs modelo "$nombre" "$herr") || fallo "resolver modelo $nombre $herr falló"
+  salida=$(node scripts/resolver.mjs "$cmd" "$ruta") || fallo "resolver $cmd $ruta falló"
+  grep -qxF "model: $modelo" <<<"$salida" || fallo "$ruta ($etiqueta): falta la línea 'model: $modelo'"
+  grep -qxF "Herramienta: $etiqueta | Modelo: $modelo | Agente: $nombre" <<<"$salida" \
+    || fallo "$ruta ($etiqueta): falta la línea de identidad 'Herramienta: $etiqueta | Modelo: $modelo | Agente: $nombre'"
+  echo "ok $nombre $etiqueta $modelo"
+  if [ "$nombre" = constructor ]; then
+    tiene_skills "$salida" || fallo "$ruta ($etiqueta, agente $nombre): falta la línea 'skills: ejecutar-plan' en la salida generada"
+    echo "ok skills constructor $etiqueta"
+  fi
+}
+for ruta in agentes/*.md; do
+  nombre=$(basename "$ruta" .md)
+  chequear "$nombre" "$ruta" claude-code agente-claude "Claude Code"
+  chequear "$nombre" "$ruta" pi agente-pi "Pi"
+done
+
+# 3c. prueba negativa: un constructor sin la línea skills debe ser rechazado (temporal que se borra al salir)
+prueba_negativa_skills() (
+  tmp=$(mktemp -d) || { echo "FALLO: no pude crear el temporal" >&2; exit 1; }
+  trap '[ -n "${tmp:-}" ] && rm -rf "$tmp"' EXIT
+  grep -v '^skills:' agentes/constructor.md > "$tmp/constructor.md"
+  for cmd in agente-claude agente-pi; do
+    salida=$(node scripts/resolver.mjs "$cmd" "$tmp/constructor.md") || { echo "FALLO: resolver $cmd sobre el temporal falló" >&2; exit 1; }
+    if tiene_skills "$salida"; then echo "FALLO: prueba negativa: el chequeo aceptó un constructor sin skills ($cmd)" >&2; exit 1; fi
+  done
+  echo "ok prueba negativa: sin skills, el chequeo rechaza (Claude Code y Pi)"
+)
+echo "-- 3c. prueba negativa de skills"
+prueba_negativa_skills || exit 1
+
+# 4. skills: SKILL.md con name (= carpeta) y description
+paso 4 "skills con SKILL.md, name y description"
+for dir in skills/*/; do
+  dir=${dir%/}
+  nombre=$(basename "$dir")
+  arch="$dir/SKILL.md"
+  [ -f "$arch" ] || fallo "$dir no tiene SKILL.md"
+  node -e '
+const fs = require("fs");
+const [arch, carpeta] = process.argv.slice(1);
+const t = fs.readFileSync(arch, "utf8");
+const m = t.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+const fail = c => { console.error("FALLO: " + arch + ": " + c); process.exit(1); };
+if (!m) fail("sin frontmatter");
+const campo = k => {
+  const r = m[1].match(new RegExp("^" + k + ":[ \\t]*(.*)$", "m"));
+  return r ? r[1].trim().replace(/^(["\x27])(.*)\1$/, "$2").trim() : null;
+};
+const name = campo("name"), desc = campo("description");
+if (!name) fail("falta name");
+if (name !== carpeta) fail("name \"" + name + "\" distinto de la carpeta \"" + carpeta + "\"");
+if (!desc) fail("falta description o está vacía");
+console.log("ok " + carpeta);
+' "$arch" "$nombre"
+done
+
+# 5. instalar.sh --simular no escribe lo que instala
+paso 5 "instalar.sh --simular no escribe lo que instala"
+autoprueba_5a || exit 1
+echo "-- 5b. instalar.sh --simular sobre el home real"
+antes=$(instantanea) || fallo "no pude tomar la instantánea previa"
+bash instalar.sh --simular >/dev/null || fallo "instalar.sh --simular salió con error"
+despues=$(instantanea) || fallo "no pude tomar la instantánea posterior"
+if [ "$antes" != "$despues" ]; then
+  diff <(printf '%s\n' "$antes") <(printf '%s\n' "$despues") >&2 || true
+  fallo "instalar.sh --simular cambió lo que instala (ver diff arriba)"
+fi
+echo "ok instantánea sin cambios ($(printf '%s\n' "$despues" | grep -c .) líneas)"
+
+# 6. reglas deny del proyecto: instalar.sh y desinstalar.sh reales, con un HOME temporal por escenario
+paso 6 "reglas deny del proyecto (instalar, reinstalar, desinstalar, JSON roto)"
+T6=$(mktemp -d) || fallo "no pude crear el temporal"
+trap '[ -n "${T6:-}" ] && rm -rf "$T6"' EXIT
+REGLAS_DENY=("Read(./.env)" "Read(./.env.*)" "Bash(git commit *)" "Bash(git push *)" "Bash(git merge *)" "Bash(gh pr create *)" "Bash(gh pr merge *)" "Bash(git * commit *)" "Bash(git * push *)" "Bash(bash -c *)" "Bash(sh -c *)" "Bash(zsh -c *)")
+REGLAS_DENY_NUEVAS=("Bash(git * commit *)" "Bash(git * push *)" "Bash(bash -c *)" "Bash(sh -c *)" "Bash(zsh -c *)")
+
+# Cada escenario: $T6/<nombre>/home (con .claude, para que Claude Code se detecte) y $T6/<nombre>/proj
+nuevo_escenario() { mkdir -p "$T6/$1/home/.claude" "$T6/$1/proj/.claude"; }
+k6_instalar() { # carpeta del escenario
+  ( unset PI_CODING_AGENT_DIR; export HOME="$1/home"; bash instalar.sh --solo claude --proyecto "$1/proj" ) >"$1/log" 2>&1 \
+    || { cat "$1/log" >&2; fallo "instalar.sh falló en $1"; }
+}
+k6_desinstalar() { # carpeta del escenario
+  ( unset PI_CODING_AGENT_DIR; export HOME="$1/home"; bash desinstalar.sh --proyecto "$1/proj" ) >"$1/log" 2>&1 \
+    || { cat "$1/log" >&2; fallo "desinstalar.sh falló en $1"; }
+}
+k6_deny_lineas() { grep "^deny"$'\t' "$1/home/.flucastr-ai/manifiesto.txt" 2>/dev/null || true; }
+
+# escenario 1: el proyecto no tiene settings.json
+e="$T6/s1"; nuevo_escenario s1
+k6_instalar "$e"
+node -e 'const fs = require("fs"); const d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).permissions.deny; process.exit(JSON.stringify(d) === JSON.stringify(process.argv.slice(2)) ? 0 : 1)' "$e/proj/.claude/settings.json" "${REGLAS_DENY[@]}" \
+  || fallo "escenario 1: las reglas deny no son exactamente las 12 del kit"
+[ "$(k6_deny_lineas "$e" | grep -c .)" = 12 ] || fallo "escenario 1: el manifiesto no tiene 12 líneas deny"
+echo "ok escenario 1: sin archivo -> 12 reglas y 12 líneas deny"
+
+# escenario 2: el proyecto ya tiene allow, otra clave y deny propios (incluida Bash(git push *))
+e="$T6/s2"; nuevo_escenario s2
+cat > "$e/proj/.claude/settings.json" <<'EOF'
+{
+  "permissions": {
+    "allow": ["Bash(ls)"],
+    "deny": ["Bash(git push *)", "Bash(rm -rf *)"]
+  },
+  "otra": true
+}
+EOF
+cp "$e/proj/.claude/settings.json" "$e/original.json"
+k6_instalar "$e"
+node -e 'const fs = require("fs"); const j = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); const d = j.permissions.deny; const reglas = process.argv.slice(2); const ok = reglas.every((r) => d.includes(r)) && d.includes("Bash(rm -rf *)") && JSON.stringify(j.permissions.allow) === "[\"Bash(ls)\"]" && j.otra === true && d.length === reglas.length + 1; process.exit(ok ? 0 : 1)' "$e/proj/.claude/settings.json" "${REGLAS_DENY[@]}" \
+  || fallo "escenario 2: no se conservó lo del usuario o no se agregaron las reglas que faltaban"
+[ "$(k6_deny_lineas "$e" | grep -c .)" = 11 ] || fallo "escenario 2: el manifiesto debe tener 11 líneas deny (Bash(git push *) era del usuario)"
+grep -qF $'\tBash(git push *)' "$e/home/.flucastr-ai/manifiesto.txt" && fallo "escenario 2: el manifiesto registró una regla que ya tenía el usuario"
+echo "ok escenario 2: se conservan allow, otra clave y deny propios; solo se registran las agregadas"
+
+# escenario 3: instalar dos veces no cambia el archivo ni las líneas deny del manifiesto
+e="$T6/s3"; nuevo_escenario s3
+k6_instalar "$e"
+cp "$e/proj/.claude/settings.json" "$e/primera.json"
+k6_deny_lineas "$e" > "$e/deny1.txt"
+k6_instalar "$e"
+cmp -s "$e/primera.json" "$e/proj/.claude/settings.json" || fallo "escenario 3: el archivo cambió al reinstalar"
+k6_deny_lineas "$e" > "$e/deny2.txt"
+cmp -s "$e/deny1.txt" "$e/deny2.txt" || fallo "escenario 3: las líneas deny del manifiesto cambiaron al reinstalar"
+echo "ok escenario 3: reinstalar deja el archivo y las líneas deny iguales"
+
+# escenario 4: desinstalar deja el archivo original del usuario, o no deja archivo si no existía
+k6_desinstalar "$T6/s2"
+node -e 'const fs = require("fs"); const r = (f) => JSON.stringify(JSON.parse(fs.readFileSync(f, "utf8"))); process.exit(r(process.argv[1]) === r(process.argv[2]) ? 0 : 1)' "$T6/s2/proj/.claude/settings.json" "$T6/s2/original.json" \
+  || fallo "escenario 4: al desinstalar no quedó el archivo original del usuario"
+k6_desinstalar "$T6/s1"
+[ ! -e "$T6/s1/proj/.claude/settings.json" ] || fallo "escenario 4: quedó un settings.json que no existía antes"
+echo "ok escenario 4: desinstalar devuelve el archivo original (con su Bash(git push *)) o no deja archivo"
+
+# escenario 5: JSON del proyecto inválido: no se toca, se avisa y la instalación no aborta
+e="$T6/s5"; nuevo_escenario s5
+printf '{"permissions":' > "$e/proj/.claude/settings.json"
+cp "$e/proj/.claude/settings.json" "$e/original.json"
+k6_instalar "$e"
+grep -q "AVISO: no se tocó" "$e/log" || fallo "escenario 5: no se avisó del JSON inválido"
+cmp -s "$e/original.json" "$e/proj/.claude/settings.json" || fallo "escenario 5: se tocó un settings.json inválido"
+[ "$(k6_deny_lineas "$e" | grep -c .)" = 0 ] || fallo "escenario 5: el manifiesto tiene líneas deny sin haber agregado nada"
+k6_desinstalar "$e"
+cmp -s "$e/original.json" "$e/proj/.claude/settings.json" || fallo "escenario 5: desinstalar tocó un settings.json inválido"
+echo "ok escenario 5: JSON inválido -> no se toca, se avisa, no aborta"
+
+# escenario 6: actualización: un proyecto instalado con las 7 del kit anterior recibe solo las 5 nuevas
+e="$T6/s6"; nuevo_escenario s6
+k6_instalar "$e"
+# estado viejo: quitar del settings.json las 5 nuevas y sus líneas del manifiesto
+node -e 'const fs = require("fs"); const f = process.argv[1]; const quitar = process.argv.slice(2); const j = JSON.parse(fs.readFileSync(f, "utf8")); j.permissions.deny = j.permissions.deny.filter((r) => !quitar.includes(r)); fs.writeFileSync(f, JSON.stringify(j, null, 2) + "\n")' "$e/proj/.claude/settings.json" "${REGLAS_DENY_NUEVAS[@]}"
+M="$e/home/.flucastr-ai/manifiesto.txt"
+for r in "${REGLAS_DENY_NUEVAS[@]}"; do grep -vF $'\t'"$r" "$M" > "$e/manifiesto.tmp" || true; mv "$e/manifiesto.tmp" "$M"; done
+[ "$(k6_deny_lineas "$e" | grep -c .)" = 7 ] || fallo "escenario 6: el estado viejo no quedó con 7 líneas deny"
+k6_instalar "$e"
+node -e 'const fs = require("fs"); const d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).permissions.deny; process.exit(JSON.stringify(d) === JSON.stringify(process.argv.slice(2)) ? 0 : 1)' "$e/proj/.claude/settings.json" "${REGLAS_DENY[@]}" \
+  || fallo "escenario 6: tras reinstalar, las reglas deny no son exactamente las 12 del kit"
+[ "$(k6_deny_lineas "$e" | grep -c .)" = 12 ] || fallo "escenario 6: el manifiesto no tiene 12 líneas deny tras reinstalar"
+for r in "${REGLAS_DENY_NUEVAS[@]}"; do grep -qF $'\t'"$r" "$M" || fallo "escenario 6: falta en el manifiesto la regla nueva $r"; done
+echo "ok escenario 6: actualización de 7 a 12 reglas; se agregan y registran solo las 5 nuevas"
+
+# escenario 7: las 7 reglas eran del usuario (sin manifiesto): se agregan solo 5 y desinstalar deja las 7
+e="$T6/s7"; nuevo_escenario s7
+cat > "$e/proj/.claude/settings.json" <<'EOF'
+{
+  "permissions": {
+    "deny": ["Read(./.env)", "Read(./.env.*)", "Bash(git commit *)", "Bash(git push *)", "Bash(git merge *)", "Bash(gh pr create *)", "Bash(gh pr merge *)"]
+  }
+}
+EOF
+cp "$e/proj/.claude/settings.json" "$e/original.json"
+k6_instalar "$e"
+node -e 'const fs = require("fs"); const d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).permissions.deny; process.exit(JSON.stringify(d) === JSON.stringify(process.argv.slice(2)) ? 0 : 1)' "$e/proj/.claude/settings.json" "${REGLAS_DENY[@]}" \
+  || fallo "escenario 7: tras instalar, las reglas deny no son exactamente las 12 del kit"
+[ "$(k6_deny_lineas "$e" | grep -c .)" = 5 ] || fallo "escenario 7: el manifiesto debe tener solo 5 líneas deny"
+for r in "${REGLAS_DENY_NUEVAS[@]}"; do grep -qF $'\t'"$r" "$e/home/.flucastr-ai/manifiesto.txt" || fallo "escenario 7: falta en el manifiesto la regla nueva $r"; done
+k6_desinstalar "$e"
+node -e 'const fs = require("fs"); const r = (f) => JSON.stringify(JSON.parse(fs.readFileSync(f, "utf8"))); process.exit(r(process.argv[1]) === r(process.argv[2]) ? 0 : 1)' "$e/proj/.claude/settings.json" "$e/original.json" \
+  || fallo "escenario 7: desinstalar no dejó las 7 reglas del usuario"
+echo "ok escenario 7: las 7 del usuario sin manifiesto -> se agregan 5; desinstalar deja las 7"
+
+# 7. migración a v2: instalar.sh --migrar sobre proyectos v1 sintéticos, con HOME temporal por escenario
+paso 7 "migración a v2 (--migrar, --simular, repetición, sin v1)"
+T7=$(mktemp -d) || fallo "no pude crear el temporal"
+trap '[ -n "${T6:-}" ] && rm -rf "$T6"; [ -n "${T7:-}" ] && rm -rf "$T7"' EXIT
+
+# Proyecto v1 sintético en $1: las tres carpetas, hook de v1, agente distinto, src/x.txt y todo en el índice de git.
+crear_v1() {
+  local p="$1"
+  mkdir -p "$p/definitions" "$p/features/F01-demo" "$p/registro" "$p/src" "$p/.claude"
+  echo "# proyecto" > "$p/definitions/PROJECT.md"
+  printf '%s\n' '| ID | Feature | Tipo | Valor | Esfuerzo | Por qué | Estado | Siguiente |' '|---|---|---|---|---|---|---|---|' '| F01 | Base | habilitante | alto | bajo | x | hecha | |' '| F02 | Abierta de prueba | producto | alto | medio | x | en curso | |' > "$p/definitions/BACKLOG.md"
+  printf '# Tarea A\nrepo: app depende_de: - estado: aprobada\n' > "$p/features/F01-demo/task-01.md"
+  printf '# Tarea B\nrepo: app depende_de: - estado: hecha\n' > "$p/features/F01-demo/task-02.md"
+  echo '{}' > "$p/registro/eventos.jsonl"
+  echo contenido > "$p/src/x.txt"
+  cat > "$p/.claude/settings.local.json" <<'EOF'
+{"agent":"otro","hooks":{"PostToolUse":[{"matcher":"Write|Edit|MultiEdit","hooks":[{"type":"command","command":"node ~/.flucastr-ai/validar-tarea.mjs --hook"}]}]}}
+EOF
+  git -C "$p" init -q && git -C "$p" add -A
+}
+
+# Huella de un árbol: nombres y contenido de cada archivo.
+huella() { { find "$1" -print | sort; find "$1" -type f -exec shasum {} + | sort; }; }
+
+# instalar.sh --migrar: $1 carpeta del escenario (HOME = $1/home), $2 proyecto, resto (p. ej. --simular) tal cual. Salida en $1/log.
+k7() {
+  local esc="$1" proy="$2"
+  shift 2
+  ( unset PI_CODING_AGENT_DIR; export HOME="$esc/home"; bash instalar.sh --migrar "$proy" "$@" ) > "$esc/log" 2>&1
+}
+
+# escenario 1: proyecto con definitions/, features/, registro/, hook de v1 y agente distinto
+e="$T7/s1"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 1: --migrar salió con error"; }
+p="$e/proj"
+for d in definitions features registro; do
+  [ -d "$p/old/v1/$d" ] || fallo "escenario 1: falta old/v1/$d"
+  [ ! -e "$p/$d" ] || fallo "escenario 1: $d sigue en la raíz"
+done
+[ "$(cat "$p/src/x.txt")" = contenido ] || fallo "escenario 1: cambió src/x.txt"
+node -e 'const fs = require("fs"); const t = fs.readFileSync(process.argv[1], "utf8"); const a = JSON.parse(t); process.exit(a.agent === "principal" && !t.includes("validar-tarea") ? 0 : 1)' "$p/.claude/settings.local.json" \
+  || fallo "escenario 1: el agente no quedó en principal o queda el hook de v1"
+node -e 'const fs = require("fs"); const d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).permissions.deny; process.exit(JSON.stringify(d) === JSON.stringify(process.argv.slice(2)) ? 0 : 1)' "$p/.claude/settings.json" "${REGLAS_DENY[@]}" \
+  || fallo "escenario 1: las reglas deny no son exactamente las 12 del kit"
+[ -d "$p/cambios" ] || fallo "escenario 1: falta cambios/"
+grep -qF "tarea aprobada: old/v1/features/F01-demo/task-01.md" "$e/log" || fallo "escenario 1: la lista no trae la tarea aprobada"
+grep -q "task-02.md" "$e/log" && fallo "escenario 1: la lista trae una tarea hecha"
+grep -qF "feature abierta: F02" "$e/log" || fallo "escenario 1: la lista no trae la feature abierta de BACKLOG"
+grep -q "F01 Base" "$e/log" && fallo "escenario 1: la lista trae una feature hecha"
+git -C "$p" ls-files | grep -q '^old/v1/features/' || fallo "escenario 1: en un proyecto git el movimiento no quedó como git mv"
+echo "ok escenario 1: old/v1 con las tres carpetas, agente principal, sin hook, 12 deny, cambios/, lista de trabajo a medias"
+
+# escenario 2: segunda corrida: «old/v1 ya existe» y nada cambia (proyecto y HOME)
+antes_p=$(huella "$p"); antes_h=$(huella "$e/home")
+k7 "$e" "$p" || { cat "$e/log" >&2; fallo "escenario 2: la segunda corrida salió con error"; }
+grep -q "old/v1 ya existe" "$e/log" || fallo "escenario 2: no dijo que old/v1 ya existe"
+[ "$(huella "$p")" = "$antes_p" ] || fallo "escenario 2: la segunda corrida cambió el proyecto"
+[ "$(huella "$e/home")" = "$antes_h" ] || fallo "escenario 2: la segunda corrida cambió el HOME"
+echo "ok escenario 2: repetir dice «old/v1 ya existe» y no cambia el árbol"
+
+# escenario 3: solo definitions/ se mueve y no hay error
+e="$T7/s3"; mkdir -p "$e/home" "$e/proj/definitions"; echo "# p" > "$e/proj/definitions/PROJECT.md"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 3: --migrar salió con error"; }
+[ -f "$e/proj/old/v1/definitions/PROJECT.md" ] || fallo "escenario 3: no se movió definitions/"
+[ ! -e "$e/proj/definitions" ] || fallo "escenario 3: definitions/ sigue en la raíz"
+[ ! -e "$e/proj/old/v1/features" ] || fallo "escenario 3: apareció features/ sin existir"
+echo "ok escenario 3: solo definitions/ -> se mueve y no hay error"
+
+# escenario 4: sin v1 no pasa nada (sin cambios/, .claude ni manifiesto)
+e="$T7/s4"; mkdir -p "$e/home" "$e/proj/src"; echo x > "$e/proj/src/x.txt"
+antes_p=$(huella "$e/proj"); antes_h=$(huella "$e/home")
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 4: --migrar salió con error"; }
+grep -q "nada que migrar" "$e/log" || fallo "escenario 4: no dijo «nada que migrar»"
+[ "$(huella "$e/proj")" = "$antes_p" ] || fallo "escenario 4: cambió el proyecto sin v1"
+[ "$(huella "$e/home")" = "$antes_h" ] || fallo "escenario 4: cambió el HOME sin v1"
+echo "ok escenario 4: sin v1 -> «nada que migrar», sin cambios"
+
+# escenario 5: --simular imprime lo que haría y deja el proyecto y el HOME idénticos
+e="$T7/s5"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+antes_p=$(huella "$e/proj"); antes_h=$(huella "$e/home")
+k7 "$e" "$e/proj" --simular || { cat "$e/log" >&2; fallo "escenario 5: --migrar --simular salió con error"; }
+[ "$(huella "$e/proj")" = "$antes_p" ] || fallo "escenario 5: --simular cambió el proyecto"
+[ "$(huella "$e/home")" = "$antes_h" ] || fallo "escenario 5: --simular cambió el HOME"
+grep -q "movería: features -> old/v1/features" "$e/log" || fallo "escenario 5: no imprimió el movimiento"
+grep -q "(simulación) agente predeterminado" "$e/log" || fallo "escenario 5: no imprimió el cambio de agente"
+grep -qF "tarea aprobada: features/F01-demo/task-01.md" "$e/log" || fallo "escenario 5: la lista de --simular no trae la tarea aprobada"
+echo "ok escenario 5: --simular imprime el plan y no cambia el árbol"
+
+# escenario 6: combinaciones no válidas salen con error sin tocar nada
+e="$T7/s6"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+antes_p=$(huella "$e/proj")
+if ( unset PI_CODING_AGENT_DIR; export HOME="$e/home"; bash instalar.sh --migrar "$e/proj" --proyecto "$e/proj" ) >/dev/null 2>&1; then
+  fallo "escenario 6: --migrar con --proyecto no dio error"
+fi
+[ "$(huella "$e/proj")" = "$antes_p" ] || fallo "escenario 6: la combinación no válida cambió el proyecto"
+echo "ok escenario 6: --migrar con --proyecto da error y no cambia nada"
+
+# Workspace sintético en $1: raíz sin .git; api y web con .git; definitions/ en la raíz y una propia en api.
+crear_ws_v1() {
+  local p="$1"
+  mkdir -p "$p/definitions" "$p/api/definitions" "$p/web"
+  echo "# proyecto" > "$p/definitions/PROJECT.md"
+  echo "# repos" > "$p/definitions/REPOS.md"
+  echo "# api" > "$p/api/definitions/PROJECT.md"
+  git -C "$p/api" init -q && git -C "$p/web" init -q
+}
+
+# escenario 7: workspace -> old/v1 de la raíz, los hijos intactos, el log lista los hijos y dice que la raíz no es repo
+e="$T7/s7"; mkdir -p "$e/home" "$e/proj"; crear_ws_v1 "$e/proj"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 7: --migrar salió con error"; }
+p="$e/proj"
+[ -f "$p/old/v1/definitions/REPOS.md" ] || fallo "escenario 7: la definitions/ de la raíz no quedó en old/v1"
+[ ! -e "$p/definitions" ] || fallo "escenario 7: definitions/ de la raíz sigue en la raíz"
+[ -f "$p/api/definitions/PROJECT.md" ] || fallo "escenario 7: se movió la definitions/ del hijo api"
+[ ! -e "$p/.git" ] || fallo "escenario 7: la raíz quedó con .git"
+grep -qF "Workspace: repos hijos: api, web" "$e/log" || fallo "escenario 7: el log no lista los dos hijos"
+grep -q "La raíz no es repo" "$e/log" || fallo "escenario 7: el log no dice que la raíz no es repo"
+echo "ok escenario 7: workspace -> old/v1 de la raíz, hijos intactos, log con hijos y raíz sin repo"
+
+# escenario 7b: --simular en workspace con AGENTS.md de v1: el árbol (incluido .gitignore) queda igual y sale el aviso
+e="$T7/s7b"; mkdir -p "$e/home" "$e/proj"; crear_ws_v1 "$e/proj"
+echo "Lee definitions/PROJECT.md antes de empezar." > "$e/proj/AGENTS.md"
+antes_p=$(huella "$e/proj"); antes_h=$(huella "$e/home")
+k7 "$e" "$e/proj" --simular || { cat "$e/log" >&2; fallo "escenario 7b: --migrar --simular salió con error"; }
+[ "$(huella "$e/proj")" = "$antes_p" ] || fallo "escenario 7b: --simular cambió el workspace (incluido .gitignore)"
+[ "$(huella "$e/home")" = "$antes_h" ] || fallo "escenario 7b: --simular cambió el HOME"
+grep -qF "AVISO: AGENTS.md sigue siendo de v1 y apunta a rutas movidas: ejecuta la skill migrar-proyecto" "$e/log" || fallo "escenario 7b: falta el aviso de AGENTS.md en --simular"
+grep -qF "(simulación) agregaría .claude/settings.local.json" "$e/log" || fallo "escenario 7b: --simular no imprimió la línea de .gitignore"
+echo "ok escenario 7b: --simular en workspace no cambia el árbol y sale el aviso de AGENTS.md"
+
+# escenario 8: .gitignore con otras líneas: la de settings.local.json queda una sola vez, no aparece settings.json y no se pierde nada
+e="$T7/s8"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+printf 'node_modules\n.claude/settings.local.json\n' > "$e/proj/.gitignore"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 8: --migrar salió con error"; }
+[ "$(grep -cxF '.claude/settings.local.json' "$e/proj/.gitignore")" = 1 ] || fallo "escenario 8: la línea de settings.local.json no quedó una sola vez"
+grep -qxF 'node_modules' "$e/proj/.gitignore" || fallo "escenario 8: se perdió node_modules del .gitignore"
+grep -qxF '.claude/settings.json' "$e/proj/.gitignore" && fallo "escenario 8: .gitignore ignora .claude/settings.json (es compartido)"
+echo "ok escenario 8: .gitignore con línea repetida no duplica y conserva las demás"
+
+# escenario 8b: .gitignore sin salto final, y proyecto sin .gitignore: en ambos queda la línea una vez
+e="$T7/s8b"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+printf 'node_modules' > "$e/proj/.gitignore"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 8b: --migrar salió con error"; }
+grep -qxF 'node_modules' "$e/proj/.gitignore" || fallo "escenario 8b: se perdió node_modules al añadir la línea"
+[ "$(grep -cxF '.claude/settings.local.json' "$e/proj/.gitignore")" = 1 ] || fallo "escenario 8b: falta o se duplica la línea (.gitignore sin salto final)"
+e="$T7/s8c"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 8c: --migrar salió con error"; }
+[ "$(grep -cxF '.claude/settings.local.json' "$e/proj/.gitignore")" = 1 ] || fallo "escenario 8c: sin .gitignore no se creó con la línea"
+grep -q "AVISO: AGENTS.md" "$e/log" && fallo "escenario 8c: salió aviso de AGENTS.md sin AGENTS.md"
+echo "ok escenario 8b y 8c: .gitignore sin salto final y sin .gitignore quedan con la línea una vez; sin AGENTS.md no hay aviso"
+
+# escenario 9: copia de Cleaner (repo con AGENTS.md): sin texto de workspace, con aviso, git mv de definitions/ y features/, .gitignore en git status
+C=/Users/franco/Codes/flucastr/Flucastr.Cleaner
+if [ -d "$C" ]; then
+  e="$T7/s9"; mkdir -p "$e/home"
+  cp -R "$C" "$e/proj"
+  antes_c=$(git -C "$C" status --porcelain | shasum)
+  k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 9: --migrar sobre la copia de Cleaner salió con error"; }
+  grep -q "Workspace:" "$e/log" && fallo "escenario 9: la copia de Cleaner imprimió texto de workspace"
+  grep -qF "AVISO: AGENTS.md sigue siendo de v1" "$e/log" || fallo "escenario 9: falta el aviso de AGENTS.md"
+  git -C "$e/proj" ls-files | grep -q '^old/v1/definitions/' || fallo "escenario 9: git mv no movió definitions/"
+  git -C "$e/proj" ls-files | grep -q '^old/v1/features/' || fallo "escenario 9: git mv no movió features/"
+  git -C "$e/proj" status --short -- .gitignore | grep -q . || fallo "escenario 9: git status no muestra .gitignore"
+  [ "$(git -C "$C" status --porcelain | shasum)" = "$antes_c" ] || fallo "escenario 9: el original de Cleaner cambió"
+  echo "ok escenario 9: copia de Cleaner -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status"
+else
+  echo "omitido: escenario 9 (Cleaner no existe en este equipo)"
+fi
+
+# 8. workspaces: la detección de preparar-proyecto y los textos clave de los archivos del cambio
+paso 8 "workspaces (detección con find, textos clave de los archivos del cambio)"
+command -v git >/dev/null 2>&1 || fallo "falta git en el PATH"
+T8=$(mktemp -d) || fallo "no pude crear el temporal"
+trap '[ -n "${T6:-}" ] && rm -rf "$T6"; [ -n "${T7:-}" ] && rm -rf "$T7"; [ -n "${T8:-}" ] && rm -rf "$T8"' EXIT
+
+# 8a. workspace con dos hijos con .git y raíz sin .git: el find de preparar-proyecto devuelve exactamente 2
+w="$T8/ws"; mkdir -p "$w/api" "$w/web"
+git -C "$w/api" init -q && git -C "$w/web" init -q
+[ ! -e "$w/.git" ] || fallo "8a: la raíz del temporal tiene .git"
+n=$(cd "$w" && find . -maxdepth 2 -name .git -not -path './.git' | grep -c .) || true
+[ "$n" = 2 ] || fallo "8a: el find devolvió $n hijos con .git, se esperaban 2"
+echo "ok 8a: workspace con dos hijos con .git -> find devuelve 2"
+
+# 8b. los archivos del cambio contienen sus textos clave; una copia sin repos: debe fallar
+textos_clave() { # $1: raíz del kit
+  local r=$1
+  grep -q '^repos:' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -q 'repos:' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -q 'git -C <carpeta>' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -q -- '-maxdepth 2' "$r/skills/preparar-proyecto/SKILL.md" || return 1
+  grep -q 'git -C <carpeta' "$r/agentes/constructor.md" || return 1
+  grep -q 'Nunca decides tú' "$r/agentes/principal.md" || return 1
+  grep -q 'REPOS.md' "$r/skills/migrar-proyecto/SKILL.md" || return 1
+  grep -q 'Descartado' "$r/skills/migrar-proyecto/SKILL.md" || return 1
+  grep -q 'repos:' "$r/skills/migrar-proyecto/SKILL.md" || return 1
+  grep -q 'definir-proyecto' "$r/agentes/principal.md" || return 1
+  grep -q 'repo o un workspace' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -q 'docs/proyecto.md' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -q 'Fuera de alcance' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -q 'VERIFY_TARGET' "$r/skills/preparar-proyecto/referencia.md" || return 1
+  grep -q 'VERIFY_PERMITIR_ESCRITURA' "$r/skills/preparar-proyecto/referencia.md" || return 1
+  grep -q 'Despliegue' "$r/skills/preparar-proyecto/SKILL.md" || return 1
+  grep -q 'Despliegue' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -q 'prepárame el despliegue' "$r/agentes/principal.md" || return 1
+}
+textos_clave . || fallo "8b: falta algún texto clave en los archivos del cambio"
+neg="$T8/neg"
+mkdir -p "$neg/skills/planificar-cambio" "$neg/skills/ejecutar-plan" "$neg/skills/preparar-proyecto" "$neg/agentes"
+cp skills/ejecutar-plan/SKILL.md "$neg/skills/ejecutar-plan/"
+cp skills/preparar-proyecto/SKILL.md "$neg/skills/preparar-proyecto/"
+cp agentes/constructor.md agentes/principal.md "$neg/agentes/"
+sed '/^repos:/d' skills/planificar-cambio/SKILL.md > "$neg/skills/planificar-cambio/SKILL.md"
+if textos_clave "$neg"; then fallo "8b: una copia sin repos: pasó la comprobación de textos"; fi
+# copia de la skill de migración sin «Descartado» (el resto completo): también debe fallar
+neg2="$T8/neg2"
+mkdir -p "$neg2/skills/planificar-cambio" "$neg2/skills/ejecutar-plan" "$neg2/skills/preparar-proyecto" "$neg2/skills/migrar-proyecto" "$neg2/agentes"
+cp skills/planificar-cambio/SKILL.md "$neg2/skills/planificar-cambio/"
+cp skills/ejecutar-plan/SKILL.md "$neg2/skills/ejecutar-plan/"
+cp skills/preparar-proyecto/SKILL.md "$neg2/skills/preparar-proyecto/"
+cp agentes/constructor.md agentes/principal.md "$neg2/agentes/"
+sed '/Descartado/d' skills/migrar-proyecto/SKILL.md > "$neg2/skills/migrar-proyecto/SKILL.md"
+if textos_clave "$neg2"; then fallo "8b: una copia de migrar-proyecto sin «Descartado» pasó la comprobación de textos"; fi
+# copia completa pero sin la skill definir-proyecto: también debe fallar
+neg3="$T8/neg3"
+mkdir -p "$neg3/skills/planificar-cambio" "$neg3/skills/ejecutar-plan" "$neg3/skills/preparar-proyecto" "$neg3/skills/migrar-proyecto" "$neg3/agentes"
+cp skills/planificar-cambio/SKILL.md "$neg3/skills/planificar-cambio/"
+cp skills/ejecutar-plan/SKILL.md "$neg3/skills/ejecutar-plan/"
+cp skills/preparar-proyecto/SKILL.md "$neg3/skills/preparar-proyecto/"
+cp skills/migrar-proyecto/SKILL.md "$neg3/skills/migrar-proyecto/"
+cp agentes/constructor.md agentes/principal.md "$neg3/agentes/"
+if textos_clave "$neg3"; then fallo "8b: una copia sin la skill definir-proyecto pasó la comprobación de textos"; fi
+# copia completa pero sin VERIFY_TARGET en referencia.md (modo remoto): también debe fallar
+neg4="$T8/neg4"
+mkdir -p "$neg4/skills/planificar-cambio" "$neg4/skills/ejecutar-plan" "$neg4/skills/preparar-proyecto" "$neg4/skills/migrar-proyecto" "$neg4/skills/definir-proyecto" "$neg4/agentes"
+cp skills/planificar-cambio/SKILL.md "$neg4/skills/planificar-cambio/"
+cp skills/ejecutar-plan/SKILL.md "$neg4/skills/ejecutar-plan/"
+cp skills/preparar-proyecto/SKILL.md "$neg4/skills/preparar-proyecto/"
+cp skills/migrar-proyecto/SKILL.md "$neg4/skills/migrar-proyecto/"
+cp skills/definir-proyecto/SKILL.md "$neg4/skills/definir-proyecto/"
+cp agentes/constructor.md agentes/principal.md "$neg4/agentes/"
+sed '/VERIFY_TARGET/d' skills/preparar-proyecto/referencia.md > "$neg4/skills/preparar-proyecto/referencia.md"
+if textos_clave "$neg4"; then fallo "8b: una copia sin VERIFY_TARGET en referencia.md pasó la comprobación de textos"; fi
+echo "ok 8b: textos clave presentes (incluido el modo remoto y Despliegue); copias sin repos:, sin «Descartado», sin definir-proyecto o sin VERIFY_TARGET fallan la comprobación"
+
+echo "VERIFY OK"
