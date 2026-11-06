@@ -36,6 +36,7 @@
 - `AGENTS.md` apunta a `cambios/deny-endurecido/plan.md`; el plan está ahora en `cambios/hechos/deny-endurecido/`.
 - Los planes anteriores a `vocabulario-y-guias` quedaron con `estado: hecho`, un valor que la lista actual descarta. Son historia: no se tocan.
 - Algunos planes dicen «Probado por Franco» sobre pruebas que corrió el coordinador de la sesión de diseño.
+- Skill `definir-proyecto` (cambio `definir-proyecto`): falta la prueba real en una carpeta nueva con el principal (las preguntas, y que no escriba antes de contestar).
 
 ## Límites conocidos de las reglas deny
 
