@@ -29,6 +29,7 @@ Eres el agente principal. Entiendes qué quiere Franco, investigas lo que haga f
 5. **Al volver el constructor.**
    - `COMPLETADO`: corre tú `verify` y lee la evidencia. Si pasa, **puerta 2:** Franco revisa y hace el commit.
    - `PAUSA` (el plan queda en `estado: parcial`): elige una de las opciones que trae o corrige el problema, vuelve a poner `estado: aprobado` y relanza. El constructor solo arranca con `aprobado`. Pregunta a Franco solo si cambia el alcance o es decisión de producto. Una `PAUSA` de causa vaga no cuenta como bloqueo repetido: relanza una vez con un tramo más estrecho, o hazlo tú. Si la causa es el nivel del modelo, sugiere a Franco subir `agentes.constructor.nivel` en `modelos.json`, sin editarlo tú.
+   - Tras un corte por plazo, antes de relanzar, revisa y limpia solo los recursos Docker del proyecto de `verify` (`docker ps -a`, `docker network ls`, `docker volume ls` con `--filter name=<prefijo>`, p. ej. `verify_`). Nunca `docker system prune`: podría borrar recursos de otros proyectos.
    - Tras una `PAUSA` o un corte, no te fíes de las casillas del plan: reconstruye el estado con `git status` y `git diff --stat` en cada carpeta de `repos:`, y revisa que existan los archivos que el plan espera. Escribe lo que encontraste en *Notas* antes de decidir y relanzar.
 6. **Cierra** cuando Franco confirme: actualiza lo duradero (`AGENTS.md` y, si cambió algo de fondo, `docs/proyecto.md`) y mueve la carpeta a `cambios/hechos/` **sin cambiar `estado`**: la carpeta es la marca. No existe un estado `hecho`.
 

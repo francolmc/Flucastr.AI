@@ -1,7 +1,8 @@
 ---
-estado: borrador
+estado: listo
 rama: feature/endurecer-constructor
 repos: [.]
+ejecutor: principal
 ---
 # Plazos: planes que caben en el tiempo del subagente (Pedido 8, tramo 3 de 3)
 
@@ -37,15 +38,31 @@ Fuera de alcance: `ejecutar-plan`, `modelos.json`, `scripts/`, instalador, `old/
 `./verify` — debe terminar en `VERIFY OK`, con el bloque `8e` en verde y su prueba negativa fallando donde corresponde. Más la prueba en Pi del paso 5 (evidencia en *Evidencia*).
 
 ## Pasos
-- [ ] `planificar-cambio`: los pasos que lanzan builds, instalaciones o suites llevan su duración estimada entre paréntesis; un plan cuya suma pase de unos 20 minutos se parte en tramos con verificación parcial. Los planes no piden «sin caché» salvo en la corrida final.
-- [ ] `preparar-proyecto/SKILL.md` y `referencia.md`: `verify` acepta `VERIFY_RAPIDO=1` (build con caché); el build sin caché queda para la corrida final. Probar el esqueleto en una carpeta temporal con un compose mínimo si hay Docker; si no, anotarlo.
-- [ ] `agentes/principal.md`: tras un corte por plazo, antes de relanzar, revisar y limpiar solo los recursos Docker con el prefijo del proyecto de verify; nunca `docker system prune`.
-- [ ] Leer en la documentación de pi-subagents (`docs/agents.md`, `docs/tool-reference.md`, configuración de la extensión) qué acepta `timeoutMs` y `checkpointBeforeDeadlineMs`; anotar el fragmento exacto en *Notas*. Comprobar: la cita existe en la documentación leída.
-- [ ] Probar en Pi con un proyecto temporal y un plan de 3 pasos, con `timeoutMs` bajo (p. ej. 60 s) y un paso que lo exceda: el subagente se corta o deja checkpoint, y con un valor acorde completa. Si funciona, agregar `timeoutMs: 3600000` a `constructor.md` y documentar la configuración opcional en `README.md`; si no, no tocar `constructor.md` y registrarlo en `PENDIENTES.md`.
-- [ ] `verify`: bloque `8e` con frases clave (`VERIFY_RAPIDO` en `referencia.md`; `docker system prune` en `principal.md` como prohibición; `timeoutMs` en `constructor.md` solo si se adoptó) y copia negativa sin `VERIFY_RAPIDO` que debe fallar; comprobar que el agente generado para Claude Code sigue resolviendo (`node scripts/resolver.mjs agente-claude agentes/constructor.md`). Comprobar: `./verify` termina en `VERIFY OK`.
+- [x] `planificar-cambio`: los pasos que lanzan builds, instalaciones o suites llevan su duración estimada entre paréntesis; un plan cuya suma pase de unos 20 minutos se parte en tramos con verificación parcial. Los planes no piden «sin caché» salvo en la corrida final.
+  - evidencia: `skills/planificar-cambio/SKILL.md`, regla 9 (duración entre paréntesis, tramos de ~20 min, `VERIFY_RAPIDO=1` en intermedios)
+- [x] `preparar-proyecto/SKILL.md` y `referencia.md`: `verify` acepta `VERIFY_RAPIDO=1` (build con caché); el build sin caché queda para la corrida final. Probar el esqueleto en una carpeta temporal con un compose mínimo si hay Docker; si no, anotarlo.
+  - evidencia: `referencia.md` (cabecera y línea de build) y `preparar-proyecto/SKILL.md`; probado con compose mínimo en Docker: `VERIFY_RAPIDO=1` reutiliza capa (`#6 CACHED`), sin la variable usa `--no-cache`
+- [x] `agentes/principal.md`: tras un corte por plazo, antes de relanzar, revisar y limpiar solo los recursos Docker con el prefijo del proyecto de verify; nunca `docker system prune`.
+  - evidencia: `agentes/principal.md`, punto 5: limpieza con `--filter name=<prefijo>`; «Nunca `docker system prune`»
+- [x] Leer en la documentación de pi-subagents (`docs/agents.md`, `docs/tool-reference.md`, configuración de la extensión) qué acepta `timeoutMs` y `checkpointBeforeDeadlineMs`; anotar el fragmento exacto en *Notas*. Comprobar: la cita existe en la documentación leída.
+  - evidencia: cita en *Notas* (`docs/agents.md` l.470, `docs/configuration.md` l.431-437 y l.457-463, `docs/tool-reference.md` l.108-110)
+- [x] Probar en Pi con un proyecto temporal y un plan de 3 pasos, con `timeoutMs` bajo (p. ej. 60 s) y un paso que lo exceda: el subagente se corta o deja checkpoint, y con un valor acorde completa. Si funciona, agregar `timeoutMs: 3600000` a `constructor.md` y documentar la configuración opcional en `README.md`; si no, no tocar `constructor.md` y registrarlo en `PENDIENTES.md`.
+  - evidencia: prueba real en Pi 0.84.0, ver *Notas*; `timeoutMs: 3600000` agregado a `agentes/constructor.md`; `README.md` sección «Plazos en Pi (opcional)»
+- [x] `verify`: bloque `8e` con frases clave (`VERIFY_RAPIDO` en `referencia.md`; `docker system prune` en `principal.md` como prohibición; `timeoutMs` en `constructor.md` solo si se adoptó) y copia negativa sin `VERIFY_RAPIDO` que debe fallar; comprobar que el agente generado para Claude Code sigue resolviendo (`node scripts/resolver.mjs agente-claude agentes/constructor.md`). Comprobar: `./verify` termina en `VERIFY OK`.
+  - evidencia: `verify` bloque `8e`; `./verify` → exit 0 (`VERIFY OK`)
 
 ## Evidencia
-(la escribe quien ejecute)
+$ ./verify
+...
+ok 8e: VERIFY_RAPIDO, docker system prune prohibido y timeoutMs presentes; el agente de Claude resuelve; copia sin VERIFY_RAPIDO falla
+VERIFY OK
+exit 0
+
+Prueba en Pi (ver Notas): con `timeoutMs: 60000` el subagente se cortó (`Subagent timed out after 60000ms`, `termination: timed-out`); con `timeoutMs: 3600000` el mismo plan terminó en `COMPLETADO`.
 
 ## Notas
-(la escribe quien ejecute)
+- Docs leídas (pi-subagents 0.84.0, `~/.pi/agent/npm/node_modules/pi-subagents/docs/`): `agents.md`: «`timeoutMs` | Positive integer default runtime deadline in milliseconds for single-agent launches. Foreground launches use 30 minutes when neither the call nor agent provides a timeout; explicit `timeoutMs`/`maxRuntimeMs` and agent defaults win.» `configuration.md`: `checkpointBeforeDeadlineMs` es «Global default for the async single-agent … launch option … best-effort "checkpoint and stop" steer … the ordinary `timeoutMs` kill still applies».
+- Prueba real en Pi (el principal, proyecto temporal en el scratchpad, `.pi/agents/constructor.md` generado con `agente-pi`, plan de 3 pasos con `sleep 100` en el 2.º): (1) sin `--approve` Pi ignora los agentes del proyecto (no está en `trust.json`) y corrió el constructor global, sin corte; la prueba válida exige `pi -p --approve`. (2) `timeoutMs: 60000`: cortó a los 60 s sin checkpoint (foreground), `a.txt` creado y paso 1 marcado, plan en `en curso`, pasos 2 y 3 sin tocar; el estado se reconstruyó desde `git status`/plan. (3) `timeoutMs: 3600000`, desde el estado cortado: `COMPLETADO`, `verify` pasa, plan `listo` (3 min 17 s).
+- `checkpointBeforeDeadlineMs` solo aplica a corridas asíncronas de un agente: no se probó (la prueba fue en primer plano) y no va en `constructor.md`; queda documentado como opcional.
+- Claude Code ignora `timeoutMs` y acepta el agente (`claude --agent constructor -p` respondió); `verify` 8e lo comprueba con el resolver.
+- Aviso: el `constructor.md` global instalado en `~/.pi/agent/agents/` es del kit anterior (aún dice «Carga `ejecutar-plan`»). Hay que reinstalar con `instalar.sh` para que Pi use los cambios de los tres tramos.

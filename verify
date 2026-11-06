@@ -573,4 +573,20 @@ sed 's/ejecutor:/ejecutor/g' skills/planificar-cambio/SKILL.md > "$eneg/skills/p
 if textos_ejecutor "$eneg"; then fallo "8d: una copia de planificar-cambio sin ejecutor: pasó la comprobación"; fi
 echo "ok 8d: ejecutor:, 20 palabras (sin 60 palabras), ventana propia y pi-constructor presentes; copia sin ejecutor: falla"
 
+# 8e. plazos: VERIFY_RAPIDO en referencia.md, prohibición de docker system prune en principal.md, timeoutMs en constructor.md; una copia sin VERIFY_RAPIDO debe fallar
+textos_plazos() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'VERIFY_RAPIDO' "$r/skills/preparar-proyecto/referencia.md" || return 1
+  grep -qF 'docker system prune' "$r/agentes/principal.md" || return 1
+  grep -qF 'timeoutMs' "$r/agentes/constructor.md" || return 1
+}
+textos_plazos . || fallo "8e: falta algún texto de plazos"
+pneg="$T8/pneg"
+mkdir -p "$pneg/skills/preparar-proyecto" "$pneg/agentes"
+cp agentes/principal.md agentes/constructor.md "$pneg/agentes/"
+sed 's/VERIFY_RAPIDO/VERIFY_X/g' skills/preparar-proyecto/referencia.md > "$pneg/skills/preparar-proyecto/referencia.md"
+if textos_plazos "$pneg"; then fallo "8e: una copia sin VERIFY_RAPIDO pasó la comprobación"; fi
+node scripts/resolver.mjs agente-claude agentes/constructor.md | grep -q '^timeoutMs: ' || fallo "8e: el agente de Claude no resuelve con timeoutMs"
+echo "ok 8e: VERIFY_RAPIDO, docker system prune prohibido y timeoutMs presentes; el agente de Claude resuelve; copia sin VERIFY_RAPIDO falla"
+
 echo "VERIFY OK"

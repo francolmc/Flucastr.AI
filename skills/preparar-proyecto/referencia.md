@@ -7,6 +7,7 @@ Punto de partida para adaptar. Nombres, puertos y rutas son de ejemplo. Las URLs
 ```bash
 #!/usr/bin/env bash
 # Build limpio -> arranque real -> recorrido real. Sale con código != 0 en el primer escalón roto.
+# Con VERIFY_RAPIDO=1 el build usa caché (para iterar); la corrida final de aceptación va sin la variable.
 # Con VERIFY_TARGET=<url> corre solo el recorrido contra un entorno ya desplegado (sin docker).
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -54,7 +55,7 @@ esperar() { # url
 }
 
 paso "1/4 Build limpio"
-$C build --no-cache
+if [ "${VERIFY_RAPIDO:-0}" = 1 ]; then $C build; else $C build --no-cache; fi
 
 paso "2/4 Arranque"
 $C up -d --wait            # espera a running|healthy (la base de datos tiene healthcheck)

@@ -77,6 +77,7 @@ Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `esta
 6. **Decisiones cerradas.** Si falta una decisión de producto, pregúntala a Franco antes de pedir la aprobación; no la dejes abierta en el plan.
 7. **Quién ejecuta (`ejecutor:`).** `ejecutor: constructor` para lo mecánico y acotado (configuración, renombrar, aplicar un patrón conocido). `ejecutor: principal` para lo que necesita diagnóstico o tiene piezas dependientes (builds, Compose, recorridos de punta a punta, pruebas negativas); el principal lo ejecuta él con `ejecutar-plan`, o el constructor con nivel `medio` en `modelos.json`. Si el plan es `principal`, una frase en `## Decisiones ya tomadas` dice por qué, para que Franco lo discuta en la puerta 1. Sin la línea, se trata como `constructor`.
 8. **Supuestos explícitos.** Cada supuesto en `## Supuestos` va en una línea y dice qué pasa si Franco lo corrige (p. ej. «Validar email con regex simple; si Franco quiere DNS, cambian el alcance y un paso»). Lo que no sea supuesto, sino decisión que cambia el resultado, no va ahí: se pregunta.
+9. **Duración en los pasos pesados.** Un paso que lanza un build, una instalación o una suite lleva su duración estimada entre paréntesis, p. ej. «(≈8 min)». Si la suma pasa de unos 20 minutos, parte el plan en tramos, cada uno con su verificación parcial. Los pasos intermedios usan `VERIFY_RAPIDO=1 ./verify` (build con caché); «sin caché» solo en la corrida final de aceptación.
 
 ## Antes de pedir la aprobación
 
