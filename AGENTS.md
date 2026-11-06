@@ -1,20 +1,22 @@
 # Flucastr.AI
 
-Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en construcción** (rama `feature/kit-v2`); la versión 1 está en el tag `kit-v1` y, mientras tanto, en `legacy/v1/`.
+Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en construcción** (rama `feature/kit-v2`); la versión 1 está en el tag `kit-v1` y en `old/v1/` (movida, no borrada; sus rutas internas son las originales y no se ejecuta).
 
 ## Cómo funciona (v2)
 
 - Dos agentes: `principal` (nivel medio: investiga, diagnostica, planifica, verifica) y `constructor` (nivel bajo: aplica el plan). Los niveles se traducen a modelos en `modelos.json`.
 - El único traspaso es `cambios/<nombre>/plan.md`. Franco tiene dos puertas: aprobar el plan y revisar la evidencia.
 - «Hecho» significa que el comando `verify` del proyecto pasa desde cero.
-- Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`.
-- Comando `verify`: `./verify` (modelos.json ↔ agentes, sintaxis de instalar/desinstalar, resolver Claude/Pi, skills, `instalar.sh --simular`, reglas deny del proyecto).
+- Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`, `migrar-proyecto` (tras `--migrar`).
+- Comando `verify`: `./verify` (modelos.json ↔ agentes, sintaxis de instalar/desinstalar, resolver Claude/Pi, skills, `instalar.sh --simular`, reglas deny del proyecto, migración a v2 en proyectos sintéticos).
+- Migrar un proyecto de la v1: `bash instalar.sh --migrar <proyecto> [--simular]`. Mueve `definitions/`, `features/` y `registro/` a `<proyecto>/old/v1/` (sin borrar), deja el agente `principal`, quita el hook de v1, pone las 12 reglas deny y crea `cambios/`. Solo Claude Code y solo ese proyecto; no se combina con `--proyecto`, `--skills-proyecto`, `--copiar`, `--solo` ni `--agente`. Después, la skill `migrar-proyecto`.
 
 ## Reglas
 
 - Los agentes no hacen commit, push, PR, merge ni despliegue: lo hace Franco.
 - No se leen `.env`, llaves ni credenciales (`.env.example` sí).
 - Git permitido a los agentes: crear la rama del cambio con `git switch -c <prefijo>/<nombre>` (`feature/`, `fix/`, `chore/`, `docs/`).
+- En Pi los subagentes no heredan skills: toda skill que use un subagente se declara en su frontmatter (`skills:`), y `inheritProjectContext: true` para el contexto del proyecto.
 - En un proyecto instalado con `--proyecto`, Claude Code bloquea con reglas deny `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C … commit`, `git -c … commit`, `git … push`, `bash -c`, `sh -c`, `zsh -c` y leer `.env`. Si una de esas acciones se bloquea, es la regla: no la saltes; lo hace Franco. El agente tampoco puede usar `bash -c` (intencional).
 
 ## Límites de las reglas deny
@@ -29,13 +31,6 @@ Las reglas viven en `<proyecto>/.claude/settings.json` (compartido, va a git). S
 - También bloquean los commits que Franco haga con Claude en ese proyecto; es lo esperado.
 - Pi no tiene equivalente conocido: en Pi rige solo el prompt del agente.
 
-Se retiran de la v1 cuando la v2 se haya usado en 2 o 3 proyectos reales. Lo que se retira:
+Lo de la v1 está en `old/v1/` (`legacy/`, `definitions/`, `features/`, `pruebas/`, `registro/`, los scripts de la v1, el README viejo y los reportes sueltos). Borrar `old/` viene después de usar la v2 en 2 o 3 proyectos reales; es decisión de Franco.
 
-- `legacy/`
-- `definitions/`
-- `features/`
-- `pruebas/`
-- los scripts de la v1: todo `scripts/` salvo `resolver.mjs`
-- el README viejo
-
-`registro/` no se lee salvo pedido explícito de Franco.
+`old/v1/registro/` no se lee salvo pedido explícito de Franco. `pruebas/.temporales/` (3,9 GB, ignorado por git) no se borra ni se mueve sin pedido.

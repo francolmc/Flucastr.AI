@@ -6,7 +6,7 @@
 //   node scripts/resolver.mjs agente-claude <archivo.md>      imprime el agente con el campo `model` ya resuelto (Claude Code)
 //   node scripts/resolver.mjs agente-pi <archivo.md>          igual, con el modelo de Pi (para el paquete de subagentes)
 //   node scripts/resolver.mjs cuerpo <archivo.md>             imprime el agente sin encabezado, con la línea de identidad de Pi (para Pi)
-//   node scripts/resolver.mjs fijar-agente <ajustes.json> <agente>   deja `agent` en los ajustes de un proyecto (no pisa otro valor)
+//   node scripts/resolver.mjs fijar-agente <ajustes.json> <agente> [--sobrescribir]   deja `agent` en los ajustes de un proyecto (no pisa otro valor, salvo con --sobrescribir)
 //   node scripts/resolver.mjs quitar-agente <ajustes.json> <agente>  deshace lo anterior, solo si el valor es ese agente
 //   node scripts/resolver.mjs comparar-modelos <personal.json> <publicado.json>  imprime las diferencias que merecen aviso (nada si no hay)
 //   node scripts/resolver.mjs fijar-compactacion pi <settings.json> [--simular]  pone compaction.modelOverrides de Pi (no pisa lo del usuario)
@@ -601,17 +601,19 @@ if (orden === "modelo" && args.length === 2) {
 } else if (orden === "cuerpo" && args.length === 1) {
   const agente = basename(args[0], ".md");
   process.stdout.write(`${lineaIdentidad("pi", agente)}\n\n` + partir(args[0]).cuerpo.replace(/^\s+/, ""));
-} else if (orden === "fijar-agente" && args.length === 2) {
+} else if (orden === "fijar-agente" && (args.length === 2 || (args.length === 3 && args[2] === "--sobrescribir"))) {
+  // Con --sobrescribir reemplaza otro agente ya fijado (lo usa --migrar) y dice cuál era.
   const [ruta, agente] = args;
   const ajustes = leerAjustes(ruta);
   if (ajustes.agent === agente) {
     console.log("ya-estaba");
-  } else if (ajustes.agent) {
+  } else if (ajustes.agent && args.length === 2) {
     console.log(`omitido:${ajustes.agent}`);
   } else {
+    const anterior = ajustes.agent;
     mkdirSync(dirname(ruta), { recursive: true });
     writeFileSync(ruta, JSON.stringify({ ...ajustes, agent: agente }, null, 2) + "\n");
-    console.log("fijado");
+    console.log(anterior ? `reemplazado:${anterior}` : "fijado");
   }
 } else if (orden === "quitar-agente" && args.length === 2) {
   const [ruta, agente] = args;
@@ -668,5 +670,5 @@ if (orden === "modelo" && args.length === 2) {
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla>");
 }

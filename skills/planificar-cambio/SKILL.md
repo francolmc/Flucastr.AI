@@ -26,6 +26,9 @@ rama: feature/<nombre>
 ## Objetivo
 Una o dos frases: qué queda funcionando y para quién.
 
+## Supuestos
+Lo que diste por sentado del pedido ambiguo, una línea cada uno. Si no hubo nada que suponer, escribe «Ninguno».
+
 ## Alcance
 Carpetas y archivos donde el constructor puede cambiar cosas. Incluye todo el camino
 que el objetivo cruza (código, manifiestos, lock, Dockerfiles, configuración).
@@ -69,6 +72,7 @@ Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `esta
 3. **De 3 a 10 pasos**, en orden, cada uno comprobable. Sin código completo salvo firmas o contratos que deban respetarse.
 4. **Corto.** Que un modelo pequeño lo lea entero sin esfuerzo. Orientación de tamaño, no límite duro: un cambio simple cabe en unos 5 KB; uno que investiga y toca varias piezas puede llegar a unos 8 KB. Si pasa de eso, probablemente son dos cambios. No hay herramienta que lo mida.
 5. **Decisiones cerradas.** Si falta una decisión de producto, pregúntala a Franco antes de pedir la aprobación; no la dejes abierta en el plan.
+6. **Supuestos explícitos.** Cada supuesto en `## Supuestos` va en una línea y dice qué pasa si Franco lo corrige (p. ej. «Validar email con regex simple; si Franco quiere DNS, cambian el alcance y un paso»). Lo que no sea supuesto, sino decisión que cambia el resultado, no va ahí: se pregunta.
 
 ## Antes de pedir la aprobación
 

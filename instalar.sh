@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Instala Flucastr.AI en Claude Code y Pi.
 # Uso: bash instalar.sh [--simular] [--copiar] [--solo claude|pi] [--proyecto <ruta> [--agente <nombre>]] [--skills-proyecto]
+#      bash instalar.sh --migrar <ruta> [--simular]   pasa un proyecto de la v1 a la v2 (solo ese proyecto, Claude Code)
 #   --copiar: copia las skills (carpetas reales) en vez de enlazarlas, y usa un modelos.json personal
 #             en ~/.flucastr-ai/modelos.json (o en $FLUCASTR_MODELOS si está definida). Modo "descarga".
 #   Sin --copiar: enlaza las skills al repo (modo "repo").
@@ -24,9 +25,17 @@ SOLO=""
 PROYECTO=""
 AGENTE="principal"
 SKILLS_PROYECTO=0
+MIGRAR=""
+AGENTE_DADO=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --simular) SIMULAR=1 ;;
+    --migrar)
+      shift
+      MIGRAR="${1:-}"
+      [ -d "$MIGRAR" ] || { echo "--migrar necesita una carpeta que exista" >&2; exit 1; }
+      MIGRAR="$(cd "$MIGRAR" && pwd)"
+      ;;
     --copiar) MODO=descarga ;;
     --solo)
       shift
@@ -45,6 +54,7 @@ while [ $# -gt 0 ]; do
     --agente)
       shift
       AGENTE="${1:-}"
+      AGENTE_DADO=1
       ;;
     --skills-proyecto) SKILLS_PROYECTO=1 ;;
     -h | --help) sed -n '2,3p' "$0"; exit 0 ;;
@@ -62,6 +72,206 @@ fi
 command -v node >/dev/null 2>&1 || { echo "Falta node: se usa para leer modelos.json." >&2; exit 1; }
 [ -f "$RAIZ/modelos.json" ] || { echo "No encuentro modelos.json en $RAIZ" >&2; exit 1; }
 [ -f "$RAIZ/agentes/$AGENTE.md" ] || { echo "No existe el agente '$AGENTE' en agentes/" >&2; exit 1; }
+
+# --- Migración v1 -> v2 (--migrar <ruta>): ver cambios/migrar-v1-v2/plan.md ---
+# Solo el proyecto y solo Claude Code: no toca ~/.claude ni ~/.pi. Va antes de cualquier paso de la instalación
+# y termina con su propia salida. Nada se borra: lo de v1 se mueve a <proyecto>/old/v1/.
+MIG_TMP=""
+MIG_MAN=""
+
+# Añade una línea al manifiesto temporal de la migración (sin duplicar). En simulación no hace nada.
+mig_anotar() { # tipo ruta [dato]
+  local linea
+  if [ "$SIMULAR" = 1 ]; then return 0; fi
+  linea="$(printf '%s\t%s\t%s' "$1" "$2" "${3:-}")"
+  if [ ! -f "$MANIFIESTO" ] && [ ! -s "$MIG_MAN" ]; then printf 'modo\trepo\t\n' > "$MIG_MAN"; fi
+  if grep -qxF "$linea" "$MIG_MAN"; then return 0; fi
+  printf '%s\n' "$linea" >> "$MIG_MAN"
+}
+
+# Quita del manifiesto temporal las líneas de ese tipo y ruta (dato vacío = cualquiera). En simulación no hace nada.
+mig_quitar() { # tipo ruta [dato]
+  if [ "$SIMULAR" = 1 ]; then return 0; fi
+  awk -F'\t' -v t="$1" -v r="$2" -v d="${3:-}" '!($1 == t && $2 == r && (d == "" || $3 == d))' "$MIG_MAN" > "$MIG_MAN.x"
+  mv "$MIG_MAN.x" "$MIG_MAN"
+}
+
+# Agente predeterminado del proyecto: queda `principal`, aunque hubiera otro. $1: archivo de ajustes a usar.
+mig_agente() {
+  local arch="$1" real="$PROYECTO/.claude/settings.local.json" salida prefijo=""
+  if [ "$SIMULAR" = 1 ]; then prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" fijar-agente "$arch" principal --sobrescribir 2>&1)"; then
+    echo "  AVISO: no se tocó $real ($salida)"
+    return 0
+  fi
+  case "$salida" in
+    fijado)
+      echo "  ${prefijo}agente predeterminado fijado: principal ($real)"
+      mig_quitar ajuste "$real"; mig_anotar ajuste "$real" principal
+      ;;
+    reemplazado:*)
+      echo "  ${prefijo}agente predeterminado cambiado de ${salida#reemplazado:} a principal ($real)"
+      mig_quitar ajuste "$real"; mig_anotar ajuste "$real" principal
+      ;;
+    ya-estaba) echo "  ${prefijo}el agente predeterminado ya es principal ($real)" ;;
+    *) echo "  AVISO: resultado inesperado de fijar-agente ($salida)" ;;
+  esac
+  return 0
+}
+
+# Quita el hook del validador de v1 (solo la entrada exacta). $1: archivo de ajustes a usar.
+mig_hook() {
+  local arch="$1" real="$PROYECTO/.claude/settings.local.json" salida prefijo=""
+  if [ "$SIMULAR" = 1 ]; then prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" quitar-hook claude "$arch" 2>&1)"; then
+    echo "  AVISO: no se tocó $real ($salida)"
+    return 0
+  fi
+  case "$salida" in
+    quitado)
+      echo "  ${prefijo}hook de v1 quitado: $real"
+      mig_quitar hook "$real" claude
+      ;;
+    archivo-quitado)
+      echo "  ${prefijo}hook de v1 quitado; $real quedó vacío y se borra"
+      mig_quitar hook "$real" claude
+      ;;
+    omitido) echo "  ${prefijo}sin hook de v1 que quitar: $real" ;;
+    *) echo "  AVISO: resultado inesperado de quitar-hook ($salida)" ;;
+  esac
+  return 0
+}
+
+# Reglas deny de Claude Code del proyecto: las mismas que instala --proyecto (fijar-deny).
+mig_deny() {
+  local ajustes="$PROYECTO/.claude/settings.json" salida linea regla prefijo="" extra=()
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" fijar-deny claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+    echo "  AVISO: no se tocó $ajustes ($salida)"
+    return 0
+  fi
+  if [ "$salida" = ya-estaba ]; then
+    echo "  ${prefijo}reglas deny de Claude Code ya estaban: $ajustes"
+    return 0
+  fi
+  while IFS= read -r linea; do
+    case "$linea" in
+      agregada:*)
+        regla="${linea#agregada:}"
+        echo "  ${prefijo}regla deny de Claude Code agregada: $regla ($ajustes)"
+        mig_anotar deny "$ajustes" "$regla"
+        ;;
+      *) echo "  AVISO: resultado inesperado de fijar-deny claude ($linea)" ;;
+    esac
+  done <<< "$salida"
+  return 0
+}
+
+migrar() {
+  local base="$PROYECTO/old/v1" lista="" d es_git=0 raiz_v1="old/v1/" leer local_arch
+  local medias t est abiertas
+  if [ -e "$base" ] || [ -L "$base" ]; then
+    echo "old/v1 ya existe en $PROYECTO: no se cambia nada (una migración anterior ya la hizo; revísala a mano si falta algo)."
+    return 0
+  fi
+  for d in definitions features registro; do
+    if [ -e "$PROYECTO/$d" ] || [ -L "$PROYECTO/$d" ]; then lista="$lista $d"; fi
+  done
+  if [ -z "$lista" ]; then
+    echo "nada que migrar: $PROYECTO no tiene definitions/, features/ ni registro/."
+    return 0
+  fi
+
+  MIG_TMP="$(mktemp -d)" || { echo "no pude crear un temporal" >&2; return 1; }
+  trap 'rm -rf "$MIG_TMP"' EXIT
+  MIG_MAN="$MIG_TMP/manifiesto.txt"
+  if [ -f "$MANIFIESTO" ]; then cp "$MANIFIESTO" "$MIG_MAN"; else : > "$MIG_MAN"; fi
+  cp "$MIG_MAN" "$MIG_TMP/manifiesto.original"
+  if git -C "$PROYECTO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then es_git=1; fi
+
+  if [ "$SIMULAR" = 1 ]; then
+    echo "SIMULACIÓN: no se escribe nada. Esto es lo que haría:"
+    raiz_v1=""
+  else
+    mkdir -p "$base"
+  fi
+
+  echo "Migrar $PROYECTO a la v2"
+  echo "Mover a old/v1/ (nada se borra; src/ no se toca):"
+  for d in $lista; do
+    if [ "$SIMULAR" = 1 ]; then
+      echo "  movería: $d -> old/v1/$d"
+    elif [ "$es_git" = 1 ] && [ -n "$(git -C "$PROYECTO" ls-files -- "$d")" ]; then
+      git -C "$PROYECTO" mv "$d" "old/v1/$d"
+      echo "  movido (git mv): $d -> old/v1/$d"
+    else
+      mv "$PROYECTO/$d" "$base/$d"
+      echo "  movido: $d -> old/v1/$d"
+    fi
+  done
+
+  # En simulación el agente y el hook se calculan sobre una copia: el proyecto no cambia.
+  local_arch="$PROYECTO/.claude/settings.local.json"
+  if [ "$SIMULAR" = 1 ]; then
+    mkdir -p "$MIG_TMP/local"
+    if [ -f "$local_arch" ]; then cp "$local_arch" "$MIG_TMP/local/settings.local.json"; fi
+    local_arch="$MIG_TMP/local/settings.local.json"
+  fi
+  echo "Claude Code (proyecto $PROYECTO):"
+  mig_agente "$local_arch"
+  mig_hook "$local_arch"
+  mig_deny
+
+  if [ "$SIMULAR" = 1 ]; then
+    echo "  crearía: $PROYECTO/cambios/"
+  elif [ -d "$PROYECTO/cambios" ]; then
+    echo "  ya existe: $PROYECTO/cambios/"
+  else
+    mkdir -p "$PROYECTO/cambios"
+    echo "  creado: $PROYECTO/cambios/"
+  fi
+
+  # Trabajo a medias: solo se lista (no se convierte aquí). Con --simular se lee desde su sitio original.
+  leer="$base"
+  if [ "$SIMULAR" = 1 ]; then leer="$PROYECTO"; fi
+  medias=""
+  for t in "$leer"/features/*/task-*.md; do
+    [ -f "$t" ] || continue
+    est="$(sed -n 2p "$t" | grep -oE 'estado: *(aprobada|en curso|bloqueada)' | sed -E 's/^estado: *//' || true)"
+    [ -n "$est" ] || continue
+    medias="$medias  tarea $est: ${raiz_v1}features/$(basename "$(dirname "$t")")/$(basename "$t")"$'\n'
+  done
+  if [ -f "$leer/definitions/BACKLOG.md" ]; then
+    abiertas="$(awk -F'|' -v p="$raiz_v1" '/^\| *F[0-9]+/ {
+      id = $2; ft = $3; e = $8
+      gsub(/^ +| +$/, "", id); gsub(/^ +| +$/, "", ft); gsub(/^ +| +$/, "", e)
+      if (e != "hecha" && e != "completada") printf "  feature abierta: %s %s (estado: %s) [%sdefinitions/BACKLOG.md]\n", id, ft, e, p
+    }' "$leer/definitions/BACKLOG.md")"
+    if [ -n "$abiertas" ]; then medias="$medias$abiertas"$'\n'; fi
+  fi
+  echo "Trabajo a medias (solo se lista; no se convierte aquí):"
+  if [ -n "$(printf '%s' "$medias" | grep .)" ]; then printf '%s\n' "$medias" | grep .; else echo "  ninguno"; fi
+
+  # El manifiesto solo cambia si algo se registró (real, no en simulación).
+  if [ "$SIMULAR" = 0 ] && ! cmp -s "$MIG_MAN" "$MIG_TMP/manifiesto.original"; then
+    mkdir -p "$ESTADO_DIR"
+    cp "$MIG_MAN" "$MANIFIESTO"
+  fi
+  if [ "$SIMULAR" = 1 ]; then
+    echo "SIMULACIÓN: no se escribió nada."
+  else
+    echo "Migración lista. Lo de v1 está en $PROYECTO/old/v1/ (sin borrar). Siguiente: skill migrar-proyecto (AGENTS.md, verify, planes)."
+  fi
+  return 0
+}
+
+if [ -n "$MIGRAR" ]; then
+  [ -z "$PROYECTO" ] && [ "$SKILLS_PROYECTO" = 0 ] && [ "$MODO" = repo ] && [ -z "$SOLO" ] && [ "$AGENTE_DADO" = 0 ] \
+    || { echo "--migrar solo trabaja sobre el proyecto con Claude Code: no se combina con --proyecto, --skills-proyecto, --copiar, --solo ni --agente" >&2; exit 1; }
+  PROYECTO="$MIGRAR"
+  migrar
+  exit $?
+fi
 
 # Una instalación no cambia de modo sin desinstalar antes. Solo lee el manifiesto; va antes de cualquier escritura.
 # Un manifiesto sin línea «modo» es de modo repo.
@@ -497,68 +707,15 @@ fi
 
 if [ "$SIMULAR" = 1 ]; then echo "SIMULACIÓN: no se escribe nada."; fi
 
-# Raíz del kit y lanzador fijo: el coordinador los usa para llegar a scripts/ desde cualquier proyecto.
-# Se escriben en ambos modos; el lanzador no tiene lógica propia (importa scripts/validar-tarea.mjs de la raíz).
+# Raíz del kit: el coordinador la usa para llegar a scripts/ desde cualquier proyecto.
+# Se escribe en ambos modos.
 if [ "$SIMULAR" = 1 ]; then
-  echo "SIMULACIÓN: se escribirá $ESTADO_DIR/raiz, $ESTADO_DIR/validar-tarea.mjs y $ESTADO_DIR/entorno.mjs"
+  echo "SIMULACIÓN: se escribirá $ESTADO_DIR/raiz"
 else
   mkdir -p "$ESTADO_DIR"
   printf '%s\n' "$RAIZ" > "$ESTADO_DIR/raiz"
-  cat > "$ESTADO_DIR/validar-tarea.mjs" <<'EOF'
-// Lanzador fijo de validar-tarea: lo escribe instalar.sh. Lee la raíz del kit y carga su script.
-import { readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
-
-let raiz;
-try {
-  raiz = readFileSync(join(homedir(), '.flucastr-ai', 'raiz'), 'utf8').trim();
-} catch {
-  process.stderr.write('No se puede leer ~/.flucastr-ai/raiz; reinstala el kit.\n');
-  process.exitCode = 2;
-}
-if (raiz !== undefined) {
-  // el script se ejecuta al importarse: su salida y su código son los del lanzador
-  await import(pathToFileURL(join(raiz, 'scripts', 'validar-tarea.mjs')).href);
-}
-EOF
-  chmod +x "$ESTADO_DIR/validar-tarea.mjs"
   registrar raiz "$ESTADO_DIR/raiz"
-  registrar raiz "$ESTADO_DIR/validar-tarea.mjs"
   echo "  raíz del kit: $ESTADO_DIR/raiz ($RAIZ)"
-  echo "  lanzador de validar-tarea: $ESTADO_DIR/validar-tarea.mjs"
-  # lanzador de entorno: carga scripts/entorno.mjs de la raíz y llama a su CLI (ejecutarCli) con los argumentos
-  cat > "$ESTADO_DIR/entorno.mjs" <<'EOF'
-// Lanzador fijo de entorno: lo escribe instalar.sh. Lee la raíz del kit, carga su módulo y ejecuta su CLI.
-import { readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
-
-let raiz;
-try {
-  raiz = readFileSync(join(homedir(), '.flucastr-ai', 'raiz'), 'utf8').trim();
-} catch {
-  process.stderr.write('No se puede leer ~/.flucastr-ai/raiz; reinstala el kit.\n');
-  process.exitCode = 2;
-}
-if (raiz !== undefined) {
-  let modulo;
-  try {
-    modulo = await import(pathToFileURL(join(raiz, 'scripts', 'entorno.mjs')).href);
-  } catch (error) {
-    process.stderr.write(`No se puede cargar scripts/entorno.mjs: ${error.message}\n`);
-    process.exitCode = 2;
-  }
-  if (modulo !== undefined) {
-    process.exitCode = await modulo.ejecutarCli(process.argv.slice(2));
-  }
-}
-EOF
-  chmod +x "$ESTADO_DIR/entorno.mjs"
-  registrar raiz "$ESTADO_DIR/entorno.mjs"
-  echo "  lanzador de entorno: $ESTADO_DIR/entorno.mjs"
 fi
 
 if [ "$INSTALAR_CLAUDE" = 1 ]; then
