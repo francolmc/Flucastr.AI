@@ -1,5 +1,5 @@
 ---
-estado: borrador
+estado: listo
 rama: feature/validar-despliegue
 repos: [.]
 ---
@@ -36,16 +36,43 @@ Fuera de alcance: `instalar.sh`, `desinstalar.sh`, `agentes/constructor.md`, `ol
 `./verify` — el escalón 8 comprueba los textos clave nuevos (`VERIFY_TARGET` y `VERIFY_PERMITIR_ESCRITURA` en `referencia.md`; «Despliegue» en `preparar-proyecto` y `definir-proyecto`; «prepárame el despliegue» en `principal.md`), con una copia negativa sin ellos que debe fallar.
 
 ## Pasos
-- [ ] `referencia.md`: modo remoto en `verify` y secciones Lectura/Escritura en `verify-flujo.sh`, según *Decisiones (a)*.
-- [ ] `preparar-proyecto/SKILL.md`: documentar `VERIFY_TARGET`, `VERIFY_PERMITIR_ESCRITURA`, la sección «Despliegue» y «Revisión previa al despliegue».
-- [ ] `definir-proyecto/SKILL.md`: escribir «Despliegue» en el segundo tiempo.
-- [ ] `principal.md`: la regla de «prepárame el despliegue» (corta; el detalle vive en la skill).
-- [ ] `verify` escalón 8: textos clave + copia negativa.
-- [ ] `AGENTS.md` y `PENDIENTES.md`: una línea cada uno.
-- [ ] Correr `./verify` y pegar la cola en *Evidencia*. La prueba funcional (a) no la hace el constructor.
+- [x] `referencia.md`: modo remoto en `verify` y secciones Lectura/Escritura en `verify-flujo.sh`, según *Decisiones (a)*.
+- [x] `preparar-proyecto/SKILL.md`: documentar `VERIFY_TARGET`, `VERIFY_PERMITIR_ESCRITURA`, la sección «Despliegue» y «Revisión previa al despliegue».
+- [x] `definir-proyecto/SKILL.md`: escribir «Despliegue» en el segundo tiempo.
+- [x] `principal.md`: la regla de «prepárame el despliegue» (corta; el detalle vive en la skill).
+- [x] `verify` escalón 8: textos clave + copia negativa.
+- [x] `AGENTS.md` y `PENDIENTES.md`: una línea cada uno.
+- [x] Correr `./verify` y pegar la cola en *Evidencia*. La prueba funcional (a) no la hace el constructor.
 
 ## Evidencia
-(la escribe el constructor)
+$ ./verify
+ar deja las 7
+== 7. migración a v2 (--migrar, --simular, repetición, sin v1) ==
+ok escenario 1: old/v1 con las tres carpetas, agente principal, sin hook, 12 deny, cambios/, lista de trabajo a medias
+ok escenario 2: repetir dice «old/v1 ya existe» y no cambia el árbol
+ok escenario 3: solo definitions/ -> se mueve y no hay error
+ok escenario 4: sin v1 -> «nada que migrar», sin cambios
+ok escenario 5: --simular imprime el plan y no cambia el árbol
+ok escenario 6: --migrar con --proyecto da error y no cambia nada
+ok escenario 7: workspace -> old/v1 de la raíz, hijos intactos, log con hijos y raíz sin repo
+ok escenario 7b: --simular en workspace no cambia el árbol y sale el aviso de AGENTS.md
+ok escenario 8: .gitignore con línea repetida no duplica y conserva las demás
+ok escenario 8b y 8c: .gitignore sin salto final y sin .gitignore quedan con la línea una vez; sin AGENTS.md no hay aviso
+ok escenario 9: copia de Cleaner -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
+== 8. workspaces (detección con find, textos clave de los archivos del cambio) ==
+ok 8a: workspace con dos hijos con .git -> find devuelve 2
+grep: /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.S5ybsWKqVM/neg3/skills/definir-proyecto/SKILL.md: No such file or directory
+ok 8b: textos clave presentes (incluido el modo remoto y Despliegue); copias sin repos:, sin «Descartado», sin definir-proyecto o sin VERIFY_TARGET fallan la comprobación
+VERIFY OK
+exit 0
+
+Verificación previa (no sustituye a la prueba funcional del modo remoto, que corre el principal): los dos scripts del esqueleto de `referencia.md` pasan `bash -n`.
 
 ## Notas
-(la escribe el constructor)
+- Rama `feature/validar-despliegue` creada desde `feature/definir-proyecto` (la rama actual). El `plan.md` modificado sin commit viajó con el cambio de rama.
+- Modo remoto: `API_URL` y `WEB_URL` se toman del entorno si ya están definidas; si no, de `VERIFY_TARGET`. El modo local no cambió sus líneas.
+- En modo remoto `verify` no usa `esperar` (que reintenta 120 s); la lectura en `verify-flujo.sh` falla de inmediato con «Falla: <url>».
+- Datos de prueba del esqueleto: `verify-$$@example.invalid` (antes `prueba-$$@example.com`), según *Supuestos*.
+- `MAILPIT_URL` es obligatoria solo en la sección «Escritura» (error claro si falta).
+- Negativo añadido (`neg4`): copia completa sin `VERIFY_TARGET` en `referencia.md` debe fallar; falla.
+- El `grep: ... neg3/... No such file` del log es ruido de la copia negativa sin `definir-proyecto` que ya existía; el escenario sigue dando «ok».
