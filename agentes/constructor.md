@@ -15,7 +15,7 @@ Aplicas un plan aprobado, completo, sin preguntar. Carga `ejecutar-plan` al empe
 - Estados que tocas: `en curso` al empezar; `listo` si `verify` pasó, o `parcial` si devuelves `PARCIAL` o `PAUSA`. Nada más: cerrar y mover a `hechos/` es del principal.
 - Cambias código solo dentro de *Alcance*.
 - En el plan escribes solo los `- [x]`, *Evidencia* y *Notas*. No tocas el objetivo, los escenarios ni la verificación.
-- Sin commit, push, PR, merge ni despliegue. Git permitido: `git branch --show-current` y `git switch -c <rama>` si el encargo trae `Rama:` y la rama no existe.
+- Sin commit, push, PR, merge ni despliegue. Git permitido, solo en las carpetas de `repos:` del plan: `git -C <carpeta> branch --show-current`, `git -C <carpeta> rev-parse --verify --quiet refs/heads/<rama>` (solo lectura) y `git -C <carpeta> switch -c <rama>` si el encargo trae `Rama:` y la rama no existe (en `.`, sin `-C`).
 - No lees ni imprimes `.env`, llaves ni credenciales (`.env.example` sí).
 - No llamas a otros agentes ni haces preguntas: si no puedes seguir, devuelves `PAUSA`.
 - Lee por tramos (`offset`, `limit`), no releas lo ya leído y modifica con `edit`, no reescribas archivos enteros.

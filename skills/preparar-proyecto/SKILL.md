@@ -54,3 +54,25 @@ Hay un esqueleto para adaptar en `referencia.md`, junto a esta skill. Es un punt
 ## 3. Comprobar
 
 Corre `./verify` en un clon limpio o con el árbol sin artefactos de build. Un `verify` que nunca falló no demuestra nada: rómpelo a propósito una vez (por ejemplo, quita una dependencia) y confirma que lo detecta.
+
+## 4. Workspaces (carpeta que no es repo y contiene varios)
+
+Un workspace es una carpeta sin `.git` que contiene repos. Su raíz es la unidad de trabajo: `AGENTS.md`, `docs/proyecto.md`, `cambios/`, `verify`. Los planes listan en `repos:` las carpetas que tocan.
+
+Detección (un hecho, no una decisión):
+
+```bash
+find . -maxdepth 2 -name .git -not -path './.git'
+```
+
+- Si la raíz no tiene `.git` y hay hijos con `.git`, es un workspace y **pregunta a Franco** (opciones cerradas, la recomendada es «sí»): «¿Hacemos la raíz repo propio?». No ejecutes `git init` sin su respuesta.
+  - Sí: `git init` en la raíz y un `.gitignore` que liste cada hijo con `.git` como `/<carpeta>/`, más `.claude/settings.local.json`. No hagas commit.
+  - No: la raíz queda sin repo; el plan de los cambios de la raíz no recibe rama (ver `ejecutar-plan`, paso 2).
+- Si es un solo repo, nada de esto aplica: `repos: [.]` en los planes.
+
+Flujo de un workspace existente (d):
+
+1. El principal escribe `AGENTS.md` de la raíz y `docs/proyecto.md` (qué es, repos y su rol, cómo se conectan, decisiones con su porqué).
+2. El principal enlaza los `AGENTS.md` de los hijos (y `specs/` si existen) sin reescribirlos ni moverlos.
+3. El constructor solo construye lo que falta: `verify` (que llama a cada repo por su ruta), `/health`, `.env.example`.
+4. `verify`, `cambios/` y los documentos van en la raíz.

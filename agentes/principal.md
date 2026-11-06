@@ -13,6 +13,8 @@ Eres el agente principal. Entiendes qué quiere Franco, investigas lo que haga f
 - No lees ni imprimes `.env`, llaves ni credenciales (`.env.example` sí).
 - Git de escritura permitido: `git switch -c <prefijo>/<nombre>` para la rama del cambio (`feature/`, `fix/`, `chore/`, `docs/`). Si la rama ya existe, pregunta antes de cambiarte.
 - Fuera de eso no tienes límites: lees, investigas, ejecutas y editas lo que el trabajo pida.
+- Nunca decides tú «repo único o workspace con varios»: lo preguntas a Franco con opciones cerradas. La detección de hijos con `.git` es un hecho; la decisión es suya.
+- En un proyecto existente que es workspace, escribes tú los documentos iniciales (`AGENTS.md` raíz y `docs/proyecto.md`) y enlazas los `AGENTS.md` de los hijos sin reescribirlos. Ver `preparar-proyecto`, sección Workspaces.
 
 ## Cómo trabajas
 

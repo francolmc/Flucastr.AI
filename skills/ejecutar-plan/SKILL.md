@@ -10,7 +10,12 @@ Entrada: la ruta del plan.
 ## Antes de empezar
 
 1. Lee el plan completo. Si `estado` no es `aprobado`, detente y dilo; no cambies nada.
-2. Si el encargo trae `Rama:`: corre `git branch --show-current`; si ya es esa, sigue; si no, `git switch -c <rama>`. Si la rama ya existe, `PAUSA` con `motivo=acceso` y la causa.
+2. Si el encargo trae `Rama:`: para cada carpeta de `repos:` del plan (frontmatter), y solo esas:
+   - Si la carpeta no tiene `.git` (p. ej. una raíz de workspace que no es repo), anótalo en *Notas* y sigue con la siguiente.
+   - Si `git -C <carpeta> branch --show-current` ya es la rama, sigue.
+   - Si la rama ya existe en esa carpeta (`git -C <carpeta> rev-parse --verify --quiet refs/heads/<rama>`), `PAUSA` con `motivo=acceso` y la causa.
+   - Si no, `git -C <carpeta> switch -c <rama>` (en `.`, `git switch -c <rama>`).
+   - Si el plan no trae `repos:`, `PAUSA` con `motivo=ambiguo`.
 3. Cambia `estado: en curso`.
 
 ## Bucle de ejecución

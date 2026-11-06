@@ -8,6 +8,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un so
 - El único traspaso es `cambios/<nombre>/plan.md`. Franco tiene dos puertas: aprobar el plan y revisar la evidencia.
 - «Hecho» significa que el comando `verify` del proyecto pasa desde cero.
 - Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`, `migrar-proyecto` (tras `--migrar`).
+- Workspaces: un proyecto puede ser una carpeta sin `.git` con varios repos; su raíz es la unidad de trabajo (`AGENTS.md`, `docs/proyecto.md`, `cambios/`, `verify`). Cada plan lleva `repos:` (carpetas que toca; `[.]` si es un repo) y la rama se crea solo en esas. Ver `preparar-proyecto`, sección 4.
 - Comando `verify`: `./verify` (modelos.json ↔ agentes, sintaxis de instalar/desinstalar, resolver Claude/Pi, skills, `instalar.sh --simular`, reglas deny del proyecto, migración a v2 en proyectos sintéticos).
 - Migrar un proyecto de la v1: `bash instalar.sh --migrar <proyecto> [--simular]`. Mueve `definitions/`, `features/` y `registro/` a `<proyecto>/old/v1/` (sin borrar), deja el agente `principal`, quita el hook de v1, pone las 12 reglas deny y crea `cambios/`. Solo Claude Code y solo ese proyecto; no se combina con `--proyecto`, `--skills-proyecto`, `--copiar`, `--solo` ni `--agente`. Después, la skill `migrar-proyecto`.
 

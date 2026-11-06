@@ -373,4 +373,38 @@ fi
 [ "$(huella "$e/proj")" = "$antes_p" ] || fallo "escenario 6: la combinación no válida cambió el proyecto"
 echo "ok escenario 6: --migrar con --proyecto da error y no cambia nada"
 
+# 8. workspaces: la detección de preparar-proyecto y los textos clave de los archivos del cambio
+paso 8 "workspaces (detección con find, textos clave de los archivos del cambio)"
+command -v git >/dev/null 2>&1 || fallo "falta git en el PATH"
+T8=$(mktemp -d) || fallo "no pude crear el temporal"
+trap '[ -n "${T6:-}" ] && rm -rf "$T6"; [ -n "${T7:-}" ] && rm -rf "$T7"; [ -n "${T8:-}" ] && rm -rf "$T8"' EXIT
+
+# 8a. workspace con dos hijos con .git y raíz sin .git: el find de preparar-proyecto devuelve exactamente 2
+w="$T8/ws"; mkdir -p "$w/api" "$w/web"
+git -C "$w/api" init -q && git -C "$w/web" init -q
+[ ! -e "$w/.git" ] || fallo "8a: la raíz del temporal tiene .git"
+n=$(cd "$w" && find . -maxdepth 2 -name .git -not -path './.git' | grep -c .) || true
+[ "$n" = 2 ] || fallo "8a: el find devolvió $n hijos con .git, se esperaban 2"
+echo "ok 8a: workspace con dos hijos con .git -> find devuelve 2"
+
+# 8b. los archivos del cambio contienen sus textos clave; una copia sin repos: debe fallar
+textos_clave() { # $1: raíz del kit
+  local r=$1
+  grep -q '^repos:' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -q 'repos:' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -q 'git -C <carpeta>' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -q -- '-maxdepth 2' "$r/skills/preparar-proyecto/SKILL.md" || return 1
+  grep -q 'git -C <carpeta' "$r/agentes/constructor.md" || return 1
+  grep -q 'Nunca decides tú' "$r/agentes/principal.md" || return 1
+}
+textos_clave . || fallo "8b: falta algún texto clave en los archivos del cambio"
+neg="$T8/neg"
+mkdir -p "$neg/skills/planificar-cambio" "$neg/skills/ejecutar-plan" "$neg/skills/preparar-proyecto" "$neg/agentes"
+cp skills/ejecutar-plan/SKILL.md "$neg/skills/ejecutar-plan/"
+cp skills/preparar-proyecto/SKILL.md "$neg/skills/preparar-proyecto/"
+cp agentes/constructor.md agentes/principal.md "$neg/agentes/"
+sed '/^repos:/d' skills/planificar-cambio/SKILL.md > "$neg/skills/planificar-cambio/SKILL.md"
+if textos_clave "$neg"; then fallo "8b: una copia sin repos: pasó la comprobación de textos"; fi
+echo "ok 8b: textos clave presentes; una copia sin repos: falla la comprobación"
+
 echo "VERIFY OK"
