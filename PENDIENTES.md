@@ -16,7 +16,7 @@
    - Primer cambio: crear el `verify` del proyecto con `preparar-proyecto` (build limpio, arranque y primer recorrido real).
    - Se considera superado si el proyecto llega a `verify` verde con solo las dos puertas de Franco, sin ampliaciones administrativas y sin abrir un plan por archivo.
    - Revisar en el PC de trabajo la hipótesis de `express`: si `src/access-http.ts` lo importa sin que esté en el `package.json` del API (llega solo como dependencia de `@nestjs/platform-express`). No se pudo comprobar desde este equipo.
-   - Migrar Cleaner real (`/Users/franco/Codes/flucastr/Flucastr.Cleaner`) con `bash instalar.sh --migrar <ruta> --simular` y luego sin `--simular`; después la skill `migrar-proyecto`. Lo hace Franco: los agentes no escriben en ese repo. La prueba sobre una copia ya está hecha (ver `cambios/migrar-v1-v2/plan.md`).
+   - Migrar Cleaner real (`/Users/franco/Codes/flucastr/Flucastr.Cleaner`) con `bash instalar.sh --migrar <ruta> --simular` y luego sin `--simular`; después la skill `migrar-proyecto`. Lo hace Franco: los agentes no escriben en ese repo. La prueba sobre una copia ya está hecha (ver `cambios/migrar-v1-v2/plan.md`). La migración también cubre workspaces (repos hijos) y el `.gitignore` (ver `cambios/migrar-workspaces/plan.md`).
 2. **Pi: probado en lo básico.** Una corrida real en Pi con un plan mínimo, con `skills: ejecutar-plan` e `inheritProjectContext: true`. `verify` comprueba que el constructor generado para Pi y para Claude Code trae `skills: ejecutar-plan`. Quedan pendientes:
    - Un plan de varios archivos en Pi.
    - El caso `PARCIAL` en Pi.

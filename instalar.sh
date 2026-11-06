@@ -167,6 +167,47 @@ mig_deny() {
   return 0
 }
 
+# Workspace: si la raíz tiene repos hijos con .git, los lista; si la raíz no es repo, lo dice. Sin hijos, no imprime nada.
+mig_workspace() {
+  local g hijos="" h
+  while IFS= read -r g; do
+    h="$(basename "$(dirname "$g")")"
+    hijos="${hijos:+$hijos, }$h"
+  done < <(find "$PROYECTO" -maxdepth 2 -name .git -not -path "$PROYECTO/.git" 2>/dev/null | sort)
+  if [ -z "$hijos" ]; then return 0; fi
+  echo "Workspace: repos hijos: $hijos"
+  if [ ! -e "$PROYECTO/.git" ]; then
+    echo "La raíz no es repo: la skill migrar-proyecto te preguntará si la hacemos repo propio (este script no la crea)"
+  fi
+  return 0
+}
+
+# .gitignore del proyecto: agrega .claude/settings.local.json una sola vez (comparación exacta).
+mig_gitignore() {
+  local gi="$PROYECTO/.gitignore" linea=".claude/settings.local.json" prefijo=""
+  if [ "$SIMULAR" = 1 ]; then prefijo="(simulación) "; fi
+  if [ -f "$gi" ] && grep -qxF "$linea" "$gi"; then
+    echo "  ${prefijo}.gitignore ya ignora $linea ($gi)"
+    return 0
+  fi
+  if [ "$SIMULAR" = 1 ]; then
+    echo "  (simulación) agregaría $linea a $gi"
+    return 0
+  fi
+  if [ -s "$gi" ] && [ -n "$(tail -c1 "$gi")" ]; then printf '\n' >> "$gi"; fi
+  printf '%s\n' "$linea" >> "$gi"
+  echo "  agregada $linea a $gi"
+  return 0
+}
+
+# Aviso si el AGENTS.md de la raíz sigue siendo de v1 (menciona definitions/, features/ o registro/).
+mig_aviso_agents() {
+  if [ -f "$PROYECTO/AGENTS.md" ] && grep -qE 'definitions/|features/|registro/' "$PROYECTO/AGENTS.md"; then
+    echo "AVISO: AGENTS.md sigue siendo de v1 y apunta a rutas movidas: ejecuta la skill migrar-proyecto"
+  fi
+  return 0
+}
+
 migrar() {
   local base="$PROYECTO/old/v1" lista="" d es_git=0 raiz_v1="old/v1/" leer local_arch
   local medias t est abiertas
@@ -197,6 +238,7 @@ migrar() {
   fi
 
   echo "Migrar $PROYECTO a la v2"
+  mig_workspace
   echo "Mover a old/v1/ (nada se borra; src/ no se toca):"
   for d in $lista; do
     if [ "$SIMULAR" = 1 ]; then
@@ -221,6 +263,8 @@ migrar() {
   mig_agente "$local_arch"
   mig_hook "$local_arch"
   mig_deny
+  echo ".gitignore:"
+  mig_gitignore
 
   if [ "$SIMULAR" = 1 ]; then
     echo "  crearía: $PROYECTO/cambios/"
@@ -251,6 +295,7 @@ migrar() {
   fi
   echo "Trabajo a medias (solo se lista; no se convierte aquí):"
   if [ -n "$(printf '%s' "$medias" | grep .)" ]; then printf '%s\n' "$medias" | grep .; else echo "  ninguno"; fi
+  mig_aviso_agents
 
   # El manifiesto solo cambia si algo se registró (real, no en simulación).
   if [ "$SIMULAR" = 0 ] && ! cmp -s "$MIG_MAN" "$MIG_TMP/manifiesto.original"; then

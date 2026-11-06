@@ -373,6 +373,78 @@ fi
 [ "$(huella "$e/proj")" = "$antes_p" ] || fallo "escenario 6: la combinación no válida cambió el proyecto"
 echo "ok escenario 6: --migrar con --proyecto da error y no cambia nada"
 
+# Workspace sintético en $1: raíz sin .git; api y web con .git; definitions/ en la raíz y una propia en api.
+crear_ws_v1() {
+  local p="$1"
+  mkdir -p "$p/definitions" "$p/api/definitions" "$p/web"
+  echo "# proyecto" > "$p/definitions/PROJECT.md"
+  echo "# repos" > "$p/definitions/REPOS.md"
+  echo "# api" > "$p/api/definitions/PROJECT.md"
+  git -C "$p/api" init -q && git -C "$p/web" init -q
+}
+
+# escenario 7: workspace -> old/v1 de la raíz, los hijos intactos, el log lista los hijos y dice que la raíz no es repo
+e="$T7/s7"; mkdir -p "$e/home" "$e/proj"; crear_ws_v1 "$e/proj"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 7: --migrar salió con error"; }
+p="$e/proj"
+[ -f "$p/old/v1/definitions/REPOS.md" ] || fallo "escenario 7: la definitions/ de la raíz no quedó en old/v1"
+[ ! -e "$p/definitions" ] || fallo "escenario 7: definitions/ de la raíz sigue en la raíz"
+[ -f "$p/api/definitions/PROJECT.md" ] || fallo "escenario 7: se movió la definitions/ del hijo api"
+[ ! -e "$p/.git" ] || fallo "escenario 7: la raíz quedó con .git"
+grep -qF "Workspace: repos hijos: api, web" "$e/log" || fallo "escenario 7: el log no lista los dos hijos"
+grep -q "La raíz no es repo" "$e/log" || fallo "escenario 7: el log no dice que la raíz no es repo"
+echo "ok escenario 7: workspace -> old/v1 de la raíz, hijos intactos, log con hijos y raíz sin repo"
+
+# escenario 7b: --simular en workspace con AGENTS.md de v1: el árbol (incluido .gitignore) queda igual y sale el aviso
+e="$T7/s7b"; mkdir -p "$e/home" "$e/proj"; crear_ws_v1 "$e/proj"
+echo "Lee definitions/PROJECT.md antes de empezar." > "$e/proj/AGENTS.md"
+antes_p=$(huella "$e/proj"); antes_h=$(huella "$e/home")
+k7 "$e" "$e/proj" --simular || { cat "$e/log" >&2; fallo "escenario 7b: --migrar --simular salió con error"; }
+[ "$(huella "$e/proj")" = "$antes_p" ] || fallo "escenario 7b: --simular cambió el workspace (incluido .gitignore)"
+[ "$(huella "$e/home")" = "$antes_h" ] || fallo "escenario 7b: --simular cambió el HOME"
+grep -qF "AVISO: AGENTS.md sigue siendo de v1 y apunta a rutas movidas: ejecuta la skill migrar-proyecto" "$e/log" || fallo "escenario 7b: falta el aviso de AGENTS.md en --simular"
+grep -qF "(simulación) agregaría .claude/settings.local.json" "$e/log" || fallo "escenario 7b: --simular no imprimió la línea de .gitignore"
+echo "ok escenario 7b: --simular en workspace no cambia el árbol y sale el aviso de AGENTS.md"
+
+# escenario 8: .gitignore con otras líneas: la de settings.local.json queda una sola vez, no aparece settings.json y no se pierde nada
+e="$T7/s8"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+printf 'node_modules\n.claude/settings.local.json\n' > "$e/proj/.gitignore"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 8: --migrar salió con error"; }
+[ "$(grep -cxF '.claude/settings.local.json' "$e/proj/.gitignore")" = 1 ] || fallo "escenario 8: la línea de settings.local.json no quedó una sola vez"
+grep -qxF 'node_modules' "$e/proj/.gitignore" || fallo "escenario 8: se perdió node_modules del .gitignore"
+grep -qxF '.claude/settings.json' "$e/proj/.gitignore" && fallo "escenario 8: .gitignore ignora .claude/settings.json (es compartido)"
+echo "ok escenario 8: .gitignore con línea repetida no duplica y conserva las demás"
+
+# escenario 8b: .gitignore sin salto final, y proyecto sin .gitignore: en ambos queda la línea una vez
+e="$T7/s8b"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+printf 'node_modules' > "$e/proj/.gitignore"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 8b: --migrar salió con error"; }
+grep -qxF 'node_modules' "$e/proj/.gitignore" || fallo "escenario 8b: se perdió node_modules al añadir la línea"
+[ "$(grep -cxF '.claude/settings.local.json' "$e/proj/.gitignore")" = 1 ] || fallo "escenario 8b: falta o se duplica la línea (.gitignore sin salto final)"
+e="$T7/s8c"; mkdir -p "$e/home" "$e/proj"; crear_v1 "$e/proj"
+k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 8c: --migrar salió con error"; }
+[ "$(grep -cxF '.claude/settings.local.json' "$e/proj/.gitignore")" = 1 ] || fallo "escenario 8c: sin .gitignore no se creó con la línea"
+grep -q "AVISO: AGENTS.md" "$e/log" && fallo "escenario 8c: salió aviso de AGENTS.md sin AGENTS.md"
+echo "ok escenario 8b y 8c: .gitignore sin salto final y sin .gitignore quedan con la línea una vez; sin AGENTS.md no hay aviso"
+
+# escenario 9: copia de Cleaner (repo con AGENTS.md): sin texto de workspace, con aviso, git mv de definitions/ y features/, .gitignore en git status
+C=/Users/franco/Codes/flucastr/Flucastr.Cleaner
+if [ -d "$C" ]; then
+  e="$T7/s9"; mkdir -p "$e/home"
+  cp -R "$C" "$e/proj"
+  antes_c=$(git -C "$C" status --porcelain | shasum)
+  k7 "$e" "$e/proj" || { cat "$e/log" >&2; fallo "escenario 9: --migrar sobre la copia de Cleaner salió con error"; }
+  grep -q "Workspace:" "$e/log" && fallo "escenario 9: la copia de Cleaner imprimió texto de workspace"
+  grep -qF "AVISO: AGENTS.md sigue siendo de v1" "$e/log" || fallo "escenario 9: falta el aviso de AGENTS.md"
+  git -C "$e/proj" ls-files | grep -q '^old/v1/definitions/' || fallo "escenario 9: git mv no movió definitions/"
+  git -C "$e/proj" ls-files | grep -q '^old/v1/features/' || fallo "escenario 9: git mv no movió features/"
+  git -C "$e/proj" status --short -- .gitignore | grep -q . || fallo "escenario 9: git status no muestra .gitignore"
+  [ "$(git -C "$C" status --porcelain | shasum)" = "$antes_c" ] || fallo "escenario 9: el original de Cleaner cambió"
+  echo "ok escenario 9: copia de Cleaner -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status"
+else
+  echo "omitido: escenario 9 (Cleaner no existe en este equipo)"
+fi
+
 # 8. workspaces: la detección de preparar-proyecto y los textos clave de los archivos del cambio
 paso 8 "workspaces (detección con find, textos clave de los archivos del cambio)"
 command -v git >/dev/null 2>&1 || fallo "falta git en el PATH"
@@ -396,6 +468,9 @@ textos_clave() { # $1: raíz del kit
   grep -q -- '-maxdepth 2' "$r/skills/preparar-proyecto/SKILL.md" || return 1
   grep -q 'git -C <carpeta' "$r/agentes/constructor.md" || return 1
   grep -q 'Nunca decides tú' "$r/agentes/principal.md" || return 1
+  grep -q 'REPOS.md' "$r/skills/migrar-proyecto/SKILL.md" || return 1
+  grep -q 'Descartado' "$r/skills/migrar-proyecto/SKILL.md" || return 1
+  grep -q 'repos:' "$r/skills/migrar-proyecto/SKILL.md" || return 1
 }
 textos_clave . || fallo "8b: falta algún texto clave en los archivos del cambio"
 neg="$T8/neg"
@@ -405,6 +480,15 @@ cp skills/preparar-proyecto/SKILL.md "$neg/skills/preparar-proyecto/"
 cp agentes/constructor.md agentes/principal.md "$neg/agentes/"
 sed '/^repos:/d' skills/planificar-cambio/SKILL.md > "$neg/skills/planificar-cambio/SKILL.md"
 if textos_clave "$neg"; then fallo "8b: una copia sin repos: pasó la comprobación de textos"; fi
-echo "ok 8b: textos clave presentes; una copia sin repos: falla la comprobación"
+# copia de la skill de migración sin «Descartado» (el resto completo): también debe fallar
+neg2="$T8/neg2"
+mkdir -p "$neg2/skills/planificar-cambio" "$neg2/skills/ejecutar-plan" "$neg2/skills/preparar-proyecto" "$neg2/skills/migrar-proyecto" "$neg2/agentes"
+cp skills/planificar-cambio/SKILL.md "$neg2/skills/planificar-cambio/"
+cp skills/ejecutar-plan/SKILL.md "$neg2/skills/ejecutar-plan/"
+cp skills/preparar-proyecto/SKILL.md "$neg2/skills/preparar-proyecto/"
+cp agentes/constructor.md agentes/principal.md "$neg2/agentes/"
+sed '/Descartado/d' skills/migrar-proyecto/SKILL.md > "$neg2/skills/migrar-proyecto/SKILL.md"
+if textos_clave "$neg2"; then fallo "8b: una copia de migrar-proyecto sin «Descartado» pasó la comprobación de textos"; fi
+echo "ok 8b: textos clave presentes; copias sin repos: o sin «Descartado» fallan la comprobación"
 
 echo "VERIFY OK"
