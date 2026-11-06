@@ -16,7 +16,7 @@
    - Primer cambio: crear el `verify` del proyecto con `preparar-proyecto` (build limpio, arranque y primer recorrido real).
    - Se considera superado si el proyecto llega a `verify` verde con solo las dos puertas de Franco, sin ampliaciones administrativas y sin abrir un plan por archivo.
    - Revisar en el PC de trabajo la hipótesis de `express`: si `src/access-http.ts` lo importa sin que esté en el `package.json` del API (llega solo como dependencia de `@nestjs/platform-express`). No se pudo comprobar desde este equipo.
-   - Migrar Cleaner real (`/Users/franco/Codes/flucastr/Flucastr.Cleaner`) con `bash instalar.sh --migrar <ruta> --simular` y luego sin `--simular`; después la skill `migrar-proyecto`. Lo hace Franco: los agentes no escriben en ese repo. La prueba sobre una copia ya está hecha (ver `cambios/migrar-v1-v2/plan.md`). La migración también cubre workspaces (repos hijos) y el `.gitignore` (ver `cambios/migrar-workspaces/plan.md`).
+   - Migrar Cleaner real (`/Users/franco/Codes/flucastr/Flucastr.Cleaner`) con `bash instalar.sh --migrar <ruta> --simular` y luego sin `--simular`; después la skill `migrar-proyecto`. Lo hace Franco: los agentes no escriben en ese repo. La prueba sobre una copia ya está hecha (ver `cambios/hechos/migrar-v1-v2/plan.md`). La migración también cubre workspaces (repos hijos) y el `.gitignore` (ver `cambios/hechos/migrar-workspaces/plan.md`).
 2. **Pi: probado en lo básico.** Una corrida real en Pi con un plan mínimo, con `skills: ejecutar-plan` e `inheritProjectContext: true`. `verify` comprueba que el constructor generado para Pi y para Claude Code trae `skills: ejecutar-plan`. Quedan pendientes:
    - Un plan de varios archivos en Pi.
    - El caso `PARCIAL` en Pi.
@@ -36,8 +36,8 @@
 - `AGENTS.md` apunta a `cambios/deny-endurecido/plan.md`; el plan está ahora en `cambios/hechos/deny-endurecido/`.
 - Los planes anteriores a `vocabulario-y-guias` quedaron con `estado: hecho`, un valor que la lista actual descarta. Son historia: no se tocan.
 - Algunos planes dicen «Probado por Franco» sobre pruebas que corrió el coordinador de la sesión de diseño.
-- Modo remoto de `verify` (`VERIFY_TARGET`, cambio `validar-despliegue`): falta la prueba funcional con un servidor de prueba (la hace el principal) y la comprobación contra un despliegue real (la hace Franco).
-- Skill `definir-proyecto` (cambio `definir-proyecto`): falta la prueba real en una carpeta nueva con el principal (las preguntas, y que no escriba antes de contestar).
+- Modo remoto de `verify` (`VERIFY_TARGET`, cambio `validar-despliegue`): probado con un servidor local (lectura, 500, escritura permitida, URL inválida). Falta la comprobación contra un despliegue real (la hace Franco) y cómo el recorrido de cada proyecto lee el correo en remoto (no hay Mailpit). Sin probar: «prepárame el despliegue» y la sección «Despliegue» en un proyecto real.
+- Skill `definir-proyecto`: probada en una carpeta vacía (4 preguntas, no escribe antes de contestar; con respuestas escribe `AGENTS.md`, `docs/proyecto.md` y `cambios/` y se detiene). Falta usarla en un proyecto nuevo real.
 
 ## Límites conocidos de las reglas deny
 
