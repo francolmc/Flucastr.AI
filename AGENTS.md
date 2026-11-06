@@ -10,7 +10,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un so
 - Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`, `migrar-proyecto` (tras `--migrar`).
 - Workspaces: un proyecto puede ser una carpeta sin `.git` con varios repos; su raíz es la unidad de trabajo (`AGENTS.md`, `docs/proyecto.md`, `cambios/`, `verify`). Cada plan lleva `repos:` (carpetas que toca; `[.]` si es un repo) y la rama se crea solo en esas. Ver `preparar-proyecto`, sección 4.
 - Comando `verify`: `./verify` (modelos.json ↔ agentes, sintaxis de instalar/desinstalar, resolver Claude/Pi, skills, `instalar.sh --simular`, reglas deny del proyecto, migración a v2 en proyectos sintéticos).
-- Migrar un proyecto de la v1: `bash instalar.sh --migrar <proyecto> [--simular]`. Mueve `definitions/`, `features/` y `registro/` a `<proyecto>/old/v1/` (sin borrar), deja el agente `principal`, quita el hook de v1, pone las 12 reglas deny y crea `cambios/`. Solo Claude Code y solo ese proyecto; no se combina con `--proyecto`, `--skills-proyecto`, `--copiar`, `--solo` ni `--agente`. Después, la skill `migrar-proyecto`.
+- Migrar un proyecto de la v1: `bash instalar.sh --migrar <proyecto> [--simular]`. Mueve `definitions/`, `features/` y `registro/` a `<proyecto>/old/v1/` (sin borrar), deja el agente `principal`, quita el hook de v1, pone las 12 reglas deny, agrega `.claude/settings.local.json` a `.gitignore`, lista los repos hijos de un workspace, avisa si `AGENTS.md` sigue siendo de v1 y crea `cambios/`. Solo Claude Code y solo ese proyecto; no se combina con `--proyecto`, `--skills-proyecto`, `--copiar`, `--solo` ni `--agente`. Después, la skill `migrar-proyecto`.
 
 ## Reglas
 

@@ -1,5 +1,5 @@
 ---
-estado: borrador
+estado: listo
 rama: feature/migrar-workspaces
 repos: [.]
 ---
@@ -39,18 +39,51 @@ Fuera de alcance: `desinstalar.sh`, `scripts/resolver.mjs`, `agentes/`, `old/v1/
 `./verify` — con escenarios nuevos en el escalón 7 (workspace sintético, `.gitignore` sin duplicar, aviso, copia de Cleaner o «omitido») y los textos clave de la skill en el escalón 8 (`REPOS.md`, `Descartado`, `repos:`).
 
 ## Pasos
-- [ ] En `migrar()`: detectar hijos con `.git`, imprimir el bloque de workspace y el aviso de raíz sin repo (solo cuando hay hijos).
-- [ ] En `migrar()`: función `mig_gitignore` (real y simulación) llamada tras `mig_deny`.
-- [ ] En `migrar()`: aviso del AGENTS.md de v1, también en `--simular`.
-- [ ] Reescribir `skills/migrar-proyecto/SKILL.md`: sección workspace (pregunta de repo propio según `preparar-proyecto` sección 4, sin `git init` sin respuesta), `docs/proyecto.md` condensado con lista «Descartado», planes con `repos:`, corrección de enlaces de `AGENTS.md`.
-- [ ] `verify` escalón 7: crear `crear_ws_v1` (raíz sin `.git`, `api` y `web` con `.git`, `definitions/` con `PROJECT.md` y `REPOS.md` en la raíz y una `definitions/` propia en `api`) y los escenarios de arriba; incluir la copia de Cleaner con `[ -d … ] || echo omitido`.
-- [ ] `verify` escalón 8: agregar los textos clave nuevos de la skill al `textos_clave` y comprobar que una copia sin ellos falla.
-- [ ] Prueba negativa: quitar a propósito la función `mig_gitignore` en una copia y ver que `./verify` falla; revertir.
-- [ ] `AGENTS.md` y `PENDIENTES.md`: una línea cada uno (migración cubre workspaces y `.gitignore`).
-- [ ] Correr `./verify` y pegar la cola en *Evidencia*.
+- [x] En `migrar()`: detectar hijos con `.git`, imprimir el bloque de workspace y el aviso de raíz sin repo (solo cuando hay hijos).
+- [x] En `migrar()`: función `mig_gitignore` (real y simulación) llamada tras `mig_deny`.
+- [x] En `migrar()`: aviso del AGENTS.md de v1, también en `--simular`.
+- [x] Reescribir `skills/migrar-proyecto/SKILL.md`: sección workspace (pregunta de repo propio según `preparar-proyecto` sección 4, sin `git init` sin respuesta), `docs/proyecto.md` condensado con lista «Descartado», planes con `repos:`, corrección de enlaces de `AGENTS.md`.
+- [x] `verify` escalón 7: crear `crear_ws_v1` (raíz sin `.git`, `api` y `web` con `.git`, `definitions/` con `PROJECT.md` y `REPOS.md` en la raíz y una `definitions/` propia en `api`) y los escenarios de arriba; incluir la copia de Cleaner con `[ -d … ] || echo omitido`.
+- [x] `verify` escalón 8: agregar los textos clave nuevos de la skill al `textos_clave` y comprobar que una copia sin ellos falla.
+- [x] Prueba negativa: quitar a propósito la función `mig_gitignore` en una copia y ver que `./verify` falla; revertir.
+- [x] `AGENTS.md` y `PENDIENTES.md`: una línea cada uno (migración cubre workspaces y `.gitignore`).
+- [x] Correr `./verify` y pegar la cola en *Evidencia*.
 
 ## Evidencia
-(la escribe el constructor)
+$ ./verify
+(cola de la salida real; la corrida completa se guardó en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/bc8c1bd8-6f3c-4990-8764-edc2a9748cad/scratchpad/verify-final.txt`)
+```
+ok escenario 3: reinstalar deja el archivo y las líneas deny iguales
+ok escenario 4: desinstalar devuelve el archivo original (con su Bash(git push *)) o no deja archivo
+ok escenario 5: JSON inválido -> no se toca, se avisa, no aborta
+ok escenario 6: actualización de 7 a 12 reglas; se agregan y registran solo las 5 nuevas
+ok escenario 7: las 7 del usuario sin manifiesto -> se agregan 5; desinstalar deja las 7
+== 7. migración a v2 (--migrar, --simular, repetición, sin v1) ==
+ok escenario 1: old/v1 con las tres carpetas, agente principal, sin hook, 12 deny, cambios/, lista de trabajo a medias
+ok escenario 2: repetir dice «old/v1 ya existe» y no cambia el árbol
+ok escenario 3: solo definitions/ -> se mueve y no hay error
+ok escenario 4: sin v1 -> «nada que migrar», sin cambios
+ok escenario 5: --simular imprime el plan y no cambia el árbol
+ok escenario 6: --migrar con --proyecto da error y no cambia nada
+ok escenario 7: workspace -> old/v1 de la raíz, hijos intactos, log con hijos y raíz sin repo
+ok escenario 7b: --simular en workspace no cambia el árbol y sale el aviso de AGENTS.md
+ok escenario 8: .gitignore con línea repetida no duplica y conserva las demás
+ok escenario 8b y 8c: .gitignore sin salto final y sin .gitignore quedan con la línea una vez; sin AGENTS.md no hay aviso
+ok escenario 9: copia de Cleaner -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
+== 8. workspaces (detección con find, textos clave de los archivos del cambio) ==
+ok 8a: workspace con dos hijos con .git -> find devuelve 2
+ok 8b: textos clave presentes; copias sin repos: o sin «Descartado» fallan la comprobación
+VERIFY OK
+exit 0
+```
+
+Prueba negativa (en una copia del kit, fuera del repo): sin la llamada `mig_gitignore` en `instalar.sh`, `./verify` sale con `exit 1` en el escenario 7b («--simular no imprimió la línea de .gitignore»).
 
 ## Notas
-(la escribe el constructor)
+- Rama `feature/migrar-workspaces` creada desde `feature/kit-v2` (el plan ya venía modificado sin commit y se llevó a la rama). Ningún commit.
+- Raíz «es repo» se comprueba con `-e .git` (no con `rev-parse`), para que un proyecto dentro de otro repo no se tome por repo propio.
+- El script imprime la línea «.gitignore:» antes del bloque de `.gitignore`; no se registra en el manifiesto (según *Supuestos*).
+- Corregido de paso un fallo propio antes de verificar: el prefijo «(simulación)» de `mig_gitignore` usaba `${SIMULAR:+…}`, que sale aunque `SIMULAR=0`; ahora compara con `= 1`.
+- `migrar-proyecto/SKILL.md` reescrita por secciones: nueva 2 (workspace, pregunta de repo propio sin `git init` sin respuesta), 3 (AGENTS.md con pregunta cerrada si menciona rutas de v1), 4 (`docs/proyecto.md` condensado con «Descartado»), 6 (planes con `repos:`).
+- El escenario 9 de `verify` copia Cleaner (3,1 MB) a un temporal; el original no cambia (comprobado con `git status --porcelain`). Como existe en este equipo, no salió «omitido».
+- Pendiente de Franco (no hecho por el agente): commit y push de la rama.
