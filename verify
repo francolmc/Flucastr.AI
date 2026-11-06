@@ -554,4 +554,23 @@ sed '/git diff --stat/d' agentes/principal.md > "$cneg/agentes/principal.md"
 if textos_contrato "$cneg"; then fallo "8c: un principal sin git diff --stat pasó la comprobación"; fi
 echo "ok 8c: contrato del constructor presente (grep -c, siguiente=, no_intentado=, 3 corridas, git diff --stat, sin PARCIAL:); copias sin esas frases fallan"
 
+# 8d. ejecutor y pasos atómicos: planificar-cambio, principal y README; una copia de planificar-cambio sin ejecutor: debe fallar
+textos_ejecutor() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'ejecutor:' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF '20 palabras' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  if grep -qF '60 palabras' "$r/skills/planificar-cambio/SKILL.md"; then return 1; fi
+  grep -qF 'ejecutor: principal' "$r/agentes/principal.md" || return 1
+  grep -qF 'claude --agent constructor' "$r/agentes/principal.md" || return 1
+  grep -qF 'pi-constructor' "$r/README.md" || return 1
+}
+textos_ejecutor . || fallo "8d: falta algún texto de ejecutor o de pasos atómicos"
+eneg="$T8/eneg"
+mkdir -p "$eneg/skills/planificar-cambio" "$eneg/agentes"
+cp agentes/principal.md "$eneg/agentes/"
+cp README.md "$eneg/"
+sed 's/ejecutor:/ejecutor/g' skills/planificar-cambio/SKILL.md > "$eneg/skills/planificar-cambio/SKILL.md"
+if textos_ejecutor "$eneg"; then fallo "8d: una copia de planificar-cambio sin ejecutor: pasó la comprobación"; fi
+echo "ok 8d: ejecutor:, 20 palabras (sin 60 palabras), ventana propia y pi-constructor presentes; copia sin ejecutor: falla"
+
 echo "VERIFY OK"

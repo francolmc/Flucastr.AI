@@ -41,6 +41,17 @@ Para desinstalar: `bash desinstalar.sh`.
 
 Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instalar y desinstalar es válida, que los modelos se resuelven para Claude y Pi, que las skills están completas, que `instalar.sh --simular` no escribe nada y que las reglas deny del proyecto están bien.
 
+## Ejecutar un plan en ventana propia
+
+Un plan pesado (muchos pasos, builds, Compose) puede correrse en una ventana propia del constructor, para ver el avance en vivo:
+
+```bash
+claude --agent constructor   # Claude Code
+pi-constructor               # Pi
+```
+
+Primer mensaje: `Plan: <ruta>` y `Rama: <rama>` (por ejemplo `Plan: cambios/mi-cambio/plan.md`, `Rama: feature/mi-cambio`). Es el mismo plan, el mismo agente y el mismo retorno que al delegar desde el principal; solo cambia que se ve en vivo.
+
 ## Estructura
 
 - `agentes/`: definiciones de `principal` y `constructor`.
