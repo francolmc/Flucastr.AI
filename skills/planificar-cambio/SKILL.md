@@ -1,0 +1,63 @@
+---
+name: planificar-cambio
+description: "Escribe el plan de un cambio en `cambios/<nombre>/plan.md`: el único documento que recibe el constructor. Úsala cuando el trabajo tiene varios pasos o cruza capas (web, API, base de datos)."
+---
+
+# Planificar un cambio
+
+El plan es el **traspaso** entre tú y el constructor. El constructor es un modelo pequeño que no vio tu conversación: solo sabe lo que está escrito. Escribe el plan para que no tenga que adivinar nada.
+
+## Antes de escribir
+
+- Explora e investiga hasta tener evidencia real: corre el build, lee los archivos, confirma que las rutas existen. Nunca cites en el plan un archivo que no hayas visto.
+- Si el cambio cruza capas, **un solo plan** cubre el recorrido completo. No abras un plan por archivo ni por capa.
+
+## Plantilla
+
+Crea `cambios/<nombre>/plan.md` (nombre corto en minúsculas con guiones):
+
+```markdown
+---
+estado: borrador
+rama: feature/<nombre>
+---
+# <Cambio>
+
+## Objetivo
+Una o dos frases: qué queda funcionando y para quién.
+
+## Alcance
+Carpetas y archivos donde el constructor puede cambiar cosas. Incluye todo el camino
+que el objetivo cruza (código, manifiestos, lock, Dockerfiles, configuración).
+Fuera de alcance: lo que NO se toca.
+
+## Decisiones ya tomadas
+Lo que el constructor no debe volver a decidir, cada una con su porqué en una línea.
+
+## Escenarios
+- CUANDO <situación> ENTONCES <resultado observable>
+
+## Verificación
+`<comando>` — el que define «hecho». Debe correr desde cero y fallar si algo falla.
+
+## Pasos
+- [ ] <paso concreto y comprobable>
+
+## Evidencia
+(la escribe el constructor)
+
+## Notas
+(la escribe el constructor)
+```
+
+## Reglas del buen plan
+
+1. **Alcance por camino, no por archivo.** Si el constructor encuentra un fallo relacionado dentro del alcance, lo corrige; no debe tener que parar por eso.
+2. **Un comando de verificación** que prueba el resultado final, no cada pieza. Si el proyecto aún no tiene `verify`, el primer plan es crearlo (`preparar-proyecto`).
+3. **De 3 a 10 pasos**, en orden, cada uno comprobable. Sin código completo salvo firmas o contratos que deban respetarse.
+4. **Corto.** Que un modelo pequeño lo lea entero sin esfuerzo. Si pasa de unos 5 KB, probablemente son dos cambios.
+5. **Decisiones cerradas.** Si falta una decisión de producto, pregúntala a Franco antes de pedir la aprobación; no la dejes abierta en el plan.
+
+## Antes de pedir la aprobación
+
+Relee el plan como si fueras el constructor sin contexto: ¿qué tendrías que adivinar? Corrige eso. Luego detente y di a Franco la ruta del plan. Con su «sí», cambia `estado: aprobado`.

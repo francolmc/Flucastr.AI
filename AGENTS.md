@@ -1,11 +1,19 @@
 # Flucastr.AI
 
-Kit personal de agentes, skills e instaladores para trabajar con IA en Claude Code y Pi. Un solo repo (remoto en GitHub: `francolmc/Flucastr.AI`). Estado: aprobado (2026-10-29).
+Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en construcción** (rama `feature/kit-v2`); la versión 1 está en el tag `kit-v1` y, mientras tanto, en `legacy/v1/`.
 
-- Qué es y cómo se prueba: [`definitions/PROJECT.md`](definitions/PROJECT.md)
-- Repos: [`definitions/REPOS.md`](definitions/REPOS.md)
-- Flujo de trabajo y tareas: [`definitions/WORKFLOW.md`](definitions/WORKFLOW.md)
-- Estructura y diagrama: [`definitions/ARCHITECTURE.md`](definitions/ARCHITECTURE.md)
-- Consumo de contexto y lectura por rol: [`definitions/CONTEXTO.md`](definitions/CONTEXTO.md)
+## Cómo funciona (v2)
 
-Reglas: no hay commit, push, PR, merge ni despliegue por parte de agentes (los commits y el PR los hace Franco); no se leen `.env`, llaves ni credenciales; una tarea, un archivo. Git de escritura permitido al `constructor`: crear la rama de la feature (`git switch -c`) y, solo con confirmación expresa de Franco (línea `CONFIRMAR:`), `git switch <rama>` a una rama existente; sin commit, push ni merge (`definitions/WORKFLOW.md` §9.1). En yolo rige la misma regla de rama y, con varias features, se detiene al terminar cada una para que Franco commitee (§9.3). Excepción acotada: el modo «yolo» (§9.3), solo a pedido explícito de Franco en la conversación; omite las puertas 2, 3 y 4 y no levanta ninguna otra regla de esta línea. `registro/` no se lee salvo pedido explícito de Franco.
+- Dos agentes: `principal` (nivel medio: investiga, diagnostica, planifica, verifica) y `constructor` (nivel bajo: aplica el plan). Los niveles se traducen a modelos en `modelos.json`.
+- El único traspaso es `cambios/<nombre>/plan.md`. Franco tiene dos puertas: aprobar el plan y revisar la evidencia.
+- «Hecho» significa que el comando `verify` del proyecto pasa desde cero.
+- Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`.
+- Comando `verify`: `./verify` (modelos.json ↔ agentes, sintaxis de instalar/desinstalar, resolver Claude/Pi, skills, `instalar.sh --simular`).
+
+## Reglas
+
+- Los agentes no hacen commit, push, PR, merge ni despliegue: lo hace Franco.
+- No se leen `.env`, llaves ni credenciales (`.env.example` sí).
+- Git permitido a los agentes: crear la rama del cambio con `git switch -c <prefijo>/<nombre>` (`feature/`, `fix/`, `chore/`, `docs/`).
+
+`definitions/`, `features/`, `scripts/` (salvo `resolver.mjs`) y `pruebas/` son de la versión 1 y se retiran en el paso 3 del rediseño. `registro/` no se lee salvo pedido explícito de Franco.

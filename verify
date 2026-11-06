@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# verify: comprueba que la v2 del kit está coherente. Sin Docker, sin escribir fuera del repo.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+fallo() { echo "FALLO: $*" >&2; exit 1; }
+paso() { echo "== $1. $2 =="; }
+
+command -v node >/dev/null 2>&1 || fallo "falta node en el PATH"
+
+# Cuenta los archivos bajo ~/.claude y ~/.pi (los que existan).
+conteo() {
+  local d n=0 c
+  for d in "$HOME/.claude" "$HOME/.pi"; do
+    if [ -d "$d" ]; then
+      c=$(find "$d" -type f 2>/dev/null | wc -l | tr -d ' ')
+      n=$(( n + c ))
+    fi
+  done
+  echo "$n"
+}
+
+# 1. modelos.json <-> agentes/*.md
+paso 1 "modelos.json parsea y agentes coinciden"
+node -e '
+const fs = require("fs");
+let m;
+try { m = JSON.parse(fs.readFileSync("modelos.json", "utf8")); }
+catch (e) { console.error("FALLO: modelos.json no es JSON válido: " + e.message); process.exit(1); }
+const claves = Object.keys(m.agentes || {}).sort();
+const archivos = fs.readdirSync("agentes").filter(f => f.endsWith(".md")).map(f => f.slice(0, -3)).sort();
+const sobran = claves.filter(c => !archivos.includes(c));
+const faltan = archivos.filter(a => !claves.includes(a));
+if (sobran.length || faltan.length) {
+  console.error("FALLO: agentes sin correspondencia. En modelos.json sin archivo: " + (sobran.join(", ") || "-") + "; archivo sin entrada en modelos.json: " + (faltan.join(", ") || "-"));
+  process.exit(1);
+}
+console.log("agentes: " + archivos.join(", "));
+'
+
+# 2. sintaxis de los instaladores
+paso 2 "sintaxis de instalar.sh y desinstalar.sh"
+for f in instalar.sh desinstalar.sh; do
+  bash -n "$f" || fallo "error de sintaxis en $f"
+  echo "ok $f"
+done
+
+# 3. resolver para cada agente y cada herramienta
+paso 3 "resolver Claude Code y Pi por agente"
+chequear() {
+  local nombre="$1" ruta="$2" herr="$3" cmd="$4" etiqueta="$5" modelo salida
+  modelo=$(node scripts/resolver.mjs modelo "$nombre" "$herr") || fallo "resolver modelo $nombre $herr falló"
+  salida=$(node scripts/resolver.mjs "$cmd" "$ruta") || fallo "resolver $cmd $ruta falló"
+  grep -qxF "model: $modelo" <<<"$salida" || fallo "$ruta ($etiqueta): falta la línea 'model: $modelo'"
+  grep -qxF "Herramienta: $etiqueta | Modelo: $modelo | Agente: $nombre" <<<"$salida" \
+    || fallo "$ruta ($etiqueta): falta la línea de identidad 'Herramienta: $etiqueta | Modelo: $modelo | Agente: $nombre'"
+  echo "ok $nombre $etiqueta $modelo"
+}
+for ruta in agentes/*.md; do
+  nombre=$(basename "$ruta" .md)
+  chequear "$nombre" "$ruta" claude-code agente-claude "Claude Code"
+  chequear "$nombre" "$ruta" pi agente-pi "Pi"
+done
+
+# 4. skills: SKILL.md con name (= carpeta) y description
+paso 4 "skills con SKILL.md, name y description"
+for dir in skills/*/; do
+  dir=${dir%/}
+  nombre=$(basename "$dir")
+  arch="$dir/SKILL.md"
+  [ -f "$arch" ] || fallo "$dir no tiene SKILL.md"
+  node -e '
+const fs = require("fs");
+const [arch, carpeta] = process.argv.slice(1);
+const t = fs.readFileSync(arch, "utf8");
+const m = t.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+const fail = c => { console.error("FALLO: " + arch + ": " + c); process.exit(1); };
+if (!m) fail("sin frontmatter");
+const campo = k => {
+  const r = m[1].match(new RegExp("^" + k + ":[ \\t]*(.*)$", "m"));
+  return r ? r[1].trim().replace(/^(["\x27])(.*)\1$/, "$2").trim() : null;
+};
+const name = campo("name"), desc = campo("description");
+if (!name) fail("falta name");
+if (name !== carpeta) fail("name \"" + name + "\" distinto de la carpeta \"" + carpeta + "\"");
+if (!desc) fail("falta description o está vacía");
+console.log("ok " + carpeta);
+' "$arch" "$nombre"
+done
+
+# 5. instalar.sh --simular no escribe y sale 0
+paso 5 "instalar.sh --simular sale 0 y no escribe"
+antes=$(conteo)
+bash instalar.sh --simular >/dev/null || fallo "instalar.sh --simular salió con error"
+despues=$(conteo)
+[ "$antes" = "$despues" ] || fallo "instalar.sh --simular cambió archivos bajo ~/.claude o ~/.pi ($antes -> $despues)"
+echo "ok archivos bajo ~/.claude y ~/.pi: $despues"
+
+echo "VERIFY OK"

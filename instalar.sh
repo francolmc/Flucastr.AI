@@ -22,7 +22,7 @@ SIMULAR=0
 MODO=repo
 SOLO=""
 PROYECTO=""
-AGENTE="arquitecto"
+AGENTE="principal"
 SKILLS_PROYECTO=0
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -536,7 +536,7 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
     echo "Proyecto ($PROYECTO)"
     fijar_agente_proyecto
     instalar_compactacion_claude
-    instalar_hook_claude
+    # v2: sin hook del validador de tareas (era de v1; ver legacy/v1/).
   fi
 else
   echo "Claude Code: no encontrado, se omite."
@@ -602,6 +602,6 @@ fi
 
 echo
 echo "Listo. Reinicia Claude Code y Pi."
-echo "  Claude Code: claude --agent arquitecto   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)"
-echo "  Pi:          pi-arquitecto"
+echo "  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)"
+echo "  Pi:          pi-principal"
 echo "Si cambias modelos.json, vuelve a correr: bash instalar.sh"
