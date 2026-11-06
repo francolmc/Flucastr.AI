@@ -520,4 +520,38 @@ sed '/VERIFY_TARGET/d' skills/preparar-proyecto/referencia.md > "$neg4/skills/pr
 if textos_clave "$neg4"; then fallo "8b: una copia sin VERIFY_TARGET en referencia.md pasó la comprobación de textos"; fi
 echo "ok 8b: textos clave presentes (incluido el modo remoto y Despliegue); copias sin repos:, sin «Descartado», sin definir-proyecto o sin VERIFY_TARGET fallan la comprobación"
 
+# 8c. contrato del constructor: cuenta externa, siguiente= y no_intentado=, 3 corridas, git diff --stat en el principal, sin PARCIAL:
+textos_contrato() { # $1: raíz del kit
+  local r=$1 f
+  for f in agentes/constructor.md skills/ejecutar-plan/SKILL.md; do
+    grep -qF "grep -c '^- \[ \]'" "$r/$f" || return 1
+    grep -qF 'siguiente=' "$r/$f" || return 1
+    grep -qF 'no_intentado=' "$r/$f" || return 1
+    grep -qF '3 corridas' "$r/$f" || return 1
+  done
+  grep -qF 'git diff --stat' "$r/agentes/principal.md" || return 1
+  if grep -qF 'PARCIAL:' "$r/agentes/constructor.md"; then return 1; fi
+}
+textos_contrato . || fallo "8c: falta algún texto del contrato del constructor"
+cneg="$T8/cneg"
+mkdir -p "$cneg/agentes" "$cneg/skills/ejecutar-plan"
+cp agentes/principal.md "$cneg/agentes/"
+cp skills/ejecutar-plan/SKILL.md "$cneg/skills/ejecutar-plan/"
+# copia del constructor sin la cuenta externa (grep -c): debe fallar
+sed '/grep -c/d' agentes/constructor.md > "$cneg/agentes/constructor.md"
+if textos_contrato "$cneg"; then fallo "8c: un constructor sin grep -c pasó la comprobación"; fi
+# copia de ejecutar-plan sin no_intentado=: debe fallar
+cp agentes/constructor.md "$cneg/agentes/"
+sed '/no_intentado=/d' skills/ejecutar-plan/SKILL.md > "$cneg/skills/ejecutar-plan/SKILL.md"
+if textos_contrato "$cneg"; then fallo "8c: un ejecutar-plan sin no_intentado= pasó la comprobación"; fi
+# copia del constructor con una línea PARCIAL: : debe fallar
+{ cat agentes/constructor.md; echo 'PARCIAL: plan=x; hecho=1/2; causa=y'; } > "$cneg/agentes/constructor.md"
+cp skills/ejecutar-plan/SKILL.md "$cneg/skills/ejecutar-plan/"
+if textos_contrato "$cneg"; then fallo "8c: un constructor con PARCIAL: pasó la comprobación"; fi
+# principal sin git diff --stat: debe fallar
+cp agentes/constructor.md "$cneg/agentes/"
+sed '/git diff --stat/d' agentes/principal.md > "$cneg/agentes/principal.md"
+if textos_contrato "$cneg"; then fallo "8c: un principal sin git diff --stat pasó la comprobación"; fi
+echo "ok 8c: contrato del constructor presente (grep -c, siguiente=, no_intentado=, 3 corridas, git diff --stat, sin PARCIAL:); copias sin esas frases fallan"
+
 echo "VERIFY OK"

@@ -28,12 +28,13 @@ Eres el agente principal. Entiendes qué quiere Franco, investigas lo que haga f
 4. **Delega.** Con el plan aprobado, lanza al `constructor` con la ruta del plan y la `Rama:`. Nada más: el plan es el traspaso. Si falta contexto, se escribe en el plan, no en el mensaje.
 5. **Al volver el constructor.**
    - `COMPLETADO`: corre tú `verify` y lee la evidencia. Si pasa, **puerta 2:** Franco revisa y hace el commit.
-   - `PARCIAL` o `PAUSA` (el plan queda en `estado: parcial`): diagnostica con lo que trae, corrige el plan (o el problema), vuelve a poner `estado: aprobado` y relanza. El constructor solo arranca con `aprobado`. Pregunta a Franco solo si cambia el alcance o es decisión de producto.
+   - `PAUSA` (el plan queda en `estado: parcial`): elige una de las opciones que trae o corrige el problema, vuelve a poner `estado: aprobado` y relanza. El constructor solo arranca con `aprobado`. Pregunta a Franco solo si cambia el alcance o es decisión de producto.
+   - Tras una `PAUSA` o un corte, no te fíes de las casillas del plan: reconstruye el estado con `git status` y `git diff --stat` en cada carpeta de `repos:`, y revisa que existan los archivos que el plan espera. Escribe lo que encontraste en *Notas* antes de decidir y relanzar.
 6. **Cierra** cuando Franco confirme: actualiza lo duradero (`AGENTS.md` y, si cambió algo de fondo, `docs/proyecto.md`) y mueve la carpeta a `cambios/hechos/` **sin cambiar `estado`**: la carpeta es la marca. No existe un estado `hecho`.
 
 ## Cuándo preguntar a Franco
 
-Solo por: una decisión de producto o de alcance, credenciales o acceso, o un `PARCIAL` que se repite con la misma causa.
+Solo por: una decisión de producto o de alcance, credenciales o acceso, o una `PAUSA` que se repite con la misma causa.
 
 Ante un pedido ambiguo:
 

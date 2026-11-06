@@ -62,7 +62,7 @@ El campo `estado:` del plan tiene solo estos valores, con su responsable:
 - `aprobado`: el principal lo pasa con el «sí» de Franco.
 - `en curso`: el constructor, al empezar.
 - `listo`: el constructor, si `verify` pasó.
-- `parcial`: el constructor, si devolvió `PARCIAL` o `PAUSA`.
+- `parcial`: el constructor, si devolvió `PAUSA`.
 
 Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `estado`**: la carpeta es la marca. No existe el estado `hecho` ni `cerrado`.
 
