@@ -1,5 +1,5 @@
 ---
-estado: listo
+estado: hecho
 rama: feature/kit-v2
 ---
 # reglas-deny-por-proyecto
