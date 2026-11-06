@@ -506,6 +506,11 @@ const REGLAS_DENY_CLAUDE = [
   "Bash(git merge *)",
   "Bash(gh pr create *)",
   "Bash(gh pr merge *)",
+  "Bash(git * commit *)",
+  "Bash(git * push *)",
+  "Bash(bash -c *)",
+  "Bash(sh -c *)",
+  "Bash(zsh -c *)",
 ];
 
 // Solo el settings.json de un proyecto: nunca ~/.claude/settings.json ni settings.local.json.
