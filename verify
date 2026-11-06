@@ -8,17 +8,59 @@ paso() { echo "== $1. $2 =="; }
 
 command -v node >/dev/null 2>&1 || fallo "falta node en el PATH"
 
-# Cuenta los archivos bajo ~/.claude y ~/.pi (los que existan).
-conteo() {
-  local d n=0 c
-  for d in "$HOME/.claude" "$HOME/.pi"; do
-    if [ -d "$d" ]; then
-      c=$(find "$d" -type f 2>/dev/null | wc -l | tr -d ' ')
-      n=$(( n + c ))
-    fi
+# Instantánea de lo que instalar.sh escribe: cada ruta vigilada (sin seguir enlaces),
+# el destino de cada enlace simbólico y el hash de cada archivo (siguiendo enlaces).
+# Las rutas salen de $HOME y PI_CODING_AGENT_DIR al llamarla. Las que no existen cuentan como vacías.
+instantanea() {
+  local base="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}" r lista=""
+  for r in "$HOME/.claude/agents" "$HOME/.claude/skills" "$base/agents" "$base/skills" "$HOME"/.local/bin/pi-*; do
+    if [ -e "$r" ] || [ -L "$r" ]; then lista="$lista$r"$'\n'; fi
   done
-  echo "$n"
+  {
+    printf '%s' "$lista" | while IFS= read -r r; do find "$r" -print; done | sed 's/^/ruta /'
+    printf '%s' "$lista" | while IFS= read -r r; do
+      find "$r" -type l -print0 | while IFS= read -r -d '' l; do echo "enlace $l -> $(readlink "$l")"; done
+    done
+    printf '%s' "$lista" | while IFS= read -r r; do find -L "$r" -type f -exec shasum {} +; done | sed 's/^/hash /'
+  } | sort
 }
+
+# 5a. autoprueba de la instantánea en un HOME temporal (siempre corre). Subshell: el temporal se borra al salir.
+autoprueba_5a() (
+  tmp=$(mktemp -d) || { echo "FALLO: no pude crear el temporal" >&2; exit 1; }
+  trap '[ -n "${tmp:-}" ] && rm -rf "$tmp"' EXIT
+  unset PI_CODING_AGENT_DIR
+  export HOME="$tmp"
+  mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.pi/agent/agents" "$HOME/.pi/agent/skills" "$HOME/.local/bin"
+
+  # (i) añadir un archivo en cada ruta vigilada, de a uno: la instantánea debe cambiar
+  previa=$(instantanea) || exit 1
+  for destino in .claude/agents .claude/skills .pi/agent/agents .pi/agent/skills .local/bin; do
+    f=prueba.md
+    if [ "$destino" = .local/bin ]; then f=pi-prueba; fi
+    echo a > "$HOME/$destino/$f"
+    nueva=$(instantanea) || exit 1
+    [ "$nueva" != "$previa" ] || { echo "FALLO: autoprueba: añadir $destino/$f no cambió la instantánea" >&2; exit 1; }
+    previa=$nueva
+  done
+
+  # (ii) cambiar el contenido de un archivo existente: la instantánea debe cambiar
+  echo b > "$HOME/.claude/agents/prueba.md"
+  nueva=$(instantanea) || exit 1
+  [ "$nueva" != "$previa" ] || { echo "FALLO: autoprueba: cambiar .claude/agents/prueba.md no cambió la instantánea" >&2; exit 1; }
+  previa=$nueva
+
+  # (iii) transcripts nuevos y history.jsonl modificado: la instantánea NO debe cambiar
+  echo '{}' > "$HOME/.claude/history.jsonl"
+  previa=$(instantanea) || exit 1
+  mkdir -p "$HOME/.claude/projects/x"
+  echo '{}' > "$HOME/.claude/projects/x/transcript.jsonl"
+  echo '{"n":2}' >> "$HOME/.claude/history.jsonl"
+  nueva=$(instantanea) || exit 1
+  [ "$nueva" = "$previa" ] || { echo "FALLO: autoprueba: transcripts o history.jsonl alteraron la instantánea" >&2; exit 1; }
+
+  echo "ok autoprueba: reacciona a añadir y cambiar; ignora transcripts e history"
+)
 
 # 1. modelos.json <-> agentes/*.md
 paso 1 "modelos.json parsea y agentes coinciden"
@@ -88,12 +130,17 @@ console.log("ok " + carpeta);
 ' "$arch" "$nombre"
 done
 
-# 5. instalar.sh --simular no escribe y sale 0
-paso 5 "instalar.sh --simular sale 0 y no escribe"
-antes=$(conteo)
+# 5. instalar.sh --simular no escribe lo que instala
+paso 5 "instalar.sh --simular no escribe lo que instala"
+autoprueba_5a || exit 1
+echo "-- 5b. instalar.sh --simular sobre el home real"
+antes=$(instantanea) || fallo "no pude tomar la instantánea previa"
 bash instalar.sh --simular >/dev/null || fallo "instalar.sh --simular salió con error"
-despues=$(conteo)
-[ "$antes" = "$despues" ] || fallo "instalar.sh --simular cambió archivos bajo ~/.claude o ~/.pi ($antes -> $despues)"
-echo "ok archivos bajo ~/.claude y ~/.pi: $despues"
+despues=$(instantanea) || fallo "no pude tomar la instantánea posterior"
+if [ "$antes" != "$despues" ]; then
+  diff <(printf '%s\n' "$antes") <(printf '%s\n' "$despues") >&2 || true
+  fallo "instalar.sh --simular cambió lo que instala (ver diff arriba)"
+fi
+echo "ok instantánea sin cambios ($(printf '%s\n' "$despues" | grep -c .) líneas)"
 
 echo "VERIFY OK"
