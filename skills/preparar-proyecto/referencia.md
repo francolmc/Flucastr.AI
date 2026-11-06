@@ -7,15 +7,39 @@ Punto de partida para adaptar. Nombres, puertos y rutas son de ejemplo. Las URLs
 ```bash
 #!/usr/bin/env bash
 # Build limpio -> arranque real -> recorrido real. Sale con código != 0 en el primer escalón roto.
+# Con VERIFY_TARGET=<url> corre solo el recorrido contra un entorno ya desplegado (sin docker).
 set -euo pipefail
 cd "$(dirname "$0")"
+
+paso() { printf '\n== %s ==\n' "$1"; }
+
+# Modo remoto: VERIFY_TARGET=https://... ./verify. Solo lectura, salvo VERIFY_PERMITIR_ESCRITURA=1.
+if [ -n "${VERIFY_TARGET:-}" ]; then
+  case "$VERIFY_TARGET" in
+    http://*|https://*) ;;
+    *) echo "VERIFY_TARGET debe empezar por http:// o https://: $VERIFY_TARGET" >&2; exit 1 ;;
+  esac
+  API_URL="${API_URL:-$VERIFY_TARGET}"
+  WEB_URL="${WEB_URL:-$VERIFY_TARGET}"
+  SOLO_LECTURA=1
+  if [ "${VERIFY_PERMITIR_ESCRITURA:-0}" = 1 ]; then SOLO_LECTURA=0; fi
+  ESCRIBE=sí
+  if grep -q '^# VERIFY_ESCRIBE: no' verify-flujo.sh; then ESCRIBE=no; fi
+  echo "MODO REMOTO: $VERIFY_TARGET"
+  if [ "$SOLO_LECTURA" = 1 ] && [ "$ESCRIBE" = sí ]; then
+    echo "OMITIDO: el recorrido escribe (# VERIFY_ESCRIBE: sí); para permitirlo: VERIFY_PERMITIR_ESCRITURA=1"
+  fi
+  paso "Recorrido real (remoto)"
+  API_URL="$API_URL" WEB_URL="$WEB_URL" MAILPIT_URL="${MAILPIT_URL:-}" VERIFY_SOLO_LECTURA="$SOLO_LECTURA" ./verify-flujo.sh
+  if [ "$SOLO_LECTURA" = 1 ]; then echo "VERIFY OK (solo lectura)"; else echo "VERIFY OK"; fi
+  exit 0
+fi
 
 PROYECTO="verify_$$"
 C="docker compose -p $PROYECTO -f docker-compose.verify.yml"
 API_URL="http://localhost:${API_PORT:-3000}"
 WEB_URL="http://localhost:${WEB_PORT:-8080}"
 
-paso() { printf '\n== %s ==\n' "$1"; }
 limpiar() { $C down -v --remove-orphans >/dev/null 2>&1 || true; }
 trap limpiar EXIT
 
@@ -87,10 +111,25 @@ Es lo único que cambia de verdad entre proyectos: el recorrido clave de punta a
 
 ```bash
 #!/usr/bin/env bash
+# VERIFY_ESCRIBE: sí
 # Recorrido de ejemplo: pedir acceso -> leer el correo -> entrar. Adaptar a tu flujo.
+# «Lectura» corre siempre; «Escritura» se salta con VERIFY_SOLO_LECTURA=1 (modo remoto).
 set -euo pipefail
 
-EMAIL="prueba-$$@example.com"
+# --- Lectura: no escribe nada ---
+comprobar() { curl -fsS "$1" >/dev/null || { echo "Falla: $1" >&2; exit 1; }; }
+comprobar "$API_URL/health"
+comprobar "$WEB_URL/"
+echo "Lectura OK"
+
+if [ "${VERIFY_SOLO_LECTURA:-0}" = 1 ]; then
+  echo "Escritura: omitida (solo lectura)"
+  exit 0
+fi
+
+# --- Escritura: crea datos de prueba marcados (verify-<pid>@example.invalid) ---
+MAILPIT_URL="${MAILPIT_URL:?define MAILPIT_URL para el recorrido de escritura}"
+EMAIL="verify-$$@example.invalid"
 
 # 1) Pedir acceso al API (ajusta la ruta y el cuerpo).
 curl -fsS -X POST "$API_URL/auth/request-access" \
@@ -110,4 +149,6 @@ echo "TODO: completar los pasos 3 en adelante con el flujo real del proyecto" >&
 exit 1
 ```
 
-El `exit 1` final es deliberado: un recorrido a medio escribir **no debe pasar**. Se quita cuando el flujo está completo.
+El `exit 1` final es deliberado: un recorrido a medio escribir **no debe pasar**. Se quita cuando el flujo está completo. Vive dentro de la sección «Escritura».
+
+La primera línea declara si el recorrido escribe: `# VERIFY_ESCRIBE: sí` o `no`. Si falta, se trata como `sí`. Con `VERIFY_TARGET` (modo remoto) y sin `VERIFY_PERMITIR_ESCRITURA=1`, `verify` omite la escritura con un aviso «OMITIDO» y termina bien solo si la lectura pasó («solo lectura»).

@@ -22,7 +22,7 @@ Trabajas en dos tiempos. No los mezcles.
 Escribe solo esto, en la raíz:
 
 - **`AGENTS.md`**: formato y límite (unas 40 líneas) de `preparar-proyecto`, sección 1. El comando `./verify` aparece marcado como pendiente: «(pendiente: lo crea el plan del esqueleto)». Las skills del kit se nombran en una sola línea, sin describirlas.
-- **`docs/proyecto.md`**: una página con estas secciones: Qué es, Para quién, MVP, Fuera de alcance, Decisiones (cada una con su porqué). En un workspace, añade «Repos» (carpeta y rol). No hay sección «Despliegue» todavía.
+- **`docs/proyecto.md`**: una página con estas secciones: Qué es, Para quién, MVP, Fuera de alcance, Decisiones (cada una con su porqué). En un workspace, añade «Repos» (carpeta y rol). Añade también «Despliegue» con sus cinco líneas (ver `preparar-proyecto`, sección 5); lo que no se sabe va como «pendiente», sin inventar valores.
 - **`cambios/`**: carpeta con un `.gitkeep`.
 
 No creas carpetas de repos hijos ni código: eso es el plan del esqueleto.

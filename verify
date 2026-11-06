@@ -475,6 +475,11 @@ textos_clave() { # $1: raíz del kit
   grep -q 'repo o un workspace' "$r/skills/definir-proyecto/SKILL.md" || return 1
   grep -q 'docs/proyecto.md' "$r/skills/definir-proyecto/SKILL.md" || return 1
   grep -q 'Fuera de alcance' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -q 'VERIFY_TARGET' "$r/skills/preparar-proyecto/referencia.md" || return 1
+  grep -q 'VERIFY_PERMITIR_ESCRITURA' "$r/skills/preparar-proyecto/referencia.md" || return 1
+  grep -q 'Despliegue' "$r/skills/preparar-proyecto/SKILL.md" || return 1
+  grep -q 'Despliegue' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -q 'prepárame el despliegue' "$r/agentes/principal.md" || return 1
 }
 textos_clave . || fallo "8b: falta algún texto clave en los archivos del cambio"
 neg="$T8/neg"
@@ -502,6 +507,17 @@ cp skills/preparar-proyecto/SKILL.md "$neg3/skills/preparar-proyecto/"
 cp skills/migrar-proyecto/SKILL.md "$neg3/skills/migrar-proyecto/"
 cp agentes/constructor.md agentes/principal.md "$neg3/agentes/"
 if textos_clave "$neg3"; then fallo "8b: una copia sin la skill definir-proyecto pasó la comprobación de textos"; fi
-echo "ok 8b: textos clave presentes; copias sin repos:, sin «Descartado» o sin definir-proyecto fallan la comprobación"
+# copia completa pero sin VERIFY_TARGET en referencia.md (modo remoto): también debe fallar
+neg4="$T8/neg4"
+mkdir -p "$neg4/skills/planificar-cambio" "$neg4/skills/ejecutar-plan" "$neg4/skills/preparar-proyecto" "$neg4/skills/migrar-proyecto" "$neg4/skills/definir-proyecto" "$neg4/agentes"
+cp skills/planificar-cambio/SKILL.md "$neg4/skills/planificar-cambio/"
+cp skills/ejecutar-plan/SKILL.md "$neg4/skills/ejecutar-plan/"
+cp skills/preparar-proyecto/SKILL.md "$neg4/skills/preparar-proyecto/"
+cp skills/migrar-proyecto/SKILL.md "$neg4/skills/migrar-proyecto/"
+cp skills/definir-proyecto/SKILL.md "$neg4/skills/definir-proyecto/"
+cp agentes/constructor.md agentes/principal.md "$neg4/agentes/"
+sed '/VERIFY_TARGET/d' skills/preparar-proyecto/referencia.md > "$neg4/skills/preparar-proyecto/referencia.md"
+if textos_clave "$neg4"; then fallo "8b: una copia sin VERIFY_TARGET en referencia.md pasó la comprobación de textos"; fi
+echo "ok 8b: textos clave presentes (incluido el modo remoto y Despliegue); copias sin repos:, sin «Descartado», sin definir-proyecto o sin VERIFY_TARGET fallan la comprobación"
 
 echo "VERIFY OK"

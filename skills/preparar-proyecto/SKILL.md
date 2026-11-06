@@ -55,6 +55,18 @@ Hay un esqueleto para adaptar en `referencia.md`, junto a esta skill. Es un punt
 
 Corre `./verify` en un clon limpio o con el árbol sin artefactos de build. Un `verify` que nunca falló no demuestra nada: rómpelo a propósito una vez (por ejemplo, quita una dependencia) y confirma que lo detecta.
 
+## 3b. Modo remoto (entorno ya desplegado)
+
+`VERIFY_TARGET=<url> ./verify` no construye ni arranca nada (no llama a `docker`): corre solo `verify-flujo.sh` contra esa URL.
+
+- `VERIFY_TARGET` debe empezar por `http://` o `https://`; si no, sale con error antes de hacer nada.
+- `API_URL` y `WEB_URL`, si ya están definidas, ganan; si no, toman el valor de `VERIFY_TARGET`.
+- Imprime siempre `MODO REMOTO: <url>`.
+- El recorrido se divide en «Lectura» (siempre) y «Escritura» (la que crea datos). Sin `VERIFY_PERMITIR_ESCRITURA=1`, la escritura se omite con un aviso `OMITIDO` y `verify` termina bien solo si la lectura pasó: `VERIFY OK (solo lectura)`.
+- Con `VERIFY_PERMITIR_ESCRITURA=1` corre también la escritura. Sus datos de prueba son correos `verify-<pid>@example.invalid` y cualquier nombre con prefijo `verify-`, para borrarlos después. `verify` no garantiza limpiar el entorno remoto.
+- Un recorrido declara si escribe con `# VERIFY_ESCRIBE: sí` o `no` en su primera línea. Si falta, se trata como `sí`.
+- El principal no corre `VERIFY_TARGET` contra producción. La comprobación posterior al despliegue la corre Franco.
+
 ## 4. Workspaces (carpeta que no es repo y contiene varios)
 
 Un workspace es una carpeta sin `.git` que contiene repos. Su raíz es la unidad de trabajo: `AGENTS.md`, `docs/proyecto.md`, `cambios/`, `verify`. Los planes listan en `repos:` las carpetas que tocan.
@@ -76,3 +88,27 @@ Flujo de un workspace existente (d):
 2. El principal enlaza los `AGENTS.md` de los hijos (y `specs/` si existen) sin reescribirlos ni moverlos.
 3. El constructor solo construye lo que falta: `verify` (que llama a cada repo por su ruta), `/health`, `.env.example`.
 4. `verify`, `cambios/` y los documentos van en la raíz.
+
+## 5. Sección «Despliegue» en docs/proyecto.md
+
+`docs/proyecto.md` lleva una sección `## Despliegue` con cinco líneas:
+
+1. Dónde se despliega (servicio, plataforma o host).
+2. Nombres de las variables requeridas, nunca sus valores (las de `.env.example`).
+3. Cómo se aplican las migraciones.
+4. Cómo se vuelve atrás.
+5. La comprobación posterior: `VERIFY_TARGET=<url> ./verify`.
+
+Si el proyecto ya existe y no tiene la sección, agrégala. Cada punto que no se conoce se escribe como `pendiente`. No inventes valores.
+
+## 6. Revisión previa al despliegue
+
+Ante «prepárame el despliegue», el principal escribe `cambios/revision-despliegue/plan.md` en borrador, con `repos:` y solo lectura: la revisión no despliega ni toca producción. Los pasos del plan cubren:
+
+- Variables de `.env.example` contra las que usa el código.
+- Migraciones pendientes.
+- Endpoints de salud (`/health` y la página principal).
+- Qué cubre `verify` y qué NO cubre: proveedores externos, OAuth y correo real.
+- La comprobación posterior con `VERIFY_TARGET`, que corre Franco.
+
+El principal no despliega, no toca producción y no ejecuta `VERIFY_TARGET` contra producción.
