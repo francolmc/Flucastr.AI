@@ -20,6 +20,7 @@ Crea `cambios/<nombre>/plan.md` (nombre corto en minúsculas con guiones):
 ---
 estado: borrador
 rama: feature/<nombre>
+base: <rama>   # opcional; sin ella, la principal del remoto
 repos: [<carpeta>, ...]
 ejecutor: constructor | principal
 ---
@@ -78,6 +79,7 @@ Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `esta
 7. **Quién ejecuta (`ejecutor:`).** Se decide con el plan ya escrito, no por el tipo de tarea, con la **Prueba de ejecutabilidad**: cuatro preguntas sí/no. (1) ¿Cada paso trae su comprobación exacta? (2) ¿Ningún paso depende de un resultado que solo existe al ejecutar? (3) ¿El plan dice qué hacer ante cada error previsible? (4) ¿No toca credenciales, despliegue ni producción? Todo sí: `ejecutor: constructor`. Falla la 1 o la 3: investiga, mejora el plan y repite la prueba. Falla la 2 o la 4: `ejecutor: principal` (lo ejecuta él cargando `ejecutar-plan`, o el constructor con nivel `medio` en `modelos.json`). Sea cual sea el ejecutor, `## Decisiones ya tomadas` lleva una línea `Ejecutor: <quién>, porque <respuesta de la prueba>`, para que Franco la discuta en la puerta 1. Sin la línea `ejecutor:`, se trata como `constructor`.
 8. **Supuestos explícitos.** Cada supuesto en `## Supuestos` va en una línea y dice qué pasa si Franco lo corrige (p. ej. «Validar email con regex simple; si Franco quiere DNS, cambian el alcance y un paso»). Lo que no sea supuesto, sino decisión que cambia el resultado, no va ahí: se pregunta.
 9. **Duración en los pasos pesados.** Un paso que lanza un build, una instalación o una suite lleva su duración estimada entre paréntesis, p. ej. «(≈8 min)». Si la suma pasa de unos 20 minutos, parte el plan en tramos, cada uno con su verificación parcial. Los pasos intermedios usan `VERIFY_RAPIDO=1 ./verify` (build con caché); «sin caché» solo en la corrida final de aceptación.
+10. **Base (`base:`).** Rama base de una carpeta de `repos:`: la de `base:` del plan; sin `base:`, la de `git symbolic-ref --short refs/remotes/origin/HEAD`; sin remoto, `main` o `master`. `base:` es un nombre (vale para todas las carpetas de `repos:`) o un mapa `{carpeta: rama}` si en un workspace varían. El principal copia `base:` desde la línea «Rama base» del `AGENTS.md` del proyecto, si la hay.
 
 ## Antes de pedir la aprobación
 
