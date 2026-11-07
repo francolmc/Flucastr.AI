@@ -3,6 +3,8 @@
 //
 // Uso:
 //   node scripts/resolver.mjs modelo <agente> <herramienta>   imprime el modelo (herramienta: claude-code | pi)
+//   node scripts/resolver.mjs esfuerzo <agente>               imprime el esfuerzo del agente (vacío si no declara)
+//   node scripts/resolver.mjs modelo-esfuerzo <agente> <herramienta>  imprime modelo:esfuerzo (solo el modelo si no hay esfuerzo)
 //   node scripts/resolver.mjs agente-claude <archivo.md>      imprime el agente con el campo `model` ya resuelto (Claude Code)
 //   node scripts/resolver.mjs agente-pi <archivo.md>          igual, con el modelo de Pi (para el paquete de subagentes)
 //   node scripts/resolver.mjs cuerpo <archivo.md>             imprime el agente sin encabezado, con la línea de identidad de Pi (para Pi)
@@ -74,6 +76,17 @@ function resolverModelo(agente, herramienta) {
     if (perfil.modelos?.[n]) return perfil.modelos[n];
   }
   fallar(`el perfil '${perfilId}' no define un modelo para el nivel '${nivel}' ni sus respaldos`);
+}
+
+// Esfuerzo del agente (agentes[agente].esfuerzo), o "" si no declara ninguno: entonces la herramienta usa el suyo.
+function resolverEsfuerzo(agente) {
+  const c = leerConfig();
+  const esfuerzo = ((c.agentes ?? {})[agente] ?? {}).esfuerzo;
+  if (esfuerzo === undefined) return "";
+  if (!(c.esfuerzos ?? []).includes(esfuerzo)) {
+    fallar(`el esfuerzo '${esfuerzo}' del agente '${agente}' no está en 'esfuerzos'`);
+  }
+  return esfuerzo;
 }
 
 function partir(archivo) {
@@ -579,6 +592,13 @@ const [orden, ...args] = process.argv.slice(2);
 
 if (orden === "modelo" && args.length === 2) {
   process.stdout.write(resolverModelo(args[0], args[1]) + "\n");
+} else if (orden === "esfuerzo" && args.length === 1) {
+  process.stdout.write(resolverEsfuerzo(args[0]) + "\n");
+} else if (orden === "modelo-esfuerzo" && args.length === 2) {
+  // Modelo con el esfuerzo como sufijo (modelo:esfuerzo), que acepta `pi --model`; sin esfuerzo, solo el modelo.
+  const modelo = resolverModelo(args[0], args[1]);
+  const esfuerzo = resolverEsfuerzo(args[0]);
+  process.stdout.write((esfuerzo ? `${modelo}:${esfuerzo}` : modelo) + "\n");
 } else if ((orden === "agente-claude" || orden === "agente-pi") && args.length === 1) {
   const archivo = args[0];
   const agente = basename(archivo, ".md");
@@ -591,12 +611,18 @@ if (orden === "modelo" && args.length === 2) {
   if (/^model:/m.test(cabecera)) {
     fallar(`${archivo} no debe declarar 'model': se define en modelos.json`);
   }
+  if (/^effort:/m.test(cabecera) || /^thinking:/m.test(cabecera)) {
+    fallar(`${archivo} no debe declarar 'effort' ni 'thinking': el esfuerzo se define en modelos.json`);
+  }
 
   const herramienta = orden === "agente-pi" ? "pi" : "claude-code";
   const modelo = resolverModelo(agente, herramienta);
+  const esfuerzo = resolverEsfuerzo(agente);
+  // Claude Code lleva 'effort'; Pi lleva 'thinking'. Sin esfuerzo no se escribe ninguna de las dos.
+  const lineaEsfuerzo = !esfuerzo ? "" : orden === "agente-pi" ? `thinking: ${esfuerzo}\n` : `effort: ${esfuerzo}\n`;
   const cabeceraSalida = orden === "agente-pi" ? bashPlano(cabecera) : cabecera;
   process.stdout.write(
-    `---\n${cabeceraSalida}\nmodel: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${lineaIdentidad(herramienta, agente)}\n${cuerpo}`
+    `---\n${cabeceraSalida}\n${lineaEsfuerzo}model: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${lineaIdentidad(herramienta, agente)}\n${cuerpo}`
   );
 } else if (orden === "cuerpo" && args.length === 1) {
   const agente = basename(args[0], ".md");
@@ -646,6 +672,11 @@ if (orden === "modelo" && args.length === 2) {
   for (const perfil of Object.keys(nuevo.perfiles ?? {})) {
     if (!tiene(propio.perfiles, perfil)) lineas.push(`perfil nuevo: ${perfil}`);
   }
+  // Esfuerzo por agente: avisa si el publicado lo trae y el personal no.
+  for (const agente of Object.keys(nuevo.agentes ?? {})) {
+    if (!tiene(nuevo.agentes[agente], "esfuerzo")) continue;
+    if (!tiene(propio.agentes?.[agente] ?? {}, "esfuerzo")) lineas.push(`campo nuevo: esfuerzo (agente ${agente})`);
+  }
   // Campos del modelos.json publicado que el personal no trae: compactar_en y ventanas (por perfil).
   if (tiene(nuevo, "compactar_en") && !tiene(propio, "compactar_en")) lineas.push("campo nuevo: compactar_en");
   for (const [perfil, datos] of Object.entries(nuevo.perfiles ?? {})) {
@@ -670,5 +701,5 @@ if (orden === "modelo" && args.length === 2) {
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | esfuerzo <agente> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla>");
 }

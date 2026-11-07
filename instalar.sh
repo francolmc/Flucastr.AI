@@ -575,7 +575,7 @@ generar_lanzador_pi() { # archivo del agente
 #!/usr/bin/env bash
 # flucastr-ai:generado - lo crea instalar.sh y lo borra desinstalar.sh
 RAIZ="$RAIZ"
-${exportar}exec pi --model "\$(node "\$RAIZ/scripts/resolver.mjs" modelo $nombre pi)" \\
+${exportar}exec pi --model "\$(node "\$RAIZ/scripts/resolver.mjs" modelo-esfuerzo $nombre pi)" \\
   --append-system-prompt "\$(node "\$RAIZ/scripts/resolver.mjs" cuerpo "\$RAIZ/agentes/$nombre.md")" "\$@"
 EOF
     chmod +x "$destino"
