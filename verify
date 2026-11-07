@@ -606,6 +606,21 @@ sed 's/ceremonia de cierre/cierre/g' agentes/principal.md > "$cierre_neg/agentes
 if textos_cierre "$cierre_neg"; then fallo "8f: un principal sin «ceremonia de cierre» pasó la comprobación"; fi
 echo "ok 8f: ceremonia de cierre, abrir el PR y rama base presentes; copia sin «ceremonia de cierre» falla"
 
+# 8g. ejecutor por prueba de ejecutabilidad: planificar-cambio y principal; una copia de planificar-cambio sin «Prueba de ejecutabilidad» debe fallar
+textos_prueba() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'Prueba de ejecutabilidad' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'Prueba de ejecutabilidad' "$r/agentes/principal.md" || return 1
+  grep -qF 'carga la skill `ejecutar-plan`' "$r/agentes/principal.md" || return 1
+}
+textos_prueba . || fallo "8g: falta algún texto de la prueba de ejecutabilidad"
+prueba_neg="$T8/prueba_neg"
+mkdir -p "$prueba_neg/skills/planificar-cambio" "$prueba_neg/agentes"
+cp agentes/principal.md "$prueba_neg/agentes/"
+sed 's/Prueba de ejecutabilidad/Prueba/g' skills/planificar-cambio/SKILL.md > "$prueba_neg/skills/planificar-cambio/SKILL.md"
+if textos_prueba "$prueba_neg"; then fallo "8g: una copia sin «Prueba de ejecutabilidad» pasó la comprobación"; fi
+echo "ok 8g: Prueba de ejecutabilidad en planificar-cambio y principal, y carga de ejecutar-plan presentes; copia sin la prueba falla"
+
 # 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
 paso 9a "migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas"
 T9=$(mktemp -d) || fallo "9a: no pude crear el temporal"
