@@ -14,6 +14,7 @@ Entrada: la ruta del plan.
    - Si la carpeta no tiene `.git` (p. ej. una raíz de workspace que no es repo), anótalo en *Notas* y sigue con la siguiente.
    - Si `git -C <carpeta> branch --show-current` ya es la rama, sigue.
    - Si la rama ya existe en esa carpeta (`git -C <carpeta> rev-parse --verify --quiet refs/heads/<rama>`), `PAUSA` con `motivo=acceso` y la causa.
+   - Si la carpeta no está en la rama base (`git symbolic-ref --short refs/remotes/origin/HEAD`; sin remoto, `main` o `master`) o tiene cambios fuera de `cambios/<nombre>/`, `PAUSA` con `motivo=acceso` y la causa.
    - Si no, `git -C <carpeta> switch -c <rama>` (en `.`, `git switch -c <rama>`).
    - Si el plan no trae `repos:`, `PAUSA` con `motivo=ambiguo`.
 3. Cambia `estado: en curso`.
