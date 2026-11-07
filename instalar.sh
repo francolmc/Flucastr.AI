@@ -584,6 +584,31 @@ EOF
   echo "  lanzador generado: $destino (modelo: $modelo)"
 }
 
+generar_lanzador_claude() { # archivo del agente
+  local archivo="$1" nombre destino esfuerzo
+  nombre="$(basename "$archivo" .md)"
+  destino="$BIN_DIR/claude-$nombre"
+  esfuerzo="$(node "$RESOLVER" esfuerzo "$nombre")"
+  if [ -e "$destino" ] || [ -L "$destino" ]; then
+    echo "  OMITIDO (ya existe): $destino"
+    return
+  fi
+  if [ "$SIMULAR" = 0 ]; then
+    mkdir -p "$BIN_DIR"
+    local exportar="" bandera=""
+    if [ "$MODO" = descarga ]; then exportar="export FLUCASTR_MODELOS=\"$MODELOS\""$'\n'; fi
+    if [ -n "$esfuerzo" ]; then bandera=" --effort $esfuerzo"; fi
+    cat > "$destino" <<EOF
+#!/usr/bin/env bash
+# flucastr-ai:generado - lo crea instalar.sh y lo borra desinstalar.sh
+${exportar}exec claude --agent $nombre$bandera "\$@"
+EOF
+    chmod +x "$destino"
+    registrar archivo "$destino"
+  fi
+  echo "  lanzador generado: $destino (esfuerzo: ${esfuerzo:-sin declarar})"
+}
+
 # Compactación automática de los modelos de Pi del kit, en el settings.json global de Pi. Si el archivo del
 # usuario no se puede tocar, avisa y sigue: no falla la instalación.
 instalar_compactacion_pi() {
@@ -768,7 +793,12 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
   instalar_skills "$CLAUDE_DIR/skills"
   for f in "$RAIZ"/agentes/*.md; do
     [ -f "$f" ] && generar_agente_claude "$f"
+    [ -f "$f" ] && generar_lanzador_claude "$f"
   done
+  case ":$PATH:" in
+    *":$BIN_DIR:"*) ;;
+    *) echo "  AVISO: $BIN_DIR no está en tu PATH; agrégalo para usar los comandos claude-<agente>." ;;
+  esac
   if [ -n "$PROYECTO" ]; then
     echo "Proyecto ($PROYECTO)"
     fijar_agente_proyecto
