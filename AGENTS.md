@@ -5,6 +5,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un so
 ## Cómo funciona (v2)
 
 - Dos agentes: `principal` (nivel medio: investiga, diagnostica, planifica, verifica) y `constructor` (nivel bajo: aplica el plan). Los niveles se traducen a modelos en `modelos.json`.
+- El esfuerzo (qué tanto razona el modelo) se declara por agente en `modelos.json` y se traduce a `effort` (Claude Code) o `thinking` (Pi).
 - El único traspaso es `cambios/<nombre>/plan.md`. Franco tiene dos puertas: aprobar el plan y revisar la evidencia.
 - Ejecutor: primero se escribe el plan; con el plan terminado, la Prueba de ejecutabilidad (4 preguntas sí/no, regla 7 de `planificar-cambio`) decide si lo ejecuta el constructor o el principal, y la razón se escribe en el plan.
 - «Hecho» significa que el comando `verify` del proyecto pasa desde cero.
