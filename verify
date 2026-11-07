@@ -589,6 +589,23 @@ if textos_plazos "$pneg"; then fallo "8e: una copia sin VERIFY_RAPIDO pasó la c
 node scripts/resolver.mjs agente-claude agentes/constructor.md | grep -q '^timeoutMs: ' || fallo "8e: el agente de Claude no resuelve con timeoutMs"
 echo "ok 8e: VERIFY_RAPIDO, docker system prune prohibido y timeoutMs presentes; el agente de Claude resuelve; copia sin VERIFY_RAPIDO falla"
 
+# 8f. ceremonia de cierre y base limpia: principal, constructor y ejecutar-plan; una copia de principal sin «ceremonia de cierre» debe fallar
+textos_cierre() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'ceremonia de cierre' "$r/agentes/principal.md" || return 1
+  grep -qF 'abrir el PR' "$r/agentes/principal.md" || return 1
+  grep -qF 'rama base' "$r/agentes/constructor.md" || return 1
+  grep -qF 'rama base' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+}
+textos_cierre . || fallo "8f: falta algún texto de cierre o base limpia"
+cierre_neg="$T8/cierre_neg"
+mkdir -p "$cierre_neg/skills/ejecutar-plan" "$cierre_neg/agentes"
+cp agentes/constructor.md "$cierre_neg/agentes/"
+cp skills/ejecutar-plan/SKILL.md "$cierre_neg/skills/ejecutar-plan/"
+sed 's/ceremonia de cierre/cierre/g' agentes/principal.md > "$cierre_neg/agentes/principal.md"
+if textos_cierre "$cierre_neg"; then fallo "8f: un principal sin «ceremonia de cierre» pasó la comprobación"; fi
+echo "ok 8f: ceremonia de cierre, abrir el PR y rama base presentes; copia sin «ceremonia de cierre» falla"
+
 # 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
 paso 9a "migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas"
 T9=$(mktemp -d) || fallo "9a: no pude crear el temporal"
