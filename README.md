@@ -10,6 +10,7 @@ Dos agentes y dos puertas humanas:
 - **`constructor`** (nivel bajo): aplica el plan aprobado, corre `verify` y deja la evidencia.
 - **Puerta 1**: Franco aprueba `cambios/<nombre>/plan.md` antes de construir.
 - **Puerta 2**: Franco revisa la evidencia antes de dar algo por hecho.
+- Cada plan aprobado debe incluir `## Aceptación`, con escenarios trazables a resultados, comprobaciones y resultados esperados; puede usar revisión manual explicada cuando no haya oráculo automático.
 
 El único traspaso entre agentes es `cambios/<nombre>/plan.md`. Los niveles se traducen a modelos en `modelos.json`.
 
@@ -41,7 +42,7 @@ Para desinstalar: `bash desinstalar.sh`.
 ./verify
 ```
 
-Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instalar y desinstalar es válida, que los modelos se resuelven para Claude y Pi, que las skills están completas, que `instalar.sh --simular` no escribe nada y que las reglas deny del proyecto están bien.
+Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instalar y desinstalar es válida, que los modelos se resuelven para Claude y Pi, que las skills están completas, que `instalar.sh --simular` no escribe nada, las reglas deny del proyecto, y pruebas deterministas aisladas del contrato (incluido el contador de pasos y una mutación de sensibilidad). Estas pruebas no miden la fiabilidad del modelo; el protocolo futuro está en `docs/evaluaciones/constructor.md`.
 
 ## Ejecutar un plan en ventana propia
 

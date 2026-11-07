@@ -551,7 +551,7 @@ textos_clave() { # $1: raíz del kit
   grep -q 'repos:' "$r/skills/ejecutar-plan/SKILL.md" || return 1
   grep -q 'git -C <carpeta>' "$r/skills/ejecutar-plan/SKILL.md" || return 1
   grep -q -- '-maxdepth 2' "$r/skills/preparar-proyecto/SKILL.md" || return 1
-  grep -q 'git -C <carpeta' "$r/agentes/constructor.md" || return 1
+  grep -q 'git -C <carpeta' "$r/skills/ejecutar-plan/SKILL.md" || return 1
   grep -q 'Nunca decides tú' "$r/agentes/principal.md" || return 1
   grep -q 'REPOS.md' "$r/skills/migrar-proyecto/SKILL.md" || return 1
   grep -q 'Descartado' "$r/skills/migrar-proyecto/SKILL.md" || return 1
@@ -605,39 +605,44 @@ sed '/VERIFY_TARGET/d' skills/preparar-proyecto/referencia.md > "$neg4/skills/pr
 if textos_clave "$neg4"; then fallo "8b: una copia sin VERIFY_TARGET en referencia.md pasó la comprobación de textos"; fi
 echo "ok 8b: textos clave presentes (incluido el modo remoto y Despliegue); copias sin repos:, sin «Descartado», sin definir-proyecto o sin VERIFY_TARGET fallan la comprobación"
 
-# 8c. contrato del constructor: cuenta externa, siguiente= y no_intentado=, 3 corridas, git diff --stat en el principal, sin PARCIAL:
+# 8c. contrato operativo: skill única, contador canónico y recuperación; revisión de texto es regresión auxiliar
 textos_contrato() { # $1: raíz del kit
   local r=$1 f
-  for f in agentes/constructor.md skills/ejecutar-plan/SKILL.md; do
-    grep -qF "grep -c '^- \[ \]'" "$r/$f" || return 1
-    grep -qF 'siguiente=' "$r/$f" || return 1
-    grep -qF 'no_intentado=' "$r/$f" || return 1
-    grep -qF '3 corridas' "$r/$f" || return 1
-  done
-  grep -qF 'git diff --stat' "$r/agentes/principal.md" || return 1
-  if grep -qF 'PARCIAL:' "$r/agentes/constructor.md"; then return 1; fi
+  grep -qF 'bash pendientes-plan' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -qF 'awk' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -qF 'siguiente=' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -qF 'no_intentado=' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -qF '3 corridas' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -qF 'git diff' "$r/agentes/principal.md" || return 1
+  grep -qF 'Lee y sigue la skill `ejecutar-plan`' "$r/agentes/constructor.md" || return 1
+  grep -qF 'status`, `diff`, `branch --show-current`, `rev-parse --verify --quiet` y `symbolic-ref' "$r/agentes/constructor.md" || return 1
+  grep -qF 'relecturas relevantes tras cambios o recuperación' "$r/agentes/constructor.md" || return 1
+  if grep -qF "grep -c '^- \[ \]'" "$r/agentes/constructor.md"; then return 1; fi
+  if grep -qF 'no releas lo ya leído' "$r/agentes/constructor.md" || grep -qF 'Git permitido, solo en las carpetas de `repos:`' "$r/agentes/constructor.md"; then return 1; fi
 }
 textos_contrato . || fallo "8c: falta algún texto del contrato del constructor"
 cneg="$T8/cneg"
 mkdir -p "$cneg/agentes" "$cneg/skills/ejecutar-plan"
-cp agentes/principal.md "$cneg/agentes/"
-cp skills/ejecutar-plan/SKILL.md "$cneg/skills/ejecutar-plan/"
-# copia del constructor sin la cuenta externa (grep -c): debe fallar
-sed '/grep -c/d' agentes/constructor.md > "$cneg/agentes/constructor.md"
-if textos_contrato "$cneg"; then fallo "8c: un constructor sin grep -c pasó la comprobación"; fi
-# copia de ejecutar-plan sin no_intentado=: debe fallar
-cp agentes/constructor.md "$cneg/agentes/"
-sed '/no_intentado=/d' skills/ejecutar-plan/SKILL.md > "$cneg/skills/ejecutar-plan/SKILL.md"
-if textos_contrato "$cneg"; then fallo "8c: un ejecutar-plan sin no_intentado= pasó la comprobación"; fi
-# copia del constructor con una línea PARCIAL: : debe fallar
-{ cat agentes/constructor.md; echo 'PARCIAL: plan=x; hecho=1/2; causa=y'; } > "$cneg/agentes/constructor.md"
-cp skills/ejecutar-plan/SKILL.md "$cneg/skills/ejecutar-plan/"
-if textos_contrato "$cneg"; then fallo "8c: un constructor con PARCIAL: pasó la comprobación"; fi
-# principal sin git diff --stat: debe fallar
-cp agentes/constructor.md "$cneg/agentes/"
-sed '/git diff --stat/d' agentes/principal.md > "$cneg/agentes/principal.md"
-if textos_contrato "$cneg"; then fallo "8c: un principal sin git diff --stat pasó la comprobación"; fi
-echo "ok 8c: contrato del constructor presente (grep -c, siguiente=, no_intentado=, 3 corridas, git diff --stat, sin PARCIAL:); copias sin esas frases fallan"
+restaurar_cneg() {
+  cp agentes/constructor.md agentes/principal.md "$cneg/agentes/"
+  cp skills/ejecutar-plan/SKILL.md "$cneg/skills/ejecutar-plan/"
+}
+restaurar_cneg
+textos_contrato "$cneg" || fallo "8c: baseline positivo del fixture temporal falló"
+sed '/bash pendientes-plan/d' skills/ejecutar-plan/SKILL.md > "$cneg/skills/ejecutar-plan/SKILL.md"
+if textos_contrato "$cneg"; then fallo "8c: skill sin contador canónico pasó la comprobación"; fi
+echo "ok 8c negativa 1: skill sin contador rechazado"
+restaurar_cneg
+textos_contrato "$cneg" || fallo "8c: baseline positivo antes de whitelist Git falló"
+printf '\n- Git permitido, solo en las carpetas de `repos:`: branch --show-current y rev-parse.\n' >> "$cneg/agentes/constructor.md"
+if textos_contrato "$cneg"; then fallo "8c: whitelist Git obsoleta pasó la comprobación"; fi
+echo "ok 8c negativa 2: whitelist Git obsoleta rechazada"
+restaurar_cneg
+textos_contrato "$cneg" || fallo "8c: baseline positivo antes de prohibición de relectura falló"
+printf '\n- no releas lo ya leído.\n' >> "$cneg/agentes/constructor.md"
+if textos_contrato "$cneg"; then fallo "8c: prohibición de relectura obsoleta pasó la comprobación"; fi
+echo "ok 8c negativa 3: prohibición de relectura obsoleta rechazada"
+echo "ok 8c: contador canónico y negativas aisladas de los límites antiguos"
 
 # 8d. ejecutor y pasos atómicos: planificar-cambio, principal y README; una copia de planificar-cambio sin ejecutor: debe fallar
 textos_ejecutor() { # $1: raíz del kit
@@ -679,7 +684,7 @@ textos_cierre() { # $1: raíz del kit
   local r=$1
   grep -qF 'ceremonia de cierre' "$r/agentes/principal.md" || return 1
   grep -qF 'abrir el PR' "$r/agentes/principal.md" || return 1
-  grep -qF 'rama base' "$r/agentes/constructor.md" || return 1
+  grep -qF 'git status' "$r/skills/ejecutar-plan/SKILL.md" || return 1
   grep -qF 'rama base' "$r/skills/ejecutar-plan/SKILL.md" || return 1
 }
 textos_cierre . || fallo "8f: falta algún texto de cierre o base limpia"
@@ -706,22 +711,21 @@ sed 's/Prueba de ejecutabilidad/Prueba/g' skills/planificar-cambio/SKILL.md > "$
 if textos_prueba "$prueba_neg"; then fallo "8g: una copia sin «Prueba de ejecutabilidad» pasó la comprobación"; fi
 echo "ok 8g: Prueba de ejecutabilidad en planificar-cambio y principal, y carga de ejecutar-plan presentes; copia sin la prueba falla"
 
-# 8h. rama base: base: en planificar-cambio; «hacia su base:» en principal; «de base:» en constructor y ejecutar-plan; una copia de ejecutar-plan sin «de base:» debe fallar
+# 8h. rama base: planificar-cambio, principal y skill de ejecución
 textos_base() { # $1: raíz del kit
   local r=$1
   grep -qF 'base:' "$r/skills/planificar-cambio/SKILL.md" || return 1
   grep -qF 'hacia su `base:`' "$r/agentes/principal.md" || return 1
-  grep -qF 'de `base:`' "$r/agentes/constructor.md" || return 1
-  grep -qF 'de `base:`' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -qF 'base:' "$r/skills/ejecutar-plan/SKILL.md" || return 1
 }
 textos_base . || fallo "8h: falta algún texto de rama base"
 base_neg="$T8/base_neg"
 mkdir -p "$base_neg/skills/planificar-cambio" "$base_neg/skills/ejecutar-plan" "$base_neg/agentes"
 cp skills/planificar-cambio/SKILL.md "$base_neg/skills/planificar-cambio/"
-cp agentes/principal.md agentes/constructor.md "$base_neg/agentes/"
-sed 's/de `base:`/de base/g' skills/ejecutar-plan/SKILL.md > "$base_neg/skills/ejecutar-plan/SKILL.md"
-if textos_base "$base_neg"; then fallo "8h: una copia de ejecutar-plan sin la frase «de base:» pasó la comprobación"; fi
-echo "ok 8h: base: en planificar-cambio, «hacia su base:» en principal, «de base:» en constructor y ejecutar-plan; copia de ejecutar-plan sin «de base:» falla"
+cp agentes/principal.md "$base_neg/agentes/"
+sed '/base:/d' skills/ejecutar-plan/SKILL.md > "$base_neg/skills/ejecutar-plan/SKILL.md"
+if textos_base "$base_neg"; then fallo "8h: una copia sin rama base pasó la comprobación"; fi
+echo "ok 8h: rama base documentada; copia sin base falla"
 
 # 3e. lanzadores y reinstalación con esfuerzo (HOME temporal, modelos.json personal con --copiar)
 paso 3e "claude-<agente> y pi-<agente> con esfuerzo; reinstalar refresca; archivo sin marca se respeta"
@@ -751,6 +755,8 @@ prueba_lanzadores() (
   echo "ok 3e: effort y thinking low->max al reinstalar, --effort en claude-constructor, archivo sin marca intacto, desinstalar limpia"
 )
 prueba_lanzadores || fallo "3e: lanzadores y reinstalación"
+
+node pruebas/contrato-constructor.mjs || fallo "8j: suite determinista del contrato del constructor"
 
 # 8i. el constructor ejecuta siempre: planificar-cambio dice «salvo que Franco» y no «Falla la 2 o la 4»; principal dice «petición expresa»; una copia de planificar-cambio con «Falla la 2 o la 4» debe fallar
 textos_constructor() { # $1: raíz del kit
