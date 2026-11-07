@@ -7,7 +7,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un so
 - Dos agentes: `principal` (nivel medio: investiga, diagnostica, planifica, verifica) y `constructor` (nivel bajo: aplica el plan). Los niveles se traducen a modelos en `modelos.json`.
 - El esfuerzo (qué tanto razona el modelo) se declara por agente en `modelos.json` y se traduce a `effort` (Claude Code) o `thinking` (Pi).
 - El único traspaso es `cambios/<nombre>/plan.md`. Franco tiene dos puertas: aprobar el plan y revisar la evidencia.
-- Ejecutor: primero se escribe el plan; con el plan terminado, la Prueba de ejecutabilidad (4 preguntas sí/no, regla 7 de `planificar-cambio`) decide si lo ejecuta el constructor o el principal, y la razón se escribe en el plan.
+- Ejecutor: el constructor ejecuta siempre; el principal solo si Franco lo pide expresamente, y esa petición se escribe en el plan.
 - Ventana propia: `claude-<agente>` y `pi-<agente>` (los crea `instalar.sh`) abren el agente con el esfuerzo de `modelos.json`. Con `--agent` directo o eligiéndolo dentro de Pi el esfuerzo no se aplica. Reinstalar con `instalar.sh` regenera los agentes y lanzadores.
 - «Hecho» significa que el comando `verify` del proyecto pasa desde cero.
 - Ceremonia de cierre: tras tu aprobación, el principal archiva el plan en `cambios/hechos/`, te pide el commit y luego abrir el PR; el cambio termina cuando confirmas el PR. Antes de crear una rama nueva exige la rama base limpia y al día; si hay una rama sin mergear, se detiene y pregunta.

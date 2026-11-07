@@ -707,6 +707,21 @@ prueba_lanzadores() (
 )
 prueba_lanzadores || fallo "3e: lanzadores y reinstalación"
 
+# 8i. el constructor ejecuta siempre: planificar-cambio dice «salvo que Franco» y no «Falla la 2 o la 4»; principal dice «petición expresa»; una copia de planificar-cambio con «Falla la 2 o la 4» debe fallar
+textos_constructor() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'salvo que Franco' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  ! grep -qF 'Falla la 2 o la 4' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'petición expresa' "$r/agentes/principal.md" || return 1
+}
+textos_constructor . || fallo "8i: falta algún texto de constructor por defecto"
+cons_neg="$T8/cons_neg"
+mkdir -p "$cons_neg/skills/planificar-cambio" "$cons_neg/agentes"
+cp agentes/principal.md "$cons_neg/agentes/"
+{ cat skills/planificar-cambio/SKILL.md; echo 'Falla la 2 o la 4: `ejecutor: principal`.'; } > "$cons_neg/skills/planificar-cambio/SKILL.md"
+if textos_constructor "$cons_neg"; then fallo "8i: una copia de planificar-cambio con «Falla la 2 o la 4» pasó la comprobación"; fi
+echo "ok 8i: planificar-cambio dice «salvo que Franco» sin «Falla la 2 o la 4»; principal dice «petición expresa»; copia con «Falla la 2 o la 4» falla"
+
 # 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
 paso 9a "migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas"
 T9=$(mktemp -d) || fallo "9a: no pude crear el temporal"
