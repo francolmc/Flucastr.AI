@@ -31,6 +31,8 @@ bash instalar.sh --proyecto <ruta>   # además fija el agente y las reglas deny 
 
 Opciones útiles: `--copiar` (copia las skills en vez de enlazarlas), `--solo claude|pi`, `--skills-proyecto`.
 
+Para ver todas las opciones, restricciones y ejemplos: `bash instalar.sh --help`.
+
 Para desinstalar: `bash desinstalar.sh`.
 
 ## Verificación

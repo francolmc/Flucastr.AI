@@ -11,6 +11,52 @@ if [ -z "${BASH_VERSION:-}" ]; then
 fi
 set -euo pipefail
 
+mostrar_ayuda() {
+  cat <<'AYUDA'
+Uso
+  bash instalar.sh [opciones]
+  bash instalar.sh --migrar <ruta> [--simular]
+
+Opciones
+  --simular                 Muestra las acciones sin escribir archivos.
+  --copiar                  Copia las skills en vez de enlazarlas (modo descarga).
+  --solo claude|pi          Limita la instalación a Claude Code o Pi; no instala herramientas.
+  --proyecto <ruta>         Además de la instalación global, configura el proyecto para Claude Code
+                            si se detecta, y fija su agente predeterminado.
+  --agente <nombre>         Elige el agente predeterminado del proyecto; por defecto, principal.
+                            No filtra los agentes globales.
+  --skills-proyecto         Copia skills en <ruta>/.pi/skills; requiere --proyecto y no se combina
+                            con --solo claude. Las copias se regeneran al reinstalar.
+  --migrar <ruta>           Migra ese proyecto de v1 a v2: solo Claude Code, conserva v1 en
+                            old/v1/ y no hace la instalación global.
+  -h, --help                Muestra esta ayuda.
+
+Restricciones
+  --migrar admite --simular; no se combina con --proyecto, --skills-proyecto, --copiar,
+  --solo ni --agente.
+  --skills-proyecto no se combina con --solo claude.
+  Las herramientas se detectan automáticamente; --solo solo filtra cuáles configurar.
+  Sin --copiar, las skills se enlazan al repositorio (modo repo). Con --copiar, se copian
+  (modo descarga). Para cambiar de modo, desinstala antes.
+
+Entorno y rutas
+  --copiar usa FLUCASTR_MODELOS si está definida; si no, usa
+  ~/.flucastr-ai/modelos.json. En modo repo se usan los modelos del repositorio.
+  PI_CODING_AGENT_DIR cambia la ruta de Pi; por defecto es ~/.pi/agent.
+  Claude Code usa ~/.claude. Los lanzadores claude-<agente> y pi-<agente> se crean en
+  ~/.local/bin; agrega esa carpeta al PATH para invocarlos.
+
+Ejemplos
+  bash instalar.sh
+  bash instalar.sh --simular
+  bash instalar.sh --copiar
+  bash instalar.sh --solo pi
+  bash instalar.sh --proyecto "/ruta/mi proyecto" --agente constructor
+  bash instalar.sh --solo pi --proyecto "/ruta/mi proyecto" --skills-proyecto
+  bash instalar.sh --migrar "/ruta/mi proyecto" --simular
+AYUDA
+}
+
 RAIZ="$(cd "$(dirname "$0")" && pwd)"
 RESOLVER="$RAIZ/scripts/resolver.mjs"
 CLAUDE_DIR="$HOME/.claude"
@@ -57,7 +103,7 @@ while [ $# -gt 0 ]; do
       AGENTE_DADO=1
       ;;
     --skills-proyecto) SKILLS_PROYECTO=1 ;;
-    -h | --help) sed -n '2,3p' "$0"; exit 0 ;;
+    -h | --help) mostrar_ayuda; exit 0 ;;
     *) echo "Opción desconocida: $1" >&2; exit 1 ;;
   esac
   shift
