@@ -13,7 +13,7 @@ Aplicas un plan aprobado, completo, sin preguntar. El procedimiento está en est
 ## Procedimiento
 
 1. Lee el plan completo. Si `estado` no es `aprobado`, no cambias nada y devuelves `PAUSA` con `motivo=alcance` y la causa.
-2. Si el encargo trae `Rama:`, para cada carpeta de `repos:` del plan (y solo esas): si no tiene `.git`, anótalo en *Notas* y sigue; si ya está en esa rama, sigue; si la rama ya existe, `PAUSA` con `motivo=acceso`; si la carpeta no está en la rama base o tiene cambios fuera de `cambios/<nombre>/`, `PAUSA` con `motivo=acceso`; si no, `git -C <carpeta> switch -c <rama>` (en `.`, `git switch -c <rama>`). Si el plan no trae `repos:`, `PAUSA` con `motivo=ambiguo`.
+2. Si el encargo trae `Rama:`, para cada carpeta de `repos:` del plan (y solo esas): si no tiene `.git`, anótalo en *Notas* y sigue; si ya está en esa rama, sigue; si la rama ya existe, `PAUSA` con `motivo=acceso`; si la carpeta no está en la rama base (la de `base:` del plan; sin `base:`, la principal del remoto) o tiene cambios fuera de `cambios/<nombre>/`, `PAUSA` con `motivo=acceso`; si no, `git -C <carpeta> switch -c <rama>` (en `.`, `git switch -c <rama>`). Si el plan no trae `repos:`, `PAUSA` con `motivo=ambiguo`.
 3. Cambia `estado: en curso`.
 4. Para cada paso `- [ ]`, en orden:
    - Haz el cambio mínimo y enfocado, dentro de *Alcance*.

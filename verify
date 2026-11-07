@@ -661,6 +661,23 @@ sed 's/Prueba de ejecutabilidad/Prueba/g' skills/planificar-cambio/SKILL.md > "$
 if textos_prueba "$prueba_neg"; then fallo "8g: una copia sin «Prueba de ejecutabilidad» pasó la comprobación"; fi
 echo "ok 8g: Prueba de ejecutabilidad en planificar-cambio y principal, y carga de ejecutar-plan presentes; copia sin la prueba falla"
 
+# 8h. rama base: base: en planificar-cambio; «hacia su base:» en principal; «de base:» en constructor y ejecutar-plan; una copia de ejecutar-plan sin «de base:» debe fallar
+textos_base() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'base:' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'hacia su `base:`' "$r/agentes/principal.md" || return 1
+  grep -qF 'de `base:`' "$r/agentes/constructor.md" || return 1
+  grep -qF 'de `base:`' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+}
+textos_base . || fallo "8h: falta algún texto de rama base"
+base_neg="$T8/base_neg"
+mkdir -p "$base_neg/skills/planificar-cambio" "$base_neg/skills/ejecutar-plan" "$base_neg/agentes"
+cp skills/planificar-cambio/SKILL.md "$base_neg/skills/planificar-cambio/"
+cp agentes/principal.md agentes/constructor.md "$base_neg/agentes/"
+sed 's/de `base:`/de base/g' skills/ejecutar-plan/SKILL.md > "$base_neg/skills/ejecutar-plan/SKILL.md"
+if textos_base "$base_neg"; then fallo "8h: una copia de ejecutar-plan sin la frase «de base:» pasó la comprobación"; fi
+echo "ok 8h: base: en planificar-cambio, «hacia su base:» en principal, «de base:» en constructor y ejecutar-plan; copia de ejecutar-plan sin «de base:» falla"
+
 # 3e. lanzadores y reinstalación con esfuerzo (HOME temporal, modelos.json personal con --copiar)
 paso 3e "claude-<agente> y pi-<agente> con esfuerzo; reinstalar refresca; archivo sin marca se respeta"
 prueba_lanzadores() (

@@ -26,7 +26,7 @@ Solo lo que un agente no puede deducir leyendo el código:
 
 ## Reglas
 - Agentes: sin commit, push, PR, merge ni despliegue; no leer `.env` ni llaves (`.env.example` sí).
-- Ramas: `feature/`, `fix/`, `chore/`, `docs/`.
+- Ramas: `feature/`, `fix/`, `chore/`, `docs/`. Rama base: `<rama>` solo si no es la principal del remoto.
 - <Convenciones propias, solo las que no se deducen del código.>
 ```
 
