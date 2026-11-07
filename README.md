@@ -46,9 +46,11 @@ Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instal
 Un plan pesado (muchos pasos, builds, Compose) puede correrse en una ventana propia del constructor, para ver el avance en vivo:
 
 ```bash
-claude --agent constructor   # Claude Code
-pi-constructor               # Pi
+claude-constructor   # Claude Code (con el esfuerzo de modelos.json)
+pi-constructor       # Pi (con el esfuerzo de modelos.json)
 ```
+
+Los lanzadores `claude-<agente>` y `pi-<agente>` los crea `instalar.sh`. Abrir el agente a mano (`claude --agent constructor`, `pi --agent constructor` o eligiéndolo dentro de Pi) no aplica el esfuerzo de `modelos.json`: ese valor solo vale cuando el principal lanza al constructor como subagente o cuando usas el lanzador.
 
 Primer mensaje: `Plan: <ruta>` y `Rama: <rama>` (por ejemplo `Plan: cambios/mi-cambio/plan.md`, `Rama: feature/mi-cambio`). Es el mismo plan, el mismo agente y el mismo retorno que al delegar desde el principal; solo cambia que se ve en vivo.
 
