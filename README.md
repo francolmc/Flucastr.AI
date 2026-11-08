@@ -69,7 +69,7 @@ Primer mensaje: `Plan: <ruta>` y `Rama: <rama>` (por ejemplo `Plan: cambios/mi-c
 - Lanzadores: `~/.local/bin/codex-<agente>`.
 - Reglas deny: `bash instalar.sh --proyecto <ruta>` escribe `<proyecto>/.codex/rules/flucastr.rules` (`prefix_rule` con `forbidden`). Son experimentales, y Codex solo las carga en proyectos marcados como de confianza (trusted).
 - Bloquean por prefijo: `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C`, `git -c`, `bash -c`, `sh -c` y `zsh -c`. Por eso `git -C` y `git -c` quedan bloqueados aunque no sean commit (es aceptado). No bloquean `bash -lc` ni `sh -lc`, porque Codex ejecuta así sus comandos. No hay regla para leer `.env`: es un límite documentado.
-- Permitido: `git switch -c` (regla `allow`), porque el sandbox de Codex deja `.git` en solo lectura y sin la regla no puede crear la rama del cambio. Reinstala con `bash instalar.sh --proyecto <ruta>` para recibirla.
+- Permitidos (`allow`, sin pedir permiso): `git switch -c` (el sandbox de Codex deja `.git` en solo lectura), `./verify`, `VERIFY_RAPIDO=1 ./verify`, `npm test`, `npm run`, `git fetch`, `git status`, `git diff`, `docker ps` y `docker info`. Sin ellos, el constructor espera aprobaciones que el principal no muestra (ver `docs/investigaciones/auditoria-memoryai-donfinancio.md`). `docker run` y el resto siguen pidiendo permiso. Reinstala con `bash instalar.sh --proyecto <ruta>` para recibirlos. Sin probar en sesión real: `VERIFY_RAPIDO=1 ./verify` lleva una variable de entorno y Codex puede no reconocerlo como prefijo.
 - Desinstalar: `bash desinstalar.sh` quita lo que creó el kit y deja lo ajeno.
 
 ## Plazos en Pi (opcional)
