@@ -813,8 +813,8 @@ prueba_codex() (
   grep -qxF '[extra]' <<<"$salida" || { echo "FALLO: codex-constructor no reenvía los argumentos" >&2; exit 1; }
   echo "ok 3f: TOML de constructor y principal con modelo y esfuerzo (max -> xhigh); codex-constructor pasa -m y el esfuerzo"
 
-  # (2) reglas: 11 prefix_rule (10 forbidden y git switch -c allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
-  [ "$(grep -c '^prefix_rule' "$R" || true)" = 11 ] || { echo "FALLO: $R no tiene 11 prefix_rule" >&2; exit 1; }
+  # (2) reglas: 20 prefix_rule (10 forbidden y 10 allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
+  [ "$(grep -c '^prefix_rule' "$R" || true)" = 20 ] || { echo "FALLO: $R no tiene 20 prefix_rule" >&2; exit 1; }
   grep -qxF '# regla ajena' "$P/.codex/rules/otra.rules" || { echo "FALLO: la regla ajena cambió tras instalar" >&2; exit 1; }
   if command -v codex >/dev/null 2>&1; then
     politica() { env HOME="$H" CODEX_HOME="$H/.codex" codex execpolicy check --rules "$R" -- "$@" 2>/dev/null || true; }
@@ -822,13 +822,15 @@ prueba_codex() (
       out=$(politica $c)
       grep -qE '"decision": ?"forbidden"' <<<"$out" || { echo "FALLO: execpolicy no bloquea «$c»: $out" >&2; exit 1; }
     done
-    out=$(politica git switch -c feature/x)
-    grep -qE '"decision": ?"allow"' <<<"$out" || { echo "FALLO: execpolicy no permite «git switch -c»: $out" >&2; exit 1; }
-    for c in "git status" "bash -lc git status"; do
+    for c in "git switch -c feature/x" "./verify" "VERIFY_RAPIDO=1 ./verify" "npm test" "npm run build" "git fetch" "git status" "git diff" "docker ps" "docker info"; do
       out=$(politica $c)
-      if grep -q 'forbidden' <<<"$out"; then echo "FALLO: execpolicy bloquea «$c» sin deberlo: $out" >&2; exit 1; fi
+      grep -qE '"decision": ?"allow"' <<<"$out" || { echo "FALLO: execpolicy no permite «$c»: $out" >&2; exit 1; }
     done
-    echo "ok 3f: execpolicy bloquea git commit/push/merge, gh pr create/merge, git -C, git -c, bash/sh/zsh -c; deja pasar git status y bash -lc"
+    for c in "docker run x" "bash -lc git status"; do
+      out=$(politica $c)
+      if grep -qE 'forbidden|"decision": ?"allow"' <<<"$out"; then echo "FALLO: execpolicy decide algo sobre «$c» sin deberlo: $out" >&2; exit 1; fi
+    done
+    echo "ok 3f: execpolicy bloquea git commit/push/merge, gh pr create/merge, git -C, git -c, bash/sh/zsh -c; permite git switch -c, verify, npm test/run, git fetch/status/diff, docker ps/info; no decide sobre docker run ni bash -lc"
   else
     echo "AVISO 3f: codex no está en el PATH; las reglas no se comprobaron con execpolicy"
   fi

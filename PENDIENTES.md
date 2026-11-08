@@ -61,3 +61,4 @@
 - **Escalón 5 de `verify`:** compara lo que `instalar.sh --simular` instala; no detecta cambios fuera de esas rutas, a propósito.
 - **Soporte de Codex:** hay soporte experimental (ver «Detalles menores»); lo que falta es probarlo en una sesión real.
 - **Fricciones sin resolver** de `friccion.md`: avisos duplicados al cerrar un subagente y documentación oficial que el lector web trunca.
+- Codex: tras reinstalar `--proyecto`, comprobar en una sesión real que `./verify`, `npm test` y `git fetch` ya no piden permiso, y si `VERIFY_RAPIDO=1 ./verify` (con variable de entorno) también pasa. Si no, indicar al constructor que use `./verify` sin variable.

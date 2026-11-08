@@ -634,7 +634,19 @@ const PREFIJOS_DENY_CODEX = [
 ];
 // Permitidas: el sandbox de Codex deja .git en solo lectura y `git switch -c` falla ahí. Una regla allow
 // lo ejecuta fuera del sandbox sin pedir aprobación. Es la única escritura de git que el kit autoriza.
-const PREFIJOS_ALLOW_CODEX = [["git", "switch", "-c"]];
+const PREFIJOS_ALLOW_CODEX = [
+  ["git", "switch", "-c"],
+  // Recorrido normal de un plan (auditoría Memory-AI/DonFinancio: ~67 permisos en un día, 182 min de espera).
+  ["./verify"],
+  ["VERIFY_RAPIDO=1", "./verify"],
+  ["npm", "test"],
+  ["npm", "run"],
+  ["git", "fetch"],
+  ["git", "status"],
+  ["git", "diff"],
+  ["docker", "ps"],
+  ["docker", "info"],
+];
 const MARCA_CODEX = "# flucastr-ai:generado - no editar; se regenera con instalar.sh";
 
 // Contenido del archivo de reglas (Starlark). Cada regla trae su ejemplo de match: Codex lo valida al cargar.
@@ -653,8 +665,8 @@ function reglasCodex() {
       `prefix_rule(\n` +
       `    pattern = ${JSON.stringify(p)},\n` +
       `    decision = "allow",\n` +
-      `    justification = "Crear la rama del cambio: el sandbox de Codex deja .git en solo lectura.",\n` +
-      `    match = [${JSON.stringify([...p, "feature/x"])}],\n` +
+      `    justification = "Comando habitual del plan: sin esta regla el sandbox de Codex pide permiso y el subagente espera.",\n` +
+      `    match = [${JSON.stringify([...p, "x"])}],\n` +
       `)\n`
   );
   return `${MARCA_CODEX}\n${[...bloques, ...permitidas].join("\n")}`;
