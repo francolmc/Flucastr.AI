@@ -1,6 +1,6 @@
 # Flucastr.AI
 
-Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en construcción** (rama `feature/kit-v2`); la versión 1 está en el tag `kit-v1` y en `old/v1/` (movida, no borrada; sus rutas internas son las originales y no se ejecuta).
+Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en `main`** (candidata: falta probarla en proyectos reales, ver `PENDIENTES.md`); la versión 1 está en el tag `kit-v1` y en `old/v1/` (movida, no borrada; sus rutas internas son las originales y no se ejecuta).
 
 ## Cómo funciona (v2)
 
@@ -11,6 +11,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un so
 - Ventana propia: `claude-<agente>` y `pi-<agente>` (los crea `instalar.sh`) abren el agente con el esfuerzo de `modelos.json`. Con `--agent` directo o eligiéndolo dentro de Pi el esfuerzo no se aplica. Reinstalar con `instalar.sh` regenera los agentes y lanzadores.
 - «Hecho» significa que el comando `verify` del proyecto pasa desde cero.
 - Ceremonia de cierre: tras tu aprobación, el principal archiva el plan en `cambios/hechos/`, te pide el commit y luego abrir el PR; el cambio termina cuando confirmas el PR. Antes de crear una rama nueva exige la rama base limpia y al día; si hay una rama sin mergear, se detiene y pregunta.
+- Arnés de comparación con OpenSpec: `pruebas/comparar-openspec/` (fixtures, oráculos externos, runner con sandbox y reserva de gasto; documentado en `docs/evaluaciones/openspec/`). `./verify` corre solo sus autopruebas offline (paso 10), nunca `--run`. La medición real no se ha ejecutado. Evidencia de fallos reales del constructor: `docs/investigaciones/auditoria-andes-constructor.md`.
 - Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`, `definir-proyecto` (proyecto nuevo), `migrar-proyecto` (tras `--migrar`).
 - Workspaces: un proyecto puede ser una carpeta sin `.git` con varios repos; su raíz es la unidad de trabajo (`AGENTS.md`, `docs/proyecto.md`, `cambios/`, `verify`). Cada plan lleva `repos:` (carpetas que toca; `[.]` si es un repo) y la rama se crea solo en esas. Ver `preparar-proyecto`, sección 4.
 - Rama base: `base:` en el plan, declarada en el `AGENTS.md` del proyecto; para este proyecto es `main`. Sin ella, la principal del remoto. Los proyectos que trabajan sobre `develop` la declaran; liberar a `main` lo hace Franco a mano.

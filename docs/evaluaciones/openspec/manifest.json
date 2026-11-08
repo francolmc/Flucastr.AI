@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "pilot": "comparar-openspec",
+  "versions": {
+    "openspec": "1.16.1",
+    "piSdk": "1.5.0",
+    "model": "openai/gpt-6-luna",
+    "effort": "high"
+  },
+  "limits": {
+    "maxRuns": 12,
+    "maxMinutesPerRun": 10,
+    "reserveUsdPerRun": 0.8,
+    "reserveUsdTotal": 9.6,
+    "unusableMarginUsd": 0.4,
+    "retries": 0,
+    "automaticCompaction": false,
+    "automaticRefresh": false,
+    "parallelism": 1
+  },
+  "cases": ["extractor-no-vacio", "prioridad-multiarchivo", "recuperacion-parcial"],
+  "schedule": [
+    {"id":"extractor-no-vacio-r1-kit","case":"extractor-no-vacio","repetition":1,"arm":"kit"},
+    {"id":"extractor-no-vacio-r1-openspec","case":"extractor-no-vacio","repetition":1,"arm":"openspec"},
+    {"id":"prioridad-multiarchivo-r1-openspec","case":"prioridad-multiarchivo","repetition":1,"arm":"openspec"},
+    {"id":"prioridad-multiarchivo-r1-kit","case":"prioridad-multiarchivo","repetition":1,"arm":"kit"},
+    {"id":"recuperacion-parcial-r1-kit","case":"recuperacion-parcial","repetition":1,"arm":"kit"},
+    {"id":"recuperacion-parcial-r1-openspec","case":"recuperacion-parcial","repetition":1,"arm":"openspec"},
+    {"id":"extractor-no-vacio-r2-openspec","case":"extractor-no-vacio","repetition":2,"arm":"openspec"},
+    {"id":"extractor-no-vacio-r2-kit","case":"extractor-no-vacio","repetition":2,"arm":"kit"},
+    {"id":"prioridad-multiarchivo-r2-kit","case":"prioridad-multiarchivo","repetition":2,"arm":"kit"},
+    {"id":"prioridad-multiarchivo-r2-openspec","case":"prioridad-multiarchivo","repetition":2,"arm":"openspec"},
+    {"id":"recuperacion-parcial-r2-openspec","case":"recuperacion-parcial","repetition":2,"arm":"openspec"},
+    {"id":"recuperacion-parcial-r2-kit","case":"recuperacion-parcial","repetition":2,"arm":"kit"}
+  ],
+  "metrics": {
+    "success": "Acceptance oracle passes all checks within time and reserve without intervention.",
+    "falseCompleted": "Worker declares completion while the external oracle fails.",
+    "unnecessaryPause": "Human transcript review confirms it requests a decision/reference already resolved by current state.",
+    "costColumns": ["reservedUsd", "usageEstimateUsd", "billedUsd"],
+    "reporting": "Per-run and paired results; two repetitions are diagnostic only, not statistical evidence."
+  },
+  "approvedState": "No real runs authorized by this artifact; execution requires human-reviewed hashes and preflight."
+}

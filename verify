@@ -788,4 +788,9 @@ sed '/Reglas de v1 que descarté/d' skills/migrar-proyecto/SKILL.md > "$T9/SKILL
 if textos_migracion "$T9/SKILL.md"; then fallo "9a: una copia de migrar-proyecto sin «Reglas de v1 que descarté» pasó la comprobación"; fi
 echo "ok 9a: migrar-proyecto trae «Reglas de v1 que descarté», «no las copies» y Fxx; una copia sin la lista falla"
 
+# 10. arnés OpenSpec: solo autopruebas offline; nunca ejecuta --run
+paso 10 "autopruebas offline del runner OpenSpec, sin inferencia"
+node pruebas/comparar-openspec/runner/cli.mjs --self-test || fallo "10: autopruebas offline del runner OpenSpec"
+echo "ok 10: self-test del runner pasó; no se lanzó --run ni inferencia"
+
 echo "VERIFY OK"

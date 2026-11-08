@@ -1,6 +1,6 @@
 # Pendientes de la v2
 
-> Lista de Franco. Los agentes no la leen salvo pedido explícito. Es de la v2 (rama `feature/kit-v2`); la lista de la v1 está en `old/v1/definitions/PENDIENTES.md`.
+> Lista de Franco. Los agentes no la leen salvo pedido explícito. Es de la v2 (ya en `main`); la lista de la v1 está en `old/v1/definitions/PENDIENTES.md`.
 > Estado al 2026-11-05: la v2 es una **versión candidata**. Funciona en este repo; falta probarla en un proyecto real y ordenar el repo.
 
 ## Qué está probado
@@ -22,13 +22,13 @@
    - El caso `PARCIAL` en Pi.
    - En Pi no hay reglas deny: rige solo el prompt.
    - No se sabe si `inheritProjectContext` hace algo.
-3. **Probar la instalación remota de la v2** en el PC de trabajo: `bash instalar-remoto.sh --ref feature/kit-v2` (el script lo soporta; no se ha corrido). Después de hacer merge a `main`, el comando normal.
+3. **Probar la instalación remota de la v2** en el PC de trabajo: el comando normal de `instalar-remoto.sh` desde `main` (no se ha corrido).
 4. **Usarla en 2 o 3 proyectos reales** antes de retirar nada de la v1.
 5. **Ordenar el repo** (solo tras el punto 4):
    - Hecho: lo de la v1 se movió a `old/v1/` con `git mv` (no se borró): `legacy/`, `definitions/`, `features/`, `pruebas/`, `registro/`, los scripts de v1 (todo `scripts/` salvo `resolver.mjs`) y los reportes sueltos. El `README.md` es el nuevo de la v2. Los lanzadores de `validar-tarea.mjs` y `entorno.mjs` salieron de `instalar.sh`.
    - Pendiente: borrar `old/` (solo tras el punto 4; decisión de Franco).
    - Pendiente: `rm -rf pruebas/.temporales` (3,9 GB, ignorado por git; lo ejecuta Franco).
-   - Pendiente: hacer el merge de `feature/kit-v2` a `main` (lo hace Franco).
+   - Hecho: `feature/kit-v2` ya está mergeada en `main`.
 
 ## Detalles menores
 
