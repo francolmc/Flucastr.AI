@@ -14,6 +14,8 @@ Dos agentes y dos puertas humanas:
 
 El único traspaso entre agentes es `cambios/<nombre>/plan.md`. Los niveles se traducen a modelos en `modelos.json`.
 
+Un cambio largo se parte en tramos (`### Tramo N`): el constructor hace un tramo por vez y el principal revisa cada uno antes de avanzar.
+
 «Hecho» significa que `./verify` pasa desde cero.
 
 ## Skills
