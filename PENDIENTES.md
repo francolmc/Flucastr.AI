@@ -37,6 +37,8 @@
 - Los planes anteriores a `vocabulario-y-guias` quedaron con `estado: hecho`, un valor que la lista actual descarta. Son historia: no se tocan.
 - Algunos planes dicen «Probado por Franco» sobre pruebas que corrió el coordinador de la sesión de diseño.
 - Modo remoto de `verify` (`VERIFY_TARGET`, cambio `validar-despliegue`): probado con un servidor local (lectura, 500, escritura permitida, URL inválida). Falta la comprobación contra un despliegue real (la hace Franco) y cómo el recorrido de cada proyecto lee el correo en remoto (no hay Mailpit). Sin probar: «prepárame el despliegue» y la sección «Despliegue» en un proyecto real.
+- Codex (soporte experimental): `verify` prueba la generación del TOML, el esfuerzo (`max` → `xhigh`), instalar, reinstalar, `--simular`, desinstalar y las reglas con `codex execpolicy`, todo en HOME temporal. Sin probar: una sesión real de Codex con un plan y el constructor como subagente (`spawn constructor`), y si el lanzador `codex-constructor` responde con `gpt-6-luna` en la cuenta de Franco (solo se probó con un `codex` de prueba). Lo mismo para elegir el rol a mano.
+- Codex: `codex-<agente>` abre con el aviso «Running without the shared background server» (usa `-c`, que exige modo embedded). Franco lo probó: la sesión funciona, solo muestra el aviso. Alternativa si molesta: un perfil `$CODEX_HOME/<nombre>.config.toml` y `codex -p <nombre>` (sin probar).
 - Skill `definir-proyecto`: probada en una carpeta vacía (4 preguntas, no escribe antes de contestar; con respuestas escribe `AGENTS.md`, `docs/proyecto.md` y `cambios/` y se detiene). Falta usarla en un proyecto nuevo real.
 
 ## Límites conocidos de las reglas deny
@@ -57,5 +59,5 @@
 - **Un lugar para la «evidencia del principal»** en la plantilla del plan (hoy se agrega a mano antes de *Evidencia*).
 - **Declarar en el plan que dos cambios editan el mismo archivo** y deben correr en orden (hoy es una frase suelta).
 - **Escalón 5 de `verify`:** compara lo que `instalar.sh --simular` instala; no detecta cambios fuera de esas rutas, a propósito.
-- **Soporte de otra herramienta (Codex):** sigue la decisión pendiente de `definitions/PENDIENTES.md`.
+- **Soporte de Codex:** hay soporte experimental (ver «Detalles menores»); lo que falta es probarlo en una sesión real.
 - **Fricciones sin resolver** de `friccion.md`: avisos duplicados al cerrar un subagente y documentación oficial que el lector web trunca.

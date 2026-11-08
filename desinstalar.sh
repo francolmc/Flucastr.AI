@@ -181,6 +181,21 @@ if [ -n "$PROYECTO" ]; then
           fi
         fi
         ;;
+      codex-reglas)
+        # reglas deny de Codex de este proyecto: solo ese archivo, y solo si lleva la marca del kit
+        if [ "$ruta" = "$PROYECTO/.codex/rules/flucastr.rules" ]; then
+          quitar=1
+          hallados=$((hallados + 1))
+          if [ "$SIMULAR" = 1 ]; then
+            decir "SIMULACIÓN: quitaría las reglas de Codex de: $ruta"
+          else
+            resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-deny codex "$ruta" < /dev/null)" || resultado="error"
+            decir "  reglas de Codex ($resultado): $ruta"
+            rmdir "$PROYECTO/.codex/rules" 2>/dev/null || true # solo si quedaron vacías
+            rmdir "$PROYECTO/.codex" 2>/dev/null || true
+          fi
+        fi
+        ;;
       skills-proyecto)
         if [ "$ruta" = "$PROYECTO" ]; then
           quitar=1
@@ -280,6 +295,18 @@ while IFS=$'\t' read -r tipo ruta extra; do
         resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-hook claude "$ruta" < /dev/null)" || resultado="error"
         decir "  hook de Claude Code ($resultado): $ruta"
         rmdir "$(dirname "$ruta")" 2>/dev/null || true # .claude del proyecto, solo si quedó vacía
+      fi
+      ;;
+    codex-reglas)
+      # reglas deny de Codex de un proyecto (.codex/rules/flucastr.rules), salvo --conservar-ajustes
+      if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
+      if [ "$SIMULAR" = 1 ]; then
+        decir "  quitaría las reglas de Codex: $ruta"
+      else
+        resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-deny codex "$ruta" < /dev/null)" || resultado="error"
+        decir "  reglas de Codex ($resultado): $ruta"
+        rmdir "$(dirname "$ruta")" 2>/dev/null || true # .codex/rules, solo si quedó vacía
+        rmdir "$(dirname "$(dirname "$ruta")")" 2>/dev/null || true # .codex, solo si quedó vacía
       fi
       ;;
     skills-proyecto)

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "_leeme": "Fuente única de verdad de los modelos. Los agentes declaran un NIVEL (alto, medio, bajo), nunca un modelo. Resolución: nivel = agentes[agente].nivel o nivel_por_defecto; perfil = agentes[agente].perfil o perfil_por_defecto[herramienta]; modelo = perfiles[perfil].modelos[nivel]; si falta, se prueba el orden de 'respaldo'. esfuerzo = agentes[agente].esfuerzo; si falta no se escribe nada (hereda el de la herramienta); debe estar en 'esfuerzos'. Para cambiar de modelo, proveedor o esfuerzo se edita solo este archivo. compactar_en = tokens de contexto a los que compacta la herramienta; ventanas = ventana de contexto por modelo (Pi: reserveTokens = ventana − compactar_en; Claude Code: autoCompactWindow = compactar_en + 33000).",
+  "_leeme": "Fuente única de verdad de los modelos. Los agentes declaran un NIVEL (alto, medio, bajo), nunca un modelo. Resolución: nivel = agentes[agente].nivel o nivel_por_defecto; perfil = agentes[agente].perfil o perfil_por_defecto[herramienta]; modelo = perfiles[perfil].modelos[nivel]; si falta, se prueba el orden de 'respaldo'. esfuerzo = agentes[agente].esfuerzo; si falta no se escribe nada (hereda el de la herramienta); debe estar en 'esfuerzos'. Codex (herramienta 'codex') usa model_reasoning_effort y no tiene 'max': ahí 'max' se escribe como 'xhigh'. Para cambiar de modelo, proveedor o esfuerzo se edita solo este archivo. compactar_en = tokens de contexto a los que compacta la herramienta; ventanas = ventana de contexto por modelo (Pi: reserveTokens = ventana − compactar_en; Claude Code: autoCompactWindow = compactar_en + 33000).",
 
   "niveles": ["alto", "medio", "bajo"],
   "esfuerzos": ["low", "medium", "high", "xhigh", "max"],
@@ -36,12 +36,22 @@
         "medio": "claude-sonnet-5-5",
         "bajo": "claude-haiku-5-5"
       }
+    },
+    "codex-openai": {
+      "herramienta": "codex",
+      "proveedor": "openai",
+      "modelos": {
+        "alto": "gpt-6-astra",
+        "medio": "gpt-6.1-sol",
+        "bajo": "gpt-6-luna"
+      }
     }
   },
 
   "perfil_por_defecto": {
     "pi": "pi-openai",
-    "claude-code": "claude-code"
+    "claude-code": "claude-code",
+    "codex": "codex-openai"
   },
 
   "agentes": {

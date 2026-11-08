@@ -1,22 +1,22 @@
 # Flucastr.AI
 
-Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en `main`** (candidata: falta probarla en proyectos reales, ver `PENDIENTES.md`); la versión 1 está en el tag `kit-v1` y en `old/v1/` (movida, no borrada; sus rutas internas son las originales y no se ejecuta).
+Kit personal de agentes y skills para trabajar con IA en Claude Code, Pi y Codex. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en `main`** (candidata: falta probarla en proyectos reales, ver `PENDIENTES.md`); la versión 1 está en el tag `kit-v1` y en `old/v1/` (movida, no borrada; sus rutas internas son las originales y no se ejecuta).
 
 ## Cómo funciona (v2)
 
 - Dos agentes: `principal` (nivel medio: investiga, diagnostica, planifica, verifica) y `constructor` (nivel bajo: aplica el plan). Los niveles se traducen a modelos en `modelos.json`.
-- El esfuerzo (qué tanto razona el modelo) se declara por agente en `modelos.json` y se traduce a `effort` (Claude Code) o `thinking` (Pi).
+- El esfuerzo (qué tanto razona el modelo) se declara por agente en `modelos.json` y se traduce a `effort` (Claude Code), `thinking` (Pi) o `model_reasoning_effort` (Codex, donde `max` se escribe como `xhigh`).
 - El único traspaso es `cambios/<nombre>/plan.md`, con sección `## Aceptación` que traza cada escenario a resultado observable, comprobación y esperado (se admite revisión manual justificada). Franco tiene dos puertas: aprobar el plan y revisar la evidencia.
 - Ejecutor: el constructor ejecuta siempre; el principal solo si Franco lo pide expresamente, y esa petición se escribe en el plan.
 - Ejecución por tramos: un cambio largo se escribe en `### Tramo N` y el constructor recibe un tramo por vez (`tramo: <n>`); el principal revisa cada tramo antes de avanzar. Los usos reales se registran en `docs/evaluaciones/tramos.md`.
-- Ventana propia: `claude-<agente>` y `pi-<agente>` (los crea `instalar.sh`) abren el agente con el esfuerzo de `modelos.json`. Con `--agent` directo o eligiéndolo dentro de Pi el esfuerzo no se aplica. Reinstalar con `instalar.sh` regenera los agentes y lanzadores.
+- Ventana propia: `claude-<agente>`, `pi-<agente>` y `codex-<agente>` (los crea `instalar.sh`) abren el agente con el modelo y el esfuerzo de `modelos.json`. Con `--agent` directo o eligiéndolo dentro de Pi el esfuerzo no se aplica; en Codex, elegir el rol a mano no está probado (usa `codex-<agente>`). Reinstalar con `instalar.sh` regenera los agentes y lanzadores.
 - «Hecho» significa que el comando `verify` del proyecto pasa desde cero.
 - Ceremonia de cierre: tras tu aprobación, el principal archiva el plan en `cambios/hechos/`, te pide el commit y luego abrir el PR; el cambio termina cuando confirmas el PR. Antes de crear una rama nueva exige la rama base limpia y al día; si hay una rama sin mergear, se detiene y pregunta.
 - Arnés de comparación con OpenSpec: `pruebas/comparar-openspec/` (fixtures, oráculos externos, runner con sandbox y reserva de gasto; documentado en `docs/evaluaciones/openspec/`). `./verify` corre solo sus autopruebas offline (paso 10), nunca `--run`. La medición real no se ha ejecutado. Evidencia de fallos reales del constructor: `docs/investigaciones/auditoria-andes-constructor.md`.
 - Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`, `definir-proyecto` (proyecto nuevo), `migrar-proyecto` (tras `--migrar`).
 - Workspaces: un proyecto puede ser una carpeta sin `.git` con varios repos; su raíz es la unidad de trabajo (`AGENTS.md`, `docs/proyecto.md`, `cambios/`, `verify`). Cada plan lleva `repos:` (carpetas que toca; `[.]` si es un repo) y la rama se crea solo en esas. Ver `preparar-proyecto`, sección 4.
 - Rama base: `base:` en el plan, declarada en el `AGENTS.md` del proyecto; para este proyecto es `main`. Sin ella, la principal del remoto. Los proyectos que trabajan sobre `develop` la declaran; liberar a `main` lo hace Franco a mano.
-- Comando `verify`: `./verify` (modelos.json ↔ agentes, sintaxis de instalar/desinstalar, ayuda completa y alias sin Node/modelos, resolver Claude/Pi, skills, `instalar.sh --simular`, reglas deny del proyecto, migración a v2 en proyectos sintéticos, textos clave de validar-despliegue y pruebas deterministas del contrato del constructor). La suite determinista no mide fiabilidad del modelo; ver `docs/evaluaciones/constructor.md`. Los proyectos tienen además modo remoto: `VERIFY_TARGET=<url> ./verify` corre solo el recorrido contra un despliegue, solo lectura salvo `VERIFY_PERMITIR_ESCRITURA=1` (`preparar-proyecto`, sección 3b).
+- Comando `verify`: `./verify` (modelos.json ↔ agentes, sintaxis de instalar/desinstalar, ayuda completa y alias sin Node/modelos, resolver Claude/Pi/Codex, Codex en HOME temporal (TOML, lanzadores, reinstalar, `--simular`, desinstalar y reglas con `codex execpolicy` si `codex` existe), skills, `instalar.sh --simular`, reglas deny del proyecto, migración a v2 en proyectos sintéticos, textos clave de validar-despliegue y pruebas deterministas del contrato del constructor). La suite determinista no mide fiabilidad del modelo; ver `docs/evaluaciones/constructor.md`. Los proyectos tienen además modo remoto: `VERIFY_TARGET=<url> ./verify` corre solo el recorrido contra un despliegue, solo lectura salvo `VERIFY_PERMITIR_ESCRITURA=1` (`preparar-proyecto`, sección 3b).
 - Migrar un proyecto de la v1: `bash instalar.sh --migrar <proyecto> [--simular]`. Mueve `definitions/`, `features/` y `registro/` a `<proyecto>/old/v1/` (sin borrar), deja el agente `principal`, quita el hook de v1, pone las 12 reglas deny, agrega `.claude/settings.local.json` a `.gitignore`, lista los repos hijos de un workspace, avisa si `AGENTS.md` sigue siendo de v1 y crea `cambios/`. Solo Claude Code y solo ese proyecto; no se combina con `--proyecto`, `--skills-proyecto`, `--copiar`, `--solo` ni `--agente`. Después, la skill `migrar-proyecto`.
 
 ## Reglas
@@ -25,7 +25,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Un so
 - No se leen `.env`, llaves ni credenciales (`.env.example` sí).
 - Git permitido a los agentes: crear la rama del cambio con `git switch -c <prefijo>/<nombre>` (`feature/`, `fix/`, `chore/`, `docs/`).
 - En Pi los subagentes no heredan skills: toda skill que use un subagente se declara en su frontmatter (`skills:`), y `inheritProjectContext: true` para el contexto del proyecto.
-- En un proyecto instalado con `--proyecto`, Claude Code bloquea con reglas deny `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C … commit`, `git -c … commit`, `git … push`, `bash -c`, `sh -c`, `zsh -c` y leer `.env`. Si una de esas acciones se bloquea, es la regla: no la saltes; lo hace Franco. El agente tampoco puede usar `bash -c` (intencional).
+- En un proyecto instalado con `--proyecto`, Claude Code bloquea con reglas deny `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C … commit`, `git -c … commit`, `git … push`, `bash -c`, `sh -c`, `zsh -c` y leer `.env`. Codex (experimental) bloquea por prefijo lo mismo, salvo leer `.env` (ver «Límites de las reglas deny»). Si una de esas acciones se bloquea, es la regla: no la saltes; lo hace Franco. El agente tampoco puede usar `bash -c` (intencional).
 
 ## Límites de las reglas deny
 
@@ -38,6 +38,7 @@ Las reglas viven en `<proyecto>/.claude/settings.json` (compartido, va a git). S
 - Los arrays `deny` de varios archivos de ajustes se combinan.
 - También bloquean los commits que Franco haga con Claude en ese proyecto; es lo esperado.
 - Pi no tiene equivalente conocido: en Pi rige solo el prompt del agente.
+- Codex (experimental; `<proyecto>/.codex/rules/flucastr.rules`, solo con `--proyecto`): Codex solo carga las reglas en proyectos de confianza (trusted) y son experimentales. Bloquean por prefijo `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C`, `git -c`, `bash -c`, `sh -c` y `zsh -c`; `git -C` y `git -c` quedan bloqueados aunque no sean commit (aceptado). No bloquean `bash -lc` ni `sh -lc`, porque Codex ejecuta así sus comandos y bloquearlo rompería todo. No hay regla para leer `.env`: límite documentado. Se comprobó con `codex execpolicy check`; no hay prueba con una sesión real de Codex.
 
 Lo de la v1 está en `old/v1/` (`legacy/`, `definitions/`, `features/`, `pruebas/`, `registro/`, los scripts de la v1, el README viejo y los reportes sueltos). Borrar `old/` viene después de usar la v2 en 2 o 3 proyectos reales; es decisión de Franco.
 

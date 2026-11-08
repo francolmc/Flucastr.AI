@@ -2,6 +2,8 @@
 # verify: comprueba que la v2 del kit está coherente. Sin Docker, sin escribir fuera del repo.
 set -euo pipefail
 cd "$(dirname "$0")"
+# Los pasos instalan en HOME temporales: CODEX_HOME (si la sesión la define) apuntaría al ~/.codex real.
+unset CODEX_HOME
 
 fallo() { echo "FALLO: $*" >&2; exit 1; }
 paso() { echo "== $1. $2 =="; }
@@ -10,10 +12,10 @@ command -v node >/dev/null 2>&1 || fallo "falta node en el PATH"
 
 # Instantánea de lo que instalar.sh escribe: cada ruta vigilada (sin seguir enlaces),
 # el destino de cada enlace simbólico y el hash de cada archivo (siguiendo enlaces).
-# Las rutas salen de $HOME y PI_CODING_AGENT_DIR al llamarla. Las que no existen cuentan como vacías.
+# Las rutas salen de $HOME, PI_CODING_AGENT_DIR y CODEX_HOME al llamarla. Las que no existen cuentan como vacías.
 instantanea() {
   local base="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}" r lista=""
-  for r in "$HOME/.claude/agents" "$HOME/.claude/skills" "$base/agents" "$base/skills" "$HOME"/.local/bin/pi-*; do
+  for r in "$HOME/.claude/agents" "$HOME/.claude/skills" "$base/agents" "$base/skills" "${CODEX_HOME:-$HOME/.codex}/agents" "$HOME/.agents/skills" "$HOME"/.local/bin/pi-* "$HOME"/.local/bin/codex-*; do
     if [ -e "$r" ] || [ -L "$r" ]; then lista="$lista$r"$'\n'; fi
   done
   {
@@ -31,11 +33,11 @@ autoprueba_5a() (
   trap '[ -n "${tmp:-}" ] && rm -rf "$tmp"' EXIT
   unset PI_CODING_AGENT_DIR
   export HOME="$tmp"
-  mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.pi/agent/agents" "$HOME/.pi/agent/skills" "$HOME/.local/bin"
+  mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.pi/agent/agents" "$HOME/.pi/agent/skills" "$HOME/.local/bin" "$HOME/.codex/agents" "$HOME/.agents/skills"
 
   # (i) añadir un archivo en cada ruta vigilada, de a uno: la instantánea debe cambiar
   previa=$(instantanea) || exit 1
-  for destino in .claude/agents .claude/skills .pi/agent/agents .pi/agent/skills .local/bin; do
+  for destino in .claude/agents .claude/skills .pi/agent/agents .pi/agent/skills .codex/agents .agents/skills .local/bin; do
     f=prueba.md
     if [ "$destino" = .local/bin ]; then f=pi-prueba; fi
     echo a > "$HOME/$destino/$f"
@@ -756,6 +758,142 @@ prueba_lanzadores() (
 )
 prueba_lanzadores || fallo "3e: lanzadores y reinstalación"
 
+# 3f. Codex: TOML de agente y lanzador con modelo y esfuerzo de modelos.json (max -> xhigh), en el repo y en HOME temporal
+paso 3f "Codex: TOML y lanzadores con modelo y esfuerzo; reinstalar refresca; --simular no escribe; desinstalar deja lo ajeno; reglas"
+# chequear_codex: el TOML trae 'model' y 'model_reasoning_effort' iguales a lo que imprime el resolver; sin esfuerzo, ninguna línea de esfuerzo
+chequear_codex() { # $1: nombre del agente; $2: archivo TOML
+  local nombre=$1 toml=$2 modelo esfuerzo
+  modelo=$(node scripts/resolver.mjs modelo "$nombre" codex) || return 1
+  esfuerzo=$(node scripts/resolver.mjs esfuerzo "$nombre" codex) || return 1
+  grep -qxF "model = \"$modelo\"" "$toml" || { echo "$toml: falta model = \"$modelo\""; return 1; }
+  if [ -n "$esfuerzo" ]; then
+    grep -qxF "model_reasoning_effort = \"$esfuerzo\"" "$toml" || { echo "$toml: falta model_reasoning_effort = \"$esfuerzo\""; return 1; }
+  elif grep -q '^model_reasoning_effort' "$toml"; then
+    echo "$toml: sale model_reasoning_effort sin esfuerzo declarado"; return 1
+  fi
+}
+# generación desde el repo: cada agente sale como TOML válido con modelo y esfuerzo de modelos.json
+for ruta in agentes/*.md; do
+  nombre=$(basename "$ruta" .md)
+  tf=$(mktemp) || fallo "3f: no pude crear el temporal"
+  node scripts/resolver.mjs agente-codex "$ruta" > "$tf" || { rm -f "$tf"; fallo "3f: agente-codex $ruta falló"; }
+  chequear_codex "$nombre" "$tf" || { rm -f "$tf"; fallo "3f: el TOML de Codex de $nombre no coincide con modelos.json"; }
+  rm -f "$tf"
+  echo "ok $nombre codex TOML (modelo y esfuerzo de modelos.json)"
+done
+prueba_codex() (
+  tmp=$(mktemp -d) || { echo "FALLO: no pude crear el temporal" >&2; exit 1; }
+  trap '[ -n "${tmp:-}" ] && rm -rf "$tmp"' EXIT
+  unset CODEX_HOME PI_CODING_AGENT_DIR
+  H="$tmp/home"; H2="$tmp/home2"; P="$tmp/proj"; M="$tmp/m.json"; F="$tmp/fake"; R="$P/.codex/rules/flucastr.rules"
+  mkdir -p "$H/.codex" "$H2/.codex" "$P/.codex/rules" "$F"
+  # codex de prueba: imprime cada argumento en su línea; no llama a ningún modelo
+  printf '%s\n' '#!/usr/bin/env bash' 'for a in "$@"; do printf "[%s]\n" "$a"; done' > "$F/codex"
+  chmod +x "$F/codex"
+  # regla ajena en el proyecto: sin marca del kit, debe sobrevivir a instalar y desinstalar
+  printf '%s\n' '# regla ajena' > "$P/.codex/rules/otra.rules"
+  poner_esfuerzo() { node -e 'const f=process.argv[1]; const m=require(require("path").resolve(process.argv[2])); m.agentes.constructor.esfuerzo=process.argv[3]; require("fs").writeFileSync(f, JSON.stringify(m))' "$M" modelos.json "$1"; }
+  correr() { # $1: HOME; resto: argumentos de instalar.sh o desinstalar.sh
+    local h=$1; shift
+    ( unset CODEX_HOME PI_CODING_AGENT_DIR; export HOME="$h" FLUCASTR_MODELOS="$M"; bash "$@" ) >"$tmp/log" 2>&1 || { cat "$tmp/log" >&2; echo "FALLO: $* falló" >&2; exit 1; }
+  }
+  huella() { { find "$1" -print; find "$1" -type f -exec shasum {} +; } | sort; } # sin seguir enlaces: el HOME tiene un enlace a la raíz del kit
+
+  # (1) instalar con max: TOML y lanzador con xhigh, reglas del proyecto
+  poner_esfuerzo max
+  correr "$H" instalar.sh --solo codex --copiar --proyecto "$P"
+  ( export FLUCASTR_MODELOS="$M"; chequear_codex constructor "$H/.codex/agents/constructor.toml" && chequear_codex principal "$H/.codex/agents/principal.toml" ) \
+    || { echo "FALLO: el TOML de Codex instalado no coincide con modelos.json" >&2; exit 1; }
+  esf=$(FLUCASTR_MODELOS="$M" node scripts/resolver.mjs esfuerzo constructor codex) || exit 1
+  [ "$esf" = xhigh ] || { echo "FALLO: max no se tradujo a xhigh para Codex (salió «$esf»)" >&2; exit 1; }
+  modelo=$(FLUCASTR_MODELOS="$M" node scripts/resolver.mjs modelo constructor codex) || exit 1
+  salida=$(PATH="$F:$PATH" HOME="$H" "$H/.local/bin/codex-constructor" extra) || { echo "FALLO: codex-constructor falló con el codex de prueba" >&2; exit 1; }
+  grep -qxF "[$modelo]" <<<"$salida" || { echo "FALLO: codex-constructor no pasa -m $modelo" >&2; exit 1; }
+  grep -qxF '[model_reasoning_effort="xhigh"]' <<<"$salida" || { echo "FALLO: codex-constructor no pasa model_reasoning_effort=xhigh" >&2; exit 1; }
+  grep -qxF '[extra]' <<<"$salida" || { echo "FALLO: codex-constructor no reenvía los argumentos" >&2; exit 1; }
+  echo "ok 3f: TOML de constructor y principal con modelo y esfuerzo (max -> xhigh); codex-constructor pasa -m y el esfuerzo"
+
+  # (2) reglas: 11 prefix_rule (10 forbidden y git switch -c allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
+  [ "$(grep -c '^prefix_rule' "$R" || true)" = 11 ] || { echo "FALLO: $R no tiene 11 prefix_rule" >&2; exit 1; }
+  grep -qxF '# regla ajena' "$P/.codex/rules/otra.rules" || { echo "FALLO: la regla ajena cambió tras instalar" >&2; exit 1; }
+  if command -v codex >/dev/null 2>&1; then
+    politica() { env HOME="$H" CODEX_HOME="$H/.codex" codex execpolicy check --rules "$R" -- "$@" 2>/dev/null || true; }
+    for c in "git commit -m x" "git push origin x" "git merge x" "gh pr create" "gh pr merge 1" "git -C . commit -m x" "git -c k=v commit -m x" "bash -c git commit -m x" "sh -c git commit -m x" "zsh -c git commit -m x"; do
+      out=$(politica $c)
+      grep -qE '"decision": ?"forbidden"' <<<"$out" || { echo "FALLO: execpolicy no bloquea «$c»: $out" >&2; exit 1; }
+    done
+    out=$(politica git switch -c feature/x)
+    grep -qE '"decision": ?"allow"' <<<"$out" || { echo "FALLO: execpolicy no permite «git switch -c»: $out" >&2; exit 1; }
+    for c in "git status" "bash -lc git status"; do
+      out=$(politica $c)
+      if grep -q 'forbidden' <<<"$out"; then echo "FALLO: execpolicy bloquea «$c» sin deberlo: $out" >&2; exit 1; fi
+    done
+    echo "ok 3f: execpolicy bloquea git commit/push/merge, gh pr create/merge, git -C, git -c, bash/sh/zsh -c; deja pasar git status y bash -lc"
+  else
+    echo "AVISO 3f: codex no está en el PATH; las reglas no se comprobaron con execpolicy"
+  fi
+
+  # (3) reinstalar con low: el TOML y el lanzador se refrescan
+  poner_esfuerzo low
+  correr "$H" instalar.sh --solo codex --copiar --proyecto "$P"
+  ( export FLUCASTR_MODELOS="$M"; chequear_codex constructor "$H/.codex/agents/constructor.toml" ) \
+    || { echo "FALLO: reinstalar no refrescó el TOML del constructor a low" >&2; exit 1; }
+  grep -qF -- 'model_reasoning_effort="low"' "$H/.local/bin/codex-constructor" || { echo "FALLO: reinstalar no refrescó codex-constructor a low" >&2; exit 1; }
+  echo "ok 3f: reinstalar con low refresca el TOML y codex-constructor"
+
+  # (4) reinstalar sin cambios no altera el HOME ni el proyecto
+  antes=$(huella "$H"); antes_p=$(huella "$P")
+  correr "$H" instalar.sh --solo codex --copiar --proyecto "$P"
+  [ "$antes" = "$(huella "$H")" ] || { diff <(echo "$antes") <(huella "$H") >&2; echo "FALLO: reinstalar sin cambios alteró el HOME" >&2; exit 1; }
+  [ "$antes_p" = "$(huella "$P")" ] || { echo "FALLO: reinstalar sin cambios alteró el proyecto" >&2; exit 1; }
+  echo "ok 3f: reinstalar sin cambios no altera el HOME ni el proyecto"
+
+  # (5) --simular en un HOME limpio: anuncia el TOML y no escribe nada
+  antes2=$(huella "$H2"); antes2_p=$(huella "$P")
+  correr "$H2" instalar.sh --solo codex --copiar --proyecto "$P" --simular
+  grep -q 'agente generado: .*constructor.toml' "$tmp/log" || { echo "FALLO: --simular no anunció el TOML del constructor" >&2; exit 1; }
+  [ "$antes2" = "$(huella "$H2")" ] || { echo "FALLO: --simular escribió en el HOME" >&2; exit 1; }
+  [ "$antes2_p" = "$(huella "$P")" ] || { echo "FALLO: --simular escribió en el proyecto" >&2; exit 1; }
+  echo "ok 3f: --simular anuncia el TOML y no escribe en el HOME ni en el proyecto"
+
+  # (6) desinstalar: se quita lo del kit y queda lo ajeno (TOML, skill y regla sin marca)
+  printf '%s\n' 'ajeno' > "$H/.codex/agents/ajeno.toml"; cp "$H/.codex/agents/ajeno.toml" "$tmp/ajeno.orig"
+  mkdir -p "$H/.agents/skills/ajena"; printf '%s\n' 'ajena' > "$H/.agents/skills/ajena/SKILL.md"
+  correr "$H" desinstalar.sh
+  for f in "$H/.codex/agents/constructor.toml" "$H/.codex/agents/principal.toml" "$H/.local/bin/codex-constructor" "$H/.local/bin/codex-principal" "$H/.agents/skills/ejecutar-plan" "$R"; do
+    if [ -e "$f" ] || [ -L "$f" ]; then echo "FALLO: desinstalar dejó $f" >&2; exit 1; fi
+  done
+  cmp -s "$H/.codex/agents/ajeno.toml" "$tmp/ajeno.orig" || { echo "FALLO: desinstalar tocó ajeno.toml" >&2; exit 1; }
+  [ -f "$H/.agents/skills/ajena/SKILL.md" ] || { echo "FALLO: desinstalar quitó la skill ajena" >&2; exit 1; }
+  [ -f "$P/.codex/rules/otra.rules" ] || { echo "FALLO: desinstalar quitó otra.rules" >&2; exit 1; }
+  echo "ok 3f: desinstalar quita los TOML, lanzadores, skills y reglas del kit; deja ajeno.toml, la skill ajena y otra.rules"
+)
+prueba_codex || fallo "3f: Codex en HOME temporal"
+
+# 3g. pruebas negativas de Codex: sin esfuerzo, esfuerzo distinto, esfuerzo fuera de 'esfuerzos' y perfil faltante deben fallar
+echo "-- 3g. pruebas negativas de Codex"
+prueba_negativa_codex() (
+  tmp=$(mktemp -d) || { echo "FALLO: no pude crear el temporal" >&2; exit 1; }
+  trap '[ -n "${tmp:-}" ] && rm -rf "$tmp"' EXIT
+  node scripts/resolver.mjs agente-codex agentes/constructor.md > "$tmp/c.toml" || { echo "FALLO: agente-codex sobre constructor falló" >&2; exit 1; }
+  # (i) sin model_reasoning_effort: el chequeo debe rechazarlo (constructor tiene esfuerzo declarado)
+  grep -v '^model_reasoning_effort' "$tmp/c.toml" > "$tmp/sin-esfuerzo.toml"
+  if chequear_codex constructor "$tmp/sin-esfuerzo.toml" >/dev/null 2>&1; then echo "FALLO: prueba negativa: el chequeo aceptó un TOML sin model_reasoning_effort" >&2; exit 1; fi
+  # (ii) con otro esfuerzo: el chequeo debe rechazarlo
+  sed 's/^model_reasoning_effort = .*/model_reasoning_effort = "max"/' "$tmp/c.toml" > "$tmp/otro-esfuerzo.toml"
+  if chequear_codex constructor "$tmp/otro-esfuerzo.toml" >/dev/null 2>&1; then echo "FALLO: prueba negativa: el chequeo aceptó un esfuerzo distinto de modelos.json" >&2; exit 1; fi
+  # (iii) esfuerzo 'ultra' fuera de 'esfuerzos': agente-codex falla y nombra el esfuerzo
+  node -e 'const f=process.argv[1]; const m=JSON.parse(require("fs").readFileSync(require("path").resolve(process.argv[2]),"utf8")); m.agentes.constructor.esfuerzo="ultra"; require("fs").writeFileSync(f, JSON.stringify(m))' "$tmp/ultra.json" modelos.json
+  if FLUCASTR_MODELOS="$tmp/ultra.json" node scripts/resolver.mjs agente-codex agentes/constructor.md >/dev/null 2>"$tmp/err1"; then echo "FALLO: prueba negativa: agente-codex aceptó el esfuerzo 'ultra'" >&2; exit 1; fi
+  grep -q "no está en 'esfuerzos'" "$tmp/err1" || { echo "FALLO: prueba negativa: el rechazo de 'ultra' no nombra el campo" >&2; exit 1; }
+  # (iv) sin perfil_por_defecto.codex: agente-codex falla y nombra el campo
+  node -e 'const f=process.argv[1]; const m=JSON.parse(require("fs").readFileSync(require("path").resolve(process.argv[2]),"utf8")); delete m.perfil_por_defecto.codex; require("fs").writeFileSync(f, JSON.stringify(m))' "$tmp/sinperfil.json" modelos.json
+  if FLUCASTR_MODELOS="$tmp/sinperfil.json" node scripts/resolver.mjs agente-codex agentes/constructor.md >/dev/null 2>"$tmp/err2"; then echo "FALLO: prueba negativa: agente-codex aceptó un modelos.json sin perfil_por_defecto.codex" >&2; exit 1; fi
+  grep -q "perfil_por_defecto.codex" "$tmp/err2" || { echo "FALLO: prueba negativa: el rechazo del perfil faltante no nombra el campo" >&2; exit 1; }
+  echo "ok 3g: sin esfuerzo, esfuerzo distinto, 'ultra' y perfil faltante de Codex se rechazan con su mensaje"
+)
+prueba_negativa_codex || fallo "3g: pruebas negativas de Codex"
+
 node pruebas/contrato-constructor.mjs || fallo "8j: suite determinista del contrato del constructor"
 
 # 8i. el constructor ejecuta siempre: planificar-cambio dice «salvo que Franco» y no «Falla la 2 o la 4»; principal dice «petición expresa»; una copia de planificar-cambio con «Falla la 2 o la 4» debe fallar
@@ -790,8 +928,12 @@ echo "ok 9a: migrar-proyecto trae «Reglas de v1 que descarté», «no las copie
 
 # 10. arnés OpenSpec: solo autopruebas offline; nunca ejecuta --run
 paso 10 "autopruebas offline del runner OpenSpec, sin inferencia"
-node pruebas/comparar-openspec/runner/cli.mjs --self-test || fallo "10: autopruebas offline del runner OpenSpec"
-echo "ok 10: self-test del runner pasó; no se lanzó --run ni inferencia"
+if [ -f pruebas/comparar-openspec/runner/cli.mjs ]; then
+  node pruebas/comparar-openspec/runner/cli.mjs --self-test || fallo "10: autopruebas offline del runner OpenSpec"
+  echo "ok 10: self-test del runner pasó; no se lanzó --run ni inferencia"
+else
+  echo "AVISO 10: falta pruebas/comparar-openspec/ (pruebas/ está en .gitignore); paso omitido"
+fi
 
 # 11. ejecución por tramos: textos nuevos de los cuatro archivos; cada copia sin su texto debe fallar con su mensaje
 paso 11 "ejecución por tramos: textos nuevos y copias sin cada uno"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Instala Flucastr.AI en Claude Code y Pi.
-# Uso: bash instalar.sh [--simular] [--copiar] [--solo claude|pi] [--proyecto <ruta> [--agente <nombre>]] [--skills-proyecto]
+# Instala Flucastr.AI en Claude Code, Pi y Codex.
+# Uso: bash instalar.sh [--simular] [--copiar] [--solo claude|pi|codex] [--proyecto <ruta> [--agente <nombre>]] [--skills-proyecto]
 #      bash instalar.sh --migrar <ruta> [--simular]   pasa un proyecto de la v1 a la v2 (solo ese proyecto, Claude Code)
 #   --copiar: copia las skills (carpetas reales) en vez de enlazarlas, y usa un modelos.json personal
 #             en ~/.flucastr-ai/modelos.json (o en $FLUCASTR_MODELOS si está definida). Modo "descarga".
@@ -20,9 +20,11 @@ Uso
 Opciones
   --simular                 Muestra las acciones sin escribir archivos.
   --copiar                  Copia las skills en vez de enlazarlas (modo descarga).
-  --solo claude|pi          Limita la instalación a Claude Code o Pi; no instala herramientas.
+  --solo claude|pi|codex    Limita la instalación a Claude Code, Pi o Codex; no instala herramientas.
   --proyecto <ruta>         Además de la instalación global, configura el proyecto para Claude Code
-                            si se detecta, y fija su agente predeterminado.
+                            si se detecta, y fija su agente predeterminado. Con Codex, escribe
+                            .codex/rules/flucastr.rules (reglas deny; Codex las carga solo en proyectos
+                            de confianza y son experimentales).
   --agente <nombre>         Elige el agente predeterminado del proyecto; por defecto, principal.
                             No filtra los agentes globales.
   --skills-proyecto         Copia skills en <ruta>/.pi/skills; requiere --proyecto y no se combina
@@ -34,7 +36,7 @@ Opciones
 Restricciones
   --migrar admite --simular; no se combina con --proyecto, --skills-proyecto, --copiar,
   --solo ni --agente.
-  --skills-proyecto no se combina con --solo claude.
+  --skills-proyecto no se combina con --solo claude ni --solo codex.
   Las herramientas se detectan automáticamente; --solo solo filtra cuáles configurar.
   Sin --copiar, las skills se enlazan al repositorio (modo repo). Con --copiar, se copian
   (modo descarga). Para cambiar de modo, desinstala antes.
@@ -43,7 +45,9 @@ Entorno y rutas
   --copiar usa FLUCASTR_MODELOS si está definida; si no, usa
   ~/.flucastr-ai/modelos.json. En modo repo se usan los modelos del repositorio.
   PI_CODING_AGENT_DIR cambia la ruta de Pi; por defecto es ~/.pi/agent.
-  Claude Code usa ~/.claude. Los lanzadores claude-<agente> y pi-<agente> se crean en
+  Claude Code usa ~/.claude. Codex usa CODEX_HOME o, si no está, ~/.codex: los agentes van
+  a <CODEX_HOME>/agents/<agente>.toml y las skills a ~/.agents/skills.
+  Los lanzadores claude-<agente>, pi-<agente> y codex-<agente> se crean en
   ~/.local/bin; agrega esa carpeta al PATH para invocarlos.
 
 Ejemplos
@@ -61,6 +65,8 @@ RAIZ="$(cd "$(dirname "$0")" && pwd)"
 RESOLVER="$RAIZ/scripts/resolver.mjs"
 CLAUDE_DIR="$HOME/.claude"
 PI_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
+CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
+CODEX_SKILLS="$HOME/.agents/skills"
 BIN_DIR="$HOME/.local/bin"
 ESTADO_DIR="$HOME/.flucastr-ai"
 MANIFIESTO="$ESTADO_DIR/manifiesto.txt"
@@ -87,8 +93,8 @@ while [ $# -gt 0 ]; do
       shift
       SOLO="${1:-}"
       case "$SOLO" in
-        claude | pi) ;;
-        *) echo "--solo acepta: claude o pi" >&2; exit 1 ;;
+        claude | pi | codex) ;;
+        *) echo "--solo acepta: claude, pi o codex" >&2; exit 1 ;;
       esac
       ;;
     --proyecto)
@@ -112,7 +118,7 @@ done
 # Validación del flag: antes de escribir nada.
 if [ "$SKILLS_PROYECTO" = 1 ]; then
   [ -n "$PROYECTO" ] || { echo "--skills-proyecto necesita --proyecto <ruta>" >&2; exit 1; }
-  [ "$SOLO" != claude ] || { echo "--skills-proyecto no se combina con --solo claude" >&2; exit 1; }
+  { [ "$SOLO" != claude ] && [ "$SOLO" != codex ]; } || { echo "--skills-proyecto no se combina con --solo claude ni --solo codex" >&2; exit 1; }
 fi
 
 command -v node >/dev/null 2>&1 || { echo "Falta node: se usa para leer modelos.json." >&2; exit 1; }
@@ -401,8 +407,10 @@ fi
 # la instalación anterior o cualquier destino.
 INSTALAR_CLAUDE=0
 INSTALAR_PI=0
-if [ "$SOLO" != "pi" ] && { [ -d "$CLAUDE_DIR" ] || command -v claude >/dev/null 2>&1; }; then INSTALAR_CLAUDE=1; fi
-if [ "$SOLO" != "claude" ] && { [ -d "$PI_DIR" ] || command -v pi >/dev/null 2>&1; }; then INSTALAR_PI=1; fi
+INSTALAR_CODEX=0
+if { [ -z "$SOLO" ] || [ "$SOLO" = claude ]; } && { [ -d "$CLAUDE_DIR" ] || command -v claude >/dev/null 2>&1; }; then INSTALAR_CLAUDE=1; fi
+if { [ -z "$SOLO" ] || [ "$SOLO" = pi ]; } && { [ -d "$PI_DIR" ] || command -v pi >/dev/null 2>&1; }; then INSTALAR_PI=1; fi
+if { [ -z "$SOLO" ] || [ "$SOLO" = codex ]; } && { [ -d "$CODEX_DIR" ] || command -v codex >/dev/null 2>&1; }; then INSTALAR_CODEX=1; fi
 
 for f in "$RAIZ"/agentes/*.md; do
   [ -f "$f" ] || continue
@@ -412,6 +420,9 @@ for f in "$RAIZ"/agentes/*.md; do
   fi
   if [ "$INSTALAR_PI" = 1 ]; then
     node "$RESOLVER" agente-pi "$f" >/dev/null
+  fi
+  if [ "$INSTALAR_CODEX" = 1 ]; then
+    node "$RESOLVER" agente-codex "$f" >/dev/null
   fi
 done
 
@@ -655,6 +666,74 @@ EOF
   echo "  lanzador generado: $destino (esfuerzo: ${esfuerzo:-sin declarar})"
 }
 
+generar_agente_codex() { # archivo del agente (lo lee Codex como rol de subagente)
+  local archivo="$1" nombre destino modelo
+  nombre="$(basename "$archivo" .md)"
+  destino="$CODEX_DIR/agents/$nombre.toml"
+  modelo="$(node "$RESOLVER" modelo "$nombre" codex)"
+  if ! liberar "$destino" && { [ -e "$destino" ] || [ -L "$destino" ]; }; then
+    echo "  OMITIDO (ya existe): $destino"
+    return
+  fi
+  if [ "$SIMULAR" = 0 ]; then
+    mkdir -p "$CODEX_DIR/agents"
+    node "$RESOLVER" agente-codex "$archivo" > "$destino"
+    registrar archivo "$destino"
+  fi
+  echo "  agente generado: $destino (modelo: $modelo)"
+}
+
+generar_lanzador_codex() { # archivo del agente
+  local archivo="$1" nombre destino modelo esfuerzo
+  nombre="$(basename "$archivo" .md)"
+  destino="$BIN_DIR/codex-$nombre"
+  modelo="$(node "$RESOLVER" modelo "$nombre" codex)"
+  esfuerzo="$(node "$RESOLVER" esfuerzo "$nombre" codex)"
+  if [ -e "$destino" ] || [ -L "$destino" ]; then
+    echo "  OMITIDO (ya existe): $destino"
+    return
+  fi
+  if [ "$SIMULAR" = 0 ]; then
+    mkdir -p "$BIN_DIR"
+    local exportar="" bandera=""
+    if [ "$MODO" = descarga ]; then exportar="export FLUCASTR_MODELOS=\"$MODELOS\""$'\n'; fi
+    if [ -n "$esfuerzo" ]; then bandera=" -c 'model_reasoning_effort=\"$esfuerzo\"'"; fi
+    # El modelo y las instrucciones se resuelven al lanzar (como en pi-<agente>); el esfuerzo se fija aquí.
+    cat > "$destino" <<EOF
+#!/usr/bin/env bash
+# flucastr-ai:generado - lo crea instalar.sh y lo borra desinstalar.sh
+RAIZ="$RAIZ"
+${exportar}exec codex -m "\$(node "\$RAIZ/scripts/resolver.mjs" modelo $nombre codex)"$bandera -c "developer_instructions=\$(node "\$RAIZ/scripts/resolver.mjs" instrucciones-codex "\$RAIZ/agentes/$nombre.md")" "\$@"
+EOF
+    chmod +x "$destino"
+    registrar archivo "$destino"
+  fi
+  echo "  lanzador generado: $destino (modelo: $modelo, esfuerzo: ${esfuerzo:-sin declarar})"
+}
+
+# Reglas deny de Codex del proyecto (<proyecto>/.codex/rules/flucastr.rules, archivo del kit: no se mezcla con lo ajeno).
+# Codex las carga solo en proyectos de confianza y son experimentales. Si el archivo es ajeno, avisa y sigue.
+instalar_deny_codex() {
+  local archivo="$PROYECTO/.codex/rules/flucastr.rules" salida prefijo=""
+  local extra=()
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" fijar-deny codex "$archivo" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+    echo "  AVISO: no se tocó $archivo ($salida)"
+    return 0
+  fi
+  case "$salida" in
+    fijado) echo "  ${prefijo}reglas de Codex fijadas: $archivo" ;;
+    actualizado) echo "  ${prefijo}reglas de Codex actualizadas: $archivo" ;;
+    ya-estaba) echo "  ${prefijo}reglas de Codex ya estaban: $archivo" ;;
+    *) echo "  AVISO: resultado inesperado de fijar-deny codex ($salida)"; return 0 ;;
+  esac
+  # Una línea por archivo: se registra solo si aún no está en el registro nuevo.
+  if [ "$SIMULAR" = 0 ] && ! grep -qxF "$(printf 'codex-reglas\t%s\t' "$archivo")" "$NUEVO"; then
+    registrar codex-reglas "$archivo"
+  fi
+  return 0
+}
+
 # Compactación automática de los modelos de Pi del kit, en el settings.json global de Pi. Si el archivo del
 # usuario no se puede tocar, avisa y sigue: no falla la instalación.
 instalar_compactacion_pi() {
@@ -818,6 +897,7 @@ if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
   grep -E "^compactacion$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude:" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^hook$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude$" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^deny$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
+  grep -E "^codex-reglas$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   bash "$RAIZ/desinstalar.sh" --silencioso --conservar-ajustes
 fi
 
@@ -873,6 +953,26 @@ else
   echo "Pi: no encontrado, se omite."
 fi
 
+if [ "$INSTALAR_CODEX" = 1 ]; then
+  echo "Codex ($CODEX_DIR)"
+  instalar_skills "$CODEX_SKILLS"
+  for f in "$RAIZ"/agentes/*.md; do
+    [ -f "$f" ] && generar_agente_codex "$f"
+    [ -f "$f" ] && generar_lanzador_codex "$f"
+  done
+  case ":$PATH:" in
+    *":$BIN_DIR:"*) ;;
+    *) echo "  AVISO: $BIN_DIR no está en tu PATH; agrégalo para usar los comandos codex-<agente>." ;;
+  esac
+  if [ -n "$PROYECTO" ]; then
+    echo "Proyecto ($PROYECTO), Codex"
+    instalar_deny_codex
+  fi
+else
+  echo "Codex: no encontrado, se omite."
+  if [ -n "$PROYECTO" ]; then echo "  (--proyecto no fijó reglas de Codex: Codex no está instalado)"; fi
+fi
+
 if [ "$SKILLS_PROYECTO" = 1 ]; then
   echo
   echo "Skills de Pi en el proyecto ($PROYECTO)"
@@ -880,17 +980,17 @@ if [ "$SKILLS_PROYECTO" = 1 ]; then
   echo "  Las copias en .pi/skills/ no se editan: se rehacen al reinstalar. Pi pedirá confiar en el proyecto (/trust)."
 fi
 
-# Proyectos registrados con skills-proyecto: se rehacen en cada instalación (con --solo claude, no).
+# Proyectos registrados con skills-proyecto: se rehacen en cada instalación (con --solo claude o codex, no).
 # Si no hay ninguno, no se imprime nada.
 if [ -n "$PROYECTOS_REGISTRADOS" ]; then
   ANTERIOR_PROYECTO="$PROYECTO"
-  if [ "$SOLO" = claude ]; then
+  if [ -n "$SOLO" ] && [ "$SOLO" != pi ]; then
     echo
-    echo "  (proyectos con skills registradas no se actualizan con --solo claude)"
+    echo "  (proyectos con skills registradas no se actualizan con --solo $SOLO)"
   fi
   while IFS= read -r ruta; do
     [ -n "$ruta" ] || continue
-    if [ "$SOLO" = claude ]; then
+    if [ -n "$SOLO" ] && [ "$SOLO" != pi ]; then
       # solo se conserva el registro; el proyecto no se toca
       if [ "$SIMULAR" = 0 ] && ! grep -qxF "$(printf 'skills-proyecto\t%s\t' "$ruta")" "$NUEVO"; then
         registrar skills-proyecto "$ruta"
@@ -918,4 +1018,5 @@ echo
 echo "Listo. Reinicia Claude Code y Pi."
 echo "  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)"
 echo "  Pi:          pi-principal"
+if [ "$INSTALAR_CODEX" = 1 ]; then echo "  Codex:       codex-principal (o el agente como rol: ~/.codex/agents)"; fi
 echo "Si cambias modelos.json, vuelve a correr: bash instalar.sh"

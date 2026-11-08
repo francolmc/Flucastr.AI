@@ -19,6 +19,12 @@
 //   node scripts/resolver.mjs quitar-hook claude <settings.local.json>  deshace lo anterior, solo la entrada exacta del validador
 //   node scripts/resolver.mjs fijar-deny claude <proyecto/.claude/settings.json> [--simular]  agrega las reglas deny del kit que falten (una línea agregada:<regla> por cada una)
 //   node scripts/resolver.mjs quitar-deny claude <proyecto/.claude/settings.json> <regla>  quita esa regla exacta; borra lo que quede vacío
+//   node scripts/resolver.mjs agente-codex <archivo.md>      imprime el TOML del agente para Codex (~/.codex/agents/<nombre>.toml), modelo y esfuerzo resueltos
+//   node scripts/resolver.mjs fijar-deny codex <proyecto/.codex/rules/flucastr.rules> [--simular]  escribe las reglas prefix_rule del kit (no pisa un archivo ajeno)
+//   node scripts/resolver.mjs quitar-deny codex <proyecto/.codex/rules/flucastr.rules>  borra ese archivo solo si lleva la marca del kit
+//   modelo-esfuerzo <agente> codex: el esfuerzo sale traducido (max -> xhigh), como lo pide Codex
+//   esfuerzo <agente> codex: igual, solo el esfuerzo traducido para Codex
+//   instrucciones-codex <archivo.md>: imprime las instrucciones del agente como cadena JSON (válida como valor TOML en codex -c)
 //
 // Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
 // si no, se lee el modelos.json del repo. Lo usa instalar.sh --copiar con el modelos.json personal.
@@ -64,7 +70,9 @@ function resolverModelo(agente, herramienta) {
   if (!perfilId || perfiles[perfilId]?.herramienta !== herramienta) {
     perfilId = (c.perfil_por_defecto ?? {})[herramienta];
   }
-  if (!perfilId) fallar(`no hay perfil para la herramienta '${herramienta}'`);
+  if (!perfilId) {
+    fallar(`no hay perfil para la herramienta '${herramienta}': define 'perfil_por_defecto.${herramienta}' en modelos.json (o 'agentes.${agente}.perfil')`);
+  }
 
   const perfil = perfiles[perfilId];
   if (!perfil) fallar(`el perfil '${perfilId}' no existe en 'perfiles'`);
@@ -89,6 +97,20 @@ function resolverEsfuerzo(agente) {
   return esfuerzo;
 }
 
+// Codex (model_reasoning_effort) no tiene 'max': ahí se escribe 'xhigh'. Las demás herramientas usan el valor tal cual.
+const ESFUERZO_CODEX = { max: "xhigh" };
+function esfuerzoDe(herramienta, esfuerzo) {
+  return herramienta === "codex" ? (ESFUERZO_CODEX[esfuerzo] ?? esfuerzo) : esfuerzo;
+}
+
+// Valor de una clave de la cabecera YAML (sin comillas exteriores), o undefined si no está.
+function valorCabecera(cabecera, campo) {
+  const m = cabecera.match(new RegExp(`^${campo}:\\s*(.+?)\\s*$`, "m"));
+  if (!m) return undefined;
+  const comillas = m[1].match(/^"(.*)"$/) ?? m[1].match(/^'(.*)'$/);
+  return comillas ? comillas[1] : m[1];
+}
+
 function partir(archivo) {
   const texto = readFileSync(archivo, "utf8");
   const m = texto.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
@@ -98,7 +120,7 @@ function partir(archivo) {
 
 // Línea fija que dice al agente en qué herramienta corre, con qué modelo y como qué agente.
 function lineaIdentidad(herramienta, agente) {
-  const nombre = herramienta === "pi" ? "Pi" : "Claude Code";
+  const nombre = herramienta === "pi" ? "Pi" : herramienta === "codex" ? "Codex" : "Claude Code";
   return `Herramienta: ${nombre} | Modelo: ${resolverModelo(agente, herramienta)} | Agente: ${agente}`;
 }
 
@@ -588,16 +610,92 @@ function quitarDenyClaude(ruta, regla) {
   }
 }
 
+// Instrucciones de un agente para Codex: línea de identidad y cuerpo (sin el encabezado). Las usan agente-codex e instrucciones-codex.
+function instruccionesCodex(agente, cuerpo) {
+  return `${lineaIdentidad("codex", agente)}\n\n${cuerpo.replace(/^\s+/, "")}`;
+}
+
+// --- Reglas deny del proyecto en Codex (fijar-deny codex / quitar-deny codex) ---
+
+// Codex bloquea por prefijo de comando (prefix_rule). Lista acordada en el plan soporte-codex (Resuelto).
+// No hay regla para .env (Codex no la tiene: límite documentado). No se bloquean bash -lc / sh -lc:
+// Codex ejecuta así sus comandos y bloquearlos rompería todo.
+const PREFIJOS_DENY_CODEX = [
+  ["git", "commit"],
+  ["git", "push"],
+  ["git", "merge"],
+  ["gh", "pr", "create"],
+  ["gh", "pr", "merge"],
+  ["git", "-C"],
+  ["git", "-c"],
+  ["bash", "-c"],
+  ["sh", "-c"],
+  ["zsh", "-c"],
+];
+// Permitidas: el sandbox de Codex deja .git en solo lectura y `git switch -c` falla ahí. Una regla allow
+// lo ejecuta fuera del sandbox sin pedir aprobación. Es la única escritura de git que el kit autoriza.
+const PREFIJOS_ALLOW_CODEX = [["git", "switch", "-c"]];
+const MARCA_CODEX = "# flucastr-ai:generado - no editar; se regenera con instalar.sh";
+
+// Contenido del archivo de reglas (Starlark). Cada regla trae su ejemplo de match: Codex lo valida al cargar.
+function reglasCodex() {
+  const bloques = PREFIJOS_DENY_CODEX.map(
+    (p) =>
+      `prefix_rule(\n` +
+      `    pattern = ${JSON.stringify(p)},\n` +
+      `    decision = "forbidden",\n` +
+      `    justification = "Lo hace Franco: flucastr-ai no hace commit, push, merge ni PR.",\n` +
+      `    match = [${JSON.stringify([...p, "x"])}],\n` +
+      `)\n`
+  );
+  const permitidas = PREFIJOS_ALLOW_CODEX.map(
+    (p) =>
+      `prefix_rule(\n` +
+      `    pattern = ${JSON.stringify(p)},\n` +
+      `    decision = "allow",\n` +
+      `    justification = "Crear la rama del cambio: el sandbox de Codex deja .git en solo lectura.",\n` +
+      `    match = [${JSON.stringify([...p, "feature/x"])}],\n` +
+      `)\n`
+  );
+  return `${MARCA_CODEX}\n${[...bloques, ...permitidas].join("\n")}`;
+}
+
+function fijarDenyCodex(ruta, simular) {
+  const esperado = reglasCodex();
+  const actual = existsSync(ruta) ? readFileSync(ruta, "utf8") : null;
+  if (actual === esperado) {
+    console.log("ya-estaba");
+    return;
+  }
+  // Un archivo que no lleva nuestra marca no es nuestro: no se pisa.
+  if (actual !== null && !actual.startsWith(MARCA_CODEX)) fallar(`${ruta} existe y no es del kit; no lo toco`);
+  if (!simular) {
+    mkdirSync(dirname(ruta), { recursive: true });
+    writeFileSync(ruta, esperado);
+  }
+  console.log(actual === null ? "fijado" : "actualizado");
+}
+
+function quitarDenyCodex(ruta) {
+  if (!existsSync(ruta) || !readFileSync(ruta, "utf8").startsWith(MARCA_CODEX)) {
+    console.log("omitido");
+    return;
+  }
+  rmSync(ruta);
+  console.log("archivo-quitado");
+}
+
 const [orden, ...args] = process.argv.slice(2);
 
 if (orden === "modelo" && args.length === 2) {
   process.stdout.write(resolverModelo(args[0], args[1]) + "\n");
-} else if (orden === "esfuerzo" && args.length === 1) {
-  process.stdout.write(resolverEsfuerzo(args[0]) + "\n");
+} else if (orden === "esfuerzo" && (args.length === 1 || (args.length === 2 && args[1] === "codex"))) {
+  // Con 'codex' el esfuerzo sale traducido para Codex (max -> xhigh); sin herramienta, tal cual.
+  process.stdout.write(esfuerzoDe(args[1], resolverEsfuerzo(args[0])) + "\n");
 } else if (orden === "modelo-esfuerzo" && args.length === 2) {
   // Modelo con el esfuerzo como sufijo (modelo:esfuerzo), que acepta `pi --model`; sin esfuerzo, solo el modelo.
   const modelo = resolverModelo(args[0], args[1]);
-  const esfuerzo = resolverEsfuerzo(args[0]);
+  const esfuerzo = esfuerzoDe(args[1], resolverEsfuerzo(args[0]));
   process.stdout.write((esfuerzo ? `${modelo}:${esfuerzo}` : modelo) + "\n");
 } else if ((orden === "agente-claude" || orden === "agente-pi") && args.length === 1) {
   const archivo = args[0];
@@ -624,6 +722,40 @@ if (orden === "modelo" && args.length === 2) {
   process.stdout.write(
     `---\n${cabeceraSalida}\n${lineaEsfuerzo}model: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${lineaIdentidad(herramienta, agente)}\n${cuerpo}`
   );
+} else if (orden === "agente-codex" && args.length === 1) {
+  // TOML de agente para Codex (~/.codex/agents/<nombre>.toml). Sin 'skills', 'tools' ni 'timeoutMs': son de otras herramientas.
+  const archivo = args[0];
+  const agente = basename(archivo, ".md");
+  const { cabecera, cuerpo } = partir(archivo);
+
+  if (valorCabecera(cabecera, "name") !== agente) {
+    fallar(`el 'name' del encabezado ('${valorCabecera(cabecera, "name")}') debe coincidir con el archivo ('${agente}')`);
+  }
+  const descripcion = valorCabecera(cabecera, "description");
+  if (!descripcion) fallar(`${archivo} no tiene 'description' en el encabezado (Codex la exige)`);
+  if (/^model:/m.test(cabecera)) {
+    fallar(`${archivo} no debe declarar 'model': se define en modelos.json`);
+  }
+  if (/^effort:/m.test(cabecera) || /^thinking:/m.test(cabecera)) {
+    fallar(`${archivo} no debe declarar 'effort' ni 'thinking': el esfuerzo se define en modelos.json`);
+  }
+
+  const modelo = resolverModelo(agente, "codex");
+  const esfuerzo = esfuerzoDe("codex", resolverEsfuerzo(agente));
+  const lineaEsfuerzo = esfuerzo ? `model_reasoning_effort = ${JSON.stringify(esfuerzo)}\n` : "";
+  // Cadenas TOML de una línea con escapes JSON (válidos en TOML): no hay que escapar nada a mano.
+  process.stdout.write(
+    `# flucastr-ai:generado - no editar; se regenera con instalar.sh\n` +
+      `name = ${JSON.stringify(agente)}\n` +
+      `description = ${JSON.stringify(descripcion)}\n` +
+      `model = ${JSON.stringify(modelo)}\n` +
+      lineaEsfuerzo +
+      `developer_instructions = ${JSON.stringify(instruccionesCodex(agente, cuerpo))}\n`
+  );
+} else if (orden === "instrucciones-codex" && args.length === 1) {
+  // Instrucciones del agente como cadena JSON: el lanzador codex-<agente> la pasa con -c developer_instructions=...
+  const agente = basename(args[0], ".md");
+  process.stdout.write(JSON.stringify(instruccionesCodex(agente, partir(args[0]).cuerpo)) + "\n");
 } else if (orden === "cuerpo" && args.length === 1) {
   const agente = basename(args[0], ".md");
   process.stdout.write(`${lineaIdentidad("pi", agente)}\n\n` + partir(args[0]).cuerpo.replace(/^\s+/, ""));
@@ -696,10 +828,14 @@ if (orden === "modelo" && args.length === 2) {
   fijarDenyClaude(args[1], args.length === 3);
 } else if (orden === "quitar-deny" && args[0] === "claude" && args.length === 3) {
   quitarDenyClaude(args[1], args[2]);
+} else if (orden === "fijar-deny" && args[0] === "codex" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+  fijarDenyCodex(args[1], args.length === 3);
+} else if (orden === "quitar-deny" && args[0] === "codex" && args.length === 2) {
+  quitarDenyCodex(args[1]);
 } else if (orden === "fijar-compactacion" && args[0] === "pi" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
   fijarCompactacionPi(args[1], args.length === 3);
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | esfuerzo <agente> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | esfuerzo <agente> [codex] | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--simular] | quitar-deny codex <rules>");
 }

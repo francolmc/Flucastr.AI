@@ -1,6 +1,6 @@
 # Flucastr.AI
 
-Kit personal de agentes y skills para trabajar con IA en Claude Code y Pi. Versión 2.
+Kit personal de agentes y skills para trabajar con IA en Claude Code, Pi y Codex. Versión 2.
 
 ## Qué es
 
@@ -27,12 +27,12 @@ Un cambio largo se parte en tramos (`### Tramo N`): el constructor hace un tramo
 ## Instalación
 
 ```bash
-bash instalar.sh              # instala en Claude Code y Pi
+bash instalar.sh              # instala en Claude Code, Pi y Codex (en los que encuentra)
 bash instalar.sh --simular    # muestra lo que haría, sin escribir nada
 bash instalar.sh --proyecto <ruta>   # además fija el agente y las reglas deny en un proyecto
 ```
 
-Opciones útiles: `--copiar` (copia las skills en vez de enlazarlas), `--solo claude|pi`, `--skills-proyecto`.
+Opciones útiles: `--copiar` (copia las skills en vez de enlazarlas), `--solo claude|pi|codex`, `--skills-proyecto`.
 
 Para ver todas las opciones, restricciones y ejemplos: `bash instalar.sh --help`.
 
@@ -44,7 +44,7 @@ Para desinstalar: `bash desinstalar.sh`.
 ./verify
 ```
 
-Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instalar y desinstalar es válida, que los modelos se resuelven para Claude y Pi, que las skills están completas, que `instalar.sh --simular` no escribe nada, las reglas deny del proyecto, y pruebas deterministas aisladas del contrato (incluido el contador de pasos y una mutación de sensibilidad). Estas pruebas no miden la fiabilidad del modelo; el protocolo futuro está en `docs/evaluaciones/constructor.md`.
+Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instalar y desinstalar es válida, que los modelos se resuelven para Claude, Pi y Codex, que las skills están completas, que `instalar.sh --simular` no escribe nada, las reglas deny del proyecto, y pruebas deterministas aisladas del contrato (incluido el contador de pasos y una mutación de sensibilidad). Estas pruebas no miden la fiabilidad del modelo; el protocolo futuro está en `docs/evaluaciones/constructor.md`.
 
 ## Ejecutar un plan en ventana propia
 
@@ -53,11 +53,24 @@ Un plan pesado (muchos pasos, builds, Compose) puede correrse en una ventana pro
 ```bash
 claude-constructor   # Claude Code (con el esfuerzo de modelos.json)
 pi-constructor       # Pi (con el esfuerzo de modelos.json)
+codex-constructor    # Codex (con el modelo y el esfuerzo de modelos.json)
 ```
 
-Los lanzadores `claude-<agente>` y `pi-<agente>` los crea `instalar.sh`. Abrir el agente a mano (`claude --agent constructor`, `pi --agent constructor` o eligiéndolo dentro de Pi) no aplica el esfuerzo de `modelos.json`: ese valor solo vale cuando el principal lanza al constructor como subagente o cuando usas el lanzador.
+Los lanzadores `claude-<agente>`, `pi-<agente>` y `codex-<agente>` los crea `instalar.sh`. Abrir el agente a mano (`claude --agent constructor`, `pi --agent constructor` o eligiéndolo dentro de Pi) no aplica el esfuerzo de `modelos.json`: ese valor solo vale cuando el principal lanza al constructor como subagente o cuando usas el lanzador. En Codex, elegir el rol a mano desde `~/.codex/agents` no está probado; usa `codex-<agente>`.
 
 Primer mensaje: `Plan: <ruta>` y `Rama: <rama>` (por ejemplo `Plan: cambios/mi-cambio/plan.md`, `Rama: feature/mi-cambio`). Es el mismo plan, el mismo agente y el mismo retorno que al delegar desde el principal; solo cambia que se ve en vivo.
+
+## Codex (experimental)
+
+`instalar.sh` configura Codex cuando lo encuentra: si existe `CODEX_HOME` o `~/.codex`, o si está el comando `codex`. Está sin probar en una sesión real de Codex: `./verify` comprueba la generación, el esfuerzo, la instalación y las reglas con `codex execpolicy`, pero no un plan completo con el constructor como subagente.
+
+- Agentes: `<CODEX_HOME o ~/.codex>/agents/<agente>.toml`, con `model` y `model_reasoning_effort` de `modelos.json` (`max` se escribe como `xhigh`). `sandbox_mode` y los permisos no se fijan ahí: heredan de la sesión.
+- Skills: `~/.agents/skills` (enlace en modo repo, copia con `--copiar`).
+- Lanzadores: `~/.local/bin/codex-<agente>`.
+- Reglas deny: `bash instalar.sh --proyecto <ruta>` escribe `<proyecto>/.codex/rules/flucastr.rules` (`prefix_rule` con `forbidden`). Son experimentales, y Codex solo las carga en proyectos marcados como de confianza (trusted).
+- Bloquean por prefijo: `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C`, `git -c`, `bash -c`, `sh -c` y `zsh -c`. Por eso `git -C` y `git -c` quedan bloqueados aunque no sean commit (es aceptado). No bloquean `bash -lc` ni `sh -lc`, porque Codex ejecuta así sus comandos. No hay regla para leer `.env`: es un límite documentado.
+- Permitido: `git switch -c` (regla `allow`), porque el sandbox de Codex deja `.git` en solo lectura y sin la regla no puede crear la rama del cambio. Reinstala con `bash instalar.sh --proyecto <ruta>` para recibirla.
+- Desinstalar: `bash desinstalar.sh` quita lo que creó el kit y deja lo ajeno.
 
 ## Plazos en Pi (opcional)
 
@@ -69,7 +82,7 @@ El agente `constructor` declara `timeoutMs: 3600000` (60 min); Pi lo respeta (pr
 - `skills/`: las tres skills.
 - `scripts/resolver.mjs`: resuelve modelos y ajustes para las herramientas.
 - `cambios/`: un directorio por cambio, con su `plan.md`.
-- `modelos.json`: nivel de cada agente y su modelo en Claude y Pi.
+- `modelos.json`: nivel de cada agente y su modelo en Claude, Pi y Codex.
 
 ## La v1
 
