@@ -1,0 +1,10 @@
+{
+  "fuente": "learn.chatgpt.com/codex/pricing",
+  "fecha": "2026-11-09",
+  "unidad": "créditos por millón de tokens: entrada, entrada en caché y salida",
+  "modelos": {
+    "gpt-6.1-sol": { "entrada": 50, "entrada_cache": 2.5, "salida": 250 },
+    "gpt-6-luna": { "entrada": 2.5, "entrada_cache": 0.25, "salida": 12.5 },
+    "gpt-6-astra": { "entrada": 250, "entrada_cache": 25, "salida": 1250 }
+  }
+}

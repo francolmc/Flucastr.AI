@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -146,8 +146,8 @@ prueba("A6b", "Calibración: la sesión que baja queda fuera también sin la cru
 // send_message, sleep, wait_agent) y contexto 20000, 50000, 80000, 30000, 45000: mediana 45000, máximo 80000, y una caída
 // del 40 % o más (80000 a 30000) = 1 compactación. La otra sesión no tiene esperas: 0, con contexto 10000 y 12000.
 const SESIONES_ESPERADAS = [
-  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1 },
-  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, sondeos: 1, creditos: null, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0 },
 ];
 
 prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0", () => {
@@ -165,12 +165,12 @@ prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactac
 // Pi: contexto 400, 1500, 3300, 4200, 1000, 1200; esperas wait_for_task, sleep y send_message (read no cuenta): mediana 1350,
 // máximo 4200, una compactación (4200 a 1000). La sesión sin esperas da 0 en ambas herramientas.
 const SESIONES_CLAUDE = [
-  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-con-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 5, esperas: 3, contexto_mediana: 14000, contexto_max: 30000, compactaciones: 1 },
-  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-sin-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 2, esperas: 0, contexto_mediana: 5500, contexto_max: 6000, compactaciones: 0 },
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-con-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 5, esperas: 3, sondeos: null, creditos: null, contexto_mediana: 14000, contexto_max: 30000, compactaciones: 1 },
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-sin-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 2, esperas: 0, sondeos: null, creditos: null, contexto_mediana: 5500, contexto_max: 6000, compactaciones: 0 },
 ];
 const SESIONES_PI = [
-  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-con-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 6, esperas: 3, contexto_mediana: 1350, contexto_max: 4200, compactaciones: 1 },
-  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-sin-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 2, esperas: 0, contexto_mediana: 200, contexto_max: 300, compactaciones: 0 },
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-con-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 6, esperas: 3, sondeos: 1, creditos: null, contexto_mediana: 1350, contexto_max: 4200, compactaciones: 1 },
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-sin-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 200, contexto_max: 300, compactaciones: 0 },
 ];
 
 prueba("A8", "Sesiones de Claude Code y de Pi: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0; sin --herramienta salen las tres", () => {
@@ -220,6 +220,55 @@ prueba("A2v", "Ventana de 5 horas de Codex: aviso con 85 % (umbral 70), sin avis
   assert.ok(!sin.avisos.some((a) => /Ventana de 5 horas/.test(a)), `sin dato no debe avisar: ${JSON.stringify(sin.avisos)}`);
   const umbral = medir(["--codex-dir", join(fixtures, "codex-ventana-40"), "--umbral", "30"]).json;
   assert.ok(umbral.avisos.includes("Ventana de 5 horas de Codex en 40 %"), `avisos con umbral 30: ${JSON.stringify(umbral.avisos)}`);
+});
+
+// Créditos y sondeos (fixtures codex-sondeos y pi-sondeos). Sondeo = llamada de shell con sleep, tail o watch; git status no cuenta.
+// Codex, gpt-6-luna (2,5 / 0,25 / 12,5 créditos por millón, de scripts/tarifas.json): con sondeos, 6000 × 2,5 + 4000 × 0,25 + 1000 × 12,5
+// = 28500 / 10^6 = 0,0285 y 3 sondeos; sin sondeos, 2000 × 2,5 + 400 × 12,5 = 10000 / 10^6 = 0,01 y 0 sondeos.
+// Pi, tarifa de tarifas-prueba.json (10 / 1 / 100): con sondeos, 2500 × 10 + 2000 × 1 + 250 × 100 = 52000 / 10^6 = 0,052 y 3 sondeos;
+// sin sondeos, 1500 × 10 + 150 × 100 = 30000 / 10^6 = 0,03 y 0 sondeos.
+const sesionesDe = (json) => json.sesiones.map((s) => ({ sesion: s.sesion, creditos: s.creditos, sondeos: s.sondeos }));
+const CODEX_SONDEOS = [
+  { sesion: "rollout-2026-11-09T10-00-00-con-sondeos.jsonl", creditos: 0.0285, sondeos: 3 },
+  { sesion: "rollout-2026-11-09T11-00-00-sin-sondeos.jsonl", creditos: 0.01, sondeos: 0 },
+];
+const PI_SONDEOS = [
+  { sesion: "sesion-pi-con-sondeos.jsonl", creditos: 0.052, sondeos: 3 },
+  { sesion: "sesion-pi-sin-sondeos.jsonl", creditos: 0.03, sondeos: 0 },
+];
+
+prueba("A5a", "Créditos y sondeos de Codex con la tarifa de scripts/tarifas.json", () => {
+  const { json } = medir(["--herramienta", "codex", "--codex-dir", join(fixtures, "codex-sondeos"), "--sesiones"]);
+  assert.deepStrictEqual(sesionesDe(json), CODEX_SONDEOS);
+});
+
+prueba("A5b", "Créditos y sondeos de Pi con tarifa de fixture; una tarifa distinta cambia creditos (sensibilidad)", () => {
+  const piArgs = (tarifas) => ["--herramienta", "pi", "--pi-dir", join(fixtures, "pi-sondeos"), "--sesiones", "--tarifas", tarifas];
+  const { json } = medir(piArgs(join(fixtures, "tarifas-prueba.json")));
+  assert.deepStrictEqual(sesionesDe(json), PI_SONDEOS);
+  const doble = join(tmp, "tarifas-dobles.json");
+  writeFileSync(doble, JSON.stringify({ modelos: { "modelo-pi-tarifa": { entrada: 20, entrada_cache: 2, salida: 200 } } }));
+  const conDoble = medir(piArgs(doble)).json;
+  assert.deepStrictEqual(sesionesDe(conDoble).map((s) => s.creditos), [0.104, 0.06], "con tarifas al doble, creditos debe cambiar");
+});
+
+prueba("A5c", "Sin tarifa del modelo, creditos es null (no 0); los sondeos se miden igual; tarifas.json trae las tres tarifas", () => {
+  const { json } = medir(["--herramienta", "pi", "--pi-dir", join(fixtures, "pi-sondeos"), "--sesiones"]);
+  assert.deepStrictEqual(sesionesDe(json).map((s) => [s.creditos, s.sondeos]), [[null, 3], [null, 0]]);
+  const tarifas = JSON.parse(readFileSync(join(raiz, "scripts", "tarifas.json"), "utf8")).modelos;
+  assert.deepStrictEqual(tarifas, {
+    "gpt-6.1-sol": { entrada: 50, entrada_cache: 2.5, salida: 250 },
+    "gpt-6-luna": { entrada: 2.5, entrada_cache: 0.25, salida: 12.5 },
+    "gpt-6-astra": { entrada: 250, entrada_cache: 25, salida: 1250 },
+  });
+});
+
+prueba("A5d", "Tarifas ilegibles avisan y dejan creditos en null sin salir con error", () => {
+  const r = correr(["--herramienta", "codex", "--codex-dir", join(fixtures, "codex-sondeos"), "--sesiones", "--json", "--tarifas", join(tmp, "no-existe.json")]);
+  assert.equal(r.status, 0, `exit ${r.status}: ${r.stderr}`);
+  const json = JSON.parse(r.stdout);
+  assert.ok(json.avisos.some((a) => /no pude leer las tarifas/.test(a)), `avisos: ${JSON.stringify(json.avisos)}`);
+  assert.deepStrictEqual(sesionesDe(json).map((s) => s.creditos), [null, null]);
 });
 
 let fallos = 0;

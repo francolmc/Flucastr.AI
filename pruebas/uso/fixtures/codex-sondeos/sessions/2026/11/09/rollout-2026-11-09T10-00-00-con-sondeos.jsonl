@@ -1,0 +1,6 @@
+{"timestamp":"2026-11-09T10:00:00.000Z","type":"session_meta","payload":{"id":"sondeos-1","cwd":"/home/test/Codes/proyecto-e"}}
+{"timestamp":"2026-11-09T10:00:01.000Z","type":"turn_context","payload":{"model":"gpt-6-luna"}}
+{"timestamp":"2026-11-09T10:01:00.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"{\"cmd\":\"tail -n 5 log.txt\"}","call_id":"s1"}}
+{"timestamp":"2026-11-09T10:02:00.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"{\"cmd\":\"tail -n 5 log.txt\"}","call_id":"s2"}}
+{"timestamp":"2026-11-09T10:03:00.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"{\"cmd\":\"tail -n 5 log.txt\"}","call_id":"s3"}}
+{"timestamp":"2026-11-09T10:04:00.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":10000,"cached_input_tokens":4000,"output_tokens":1000,"total_tokens":11000},"last_token_usage":{"input_tokens":10000,"cached_input_tokens":4000,"output_tokens":1000,"total_tokens":11000}}}}

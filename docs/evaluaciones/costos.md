@@ -8,7 +8,7 @@ Reproducir:
 node scripts/uso.mjs --herramienta codex --desde 2026-11-01 --json
 ```
 
-Solo se calcula tokens y puntos de cuota semanal. No hay tarifas ni se calcula dinero. Solo Codex tiene cuota en este medidor: Claude Code y Pi no se calibran aquí.
+Se calcula tokens y puntos de cuota semanal. Desde el cambio `espera-unica`, `--sesiones` añade créditos estimados por sesión (con `scripts/tarifas.json`) y sondeos; ver «Créditos y espera» más abajo. No se calcula dinero. Solo Codex tiene cuota en este medidor: Claude Code y Pi no se calibran aquí.
 
 ## Uso desde 2026-11-01 (todos los proyectos)
 
@@ -63,3 +63,13 @@ Franco aprueba cualquier cambio en `modelos.json` (tramo 3).
 - Solo Codex. Claude Code y Pi no tienen cuota en este medidor.
 - El día es UTC; por eso un bloque de trabajo de la noche chilena puede caer en el día siguiente.
 - Un punto de cuota equivale a un porcentaje entero de la cuota secundaria. Con muestras cortas el error relativo es grande.
+
+## Créditos y espera
+
+`node scripts/uso.mjs --sesiones --herramienta codex --json` da por sesión `creditos` y `sondeos`.
+
+- `creditos`: tokens sin caché × entrada, más caché leída × entrada en caché, más salida × salida, todo por millón y según `scripts/tarifas.json` (fuente: `learn.chatgpt.com/codex/pricing`, fecha 2026-11-09). Es una estimación con las tarifas guardadas en ese archivo; si la fuente cambia, se actualiza el archivo. Sin tarifa para el modelo, `creditos` es `null`, no 0. Pi usa la misma tabla; Claude Code no tiene tarifas aquí, así que `null`.
+- `sondeos`: llamadas de shell con `sleep`, `tail` o `watch`, contadas una vez cada una. Es una aproximación: no separa «consultas de estado» de otros usos de `tail`. Claude Code no lo mide (`null`).
+- Regla de trabajo: en las sesiones de Codex de 8 y 9 de noviembre, unos 1,2 créditos equivalían a un punto de la ventana de 5 horas. Las esperas (`wait_agent` con 10 a 60 s y bucles de `tail` y `sleep`) fueron alrededor de 46 % de los créditos del principal y 31 % de las llamadas de `luna`, según el registro de esa fecha.
+- Antes y después: el antes es ese registro. El después se mide con el mismo medidor en sesiones nuevas, comparando `creditos` y `sondeos` por sesión; hasta que haya esas sesiones, no hay cifra de ahorro. No se estima sin datos.
+- Límite: la tabla de tarifas y la regla de 1,2 créditos por punto son una lectura del registro local; no es facturación.

@@ -21,6 +21,7 @@ Aplicas un plan aprobado, sin preguntar. Lee y sigue la skill `ejecutar-plan` de
 - No llamas a otros agentes ni preguntas: si no puedes seguir, `PAUSA`.
 - Lee por tramos (`offset`, `limit`) y permite relecturas relevantes tras cambios o recuperación; modifica con `edit`.
 - Salidas largas: ver *Bucle de ejecución* de `ejecutar-plan`.
+- Comandos largos (`verify`, builds): espéralos con una sola llamada (Claude Code, `timeout` máximo o `run_in_background` y esperar su aviso; Pi, el timeout de `bash`; Codex, `exec_command` en una celda `exec` y, cuando devuelva «Script running with cell ID N», una sola llamada `wait` con ese `cell_id` y `yield_time_ms: 300000`). Nunca bucles de `sleep`, `tail` ni consulta de estado.
 
 ## Retorno
 
