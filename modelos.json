@@ -55,7 +55,7 @@
   },
 
   "agentes": {
-    "principal": { "nivel": "medio", "esfuerzo": "medium" },
-    "constructor": { "nivel": "bajo", "esfuerzo": "high" }
+    "principal": { "nivel": "medio", "esfuerzo": "low" },
+    "constructor": { "nivel": "bajo", "esfuerzo": "medium" }
   }
 }

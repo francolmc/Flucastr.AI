@@ -612,8 +612,8 @@ textos_contrato() { # $1: raíz del kit
   local r=$1 f
   grep -qF 'bash pendientes-plan' "$r/skills/ejecutar-plan/SKILL.md" || return 1
   grep -qF 'awk' "$r/skills/ejecutar-plan/SKILL.md" || return 1
-  grep -qF 'siguiente=' "$r/skills/ejecutar-plan/SKILL.md" || return 1
-  grep -qF 'no_intentado=' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -qF 'siguiente=' "$r/agentes/constructor.md" || return 1
+  grep -qF 'no_intentado=' "$r/agentes/constructor.md" || return 1
   grep -qF '3 corridas' "$r/skills/ejecutar-plan/SKILL.md" || return 1
   grep -qF 'git diff' "$r/agentes/principal.md" || return 1
   grep -qF 'Lee y sigue la skill `ejecutar-plan`' "$r/agentes/constructor.md" || return 1
@@ -961,7 +961,7 @@ TEXTOS_TRAMOS=(
   'skills/ejecutar-plan/SKILL.md|Si el plan trae `tramo: <n>` en el frontmatter'
   'skills/ejecutar-plan/SKILL.md|vuelve a correr el mismo comando'
   'skills/ejecutar-plan/SKILL.md|Resuelto:'
-  'skills/ejecutar-plan/SKILL.md|Ejemplo de `COMPLETADO`'
+  'agentes/constructor.md|COMPLETADO: plan=<ruta>; tramo=<n>; verify=pasa'
   'agentes/principal.md|Revisión por tramo'
   'agentes/principal.md|tramo: <n>'
   'agentes/constructor.md|tramo: <n>'

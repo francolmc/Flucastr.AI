@@ -11,8 +11,9 @@
 //
 // Carpetas por defecto: ~/.claude/projects, ~/.codex (sessions/ dentro) y ~/.pi/agent/sessions.
 // --desde por defecto: hace 7 días. Sin --json imprime tablas de texto.
-// --sesiones (solo Codex): diagnóstico por sesión (llamadas, esperas, contexto mediana y máximo, compactaciones).
-// --umbral (por defecto 70): si la cuota semanal de Codex de la última sesión llega a ese %, aparece un aviso.
+// --sesiones: diagnóstico por sesión de Claude Code, Codex y Pi (llamadas, esperas, contexto mediana y máximo, compactaciones).
+// En Claude Code solo cuenta la sesión principal (un .jsonl por sesión); sus subagentes no suman en su fila.
+// --umbral (por defecto 70): si la cuota semanal o la ventana de 5 horas de Codex de la última sesión llega a ese %, aparece un aviso.
 
 import { createReadStream, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
@@ -37,8 +38,8 @@ function ayuda() {
   --claude-dir <dir>            carpeta de proyectos de Claude Code (por defecto ~/.claude/projects)
   --codex-dir <dir>             carpeta de Codex (por defecto ~/.codex; se leen sus sessions/)
   --pi-dir <dir>                carpeta de sesiones de Pi (por defecto ~/.pi/agent/sessions)
-  --sesiones                    diagnóstico por sesión de Codex (solo Codex): esperas, contexto y compactaciones
-  --umbral <n>                  aviso si la cuota semanal de Codex llega a n % (por defecto 70)`);
+  --sesiones                    diagnóstico por sesión de Claude Code, Codex y Pi: esperas, contexto y compactaciones (los subagentes de Claude Code no suman en su sesión)
+  --umbral <n>                  aviso si la cuota semanal o la ventana de 5 horas de Codex llega a n % (por defecto 70)`);
 }
 
 function leerOpciones(argv) {
@@ -80,10 +81,6 @@ function leerOpciones(argv) {
   }
   if (o.herramienta !== null && !HERRAMIENTAS.includes(o.herramienta)) {
     fallar("--herramienta debe ser claude, codex o pi", 2);
-  }
-  if (o.sesiones) {
-    if (o.herramienta === null) o.herramienta = "codex";
-    else if (o.herramienta !== "codex") fallar("--sesiones solo aplica a Codex (usa --herramienta codex)", 2);
   }
   o.inicioMs = Date.parse(`${o.desde}T00:00:00Z`);
   return o;
@@ -163,12 +160,20 @@ async function procesarClaude(ctx, raiz) {
     if (!coincide(ctx, proyecto) || !reciente(ruta, ctx.o.inicioMs)) continue;
     const rol = partes.some((p) => p.startsWith("subagent")) ? "sub" : "main";
     const mensajes = [];
+    const esperas = new Set();
     let primerTs = null;
     try {
       await leerJsonl(ruta, (obj) => {
         if (primerTs === null && typeof obj.timestamp === "string") primerTs = obj.timestamp;
         const m = obj.message;
-        if (!m || typeof m !== "object" || m.role !== "assistant" || !m.usage || typeof m.usage !== "object") return;
+        if (!m || typeof m !== "object" || m.role !== "assistant") return;
+        // Esperas: bloques tool_use de espera, contados una vez por id (un mensaje se repite en varias líneas).
+        if (Array.isArray(m.content)) {
+          m.content.forEach((b, i) => {
+            if (b && b.type === "tool_use" && ESPERAS_CLAUDE.has(b.name)) esperas.add(typeof b.id === "string" ? b.id : `${m.id}|${i}`);
+          });
+        }
+        if (!m.usage || typeof m.usage !== "object") return;
         mensajes.push({
           clave: typeof m.id === "string" ? `${m.id}|${obj.requestId ?? ""}` : null,
           modelo: typeof m.model === "string" ? m.model : "desconocido",
@@ -176,6 +181,7 @@ async function procesarClaude(ctx, raiz) {
           cache_leida: num(m.usage.cache_read_input_tokens),
           cache_escrita: num(m.usage.cache_creation_input_tokens),
           salida: num(m.usage.output_tokens),
+          contexto: num(m.usage.input_tokens) + num(m.usage.cache_read_input_tokens) + num(m.usage.cache_creation_input_tokens),
         });
       });
     } catch (e) {
@@ -184,6 +190,22 @@ async function procesarClaude(ctx, raiz) {
     }
     const fecha = fechaUTC(primerTs);
     if (!fecha) continue;
+    if (ctx.o.sesiones && rol === "main" && fecha >= ctx.o.desde) {
+      // Una fila por sesión principal: cada llamada cuenta una vez (por id de mensaje) y los subagentes no entran.
+      const vistos = new Set();
+      const contextos = [];
+      for (const x of mensajes) {
+        if (x.clave !== null) {
+          if (vistos.has(x.clave)) continue;
+          vistos.add(x.clave);
+        }
+        contextos.push(x.contexto);
+      }
+      ctx.sesiones.push({
+        herramienta: "claude", fecha, proyecto, sesion: basename(ruta), modelo: mensajes.at(-1)?.modelo ?? "desconocido",
+        llamadas: contextos.length, esperas: esperas.size, ...estadisticasContexto(contextos),
+      });
+    }
     for (const x of mensajes) {
       if (x.clave !== null) {
         if (ctx.vistos.has(x.clave)) continue;
@@ -203,6 +225,7 @@ async function procesarPi(ctx, raiz) {
     const rol = partes.some((p) => p.startsWith("subagent")) ? "sub" : "main";
     const mensajes = [];
     const limites = [];
+    let esperas = 0;
     let primerTs = null;
     try {
       await leerJsonl(ruta, (obj) => {
@@ -213,6 +236,12 @@ async function procesarPi(ctx, raiz) {
           limites.push(typeof obj.timestamp === "string" ? obj.timestamp : null);
           return;
         }
+        // Esperas: llamadas de herramienta cuyo nombre contiene wait, sleep o send.
+        if (Array.isArray(m.content)) {
+          for (const b of m.content) {
+            if (b && b.type === "toolCall" && typeof b.name === "string" && PATRON_ESPERA_PI.test(b.name)) esperas++;
+          }
+        }
         const u = m.usage;
         if (!u || typeof u !== "object") return;
         mensajes.push({
@@ -221,6 +250,7 @@ async function procesarPi(ctx, raiz) {
           cache_leida: num(u.cacheRead),
           cache_escrita: num(u.cacheWrite),
           salida: num(u.output),
+          contexto: num(u.input) + num(u.cacheRead),
         });
       });
     } catch (e) {
@@ -229,6 +259,12 @@ async function procesarPi(ctx, raiz) {
     }
     const fecha = fechaUTC(primerTs);
     if (!fecha) continue;
+    if (ctx.o.sesiones && rol === "main" && fecha >= ctx.o.desde) {
+      ctx.sesiones.push({
+        herramienta: "pi", fecha, proyecto, sesion: basename(ruta), modelo: mensajes.at(-1)?.modelo ?? "desconocido",
+        llamadas: mensajes.length, esperas, ...estadisticasContexto(mensajes.map((x) => x.contexto)),
+      });
+    }
     for (const ts of limites) {
       const f = fechaUTC(ts);
       if (f === null || f >= ctx.o.desde) ctx.avisos.push(`Pi: límite de uso alcanzado en ${proyecto} (${ts ?? "sin fecha"}); no suma tokens`);
@@ -244,6 +280,9 @@ const MUESTRA_MINIMA = 5;
 
 // Llamadas de Codex que esperan a otro agente o al tiempo: cada una es una espera del principal.
 const ESPERAS = new Set(["wait_agent", "wait", "sleep", "send_message"]);
+// Llamadas de Claude Code que esperan (TaskOutput, Sleep, Monitor, SendMessage) y nombre de herramienta de Pi que espera.
+const ESPERAS_CLAUDE = new Set(["TaskOutput", "Sleep", "Monitor", "SendMessage"]);
+const PATRON_ESPERA_PI = /wait|sleep|send/i;
 
 // Diagnóstico de una sesión de Codex a partir del contexto (input de la última llamada de cada evento).
 // Una compactación es una caída del 40 % o más respecto a la llamada anterior.
@@ -282,6 +321,7 @@ async function procesarCodex(ctx, raiz) {
     const contextos = [];
     let cuotaInicial = null;
     let cuotaFinal = null;
+    let primariaFinal = null;
     try {
       await leerJsonl(ruta, (obj) => {
         if (typeof obj.timestamp === "string") {
@@ -299,6 +339,8 @@ async function procesarCodex(ctx, raiz) {
           if (cuotaInicial === null) cuotaInicial = usado;
           cuotaFinal = usado;
         }
+        const ventana = p.rate_limits?.primary?.used_percent;
+        if (typeof ventana === "number" && Number.isFinite(ventana)) primariaFinal = ventana;
         if (p.info && typeof p.info === "object") {
           llamadas++;
           if (p.info.total_token_usage && typeof p.info.total_token_usage === "object") total = p.info.total_token_usage;
@@ -323,6 +365,7 @@ async function procesarCodex(ctx, raiz) {
       total,
       cuotaInicial,
       cuotaFinal,
+      primariaFinal,
     });
   }
   for (const s of sesiones) {
@@ -341,15 +384,20 @@ async function procesarCodex(ctx, raiz) {
       ctx.avisos.push(`Cuota semanal de Codex en ${ultima.cuotaFinal} %: llegó al umbral de ${ctx.o.umbral} %`);
     }
   }
+  // Alerta de ventana de 5 horas: rate_limits.primary de la sesión más reciente con ese dato.
+  const conVentana = sesiones.filter((s) => s.primariaFinal !== null && s.finMs !== null && s.fecha && s.fecha >= ctx.o.desde && coincide(ctx, s.proyecto));
+  if (conVentana.length > 0) {
+    const ultima = conVentana.reduce((a, b) => (b.finMs > a.finMs ? b : a));
+    if (ultima.primariaFinal >= ctx.o.umbral) ctx.avisos.push(`Ventana de 5 horas de Codex en ${ultima.primariaFinal} %`);
+  }
   // Diagnóstico por sesión (--sesiones): sin la ruta completa, solo el nombre del archivo.
   if (ctx.o.sesiones) {
-    ctx.sesiones = sesiones
-      .filter((s) => s.fecha && s.fecha >= ctx.o.desde && coincide(ctx, s.proyecto))
-      .map((s) => ({
-        fecha: s.fecha, proyecto: s.proyecto, sesion: basename(s.ruta), modelo: s.modelo,
+    for (const s of sesiones.filter((x) => x.fecha && x.fecha >= ctx.o.desde && coincide(ctx, x.proyecto))) {
+      ctx.sesiones.push({
+        herramienta: "codex", fecha: s.fecha, proyecto: s.proyecto, sesion: basename(s.ruta), modelo: s.modelo,
         llamadas: s.llamadas, esperas: s.esperas, ...estadisticasContexto(s.contextos),
-      }))
-      .sort((a, b) => (a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : a.sesion < b.sesion ? -1 : a.sesion > b.sesion ? 1 : 0));
+      });
+    }
   }
 }
 
@@ -389,11 +437,11 @@ function tabla(columnas, filas) {
   return celdas.map((r) => r.map((v, i) => v.padEnd(anchos[i])).join("  ").trimEnd());
 }
 
-const COLUMNAS_SESIONES = ["fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones"];
+const COLUMNAS_SESIONES = ["herramienta", "fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones"];
 
 function imprimirSesiones(sesiones, avisos, desde) {
   if (sesiones.length === 0) {
-    console.log(`sin sesiones de Codex desde ${desde}`);
+    console.log(`sin sesiones desde ${desde}`);
   } else {
     const celdas = sesiones.map((s) => ({ ...s, contexto_mediana: s.contexto_mediana ?? "-", contexto_max: s.contexto_max ?? "-" }));
     for (const linea of tabla(COLUMNAS_SESIONES, celdas)) console.log(linea);
@@ -441,6 +489,8 @@ async function main() {
       return 0;
     });
   if (o.sesiones) {
+    const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+    ctx.sesiones.sort((a, b) => cmp(a.fecha, b.fecha) || cmp(a.herramienta, b.herramienta) || cmp(a.sesion, b.sesion));
     if (o.json) console.log(JSON.stringify({ filas, cuota: ctx.cuota, avisos: ctx.avisos, sesiones: ctx.sesiones }, null, 2));
     else imprimirSesiones(ctx.sesiones, ctx.avisos, o.desde);
   } else if (o.json) console.log(JSON.stringify({ filas, cuota: ctx.cuota, avisos: ctx.avisos }, null, 2));
