@@ -146,17 +146,44 @@ prueba("A6b", "Calibración: la sesión que baja queda fuera también sin la cru
 // send_message, sleep, wait_agent) y contexto 20000, 50000, 80000, 30000, 45000: mediana 45000, máximo 80000, y una caída
 // del 40 % o más (80000 a 30000) = 1 compactación. La otra sesión no tiene esperas: 0, con contexto 10000 y 12000.
 const SESIONES_ESPERADAS = [
-  { fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1 },
-  { fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0 },
 ];
 
 prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0", () => {
-  const { json } = medir(["--codex-dir", join(fixtures, "codex-sesiones"), "--sesiones"]);
+  const { json } = medir(["--herramienta", "codex", "--codex-dir", join(fixtures, "codex-sesiones"), "--sesiones"]);
   assert.deepStrictEqual(json.sesiones, SESIONES_ESPERADAS);
-  const texto = correr([...base(), "--codex-dir", join(fixtures, "codex-sesiones"), "--sesiones"]);
+  const texto = correr([...base(), "--herramienta", "codex", "--codex-dir", join(fixtures, "codex-sesiones"), "--sesiones"]);
   assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
   assert.match(texto.stdout, /esperas\s+contexto_mediana\s+contexto_max\s+compactaciones/);
-  assert.equal(correr(["--sesiones", "--herramienta", "claude"]).status, 2, "--sesiones con otra herramienta debe salir con código 2");
+  assert.equal(correr(["--sesiones", "--herramienta", "otra"]).status, 2, "--sesiones con una herramienta desconocida debe salir con código 2");
+});
+
+// Diagnóstico por sesión de Claude Code y de Pi (fixtures claude-sesiones y pi-sesiones). La sesión con esperas tiene 3 esperas
+// (TaskOutput, Sleep, SendMessage; el TaskOutput repetido en dos líneas cuenta una vez; Bash no cuenta) y contexto 10000, 20000,
+// 30000, 12000, 14000: mediana 14000, máximo 30000, una caída del 40 % (30000 a 12000). Su subagente (TaskOutput) no suma.
+// Pi: contexto 400, 1500, 3300, 4200, 1000, 1200; esperas wait_for_task, sleep y send_message (read no cuenta): mediana 1350,
+// máximo 4200, una compactación (4200 a 1000). La sesión sin esperas da 0 en ambas herramientas.
+const SESIONES_CLAUDE = [
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-con-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 5, esperas: 3, contexto_mediana: 14000, contexto_max: 30000, compactaciones: 1 },
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-sin-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 2, esperas: 0, contexto_mediana: 5500, contexto_max: 6000, compactaciones: 0 },
+];
+const SESIONES_PI = [
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-con-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 6, esperas: 3, contexto_mediana: 1350, contexto_max: 4200, compactaciones: 1 },
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-sin-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 2, esperas: 0, contexto_mediana: 200, contexto_max: 300, compactaciones: 0 },
+];
+
+prueba("A8", "Sesiones de Claude Code y de Pi: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0; sin --herramienta salen las tres", () => {
+  const claude = medir(["--herramienta", "claude", "--claude-dir", join(fixtures, "claude-sesiones"), "--sesiones"]).json;
+  assert.deepStrictEqual(claude.sesiones, SESIONES_CLAUDE);
+  const pi = medir(["--herramienta", "pi", "--pi-dir", join(fixtures, "pi-sesiones"), "--sesiones"]).json;
+  assert.deepStrictEqual(pi.sesiones, SESIONES_PI);
+  const texto = correr([...base(), "--herramienta", "claude", "--claude-dir", join(fixtures, "claude-sesiones"), "--sesiones"]);
+  assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
+  assert.match(texto.stdout, /claude\s+2026-11-08\s+proyecto-d/);
+  const todas = medir(["--codex-dir", join(fixtures, "codex-sesiones"), "--claude-dir", join(fixtures, "claude-sesiones"), "--pi-dir", join(fixtures, "pi-sesiones"), "--sesiones"]).json;
+  assert.deepStrictEqual([...new Set(todas.sesiones.map((s) => s.herramienta))].sort(), ["claude", "codex", "pi"], "sin --herramienta deben salir las tres herramientas");
+  assert.equal(todas.sesiones.length, SESIONES_CLAUDE.length + SESIONES_PI.length + SESIONES_ESPERADAS.length);
 });
 
 // Alerta de cuota (fixtures codex-alerta-85 y codex-alerta-40): la última sesión con dato de cuota semanal decide.
@@ -175,6 +202,24 @@ prueba("A7", "Cuota de Codex: aviso con 85 % (umbral 70), sin aviso con 40 %, si
   assert.ok(!sin.avisos.some((a) => /Cuota semanal/.test(a)), `sin dato no debe avisar: ${JSON.stringify(sin.avisos)}`);
   const umbral = medir(["--codex-dir", join(fixtures, "codex-alerta-40"), "--umbral", "30"]).json;
   assert.ok(umbral.avisos.some((a) => a.includes("Cuota semanal de Codex en 40 %")), `avisos con umbral 30: ${JSON.stringify(umbral.avisos)}`);
+});
+
+// Alerta de ventana de 5 horas (fixtures codex-ventana-85 y codex-ventana-40): usa rate_limits.primary del último evento.
+prueba("A2v", "Ventana de 5 horas de Codex: aviso con 85 % (umbral 70), sin aviso con 40 %, sin dato no avisa; --umbral lo cambia", () => {
+  const con85 = medir(["--codex-dir", join(fixtures, "codex-ventana-85")]).json;
+  assert.ok(con85.avisos.includes("Ventana de 5 horas de Codex en 85 %"), `avisos: ${JSON.stringify(con85.avisos)}`);
+  const con40 = medir(["--codex-dir", join(fixtures, "codex-ventana-40")]).json;
+  assert.ok(!con40.avisos.some((a) => /Ventana de 5 horas/.test(a)), `avisos: ${JSON.stringify(con40.avisos)}`);
+  const sinDato = join(tmp, "codex-sin-ventana", "sessions", "2026", "11", "08");
+  mkdirSync(sinDato, { recursive: true });
+  writeFileSync(join(sinDato, "rollout-2026-11-08T12-00-00-sin-ventana.jsonl"), [
+    { timestamp: "2026-11-08T12:00:00.000Z", type: "session_meta", payload: { cwd: "/home/test/Codes/proyecto-e" } },
+    { timestamp: "2026-11-08T12:01:00.000Z", type: "event_msg", payload: { type: "token_count", info: { total_token_usage: { input_tokens: 100, output_tokens: 10, total_tokens: 110 } } } },
+  ].map((l) => JSON.stringify(l)).join("\n") + "\n");
+  const sin = medir(["--codex-dir", join(tmp, "codex-sin-ventana")]).json;
+  assert.ok(!sin.avisos.some((a) => /Ventana de 5 horas/.test(a)), `sin dato no debe avisar: ${JSON.stringify(sin.avisos)}`);
+  const umbral = medir(["--codex-dir", join(fixtures, "codex-ventana-40"), "--umbral", "30"]).json;
+  assert.ok(umbral.avisos.includes("Ventana de 5 horas de Codex en 40 %"), `avisos con umbral 30: ${JSON.stringify(umbral.avisos)}`);
 });
 
 let fallos = 0;

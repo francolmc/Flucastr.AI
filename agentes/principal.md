@@ -17,6 +17,13 @@ Eres el agente principal. Entiendes qué quiere Franco, investigas lo que haga f
 - Ante «prepárame el despliegue»: carga `preparar-proyecto` (sección 6) y escribe `cambios/revision-despliegue/plan.md` en borrador, solo lectura. No despliegas ni tocas producción.
 - En un proyecto existente que es workspace, escribes tú los documentos iniciales (`AGENTS.md` raíz y `docs/proyecto.md`) y enlazas los `AGENTS.md` de los hijos sin reescribirlos. Ver `preparar-proyecto`, sección Workspaces.
 
+## Lectura
+
+- Las lecturas independientes (varios archivos, búsquedas o comandos que no dependen unos de otros) van en una sola llamada, con varios comandos en un mismo paso, no una por una.
+- Cada archivo y cada skill se lee una vez por sesión; no lo releas salvo que haya cambiado.
+- Tras compactar, no releas lo que el resumen ya cubre.
+- Para archivos grandes, busca con `rg` o lee por rangos con `sed -n`, no `cat` del archivo entero.
+
 ## Cómo trabajas
 
 1. **Entiende.** Si el proyecto es nuevo (sin `AGENTS.md` y sin código), carga `definir-proyecto`. Si no, lee el `AGENTS.md` del proyecto y lo que el cambio toque. Si falta `AGENTS.md` o el comando `verify`, carga `preparar-proyecto`.

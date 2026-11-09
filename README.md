@@ -6,8 +6,8 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code, Pi y Codex
 
 Dos agentes y dos puertas humanas:
 
-- **`principal`** (nivel medio): entiende lo que Franco quiere, investiga, diagnostica, escribe el plan y verifica el resultado.
-- **`constructor`** (nivel bajo): aplica el plan aprobado, corre `verify` y deja la evidencia.
+- **`principal`** (nivel medio, esfuerzo `low`): entiende lo que Franco quiere, investiga, diagnostica, escribe el plan y verifica el resultado.
+- **`constructor`** (nivel bajo, esfuerzo `medium`): aplica el plan aprobado, corre `verify` y deja la evidencia.
 - **Puerta 1**: Franco aprueba `cambios/<nombre>/plan.md` antes de construir.
 - **Puerta 2**: Franco revisa la evidencia antes de dar algo por hecho.
 - Cada plan aprobado debe incluir `## Aceptación`, con escenarios trazables a resultados, comprobaciones y resultados esperados; puede usar revisión manual explicada cuando no haya oráculo automático.
