@@ -1,0 +1,6 @@
+{"timestamp":"2026-11-08T14:00:00.000Z","type":"session_meta","payload":{"id":"c1","timestamp":"2026-11-08T14:00:00.000Z","cwd":"/home/test/Codes/proyecto-c","cli_version":"0.0.0-fixture"}}
+{"timestamp":"2026-11-08T14:00:01.000Z","type":"turn_context","payload":{"model":"gpt-codex-fixture"}}
+{"timestamp":"2026-11-08T14:00:10.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":1000,"cached_input_tokens":400,"output_tokens":100,"total_tokens":1100}},"rate_limits":{"secondary":{"used_percent":10.0}}}}
+{"timestamp":"2026-11-08T14:01:10.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":2000,"cached_input_tokens":900,"output_tokens":300,"total_tokens":2300}},"rate_limits":{"secondary":{"used_percent":12.0}}}}
+{"timestamp":"2026-11-08T14:02:10.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":3000,"cached_input_tokens":1500,"output_tokens":450,"total_tokens":3450}},"rate_limits":{"secondary":{"used_percent":14.0}}}}
+{"timestamp":"2026-11-08T14:02:30.000Z","type":"event_msg","payload":{"type":"token_count","info":null,"rate_limits":{"secondary":{"used_percent":14.0}}}}

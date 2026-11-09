@@ -1,2 +1,4 @@
 .claude/settings.local.json
-pruebas/
+pruebas/*
+!pruebas/uso/
+!pruebas/contrato-constructor.mjs
