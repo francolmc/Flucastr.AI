@@ -25,6 +25,7 @@
 //   modelo-esfuerzo <agente> codex: el esfuerzo sale traducido (max -> xhigh), como lo pide Codex
 //   esfuerzo <agente> codex: igual, solo el esfuerzo traducido para Codex
 //   instrucciones-codex <archivo.md>: imprime las instrucciones del agente como cadena JSON (válida como valor TOML en codex -c)
+//   compactar-codex <agente>: imprime el umbral de compactación de Codex del agente (compactar_en), o nada si no hay uno válido
 //
 // Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
 // si no, se lee el modelos.json del repo. Lo usa instalar.sh --copiar con el modelos.json personal.
@@ -95,6 +96,19 @@ function resolverEsfuerzo(agente) {
     fallar(`el esfuerzo '${esfuerzo}' del agente '${agente}' no está en 'esfuerzos'`);
   }
   return esfuerzo;
+}
+
+// Umbral de compactación de Codex del agente (perfil.compactar_en ?? compactar_en), o "" si no hay uno válido.
+// Lo usa el lanzador codex-<agente> con -c model_auto_compact_token_limit=<valor>.
+function compactarCodex(agente) {
+  const c = leerConfig();
+  const perfiles = c.perfiles ?? {};
+  let perfilId = ((c.agentes ?? {})[agente] ?? {}).perfil;
+  if (!perfilId || perfiles[perfilId]?.herramienta !== "codex") {
+    perfilId = (c.perfil_por_defecto ?? {}).codex;
+  }
+  const compactar = (perfiles[perfilId] ?? {}).compactar_en ?? c.compactar_en;
+  return esEntero(compactar) ? String(compactar) : "";
 }
 
 // Codex (model_reasoning_effort) no tiene 'max': ahí se escribe 'xhigh'. Las demás herramientas usan el valor tal cual.
@@ -764,6 +778,9 @@ if (orden === "modelo" && args.length === 2) {
       lineaEsfuerzo +
       `developer_instructions = ${JSON.stringify(instruccionesCodex(agente, cuerpo))}\n`
   );
+} else if (orden === "compactar-codex" && args.length === 1) {
+  // Umbral de compactación de Codex del agente; sale vacío si modelos.json no tiene compactar_en válido.
+  process.stdout.write(compactarCodex(args[0]) + "\n");
 } else if (orden === "instrucciones-codex" && args.length === 1) {
   // Instrucciones del agente como cadena JSON: el lanzador codex-<agente> la pasa con -c developer_instructions=...
   const agente = basename(args[0], ".md");

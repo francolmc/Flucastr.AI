@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Pruebas del medidor scripts/uso.mjs sobre fixtures con totales conocidos (A1 a A6).
+// Pruebas del medidor scripts/uso.mjs sobre fixtures con totales conocidos (A1 a A7).
 // Uso: node pruebas/uso/probar.mjs [--script <ruta>] [--fixtures <dir>]
 // --script y --fixtures sirven solo para la comprobación de sensibilidad (copias modificadas);
 // por defecto prueban el medidor del repo y los fixtures de esta carpeta.
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -140,6 +140,41 @@ prueba("A6b", "Calibración: la sesión que baja queda fuera también sin la cru
   rmSync(join(copia, "sessions", "2026", "11", "08", "rollout-2026-11-08T13-10-00-cuota-cruzada.jsonl"));
   const { json } = medir(["--codex-dir", copia]);
   assert.deepStrictEqual(json.cuota, CUOTA_ESPERADA);
+});
+
+// Diagnóstico por sesión (fixtures/codex-sesiones). La sesión con esperas tiene 5 llamadas de espera (wait_agent, wait,
+// send_message, sleep, wait_agent) y contexto 20000, 50000, 80000, 30000, 45000: mediana 45000, máximo 80000, y una caída
+// del 40 % o más (80000 a 30000) = 1 compactación. La otra sesión no tiene esperas: 0, con contexto 10000 y 12000.
+const SESIONES_ESPERADAS = [
+  { fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1 },
+  { fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0 },
+];
+
+prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0", () => {
+  const { json } = medir(["--codex-dir", join(fixtures, "codex-sesiones"), "--sesiones"]);
+  assert.deepStrictEqual(json.sesiones, SESIONES_ESPERADAS);
+  const texto = correr([...base(), "--codex-dir", join(fixtures, "codex-sesiones"), "--sesiones"]);
+  assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
+  assert.match(texto.stdout, /esperas\s+contexto_mediana\s+contexto_max\s+compactaciones/);
+  assert.equal(correr(["--sesiones", "--herramienta", "claude"]).status, 2, "--sesiones con otra herramienta debe salir con código 2");
+});
+
+// Alerta de cuota (fixtures codex-alerta-85 y codex-alerta-40): la última sesión con dato de cuota semanal decide.
+prueba("A7", "Cuota de Codex: aviso con 85 % (umbral 70), sin aviso con 40 %, sin dato no avisa; --umbral lo cambia", () => {
+  const con85 = medir(["--codex-dir", join(fixtures, "codex-alerta-85")]).json;
+  assert.ok(con85.avisos.some((a) => a.includes("Cuota semanal de Codex en 85 %")), `avisos: ${JSON.stringify(con85.avisos)}`);
+  const con40 = medir(["--codex-dir", join(fixtures, "codex-alerta-40")]).json;
+  assert.ok(!con40.avisos.some((a) => /Cuota semanal/.test(a)), `avisos: ${JSON.stringify(con40.avisos)}`);
+  const sinDato = join(tmp, "codex-sin-cuota", "sessions", "2026", "11", "08");
+  mkdirSync(sinDato, { recursive: true });
+  writeFileSync(join(sinDato, "rollout-2026-11-08T12-00-00-sin-cuota.jsonl"), [
+    { timestamp: "2026-11-08T12:00:00.000Z", type: "session_meta", payload: { cwd: "/home/test/Codes/proyecto-e" } },
+    { timestamp: "2026-11-08T12:01:00.000Z", type: "event_msg", payload: { type: "token_count", info: { total_token_usage: { input_tokens: 100, output_tokens: 10, total_tokens: 110 } } } },
+  ].map((l) => JSON.stringify(l)).join("\n") + "\n");
+  const sin = medir(["--codex-dir", join(tmp, "codex-sin-cuota")]).json;
+  assert.ok(!sin.avisos.some((a) => /Cuota semanal/.test(a)), `sin dato no debe avisar: ${JSON.stringify(sin.avisos)}`);
+  const umbral = medir(["--codex-dir", join(fixtures, "codex-alerta-40"), "--umbral", "30"]).json;
+  assert.ok(umbral.avisos.some((a) => a.includes("Cuota semanal de Codex en 40 %")), `avisos con umbral 30: ${JSON.stringify(umbral.avisos)}`);
 });
 
 let fallos = 0;
