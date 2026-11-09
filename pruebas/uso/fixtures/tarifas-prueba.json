@@ -1,0 +1,6 @@
+{
+  "fuente": "fixture de pruebas, no es una tarifa real",
+  "modelos": {
+    "modelo-pi-tarifa": { "entrada": 10, "entrada_cache": 1, "salida": 100 }
+  }
+}

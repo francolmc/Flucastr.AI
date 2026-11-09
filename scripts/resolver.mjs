@@ -98,16 +98,17 @@ function resolverEsfuerzo(agente) {
   return esfuerzo;
 }
 
-// Umbral de compactación de Codex del agente (perfil.compactar_en ?? compactar_en), o "" si no hay uno válido.
-// Lo usa el lanzador codex-<agente> con -c model_auto_compact_token_limit=<valor>.
+// Umbral de compactación de Codex del agente (agentes[agente].compactar_en ?? perfil.compactar_en ?? compactar_en),
+// o "" si no hay uno válido. Lo usa el lanzador codex-<agente> con -c model_auto_compact_token_limit=<valor>.
 function compactarCodex(agente) {
   const c = leerConfig();
   const perfiles = c.perfiles ?? {};
-  let perfilId = ((c.agentes ?? {})[agente] ?? {}).perfil;
+  const propio = (c.agentes ?? {})[agente] ?? {};
+  let perfilId = propio.perfil;
   if (!perfilId || perfiles[perfilId]?.herramienta !== "codex") {
     perfilId = (c.perfil_por_defecto ?? {}).codex;
   }
-  const compactar = (perfiles[perfilId] ?? {}).compactar_en ?? c.compactar_en;
+  const compactar = propio.compactar_en ?? (perfiles[perfilId] ?? {}).compactar_en ?? c.compactar_en;
   return esEntero(compactar) ? String(compactar) : "";
 }
 

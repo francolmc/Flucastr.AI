@@ -7,18 +7,21 @@
 // Uso:
 //   node scripts/uso.mjs [--desde AAAA-MM-DD] [--herramienta claude|codex|pi] [--proyecto <subcadena>]
 //                        [--json] [--claude-dir <dir>] [--codex-dir <dir>] [--pi-dir <dir>]
-//                        [--sesiones] [--umbral <n>]
+//                        [--sesiones] [--umbral <n>] [--tarifas <archivo>]
 //
 // Carpetas por defecto: ~/.claude/projects, ~/.codex (sessions/ dentro) y ~/.pi/agent/sessions.
+// Tarifas por defecto: scripts/tarifas.json (créditos por millón de tokens). Sin tarifa del modelo, creditos es null.
 // --desde por defecto: hace 7 días. Sin --json imprime tablas de texto.
-// --sesiones: diagnóstico por sesión de Claude Code, Codex y Pi (llamadas, esperas, contexto mediana y máximo, compactaciones).
+// --sesiones: diagnóstico por sesión de Claude Code, Codex y Pi (llamadas, esperas, contexto mediana y máximo, compactaciones,
+// créditos y sondeos). Sondeos: llamadas de shell con sleep, tail o watch. Claude Code no mide créditos ni sondeos (null).
 // En Claude Code solo cuenta la sesión principal (un .jsonl por sesión); sus subagentes no suman en su fila.
 // --umbral (por defecto 70): si la cuota semanal o la ventana de 5 horas de Codex de la última sesión llega a ese %, aparece un aviso.
 
-import { createReadStream, readdirSync, statSync } from "node:fs";
+import { createReadStream, readFileSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, join, relative, sep } from "node:path";
+import { basename, dirname, join, relative, sep } from "node:path";
 import { createInterface } from "node:readline";
+import { fileURLToPath } from "node:url";
 
 const HERRAMIENTAS = ["claude", "codex", "pi"];
 const NOMBRES = { claude: "Claude Code", codex: "Codex", pi: "Pi" };
@@ -39,7 +42,8 @@ function ayuda() {
   --codex-dir <dir>             carpeta de Codex (por defecto ~/.codex; se leen sus sessions/)
   --pi-dir <dir>                carpeta de sesiones de Pi (por defecto ~/.pi/agent/sessions)
   --sesiones                    diagnóstico por sesión de Claude Code, Codex y Pi: esperas, contexto y compactaciones (los subagentes de Claude Code no suman en su sesión)
-  --umbral <n>                  aviso si la cuota semanal o la ventana de 5 horas de Codex llega a n % (por defecto 70)`);
+  --umbral <n>                  aviso si la cuota semanal o la ventana de 5 horas de Codex llega a n % (por defecto 70)
+  --tarifas <archivo>           tarifas en créditos por millón de tokens (por defecto scripts/tarifas.json)`);
 }
 
 function leerOpciones(argv) {
@@ -53,6 +57,7 @@ function leerOpciones(argv) {
     piDir: join(homedir(), ".pi", "agent", "sessions"),
     sesiones: false,
     umbral: 70,
+    tarifas: join(dirname(fileURLToPath(import.meta.url)), "tarifas.json"),
   };
   const valor = (i) => {
     const v = argv[i + 1];
@@ -71,6 +76,7 @@ function leerOpciones(argv) {
     else if (a === "--pi-dir") { o.piDir = valor(i); i++; }
     else if (a === "--sesiones") o.sesiones = true;
     else if (a === "--umbral") { o.umbral = Number(valor(i)); i++; }
+    else if (a === "--tarifas") { o.tarifas = valor(i); i++; }
     else fallar(`opción desconocida: ${a}`, 2);
   }
   if (!Number.isFinite(o.umbral) || o.umbral < 0 || o.umbral > 100) {
@@ -153,6 +159,58 @@ function agregar(ctx, d) {
   g.salida += d.salida;
 }
 
+// Tarifas por modelo (créditos por millón de tokens). Si el archivo no se puede leer, avisa y no hay tarifas.
+function cargarTarifas(ruta, avisos) {
+  try {
+    const modelos = JSON.parse(readFileSync(ruta, "utf8")).modelos;
+    return modelos && typeof modelos === "object" ? modelos : {};
+  } catch (e) {
+    avisos.push(`no pude leer las tarifas ${ruta}: ${e.message}; los créditos quedan sin calcular`);
+    return {};
+  }
+}
+
+// Créditos de una sesión: (entrada + caché escrita) × entrada + caché leída × entrada en caché + salida × salida, por millón.
+// Sin tarifa válida para el modelo devuelve null, nunca 0.
+function creditosSesion(tarifas, modelo, t) {
+  const tar = Object.hasOwn(tarifas, modelo) ? tarifas[modelo] : null;
+  if (!t || !tar || !["entrada", "entrada_cache", "salida"].every((k) => typeof tar[k] === "number")) return null;
+  const creditos = ((t.entrada + t.cache_escrita) * tar.entrada + t.cache_leida * tar.entrada_cache + t.salida * tar.salida) / 1e6;
+  return Math.round(creditos * 10000) / 10000;
+}
+
+function sumarTokens(mensajes) {
+  return mensajes.reduce((a, x) => ({
+    entrada: a.entrada + x.entrada,
+    cache_leida: a.cache_leida + x.cache_leida,
+    cache_escrita: a.cache_escrita + x.cache_escrita,
+    salida: a.salida + x.salida,
+  }), { entrada: 0, cache_leida: 0, cache_escrita: 0, salida: 0 });
+}
+
+// Sondeos: llamadas de shell que duermen o miran un log (sleep, tail, watch). Cada llamada cuenta una vez.
+const NOMBRES_SONDEO = new Set(["sleep", "tail", "watch"]);
+const PATRON_SONDEO = /\b(sleep|tail|watch)\b/;
+
+// Texto del comando de una llamada: campo cmd o command (texto o lista). args puede ser JSON en texto (Codex) u objeto (Pi).
+function comandoDe(args) {
+  let a = args;
+  if (typeof a === "string") {
+    try { a = JSON.parse(a); } catch { return null; }
+  }
+  if (!a || typeof a !== "object") return null;
+  const c = a.cmd ?? a.command;
+  if (typeof c === "string") return c;
+  if (Array.isArray(c)) return c.filter((x) => typeof x === "string").join(" ");
+  return null;
+}
+
+function esSondeo(nombre, args) {
+  if (NOMBRES_SONDEO.has(nombre)) return true;
+  const cmd = comandoDe(args);
+  return cmd !== null && PATRON_SONDEO.test(cmd);
+}
+
 async function procesarClaude(ctx, raiz) {
   for (const ruta of listarJsonl(raiz, () => true)) {
     const partes = relative(raiz, ruta).split(sep);
@@ -203,7 +261,7 @@ async function procesarClaude(ctx, raiz) {
       }
       ctx.sesiones.push({
         herramienta: "claude", fecha, proyecto, sesion: basename(ruta), modelo: mensajes.at(-1)?.modelo ?? "desconocido",
-        llamadas: contextos.length, esperas: esperas.size, ...estadisticasContexto(contextos),
+        llamadas: contextos.length, esperas: esperas.size, creditos: null, sondeos: null, ...estadisticasContexto(contextos),
       });
     }
     for (const x of mensajes) {
@@ -226,6 +284,7 @@ async function procesarPi(ctx, raiz) {
     const mensajes = [];
     const limites = [];
     let esperas = 0;
+    let sondeos = 0;
     let primerTs = null;
     try {
       await leerJsonl(ruta, (obj) => {
@@ -240,6 +299,7 @@ async function procesarPi(ctx, raiz) {
         if (Array.isArray(m.content)) {
           for (const b of m.content) {
             if (b && b.type === "toolCall" && typeof b.name === "string" && PATRON_ESPERA_PI.test(b.name)) esperas++;
+            if (b && b.type === "toolCall" && typeof b.name === "string" && esSondeo(b.name, b.arguments)) sondeos++;
           }
         }
         const u = m.usage;
@@ -260,9 +320,12 @@ async function procesarPi(ctx, raiz) {
     const fecha = fechaUTC(primerTs);
     if (!fecha) continue;
     if (ctx.o.sesiones && rol === "main" && fecha >= ctx.o.desde) {
+      const modelo = mensajes.at(-1)?.modelo ?? "desconocido";
       ctx.sesiones.push({
-        herramienta: "pi", fecha, proyecto, sesion: basename(ruta), modelo: mensajes.at(-1)?.modelo ?? "desconocido",
-        llamadas: mensajes.length, esperas, ...estadisticasContexto(mensajes.map((x) => x.contexto)),
+        herramienta: "pi", fecha, proyecto, sesion: basename(ruta), modelo,
+        llamadas: mensajes.length, esperas, sondeos,
+        creditos: creditosSesion(ctx.tarifas, modelo, sumarTokens(mensajes)),
+        ...estadisticasContexto(mensajes.map((x) => x.contexto)),
       });
     }
     for (const ts of limites) {
@@ -318,6 +381,7 @@ async function procesarCodex(ctx, raiz) {
     let total = null;
     let llamadas = 0;
     let esperas = 0;
+    let sondeos = 0;
     const contextos = [];
     let cuotaInicial = null;
     let cuotaFinal = null;
@@ -333,6 +397,7 @@ async function procesarCodex(ctx, raiz) {
         if (obj.type === "session_meta" && typeof p.cwd === "string") cwd = p.cwd;
         if (obj.type === "turn_context" && typeof p.model === "string") modelo = p.model;
         if (obj.type === "response_item" && p.type === "function_call" && ESPERAS.has(p.name)) esperas++;
+        if (obj.type === "response_item" && p.type === "function_call" && esSondeo(p.name, p.arguments)) sondeos++;
         if (p.type !== "token_count") return;
         const usado = p.rate_limits?.secondary?.used_percent;
         if (typeof usado === "number" && Number.isFinite(usado)) {
@@ -361,6 +426,7 @@ async function procesarCodex(ctx, raiz) {
       modelo: modelo ?? "desconocido",
       llamadas,
       esperas,
+      sondeos,
       contextos,
       total,
       cuotaInicial,
@@ -393,9 +459,16 @@ async function procesarCodex(ctx, raiz) {
   // Diagnóstico por sesión (--sesiones): sin la ruta completa, solo el nombre del archivo.
   if (ctx.o.sesiones) {
     for (const s of sesiones.filter((x) => x.fecha && x.fecha >= ctx.o.desde && coincide(ctx, x.proyecto))) {
+      const t = s.total ? {
+        entrada: Math.max(0, num(s.total.input_tokens) - num(s.total.cached_input_tokens)),
+        cache_leida: num(s.total.cached_input_tokens),
+        cache_escrita: 0,
+        salida: num(s.total.output_tokens),
+      } : null;
       ctx.sesiones.push({
         herramienta: "codex", fecha: s.fecha, proyecto: s.proyecto, sesion: basename(s.ruta), modelo: s.modelo,
-        llamadas: s.llamadas, esperas: s.esperas, ...estadisticasContexto(s.contextos),
+        llamadas: s.llamadas, esperas: s.esperas, sondeos: s.sondeos, creditos: creditosSesion(ctx.tarifas, s.modelo, t),
+        ...estadisticasContexto(s.contextos),
       });
     }
   }
@@ -437,13 +510,16 @@ function tabla(columnas, filas) {
   return celdas.map((r) => r.map((v, i) => v.padEnd(anchos[i])).join("  ").trimEnd());
 }
 
-const COLUMNAS_SESIONES = ["herramienta", "fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones"];
+const COLUMNAS_SESIONES = ["herramienta", "fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones", "creditos", "sondeos"];
 
 function imprimirSesiones(sesiones, avisos, desde) {
   if (sesiones.length === 0) {
     console.log(`sin sesiones desde ${desde}`);
   } else {
-    const celdas = sesiones.map((s) => ({ ...s, contexto_mediana: s.contexto_mediana ?? "-", contexto_max: s.contexto_max ?? "-" }));
+    const celdas = sesiones.map((s) => ({
+      ...s, contexto_mediana: s.contexto_mediana ?? "-", contexto_max: s.contexto_max ?? "-",
+      creditos: s.creditos ?? "-", sondeos: s.sondeos ?? "-",
+    }));
     for (const linea of tabla(COLUMNAS_SESIONES, celdas)) console.log(linea);
   }
   for (const a of avisos) console.log(`aviso: ${a}`);
@@ -466,6 +542,7 @@ function imprimirTexto(filas, cuota, avisos, desde) {
 async function main() {
   const o = leerOpciones(process.argv.slice(2));
   const ctx = { o, filas: new Map(), avisos: [], vistos: new Set(), cuota: [], sesiones: [] };
+  ctx.tarifas = cargarTarifas(o.tarifas, ctx.avisos);
   const raices = { claude: o.claudeDir, codex: join(o.codexDir, "sessions"), pi: o.piDir };
   const herramientas = o.herramienta ? [o.herramienta] : HERRAMIENTAS;
   const presentes = [];

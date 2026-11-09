@@ -701,6 +701,8 @@ generar_lanzador_codex() { # archivo del agente
     if [ -n "$esfuerzo" ]; then bandera=" -c 'model_reasoning_effort=\"$esfuerzo\"'"; fi
     # Umbral de compactación (compactar_en de modelos.json): la prueba de codex-compactacion lo confirmó para Codex.
     if [ -n "$compactar" ]; then bandera="$bandera -c model_auto_compact_token_limit=$compactar"; fi
+    # Espera larga de comandos (una sola llamada, sin sondeos): 30 min. Sin probar hasta el tramo 2 de espera-unica (A2).
+    bandera="$bandera -c background_terminal_max_timeout=1800000"
     # El modelo y las instrucciones se resuelven al lanzar (como en pi-<agente>); el esfuerzo y el umbral se fijan aquí.
     cat > "$destino" <<EOF
 #!/usr/bin/env bash

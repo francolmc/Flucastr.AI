@@ -825,6 +825,19 @@ prueba_codex() (
   if grep -q model_auto_compact_token_limit "$H3/.local/bin/codex-constructor"; then echo "FALLO: sin compactar_en el lanzador trae umbral de compactación" >&2; exit 1; fi
   echo "ok 3f: compactar_en de modelos.json va en codex-constructor una sola vez (reinstalar no duplica); sin compactar_en no aparece"
 
+  # (1c) por agente: principal compacta con agentes.principal.compactar_en; constructor con el general. Ambos lanzadores traen la espera larga de comandos.
+  esp_p=$(node -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.agentes.principal.compactar_en ?? ""))' "$M") || exit 1
+  esp_c=$(node -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.compactar_en ?? ""))' "$M") || exit 1
+  umbral_p=$(FLUCASTR_MODELOS="$M" node scripts/resolver.mjs compactar-codex principal) || exit 1
+  [ -n "$esp_p" ] && [ "$umbral_p" = "$esp_p" ] || { echo "FALLO: compactar-codex principal salió «$umbral_p», modelos.json dice «$esp_p»" >&2; exit 1; }
+  [ "$umbral" = "$esp_c" ] || { echo "FALLO: compactar-codex constructor salió «$umbral», el general de modelos.json es «$esp_c»" >&2; exit 1; }
+  salida_p=$(PATH="$F:$PATH" HOME="$H" "$H/.local/bin/codex-principal" extra) || { echo "FALLO: codex-principal falló con el codex de prueba" >&2; exit 1; }
+  grep -qxF "[model_auto_compact_token_limit=$esp_p]" <<<"$salida_p" || { echo "FALLO: codex-principal no pasa model_auto_compact_token_limit=$esp_p" >&2; exit 1; }
+  for s in "$salida" "$salida_p"; do
+    grep -qxF '[background_terminal_max_timeout=1800000]' <<<"$s" || { echo "FALLO: un lanzador de Codex no pasa background_terminal_max_timeout=1800000" >&2; exit 1; }
+  done
+  echo "ok 3f: umbral por agente (principal $esp_p, constructor $esp_c general) y espera larga de comandos en ambos lanzadores"
+
   # (2) reglas: 20 prefix_rule (10 forbidden y 10 allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
   [ "$(grep -c '^prefix_rule' "$R" || true)" = 20 ] || { echo "FALLO: $R no tiene 20 prefix_rule" >&2; exit 1; }
   grep -qxF '# regla ajena' "$P/.codex/rules/otra.rules" || { echo "FALLO: la regla ajena cambió tras instalar" >&2; exit 1; }

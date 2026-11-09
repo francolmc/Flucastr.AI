@@ -17,7 +17,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code, Pi y Codex
 - Rama base: `base:` del plan (`planificar-cambio`, regla 10); los proyectos que trabajan sobre `develop` la declaran. Para este proyecto es `main`. Liberar a `main` lo hace Franco a mano.
 - Comando `verify`: `./verify`; qué comprueba, en `README.md` («Verificación»). Modo remoto: `VERIFY_TARGET=<url> ./verify` corre solo el recorrido contra un despliegue, solo lectura salvo `VERIFY_PERMITIR_ESCRITURA=1` (`preparar-proyecto`, sección 3b).
 - Migrar un proyecto de la v1: `bash instalar.sh --migrar <proyecto> [--simular]`. Mueve `definitions/`, `features/` y `registro/` a `old/v1/` (sin borrar), deja `principal`, quita el hook de v1, pone las 12 reglas deny, ignora `.claude/settings.local.json`, lista los repos hijos, avisa si `AGENTS.md` es de v1 y crea `cambios/`. Solo Claude Code y solo ese proyecto; no se combina con `--proyecto`, `--skills-proyecto`, `--copiar`, `--solo` ni `--agente`.
-- Medidor de costos (solo lectura): `node scripts/uso.mjs` da tokens por día, proyecto y modelo de Claude Code, Codex y Pi, y la cuota semanal de Codex. Informe en `docs/evaluaciones/costos.md`.
+- Medidor de costos (solo lectura): `node scripts/uso.mjs` da tokens por día, proyecto y modelo de Claude Code, Codex y Pi, y la cuota semanal de Codex; con `--sesiones` da créditos estimados (`scripts/tarifas.json`) y sondeos por sesión. Informe en `docs/evaluaciones/costos.md`.
 
 ## Reglas
 

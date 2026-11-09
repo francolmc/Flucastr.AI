@@ -35,6 +35,7 @@ Para cada paso `- [ ]`, en orden:
 - Cuenta pendientes con el bloque `bash pendientes-plan` (abajo), pasando la ruta del plan como `$1`. Registra la cuenta; un error de lectura no es cero. Con pendientes, sigues salvo bloqueo permitido.
 - Corrige fallos relacionados dentro del alcance y anótalos en *Notas*.
 - Salidas largas (build, `verify`, listados): muestra solo la cola y los errores; usa opciones silenciosas cuando existan.
+- Comandos largos (`verify`, builds): espéralos con una sola llamada (Claude Code, `timeout` máximo o `run_in_background` y esperar su aviso; Pi, el timeout de `bash`; Codex, `exec_command` en una celda `exec` y, cuando devuelva «Script running with cell ID N», una sola llamada `wait` con ese `cell_id` y `yield_time_ms: 300000`). Nunca bucles de `sleep`, `tail` ni consulta de estado.
 
 ### Contador canónico
 
