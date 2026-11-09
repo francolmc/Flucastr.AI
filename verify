@@ -813,6 +813,18 @@ prueba_codex() (
   grep -qxF '[extra]' <<<"$salida" || { echo "FALLO: codex-constructor no reenvía los argumentos" >&2; exit 1; }
   echo "ok 3f: TOML de constructor y principal con modelo y esfuerzo (max -> xhigh); codex-constructor pasa -m y el esfuerzo"
 
+  # (1b) umbral de compactación: compactar_en de modelos.json va en codex-constructor una sola vez; sin compactar_en no aparece
+  umbral=$(FLUCASTR_MODELOS="$M" node scripts/resolver.mjs compactar-codex constructor) || exit 1
+  [ -n "$umbral" ] || { echo "FALLO: compactar-codex no sacó el umbral de compactar_en" >&2; exit 1; }
+  grep -qxF "[model_auto_compact_token_limit=$umbral]" <<<"$salida" || { echo "FALLO: codex-constructor no pasa model_auto_compact_token_limit=$umbral" >&2; exit 1; }
+  [ "$(grep -c model_auto_compact_token_limit "$H/.local/bin/codex-constructor")" = 1 ] || { echo "FALLO: codex-constructor no trae exactamente 1 umbral de compactación" >&2; exit 1; }
+  M2="$tmp/m-sin-compactar.json"; H3="$tmp/home3"; mkdir -p "$H3/.codex"
+  node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); delete m.compactar_en; for (const p of Object.values(m.perfiles)) delete p.compactar_en; fs.writeFileSync(process.argv[2], JSON.stringify(m))' "$M" "$M2" || exit 1
+  ( unset CODEX_HOME PI_CODING_AGENT_DIR; export HOME="$H3" FLUCASTR_MODELOS="$M2"; PATH="$F:$PATH" bash instalar.sh --solo codex --copiar ) >"$tmp/log3" 2>&1 || { cat "$tmp/log3" >&2; echo "FALLO: instalar con modelos sin compactar_en falló" >&2; exit 1; }
+  [ -f "$H3/.local/bin/codex-constructor" ] || { echo "FALLO: sin compactar_en no se generó codex-constructor" >&2; exit 1; }
+  if grep -q model_auto_compact_token_limit "$H3/.local/bin/codex-constructor"; then echo "FALLO: sin compactar_en el lanzador trae umbral de compactación" >&2; exit 1; fi
+  echo "ok 3f: compactar_en de modelos.json va en codex-constructor una sola vez (reinstalar no duplica); sin compactar_en no aparece"
+
   # (2) reglas: 20 prefix_rule (10 forbidden y 10 allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
   [ "$(grep -c '^prefix_rule' "$R" || true)" = 20 ] || { echo "FALLO: $R no tiene 20 prefix_rule" >&2; exit 1; }
   grep -qxF '# regla ajena' "$P/.codex/rules/otra.rules" || { echo "FALLO: la regla ajena cambió tras instalar" >&2; exit 1; }
@@ -841,7 +853,8 @@ prueba_codex() (
   ( export FLUCASTR_MODELOS="$M"; chequear_codex constructor "$H/.codex/agents/constructor.toml" ) \
     || { echo "FALLO: reinstalar no refrescó el TOML del constructor a low" >&2; exit 1; }
   grep -qF -- 'model_reasoning_effort="low"' "$H/.local/bin/codex-constructor" || { echo "FALLO: reinstalar no refrescó codex-constructor a low" >&2; exit 1; }
-  echo "ok 3f: reinstalar con low refresca el TOML y codex-constructor"
+  [ "$(grep -c model_auto_compact_token_limit "$H/.local/bin/codex-constructor")" = 1 ] || { echo "FALLO: reinstalar duplicó el umbral de compactación en codex-constructor" >&2; exit 1; }
+  echo "ok 3f: reinstalar con low refresca el TOML y codex-constructor, sin duplicar el umbral"
 
   # (4) reinstalar sin cambios no altera el HOME ni el proyecto
   antes=$(huella "$H"); antes_p=$(huella "$P")
@@ -953,6 +966,15 @@ TEXTOS_TRAMOS=(
   'agentes/principal.md|tramo: <n>'
   'agentes/constructor.md|tramo: <n>'
   'agentes/constructor.md|tramo=<n>'
+  'agentes/principal.md|una sola espera'
+  'agentes/principal.md|send_message'
+  'agentes/constructor.md|Salidas largas'
+  'agentes/constructor.md|tramo-<n>.md'
+  'skills/planificar-cambio/SKILL.md|tramo-N.md'
+  'skills/planificar-cambio/SKILL.md|/compact'
+  'skills/ejecutar-plan/SKILL.md|tramo-<n>.md'
+  'skills/ejecutar-plan/SKILL.md|/compact'
+  'skills/ejecutar-plan/SKILL.md|Salidas largas'
 )
 textos_tramos() { # $1: raíz del kit; nombra cada texto que falta y devuelve 1 si falta alguno
   local r=$1 par f t rc=0

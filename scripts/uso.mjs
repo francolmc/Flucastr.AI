@@ -7,13 +7,16 @@
 // Uso:
 //   node scripts/uso.mjs [--desde AAAA-MM-DD] [--herramienta claude|codex|pi] [--proyecto <subcadena>]
 //                        [--json] [--claude-dir <dir>] [--codex-dir <dir>] [--pi-dir <dir>]
+//                        [--sesiones] [--umbral <n>]
 //
 // Carpetas por defecto: ~/.claude/projects, ~/.codex (sessions/ dentro) y ~/.pi/agent/sessions.
 // --desde por defecto: hace 7 días. Sin --json imprime tablas de texto.
+// --sesiones (solo Codex): diagnóstico por sesión (llamadas, esperas, contexto mediana y máximo, compactaciones).
+// --umbral (por defecto 70): si la cuota semanal de Codex de la última sesión llega a ese %, aparece un aviso.
 
 import { createReadStream, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { join, relative, sep } from "node:path";
+import { basename, join, relative, sep } from "node:path";
 import { createInterface } from "node:readline";
 
 const HERRAMIENTAS = ["claude", "codex", "pi"];
@@ -33,7 +36,9 @@ function ayuda() {
   --json                        salida JSON: {filas, cuota, avisos}
   --claude-dir <dir>            carpeta de proyectos de Claude Code (por defecto ~/.claude/projects)
   --codex-dir <dir>             carpeta de Codex (por defecto ~/.codex; se leen sus sessions/)
-  --pi-dir <dir>                carpeta de sesiones de Pi (por defecto ~/.pi/agent/sessions)`);
+  --pi-dir <dir>                carpeta de sesiones de Pi (por defecto ~/.pi/agent/sessions)
+  --sesiones                    diagnóstico por sesión de Codex (solo Codex): esperas, contexto y compactaciones
+  --umbral <n>                  aviso si la cuota semanal de Codex llega a n % (por defecto 70)`);
 }
 
 function leerOpciones(argv) {
@@ -45,6 +50,8 @@ function leerOpciones(argv) {
     claudeDir: join(homedir(), ".claude", "projects"),
     codexDir: join(homedir(), ".codex"),
     piDir: join(homedir(), ".pi", "agent", "sessions"),
+    sesiones: false,
+    umbral: 70,
   };
   const valor = (i) => {
     const v = argv[i + 1];
@@ -61,13 +68,22 @@ function leerOpciones(argv) {
     else if (a === "--claude-dir") { o.claudeDir = valor(i); i++; }
     else if (a === "--codex-dir") { o.codexDir = valor(i); i++; }
     else if (a === "--pi-dir") { o.piDir = valor(i); i++; }
+    else if (a === "--sesiones") o.sesiones = true;
+    else if (a === "--umbral") { o.umbral = Number(valor(i)); i++; }
     else fallar(`opción desconocida: ${a}`, 2);
+  }
+  if (!Number.isFinite(o.umbral) || o.umbral < 0 || o.umbral > 100) {
+    fallar("--umbral debe ser un número entre 0 y 100", 2);
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(o.desde) || Number.isNaN(Date.parse(`${o.desde}T00:00:00Z`))) {
     fallar(`--desde debe ser AAAA-MM-DD (recibí ${o.desde})`, 2);
   }
   if (o.herramienta !== null && !HERRAMIENTAS.includes(o.herramienta)) {
     fallar("--herramienta debe ser claude, codex o pi", 2);
+  }
+  if (o.sesiones) {
+    if (o.herramienta === null) o.herramienta = "codex";
+    else if (o.herramienta !== "codex") fallar("--sesiones solo aplica a Codex (usa --herramienta codex)", 2);
   }
   o.inicioMs = Date.parse(`${o.desde}T00:00:00Z`);
   return o;
@@ -226,6 +242,23 @@ async function procesarPi(ctx, raiz) {
 
 const MUESTRA_MINIMA = 5;
 
+// Llamadas de Codex que esperan a otro agente o al tiempo: cada una es una espera del principal.
+const ESPERAS = new Set(["wait_agent", "wait", "sleep", "send_message"]);
+
+// Diagnóstico de una sesión de Codex a partir del contexto (input de la última llamada de cada evento).
+// Una compactación es una caída del 40 % o más respecto a la llamada anterior.
+function estadisticasContexto(contextos) {
+  if (contextos.length === 0) return { contexto_mediana: null, contexto_max: null, compactaciones: 0 };
+  const orden = [...contextos].sort((a, b) => a - b);
+  const n = orden.length;
+  const mediana = n % 2 === 1 ? orden[(n - 1) / 2] : Math.round((orden[n / 2 - 1] + orden[n / 2]) / 2);
+  let compactaciones = 0;
+  for (let i = 1; i < contextos.length; i++) {
+    if (contextos[i] <= contextos[i - 1] * 0.6) compactaciones++;
+  }
+  return { contexto_mediana: mediana, contexto_max: orden[n - 1], compactaciones };
+}
+
 // Milisegundos de un timestamp ISO, o null si no es válido.
 function msDeTs(ts) {
   if (typeof ts !== "string") return null;
@@ -245,6 +278,8 @@ async function procesarCodex(ctx, raiz) {
     let modelo = null;
     let total = null;
     let llamadas = 0;
+    let esperas = 0;
+    const contextos = [];
     let cuotaInicial = null;
     let cuotaFinal = null;
     try {
@@ -257,6 +292,7 @@ async function procesarCodex(ctx, raiz) {
         if (!p) return;
         if (obj.type === "session_meta" && typeof p.cwd === "string") cwd = p.cwd;
         if (obj.type === "turn_context" && typeof p.model === "string") modelo = p.model;
+        if (obj.type === "response_item" && p.type === "function_call" && ESPERAS.has(p.name)) esperas++;
         if (p.type !== "token_count") return;
         const usado = p.rate_limits?.secondary?.used_percent;
         if (typeof usado === "number" && Number.isFinite(usado)) {
@@ -266,6 +302,8 @@ async function procesarCodex(ctx, raiz) {
         if (p.info && typeof p.info === "object") {
           llamadas++;
           if (p.info.total_token_usage && typeof p.info.total_token_usage === "object") total = p.info.total_token_usage;
+          const contexto = p.info.last_token_usage?.input_tokens;
+          if (typeof contexto === "number" && Number.isFinite(contexto)) contextos.push(contexto);
         }
       });
     } catch (e) {
@@ -280,6 +318,8 @@ async function procesarCodex(ctx, raiz) {
       proyecto: cwd ? (cwd.split(/[\\/]/).filter(Boolean).pop() ?? "desconocido") : "desconocido",
       modelo: modelo ?? "desconocido",
       llamadas,
+      esperas,
+      contextos,
       total,
       cuotaInicial,
       cuotaFinal,
@@ -293,6 +333,24 @@ async function procesarCodex(ctx, raiz) {
       salida: num(s.total.output_tokens) });
   }
   ctx.cuota = calcularCuota(ctx, sesiones);
+  // Alerta de cuota: la sesión más reciente con dato de cuota semanal; si ya llegó al umbral, avisa.
+  const conCuota = sesiones.filter((s) => s.cuotaFinal !== null && s.finMs !== null && s.fecha && s.fecha >= ctx.o.desde && coincide(ctx, s.proyecto));
+  if (conCuota.length > 0) {
+    const ultima = conCuota.reduce((a, b) => (b.finMs > a.finMs ? b : a));
+    if (ultima.cuotaFinal >= ctx.o.umbral) {
+      ctx.avisos.push(`Cuota semanal de Codex en ${ultima.cuotaFinal} %: llegó al umbral de ${ctx.o.umbral} %`);
+    }
+  }
+  // Diagnóstico por sesión (--sesiones): sin la ruta completa, solo el nombre del archivo.
+  if (ctx.o.sesiones) {
+    ctx.sesiones = sesiones
+      .filter((s) => s.fecha && s.fecha >= ctx.o.desde && coincide(ctx, s.proyecto))
+      .map((s) => ({
+        fecha: s.fecha, proyecto: s.proyecto, sesion: basename(s.ruta), modelo: s.modelo,
+        llamadas: s.llamadas, esperas: s.esperas, ...estadisticasContexto(s.contextos),
+      }))
+      .sort((a, b) => (a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : a.sesion < b.sesion ? -1 : a.sesion > b.sesion ? 1 : 0));
+  }
 }
 
 // Puntos de cuota semanal por modelo. Solo cuentan sesiones exclusivas (su intervalo primer-último evento
@@ -331,6 +389,18 @@ function tabla(columnas, filas) {
   return celdas.map((r) => r.map((v, i) => v.padEnd(anchos[i])).join("  ").trimEnd());
 }
 
+const COLUMNAS_SESIONES = ["fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones"];
+
+function imprimirSesiones(sesiones, avisos, desde) {
+  if (sesiones.length === 0) {
+    console.log(`sin sesiones de Codex desde ${desde}`);
+  } else {
+    const celdas = sesiones.map((s) => ({ ...s, contexto_mediana: s.contexto_mediana ?? "-", contexto_max: s.contexto_max ?? "-" }));
+    for (const linea of tabla(COLUMNAS_SESIONES, celdas)) console.log(linea);
+  }
+  for (const a of avisos) console.log(`aviso: ${a}`);
+}
+
 function imprimirTexto(filas, cuota, avisos, desde) {
   if (filas.length === 0) {
     console.log(`sin sesiones desde ${desde}`);
@@ -347,7 +417,7 @@ function imprimirTexto(filas, cuota, avisos, desde) {
 
 async function main() {
   const o = leerOpciones(process.argv.slice(2));
-  const ctx = { o, filas: new Map(), avisos: [], vistos: new Set(), cuota: [] };
+  const ctx = { o, filas: new Map(), avisos: [], vistos: new Set(), cuota: [], sesiones: [] };
   const raices = { claude: o.claudeDir, codex: join(o.codexDir, "sessions"), pi: o.piDir };
   const herramientas = o.herramienta ? [o.herramienta] : HERRAMIENTAS;
   const presentes = [];
@@ -370,7 +440,10 @@ async function main() {
       for (const k of orden) if (a[k] !== b[k]) return a[k] < b[k] ? -1 : 1;
       return 0;
     });
-  if (o.json) console.log(JSON.stringify({ filas, cuota: ctx.cuota, avisos: ctx.avisos }, null, 2));
+  if (o.sesiones) {
+    if (o.json) console.log(JSON.stringify({ filas, cuota: ctx.cuota, avisos: ctx.avisos, sesiones: ctx.sesiones }, null, 2));
+    else imprimirSesiones(ctx.sesiones, ctx.avisos, o.desde);
+  } else if (o.json) console.log(JSON.stringify({ filas, cuota: ctx.cuota, avisos: ctx.avisos }, null, 2));
   else imprimirTexto(filas, ctx.cuota, ctx.avisos, o.desde);
 }
 

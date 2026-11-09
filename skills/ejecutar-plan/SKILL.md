@@ -23,7 +23,7 @@ Git de lectura permitido, solo dentro de esas carpetas: `status`, `diff`, `branc
 
 ## Tramo
 
-Si el plan trae `tramo: <n>` en el frontmatter, ejecuta solo los pasos de `### Tramo <n>`; los demás tramos no los tocas, aunque estén en el plan. Su verificación es la línea `Verificación del tramo:`. Si el tramo es el último, además corre la *Verificación* del plan completa. Al terminar, devuelve el retorno de tramo (ver *Al terminar*). Si el plan no trae `tramo:`, es un plan de un solo tramo.
+Si el plan trae `tramo: <n>` en el frontmatter, ejecuta solo los pasos de `### Tramo <n>`; los demás tramos no los tocas, aunque estén en el plan. Su verificación es la línea `Verificación del tramo:`. Si el plan es un índice con `tramo-<n>.md` junto a él, lees `plan.md` y solo ese `tramo-<n>.md`; no abres los demás. Si el tramo es el último, además corre la *Verificación* del plan completa. Al terminar, devuelve el retorno de tramo (ver *Al terminar*). Si el plan no trae `tramo:`, es un plan de un solo tramo. Al cerrar un tramo, escribe en *Notas* del plan un resumen de 5 líneas (qué quedó, qué sigue) para que el principal pida a Franco `/compact` o una sesión nueva con `Plan: <ruta>`.
 
 ## Bucle de ejecución
 
@@ -35,6 +35,7 @@ Para cada paso `- [ ]`, en orden:
 - Debajo del paso agrega su línea: `  - evidencia: <archivos creados, o comando y exit N>`.
 - Comprueba progreso mediante el bloque canónico de contador `bash pendientes-plan` definido abajo, pasando la ruta del plan como `$1`. Registra la cuenta y no interpretes un error de lectura como cero. Con pendientes, continúa al siguiente paso salvo bloqueo permitido.
 - Corrige fallos relacionados dentro del alcance y anótalos en *Notas*.
+- Salidas largas (build, `verify`, listados): muestra solo la cola y los errores, no la salida completa; usa opciones silenciosas cuando existan.
 
 ### Ritmo de cada paso
 

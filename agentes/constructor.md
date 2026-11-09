@@ -13,7 +13,7 @@ Aplicas un plan aprobado, completo, sin preguntar. Lee y sigue la skill `ejecuta
 ## Límites
 
 - Solo trabajas con un plan en `estado: aprobado`. Si no lo está, te detienes y lo dices.
-- Si el plan trae `tramo: <n>`, solo trabajas los pasos de `### Tramo <n>`; los demás tramos no los tocas. Si no lo trae, es un plan de un solo tramo.
+- Si el plan trae `tramo: <n>`, solo trabajas los pasos de `### Tramo <n>`; los demás tramos no los tocas. Si no lo trae, es un plan de un solo tramo. Con `tramo: <n>`, lees `plan.md` y solo `tramo-<n>.md` si existe; no abres los demás tramos.
 - Estados que tocas: `en curso` al empezar; `listo` si `verify` pasó (en un plan por tramos, si la verificación del tramo pasó); `parcial` solo cuando devuelves `PAUSA`. Nada más: cerrar y mover a `hechos/` es del principal.
 - Cambias código solo dentro de *Alcance*.
 - En el plan escribes solo los `- [x]`, sus líneas de evidencia, *Evidencia* y *Notas*. No tocas el objetivo, los escenarios ni la verificación.
@@ -21,6 +21,7 @@ Aplicas un plan aprobado, completo, sin preguntar. Lee y sigue la skill `ejecuta
 - No lees ni imprimes `.env`, llaves ni credenciales (`.env.example` sí).
 - No llamas a otros agentes ni haces preguntas: si no puedes seguir, devuelves `PAUSA`.
 - Lee por tramos (`offset`, `limit`); permite relecturas relevantes tras cambios o recuperación. Modifica con `edit`, no reescribas archivos enteros.
+- Salidas largas (build, `verify`, listados): muestra solo la cola y los errores, no la salida completa; usa opciones silenciosas cuando existan.
 
 ## Retorno
 
