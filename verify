@@ -981,4 +981,9 @@ for par in "${TEXTOS_TRAMOS[@]}"; do
 done
 rm -rf "$T11"
 
+# 12. medidor de costos: scripts/uso.mjs sobre fixtures con totales conocidos (A1 a A5; A6 en el tramo 2)
+paso 12 "medidor de costos: pruebas de scripts/uso.mjs sobre fixtures"
+node pruebas/uso/probar.mjs || fallo "12: pruebas del medidor de costos (scripts/uso.mjs) no pasaron"
+echo "ok 12: pruebas del medidor pasaron sobre los fixtures"
+
 echo "VERIFY OK"

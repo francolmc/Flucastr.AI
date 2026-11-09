@@ -1,0 +1,4 @@
+{"timestamp":"2026-11-08T09:00:00.000Z","type":"session_meta","payload":{"id":"cuota-b","timestamp":"2026-11-08T09:00:00.000Z","cwd":"/home/test/Codes/proyecto-cuota","cli_version":"0.0.0-fixture"}}
+{"timestamp":"2026-11-08T09:00:01.000Z","type":"turn_context","payload":{"model":"gpt-cuota-fixture"}}
+{"timestamp":"2026-11-08T09:00:10.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":1000,"cached_input_tokens":0,"output_tokens":500,"total_tokens":1500}},"rate_limits":{"secondary":{"used_percent":20.0}}}}
+{"timestamp":"2026-11-08T09:20:00.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":2000,"cached_input_tokens":0,"output_tokens":1000,"total_tokens":3000}},"rate_limits":{"secondary":{"used_percent":22.5}}}}

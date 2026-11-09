@@ -1,0 +1,6 @@
+{"type":"user","message":{"role":"user","content":"hola"},"timestamp":"2026-11-08T10:00:00.000Z","sessionId":"sesion-fixture-1"}
+{"type":"assistant","message":{"id":"msg_m1","role":"assistant","model":"claude-sonnet-fixture","usage":{"input_tokens":100,"output_tokens":50,"cache_creation_input_tokens":200,"cache_read_input_tokens":1000}},"requestId":"req_r1","timestamp":"2026-11-08T10:00:05.000Z","sessionId":"sesion-fixture-1"}
+{"type":"assistant","message":{"id":"msg_m1","role":"assistant","model":"claude-sonnet-fixture","usage":{"input_tokens":100,"output_tokens":50,"cache_creation_input_tokens":200,"cache_read_input_tokens":1000}},"requestId":"req_r1","timestamp":"2026-11-08T10:00:05.000Z","sessionId":"sesion-fixture-1"}
+{"type":"assistant","message":{"id":"msg_m2","role":"assistant","model":"claude-sonnet-fixture","usage":{"input_tokens":30,"output_tokens":20,"cache_creation_input_tokens":0,"cache_read_input_tokens":500}},"requestId":"req_r2","timestamp":"2026-11-08T10:01:00.000Z","sessionId":"sesion-fixture-1"}
+{"type":"assistant","message":{"id":"msg_roto"
+{"type":"user","message":{"role":"user","content":"gracias"},"timestamp":"2026-11-08T10:02:00.000Z","sessionId":"sesion-fixture-1"}
