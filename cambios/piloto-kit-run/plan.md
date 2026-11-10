@@ -1,7 +1,7 @@
 ---
-estado: aprobado
+estado: listo
 rama: docs/piloto-kit-run
-base: feature/kit-run
+base: main
 repos: [.]
 ejecutor: constructor
 tipo: docs
@@ -18,7 +18,8 @@ Plan de documentos chico, hecho para medir A4 de `cambios/kit-run/plan.md` con `
 `docs/kit-run.md` (nuevo). Fuera: todo lo demás.
 
 ## Pasos
-- [ ] Crear `docs/kit-run.md` (máx. 40 líneas): para qué sirve, uso (`kit-run <plan> --herramienta codex`), qué hace el ciclo (constructor → verify → ≤2 relanzamientos → revisor de solo lectura), estados finales (`listo`/`parcial`) y los topes de tiempo. Leer `scripts/kit-run.mjs` para no inventar nada.
+- [x] Crear `docs/kit-run.md` (máx. 40 líneas): para qué sirve, uso (`kit-run <plan> --herramienta codex`), qué hace el ciclo (constructor → verify → ≤2 relanzamientos → revisor de solo lectura), estados finales (`listo`/`parcial`) y los topes de tiempo. Leer `scripts/kit-run.mjs` para no inventar nada.
+  - evidencia: longitud y cifras contrastadas con `scripts/kit-run.mjs`; aclarado que las dos oportunidades de relanzamiento se comparten entre verify y revisión.
 
 ## Aceptación
 | ID | Resultado observable | Comprobación | Resultado esperado |
@@ -28,5 +29,22 @@ Plan de documentos chico, hecho para medir A4 de `cambios/kit-run/plan.md` con `
 
 ## Verificación
 `./verify`
-- kit run: PAUSA (acceso): PAUSA: plan=cambios/piloto-kit-run/plan.md; motivo=acceso; hecho=0/1; siguiente=aprobar el plan cambiando `estado: en curso` a `estado: aprobado`; no_intentado=la skill `ejecutar-plan` exige detenerse si el plan no está aprobado.
-- kit run: PAUSA (acceso): PAUSA: plan=cambios/piloto-kit-run/plan.md; motivo=acceso; hecho=0/1; siguiente=aprobar el plan cambiando `estado: en curso` a `estado: aprobado`; no_intentado=la skill `ejecutar-plan` exige detenerse si el plan no está aprobado.
+
+## Evidencia
+
+$ wc -l docs/kit-run.md
+26 docs/kit-run.md
+exit 0
+
+$ grep -c "45\|15\|30" docs/kit-run.md
+1
+exit 0
+
+$ ./verify
+VERIFY OK
+exit 0
+
+## Notas
+- La revisión detectó que verify y revisión comparten un contador de dos relanzamientos; se aclaró en la guía.
+- `./verify` falló una primera vez porque el entorno bloqueó `spawnSync bash` (EPERM); la segunda corrida completa pasó.
+- kit run: revisión APROBADO tras 2 corrida(s) del constructor; verify pasó.
