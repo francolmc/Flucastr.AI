@@ -47,7 +47,7 @@ Entorno y rutas
   PI_CODING_AGENT_DIR cambia la ruta de Pi; por defecto es ~/.pi/agent.
   Claude Code usa ~/.claude. Codex usa CODEX_HOME o, si no está, ~/.codex: los agentes van
   a <CODEX_HOME>/agents/<agente>.toml y las skills a ~/.agents/skills.
-  Los lanzadores claude-<agente>, pi-<agente> y codex-<agente> se crean en
+  Los lanzadores claude-<agente>, pi-<agente> y codex-<agente> (y kit-run, con Codex) se crean en
   ~/.local/bin; agrega esa carpeta al PATH para invocarlos.
 
 Ejemplos
@@ -716,6 +716,27 @@ EOF
   echo "  lanzador generado: $destino (modelo: $modelo, esfuerzo: ${esfuerzo:-sin declarar}, compacta en: ${compactar:-sin declarar})"
 }
 
+# kit-run: lanza al constructor sin interfaz y revisa al final (scripts/kit-run.mjs). Va con Codex (tramo 2 de kit-run).
+generar_lanzador_kit_run() {
+  local destino="$BIN_DIR/kit-run"
+  if [ -e "$destino" ] || [ -L "$destino" ]; then
+    echo "  OMITIDO (ya existe): $destino"
+    return
+  fi
+  if [ "$SIMULAR" = 0 ]; then
+    mkdir -p "$BIN_DIR"
+    cat > "$destino" <<EOF
+#!/usr/bin/env bash
+# flucastr-ai:generado - lo crea instalar.sh y lo borra desinstalar.sh
+RAIZ="$RAIZ"
+exec node "\$RAIZ/scripts/kit-run.mjs" "\$@"
+EOF
+    chmod +x "$destino"
+    registrar archivo "$destino"
+  fi
+  echo "  lanzador generado: $destino (herramienta: codex)"
+}
+
 # Reglas deny de Codex del proyecto (<proyecto>/.codex/rules/flucastr.rules, archivo del kit: no se mezcla con lo ajeno).
 # Codex las carga solo en proyectos de confianza y son experimentales. Si el archivo es ajeno, avisa y sigue.
 instalar_deny_codex() {
@@ -965,9 +986,10 @@ if [ "$INSTALAR_CODEX" = 1 ]; then
     [ -f "$f" ] && generar_agente_codex "$f"
     [ -f "$f" ] && generar_lanzador_codex "$f"
   done
+  generar_lanzador_kit_run
   case ":$PATH:" in
     *":$BIN_DIR:"*) ;;
-    *) echo "  AVISO: $BIN_DIR no está en tu PATH; agrégalo para usar los comandos codex-<agente>." ;;
+    *) echo "  AVISO: $BIN_DIR no está en tu PATH; agrégalo para usar los comandos codex-<agente> y kit-run." ;;
   esac
   if [ -n "$PROYECTO" ]; then
     echo "Proyecto ($PROYECTO), Codex"
