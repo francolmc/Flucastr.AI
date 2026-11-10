@@ -1,5 +1,5 @@
 ---
-estado: borrador
+estado: listo
 rama: docs/investigar-a4
 base: main
 repos: [.]
@@ -28,8 +28,10 @@ Revisor `gpt-6.1-sol`, esfuerzo `low`, 3 llamadas al modelo por revisión. Tarif
 Si el prefijo de ≈19 k estuviera en caché, cada revisión costaría ≈0,4 créditos y la razón sería ≈ 2,0 (< 3). Hay que medirlo.
 
 ## Pasos
-- [ ] Escribir el informe con: (1) causa medida de la razón 6,6; (2) tabla de arriba; (3) qué compone el prefijo de ≈19 k: correr `codex debug prompt-input` (o equivalente) con la config de `kit-run.mjs` para el revisor y listar AGENTS.md, skills, instrucciones y plan+diff con su tamaño; (4) palancas ordenadas por ahorro estimado: perfil mínimo del revisor (`--ignore-user-config`, `--ephemeral`, sin skills ni MCP), caché caliente entre revisiones, no revisar dos veces por defectos que el plan pudo cubrir, revisión escalonada con Luna, A4 por tamaño; (5) síntesis de la evidencia externa (adjunta abajo) marcando medido/opinión; (6) qué no se sabe y 5 mediciones mínimas.
-- [ ] Solo lectura sobre `~/.codex/sessions/` y el repo; no ejecutar `codex exec`.
+- [x] Escribir el informe con: (1) causa medida de la razón 6,6; (2) tabla de arriba; (3) qué compone el prefijo de ≈19 k: correr `codex debug prompt-input` (o equivalente) con la config de `kit-run.mjs` para el revisor y listar AGENTS.md, skills, instrucciones y plan+diff con su tamaño; (4) palancas ordenadas por ahorro estimado: perfil mínimo del revisor (`--ignore-user-config`, `--ephemeral`, sin skills ni MCP), caché caliente entre revisiones, no revisar dos veces por defectos que el plan pudo cubrir, revisión escalonada con Luna, A4 por tamaño; (5) síntesis de la evidencia externa (adjunta abajo) marcando medido/opinión; (6) qué no se sabe y 5 mediciones mínimas.
+  - evidencia: `docs/investigaciones/a4-costo-revisor.md`, 74 líneas; cifras de la tabla y del prefijo verificadas en los rollouts y en `codex debug prompt-input`.
+- [x] Solo lectura sobre `~/.codex/sessions/` y el repo; no ejecutar `codex exec`.
+  - evidencia: lectura de `~/.codex/sessions/2026/11/10/*.jsonl` (`total_token_usage`) y `codex -m gpt-6.1-sol -c model_reasoning_effort="low" debug prompt-input` (exit 0, sin `codex exec`).
 
 ## Evidencia externa (resumen, de la investigación de Franco)
 Cognition (abr 2026): revisor sin contexto compartido funciona mejor, sin costo publicado (interno). Anthropic: relectura del historial con caché; subagente nuevo paga su prefijo (≈25 k en una medición de terceros). OpenAI (dic 2025): verificar cuesta «una fracción» del generador; esfuerzo alto rinde menos en código generado. Codex `exec` trivial: 8–13 k tokens de entrada. Tarifas Sol = 20 × Luna. No existe razón revisor/constructor de referencia publicada.
@@ -44,3 +46,23 @@ Cognition (abr 2026): revisor sin contexto compartido funciona mejor, sin costo 
 
 ## Verificación
 `./verify`
+
+## Evidencia
+
+$ ./verify (tramo final, cola)
+```
+kit-run: 13 casos pasaron
+ok 13: pruebas de kit run pasaron con los CLIs simulados
+VERIFY OK
+exit 0
+```
+
+I1: `wc -l docs/investigaciones/a4-costo-revisor.md` = 74 (entre 40 y 80).
+I2: `grep -c "1,378\|1,251\|19.265" docs/investigaciones/a4-costo-revisor.md` = 6 (≥ 3).
+I3 y I4: lectura del informe; cada cifra va marcada como medido, documentado, estimado u opinión, y la sección 2 desglosa el prefijo por componente en caracteres (no en tokens, con el motivo).
+
+## Notas
+
+- El paso 3 de la lista del informe se midió con `codex debug prompt-input` (no `codex exec`). Ese comando necesita `-c` antes del subcomando; se usó `codex -m ... -c ... debug prompt-input`.
+- El `./verify` muestra un AVISO por `pruebas/comparar-openspec/` ausente en este equipo (`pruebas/` está en `.gitignore`); es un paso omitido, no un fallo.
+- El 6 % de salida del plan corresponde a la revisión 1; la revisión 2 da 3 %. El informe muestra ambas.
