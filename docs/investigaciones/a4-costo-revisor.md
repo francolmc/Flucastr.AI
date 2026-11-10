@@ -42,8 +42,8 @@ Medido con `codex -m gpt-6.1-sol -c model_reasoning_effort="low" debug prompt-in
 
 Sobre un revisor de 1,378 créditos:
 
-1. **Perfil mínimo del revisor** (**estimado**): quitar skills y herramientas que no usa y correr con `--ignore-user-config --ephemeral` (ambos flags existen en `codex exec`). Skills y herramientas suman ≈56 % de los caracteres; si se quitan, el prefijo bajaría a ≈8 a 10 k tokens y ahorraría ≈0,4 a 0,5 créditos por revisión. Hay que comprobar que el revisor sigue leyendo el plan y el diff. La instrucción de sistema de Codex no se puede quitar.
-2. **Caché caliente** (**estimado**): si los 19 k del primer turno estuvieran en caché, cada revisión costaría ≈0,4 créditos y la razón caería a ≈2,0. Falta medir si la caché sobrevive entre revisiones.
+1. **Perfil mínimo del revisor** (**medido**, sección 8): con `--ignore-user-config --ephemeral -c skills.bundled.enabled=false -c skills.include_instructions=false` el primer turno baja de 18.299 a 16.370 tokens (−10,5 %; ≈0,10 créditos por revisión en frío, estimado). Quita el bloque de skills; las definiciones de herramientas y la instrucción de sistema se quedan. La estimación previa de 8 a 10 k tokens y 0,4 a 0,5 créditos no se sostiene. Falta comprobar que el revisor sigue leyendo el plan y el diff.
+2. **Caché caliente** (**medido en parte**, secciones 6 y 7): la caché sobrevive a corridas seguidas, pero en la serie de la sección 7 cae a 0 con 1 min de separación y solo T0 tuvo 7.168 tokens. Si los 18 k se reutilizaran, la entrada costaría ≈0,05 créditos (estimado). Por qué se pierde la caché no está medido.
 3. **No revisar dos veces por defectos que el plan pudo cubrir** (**opinión**).
 4. **Revisión escalonada con Luna** (**opinión**): una primera pasada barata y Sol solo si Luna marca riesgo. Con tarifas documentadas, Sol cuesta 20 veces Luna por token de entrada. El riesgo de calidad no está medido.
 5. **A4 según tamaño** (**opinión**): solo para planes o diffs por encima de un umbral.
@@ -61,14 +61,14 @@ Sobre un revisor de 1,378 créditos:
 No se sabe:
 
 - ~~si la caché del revisor sobrevive entre dos revisiones seguidas, y cuánto dura~~ (medido en la sección 6: sobrevive una parte, no todo; la duración no se midió);
-- cuánto del prefijo de 19 k es instrucción de sistema no recortable;
+- ~~cuánto del prefijo de 19 k es instrucción de sistema no recortable~~ (sección 8: los flags de perfil mínimo no recortan la instrucción de sistema; sí el bloque de skills);
 - cómo rinde Luna como revisor frente a Sol;
 - cuántos tokens suma el plan y el diff al prompt real.
 
 Cinco mediciones mínimas:
 
 1. Dos revisiones seguidas del mismo plan con Sol: ¿el primer turno de la segunda llega con caché?
-2. Una revisión con `--ignore-user-config --ephemeral` y sin skills: tokens del primer turno.
+2. ~~Una revisión con `--ignore-user-config --ephemeral` y sin skills: tokens del primer turno.~~ (hecha en la sección 8)
 3. El mismo diff con defectos sembrados, revisado por Luna y por Sol: defectos detectados por cada uno.
 4. Tamaño en tokens del plan y del diff, sumado al prefijo.
 5. Razón revisor/constructor en 5 planes reales, no en uno.
@@ -88,3 +88,39 @@ Suma: **2,041 créditos**, por encima del tope de 2 (M3 no se cumple por 0,04).
 Conclusión: **sí**, la caché sobrevive entre corridas seguidas (B y C reciben 7.168 tokens en caché; A no tenía ninguno), y también cuando cambia el final del prompt (C). Pero solo 7.168 de ≈18 k tokens del prefijo se reutilizan; el resto se paga entero en cada corrida. Frente a la revisión del piloto (0 en caché a ≈2,5 min), aquí las corridas estaban a 7 s; la diferencia puede ser de tiempo o de otra causa, no medida.
 
 Hipótesis, no hecho: si el prefijo compartido fuera mayor, la caché bajaría el costo del primer turno. Qué haría falta: medir con separaciones de 1 min, 5 min y 15 min, y comparar el prefijo de A con el de B para ver qué bloque no se repite.
+
+## 7. Medición 2: separación de tiempo
+
+Config del revisor (`gpt-6.1-sol`, esfuerzo `low`, `--sandbox read-only`, `-C` en la raíz, prompt «Responde solo: OK»). Primer `token_count` del rollout; créditos con `scripts/tarifas.json`. Hora UTC-3.
+
+| Corrida | Separación desde la anterior | Entrada | En caché | % en caché | Créditos |
+| --- | --- | --- | --- | --- | --- |
+| T0 (fin 02:47:27) | ≈9 min desde la última de la sección 6 | 17.756 | 7.168 | 40 % | 0,549 |
+| T1 (02:48:27) | 1 min | 18.299 | 0 | 0 % | 0,916 |
+| T2 (02:53:32) | 5 min | 18.299 | 0 | 0 % | 0,916 |
+| T3 (03:03:38) | 10 min | 18.299 | 0 | 0 % | 0,916 |
+
+Suma de la parte: 3,297 créditos.
+
+Conclusión (**medido**): en esta serie la caché ya no aparece a 1 min de separación y tampoco a 5 ni a 10 min. T0 sí la tuvo (7.168 tokens) con ≈9 min de separación desde la sección 6, así que la separación por sí sola no explica la caché: la pregunta «desde qué separación cae» queda contestada solo como «≤ 1 min en esta serie». La causa no está medida.
+
+## 8. Medición 3: perfil mínimo
+
+Config del revisor igual que la sección 7. Perfil mínimo: `--ignore-user-config --ephemeral -c skills.bundled.enabled=false -c skills.include_instructions=false`. Hora UTC-3. Créditos con `scripts/tarifas.json`. M0 va sin `--json`: con `--ephemeral` no hay rollout y no da desglose de caché.
+
+| Corrida | Config | Entrada | En caché | % en caché | Créditos |
+| --- | --- | --- | --- | --- | --- |
+| T0 (02:47) | actual | 17.756 | 7.168 | 40 % | 0,549 |
+| T1 (02:48) | actual | 18.299 | 0 | 0 % | 0,916 |
+| M0 (03:18) | mínimo, sin `--json` | no desglosada | no desglosada | — | ≤ 0,173 |
+| M0b (03:19) | mínimo, `--json` | 16.370 | 7.168 | 44 % | 0,479 |
+| M1 (03:19) | mínimo, `--json` | 16.370 | 7.168 | 44 % | 0,479 |
+| M0c (03:20) | mínimo, `--json` | 16.370 | 7.168 | 44 % | 0,479 |
+
+Frente a T1 (sin caché, misma sesión de medición), el perfil mínimo baja la entrada de 18.299 a 16.370 tokens (−1.929, −10,5 %) y el costo del primer turno en frío de 0,916 a ≈0,820 créditos (≈−0,10, estimado con la tarifa). Frente a T0, con caché parcial en ambas, baja de 0,549 a 0,479 créditos.
+
+`codex debug prompt-input` no acepta `--ignore-user-config`, `--ephemeral` ni `-C` (error «unexpected argument»); con solo los dos `-c` salió: 85.748 → 79.884 caracteres (−6,8 %). Baja el bloque de skills (19.630 → 13.876 caracteres en ese ítem); las definiciones de herramientas (26.452) y las instrucciones de sistema (22.131) no cambian. Estas cifras no igualan a las 78.400 de la sección 2: no se reconcilió la diferencia.
+
+Sin reconciliar: M0 reporta 3.447 «tokens used» en stderr y las corridas con `--json` reportan 16.370 de entrada. Se usa la cifra de `--json`, que coincide en M0b, M1 y M0c.
+
+Conclusión (**medido**): **sí**, el perfil mínimo baja el primer turno ≈1.929 tokens (≈10,5 %) y ≈0,10 créditos por revisión en frío (estimado). La estimación de la sección 3 (prefijo de 8 a 10 k y 0,4 a 0,5 créditos) no se sostiene. Calidad (que el revisor siga leyendo plan y diff) no medida.
