@@ -60,7 +60,7 @@ Sobre un revisor de 1,378 créditos:
 
 No se sabe:
 
-- si la caché del revisor sobrevive entre dos revisiones seguidas, y cuánto dura;
+- ~~si la caché del revisor sobrevive entre dos revisiones seguidas, y cuánto dura~~ (medido en la sección 6: sobrevive una parte, no todo; la duración no se midió);
 - cuánto del prefijo de 19 k es instrucción de sistema no recortable;
 - cómo rinde Luna como revisor frente a Sol;
 - cuántos tokens suma el plan y el diff al prompt real.
@@ -72,3 +72,19 @@ Cinco mediciones mínimas:
 3. El mismo diff con defectos sembrados, revisado por Luna y por Sol: defectos detectados por cada uno.
 4. Tamaño en tokens del plan y del diff, sumado al prefijo.
 5. Razón revisor/constructor en 5 planes reales, no en uno.
+
+## 6. Medición 1: caché entre revisiones
+
+Medido con `codex exec` con la config del revisor (`gpt-6.1-sol`, esfuerzo `low`, `--sandbox read-only`, `-C` en la raíz, sin `--output-schema`), prompt trivial, tres corridas seguidas (B a 7 s de A, C a 7 s de B). Primer evento `token_count` de cada rollout; créditos con la fórmula de `scripts/uso.mjs` y `scripts/tarifas.json` (entrada sin caché a 50, caché a 2,5, salida a 250, por 1M).
+
+| Corrida | Hora (UTC-3) | Prompt | Entrada | En caché | % en caché | Créditos |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | 02:38:06 | «Responde solo: OK» | 17.756 | 0 | 0 % | 0,889 |
+| B | 02:38:17 | «Responde solo: OK» | 18.299 | 7.168 | 39 % | 0,576 |
+| C | 02:38:24 | «Responde solo: LISTO» | 18.300 | 7.168 | 39 % | 0,576 |
+
+Suma: **2,041 créditos**, por encima del tope de 2 (M3 no se cumple por 0,04).
+
+Conclusión: **sí**, la caché sobrevive entre corridas seguidas (B y C reciben 7.168 tokens en caché; A no tenía ninguno), y también cuando cambia el final del prompt (C). Pero solo 7.168 de ≈18 k tokens del prefijo se reutilizan; el resto se paga entero en cada corrida. Frente a la revisión del piloto (0 en caché a ≈2,5 min), aquí las corridas estaban a 7 s; la diferencia puede ser de tiempo o de otra causa, no medida.
+
+Hipótesis, no hecho: si el prefijo compartido fuera mayor, la caché bajaría el costo del primer turno. Qué haría falta: medir con separaciones de 1 min, 5 min y 15 min, y comparar el prefijo de A con el de B para ver qué bloque no se repite.
