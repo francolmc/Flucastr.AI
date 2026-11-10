@@ -25,6 +25,7 @@
 //   modelo-esfuerzo <agente> codex: el esfuerzo sale traducido (max -> xhigh), como lo pide Codex
 //   esfuerzo <agente> codex: igual, solo el esfuerzo traducido para Codex
 //   instrucciones-codex <archivo.md>: imprime las instrucciones del agente como cadena JSON (válida como valor TOML en codex -c)
+//   revisor <herramienta>: dos líneas, modelo y esfuerzo del revisor de kit run (kit_run.revisor; sin esa clave, el de principal). Esfuerzo traducido para codex.
 //   compactar-codex <agente>: imprime el umbral de compactación de Codex del agente (compactar_en), o nada si no hay uno válido
 //
 // Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
@@ -55,10 +56,9 @@ function leerConfig() {
   }
 }
 
-// nivel -> perfil -> modelo, con respaldo si el perfil no define ese nivel
-function resolverModelo(agente, herramienta) {
-  const c = leerConfig();
-  const a = (c.agentes ?? {})[agente] ?? {};
+// nivel -> perfil -> modelo, con respaldo si el perfil no define ese nivel.
+// `a` es la entrada de modelos.json (agentes[agente] o kit_run.revisor); `agente` solo sirve para los mensajes.
+function modeloDe(c, a, agente, herramienta) {
   const perfiles = c.perfiles ?? {};
 
   const nivel = a.nivel ?? c.nivel_por_defecto;
@@ -87,15 +87,38 @@ function resolverModelo(agente, herramienta) {
   fallar(`el perfil '${perfilId}' no define un modelo para el nivel '${nivel}' ni sus respaldos`);
 }
 
-// Esfuerzo del agente (agentes[agente].esfuerzo), o "" si no declara ninguno: entonces la herramienta usa el suyo.
-function resolverEsfuerzo(agente) {
+function resolverModelo(agente, herramienta) {
   const c = leerConfig();
-  const esfuerzo = ((c.agentes ?? {})[agente] ?? {}).esfuerzo;
+  return modeloDe(c, (c.agentes ?? {})[agente] ?? {}, agente, herramienta);
+}
+
+// Esfuerzo de una entrada de modelos.json (agentes[agente] o kit_run.revisor), o "" si no declara ninguno:
+// entonces la herramienta usa el suyo.
+function esfuerzoEn(c, a, agente) {
+  const esfuerzo = a.esfuerzo;
   if (esfuerzo === undefined) return "";
   if (!(c.esfuerzos ?? []).includes(esfuerzo)) {
     fallar(`el esfuerzo '${esfuerzo}' del agente '${agente}' no está en 'esfuerzos'`);
   }
   return esfuerzo;
+}
+
+function resolverEsfuerzo(agente) {
+  const c = leerConfig();
+  return esfuerzoEn(c, (c.agentes ?? {})[agente] ?? {}, agente);
+}
+
+// Revisor de kit run: kit_run.revisor de modelos.json, con la misma resolución que un agente.
+// Sin esa clave, el revisor es el agente principal, como antes. Devuelve { modelo, esfuerzo } sin traducir.
+function resolverRevisor(herramienta) {
+  const c = leerConfig();
+  const propio = c.kit_run?.revisor;
+  if (propio === undefined) {
+    const principal = (c.agentes ?? {}).principal ?? {};
+    return { modelo: modeloDe(c, principal, "principal", herramienta), esfuerzo: esfuerzoEn(c, principal, "principal") };
+  }
+  if (!esObjeto(propio)) fallar("'kit_run.revisor' no es un objeto");
+  return { modelo: modeloDe(c, propio, "kit_run.revisor", herramienta), esfuerzo: esfuerzoEn(c, propio, "kit_run.revisor") };
 }
 
 // Umbral de compactación de Codex del agente (agentes[agente].compactar_en ?? perfil.compactar_en ?? compactar_en),
@@ -719,6 +742,10 @@ if (orden === "modelo" && args.length === 2) {
 } else if (orden === "esfuerzo" && (args.length === 1 || (args.length === 2 && args[1] === "codex"))) {
   // Con 'codex' el esfuerzo sale traducido para Codex (max -> xhigh); sin herramienta, tal cual.
   process.stdout.write(esfuerzoDe(args[1], resolverEsfuerzo(args[0])) + "\n");
+} else if (orden === "revisor" && args.length === 1) {
+  // Dos líneas: modelo y esfuerzo del revisor de kit run (esfuerzo traducido para Codex; línea vacía si no declara).
+  const r = resolverRevisor(args[0]);
+  process.stdout.write(`${r.modelo}\n${esfuerzoDe(args[0], r.esfuerzo)}\n`);
 } else if (orden === "modelo-esfuerzo" && args.length === 2) {
   // Modelo con el esfuerzo como sufijo (modelo:esfuerzo), que acepta `pi --model`; sin esfuerzo, solo el modelo.
   const modelo = resolverModelo(args[0], args[1]);
@@ -867,5 +894,5 @@ if (orden === "modelo" && args.length === 2) {
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | esfuerzo <agente> [codex] | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--simular] | quitar-deny codex <rules>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | esfuerzo <agente> [codex] | revisor <herramienta> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--simular] | quitar-deny codex <rules>");
 }

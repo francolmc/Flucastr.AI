@@ -76,6 +76,10 @@ Primer mensaje: `Plan: <ruta>` y `Rama: <rama>` (por ejemplo `Plan: cambios/mi-c
 
 El agente `constructor` declara `timeoutMs: 3600000` (60 min); Pi lo respeta (probado: con 60 s el subagente se corta; con 3 600 000 completa) y Claude Code lo ignora. Sin él, Pi corta a los 30 minutos. Para que Pi avise antes de cortar, `~/.pi/agent/extensions/subagent/config.json` admite `checkpointBeforeDeadlineMs` (solo corridas asíncronas de un agente); el kit no instala ni edita ese archivo. Para iterar rápido, `VERIFY_RAPIDO=1 ./verify` construye con caché; la corrida final va sin la variable.
 
+## Revisor de kit run
+
+El revisor de `kit run` se configura en `modelos.json` con `kit_run.revisor` (`nivel` y `esfuerzo`, resueltos como los agentes). El repo lo deja en `medio`/`low`, igual que el agente `principal`; si la clave falta, el revisor es `principal`. Para probar Luna como revisor, cambia su `nivel` a `bajo`. No hay agente nuevo: `kit run` anota `revisor=<modelo>:<esfuerzo>` en *Notas* del plan. Solo Codex lo usa hoy.
+
 ## Estructura
 
 - `agentes/`: definiciones de `principal` y `constructor`.

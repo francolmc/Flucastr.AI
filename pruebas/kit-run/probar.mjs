@@ -145,6 +145,7 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false } = {}) {
     ...env,
   };
   delete entorno.KIT_RUN_TOPE_MS;
+  if (!env.FLUCASTR_MODELOS) delete entorno.FLUCASTR_MODELOS;
   if (codex) {
     delete entorno.KIT_RUN_CONSTRUCTOR;
     delete entorno.KIT_RUN_REVISOR;
@@ -288,6 +289,66 @@ caso("uso: plan en curso se rechaza sin cambiarlo", () => {
   assert.equal(r.status, 2);
   assert.equal(r.estado, "en curso");
   assert.equal(r.cuenta("constructor"), 0);
+});
+
+// Revisor configurable (kit_run.revisor de modelos.json): V2 a V5. Cada modelos.json temporal es una copia del del repo.
+const MODELOS_BASE = JSON.parse(readFileSync(fileURLToPath(new URL("../../modelos.json", import.meta.url)), "utf8"));
+function modelosTemporal(nombre, mutar) {
+  const c = structuredClone(MODELOS_BASE);
+  mutar(c);
+  const ruta = join(dir, nombre);
+  writeFileSync(ruta, JSON.stringify(c, null, 2));
+  return ruta;
+}
+// Modelo (-m) y esfuerzo (model_reasoning_effort) de una invocación del codex falso.
+function modeloYEsfuerzo(args) {
+  const m = args[args.indexOf("-m") + 1];
+  const e = args.find(a => a.startsWith("model_reasoning_effort=")).split("=")[1].replace(/"/g, "");
+  return { m, e };
+}
+
+// V2: con kit_run.revisor en nivel bajo, el revisor va con Luna low y el constructor no cambia.
+caso("V2 revisor con nivel bajo: Luna low; el constructor no cambia", () => {
+  const ruta = modelosTemporal("v2.json", c => { c.kit_run.revisor.nivel = "bajo"; });
+  const r = correr("v2", { codex: true, env: { FLUCASTR_MODELOS: ruta } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const rev = modeloYEsfuerzo(r.registro.find(x => x.rol === "revisor").args);
+  assert.deepEqual(rev, { m: "gpt-6-luna", e: "low" });
+  const base = correr("v2base", { codex: true });
+  const conBase = modeloYEsfuerzo(base.registro.find(x => x.rol === "constructor").args);
+  const con = modeloYEsfuerzo(r.registro.find(x => x.rol === "constructor").args);
+  assert.deepEqual(con, conBase);
+});
+
+// V3: sin kit_run, el revisor usa el modelo y el esfuerzo del principal (lo mismo que sin la clave en el repo).
+caso("V3 sin kit_run el revisor usa el modelo y esfuerzo del principal", () => {
+  const ruta = modelosTemporal("v3.json", c => { delete c.kit_run; });
+  const r = correr("v3", { codex: true, env: { FLUCASTR_MODELOS: ruta } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const base = correr("v3base", { codex: true });
+  const rev = modeloYEsfuerzo(r.registro.find(x => x.rol === "revisor").args);
+  const revBase = modeloYEsfuerzo(base.registro.find(x => x.rol === "revisor").args);
+  assert.deepEqual(rev, revBase);
+  assert.equal(rev.e, "low");
+});
+
+// V4: un nivel inválido sale con exit 2 antes de tocar el plan ni lanzar al constructor.
+caso("V4 nivel inválido en kit_run.revisor: exit 2 y plan intacto", () => {
+  const ruta = modelosTemporal("v4.json", c => { c.kit_run.revisor.nivel = "inexistente"; });
+  const r = correr("v4", { codex: true, env: { FLUCASTR_MODELOS: ruta } });
+  assert.equal(r.status, 2, r.stdout + r.stderr);
+  assert.match(r.stderr, /inexistente/);
+  assert.equal(r.cuenta("constructor"), 0);
+  assert.equal(r.plan, PLAN);
+});
+
+// V5: la nota del plan lleva revisor=<modelo>:<esfuerzo> del revisor que corrió.
+caso("V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>", () => {
+  const r = correr("v5", { codex: true });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const rev = modeloYEsfuerzo(r.registro.find(x => x.rol === "revisor").args);
+  assert.ok(r.plan.includes(`- kit run: revisión APROBADO`), r.plan);
+  assert.ok(r.plan.includes(`revisor=${rev.m}:${rev.e}`), r.plan);
 });
 
 let fallos = 0;
