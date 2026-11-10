@@ -13,7 +13,8 @@
 // Tarifas por defecto: scripts/tarifas.json (créditos por millón de tokens). Sin tarifa del modelo, creditos es null.
 // --desde por defecto: hace 7 días. Sin --json imprime tablas de texto.
 // --sesiones: diagnóstico por sesión de Claude Code, Codex y Pi (llamadas, esperas, contexto mediana y máximo, compactaciones,
-// créditos y sondeos). Sondeos: llamadas de shell con sleep, tail o watch. Claude Code no mide créditos ni sondeos (null).
+// créditos, sondeos, ediciones_fuera y corridas_verify). Sondeos: llamadas de shell con sleep, tail o watch. Claude Code no mide créditos ni sondeos (null).
+// ediciones_fuera: escrituras del principal a rutas que no son cambios/, AGENTS.md ni docs/proyecto.md. corridas_verify: llamadas a ./verify o npm run verify.
 // En Claude Code solo cuenta la sesión principal (un .jsonl por sesión); sus subagentes no suman en su fila.
 // --umbral (por defecto 70): si la cuota semanal o la ventana de 5 horas de Codex de la última sesión llega a ese %, aparece un aviso.
 
@@ -211,6 +212,60 @@ function esSondeo(nombre, args) {
   return cmd !== null && PATRON_SONDEO.test(cmd);
 }
 
+// Invasión del principal (--sesiones): una escritura fuera de cambios/, AGENTS.md y docs/proyecto.md es una edición fuera de lo permitido.
+// Ruta permitida: cualquiera bajo una carpeta cambios/, o el AGENTS.md o docs/proyecto.md del proyecto.
+function esPermitida(ruta) {
+  const r = String(ruta).replace(/\\/g, "/");
+  return /(^|\/)cambios\//.test(r) || /(^|\/)AGENTS\.md$/.test(r) || /(^|\/)docs\/proyecto\.md$/.test(r);
+}
+
+// Rutas que escribe un parche de apply_patch (Add, Update, Delete y Move to).
+function rutasDeParche(texto) {
+  const s = String(texto);
+  const rutas = [...s.matchAll(/^\*\*\* (?:Update|Add|Delete) File: (.+)$/gm)].map((m) => m[1].trim());
+  return rutas.concat([...s.matchAll(/^\*\*\* Move to: (.+)$/gm)].map((m) => m[1].trim()));
+}
+
+// Rutas que escribe un comando de shell: cat > y tee, y open(…, "w") o Path(…).write_text de un script de Python.
+function rutasDeShell(cmd) {
+  const s = String(cmd ?? "");
+  const rutas = [
+    ...[...s.matchAll(/\bcat\s*>>?\s*["']?([^\s"'<>|;&]+)/g)].map((m) => m[1]),
+    ...[...s.matchAll(/\btee\s+(?:-a\s+)?["']?([^\s"'<>|;&]+)/g)].map((m) => m[1]),
+    ...[...s.matchAll(/open\(\s*["']([^"']+)["']\s*,\s*["'][wax]/g)].map((m) => m[1]),
+    ...[...s.matchAll(/Path\(\s*["']([^"']+)["']\s*\)\.write_(?:text|bytes)/g)].map((m) => m[1]),
+  ];
+  return rutas.filter((r) => r !== "/dev/null");
+}
+
+// Llamada a ./verify o npm run verify, como comando completo o encadenado con ; && || o |.
+const PATRON_VERIFY = /(^|[\s;&|(])(\.\/verify|npm run verify)(?=$|[\s;&|)])/;
+function esVerify(cmd) {
+  return typeof cmd === "string" && PATRON_VERIFY.test(cmd);
+}
+
+// Argumentos de una llamada como objeto: Pi los trae como objeto; Codex, como texto JSON. Sin objeto válido, null.
+function argumentosDe(args) {
+  if (typeof args !== "string") return args && typeof args === "object" ? args : null;
+  try {
+    const o = JSON.parse(args);
+    return o && typeof o === "object" ? o : null;
+  } catch {
+    return null;
+  }
+}
+
+// Texto del parche de apply_patch: campo input (Codex) o arguments, que puede venir como JSON con input.
+function textoDePatch(p) {
+  const raw = p.input ?? p.arguments;
+  if (typeof raw !== "string") return "";
+  try {
+    const o = JSON.parse(raw);
+    if (o && typeof o.input === "string") return o.input;
+  } catch { /* texto plano */ }
+  return raw;
+}
+
 async function procesarClaude(ctx, raiz) {
   for (const ruta of listarJsonl(raiz, () => true)) {
     const partes = relative(raiz, ruta).split(sep);
@@ -219,16 +274,25 @@ async function procesarClaude(ctx, raiz) {
     const rol = partes.some((p) => p.startsWith("subagent")) ? "sub" : "main";
     const mensajes = [];
     const esperas = new Set();
+    const usosVistos = new Set();
+    let ediciones = 0;
+    let verifys = 0;
     let primerTs = null;
     try {
       await leerJsonl(ruta, (obj) => {
         if (primerTs === null && typeof obj.timestamp === "string") primerTs = obj.timestamp;
         const m = obj.message;
         if (!m || typeof m !== "object" || m.role !== "assistant") return;
-        // Esperas: bloques tool_use de espera, contados una vez por id (un mensaje se repite en varias líneas).
+        // Esperas, ediciones fuera de lo permitido y corridas de verify: bloques tool_use, contados una vez por id (un mensaje se repite en varias líneas).
         if (Array.isArray(m.content)) {
           m.content.forEach((b, i) => {
-            if (b && b.type === "tool_use" && ESPERAS_CLAUDE.has(b.name)) esperas.add(typeof b.id === "string" ? b.id : `${m.id}|${i}`);
+            if (!b || b.type !== "tool_use") return;
+            const id = typeof b.id === "string" ? b.id : `${m.id}|${i}`;
+            if (ESPERAS_CLAUDE.has(b.name)) esperas.add(id);
+            if (usosVistos.has(id)) return;
+            usosVistos.add(id);
+            if (HERRAMIENTAS_EDICION_CLAUDE.has(b.name) && b.input && typeof b.input.file_path === "string" && !esPermitida(b.input.file_path)) ediciones++;
+            if (b.name === "Bash" && esVerify(b.input?.command)) verifys++;
           });
         }
         if (!m.usage || typeof m.usage !== "object") return;
@@ -261,7 +325,8 @@ async function procesarClaude(ctx, raiz) {
       }
       ctx.sesiones.push({
         herramienta: "claude", fecha, proyecto, sesion: basename(ruta), modelo: mensajes.at(-1)?.modelo ?? "desconocido",
-        llamadas: contextos.length, esperas: esperas.size, creditos: null, sondeos: null, ...estadisticasContexto(contextos),
+        llamadas: contextos.length, esperas: esperas.size, creditos: null, sondeos: null, ediciones_fuera: ediciones, corridas_verify: verifys,
+        ...estadisticasContexto(contextos),
       });
     }
     for (const x of mensajes) {
@@ -285,6 +350,8 @@ async function procesarPi(ctx, raiz) {
     const limites = [];
     let esperas = 0;
     let sondeos = 0;
+    let ediciones = 0;
+    let verifys = 0;
     let primerTs = null;
     try {
       await leerJsonl(ruta, (obj) => {
@@ -300,6 +367,12 @@ async function procesarPi(ctx, raiz) {
           for (const b of m.content) {
             if (b && b.type === "toolCall" && typeof b.name === "string" && PATRON_ESPERA_PI.test(b.name)) esperas++;
             if (b && b.type === "toolCall" && typeof b.name === "string" && esSondeo(b.name, b.arguments)) sondeos++;
+            if (b && b.type === "toolCall" && (b.name === "edit" || b.name === "write")) {
+              const a = argumentosDe(b.arguments);
+              const f = a?.path ?? a?.file_path;
+              if (typeof f === "string" && !esPermitida(f)) ediciones++;
+            }
+            if (b && b.type === "toolCall" && b.name === "bash" && esVerify(comandoDe(b.arguments))) verifys++;
           }
         }
         const u = m.usage;
@@ -323,7 +396,7 @@ async function procesarPi(ctx, raiz) {
       const modelo = mensajes.at(-1)?.modelo ?? "desconocido";
       ctx.sesiones.push({
         herramienta: "pi", fecha, proyecto, sesion: basename(ruta), modelo,
-        llamadas: mensajes.length, esperas, sondeos,
+        llamadas: mensajes.length, esperas, sondeos, ediciones_fuera: ediciones, corridas_verify: verifys,
         creditos: creditosSesion(ctx.tarifas, modelo, sumarTokens(mensajes)),
         ...estadisticasContexto(mensajes.map((x) => x.contexto)),
       });
@@ -345,6 +418,8 @@ const MUESTRA_MINIMA = 5;
 const ESPERAS = new Set(["wait_agent", "wait", "sleep", "send_message"]);
 // Llamadas de Claude Code que esperan (TaskOutput, Sleep, Monitor, SendMessage) y nombre de herramienta de Pi que espera.
 const ESPERAS_CLAUDE = new Set(["TaskOutput", "Sleep", "Monitor", "SendMessage"]);
+// Herramientas de Claude Code que escriben un archivo por file_path.
+const HERRAMIENTAS_EDICION_CLAUDE = new Set(["Edit", "Write"]);
 const PATRON_ESPERA_PI = /wait|sleep|send/i;
 
 // Diagnóstico de una sesión de Codex a partir del contexto (input de la última llamada de cada evento).
@@ -382,6 +457,8 @@ async function procesarCodex(ctx, raiz) {
     let llamadas = 0;
     let esperas = 0;
     let sondeos = 0;
+    let ediciones = 0;
+    let verifys = 0;
     const contextos = [];
     let cuotaInicial = null;
     let cuotaFinal = null;
@@ -398,6 +475,15 @@ async function procesarCodex(ctx, raiz) {
         if (obj.type === "turn_context" && typeof p.model === "string") modelo = p.model;
         if (obj.type === "response_item" && p.type === "function_call" && ESPERAS.has(p.name)) esperas++;
         if (obj.type === "response_item" && p.type === "function_call" && esSondeo(p.name, p.arguments)) sondeos++;
+        // Ediciones fuera de lo permitido: apply_patch y escrituras de shell (cat >, tee, open(…, "w") y write_text).
+        if (obj.type === "response_item" && (p.type === "custom_tool_call" || p.type === "function_call") && p.name === "apply_patch") {
+          ediciones += rutasDeParche(textoDePatch(p)).filter((r) => !esPermitida(r)).length;
+        }
+        if (obj.type === "response_item" && p.type === "function_call" && (p.name === "exec_command" || p.name === "shell")) {
+          const cmd = comandoDe(p.arguments);
+          ediciones += rutasDeShell(cmd).filter((r) => !esPermitida(r)).length;
+          if (esVerify(cmd)) verifys++;
+        }
         if (p.type !== "token_count") return;
         const usado = p.rate_limits?.secondary?.used_percent;
         if (typeof usado === "number" && Number.isFinite(usado)) {
@@ -427,6 +513,8 @@ async function procesarCodex(ctx, raiz) {
       llamadas,
       esperas,
       sondeos,
+      ediciones,
+      verifys,
       contextos,
       total,
       cuotaInicial,
@@ -467,7 +555,8 @@ async function procesarCodex(ctx, raiz) {
       } : null;
       ctx.sesiones.push({
         herramienta: "codex", fecha: s.fecha, proyecto: s.proyecto, sesion: basename(s.ruta), modelo: s.modelo,
-        llamadas: s.llamadas, esperas: s.esperas, sondeos: s.sondeos, creditos: creditosSesion(ctx.tarifas, s.modelo, t),
+        llamadas: s.llamadas, esperas: s.esperas, sondeos: s.sondeos, ediciones_fuera: s.ediciones, corridas_verify: s.verifys,
+        creditos: creditosSesion(ctx.tarifas, s.modelo, t),
         ...estadisticasContexto(s.contextos),
       });
     }
@@ -510,7 +599,7 @@ function tabla(columnas, filas) {
   return celdas.map((r) => r.map((v, i) => v.padEnd(anchos[i])).join("  ").trimEnd());
 }
 
-const COLUMNAS_SESIONES = ["herramienta", "fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones", "creditos", "sondeos"];
+const COLUMNAS_SESIONES = ["herramienta", "fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones", "creditos", "sondeos", "ediciones_fuera", "corridas_verify"];
 
 function imprimirSesiones(sesiones, avisos, desde) {
   if (sesiones.length === 0) {

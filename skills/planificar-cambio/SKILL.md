@@ -24,6 +24,7 @@ base: <rama>   # opcional; sin ella, la principal del remoto
 repos: [<carpeta>, ...]
 ejecutor: constructor   # principal solo si Franco lo pidió
 tramo: 1   # solo en planes por tramos: el tramo que ejecuta el constructor (regla 11)
+tipo: codigo   # docs si el cambio solo toca documentos (regla 12)
 ---
 # <Cambio>
 
@@ -91,6 +92,7 @@ Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `esta
 9. **Duración en los pasos pesados.** Un paso que lanza un build, una instalación o una suite lleva su duración estimada entre paréntesis, p. ej. «(≈8 min)». Si la suma pasa de unos 20 minutos, parte el plan en tramos, cada uno con su verificación parcial. Los pasos intermedios usan `VERIFY_RAPIDO=1 ./verify` (build con caché); «sin caché» solo en la corrida final de aceptación.
 10. **Base (`base:`).** Rama base de una carpeta de `repos:`: la de `base:` del plan; sin `base:`, la de `git symbolic-ref --short refs/remotes/origin/HEAD`; sin remoto, `main` o `master`. `base:` es un nombre (vale para todas las carpetas de `repos:`) o un mapa `{carpeta: rama}` si en un workspace varían. El principal copia `base:` desde la línea «Rama base» del `AGENTS.md` del proyecto, si la hay.
 11. **Tramos.** Si el cambio pasa de ≈6 pasos o ≈20 min estimados, se escribe en tramos. Cada tramo es un `### Tramo N` dentro de `## Pasos`, con: el resultado observable al terminarlo; los archivos que toca; sus pasos, cada uno con su A# entre paréntesis; una línea `Verificación del tramo:` con un comando que corre desde cero; y las A# que cubre. Si el entorno no está comprobado, el primer tramo es solo entorno (instalar, levantar, reproducir), sin cambiar código. La evidencia y las capturas van en el último tramo. El plan lleva `tramo: 1`; el principal sube `tramo:` al lanzar cada siguiente tramo. Cada A# se comprueba por el recorrido real (el entrypoint productivo, no una función suelta): un arnés propio solo vale si monta la misma composición que producción. Los tramos posteriores se ajustan tras ver el estado real del anterior. Si el plan pasa de 3 tramos o de ≈8 KB, cada tramo va en su propio archivo `tramo-N.md` en la misma carpeta (con sus pasos, su `Verificación del tramo:` y su evidencia), y `plan.md` queda como índice corto: frontmatter, Objetivo, Alcance, Decisiones, Aceptación, Verificación, y una lista de tramos con su estado (pendiente, en curso, listo). El constructor lee `plan.md` y solo `tramo-<n>.md`, no los demás tramos. Al cerrar cada tramo, el principal deja en *Notas* del `plan.md` un resumen de 5 líneas (qué quedó, qué sigue) y pide a Franco compactar (`/compact`) o abrir sesión nueva con `Plan: <ruta>`, para no arrastrar el contexto del tramo anterior. Una decisión que se resuelve durante el cambio se escribe en *Decisiones ya tomadas* como `Resuelto: <fecha> <decisión>`, para que el constructor no la vuelva a pedir.
+12. **Tipo.** `tipo: docs` solo si el cambio toca archivos `*.md` o `docs/`. Su *Verificación* es liviana, sin build ni Docker: `git diff --check` más comprobar que existen las rutas y los comandos que el documento cita (`test -f`, `rg`). Sin `tipo:`, es `codigo`.
 
 ## Antes de pedir la aprobación
 

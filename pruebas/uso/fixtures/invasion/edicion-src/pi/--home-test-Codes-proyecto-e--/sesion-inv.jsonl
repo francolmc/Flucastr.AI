@@ -1,0 +1,3 @@
+{"type":"session","timestamp":"2026-11-08T10:00:00.000Z"}
+{"type":"message","timestamp":"2026-11-08T10:00:05.000Z","message":{"role":"assistant","model":"modelo-pi-inv","content":[{"type":"toolCall","id":"pc_2","name":"edit","arguments":{"path":"src/app.ts","oldText":"a","newText":"b"}}],"usage":{"input":100,"output":20,"cacheRead":0,"cacheWrite":0}}}
+{"type":"message","timestamp":"2026-11-08T10:00:09.000Z","message":{"role":"assistant","model":"modelo-pi-inv","content":[{"type":"toolCall","id":"pc_3","name":"bash","arguments":{"command":"./verify"}}],"usage":{"input":120,"output":10,"cacheRead":0,"cacheWrite":0}}}

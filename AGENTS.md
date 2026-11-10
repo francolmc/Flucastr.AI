@@ -4,7 +4,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code, Pi y Codex
 
 ## Cómo funciona (v2)
 
-- Dos agentes: `principal` (nivel medio con esfuerzo `low`: investiga, diagnostica, planifica, verifica) y `constructor` (nivel bajo, esfuerzo `medium`: aplica el plan). Los niveles se traducen a modelos en `modelos.json`. El principal no rinde en nivel bajo (probado 2026-11-09): se queda en medio y se ahorra con el esfuerzo.
+- Dos agentes: `principal` (nivel medio con esfuerzo `low`: investiga, planifica y revisa; no edita el producto) y `constructor` (nivel bajo, esfuerzo `medium`: ejecuta toda edición del plan). Los niveles se traducen a modelos en `modelos.json`. El principal no rinde en nivel bajo (probado 2026-11-09): se queda en medio y se ahorra con el esfuerzo.
 - El esfuerzo (qué tanto razona el modelo) se declara por agente en `modelos.json` y se traduce a `effort` (Claude Code), `thinking` (Pi) o `model_reasoning_effort` (Codex, donde `max` se escribe como `xhigh`).
 - Traspaso: solo `cambios/<nombre>/plan.md`, con `## Aceptación` (README, «Qué es»).
 - Ejecutor: el `ejecutor:` del plan; el constructor ejecuta siempre y el principal solo si Franco lo pide (`planificar-cambio`, regla 7).

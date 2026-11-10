@@ -73,3 +73,20 @@ Franco aprueba cualquier cambio en `modelos.json` (tramo 3).
 - Regla de trabajo: en las sesiones de Codex de 8 y 9 de noviembre, unos 1,2 créditos equivalían a un punto de la ventana de 5 horas. Las esperas (`wait_agent` con 10 a 60 s y bucles de `tail` y `sleep`) fueron alrededor de 46 % de los créditos del principal y 31 % de las llamadas de `luna`, según el registro de esa fecha.
 - Antes y después: el antes es ese registro. El después se mide con el mismo medidor en sesiones nuevas, comparando `creditos` y `sondeos` por sesión; hasta que haya esas sesiones, no hay cifra de ahorro. No se estima sin datos.
 - Límite: la tabla de tarifas y la regla de 1,2 créditos por punto son una lectura del registro local; no es facturación.
+
+## Invasión del principal
+
+El principal editaba el producto, probaba y depuraba entornos en vez de revisar. `node scripts/uso.mjs --sesiones` mide por sesión principal dos columnas nuevas:
+
+- `ediciones_fuera`: escrituras del principal a rutas que no son `cambios/`, `AGENTS.md` ni `docs/proyecto.md`. En Codex cuentan `apply_patch` y las escrituras de shell (`cat >`, `tee`, `open(…, "w")`); en Claude Code, `Edit` y `Write`; en Pi, `edit` y `write`.
+- `corridas_verify`: llamadas a `./verify` o `npm run verify`.
+
+Las sesiones de subagente (el constructor) no cuentan. Los fixtures de `pruebas/uso/fixtures/invasion/` fijan los casos: sin escrituras (0 y 0), escritura en `src/` con `./verify` (1 y 1; el subagente no suma) y escritura en `cambios/` (0 y 0).
+
+Línea base (9 nov, README de Memory-AI): el principal gastó 10 créditos frente a 0,7 del constructor en el mismo cambio, con 58 llamadas. Editó tres veces pruebas del producto (`test/pi-context.test.ts` y `test/memory-actions.test.ts`) en dos sesiones, y corrió `./verify` con Docker para un cambio de documentos.
+
+Después (vacío hasta tener sesiones nuevas con el principal nuevo):
+
+| sesión | ediciones_fuera | corridas_verify | llamadas tras el retorno | créditos del principal ÷ créditos del constructor |
+| --- | --- | --- | --- | --- |
+| pendiente | | | no medible aún: el medidor no separa las llamadas posteriores al retorno | |

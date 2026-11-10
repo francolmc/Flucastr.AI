@@ -1,0 +1,2 @@
+{"type":"user","timestamp":"2026-11-08T10:00:00.000Z","message":{"role":"user","content":"lee el plan"}}
+{"type":"assistant","timestamp":"2026-11-08T10:00:05.000Z","requestId":"req_inv_1","message":{"id":"msg_inv_1","role":"assistant","model":"claude-sonnet-fixture-inv","content":[{"type":"tool_use","id":"tu_inv_1","name":"Read","input":{"file_path":"/home/test/Codes/proyecto-e/src/app.ts"}}],"usage":{"input_tokens":100,"output_tokens":20,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}}
