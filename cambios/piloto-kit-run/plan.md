@@ -29,3 +29,4 @@ Plan de documentos chico, hecho para medir A4 de `cambios/kit-run/plan.md` con `
 ## Verificación
 `./verify`
 - kit run: PAUSA (acceso): PAUSA: plan=cambios/piloto-kit-run/plan.md; motivo=acceso; hecho=0/1; siguiente=aprobar el plan cambiando `estado: en curso` a `estado: aprobado`; no_intentado=la skill `ejecutar-plan` exige detenerse si el plan no está aprobado.
+- kit run: PAUSA (acceso): PAUSA: plan=cambios/piloto-kit-run/plan.md; motivo=acceso; hecho=0/1; siguiente=aprobar el plan cambiando `estado: en curso` a `estado: aprobado`; no_intentado=la skill `ejecutar-plan` exige detenerse si el plan no está aprobado.
