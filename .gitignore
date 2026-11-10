@@ -2,4 +2,5 @@
 pruebas/*
 !pruebas/uso/
 !pruebas/kit-run/
+!pruebas/revisor-luna/
 !pruebas/contrato-constructor.mjs

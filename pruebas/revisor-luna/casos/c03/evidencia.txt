@@ -1,0 +1,5 @@
+$ node --test tests/calc.test.mjs
+# tests 1
+# pass 1
+# fail 0
+exit 0

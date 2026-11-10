@@ -1,0 +1,19 @@
+--- a/src/calc.mjs
++++ b/src/calc.mjs
+@@ -4,3 +4,9 @@ export function promedio(valores) {
+   return valores.reduce((a, b) => a + b, 0) / valores.length;
+ }
++
++export function dividir(a, b) {
++  if (b === 0) return null;
++  return a / b;
++}
+--- /dev/null
++++ b/tests/calc.test.mjs
+@@ -0,0 +1,8 @@
++import { test } from "node:test";
++import assert from "node:assert/strict";
++import { dividir } from "../src/calc.mjs";
++
++test("dividir 6 entre 3", () => assert.equal(dividir(6, 3), 2));
++test("dividir entre 0 devuelve null", () => assert.equal(dividir(5, 0), null));

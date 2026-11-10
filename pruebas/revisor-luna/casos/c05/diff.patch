@@ -1,0 +1,17 @@
+--- /dev/null
++++ b/src/pedidos/listar.mjs
+@@ -0,0 +1,7 @@
++export async function listarPorEstado(repo, estado, pagina) {
++  const desde = (pagina - 1) * 20;
++  const todos = await repo.todos();
++  return todos.filter((p) => p.estado === estado).slice(desde, desde + 20);
++}
+--- a/package.json
++++ b/package.json
+@@ -10,6 +10,7 @@
+   "dependencies": {
+-    "express": "^4.19.2"
++    "express": "^4.19.2",
++    "lodash": "^4.17.21"
+   }
+ }

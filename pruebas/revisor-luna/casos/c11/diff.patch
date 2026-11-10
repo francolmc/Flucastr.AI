@@ -1,0 +1,15 @@
+--- a/src/calc.mjs
++++ b/src/calc.mjs
+@@ -4,3 +4,7 @@ export function promedio(valores) {
+   return valores.reduce((a, b) => a + b, 0) / valores.length;
+ }
++
++export function limitar(valor, min, max) {
++  return Math.min(Math.max(valor, min), max);
++}
+--- a/tests/calc.test.mjs
++++ b/tests/calc.test.mjs
+@@ -4,3 +4,5 @@ import { promedio } from "../src/calc.mjs";
+ test("promedio de 2 y 4 es 3", () => assert.equal(promedio([2, 4]), 3));
++
++test("limitar acota al rango", () => assert.equal(limitar(15, 0, 10), 10));
