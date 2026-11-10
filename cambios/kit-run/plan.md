@@ -75,7 +75,8 @@ Archivos: `scripts/kit-run.mjs`, `instalar.sh`, `docs/evaluaciones/costos.md`.
   - evidencia: `scripts/kit-run.mjs` (comando: `exec --sandbox … -m <modelo> -c model_reasoning_effort=… -C <raiz> [--output-schema <f>] -`; TOPE_MS y `correr(…, tope)` con `spawnSync timeout`; preflight en main); casos C1 y C2 en `pruebas/kit-run/probar.mjs`, con `codex` falso en el PATH, exit 0. Sin `codex` real.
 - [x] Lanzador `kit-run` generado por `instalar.sh` (A4)
   - evidencia: `instalar.sh` (`generar_lanzador_kit_run`, llamada en el bloque de Codex); con `HOME` y `CODEX_HOME` temporales, `bash instalar.sh --solo codex` generó `kit-run` con la marca `flucastr-ai:generado` y `exec node "$RAIZ/scripts/kit-run.mjs" "$@"`; `kit-run` sin argumentos sale con exit 2 y uso; `desinstalar.sh` lo borra. `~/.local/bin` no se tocó.
-- [ ] Piloto con un plan de documentos real y medición con `uso.mjs` (A4)
+- [x] Piloto con un plan de documentos real y medición con `uso.mjs` (A4)
+  - evidencia: ciclo completo con Codex real (APROBADO tras 2 corridas); **A4 no cumplido**: créditos principal 2,6292 vs constructor 0,3966 (≈6,6 > 3); ediciones del principal 0. Detalle en `docs/evaluaciones/costos.md` (plan `cambios/anotar-a4/plan.md`). El tramo 3 queda en espera.
 
 Verificación del tramo: `./verify`; A4 se anota en `docs/evaluaciones/costos.md`.
 

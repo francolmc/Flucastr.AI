@@ -90,3 +90,26 @@ Después (vacío hasta tener sesiones nuevas con el principal nuevo):
 | sesión | ediciones_fuera | corridas_verify | llamadas tras el retorno | créditos del principal ÷ créditos del constructor |
 | --- | --- | --- | --- | --- |
 | pendiente | | | no medible aún: el medidor no separa las llamadas posteriores al retorno | |
+
+## kit run: piloto A4
+
+Resultado: A4 no cumplido. El criterio pedía que el principal costara menos de 3 veces el constructor en el mismo cambio; no se cumple.
+
+Datos (`node scripts/uso.mjs --sesiones`, 10 nov, Codex, plan `cambios/piloto-kit-run/plan.md`):
+
+| rol | modelo | corridas | créditos |
+| --- | --- | --- | --- |
+| principal | `gpt-6.1-sol` | 2 revisiones (1,3784 + 1,2508) | 2,6292 |
+| constructor | `gpt-6-luna` | 2 corridas (0,2264 + 0,1702) | 0,3966 |
+
+- Razón principal ÷ constructor: 2,6292 ÷ 0,3966 ≈ 6,6. El umbral era 3.
+- Ediciones y sondeos del principal: 0.
+- Lectura: el costo fijo de cada revisión de `sol` (≈1,3 créditos) pesa más que el del constructor en un cambio de docs chico. No se sabe si la razón baja con un cambio de código mayor; no se afirma.
+
+Hallazgos del piloto:
+
+- Dos PAUSA iniciales de `kit run` dejaron el plan en `en curso`. Corregido en #67.
+- Una PAUSA de alcance por base atrasada.
+- `./verify` dentro del sandbox del constructor falla con `spawnSync bash EPERM`. Sin corregir.
+
+Siguiente paso: medir un cambio de código mayor antes del tramo 3 de `cambios/kit-run/plan.md`.
