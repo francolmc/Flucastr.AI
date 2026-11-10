@@ -12,7 +12,8 @@
 // KIT_RUN_VERIFY (rutas de ejecutable). Con ellas el script llama a esa ruta con los mismos argumentos y el prompt por stdin.
 // Sin ellas, herramienta codex usa `codex exec`; claude y pi se mapean en el tramo 3 y hasta entonces salen con error.
 // Mapeo codex: constructor con `--sandbox workspace-write`; revisor (agente principal) con `--sandbox read-only` y
-// `--output-schema`. Modelo y esfuerzo salen de modelos.json (resolver.mjs). Cada corrida tiene tope de tiempo:
+// `--output-schema`. Modelo y esfuerzo salen de modelos.json (resolver.mjs): el constructor de su agente y el
+// revisor de kit_run.revisor (sin esa clave, el de principal). Cada corrida tiene tope de tiempo:
 // constructor 45 min, revisor 15 min, verify 30 min; KIT_RUN_TOPE_MS lo fija en ms para todas (pruebas).
 
 import { spawnSync } from "node:child_process";
@@ -120,8 +121,23 @@ function resolverAgente(subcomando, agente) {
   return r.stdout.trim();
 }
 
+// Modelo y esfuerzo del revisor de kit run (resolver.mjs revisor): kit_run.revisor de modelos.json, o el de principal.
+function resolverRevisorKit(herramienta) {
+  const r = spawnSync(process.execPath, [join(RAIZ_KIT, "scripts", "resolver.mjs"), "revisor", herramienta], { encoding: "utf8" });
+  if (r.status !== 0) throw new Error(`resolver revisor ${herramienta} falló: ${r.stderr.trim()}`);
+  const [modelo, esfuerzo = ""] = r.stdout.split("\n");
+  return { modelo, esfuerzo };
+}
+
+// Rastro del revisor para la nota del plan: modelo:esfuerzo (o solo el modelo). claude y pi usan su perfil.
+const HERRAMIENTA_RESOLVER = { codex: "codex", claude: "claude-code", pi: "pi" };
+function etiquetaRevisor(herramienta) {
+  const { modelo, esfuerzo } = resolverRevisorKit(HERRAMIENTA_RESOLVER[herramienta]);
+  return esfuerzo ? `${modelo}:${esfuerzo}` : modelo;
+}
+
 // Comando de un rol. Con KIT_RUN_<ROL> el ejecutable cambia y los argumentos son los del mapeo sin modelo;
-// sin él, herramienta codex usa `codex exec` con el modelo y el esfuerzo del agente (constructor o principal).
+// sin él, herramienta codex usa `codex exec` con el modelo y el esfuerzo de cada rol.
 function comando(rol, herramienta, raiz, schema) {
   const constructor = rol === "CONSTRUCTOR";
   const sandbox = constructor ? "workspace-write" : "read-only";
@@ -131,9 +147,9 @@ function comando(rol, herramienta, raiz, schema) {
   if (herramienta !== "codex") {
     throw new Error(`herramienta «${herramienta}» aún sin mapear (tramo 3); define KIT_RUN_${rol}`);
   }
-  const agente = constructor ? "constructor" : "principal";
-  const modelo = resolverAgente("modelo", agente);
-  const esfuerzo = resolverAgente("esfuerzo", agente);
+  const { modelo, esfuerzo } = constructor
+    ? { modelo: resolverAgente("modelo", "constructor"), esfuerzo: resolverAgente("esfuerzo", "constructor") }
+    : resolverRevisorKit("codex");
   const cfg = esfuerzo ? ["-c", `model_reasoning_effort="${esfuerzo}"`] : [];
   return { exe: "codex", args: ["exec", "--sandbox", sandbox, "-m", modelo, ...cfg, "-C", raiz, ...fin, "-"] };
 }
@@ -243,10 +259,12 @@ function main() {
   const pieza = tramo ? `tramo=${tramo}; ` : "";
   const veredictoOut = (linea) => console.log(linea);
 
-  // Preflight: si el mapeo no se puede resolver (p. ej. modelos.json sin el agente), sale antes de tocar el plan.
+  // Preflight: si el mapeo no se puede resolver (p. ej. modelos.json sin el agente o un nivel inválido), sale antes de tocar el plan.
+  let revisor;
   try {
     comando("CONSTRUCTOR", a.herramienta, raiz, "");
     comando("REVISOR", a.herramienta, raiz, "");
+    revisor = etiquetaRevisor(a.herramienta);
   } catch (e) {
     uso(e.message);
   }
@@ -316,12 +334,12 @@ function main() {
   const { hechos, total } = progreso(planPath);
   if (final.aprobado) {
     fijarEstado(planPath, "listo");
-    anotarNotas(planPath, `revisión APROBADO tras ${relanzamientos + 1} corrida(s) del constructor; verify pasó.`);
+    anotarNotas(planPath, `revisión APROBADO tras ${relanzamientos + 1} corrida(s) del constructor; verify pasó; revisor=${revisor}.`);
     veredictoOut(`COMPLETADO: plan=${planRel}; ${pieza}verify=pasa`);
     process.exit(0);
   }
   fijarEstado(planPath, "parcial");
-  anotarNotas(planPath, `PAUSA (${final.motivo}): ${final.msg.replace(/\n/g, " ").slice(0, 600)}`);
+  anotarNotas(planPath, `PAUSA (${final.motivo}): ${final.msg.replace(/\n/g, " ").slice(0, 600)}; revisor=${revisor}.`);
   veredictoOut(`PAUSA: plan=${planRel}; ${pieza}motivo=${final.motivo}; hecho=${hechos}/${total}; siguiente=revisar la nota de kit run en el plan; no_intentado=${final.msg.replace(/\n/g, " ").slice(0, 300)}`);
   process.exit(1);
 }

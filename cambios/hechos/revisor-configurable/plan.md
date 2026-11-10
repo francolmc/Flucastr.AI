@@ -1,5 +1,5 @@
 ---
-estado: borrador
+estado: listo
 rama: feature/revisor-configurable
 base: main
 repos: [.]
@@ -35,9 +35,36 @@ Que el modelo y el esfuerzo del revisor de `kit run` se cambien con una línea d
 `node pruebas/kit-run/probar.mjs && ./verify`
 
 ## Pasos
-- [ ] `scripts/resolver.mjs`: subcomando `modelo-kit-run revisor <herramienta>` y `esfuerzo-kit-run revisor <herramienta>` (o uno solo que imprima `modelo:esfuerzo`), con validación y respaldo; si falta la clave, resolver como el agente `principal` (V1, V3, V4).
-- [ ] `modelos.json`: añadir `kit_run.revisor` con `medio`/`low` y documentarlo en `_leeme` (V1).
-- [ ] `scripts/kit-run.mjs`: el revisor usa el subcomando nuevo (el constructor sigue con `constructor`); el preflight valida antes de tocar el plan; la nota final incluye `revisor=<modelo>:<esfuerzo>` (V2, V4, V5).
-- [ ] `pruebas/kit-run/probar.mjs`: casos V2 a V5 con `codex` falso y `modelos.json` temporales (V2–V5).
-- [ ] `README.md` y `AGENTS.md`: cómo cambiar el revisor a Luna (una línea de `modelos.json`) y que no hay agente nuevo (V6).
-- [ ] `./verify` (V1–V6).
+- [x] `scripts/resolver.mjs`: subcomando `revisor <herramienta>` (dos líneas: modelo y esfuerzo, esfuerzo traducido para codex) sobre `resolverRevisor`, que lee `kit_run.revisor` o, si falta, el agente `principal`; validación con `modeloDe` y `esfuerzoEn` (V1, V3, V4).
+  - evidencia: `node scripts/resolver.mjs revisor codex` imprime `gpt-6.1-sol` y `low`, exit 0; `node scripts/resolver.mjs modelo principal codex` imprime `gpt-6.1-sol`, sin cambios.
+- [x] `modelos.json`: añadir `kit_run.revisor` con `medio`/`low` y documentarlo en `_leeme` (V1).
+  - evidencia: `modelos.json` (clave `kit_run.revisor` y frase en `_leeme`); `JSON.parse` sin error.
+- [x] `scripts/kit-run.mjs`: el revisor usa `resolverRevisorKit` (el constructor sigue con `constructor`); el preflight valida antes de tocar el plan; la nota final incluye `revisor=<modelo>:<esfuerzo>` (V2, V4, V5).
+  - evidencia: `scripts/kit-run.mjs` (`resolverRevisorKit`, `etiquetaRevisor`, preflight con `revisor`, notas APROBADO y PAUSA); `node pruebas/kit-run/probar.mjs` casos V2 a V5 ok.
+- [x] `pruebas/kit-run/probar.mjs`: casos V2 a V5 con `codex` falso y `modelos.json` temporales (V2–V5).
+  - evidencia: `node pruebas/kit-run/probar.mjs`, exit 0: «kit-run: 17 casos pasaron» (13 previos y V2, V3, V4, V5).
+- [x] `README.md` y `AGENTS.md`: cómo cambiar el revisor a Luna (una línea de `modelos.json`) y que no hay agente nuevo (V6).
+  - evidencia: `README.md`, sección «Revisor de kit run» (un párrafo); `AGENTS.md`, una viñeta en «Cómo funciona (v2)».
+- [x] `./verify` (V1–V6).
+  - evidencia: `node pruebas/kit-run/probar.mjs && ./verify`, exit 0; `./verify` termina con «VERIFY OK».
+
+## Evidencia
+
+$ node pruebas/kit-run/probar.mjs && ./verify
+```
+ok V2 revisor con nivel bajo: Luna low; el constructor no cambia
+ok V3 sin kit_run el revisor usa el modelo y esfuerzo del principal
+ok V4 nivel inválido en kit_run.revisor: exit 2 y plan intacto
+ok V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>
+kit-run: 17 casos pasaron
+...
+ok 13: pruebas de kit run pasaron con los CLIs simulados
+VERIFY OK
+```
+exit 0
+
+## Notas
+- Nombre del subcomando: `revisor <herramienta>` imprime dos líneas (modelo y esfuerzo) en vez de `modelo-kit-run`/`esfuerzo-kit-run`; el plan lo dejaba abierto.
+- La nota de `kit run` incluye `revisor=<modelo>:<esfuerzo>` también en PAUSA, no solo en APROBADO; así se compara en los dos casos.
+- `pruebas/kit-run/probar.mjs` borra `FLUCASTR_MODELOS` del entorno salvo que el caso lo fije, para que un valor externo no cambie los casos.
+- Claude y Pi: la clave se acepta y se rastrea en la nota con su perfil, pero el revisor de esas herramientas sigue sin mapear (tramo 3 de `cambios/kit-run/plan.md`).
