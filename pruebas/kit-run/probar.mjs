@@ -50,7 +50,15 @@ const FALSOS = {
   "constructor.mjs": `${CABECERA}${REGISTRO}
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-anotar("constructor");
+// Como ejecutar-plan (paso 1): solo arranca con estado aprobado; lo pasa a en curso al empezar.
+const planPath = join(process.cwd(), "cambios/prueba/plan.md");
+const estado = readFileSync(planPath, "utf8").match(/^estado: (.*)$/m)[1];
+anotar("constructor", { estado });
+if (estado !== "aprobado") {
+  console.log("PAUSA: plan=cambios/prueba/plan.md; tramo=1; motivo=ambiguo; hecho=0/1; siguiente=arrancar con el plan aprobado; no_intentado=el plan llegó con estado " + estado);
+  process.exit(0);
+}
+writeFileSync(planPath, readFileSync(planPath, "utf8").replace(/^estado: .*$/m, "estado: en curso"));
 writeFileSync(join(process.cwd(), "creado.txt"), "hecho\\n");
 console.log("COMPLETADO: plan=cambios/prueba/plan.md; tramo=1; verify=pasa");
 `,
@@ -264,6 +272,14 @@ caso("C2 tope de tiempo: el constructor que no termina se corta, parcial sin rel
   assert.match(r.stdout, /superó el tope de 500 ms/);
   assert.equal(r.cuenta("constructor"), 1, "el tope no relanza");
   assert.equal(r.estado, "parcial");
+});
+
+// A6: el constructor falso ve «aprobado» al arrancar en las 3 corridas (verify falla siempre).
+caso("A6 el constructor ve aprobado al arrancar en las 3 corridas", () => {
+  const r = correr("a6", { env: { FAKE_VERIFY_FALLA: "1" } });
+  assert.equal(r.cuenta("constructor"), 3, r.stdout);
+  const estados = r.registro.filter(x => x.rol === "constructor").map(x => x.estado);
+  assert.deepEqual(estados, ["aprobado", "aprobado", "aprobado"], r.stdout);
 });
 
 // Uso: un plan que no está aprobado no se toca.
