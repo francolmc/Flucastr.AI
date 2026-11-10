@@ -251,7 +251,6 @@ function main() {
     uso(e.message);
   }
 
-  fijarEstado(planPath, "en curso");
   const dir = mkdtempSync(join(tmpdir(), "kit-run-"));
   const schemaPath = join(dir, "veredicto.schema.json");
   writeFileSync(schemaPath, JSON.stringify(ESQUEMA_VEREDICTO));
@@ -262,6 +261,8 @@ function main() {
 
   try {
     for (;;) {
+      // El constructor (ejecutar-plan, paso 3) pone «en curso» al empezar; cada corrida, relanzamientos incluidos, arranca con «aprobado».
+      fijarEstado(planPath, "aprobado");
       console.error(`kit-run: constructor (corrida ${relanzamientos + 1})`);
       const c = correr(comando("CONSTRUCTOR", a.herramienta, raiz), prompt, raiz, false, topeMs("CONSTRUCTOR"));
       const primera = c.stdout.trim().split("\n")[0] ?? "";
