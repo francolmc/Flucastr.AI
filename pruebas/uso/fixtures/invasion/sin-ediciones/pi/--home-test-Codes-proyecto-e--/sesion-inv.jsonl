@@ -1,0 +1,2 @@
+{"type":"session","timestamp":"2026-11-08T10:00:00.000Z"}
+{"type":"message","timestamp":"2026-11-08T10:00:05.000Z","message":{"role":"assistant","model":"modelo-pi-inv","content":[{"type":"toolCall","id":"pc_1","name":"read","arguments":{"path":"src/app.ts"}}],"usage":{"input":100,"output":20,"cacheRead":0,"cacheWrite":0}}}

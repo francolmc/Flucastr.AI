@@ -21,6 +21,8 @@ Entrada: la ruta del plan.
 
 Git, estados y retorno: ver *Límites* y *Retorno* del constructor.
 
+Con `tipo: docs`, al terminar confirma con `git diff --name-only <base>` que solo cambiaron `*.md` o `docs/`; si cambió otra cosa, `PAUSA` con `motivo=alcance`.
+
 ## Tramo
 
 Si el plan trae `tramo: <n>` en el frontmatter, ejecuta solo los pasos de `### Tramo <n>`; los demás no los tocas. Su verificación es la línea `Verificación del tramo:`; si el tramo es el último, corre además la *Verificación* del plan completa. Si el plan es un índice con `tramo-<n>.md` junto a él, lees solo ese archivo. Sin `tramo:`, es un plan de un solo tramo. Al cerrar un tramo, escribe en *Notas* del plan un resumen de 5 líneas (qué quedó, qué sigue) para que el principal pida a Franco `/compact` o una sesión nueva con `Plan: <ruta>`.

@@ -1,0 +1,2 @@
+{"type":"session","timestamp":"2026-11-08T10:00:00.000Z"}
+{"type":"message","timestamp":"2026-11-08T10:00:05.000Z","message":{"role":"assistant","model":"modelo-pi-inv","content":[{"type":"toolCall","id":"pc_4","name":"write","arguments":{"path":"cambios/inv/plan.md","content":"x"}}],"usage":{"input":100,"output":20,"cacheRead":0,"cacheWrite":0}}}

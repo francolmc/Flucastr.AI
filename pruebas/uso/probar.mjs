@@ -146,8 +146,8 @@ prueba("A6b", "Calibración: la sesión que baja queda fuera también sin la cru
 // send_message, sleep, wait_agent) y contexto 20000, 50000, 80000, 30000, 45000: mediana 45000, máximo 80000, y una caída
 // del 40 % o más (80000 a 30000) = 1 compactación. La otra sesión no tiene esperas: 0, con contexto 10000 y 12000.
 const SESIONES_ESPERADAS = [
-  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, sondeos: 1, creditos: null, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1 },
-  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, sondeos: 1, creditos: null, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1, ediciones_fuera: 0, corridas_verify: 0 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0, ediciones_fuera: 0, corridas_verify: 0 },
 ];
 
 prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0", () => {
@@ -165,12 +165,12 @@ prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactac
 // Pi: contexto 400, 1500, 3300, 4200, 1000, 1200; esperas wait_for_task, sleep y send_message (read no cuenta): mediana 1350,
 // máximo 4200, una compactación (4200 a 1000). La sesión sin esperas da 0 en ambas herramientas.
 const SESIONES_CLAUDE = [
-  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-con-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 5, esperas: 3, sondeos: null, creditos: null, contexto_mediana: 14000, contexto_max: 30000, compactaciones: 1 },
-  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-sin-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 2, esperas: 0, sondeos: null, creditos: null, contexto_mediana: 5500, contexto_max: 6000, compactaciones: 0 },
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-con-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 5, esperas: 3, sondeos: null, creditos: null, contexto_mediana: 14000, contexto_max: 30000, compactaciones: 1, ediciones_fuera: 0, corridas_verify: 0 },
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-sin-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 2, esperas: 0, sondeos: null, creditos: null, contexto_mediana: 5500, contexto_max: 6000, compactaciones: 0, ediciones_fuera: 0, corridas_verify: 0 },
 ];
 const SESIONES_PI = [
-  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-con-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 6, esperas: 3, sondeos: 1, creditos: null, contexto_mediana: 1350, contexto_max: 4200, compactaciones: 1 },
-  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-sin-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 200, contexto_max: 300, compactaciones: 0 },
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-con-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 6, esperas: 3, sondeos: 1, creditos: null, contexto_mediana: 1350, contexto_max: 4200, compactaciones: 1, ediciones_fuera: 0, corridas_verify: 0 },
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-sin-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 200, contexto_max: 300, compactaciones: 0, ediciones_fuera: 0, corridas_verify: 0 },
 ];
 
 prueba("A8", "Sesiones de Claude Code y de Pi: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0; sin --herramienta salen las tres", () => {
@@ -269,6 +269,32 @@ prueba("A5d", "Tarifas ilegibles avisan y dejan creditos en null sin salir con e
   const json = JSON.parse(r.stdout);
   assert.ok(json.avisos.some((a) => /no pude leer las tarifas/.test(a)), `avisos: ${JSON.stringify(json.avisos)}`);
   assert.deepStrictEqual(sesionesDe(json).map((s) => s.creditos), [null, null]);
+});
+
+// Medidor de invasión (fixtures/invasion/<escenario>/<herramienta>): sesión principal de cada herramienta con una escritura
+// o ninguna. sin-ediciones solo lee (0 y 0, nunca null); edicion-src escribe src/ y corre ./verify (1 y 1; el subagente de Claude no suma);
+// edicion-cambios escribe en cambios/ (0 y 0).
+const INVASION = {
+  "sin-ediciones": { ediciones_fuera: 0, corridas_verify: 0 },
+  "edicion-src": { ediciones_fuera: 1, corridas_verify: 1 },
+  "edicion-cambios": { ediciones_fuera: 0, corridas_verify: 0 },
+};
+const DIR_HERRAMIENTA = { claude: "--claude-dir", codex: "--codex-dir", pi: "--pi-dir" };
+const SUBRUTA = { claude: "claude", codex: "codex", pi: "pi" };
+
+prueba("A4i", "Medidor de invasión: ediciones fuera de cambios/ y corridas de ./verify por sesión principal, en las tres herramientas", () => {
+  for (const [escenario, esperado] of Object.entries(INVASION)) {
+    for (const herr of Object.keys(DIR_HERRAMIENTA)) {
+      const dir = join(fixtures, "invasion", escenario, SUBRUTA[herr]);
+      const { json } = medir(["--herramienta", herr, DIR_HERRAMIENTA[herr], dir, "--sesiones"]);
+      assert.equal(json.sesiones.length, 1, `${escenario}/${herr}: ${JSON.stringify(json.sesiones)}`);
+      const [s] = json.sesiones;
+      assert.deepStrictEqual({ ediciones_fuera: s.ediciones_fuera, corridas_verify: s.corridas_verify }, esperado, `${escenario}/${herr}`);
+    }
+  }
+  const texto = correr([...base(), "--herramienta", "claude", "--claude-dir", join(fixtures, "invasion", "edicion-src", "claude"), "--sesiones"]);
+  assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
+  assert.match(texto.stdout, /ediciones_fuera\s+corridas_verify/, "la tabla de --sesiones debe mostrar ediciones_fuera y corridas_verify");
 });
 
 let fallos = 0;
