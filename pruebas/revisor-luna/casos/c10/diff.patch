@@ -1,0 +1,9 @@
+--- a/README.md
++++ b/README.md
+@@ -40,5 +40,5 @@ ## Verificación
+ Comando único: `./verify`.
+ 
+-`./verify` corre las autopruebas offline. Con `--run` también corre el recorrido contra la app.
++`./verify` corre las autopruebas offline. Con `--run` agrega el recorrido contra la app.
+ 
+ Modo remoto: `VERIFY_TARGET=<url> ./verify`.

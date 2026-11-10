@@ -1,0 +1,9 @@
+--- a/src/pedidos/ruta.mjs
++++ b/src/pedidos/ruta.mjs
+@@ -8,4 +8,7 @@ router.get("/pedidos/:id", async (req, res) => {
+   const pedido = await repo.buscar(req.params.id);
++  if (!pedido) {
++    return res.status(404).json({ error: "no existe" });
++  }
+   res.json(pedido);
+ });

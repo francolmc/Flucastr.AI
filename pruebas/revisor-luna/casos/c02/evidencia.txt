@@ -1,0 +1,4 @@
+$ git diff --stat
+ README.md | 2 +-
+ 1 file changed
+exit 0

@@ -1,0 +1,7 @@
+--- a/README.md
++++ b/README.md
+@@ -86,4 +86,4 @@ ## kit run
+ `kit run` lanza al constructor y, al final, a un revisor de solo lectura.
+ 
+-El revisor de `kit run` usa `gpt-6.1-sol` con esfuerzo `low`.
++El revisor de `kit run` usa `gpt-6-luna` con esfuerzo `low`.

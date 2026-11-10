@@ -1,0 +1,4 @@
+$ node --test tests/pedidos/
+# pass 3
+# fail 0
+exit 0

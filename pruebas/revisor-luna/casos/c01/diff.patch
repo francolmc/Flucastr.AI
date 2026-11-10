@@ -1,0 +1,8 @@
+--- a/docs/relanzamiento.md
++++ b/docs/relanzamiento.md
+@@ -12,7 +12,7 @@ ## Límites de relanzamiento
+ 
+-Hay un contador de relanzamientos compartido por todas las causas (timeout, verificación fallida, revisor devuelto). Su cupo total es 2.
++Cada causa de relanzamiento (timeout, verificación fallida, revisor devuelto) tiene su propio cupo de 2.
+ 
+ Al agotar el cupo, el script pasa a PAUSA.
