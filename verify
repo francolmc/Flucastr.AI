@@ -838,8 +838,8 @@ prueba_codex() (
   done
   echo "ok 3f: umbral por agente (principal $esp_p, constructor $esp_c general) y espera larga de comandos en ambos lanzadores"
 
-  # (2) reglas: 20 prefix_rule (10 forbidden y 10 allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
-  [ "$(grep -c '^prefix_rule' "$R" || true)" = 20 ] || { echo "FALLO: $R no tiene 20 prefix_rule" >&2; exit 1; }
+  # (2) reglas: 35 prefix_rule (10 forbidden y 25 allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
+  [ "$(grep -c '^prefix_rule' "$R" || true)" = 35 ] || { echo "FALLO: $R no tiene 35 prefix_rule" >&2; exit 1; }
   grep -qxF '# regla ajena' "$P/.codex/rules/otra.rules" || { echo "FALLO: la regla ajena cambió tras instalar" >&2; exit 1; }
   if command -v codex >/dev/null 2>&1; then
     politica() { env HOME="$H" CODEX_HOME="$H/.codex" codex execpolicy check --rules "$R" -- "$@" 2>/dev/null || true; }
@@ -847,15 +847,19 @@ prueba_codex() (
       out=$(politica $c)
       grep -qE '"decision": ?"forbidden"' <<<"$out" || { echo "FALLO: execpolicy no bloquea «$c»: $out" >&2; exit 1; }
     done
-    for c in "git switch -c feature/x" "./verify" "VERIFY_RAPIDO=1 ./verify" "npm test" "npm run build" "git fetch" "git status" "git diff" "docker ps" "docker info"; do
+    for c in "git switch -c feature/x" "./verify" "VERIFY_RAPIDO=1 ./verify" "npm test" "npm run build" "git fetch" "git status" "git diff" "docker ps" "docker info" "docker compose build" "docker compose up" "docker compose run" "docker compose ps" "docker compose logs" "docker compose stop" "docker compose down" "docker version" "pnpm install" "pnpm lint" "pnpm test" "pnpm build" "pnpm typecheck"; do
       out=$(politica $c)
       grep -qE '"decision": ?"allow"' <<<"$out" || { echo "FALLO: execpolicy no permite «$c»: $out" >&2; exit 1; }
     done
-    for c in "docker run x" "bash -lc git status"; do
+    for c in "./verify" "VERIFY_RAPIDO=1 ./verify"; do
+      out=$(politica /bin/bash -lc "$c")
+      grep -qE '"decision": ?"allow"' <<<"$out" || { echo "FALLO: execpolicy no permite /bin/bash -lc «$c»: $out" >&2; exit 1; }
+    done
+    for c in "docker run x" "docker system prune" "docker volume rm x" "bash -lc git status"; do
       out=$(politica $c)
       if grep -qE 'forbidden|"decision": ?"allow"' <<<"$out"; then echo "FALLO: execpolicy decide algo sobre «$c» sin deberlo: $out" >&2; exit 1; fi
     done
-    echo "ok 3f: execpolicy bloquea git commit/push/merge, gh pr create/merge, git -C, git -c, bash/sh/zsh -c; permite git switch -c, verify, npm test/run, git fetch/status/diff, docker ps/info; no decide sobre docker run ni bash -lc"
+    echo "ok 3f: execpolicy bloquea git commit/push/merge, gh pr create/merge, git -C, git -c, bash/sh/zsh -c; permite git switch -c, verify (y /bin/bash -lc), npm test/run, git fetch/status/diff, docker ps/info/version, docker compose build/up/run/ps/logs/stop/down, pnpm install/lint/test/build/typecheck; no decide sobre docker run, docker system prune, docker volume rm ni bash -lc git status"
   else
     echo "AVISO 3f: codex no está en el PATH; las reglas no se comprobaron con execpolicy"
   fi
@@ -956,6 +960,19 @@ if textos_principal "$principal_neg"; then fallo "8k: un principal sin «Solo cr
 { cat agentes/principal.md; echo 'Fuera de eso no tienes límites.'; } > "$principal_neg/agentes/principal.md"
 if textos_principal "$principal_neg"; then fallo "8k: un principal con «Fuera de eso no tienes límites» pasó la comprobación"; fi
 echo "ok 8k: principal con «Solo creas o editas», «APROBADO», «no corriges» y «una sola espera»; copias sin la lista o con la frase vieja fallan"
+
+# 8l. principal de Codex: agentes/principal.md trae la receta de espera de verify (yield_time_ms: 300000 y «no cuentan»); una copia sin la primera cadena debe fallar
+textos_espera() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'yield_time_ms: 300000' "$r/agentes/principal.md" || return 1
+  grep -qF 'no cuentan' "$r/agentes/principal.md" || return 1
+}
+textos_espera . || fallo "8l: falta la receta de espera de verify en principal.md"
+espera_neg="$T8/espera_neg"
+mkdir -p "$espera_neg/agentes"
+sed 's/yield_time_ms: 300000/espera larga/' agentes/principal.md > "$espera_neg/agentes/principal.md"
+if textos_espera "$espera_neg"; then fallo "8l: un principal sin «yield_time_ms: 300000» pasó la comprobación"; fi
+echo "ok 8l: principal con «yield_time_ms: 300000» y «no cuentan»; copia sin la receta falla"
 
 # 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
 paso 9a "migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas"

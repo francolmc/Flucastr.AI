@@ -672,6 +672,7 @@ const PREFIJOS_DENY_CODEX = [
 ];
 // Permitidas: el sandbox de Codex deja .git en solo lectura y `git switch -c` falla ahí. Una regla allow
 // lo ejecuta fuera del sandbox sin pedir aprobación. Es la única escritura de git que el kit autoriza.
+// Docker queda fuera del sandbox, por eso Compose y las dos formas de bash -lc van como allow.
 const PREFIJOS_ALLOW_CODEX = [
   ["git", "switch", "-c"],
   // Recorrido normal de un plan (auditoría Memory-AI/DonFinancio: ~67 permisos en un día, 182 min de espera).
@@ -684,6 +685,21 @@ const PREFIJOS_ALLOW_CODEX = [
   ["git", "diff"],
   ["docker", "ps"],
   ["docker", "info"],
+  ["/bin/bash", "-lc", "./verify"],
+  ["/bin/bash", "-lc", "VERIFY_RAPIDO=1 ./verify"],
+  ["docker", "compose", "build"],
+  ["docker", "compose", "up"],
+  ["docker", "compose", "run"],
+  ["docker", "compose", "ps"],
+  ["docker", "compose", "logs"],
+  ["docker", "compose", "stop"],
+  ["docker", "compose", "down"],
+  ["docker", "version"],
+  ["pnpm", "install"],
+  ["pnpm", "lint"],
+  ["pnpm", "test"],
+  ["pnpm", "build"],
+  ["pnpm", "typecheck"],
 ];
 const MARCA_CODEX = "# flucastr-ai:generado - no editar; se regenera con instalar.sh";
 

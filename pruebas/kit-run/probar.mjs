@@ -328,8 +328,9 @@ caso("V3 sin kit_run el revisor usa el modelo y esfuerzo del principal", () => {
   const base = correr("v3base", { codex: true });
   const rev = modeloYEsfuerzo(r.registro.find(x => x.rol === "revisor").args);
   const revBase = modeloYEsfuerzo(base.registro.find(x => x.rol === "revisor").args);
-  assert.deepEqual(rev, revBase);
-  assert.equal(rev.e, "low");
+  // El modelo del revisor sin kit_run es el del principal, igual que con kit_run; el esfuerzo es el del principal (modelos.json).
+  assert.equal(rev.m, revBase.m);
+  assert.equal(rev.e, MODELOS_BASE.agentes.principal.esfuerzo);
 });
 
 // V4: un nivel inválido sale con exit 2 antes de tocar el plan ni lanzar al constructor.
