@@ -18,8 +18,8 @@
       "herramienta": "pi",
       "proveedor": "openai",
       "modelos": {
-        "alto": "openai/gpt-6-astra",
-        "medio": "openai/gpt-6.1-sol",
+        "alto": "openai/gpt-6.1-sol",
+        "medio": "openai/gpt-6.1-terra",
         "bajo": "openai/gpt-6-luna"
       },
       "ventanas": {
@@ -41,8 +41,8 @@
       "herramienta": "codex",
       "proveedor": "openai",
       "modelos": {
-        "alto": "gpt-6-astra",
-        "medio": "gpt-6.1-sol",
+        "alto": "gpt-6.1-sol",
+        "medio": "gpt-6.1-terra",
         "bajo": "gpt-6-luna"
       }
     }
@@ -55,7 +55,7 @@
   },
 
   "agentes": {
-    "principal": { "nivel": "medio", "esfuerzo": "low", "compactar_en": 60000 },
+    "principal": { "nivel": "medio", "esfuerzo": "medium", "compactar_en": 60000 },
     "constructor": { "nivel": "bajo", "esfuerzo": "medium" }
   },
 
