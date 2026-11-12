@@ -23,6 +23,7 @@ Solo lo que un agente no puede deducir leyendo el código:
 - Correr en local: `...`
 - Pruebas: `...`
 - **Verificar todo desde cero: `./verify`**
+- Comprobación rápida: `...` (tipos, lint y tests unitarios del host, sin Docker). Sin esa línea el plan usa `verify`.
 
 ## Reglas
 - Agentes: sin commit, push, PR, merge ni despliegue; no leer `.env` ni llaves (`.env.example` sí).

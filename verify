@@ -974,6 +974,26 @@ sed 's/yield_time_ms: 300000/espera larga/' agentes/principal.md > "$espera_neg/
 if textos_espera "$espera_neg"; then fallo "8l: un principal sin «yield_time_ms: 300000» pasó la comprobación"; fi
 echo "ok 8l: principal con «yield_time_ms: 300000» y «no cuentan»; copia sin la receta falla"
 
+# 8m. niveles de verificación: planificar-cambio (reglas 11 y 13), preparar-proyecto y ejecutar-plan; una copia de planificar-cambio sin «Niveles de verificación» debe fallar
+textos_niveles() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'Niveles de verificación' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'Comprobación rápida' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'Nivel 2' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'Sin esa línea' "$r/skills/preparar-proyecto/SKILL.md" || return 1
+  grep -qF 'Comprobación rápida' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+}
+textos_niveles . || fallo "8m: falta algún texto de los niveles de verificación"
+niveles_neg="$T8/niveles_neg"
+mkdir -p "$niveles_neg/skills/planificar-cambio" "$niveles_neg/skills/preparar-proyecto" "$niveles_neg/skills/ejecutar-plan"
+cp skills/planificar-cambio/SKILL.md "$niveles_neg/skills/planificar-cambio/SKILL.md"
+cp skills/preparar-proyecto/SKILL.md "$niveles_neg/skills/preparar-proyecto/SKILL.md"
+cp skills/ejecutar-plan/SKILL.md "$niveles_neg/skills/ejecutar-plan/SKILL.md"
+textos_niveles "$niveles_neg" || fallo "8m: baseline positivo de la copia temporal falló"
+sed '/Niveles de verificación/d' skills/planificar-cambio/SKILL.md > "$niveles_neg/skills/planificar-cambio/SKILL.md"
+if textos_niveles "$niveles_neg"; then fallo "8m: una copia de planificar-cambio sin «Niveles de verificación» pasó la comprobación"; fi
+echo "ok 8m: niveles de verificación en planificar-cambio, «Sin esa línea» en preparar-proyecto y Comprobación rápida en ejecutar-plan; copia sin «Niveles de verificación» falla"
+
 # 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
 paso 9a "migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas"
 T9=$(mktemp -d) || fallo "9a: no pude crear el temporal"
