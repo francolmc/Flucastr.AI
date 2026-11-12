@@ -1,5 +1,5 @@
 ---
-estado: borrador
+estado: listo
 rama: feature/niveles-verificacion
 base: main
 repos: [.]
@@ -48,17 +48,37 @@ Fuera de alcance: `agentes/constructor.md`, `modelos.json`, `scripts/`, los proy
 `./verify` (unos minutos, sin Docker) — debe terminar con exit 0.
 
 ## Pasos
-- [ ] En `skills/planificar-cambio/SKILL.md`, añade la regla 12 «Niveles de verificación» con las definiciones de Nivel 1, 2 y 3, el umbral de cambio chico del *Supuesto* y la fila de «sin la línea, se usa `verify`». Máximo 8 líneas. (A1, A3)
-- [ ] En la regla 11 (Tramos) de esa skill, añade que cada `Verificación del tramo:` declara su nivel y que el Nivel 2 va solo en el tramo que completa el flujo. (A2)
-- [ ] En `skills/preparar-proyecto/SKILL.md`, bajo `## Comandos` de la plantilla de `AGENTS.md`, añade la línea `- Comprobación rápida: \`...\`` (tipos + lint + tests unitarios del host, sin Docker). Añade una frase: «Sin esa línea el plan usa `verify`.». (A3)
-- [ ] En `skills/ejecutar-plan/SKILL.md`, en *Bucle de ejecución*, sustituye «Verifica cada unidad coherente al terminarla» por la misma idea con la `Comprobación rápida` del `AGENTS.md` (si existe) y deja el `verify` con Docker para *Verificación final* y para `Verificación del tramo:`. (A4)
-- [ ] En `agentes/principal.md`, paso 5 de tramos: añade «corre el nivel que ese tramo declara; no subas de nivel por tu cuenta». Conserva «una sola espera». (A2)
-- [ ] En `README.md`, añade una viñeta en «Verificación» con los tres niveles. (A1)
-- [ ] En `verify`, añade tras 8l un bloque 8m con el patrón de 8k: comprueba las cuatro frases de A1 a A4 en sus archivos y que una copia de `planificar-cambio` sin «Niveles de verificación» falla. (A5)
-- [ ] Corre `./verify` (unos minutos) y copia su cola en *Evidencia*. (A6)
+- [x] En `skills/planificar-cambio/SKILL.md`, añade la regla 12 «Niveles de verificación» con las definiciones de Nivel 1, 2 y 3, el umbral de cambio chico del *Supuesto* y la fila de «sin la línea, se usa `verify`». Máximo 8 líneas. (A1, A3)
+  - evidencia: `skills/planificar-cambio/SKILL.md` línea 96 (regla 13 «Niveles de verificación»; ver *Notas* sobre el número)
+- [x] En la regla 11 (Tramos) de esa skill, añade que cada `Verificación del tramo:` declara su nivel y que el Nivel 2 va solo en el tramo que completa el flujo. (A2)
+  - evidencia: `skills/planificar-cambio/SKILL.md` línea 94 (final de la regla 11)
+- [x] En `skills/preparar-proyecto/SKILL.md`, bajo `## Comandos` de la plantilla de `AGENTS.md`, añade la línea `- Comprobación rápida: \`...\`` (tipos + lint + tests unitarios del host, sin Docker). Añade una frase: «Sin esa línea el plan usa `verify`.». (A3)
+  - evidencia: `skills/preparar-proyecto/SKILL.md` línea 26
+- [x] En `skills/ejecutar-plan/SKILL.md`, en *Bucle de ejecución*, sustituye «Verifica cada unidad coherente al terminarla» por la misma idea con la `Comprobación rápida` del `AGENTS.md` (si existe) y deja el `verify` con Docker para *Verificación final* y para `Verificación del tramo:`. (A4)
+  - evidencia: `skills/ejecutar-plan/SKILL.md` línea 36
+- [x] En `agentes/principal.md`, paso 5 de tramos: añade «corre el nivel que ese tramo declara; no subas de nivel por tu cuenta». Conserva «una sola espera». (A2)
+  - evidencia: `agentes/principal.md` línea 37 (paso 5, «Plan por tramos»); «una sola espera» sigue en el paso 4
+- [x] En `README.md`, añade una viñeta en «Verificación» con los tres niveles. (A1)
+  - evidencia: `README.md` sección «Verificación», viñeta tras el párrafo (línea 49)
+- [x] En `verify`, añade tras 8l un bloque 8m con el patrón de 8k: comprueba las cuatro frases de A1 a A4 en sus archivos y que una copia de `planificar-cambio` sin «Niveles de verificación» falla. (A5)
+  - evidencia: `verify` bloque «8m», entre 8l y 9a; salida `ok 8m: niveles de verificación ...`
+- [x] Corre `./verify` (unos minutos) y copia su cola en *Evidencia*. (A6)
+  - evidencia: `./verify`, exit 0 (ver *Evidencia*)
 
 ## Evidencia
-(la escribe el constructor)
+$ ./verify
+ok 8l: principal con «yield_time_ms: 300000» y «no cuentan»; copia sin la receta falla
+ok 8m: niveles de verificación en planificar-cambio, «Sin esa línea» en preparar-proyecto y Comprobación rápida en ejecutar-plan; copia sin «Niveles de verificación» falla
+...
+== 13. kit run: arnés con constructor, verify y revisor simulados ==
+ok A6 el constructor ve aprobado al arrancar en las 3 corridas
+...
+kit-run: 17 casos pasaron
+ok 13: pruebas de kit run pasaron con los CLIs simulados
+VERIFY OK
+exit 0
 
 ## Notas
-(la escribe el constructor)
+- Numeración: la regla nueva es la 13 y no la 12 del plan, porque la 12 ya es «Tipo» y la plantilla de `planificar-cambio` la cita. No se renumeró. A1 se comprueba con `grep`, que no mira el número.
+- Bloque 8m: además de las cuatro comprobaciones, la copia temporal positiva se valida antes de quitar la regla, para que la prueba negativa falle por el motivo esperado.
+- `ejecutar-plan`, línea 36: la cláusula «con el nivel que declara» en *Verificación final* y `Verificación del tramo:` sigue la regla 13; no cambia el tope de 3 corridas finales.
