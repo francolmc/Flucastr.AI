@@ -760,6 +760,36 @@ instalar_deny_codex() {
   return 0
 }
 
+# Refresca las reglas de Codex de los proyectos ya registrados (sin --proyecto), para no ir uno por uno.
+# Un proyecto que ya no existe o un archivo de reglas ajeno solo avisa y sigue; su línea del registro se conserva
+# (ya va copiada a $NUEVO).
+refrescar_reglas_codex_registradas() {
+  local ruta raiz_proyecto salida extra=() prefijo=""
+  [ -n "$REGLAS_CODEX_REGISTRADAS" ] || return 0
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  echo
+  echo "Reglas de Codex de proyectos registrados"
+  while IFS= read -r ruta; do
+    [ -n "$ruta" ] || continue
+    raiz_proyecto="${ruta%/.codex/rules/flucastr.rules}"
+    if [ ! -d "$raiz_proyecto" ]; then
+      echo "  AVISO: el proyecto registrado ya no existe, se omiten sus reglas de Codex (registro conservado): $raiz_proyecto"
+      continue
+    fi
+    if ! salida="$(node "$RESOLVER" fijar-deny codex "$ruta" ${extra[@]+"${extra[@]}"} < /dev/null 2>&1)"; then
+      echo "  AVISO: no se tocó $ruta ($salida)"
+      continue
+    fi
+    case "$salida" in
+      fijado) echo "  ${prefijo}reglas de Codex fijadas: $ruta" ;;
+      actualizado) echo "  ${prefijo}reglas de Codex actualizadas: $ruta" ;;
+      ya-estaba) echo "  ${prefijo}reglas de Codex ya estaban: $ruta" ;;
+      *) echo "  AVISO: resultado inesperado de fijar-deny codex ($salida)" ;;
+    esac
+  done <<< "$REGLAS_CODEX_REGISTRADAS"
+  return 0
+}
+
 # Compactación automática de los modelos de Pi del kit, en el settings.json global de Pi. Si el archivo del
 # usuario no se puede tocar, avisa y sigue: no falla la instalación.
 instalar_compactacion_pi() {
@@ -915,6 +945,17 @@ if [ -f "$MANIFIESTO" ]; then
   done < "$MANIFIESTO"
 fi
 
+# Reglas de Codex de proyectos registrados (líneas codex-reglas): se leen antes de quitar la instalación anterior,
+# para refrescarlas tras instalar Codex. Lista separada por saltos de línea.
+REGLAS_CODEX_REGISTRADAS=""
+if [ -f "$MANIFIESTO" ]; then
+  while IFS=$'\t' read -r p_tipo p_ruta _; do
+    if [ "${p_tipo:-}" = codex-reglas ] && [ -n "${p_ruta:-}" ]; then
+      REGLAS_CODEX_REGISTRADAS+="$p_ruta"$'\n'
+    fi
+  done < "$MANIFIESTO"
+fi
+
 # Quita primero lo instalado antes, para que no queden restos de skills o agentes borrados del repo.
 # Los ajustes de proyectos se conservan: se pasan tal cual al registro nuevo.
 if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
@@ -994,6 +1035,8 @@ if [ "$INSTALAR_CODEX" = 1 ]; then
   if [ -n "$PROYECTO" ]; then
     echo "Proyecto ($PROYECTO), Codex"
     instalar_deny_codex
+  else
+    refrescar_reglas_codex_registradas
   fi
 else
   echo "Codex: no encontrado, se omite."
