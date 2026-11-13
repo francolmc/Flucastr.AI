@@ -994,6 +994,18 @@ sed '/Niveles de verificación/d' skills/planificar-cambio/SKILL.md > "$niveles_
 if textos_niveles "$niveles_neg"; then fallo "8m: una copia de planificar-cambio sin «Niveles de verificación» pasó la comprobación"; fi
 echo "ok 8m: niveles de verificación en planificar-cambio, «Sin esa línea» en preparar-proyecto y Comprobación rápida en ejecutar-plan; copia sin «Niveles de verificación» falla"
 
+# 8n. principal reanuda la espera: agentes/principal.md trae «vuelve a esperar en el mismo turno» en el paso 4; una copia sin esa frase debe fallar
+textos_reanuda() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'vuelve a esperar en el mismo turno' "$r/agentes/principal.md" || return 1
+}
+textos_reanuda . || fallo "8n: falta «vuelve a esperar en el mismo turno» en principal.md"
+reanuda_neg="$T8/reanuda_neg"
+mkdir -p "$reanuda_neg/agentes"
+sed 's/vuelve a esperar en el mismo turno/termina el turno/' agentes/principal.md > "$reanuda_neg/agentes/principal.md"
+if textos_reanuda "$reanuda_neg"; then fallo "8n: un principal sin «vuelve a esperar en el mismo turno» pasó la comprobación"; fi
+echo "ok 8n: principal con «vuelve a esperar en el mismo turno» en el paso 4; copia sin la frase falla"
+
 # 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
 paso 9a "migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas"
 T9=$(mktemp -d) || fallo "9a: no pude crear el temporal"
