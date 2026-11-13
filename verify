@@ -1006,6 +1006,29 @@ sed 's/vuelve a esperar en el mismo turno/termina el turno/' agentes/principal.m
 if textos_reanuda "$reanuda_neg"; then fallo "8n: un principal sin «vuelve a esperar en el mismo turno» pasó la comprobación"; fi
 echo "ok 8n: principal con «vuelve a esperar en el mismo turno» en el paso 4; copia sin la frase falla"
 
+# 8o. experiencia antes del plan: disenar-experiencia trae sus cadenas (A1); planificar-cambio enlaza pantallas.md (A2); definir-proyecto y principal la nombran (A3); una copia sin «40 columnas» debe fallar (A4)
+textos_experiencia() { # $1: raíz del kit
+  local r=$1 t
+  for t in 'docs/experiencia.md' 'pantallas.md' 'ASCII' '40 columnas' 'vacío' 'error'; do
+    grep -qF -- "$t" "$r/skills/disenar-experiencia/SKILL.md" || return 1
+  done
+  grep -qF 'disenar-experiencia' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'pantallas.md' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'disenar-experiencia' "$r/skills/definir-proyecto/SKILL.md" || return 1
+  grep -qF 'disenar-experiencia' "$r/agentes/principal.md" || return 1
+}
+textos_experiencia . || fallo "8o: falta algún texto de disenar-experiencia o de su enlace"
+exp_neg="$T8/exp_neg"
+mkdir -p "$exp_neg/skills/disenar-experiencia" "$exp_neg/skills/planificar-cambio" "$exp_neg/skills/definir-proyecto" "$exp_neg/agentes"
+cp skills/disenar-experiencia/SKILL.md "$exp_neg/skills/disenar-experiencia/"
+cp skills/planificar-cambio/SKILL.md "$exp_neg/skills/planificar-cambio/"
+cp skills/definir-proyecto/SKILL.md "$exp_neg/skills/definir-proyecto/"
+cp agentes/principal.md "$exp_neg/agentes/"
+textos_experiencia "$exp_neg" || fallo "8o: baseline positivo de la copia temporal falló"
+sed '/40 columnas/d' skills/disenar-experiencia/SKILL.md > "$exp_neg/skills/disenar-experiencia/SKILL.md"
+if textos_experiencia "$exp_neg"; then fallo "8o: una copia de disenar-experiencia sin «40 columnas» pasó la comprobación"; fi
+echo "ok 8o: disenar-experiencia con sus cadenas, enlazada en planificar-cambio, definir-proyecto y principal; copia sin «40 columnas» falla"
+
 # 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
 paso 9a "migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas"
 T9=$(mktemp -d) || fallo "9a: no pude crear el temporal"

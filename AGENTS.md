@@ -12,7 +12,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code, Pi y Codex
 - Ventana propia: `claude-<agente>`, `pi-<agente>` y `codex-<agente>` (README, «Ejecutar un plan en ventana propia»); `instalar.sh` los regenera al reinstalar.
 - Cierre: tras tu aprobación, el principal archiva el plan en `cambios/hechos/`, te pide el commit y luego el PR (`agentes/principal.md`, paso 6). Antes de crear una rama nueva exige la rama base limpia y al día; si hay una rama sin mergear, se detiene y pregunta.
 - Arnés de comparación con OpenSpec: `pruebas/comparar-openspec/` (fixtures, oráculos externos, runner con sandbox y reserva de gasto; documentado en `docs/evaluaciones/openspec/`). `./verify` corre solo sus autopruebas offline (paso 10), nunca `--run`. La medición real no se ha ejecutado. Evidencia de fallos reales del constructor: `docs/investigaciones/auditoria-andes-constructor.md`.
-- Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`, `definir-proyecto`, `migrar-proyecto`.
+- Skills: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`, `definir-proyecto`, `migrar-proyecto`, `disenar-experiencia`.
 - Workspaces: cada plan lleva `repos:` (carpetas que toca; `[.]` si es un repo) y la rama se crea solo en esas; detalle en `preparar-proyecto`, sección 4.
 - Revisor de `kit run`: `kit_run.revisor` en `modelos.json` (nivel y esfuerzo; sin la clave, el principal). Para Luna, nivel `bajo`; no hay agente nuevo (README, «Revisor de kit run»).
 - Rama base: `base:` del plan (`planificar-cambio`, regla 10); los proyectos que trabajan sobre `develop` la declaran. Para este proyecto es `main`. Liberar a `main` lo hace Franco a mano.
