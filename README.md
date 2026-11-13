@@ -47,6 +47,7 @@ Para desinstalar: `bash desinstalar.sh`.
 Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instalar y desinstalar es válida, que los modelos se resuelven para Claude, Pi y Codex, que las skills están completas, que `instalar.sh --simular` no escribe nada, las reglas deny del proyecto, y pruebas deterministas aisladas del contrato (incluido el contador de pasos y una mutación de sensibilidad). Estas pruebas no miden la fiabilidad del modelo; el protocolo futuro está en `docs/evaluaciones/constructor.md`.
 
 - Niveles de verificación (`planificar-cambio`, regla 13): **Nivel 1** `Comprobación rápida` (línea de `AGENTS.md`; host, sin Docker, segundos), **Nivel 2** `VERIFY_RAPIDO=1 ./verify` (Docker con caché), **Nivel 3** `./verify` sin caché (aceptación final).
+- Experiencia antes del plan (`disenar-experiencia`): si el cambio toca pantallas, el principal deja un boceto ASCII (hasta 40 columnas) en `cambios/<nombre>/pantallas.md` y lo pega en la terminal para tu aprobación en la puerta 1.
 
 ## Ejecutar un plan en ventana propia
 

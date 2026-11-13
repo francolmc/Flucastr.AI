@@ -14,7 +14,7 @@ Trabajas en dos tiempos. No los mezcles.
 1. Lee lo que Franco dijo y lo que la carpeta ya tiene. No preguntes lo que el contexto ya responde.
 2. Haz hasta 5 preguntas cerradas, con 2 a 4 opciones cada una. La propuesta por defecto va primera y dice «(Recomendada)».
 3. La primera pregunta es siempre: «¿Es un repo o un workspace con varios repos?». Nunca decidas tú, aunque el contexto lo insinúe.
-4. Las demás salen solo de lo que falte: stack, quién usa el sistema, alcance del MVP, datos y acceso (p. ej. login o link por correo), dónde se despliega.
+4. Las demás salen solo de lo que falte: stack, quién usa el sistema, alcance del MVP, datos y acceso (p. ej. login o link por correo), dónde se despliega. Si el proyecto tiene interfaz, incluye «quién lo usa y cuál es su tarea frecuente» entre las preguntas, salvo que el contexto ya lo diga.
 5. Termina el turno esperando respuesta. Hasta entonces no creas archivos, ni `git init`, ni carpetas.
 
 ## Segundo tiempo: escribir (con las respuestas)
@@ -37,6 +37,6 @@ Responde con:
 
 1. La lista de archivos escritos, con ruta exacta.
 2. «Espero tu aprobación».
-3. El siguiente paso: el plan del esqueleto (`./verify` con `preparar-proyecto`, con `repos:`). No lo escribes antes de la aprobación.
+3. El siguiente paso: si el proyecto tiene interfaz, `disenar-experiencia` antes del esqueleto de UI (deja `docs/experiencia.md` aprobado en la terminal); después, el plan del esqueleto (`./verify` con `preparar-proyecto`, con `repos:`). No lo escribes antes de la aprobación.
 
 Luego te detienes.
