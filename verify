@@ -838,8 +838,8 @@ prueba_codex() (
   done
   echo "ok 3f: umbral por agente (principal $esp_p, constructor $esp_c general) y espera larga de comandos en ambos lanzadores"
 
-  # (2) reglas: 35 prefix_rule (10 forbidden y 25 allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
-  [ "$(grep -c '^prefix_rule' "$R" || true)" = 35 ] || { echo "FALLO: $R no tiene 35 prefix_rule" >&2; exit 1; }
+  # (2) reglas: 41 prefix_rule (10 forbidden y 31 allow) del kit; si codex existe, execpolicy bloquea las reglas y deja pasar git status
+  [ "$(grep -c '^prefix_rule' "$R" || true)" = 41 ] || { echo "FALLO: $R no tiene 41 prefix_rule" >&2; exit 1; }
   grep -qxF '# regla ajena' "$P/.codex/rules/otra.rules" || { echo "FALLO: la regla ajena cambió tras instalar" >&2; exit 1; }
   if command -v codex >/dev/null 2>&1; then
     politica() { env HOME="$H" CODEX_HOME="$H/.codex" codex execpolicy check --rules "$R" -- "$@" 2>/dev/null || true; }
@@ -847,7 +847,7 @@ prueba_codex() (
       out=$(politica $c)
       grep -qE '"decision": ?"forbidden"' <<<"$out" || { echo "FALLO: execpolicy no bloquea «$c»: $out" >&2; exit 1; }
     done
-    for c in "git switch -c feature/x" "./verify" "VERIFY_RAPIDO=1 ./verify" "npm test" "npm run build" "git fetch" "git status" "git diff" "docker ps" "docker info" "docker compose build" "docker compose up" "docker compose run" "docker compose ps" "docker compose logs" "docker compose stop" "docker compose down" "docker version" "pnpm install" "pnpm lint" "pnpm test" "pnpm build" "pnpm typecheck"; do
+    for c in "git switch -c feature/x" "./verify" "VERIFY_RAPIDO=1 ./verify" "npm test" "npm run build" "git fetch" "git status" "git diff" "docker ps" "docker info" "docker compose build" "docker compose up" "docker compose run" "docker compose ps" "docker compose logs" "docker compose stop" "docker compose down" "docker compose --project-name x --profile verify --file f.yml run --rm browser y" "docker compose -p x run --rm browser y" "docker compose -f f.yml up -d" "docker compose --env-file e.env build" "docker compose --profile verify run --rm browser y" "docker version" "pnpm install" "pnpm lint" "pnpm test" "pnpm build" "pnpm typecheck"; do
       out=$(politica $c)
       grep -qE '"decision": ?"allow"' <<<"$out" || { echo "FALLO: execpolicy no permite «$c»: $out" >&2; exit 1; }
     done
@@ -859,7 +859,7 @@ prueba_codex() (
       out=$(politica $c)
       if grep -qE 'forbidden|"decision": ?"allow"' <<<"$out"; then echo "FALLO: execpolicy decide algo sobre «$c» sin deberlo: $out" >&2; exit 1; fi
     done
-    echo "ok 3f: execpolicy bloquea git commit/push/merge, gh pr create/merge, git -C, git -c, bash/sh/zsh -c; permite git switch -c, verify (y /bin/bash -lc), npm test/run, git fetch/status/diff, docker ps/info/version, docker compose build/up/run/ps/logs/stop/down, pnpm install/lint/test/build/typecheck; no decide sobre docker run, docker system prune, docker volume rm ni bash -lc git status"
+    echo "ok 3f: execpolicy bloquea git commit/push/merge, gh pr create/merge, git -C, git -c, bash/sh/zsh -c; permite git switch -c, verify (y /bin/bash -lc), npm test/run, git fetch/status/diff, docker ps/info/version, docker compose build/up/run/ps/logs/stop/down y con --project-name/-p/--file/-f/--env-file/--profile, pnpm install/lint/test/build/typecheck; no decide sobre docker run, docker system prune, docker volume rm ni bash -lc git status"
   else
     echo "AVISO 3f: codex no está en el PATH; las reglas no se comprobaron con execpolicy"
   fi
@@ -925,6 +925,37 @@ prueba_negativa_codex() (
   echo "ok 3g: sin esfuerzo, esfuerzo distinto, 'ultra' y perfil faltante de Codex se rechazan con su mensaje"
 )
 prueba_negativa_codex || fallo "3g: pruebas negativas de Codex"
+
+# 3h. reglas de Codex de proyectos registrados: una instalación normal (sin --proyecto) las refresca; un proyecto borrado solo avisa (HOME temporal)
+paso 3h "reglas de Codex de proyectos registrados: instalar las refresca; un proyecto borrado solo avisa"
+prueba_refresco_codex() (
+  tmp=$(mktemp -d) || { echo "FALLO: no pude crear el temporal" >&2; exit 1; }
+  trap '[ -n "${tmp:-}" ] && rm -rf "$tmp"' EXIT
+  unset CODEX_HOME PI_CODING_AGENT_DIR
+  H="$tmp/home"; P="$tmp/proj"; R="$P/.codex/rules/flucastr.rules"; M="$tmp/m.json"; MAN="$H/.flucastr-ai/manifiesto.txt"
+  mkdir -p "$H/.codex" "$P" || exit 1
+  cp modelos.json "$M" || exit 1
+  correr() { # resto: argumentos de instalar.sh
+    ( unset CODEX_HOME PI_CODING_AGENT_DIR; export HOME="$H" FLUCASTR_MODELOS="$M"; bash "$@" ) >"$tmp/log" 2>&1 || { cat "$tmp/log" >&2; echo "FALLO: $* falló" >&2; exit 1; }
+  }
+  # registro: instalar con --proyecto deja la línea codex-reglas en el manifiesto
+  correr instalar.sh --solo codex --copiar --proyecto "$P"
+  grep -qF "$(printf 'codex-reglas\t%s' "$R")" "$MAN" || { echo "FALLO: el manifiesto no registra las reglas de $R" >&2; exit 1; }
+  # (A3) reglas viejas del kit (con marca) en el proyecto registrado; una instalación normal las refresca
+  printf '%s\n' '# flucastr-ai:generado - no editar; se regenera con instalar.sh' 'prefix_rule(pattern = ["viejo"], decision = "allow")' > "$R"
+  correr instalar.sh --solo codex --copiar
+  grep -qF -- '"--project-name"' "$R" || { echo "FALLO: instalar no refrescó las reglas del proyecto registrado" >&2; exit 1; }
+  grep -q 'reglas de Codex actualizadas' "$tmp/log" || { echo "FALLO: instalar no anunció el refresco de las reglas" >&2; exit 1; }
+  grep -qF "$(printf 'codex-reglas\t%s' "$R")" "$MAN" || { echo "FALLO: el refresco perdió la línea del registro" >&2; exit 1; }
+  echo "ok 3h: instalar sin --proyecto refresca las reglas viejas del proyecto registrado (contiene --project-name)"
+  # (A4) proyecto borrado: la instalación avisa, termina bien y conserva el registro
+  rm -rf "$P"
+  correr instalar.sh --solo codex --copiar
+  grep -q 'AVISO: el proyecto registrado ya no existe' "$tmp/log" || { echo "FALLO: no avisó del proyecto borrado" >&2; exit 1; }
+  grep -qF "$(printf 'codex-reglas\t%s' "$R")" "$MAN" || { echo "FALLO: el proyecto borrado quitó la línea del registro" >&2; exit 1; }
+  echo "ok 3h: proyecto registrado borrado: AVISO y exit 0; el registro se conserva"
+)
+prueba_refresco_codex || fallo "3h: refresco de reglas de Codex en proyectos registrados"
 
 node pruebas/contrato-constructor.mjs || fallo "8j: suite determinista del contrato del constructor"
 

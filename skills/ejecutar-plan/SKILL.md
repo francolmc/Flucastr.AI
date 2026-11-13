@@ -38,6 +38,7 @@ Para cada paso `- [ ]`, en orden:
 - Corrige fallos relacionados dentro del alcance y anótalos en *Notas*.
 - Salidas largas (build, `verify`, listados): muestra solo la cola y los errores; usa opciones silenciosas cuando existan.
 - Comandos largos (`verify`, builds): espéralos con una sola llamada (Claude Code, `timeout` máximo o `run_in_background` y esperar su aviso; Pi, el timeout de `bash`; Codex, `exec_command` en una celda `exec` y, cuando devuelva «Script running with cell ID N», una sola llamada `wait` con ese `cell_id` y `yield_time_ms: 300000`). Nunca bucles de `sleep`, `tail` ni consulta de estado.
+- Validar con navegador o contenedores: usa un script de comando fijo del repo (`./scripts/<nombre>.sh` o `./verify`) que haga todos los recorridos y capturas en una sola corrida. No encadenes `docker run` ni `compose run` sueltos.
 
 ### Contador canónico
 

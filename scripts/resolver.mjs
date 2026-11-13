@@ -694,6 +694,13 @@ const PREFIJOS_ALLOW_CODEX = [
   ["docker", "compose", "logs"],
   ["docker", "compose", "stop"],
   ["docker", "compose", "down"],
+  // Opciones de compose antes del subcomando (forma real de Byteria y DonFinancio: sesión rollout-2026-11-13T18-59-29).
+  ["docker", "compose", "--project-name"],
+  ["docker", "compose", "-p"],
+  ["docker", "compose", "--file"],
+  ["docker", "compose", "-f"],
+  ["docker", "compose", "--env-file"],
+  ["docker", "compose", "--profile"],
   ["docker", "version"],
   ["pnpm", "install"],
   ["pnpm", "lint"],

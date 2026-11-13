@@ -56,7 +56,7 @@
 
   "agentes": {
     "principal": { "nivel": "medio", "esfuerzo": "medium", "compactar_en": 60000 },
-    "constructor": { "nivel": "bajo", "esfuerzo": "medium" }
+    "constructor": { "nivel": "bajo", "esfuerzo": "high" }
   },
 
   "kit_run": {
