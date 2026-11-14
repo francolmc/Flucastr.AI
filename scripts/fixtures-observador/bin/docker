@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# docker falso para las pruebas del observador: imprime salida fija y termina solo.
+# No toca Docker real. events y buildx history salen de ../datos/; stats y logs/inspect son fijos.
+DATOS="$(cd "$(dirname "$0")/../datos" && pwd)"
+case "$1 $2" in
+  "events "*)
+    cat "$DATOS/eventos.jsonl"
+    ;;
+  "stats "*)
+    echo '{"BlockIO":"0B / 0B","CPUPerc":"12.00%","Container":"f09web","ID":"f09web","MemPerc":"7.7%","MemUsage":"300MiB / 3.8GiB","Name":"f09-1-web-1","NetIO":"1kB / 1kB","PIDs":"10"}'
+    echo '{"BlockIO":"0B / 0B","CPUPerc":"3.10%","Container":"f09worker","ID":"f09worker","MemPerc":"3.1%","MemUsage":"120MiB / 3.8GiB","Name":"f09-1-worker-1","NetIO":"1kB / 1kB","PIDs":"4"}'
+    ;;
+  "buildx history")
+    cat "$DATOS/builds.jsonl"
+    ;;
+  "logs "*)
+    echo "fake: ultimas lineas del contenedor (fixture)"
+    ;;
+  "inspect "*)
+    echo '[{"Id":"fake","State":{"Status":"exited","OOMKilled":true}}]'
+    ;;
+  *)
+    echo "docker falso: comando no soportado: $*" >&2
+    exit 1
+    ;;
+esac
