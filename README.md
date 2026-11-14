@@ -6,8 +6,8 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code, Pi y Codex
 
 Dos agentes y dos puertas humanas:
 
-- **`principal`** (nivel medio, esfuerzo `low`): entiende lo que Franco quiere, investiga, diagnostica, escribe el plan y verifica el resultado.
-- **`constructor`** (nivel bajo, esfuerzo `medium`): aplica el plan aprobado, corre `verify` y deja la evidencia.
+- **`principal`** (nivel medio, esfuerzo `medium`): entiende lo que Franco quiere, investiga, diagnostica, escribe el plan y verifica el resultado.
+- **`constructor`** (nivel bajo, esfuerzo `high`): aplica el plan aprobado, corre `verify` y deja la evidencia.
 - **Puerta 1**: Franco aprueba `cambios/<nombre>/plan.md` antes de construir.
 - **Puerta 2**: Franco revisa la evidencia antes de dar algo por hecho.
 - **Cambio pequeño** (`agentes/principal.md`, seis condiciones: una intención, un repo, hasta 2 archivos y 30 líneas, sin funcionalidad nueva ni áreas sensibles, con comprobación previa): el principal lo edita en línea, sin plan ni constructor. Todo lo demás va por plan.
@@ -24,6 +24,10 @@ Un cambio largo se parte en tramos (`### Tramo N`): el constructor hace un tramo
 - `planificar-cambio`: escribe el plan de un cambio.
 - `ejecutar-plan`: aplica un plan aprobado.
 - `preparar-proyecto`: deja un proyecto listo (`AGENTS.md` y `verify`).
+- `definir-proyecto`: define un proyecto nuevo (hasta 5 preguntas cerradas, `AGENTS.md` y `docs/proyecto.md`).
+- `migrar-proyecto`: termina la migración de un proyecto de la v1 a la v2.
+- `disenar-experiencia`: boceto de pantallas que Franco aprueba antes de planificar una interfaz.
+- Prácticas por tecnología que el principal consulta al revisar: `docs/practicas-por-tecnologia.md`.
 
 ## Instalación
 
@@ -89,7 +93,7 @@ El revisor de `kit run` se configura en `modelos.json` con `kit_run.revisor` (`n
 ## Estructura
 
 - `agentes/`: definiciones de `principal` y `constructor`.
-- `skills/`: las tres skills.
+- `skills/`: las seis skills.
 - `scripts/resolver.mjs`: resuelve modelos y ajustes para las herramientas.
 - `cambios/`: un directorio por cambio, con su `plan.md`.
 - `modelos.json`: nivel de cada agente y su modelo en Claude, Pi y Codex.
