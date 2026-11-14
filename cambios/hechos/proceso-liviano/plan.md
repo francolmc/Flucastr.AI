@@ -1,5 +1,5 @@
 ---
-estado: aprobado
+estado: listo
 rama: feature/proceso-liviano
 base: main
 repos: [.]
@@ -61,23 +61,77 @@ Fuera: proyectos, `instalar.sh`, `scripts/`, `modelos.json`, `agentes/constructo
 `./verify` — offline; debe terminar en exit 0.
 
 ## Pasos
-- [ ] En `principal.md` reglas duras (línea 8 y la de editar archivos), reemplaza «toda edición, aunque sea de una línea, va por plan» por la definición de cambio pequeño con sus seis condiciones, la línea `Clasificación:` y «Ante la duda, constructor», copiadas de *Decisiones* (A1)
-- [ ] En `principal.md` paso 3, añade la clasificación por riesgo y los casos en que va el constructor; paso 4 sin cambios salvo «solo si hay razón nombrada» (A1)
-- [ ] En `principal.md` paso 5, separa revisión de bajo riesgo (diff y comprobación) y de riesgo alto (además `Verificación` una vez); conserva «una sola espera» y `yield_time_ms: 300000` (A2)
-- [ ] En `planificar-cambio` regla 13, cambia «hasta ≈3 archivos…» por la definición por riesgo; regla 7, `ejecutor: principal` también para cambios pequeños (A3)
-- [ ] Crea `docs/practicas-por-tecnologia.md`: por tecnología, la práctica en una línea, su `Fuente:` (enlace o «medido en DonFinancio, 2026-11-14») y su `Nivel:` (medido, oficial, blog, inferencia). Parte de la lista de *Decisiones*; no agregues nada sin fuente (A6)
-- [ ] En `principal.md` paso 5, añade: consulta ese documento según la tecnología tocada y anota hasta 3 «Mejora sugerida» sin devolver el cambio por ellas (A6)
-- [ ] En `ejecutar-plan`, busca la frase equivalente y alinéala; si no existe, no lo toques (A1)
-- [ ] En `verify`, busca con `rg` los bloques que exijan «aunque sea de una línea» o «toda edición» y ajústalos a la nueva frase sin debilitarlos (A5)
-- [ ] En `verify`, bloque 8t copiando el patrón del 8l: exige `cambio pequeño`, `sin plan` y `riesgo alto` en `principal.md` y `riesgo` en `planificar-cambio`, y `Mejora sugerida` en `principal.md` con el documento de prácticas existente; copia negativa con `sed` (A4)
-- [ ] En `README.md`, una viñeta con la regla (A1)
-- [ ] Corre `./verify` y pega la cola en *Evidencia* (A5)
+- [x] En `principal.md` reglas duras (línea 8 y la de editar archivos), reemplaza «toda edición, aunque sea de una línea, va por plan» por la definición de cambio pequeño con sus seis condiciones, la línea `Clasificación:` y «Ante la duda, constructor», copiadas de *Decisiones* (A1)
+  - evidencia: `agentes/principal.md` (líneas 8, 15 y reglas duras); `grep -cF` de A1: «cambio pequeño» 4, «sin plan» 1, «30 líneas» 1, «Clasificación:» 1, «Ante la duda, constructor» 1
+- [x] En `principal.md` paso 3, añade la clasificación por riesgo y los casos en que va el constructor; paso 4 sin cambios salvo «solo si hay razón nombrada» (A1)
+  - evidencia: `agentes/principal.md` paso 3 («Clasifica primero», «Riesgo», «Constructor solo con razón nombrada») y paso 4 («Lanzas el constructor solo si hay razón nombrada»); A1 cubierta por la fila anterior
+- [x] En `principal.md` paso 5, separa revisión de bajo riesgo (diff y comprobación) y de riesgo alto (además `Verificación` una vez); conserva «una sola espera» y `yield_time_ms: 300000` (A2)
+  - evidencia: `agentes/principal.md` paso 5 («**Riesgo alto:** … una sola espera», «**Riesgo bajo** (cambio pequeño o `tipo: docs`): no repites `verify`»); `grep -cF 'riesgo alto'` = 1; 8k y 8l de `verify` pasan (ver Evidencia)
+- [x] En `planificar-cambio` regla 13, cambia «hasta ≈3 archivos…» por la definición por riesgo; regla 7, `ejecutor: principal` también para cambios pequeños (A3)
+  - evidencia: `grep -c '≈3 archivos' skills/planificar-cambio/SKILL.md` = 0; `grep -cF 'riesgo' skills/planificar-cambio/SKILL.md` = 1; regla 7 conserva «salvo que Franco» (8i pasa)
+- [x] Crea `docs/practicas-por-tecnologia.md`: por tecnología, la práctica en una línea, su `Fuente:` (enlace o «medido en DonFinancio, 2026-11-14») y su `Nivel:` (medido, oficial, blog, inferencia). Parte de la lista de *Decisiones*; no agregues nada sin fuente (A6)
+  - evidencia: `docs/practicas-por-tecnologia.md` creado con 11 prácticas (Docker ×5, Compose/PostgreSQL ×2, Playwright ×3, Comprobación rápida ×1), cada una con fuente y una línea `- Nivel:`; `test -f` = existe; `grep -c 'Nivel:'` = 11
+- [x] En `principal.md` paso 5, añade: consulta ese documento según la tecnología tocada y anota hasta 3 «Mejora sugerida» sin devolver el cambio por ellas (A6)
+  - evidencia: `agentes/principal.md` («**Mejora sugerida (no bloquea):** … consulta `docs/practicas-por-tecnologia.md` … hasta 3»); `grep -cF 'Mejora sugerida'` = 1
+- [x] En `ejecutar-plan`, busca la frase equivalente y alinéala; si no existe, no lo toques (A1)
+  - evidencia: búsqueda `rg -n "toda edición|aunque sea de una línea|edita|editar" skills/ejecutar-plan/SKILL.md` sin coincidencias; no existe frase equivalente, así que `skills/ejecutar-plan/SKILL.md` no se toca
+- [x] En `verify`, busca con `rg` los bloques que exijan «aunque sea de una línea» o «toda edición» y ajústalos a la nueva frase sin debilitarlos (A5)
+  - evidencia: `rg -n "aunque sea de una línea|toda edición|una línea" verify` sin coincidencias de esas frases (solo «una línea de esfuerzo», en 158 y 763, que no son la regla); no hay bloque que ajustar, y no se debilitó ninguno
+- [x] En `verify`, bloque 8t copiando el patrón del 8l: exige `cambio pequeño`, `sin plan` y `riesgo alto` en `principal.md` y `riesgo` en `planificar-cambio`, y `Mejora sugerida` en `principal.md` con el documento de prácticas existente; copia negativa con `sed` (A4)
+  - evidencia: `verify` bloque «8t» (después del 8r); la copia con `sed 's/cambio pequeño/cambio chico/g'` falla y el original pasa: «ok 8t: principal con la definición de cambio pequeño, riesgo alto y Mejora sugerida; … copia sin «cambio pequeño» falla»
+- [x] En `README.md`, una viñeta con la regla (A1)
+  - evidencia: `README.md`, sección «Qué es», viñeta «**Cambio pequeño** (`agentes/principal.md`, seis condiciones …)»; `grep -cF 'cambio pequeño' agentes/principal.md` = 4 ya cubre la regla en el principal
+- [x] Corre `./verify` y pega la cola en *Evidencia* (A5)
+  - evidencia: `./verify` → exit 0; líneas `ok 8k`, `ok 8l`, `ok 8t` y `VERIFY OK` (salida completa en la *Evidencia*)
 
 ## Prerrequisitos
 `feature/medir-verificacion` mergeada (comparte `README.md` y `verify`). Base limpia y al día.
 
 ## Evidencia
-(la escribe el constructor)
+Comprobaciones de Aceptación (salida real):
+
+$ grep -cF 'cambio pequeño' agentes/principal.md; grep -cF 'sin plan' agentes/principal.md; grep -cF '30 líneas' agentes/principal.md; grep -cF 'Clasificación:' agentes/principal.md; grep -cF 'Ante la duda, constructor' agentes/principal.md
+4
+1
+1
+1
+1
+exit 0
+
+$ grep -cF 'riesgo alto' agentes/principal.md
+1
+exit 0
+
+$ grep -c '≈3 archivos' skills/planificar-cambio/SKILL.md; grep -cF 'riesgo' skills/planificar-cambio/SKILL.md
+0
+1
+exit 0
+
+$ sed 's/cambio pequeño/cambio chico/g' agentes/principal.md | grep -cF 'cambio pequeño'
+0
+exit 0
+
+$ test -f docs/practicas-por-tecnologia.md && grep -c 'Nivel:' docs/practicas-por-tecnologia.md; grep -cF 'Mejora sugerida' agentes/principal.md
+11
+1
+exit 0
+
+$ ./verify
+[...]
+ok 8r A1-A3: el informe del fixture coincide con LEEME.txt (medianas, máximos, caché, OOM, solape y pico)
+ok 8r negativa: la copia sin oom no muestra OOM
+ok 8r A4: start, status, segundo start sin duplicar y stop; archivos creados y el PID ya no existe
+== 8t. cambio pequeño: definición, riesgo y prácticas por tecnología ==
+ok 8t: principal con la definición de cambio pequeño, riesgo alto y Mejora sugerida; el documento de prácticas tiene ≥8 niveles; copia sin «cambio pequeño» falla
+VERIFY OK
+exit 0
+
+Las líneas `ok 8k` y `ok 8l` (salida completa en el log) también pasan: «Solo creas o editas», «APROBADO», «no corriges», «una sola espera», «yield_time_ms: 300000» y «no cuentan» siguen en `principal.md`.
 
 ## Notas
-(la escribe el constructor)
+- `ejecutar-plan/SKILL.md` no se tocó: no tiene frase equivalente a «toda edición».
+- `verify`: ningún bloque existente exigía «aunque sea de una línea» ni «toda edición»; ninguno se debilitó. El bloque 8t copia el patrón del 8l y su copia negativa usa `/g` para quitar todas las apariciones.
+- `principal.md`: la línea «Solo creas o editas…» se conserva (8k); la excepción de cambio pequeño va en la frase siguiente.
+- `docs/practicas-por-tecnologia.md`: 11 prácticas, cada una con fuente del repo o enlace, y grado de evidencia. Se usó la propuesta ya existente (`cambios/auditoria-verificacion-general/propuesta-final.md`); no se agregó nada sin fuente.
+- Fuera de Alcance, para Franco: `AGENTS.md` (raíz, línea 7) dice que el constructor «ejecuta toda edición del plan». Sigue siendo cierto para planes; no se tocó, pero conviene alinearlo en un cambio aparte.
+- Pendiente de medición (no es un paso): `node scripts/uso.mjs --sesiones` en los 3 próximos cambios, según *Supuestos*.

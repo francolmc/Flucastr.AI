@@ -10,6 +10,7 @@ Dos agentes y dos puertas humanas:
 - **`constructor`** (nivel bajo, esfuerzo `medium`): aplica el plan aprobado, corre `verify` y deja la evidencia.
 - **Puerta 1**: Franco aprueba `cambios/<nombre>/plan.md` antes de construir.
 - **Puerta 2**: Franco revisa la evidencia antes de dar algo por hecho.
+- **Cambio pequeño** (`agentes/principal.md`, seis condiciones: una intención, un repo, hasta 2 archivos y 30 líneas, sin funcionalidad nueva ni áreas sensibles, con comprobación previa): el principal lo edita en línea, sin plan ni constructor. Todo lo demás va por plan.
 - Cada plan aprobado debe incluir `## Aceptación`, con escenarios trazables a resultados, comprobaciones y resultados esperados; puede usar revisión manual explicada cuando no haya oráculo automático.
 
 El único traspaso entre agentes es `cambios/<nombre>/plan.md`. Los niveles se traducen a modelos en `modelos.json`.
