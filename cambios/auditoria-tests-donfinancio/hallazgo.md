@@ -42,5 +42,13 @@ Lo que más tiempo consume no son los tests: es **instalar dependencias dentro d
 
 No tocar: el aislamiento entre dos identidades, la idempotencia y el cálculo financiero. Ninguna de las recomendaciones anteriores los reduce.
 
+## Anexo: F10 «portada y acceso» (2026-11-13, medido a las 20:40 hora local)
+- Sesión del principal abierta ~11,6 h (desde 12:01Z). Plan `cambios/experiencia-completa/plan.md` de 20 KB (orientación del kit: ≈8 KB), casi todo Notas y Evidencia acumuladas.
+- 11 corridas de `verify` desde esa sesión: 5 rápidas y 6 completas sin caché (14:10, 14:12, 14:18, 17:52, 22:27 y la de las 23:18Z, aún en curso con 20+ min). Nivel 3 debía correr una vez, al final.
+- Revisiones: DEVUELTO ×4 y una PAUSA. Los defectos devueltos fueron del propio código de prueba, no de la portada: `recorrido.mjs` esperaba la respuesta después de recibir la petición (carrera), contaba solicitudes simuladas sin esperar la respuesta, y filtraba por sufijo de URL exacto.
+- Un build sin caché falló por timeout al descargar `@prisma/dev` (la red lenta ya medida arriba).
+- El principal espera con `wait` de `yield_time_ms: 20000` (54 llamadas) y solo 2 de 200000, aunque su regla pide 300000.
+- No verifiqué si el producto de la portada tiene defectos reales; solo el costo del ciclo.
+
 ## Siguiente
 Dos planes separados en DonFinancio: (a) Dockerfiles y caché (recomendaciones 1 a 3); (b) `Comprobación rápida` y disciplina de niveles (4 y 5). Primero conviene medir una corrida rápida real tras el cambio de Dockerfile, para confirmar el ahorro.

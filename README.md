@@ -48,6 +48,7 @@ Comprueba que `modelos.json` coincide con los agentes, que la sintaxis de instal
 
 - Niveles de verificación (`planificar-cambio`, regla 13): **Nivel 1** `Comprobación rápida` (línea de `AGENTS.md`; host, sin Docker, segundos), **Nivel 2** `VERIFY_RAPIDO=1 ./verify` (Docker con caché), **Nivel 3** `./verify` sin caché (aceptación final).
 - Experiencia antes del plan (`disenar-experiencia`): si el cambio toca pantallas, el principal deja un boceto ASCII (hasta 40 columnas) en `cambios/<nombre>/pantallas.md` y lo pega en la terminal para tu aprobación en la puerta 1.
+- Observador de Docker (solo lectura, datos en `~/.flucastr-ai/observador/`, nada sale del equipo): `node scripts/observar.mjs start` lo arranca en segundo plano, `status` y `stop` lo controlan, y `informe` (`[--desde AAAA-MM-DD]`) muestra medianas y caché de builds, pico de memoria por contenedor, OOM y unhealthy, y los proyectos que se solaparon.
 
 ## Ejecutar un plan en ventana propia
 
