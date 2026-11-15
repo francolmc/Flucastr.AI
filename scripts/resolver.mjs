@@ -20,7 +20,7 @@
 //   node scripts/resolver.mjs fijar-deny claude <proyecto/.claude/settings.json> [--simular]  agrega las reglas deny del kit que falten (una línea agregada:<regla> por cada una)
 //   node scripts/resolver.mjs quitar-deny claude <proyecto/.claude/settings.json> <regla>  quita esa regla exacta; borra lo que quede vacío
 //   node scripts/resolver.mjs agente-codex <archivo.md>      imprime el TOML del agente para Codex (~/.codex/agents/<nombre>.toml), modelo y esfuerzo resueltos
-//   node scripts/resolver.mjs fijar-deny codex <proyecto/.codex/rules/flucastr.rules> [--simular]  escribe las reglas prefix_rule del kit (no pisa un archivo ajeno)
+//   node scripts/resolver.mjs fijar-deny codex <rules> [<proyecto/AGENTS.md>] [--simular]  genera reglas conservadoras (no pisa un archivo ajeno)
 //   node scripts/resolver.mjs quitar-deny codex <proyecto/.codex/rules/flucastr.rules>  borra ese archivo solo si lleva la marca del kit
 //   modelo-esfuerzo <agente> codex: el esfuerzo sale traducido (max -> xhigh), como lo pide Codex
 //   esfuerzo <agente> codex: igual, solo el esfuerzo traducido para Codex
@@ -655,9 +655,8 @@ function instruccionesCodex(agente, cuerpo) {
 
 // --- Reglas deny del proyecto en Codex (fijar-deny codex / quitar-deny codex) ---
 
-// Codex bloquea por prefijo de comando (prefix_rule). Lista acordada en el plan soporte-codex (Resuelto).
-// No hay regla para .env (Codex no la tiene: límite documentado). No se bloquean bash -lc / sh -lc:
-// Codex ejecuta así sus comandos y bloquearlos rompería todo.
+// Codex bloquea por prefijo (prefix_rule), que acepta argumentos adicionales. No permite
+// comparar el comando completo ni proteger los efectos de scripts, así que esos permisos se omiten.
 const PREFIJOS_DENY_CODEX = [
   ["git", "commit"],
   ["git", "push"],
@@ -670,48 +669,33 @@ const PREFIJOS_DENY_CODEX = [
   ["sh", "-c"],
   ["zsh", "-c"],
 ];
-// Permitidas: el sandbox de Codex deja .git en solo lectura y `git switch -c` falla ahí. Una regla allow
-// lo ejecuta fuera del sandbox sin pedir aprobación. Es la única escritura de git que el kit autoriza.
-// Docker queda fuera del sandbox, por eso Compose y las dos formas de bash -lc van como allow.
-const PREFIJOS_ALLOW_CODEX = [
-  ["git", "switch", "-c"],
-  // Recorrido normal de un plan (auditoría Memory-AI/DonFinancio: ~67 permisos en un día, 182 min de espera).
-  ["./verify"],
-  ["VERIFY_RAPIDO=1", "./verify"],
-  ["npm", "test"],
-  ["npm", "run"],
-  ["git", "fetch"],
-  ["git", "status"],
-  ["git", "diff"],
-  ["docker", "ps"],
-  ["docker", "info"],
-  ["/bin/bash", "-lc", "./verify"],
-  ["/bin/bash", "-lc", "VERIFY_RAPIDO=1 ./verify"],
-  ["docker", "compose", "build"],
-  ["docker", "compose", "up"],
-  ["docker", "compose", "run"],
-  ["docker", "compose", "ps"],
-  ["docker", "compose", "logs"],
-  ["docker", "compose", "stop"],
-  ["docker", "compose", "down"],
-  // Opciones de compose antes del subcomando (forma real de Byteria y DonFinancio: sesión rollout-2026-11-13T18-59-29).
-  ["docker", "compose", "--project-name"],
-  ["docker", "compose", "-p"],
-  ["docker", "compose", "--file"],
-  ["docker", "compose", "-f"],
-  ["docker", "compose", "--env-file"],
-  ["docker", "compose", "--profile"],
-  ["docker", "version"],
-  ["pnpm", "install"],
-  ["pnpm", "lint"],
-  ["pnpm", "test"],
-  ["pnpm", "build"],
-  ["pnpm", "typecheck"],
-];
 const MARCA_CODEX = "# flucastr-ai:generado - no editar; se regenera con instalar.sh";
 
+function comandosCapacidad(agentsPath) {
+  if (!agentsPath || !existsSync(agentsPath)) return [];
+  const comandos = [];
+  for (const linea of readFileSync(agentsPath, "utf8").split(/\r?\n/)) {
+    if (!/^\s*-?\s*(?:Comprobación rápida|Servicio|Aceptación):/i.test(linea)) continue;
+    const literal = linea.match(/`([^`]+)`/);
+    if (!literal) continue;
+    const comando = literal[1].trim();
+    if (!comando || /[;&|<>*$()`\n\r]|\$\{|\$[A-Za-z_]/.test(comando)) continue;
+    comandos.push(comando);
+  }
+  return [...new Set(comandos)];
+}
+
 // Contenido del archivo de reglas (Starlark). Cada regla trae su ejemplo de match: Codex lo valida al cargar.
-function reglasCodex() {
+function reglasCodex(agentsPath) {
+  const declarados = comandosCapacidad(agentsPath);
+  // Solo consultas de metadatos: una regla de prefijo para git log/diff o rg podría leer contenido,
+  // y una regla para cualquier comando declarado podría aceptar argumentos que cambien su efecto.
+  const allow = [["ls"]];
+  for (const comando of declarados) {
+    const tokens = comando.split(/\s+/);
+    if (tokens.length === 1 && tokens[0] === "ls") allow.push(tokens);
+  }
+  const allowUnicos = [...new Map(allow.map((p) => [JSON.stringify(p), p])).values()];
   const bloques = PREFIJOS_DENY_CODEX.map(
     (p) =>
       `prefix_rule(\n` +
@@ -721,7 +705,7 @@ function reglasCodex() {
       `    match = [${JSON.stringify([...p, "x"])}],\n` +
       `)\n`
   );
-  const permitidas = PREFIJOS_ALLOW_CODEX.map(
+  const permitidas = allowUnicos.map(
     (p) =>
       `prefix_rule(\n` +
       `    pattern = ${JSON.stringify(p)},\n` +
@@ -733,8 +717,8 @@ function reglasCodex() {
   return `${MARCA_CODEX}\n${[...bloques, ...permitidas].join("\n")}`;
 }
 
-function fijarDenyCodex(ruta, simular) {
-  const esperado = reglasCodex();
+function fijarDenyCodex(ruta, agentsPath, simular) {
+  const esperado = reglasCodex(agentsPath);
   const actual = existsSync(ruta) ? readFileSync(ruta, "utf8") : null;
   if (actual === esperado) {
     console.log("ya-estaba");
@@ -908,8 +892,14 @@ if (orden === "modelo" && args.length === 2) {
   fijarDenyClaude(args[1], args.length === 3);
 } else if (orden === "quitar-deny" && args[0] === "claude" && args.length === 3) {
   quitarDenyClaude(args[1], args[2]);
-} else if (orden === "fijar-deny" && args[0] === "codex" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
-  fijarDenyCodex(args[1], args.length === 3);
+} else if (
+  orden === "fijar-deny" && args[0] === "codex" &&
+  (args.length === 2 || (args.length === 3 && (args[2] === "--simular" || !args[2].startsWith("--"))) ||
+    (args.length === 4 && !args[2].startsWith("--") && args[3] === "--simular"))
+) {
+  const opcionSimular = args.at(-1) === "--simular";
+  const agentsPath = args.length >= 3 && args[2] !== "--simular" ? args[2] : undefined;
+  fijarDenyCodex(args[1], agentsPath, opcionSimular);
 } else if (orden === "quitar-deny" && args[0] === "codex" && args.length === 2) {
   quitarDenyCodex(args[1]);
 } else if (orden === "fijar-compactacion" && args[0] === "pi" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {

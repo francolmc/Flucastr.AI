@@ -136,6 +136,15 @@ function etiquetaRevisor(herramienta) {
   return esfuerzo ? `${modelo}:${esfuerzo}` : modelo;
 }
 
+// Claude debe recibir el mismo hook del proyecto tanto en el constructor como en el revisor.
+// Ambos procesos arrancan con cwd=raiz, por lo que Claude carga esta configuración de proyecto.
+function comprobarPoliticaClaude(raiz) {
+  const r = spawnSync(process.execPath, [join(RAIZ_KIT, "scripts", "permisos-hook.mjs"), "comprobar", raiz], { encoding: "utf8" });
+  if (r.status !== 0 || r.stdout.trim() !== "instalado") {
+    throw new Error(`Claude Code no tiene instalada la política conservadora en ${raiz}; ejecuta instalar.sh --proyecto ${raiz}`);
+  }
+}
+
 // Comando de un rol. Con KIT_RUN_<ROL> el ejecutable cambia y los argumentos son los del mapeo sin modelo;
 // sin él, herramienta codex usa `codex exec` con el modelo y el esfuerzo de cada rol.
 function comando(rol, herramienta, raiz, schema) {
@@ -245,6 +254,9 @@ function main() {
     uso(`herramienta «${a.herramienta}» aún sin mapear (tramo 3); define KIT_RUN_CONSTRUCTOR y KIT_RUN_REVISOR`);
   }
   const raiz = a.raiz;
+  if (a.herramienta === "claude") {
+    try { comprobarPoliticaClaude(raiz); } catch (e) { uso(e.message); }
+  }
   const planPath = resolve(raiz, a.plan);
   if (!existsSync(planPath)) uso(`no existe el plan ${a.plan}`);
   const planRel = a.plan;

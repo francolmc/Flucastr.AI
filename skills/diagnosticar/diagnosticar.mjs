@@ -8,6 +8,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { builtinModules } from "node:module";
 import { join, resolve, relative, sep } from "node:path";
+import { homedir } from "node:os";
 
 const CAPACIDADES = [
   { id: "Rápida", clave: "comprobacion rapida" },
@@ -115,6 +116,43 @@ function aceptacion(carpeta) {
   return { tipo: "aceptacion", archivos: archivos.length, lista: archivos.slice(0, MAX_LISTA), mas: Math.max(0, archivos.length - MAX_LISTA) };
 }
 
+function permisosClaude(carpeta, avisos) {
+  const fuentes = [
+    { alcance: "global", ruta: join(homedir(), ".claude", "settings.json") },
+    { alcance: "proyecto", ruta: join(carpeta, ".claude", "settings.json") },
+    { alcance: "proyecto-local", ruta: join(carpeta, ".claude", "settings.local.json") },
+  ];
+  let allowProyecto = false;
+  for (const fuente of fuentes) {
+    if (!existsSync(fuente.ruta)) continue;
+    try {
+      const config = JSON.parse(readFileSync(fuente.ruta, "utf8"));
+      for (const regla of config?.permissions?.allow ?? []) {
+        const texto = String(regla).trim();
+        const patron = texto.match(/^Bash\((.*)\)$/i)?.[1] ?? texto;
+        if (/^(?:\*|npm\s+\*|docker\s+\*|(?:bash|sh|zsh)\s+-c(?:\s+.*)?|node\s+-e(?:\s+.*)?|python(?:3)?\s+-c(?:\s+.*)?)$/i.test(patron.trim())) {
+          avisos.push("allow amplio previo en " + fuente.ruta + ": " + regla);
+          if (fuente.alcance.startsWith("proyecto")) allowProyecto = true;
+        }
+      }
+    } catch (error) {
+      avisos.push("no se pudo revisar configuración de Claude en " + fuente.ruta + ": " + error.message);
+    }
+  }
+  const local = join(carpeta, ".claude", "settings.local.json");
+  let hook = false;
+  try {
+    const config = JSON.parse(readFileSync(local, "utf8"));
+    hook = (config?.hooks?.PreToolUse ?? []).some((entrada) =>
+      (entrada?.hooks ?? []).some((h) => typeof h?.command === "string" && h.command.includes("permisos-hook.mjs") && h.command.includes(" decision --project ")),
+    );
+  } catch {
+    // La ausencia del ajuste es un aviso, no un error del diagnóstico.
+  }
+  if (!hook) avisos.push("falta el hook de permisos de Claude en " + local);
+  if (!hook && allowProyecto) avisos.push("hay allow amplias de proyecto sin el hook de permisos de Claude");
+}
+
 const FUENTES = [
   /\b(?:import|export)\b[^'"`;]*?\bfrom\s*['"]([^'"\n]+)['"]/g,
   /\bimport\s*['"]([^'"\n]+)['"]/g,
@@ -217,6 +255,7 @@ function diagnosticar(carpeta) {
     }
   }
   const receta = recetaNode(carpeta, avisos);
+  permisosClaude(carpeta, avisos);
   return { carpeta, capacidades, resultado, aceptacion: acept, receta, avisos };
 }
 

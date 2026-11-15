@@ -1,5 +1,7 @@
 # Contrato de verificación
 
+La garantía cubre solo los permisos instalados por el kit; los efectos internos de scripts declarados quedan sujetos a revisión de la evidencia.
+
 El kit pide verificación por capacidades, no por herramientas. Cada proyecto declara en su `AGENTS.md`, en la sección Comandos, una línea por capacidad con el comando que la cubre. Una capacidad sin línea se cubre con `./verify`.
 
 ## Capacidades

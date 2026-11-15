@@ -740,10 +740,10 @@ EOF
 # Reglas deny de Codex del proyecto (<proyecto>/.codex/rules/flucastr.rules, archivo del kit: no se mezcla con lo ajeno).
 # Codex las carga solo en proyectos de confianza y son experimentales. Si el archivo es ajeno, avisa y sigue.
 instalar_deny_codex() {
-  local archivo="$PROYECTO/.codex/rules/flucastr.rules" salida prefijo=""
+  local archivo="$PROYECTO/.codex/rules/flucastr.rules" agents="$PROYECTO/AGENTS.md" salida prefijo=""
   local extra=()
   if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
-  if ! salida="$(node "$RESOLVER" fijar-deny codex "$archivo" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+  if ! salida="$(node "$RESOLVER" fijar-deny codex "$archivo" "$agents" ${extra[@]+"${extra[@]}"} 2>&1)"; then
     echo "  AVISO: no se tocó $archivo ($salida)"
     return 0
   fi
@@ -776,7 +776,7 @@ refrescar_reglas_codex_registradas() {
       echo "  AVISO: el proyecto registrado ya no existe, se omiten sus reglas de Codex (registro conservado): $raiz_proyecto"
       continue
     fi
-    if ! salida="$(node "$RESOLVER" fijar-deny codex "$ruta" ${extra[@]+"${extra[@]}"} < /dev/null 2>&1)"; then
+    if ! salida="$(node "$RESOLVER" fijar-deny codex "$ruta" "$raiz_proyecto/AGENTS.md" ${extra[@]+"${extra[@]}"} < /dev/null 2>&1)"; then
       echo "  AVISO: no se tocó $ruta ($salida)"
       continue
     fi
@@ -873,6 +873,37 @@ instalar_compactacion_claude() {
     *) echo "  AVISO: resultado inesperado de fijar-compactacion claude ($salida)" ;;
   esac
   return 0
+}
+
+# Política preaprobada conservadora de Claude Code: cualquier duda conserva el permiso normal de Claude.
+# El hook se agrega al final de PreToolUse sin reemplazar entradas ajenas y autoriza solo comandos verificados.
+instalar_hook_permisos_claude() {
+  local prefijo="" verificacion="" auditoria=""
+  if [ "$SIMULAR" = 1 ]; then
+    echo "  (simulación) fijaría el hook de permisos conservadores en: $PROYECTO/.claude/settings.local.json"
+    return 0
+  fi
+  local salida
+  if ! salida="$(node "$RAIZ/scripts/permisos-hook.mjs" instalar "$PROYECTO" 2>&1)"; then
+    node "$RAIZ/scripts/permisos-hook.mjs" quitar "$PROYECTO" >/dev/null 2>&1 || true
+    echo "  AVISO: no se activó la política preaprobada de Claude Code ($salida)"
+    return 0
+  fi
+  if ! verificacion="$(node "$RAIZ/scripts/permisos-hook.mjs" comprobar "$PROYECTO" 2>&1)" || [ "$verificacion" != "instalado" ]; then
+    node "$RAIZ/scripts/permisos-hook.mjs" quitar "$PROYECTO" >/dev/null 2>&1 || true
+    echo "  AVISO: no se activó la política preaprobada de Claude Code; el hook no quedó verificado ($verificacion)"
+    return 0
+  fi
+  case "$salida" in
+    fijado) echo "  hook de permisos conservadores fijado: $PROYECTO/.claude/settings.local.json" ;;
+    ya-estaba) echo "  hook de permisos conservadores ya estaba fijado: $PROYECTO/.claude/settings.local.json" ;;
+    *) echo "  AVISO: no se activó la política preaprobada de Claude Code (respuesta inesperada: $salida)" ;;
+  esac
+  if auditoria="$(node "$RAIZ/scripts/permisos-hook.mjs" auditar "$PROYECTO" 2>&1)"; then
+    node -e 'const a=JSON.parse(process.argv[1]); for (const h of a.hallazgos) if (h.tipo === "allow-amplia") console.log("  AVISO: allow amplio previo en " + h.ruta + ": " + h.regla); for (const e of a.errores) console.log("  AVISO: no se pudo revisar configuración en " + e.ruta + ": " + e.error)' "$auditoria"
+  else
+    echo "  AVISO: no se pudieron revisar los allow previos de Claude Code ($auditoria)"
+  fi
 }
 
 # Hook del validador de tareas en Claude Code (ajuste personal del proyecto, settings.local.json; no se sube a git).
@@ -997,6 +1028,7 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
     fijar_agente_proyecto
     instalar_deny_claude
     instalar_compactacion_claude
+    instalar_hook_permisos_claude
     # v2: sin hook del validador de tareas (era de v1; ver legacy/v1/).
   fi
 else
