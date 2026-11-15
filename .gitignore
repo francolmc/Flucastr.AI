@@ -7,5 +7,6 @@ pruebas/*
 !pruebas/contrato-constructor.mjs
 !pruebas/diagnostico-sugiere/
 !pruebas/aceptacion/
+!pruebas/permisos-contrato/
 
 .codex/
