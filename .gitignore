@@ -4,3 +4,5 @@ pruebas/*
 !pruebas/kit-run/
 !pruebas/revisor-luna/
 !pruebas/contrato-constructor.mjs
+
+.codex/
