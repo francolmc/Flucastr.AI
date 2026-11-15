@@ -1,5 +1,6 @@
 .claude/settings.local.json
 pruebas/*
+!pruebas/revisar-plan/
 !pruebas/uso/
 !pruebas/kit-run/
 !pruebas/revisor-luna/

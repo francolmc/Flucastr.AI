@@ -1084,6 +1084,11 @@ else
   echo "AVISO 10: falta pruebas/comparar-openspec/ (pruebas/ está en .gitignore); paso omitido"
 fi
 
+# 10b. revisor de planes: contrato CLI, límites y avisos por línea
+paso "10b" "revisor de planes: pruebas de scripts/revisar-plan.mjs"
+node --test pruebas/revisar-plan/*.test.mjs || fallo "10b: pruebas del revisor de planes no pasaron"
+echo "ok 10b: pruebas del revisor de planes pasaron"
+
 # 11. ejecución por tramos: textos nuevos de los cuatro archivos; cada copia sin su texto debe fallar con su mensaje
 paso 11 "ejecución por tramos: textos nuevos y copias sin cada uno"
 T11=$(mktemp -d) || fallo "11: no pude crear el temporal"
