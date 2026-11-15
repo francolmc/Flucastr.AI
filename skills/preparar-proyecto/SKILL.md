@@ -5,7 +5,7 @@ description: "Deja un proyecto listo para trabajar con el kit: un `AGENTS.md` co
 
 # Preparar un proyecto
 
-Dos entregables: `AGENTS.md` y `verify`. Sin ellos no hay forma fiable de saber si un cambio quedó bien. Además, la sección 7 deja `docs/mejoras.md` con lo que al proyecto le falta según el contrato; eso nunca bloquea nada.
+Dos entregables: `AGENTS.md` y `verify`. Sin ellos no hay forma fiable de saber si un cambio quedó bien.
 
 ## 1. AGENTS.md (máximo unas 40 líneas)
 
@@ -126,21 +126,3 @@ Ante «prepárame el despliegue», el principal escribe `cambios/revision-despli
 - La comprobación posterior con `VERIFY_TARGET`, que corre Franco.
 
 El principal no despliega, no toca producción y no ejecuta `VERIFY_TARGET` contra producción.
-
-## 7. Diagnóstico de mejoras (`docs/mejoras.md`)
-
-Cuándo corre: al preparar un proyecto, y cuando Franco pide «diagnostica». No se repite solo en cada plan. Lee `nucleo/contrato/verificacion.md` (no lo cambies) y compara con él el `AGENTS.md` y el código del proyecto. No corre `verify`: solo lee.
-
-Escribe `docs/mejoras.md` en español, de máximo unos 2 KB, con esta forma:
-
-1. Una tabla con una fila por capacidad del contrato (`Rápida`, `Servicio`, `Aceptación`, `Evidencia`) y columnas `Estado`, `Costo hoy` y `Evidencia`.
-   - `Estado` es `cubierta` solo si su línea existe en el `AGENTS.md` y el comando corre; si no, `falta` (se cubre con `./verify`).
-2. `## Siguiente mejora`: **una** sola, con qué es, por qué y tamaño estimado. Si no falta nada, escribe «sin faltas» y no propongas ninguna.
-3. `## Anotadas`: las que Franco dejó pendientes. Al crearlo, vacía.
-
-Reglas de evidencia:
-
-- `Costo hoy` y `Evidencia` solo con datos observables: duración medida de una corrida, `git log` (arreglos que volvieron, reversiones), planes en `cambios/` con `PAUSA` o `DEVUELTO`, archivos de código sin test.
-- Sin dato, escribe `sin evidencia`. No estimes ni inventes cifras.
-
-No bloquea nada. Una capacidad faltante no impide planificar ni construir; lo que sí bloquea está en `agentes/principal.md`, «Qué bloquea y qué no».
