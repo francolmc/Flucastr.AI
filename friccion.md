@@ -2,6 +2,8 @@
 
 Cosas que costaron o que el flujo pidió sin necesidad. Una línea cada una.
 
+- **Docker y loopback en Don Financio.** La auditoría registró 30 escalaciones Docker y atribuye la mayoría al socket fuera del sandbox; no contiene una prueba de loopback, que queda pendiente de reproducción ([hallazgo](cambios/auditoria-codex-permisos-esperas/hallazgo.md)).
+
 - **Estados del plan sin vocabulario.** La plantilla trae `estado: borrador` y el flujo usa `aprobado`; el constructor puso `listo` y yo `hecho`. Nadie define la lista. Propuesta: fijar `borrador → aprobado → listo → hecho` en `planificar-cambio`.
 - **Prueba negativa pedida antes de que exista lo probado.** En `verify-del-kit` el plan tuvo que ordenar la prueba negativa a un comando que aún no existía; su evidencia solo podía llegar después de la puerta 1. Funcionó, pero el plan queda «ciego» en esa parte.
 - **Mi primer borrador del plan se desordenó.** Dejé un paso (prueba negativa B) con texto contradictorio y lo arreglé en una segunda pasada. El «relee como constructor» de la skill no lo detectó; lo vi al reabrir el archivo.
