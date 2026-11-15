@@ -1,5 +1,5 @@
 ---
-estado: aprobado
+estado: listo
 rama: feature/diagnostico-sugiere
 base: main
 repos: [.]
@@ -25,6 +25,7 @@ Que `preparar-proyecto` compare un proyecto con `nucleo/contrato/verificacion.md
 - `skills/planificar-cambio/SKILL.md` (una regla nueva, 15).
 - `README.md` (una viñeta).
 - `pruebas/diagnostico-sugiere/juguete/` (proyecto de juguete sin tests, para el escenario).
+- `.gitignore` (solo añadir la excepción `!pruebas/diagnostico-sugiere/` tras las otras `!pruebas/...`, para que el juguete entre en git).
 - No: `nucleo/`, `instalar.sh`, `verify`, `ejecutar-plan`.
 
 ## Decisiones ya tomadas
@@ -62,7 +63,51 @@ Que `preparar-proyecto` compare un proyecto con `nucleo/contrato/verificacion.md
 6. Corre `git diff --stat -- nucleo/` (debe estar vacío) y `./verify` (A7, A8). Deja la cola en *Evidencia*.
 
 ## Evidencia
-(la deja el constructor)
+$ git diff --check
+(sin salida)
+exit 0
+
+$ git diff --stat -- nucleo/
+(sin salida: el contrato no cambió; A7)
+exit 0
+
+$ find pruebas/diagnostico-sugiere/juguete -name "*test*" -o -name "*spec*"
+(sin salida; A6)
+exit 0
+
+$ ./verify
+ok A3d DEVUELTO siempre: cupo de 2 agotado, parcial sin más corridas
+ok A5a revisor que devuelve texto no JSON: parcial sin aprobar
+ok A5b APROBADO con defectos: viola el esquema, parcial
+ok A5c veredicto con clave extra: viola el esquema, parcial
+ok C1 mapeo codex: constructor en workspace-write, revisor en read-only con esquema, modelo del agente
+ok C2 tope de tiempo: el constructor que no termina se corta, parcial sin relanzar
+ok A6 el constructor ve aprobado al arrancar en las 3 corridas
+ok uso: plan en curso se rechaza sin cambiarlo
+ok V2 revisor con nivel bajo: Luna low; el constructor no cambia
+ok V3 sin kit_run el revisor usa el modelo y esfuerzo del principal
+ok V4 nivel inválido en kit_run.revisor: exit 2 y plan intacto
+ok V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>
+kit-run: 17 casos pasaron
+ok 13: pruebas de kit run pasaron con los CLIs simulados
+== 8r. observador de Docker: informe sobre el fixture, ciclo con docker falso y copia sin oom ==
+ok 8r A1-A3: el informe del fixture coincide con LEEME.txt (medianas, máximos, caché, OOM, solape y pico)
+ok 8r negativa: la copia sin oom no muestra OOM
+ok 8r A4: start, status, segundo start sin duplicar y stop; archivos creados y el PID ya no existe
+== 8t. cambio pequeño: definición, riesgo y prácticas por tecnología ==
+ok 8t: principal con la definición de cambio pequeño, riesgo alto y Mejora sugerida; el documento de prácticas tiene ≥8 niveles; copia sin «cambio pequeño» falla
+VERIFY OK
+exit 0
 
 ## Notas
-(el constructor y el principal)
+- Estado final `listo`: `./verify` pasó en la primera corrida (una sola corrida, tipo `docs`). `git diff --name-only main` solo lista `*.md`.
+- Los pasos del plan son numerados (`1.` a `6.`), no casillas `- [ ]`: no las marqué ni cambié su formato. El contador `pendientes-plan` da 0 por eso; los seis pasos están hechos según las comprobaciones de la sección Aceptación (A1 a A7 pasaron; A8 es `./verify`; A9 la corre Franco).
+- **Juguete ignorado por git:** `.gitignore` tiene `pruebas/*` y solo exceptúa `uso`, `kit-run`, `revisor-luna` y `contrato-constructor.mjs`. `pruebas/diagnostico-sugiere/juguete/` existe en disco pero no entra en `git status` ni en el commit. Hace falta una excepción `!pruebas/diagnostico-sugiere/` en `.gitignore`, que está fuera del Alcance; no la añadí. Franco decide si la agrega antes del commit.
+- Decisión menor en `planificar-cambio` regla 15: si la mejora «queda anotada», el principal la anota en `## Anotadas` solo cuando Franco lo pide. Así no se contradice A4 (escribir `docs/mejoras.md` solo desde `preparar-proyecto` o al diagnosticar).
+- «Tests de aceptación alterados» se redactó como en *Supuestos* (edición, borrado o debilitamiento fuera del Alcance para que pase) en `agentes/principal.md`, sección «Qué bloquea y qué no».
+- Fallos relacionados corregidos: ninguno; `verify` pasó sin cambios adicionales.
+
+- Principal (revisión): defecto del plan, no del constructor. El juguete queda ignorado por `pruebas/*`; se amplía el Alcance con la excepción en `.gitignore`. Nuevo criterio A10: `git check-ignore pruebas/diagnostico-sugiere/juguete/suma.js` sin salida y `git status --short` lista el juguete. Relanzar solo para eso; no repetir `./verify` (tipo docs, solo `.gitignore`).
+
+- Constructor (revisión, A10): añadida `!pruebas/diagnostico-sugiere/` en `.gitignore`, tras `!pruebas/contrato-constructor.mjs`. Comprobado: `git check-ignore pruebas/diagnostico-sugiere/juguete/suma.js` sin salida (exit 1, no ignorado); `git status --short -uall pruebas/diagnostico-sugiere/` lista `juguete/AGENTS.md` y `juguete/suma.js` como `??`; `git diff --check` exit 0. No se repitió `./verify`, como pidió el principal.
+- Constructor: el plan pasó a `estado: listo`. El cierre (archivo en `hechos/`, commit y PR) es del principal y de Franco.
