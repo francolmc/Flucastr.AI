@@ -21,9 +21,11 @@ Solo lo que un agente no puede deducir leyendo el código:
 ## Comandos
 - Instalar: `...`
 - Correr en local: `...`
-- Pruebas: `...`
 - **Verificar todo desde cero: `./verify`**
-- Comprobación rápida: `...` (tipos, lint y tests unitarios del host, sin Docker). Sin esa línea el plan usa `verify`.
+- Comprobación rápida: `...` (segundos, en el host, sin servicios). Sin esa línea el plan usa `verify`.
+- Servicio: `...` (opcional)
+- Aceptación: `...` (opcional)
+- Evidencia: `...` (opcional; dónde escribe `resultado.json`)
 
 ## Reglas
 - Agentes: sin commit, push, PR, merge ni despliegue; no leer `.env` ni llaves (`.env.example` sí).
@@ -31,21 +33,32 @@ Solo lo que un agente no puede deducir leyendo el código:
 - <Convenciones propias, solo las que no se deducen del código.>
 ```
 
+Las cuatro capacidades de verificación, una línea cada una (contrato completo en `nucleo/contrato/verificacion.md`):
+
+- **Rápida** (`Comprobación rápida:`): segundos, en el host, sin servicios.
+- **Servicio** (`Servicio:`): la lógica contra dependencias reales, sin interfaz.
+- **Aceptación** (`Aceptación:`): un archivo por flujo, filtrable por nombre; resume todos los fallos al final.
+- **Evidencia** (`Evidencia:`): dónde escribe `resultado.json`.
+
+La que falte se cubre con `./verify`.
+
 Si el proyecto ya existe, explóralo antes y no repitas lo que el código ya dice.
 
 ## 2. verify
 
 Un único comando en la raíz (`./verify`) que **falla con código distinto de 0** en el primer escalón roto y no necesita nada de tu máquina:
 
-1. **Build limpio.** Instalación desde el lock (`npm ci`, `pnpm install --frozen-lockfile`) y build de las imágenes sin caché. `VERIFY_RAPIDO=1 ./verify` hace el build con caché para iterar; la corrida final de aceptación va siempre sin la variable. Detecta dependencias sin declarar y contextos de build incompletos.
+1. **Build limpio.** Instalación desde el lock del gestor del proyecto y build de las imágenes sin caché. `VERIFY_RAPIDO=1 ./verify` hace el build con caché para iterar; la corrida final de aceptación va siempre sin la variable. Detecta dependencias sin declarar y contextos de build incompletos.
 2. **Arranque real.** Un `docker compose` con todo el sistema: web, API, base de datos y un buzón de correo de prueba (Mailpit). Las migraciones corren al arrancar y se espera a que los servicios respondan.
 3. **Recorrido real.** El flujo clave de punta a punta, sin mocks de base de datos ni de correo.
 4. **Mismo camino que producción.** Los mismos Dockerfiles y las mismas variables de `.env.example`; solo cambian los valores.
 
+Contrato: `nucleo/contrato/verificacion.md`. Si existe `nucleo/recetas/<stack>.md` que coincide con el proyecto, léela; si no, sigue sin ella.
+
 Reglas de diseño:
 
 - **Contexto de build = el repo entero** menos lo que excluya `.dockerignore`. Nunca una lista de archivos permitidos: cada olvido rompe el build.
-- Declara en `package.json` todo lo que el código importa directamente. Un paquete que solo llega como dependencia de otro (por ejemplo `express` vía el adaptador de NestJS) funciona en tu máquina y falla en un build limpio. En TypeScript, la regla `import/no-extraneous-dependencies` de ESLint lo detecta.
+- Declara en el manifiesto de dependencias todo lo que el código importa directamente. Un paquete que solo llega como dependencia de otro funciona en tu máquina y falla en un build limpio.
 - Limpieza al final (`down -v`) y un proyecto de compose propio, para no pisar nada.
 - **Solo corre cuando alguien lo pide**, nunca como efecto lateral de planificar.
 - Imprime un encabezado por escalón y `VERIFY OK` al final.
