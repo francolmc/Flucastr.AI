@@ -24,6 +24,7 @@ Un cambio largo se parte en tramos (`### Tramo N`): el constructor hace un tramo
 - `planificar-cambio`: escribe el plan de un cambio.
 - `ejecutar-plan`: aplica un plan aprobado.
 - `preparar-proyecto`: deja un proyecto listo (`AGENTS.md` y `verify`).
+- Diagnóstico de mejoras (`preparar-proyecto`, sección 7): escribe `docs/mejoras.md` con lo que le falta al proyecto según el contrato de verificación y una sola siguiente mejora. Nunca bloquea planificar ni construir.
 - `definir-proyecto`: define un proyecto nuevo (hasta 5 preguntas cerradas, `AGENTS.md` y `docs/proyecto.md`).
 - `migrar-proyecto`: termina la migración de un proyecto de la v1 a la v2.
 - `disenar-experiencia`: boceto de pantallas que Franco aprueba antes de planificar una interfaz.
