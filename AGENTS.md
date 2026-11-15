@@ -4,6 +4,7 @@ Kit personal de agentes y skills para trabajar con IA en Claude Code, Pi y Codex
 
 ## Cómo funciona (v2)
 
+- Aceptación: `node --test pruebas/aceptacion/*.test.mjs` corre un archivo por flujo (`contrato-constructor`, `kit-run`, `uso`); filtro por flujo con `--test-name-pattern=<flujo>`. Los envoltorios están en `pruebas/aceptacion/` y no cambian las suites que envuelven.
 - Dos agentes: `principal` (nivel medio con esfuerzo `medium`: investiga, planifica y revisa; solo edita el producto en un «cambio pequeño», definido por seis condiciones en `agentes/principal.md`; ante la duda, constructor) y `constructor` (nivel bajo, esfuerzo `high`: ejecuta toda edición de un plan). Revisión: riesgo bajo no repite `verify`; cada revisión anota hasta 3 «Mejora sugerida» desde `docs/practicas-por-tecnologia.md`. Los niveles se traducen a modelos en `modelos.json`. El principal no rinde en nivel bajo (probado 2026-11-09): se queda en medio y se ahorra con el esfuerzo.
 - El esfuerzo (qué tanto razona el modelo) se declara por agente en `modelos.json` y se traduce a `effort` (Claude Code), `thinking` (Pi) o `model_reasoning_effort` (Codex, donde `max` se escribe como `xhigh`).
 - Traspaso: solo `cambios/<nombre>/plan.md`, con `## Aceptación` (README, «Qué es»).
