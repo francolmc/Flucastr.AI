@@ -58,7 +58,8 @@ Cada escenario debe enlazarse explícitamente con una fila de Aceptación. En pr
 `<comando>` — el que define «hecho». Debe correr desde cero y fallar si algo falla.
 
 ## Pasos
-- [ ] <paso concreto y comprobable> (A1; los de entorno, «entorno»)
+- [ ] <paso concreto> (A1; los de entorno, «entorno»)
+  - Comprobación: `<comando o señal observable>`; resultado esperado: `<resultado>`
 
 ## Evidencia
 (la escribe el constructor)
@@ -83,7 +84,7 @@ Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `esta
 
 1. **Alcance por camino, no por archivo.** Si el constructor encuentra un fallo relacionado dentro del alcance, lo corrige; no debe tener que parar por eso.
 2. **Un comando de verificación** que prueba el resultado final, no cada pieza. Si el proyecto aún no tiene `verify`, el primer plan es crearlo (`preparar-proyecto`).
-3. **Paso atómico**: una línea, una acción, una comprobación, con orientación de unas 20 palabras. Se permite una sublínea para comprobación y resultado esperado; no sacrifiques claridad por el límite. Un paso con más de un requisito se parte. No hay tope de pasos (40 es válido), en orden, cada uno comprobable. Sin código completo salvo firmas o contratos que deban respetarse.
+3. **Paso atómico**: una línea, una acción, una comprobación explícita y su resultado esperado, con orientación de unas 20 palabras. Incluye la comprobación como sublínea cuando no quepa con claridad en el paso. `Verificación del tramo` es adicional y nunca sustituye la comprobación individual. No sacrifiques claridad por el límite. Un paso con más de un requisito se parte. No hay tope de pasos (40 es válido), en orden, cada uno comprobable. Sin código completo salvo firmas o contratos que deban respetarse.
 4. **Corto.** Que un modelo pequeño lo lea entero sin esfuerzo. Orientación de tamaño, no límite duro: un cambio simple cabe en unos 5 KB; uno que investiga y toca varias piezas puede llegar a unos 8 KB. Si pasa de eso, se parte en tramos, cada uno con su verificación (o son dos cambios).
 5. **Repos en el frontmatter.** `repos:` es obligatorio: la lista de carpetas (relativas a la raíz del proyecto) donde el cambio toca código o recibe la rama. Un proyecto de un repo escribe `repos: [.]`. Un workspace escribe solo las carpetas que el cambio toca (p. ej. `repos: [api]`). Si el cambio toca solo documentos o `verify` de la raíz, `repos: [.]`: la raíz cuenta como un repo más.
 6. **Decisiones cerradas.** Si falta una decisión de producto, pregúntala a Franco antes de pedir la aprobación; no la dejes abierta en el plan.

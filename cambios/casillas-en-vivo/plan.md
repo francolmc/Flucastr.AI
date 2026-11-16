@@ -1,5 +1,5 @@
 ---
-estado: aprobado
+estado: parcial
 rama: feature/casillas-en-vivo
 base: main
 repos: [.]
@@ -45,14 +45,75 @@ Mostrar el avance del constructor al completar cada paso comprobado y conservar 
 
 ## Pasos
 - [ ] Ajustar `agentes/constructor.md` y `skills/ejecutar-plan/SKILL.md` para el ciclo, límites y notas indicados (A1, A2). Comprobación: `node pruebas/contrato-constructor.mjs`; se cumplen A1 y A2.
-- [ ] Alinear `skills/planificar-cambio/SKILL.md` con comprobación explícita por paso y evidencia en su sección (A1, A2). Comprobación: `node pruebas/contrato-constructor.mjs`; el contrato actualizado pasa.
-- [ ] Cubrir `scripts/revisar-plan.mjs` con casos positivos y negativos en `pruebas/revisar-plan/`, corrigiendo solo si falla (A3). Comprobación: `node --test pruebas/revisar-plan/*.test.mjs`; exit 0.
-- [ ] Corregir el contrato de huella en `nucleo/contrato/verificacion.md` y su consumidor `skills/diagnosticar/diagnosticar.mjs` (A4). Comprobación: `node --test pruebas/diagnostico-sugiere/*.test.mjs`; se cumplen los casos de A4.
-- [ ] Conectar las pruebas nuevas a `verify` si aún no están incluidas (A1, A3, A4). Comprobación: `./verify` (≈10 min); exit 0 y suites pertinentes ejecutadas.
+- [x] Alinear `skills/planificar-cambio/SKILL.md` con comprobación explícita por paso y evidencia en su sección (A1, A2). Comprobación: `node pruebas/contrato-constructor.mjs`; el contrato actualizado pasa.
+- [x] Cubrir `scripts/revisar-plan.mjs` con casos positivos y negativos en `pruebas/revisar-plan/`, corrigiendo solo si falla (A3). Comprobación: `node --test pruebas/revisar-plan/*.test.mjs`; exit 0.
+- [x] Corregir el contrato de huella en `nucleo/contrato/verificacion.md` y su consumidor `skills/diagnosticar/diagnosticar.mjs` (A4). Comprobación: `node --test pruebas/diagnostico-sugiere/*.test.mjs`; se cumplen los casos de A4.
+- [x] Conectar las pruebas nuevas a `verify` si aún no están incluidas (A1, A3, A4). Comprobación: `./verify` (≈10 min); exit 0 y suites pertinentes ejecutadas.
 
 ## Evidencia
+$ node pruebas/contrato-constructor.mjs
+ok A1
+ok A2
+ok A3
+ok A5
+ok A4
+exit 0
+
+$ ./verify
+ok A1 / ok A2 / ok A3 / ok A5 / ok A4 (contrato-constructor)
+10b: tests 10, pass 10, fail 0 (revisar-plan)
+10c: tests 2, pass 2, fail 0 (huella del diagnóstico)
+VERIFY OK
+exit 0
+
+Nota de revisión: estas salidas reflejan aserciones estáticas del contrato y el resto de las suites; los rótulos `ok A1/A2` no son observaciones del comportamiento de un constructor ejecutado.
+
+Paso 2 — `$ node pruebas/contrato-constructor.mjs`
+ok A1
+ok A2
+ok A3
+ok A5
+ok A4
+exit 0
+
+$ node --test pruebas/revisar-plan/*.test.mjs
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+exit 0
+
+$ node --test pruebas/diagnostico-sugiere/*.test.mjs
+✔ the contract and diagnostic exclude tracked edits and new files under cambios/
+✔ a repository without HEAD keeps the status-only fingerprint behavior
+ℹ tests 2
+ℹ pass 2
+ℹ fail 0
+exit 0
+
+$ node pruebas/contrato-constructor.mjs
+ok A2 sin comprobación: casilla pendiente y nota de reanudación
+ok A2 interrumpido: casilla pendiente y nota de reanudación
+ok A2 mutante: marcar anticipadamente se rechaza
+ok A1 / ok A2 / ok A3 / ok A5 / ok A4
+exit 0
+
+Nota de revisión: esta salida procede de cadenas preparadas y `validarA2` dentro de la propia prueba; no ejercita al constructor y no acredita A2.
+
+$ ./verify
+ok A2 sin comprobación: casilla pendiente y nota de reanudación
+ok A2 interrumpido: casilla pendiente y nota de reanudación
+ok A2 mutante: marcar anticipadamente se rechaza
+10b: tests 10, pass 10, fail 0 (revisar-plan)
+10c: tests 2, pass 2, fail 0 (huella del diagnóstico)
+VERIFY OK
+exit 0
 
 ## Notas
+- Escenario temporal listo en `/tmp/casillas-en-vivo-observacion`: `cambios/casillas-en-vivo-real/plan.md` y `pruebas/observar.mjs`. La sintaxis del observador pasa con `node --check`; no se invocó como sustituto del constructor ni se afirma A1/A2 observado. Para completar la observación, lanzar exactamente `codex-constructor exec --skip-git-repo-check -C /tmp/casillas-en-vivo-observacion 'Lee /home/franco/.agents/skills/ejecutar-plan/SKILL.md y ejecuta el plan aprobado cambios/casillas-en-vivo-real/plan.md paso por paso. Sigue la skill; después de cada comprobación registra evidencia y marca la casilla antes del siguiente paso. En el paso 5, que no tiene comprobación, deja la casilla pendiente y añade una nota de una línea. No edites Alcance ni Aceptación. Corre la Verificación final tal cual y no alteres otros archivos.'`. Revisar `/tmp/casillas-en-vivo-observacion/observaciones.log` y las cuatro señales; registrar sus salidas reales aquí solo si el constructor termina el recorrido. Esta instancia no puede lanzar otra instancia del constructor bajo sus instrucciones, por eso la observación real sigue pendiente.
+- Revisión DEVUELTO (A2): los casos `sin comprobación`, `interrumpido` y `mutante` de `pruebas/contrato-constructor.mjs` son cadenas preparadas comprobadas por un validador ad hoc. No ejercitan al constructor ni prueban que edite el plan como requiere A2; sus salidas se conservan como resultado de esa prueba, no como evidencia del criterio.
+- `kit run` usa ejecutables simulados en sus pruebas y la evaluación real del constructor está declarada como pendiente en `docs/evaluaciones/constructor.md`. Esta instancia no puede iniciar otra sesión del constructor por su instrucción de no llamar agentes; no se presenta la sesión actual como observación independiente. El escenario preparado arriba cubre A1 y el paso sin comprobación de A2; hace falta lanzarlo desde una sesión independiente y revisar sus resultados reales.
 - Crear `pruebas/diagnostico-sugiere/huella.test.mjs` y conectarlo a `verify`: hoy esa carpeta solo contiene el proyecto juguete.
 - Para A1 el principal deberá observar una ejecución real posterior con la skill modificada y un plan aprobado de cuatro pasos independientes, cada comprobación con señal y cada paso siguiente condicionado a observar la casilla anterior. Registrar las cuatro observaciones y comparar Alcance y Aceptación antes y después. No atribuir a una simulación prueba de comportamiento real; sin esa observación A1 queda pendiente en la revisión.
-- El árbol ya tiene `.claude/settings.json` modificado; preservarlo. Antes de construir, Franco debe resolver la base sucia conforme al flujo del principal.
+- La comprobación inicial mostró `main` limpia y actualizada; se creó `feature/casillas-en-vivo` como estaba autorizado.
+- La suite aislada de revisar-plan falló dentro del sandbox al lanzar procesos hijos; fuera del sandbox pasó con 10/10.
+- A1 todavía requiere que el principal observe en otra ejecución real con cuatro pasos los estados 1000 → 1100 → 1110 → 1111; esta ejecución no se usa como evidencia de esa observación.

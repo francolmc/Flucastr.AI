@@ -6,6 +6,57 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const skill = readFileSync(new URL('../skills/ejecutar-plan/SKILL.md', import.meta.url), 'utf8');
+const constructor = readFileSync(new URL('../agentes/constructor.md', import.meta.url), 'utf8');
+const planificador = readFileSync(new URL('../skills/planificar-cambio/SKILL.md', import.meta.url), 'utf8');
+assert.match(skill, /En cuanto un paso esté completo y su comprobación pase, marca su `- \[x\]`[\s\S]*?antes de empezar el paso siguiente/,
+  'A1: la casilla debe marcarse al completar y comprobar cada paso, antes del siguiente');
+assert.match(skill, /Si el paso no tiene una comprobación explícita, déjalo sin marcar[\s\S]*?Si se interrumpe o queda incompleto, déjalo sin marcar/,
+  'A2: pasos sin comprobación o interrumpidos deben quedar pendientes con nota');
+assert.match(skill, /nunca edites \*Alcance\* ni \*Aceptación\*/,
+  'A1: el constructor no modifica Alcance ni Aceptación');
+assert.match(constructor, /antes de empezar el paso siguiente; no acumules casillas para el final del tramo/,
+  'A1: el contrato del constructor requiere avance visible por paso');
+assert.match(planificador, /una comprobación explícita y su resultado esperado[\s\S]*?`Verificación del tramo` es adicional y nunca sustituye la comprobación individual/,
+  'A2/A3: cada paso requiere comprobación propia aunque el tramo tenga verificación');
+
+function validarA2({ plan, paso, nota }) {
+  const lines = plan.split(/\r?\n/);
+  const step = lines.find(line => /^- \[[ x]\] /.test(line) && line.slice(6).startsWith(paso));
+  assert.ok(step, `A2: debe existir ${paso}`);
+  assert.match(step, /^- \[ \] /, `A2: ${paso} debe quedar sin marcar`);
+  const notesStart = lines.indexOf('## Notas');
+  assert.notEqual(notesStart, -1, 'A2: debe existir la sección Notas');
+  const notes = lines.slice(notesStart + 1).filter(line => line.startsWith(`- ${paso}`));
+  assert.equal(notes.length, 1, `A2: ${paso} debe tener una sola nota retomable`);
+  assert.equal(notes[0], `- ${nota}`, `A2: nota incorrecta para ${paso}`);
+}
+
+const sinComprobacion = [
+  '# Plan de prueba',
+  '## Pasos',
+  '- [ ] Paso 1: preparar fixture',
+  '## Notas',
+  '- Paso 1: falta comprobación explícita; retomar definiendo una señal verificable.',
+].join('\n');
+const interrumpido = [
+  '# Plan de prueba',
+  '## Pasos',
+  '- [ ] Paso 2: ejecutar recorrido. Comprobación: node recorrido.mjs; termina con exit 0.',
+  '## Notas',
+  '- Paso 2: interrumpido durante el recorrido; retomar revisando el estado del fixture.',
+].join('\n');
+validarA2({ plan: sinComprobacion, paso: 'Paso 1:', nota: 'Paso 1: falta comprobación explícita; retomar definiendo una señal verificable.' });
+validarA2({ plan: interrumpido, paso: 'Paso 2:', nota: 'Paso 2: interrumpido durante el recorrido; retomar revisando el estado del fixture.' });
+console.log('ok A2 sin comprobación: casilla pendiente y nota de reanudación');
+console.log('ok A2 interrumpido: casilla pendiente y nota de reanudación');
+const marcaAnticipada = sinComprobacion.replace('- [ ] Paso 1:', '- [x] Paso 1:');
+assert.throws(
+  () => validarA2({ plan: marcaAnticipada, paso: 'Paso 1:', nota: 'Paso 1: falta comprobación explícita; retomar definiendo una señal verificable.' }),
+  error => error instanceof assert.AssertionError && /A2: Paso 1: debe quedar sin marcar/.test(error.message),
+  'A2: el caso mutante que marca antes de comprobar debe fallar',
+);
+console.log('ok A2 mutante: marcar anticipadamente se rechaza');
+
 const matches = [...skill.matchAll(/```bash pendientes-plan\n([\s\S]*?)\n```/g)];
 assert.equal(matches.length, 1, 'debe existir exactamente un bloque canónico bash pendientes-plan');
 const block = matches[0][1];

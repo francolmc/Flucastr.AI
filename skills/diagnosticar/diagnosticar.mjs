@@ -66,18 +66,19 @@ function recorrer(dir, base, saltar, visita) {
   }
 }
 
-// Huella del contrato: { git status --porcelain; git diff HEAD; } | sha256sum | cut -c1-12.
+// Huella del contrato: excluye cambios/ de status y diff, conservando los demás cambios.
 // null si la carpeta no es la raíz de un repo o git no responde.
 function huellaActual(carpeta) {
   try {
     const opts = { stdio: ["ignore", "pipe", "ignore"], maxBuffer: 256 * 1024 * 1024 };
     const env = { ...process.env, GIT_OPTIONAL_LOCKS: "0" };
+    const paths = ["--", ".", ":(exclude,top)cambios/**"];
     const top = execFileSync("git", ["-C", carpeta, "rev-parse", "--show-toplevel"], opts).toString().trim();
     if (realpathSync(top) !== realpathSync(carpeta)) return null;
-    const st = execFileSync("git", ["-C", carpeta, "status", "--porcelain"], { ...opts, env });
+    const st = execFileSync("git", ["-C", carpeta, "status", "--porcelain", ...paths], { ...opts, env });
     let df = Buffer.alloc(0);
     try {
-      df = execFileSync("git", ["-C", carpeta, "diff", "HEAD"], { ...opts, env });
+      df = execFileSync("git", ["-C", carpeta, "diff", "HEAD", ...paths], { ...opts, env });
     } catch {
       // sin HEAD (repo recién creado): la huella usa solo el estado
     }
