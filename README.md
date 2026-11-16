@@ -15,7 +15,7 @@ Dos agentes y dos puertas humanas:
 
 El único traspaso entre agentes es `cambios/<nombre>/plan.md`. Los niveles se traducen a modelos en `modelos.json`.
 
-Un cambio largo se parte en tramos (`### Tramo N`): el constructor hace un tramo por vez y el principal revisa cada uno antes de avanzar.
+Un cambio largo se parte en tramos pequeños (`### Tramo N`). Por defecto, el constructor ejecuta un tramo y espera la revisión del principal; un plan puede declarar `continuidad: continua` para que complete la historia aprobada de punta a punta. El plan fija condiciones de parada y mide antes la duración de cada comprobación limitante. Si la medida falta, el constructor se detiene antes de esa comprobación. Al completar la historia, el principal revisa en contexto nuevo; si es de riesgo alto, el plan puede exigir revisión por tramo, que detecta defectos antes a costa de más pausas. Cada tramo deja un punto de control con archivos tocados, resumen del diff y comprobación; sugiere un commit al final de la historia, que Franco hace manualmente.
 
 «Hecho» significa que `./verify` pasa desde cero.
 
