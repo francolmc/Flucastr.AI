@@ -236,6 +236,10 @@ function promptConstructor(planRel, tramo, ajuste) {
   return ajuste ? `${base}\n\nCorrige antes de seguir:\n${ajuste}` : base;
 }
 
+function claveFalloVerificacion(v) {
+  return `${v.status ?? "sin-codigo"}:${(v.stdout + v.stderr).trim().replace(/\s+/g, " ")}`;
+}
+
 function promptRevisor(planRel, diff, esquema) {
   return [
     `Revisa el plan ${planRel} contra el diff que sigue. Solo lees; no escribes nada.`,
@@ -267,6 +271,7 @@ function main() {
     process.exit(2);
   }
   const tramo = fm.tramo;
+  const continuidad = fm.continuidad === "continua";
   const verificacion = comandoVerificacion(texto0);
   const pieza = tramo ? `tramo=${tramo}; ` : "";
   const veredictoOut = (linea) => console.log(linea);
@@ -286,6 +291,7 @@ function main() {
   writeFileSync(schemaPath, JSON.stringify(ESQUEMA_VEREDICTO));
 
   let relanzamientos = 0;
+  let fallosVerificacion = new Set();
   let prompt = promptConstructor(planRel, tramo, null);
   let final = null;
 
@@ -310,6 +316,12 @@ function main() {
         ? correr({ exe: process.env.KIT_RUN_VERIFY, args: [] }, null, raiz, false, topeMs("VERIFY"))
         : correr({ exe: verificacion }, null, raiz, true, topeMs("VERIFY"));
       if (v.status !== 0 || v.error) {
+        const causa = claveFalloVerificacion(v);
+        if (continuidad && fallosVerificacion.has(causa)) {
+          final = { pausa: true, motivo: "verify", msg: `la verificación repitió la misma causa: ${cola(v.stdout + v.stderr)}` };
+          break;
+        }
+        fallosVerificacion.add(causa);
         if (relanzamientos < MAX_RELANZAMIENTOS) {
           relanzamientos++;
           prompt = promptConstructor(planRel, tramo, `La verificación falló (exit ${v.status}). Salida:\n${cola(v.stdout + v.stderr)}`);

@@ -9,5 +9,6 @@ pruebas/*
 !pruebas/aceptacion/
 !pruebas/permisos-contrato/
 !pruebas/permisos-v2.test.mjs
+!pruebas/continuidad/
 
 .codex/

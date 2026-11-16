@@ -1,10 +1,10 @@
 ---
-estado: aprobado
+estado: listo
 rama: feature/continuidad
 base: main
 repos: [.]
 ejecutor: constructor
-tramo: 2
+tramo: 3
 tipo: codigo
 ---
 # Continuidad del constructor
@@ -189,3 +189,49 @@ El constructor puede avanzar dentro de una historia y registrar decisiones, punt
 La integración es mediante las instrucciones reales del agente y su skill; la ejecución real se verifica en el tramo 3.
 Compatibilidad existente: node pruebas/contrato-constructor.mjs pasó en revisión.
 Sigue tramo 3 en contexto nuevo; falta comprobar el recorrido real y la pausa provocada.
+
+PAUSA tramo 3: protocolo real completó dos tramos en una sesión independiente y la sesión de fallo provocada dejó `parcial` tras dos fallos idénticos (`motivo=verify`); evidencia en `pruebas/continuidad/evidencia-real.md`. `./verify` completo falla en el paso 11 porque faltan `/compact` en ambas skills; la corrección excede el alcance del tramo 3. Su TODO permanece pendiente.
+
+Reanudación tramo 3: estado reconstruido con `git status --short` y `git diff --stat`: modificados `.gitignore`, plan, tramo 3, `pruebas/kit-run/probar.mjs`, `scripts/kit-run.mjs`; nueva `pruebas/continuidad/`. Para resolver verify, se amplía este tramo a las dos skills ya incluidas en el alcance general y a `.gitignore` para incluir el protocolo. Restablecer en ambas la indicación real de `/compact` o sesión nueva al cerrar historia, y el comportamiento legado por tramo cuando no hay continuidad; conservar la continuidad sin pausa entre tramos. No alterar ni debilitar verify ni tests de aceptación. Luego ejecutar `./verify`.
+
+$ ./verify
+ok A4: contrato nuevo y compatibilidad con el contrato anterior
+ok A2: 17 condiciones del modo continuo y compatibilidad verificadas
+ok 13: pruebas de kit run pasaron con los CLIs simulados
+VERIFY OK
+exit 0
+
+Tramo 3 listo: ambos recorridos reales registrados en `pruebas/continuidad/evidencia-real.md`; la ejecución completa terminó con `./verify` exit 0. Punto de control: archivos de producto `scripts/kit-run.mjs`, `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`; pruebas `pruebas/kit-run/probar.mjs`, `pruebas/continuidad/protocolo.mjs`; `.gitignore`. Diff resumido: orquestación continua y prueba de mutación sensible; fixture reproducible de éxito/parada; `/compact` o sesión nueva al cerrar historia y preservación del modo legado. Comprobación: `node pruebas/kit-run/probar.mjs` (20 casos), protocolo real (dos sesiones registradas) y `./verify` (`VERIFY OK`, exit 0). No se hizo commit.
+
+Revisión tramo 3 — DEVUELTO: `pruebas/continuidad/protocolo.mjs:71` y `:86` anticipan al constructor la falla concreta y le dictan repetirla y parar; la evidencia no demuestra que aplique autónomamente las condiciones generales (A3). Retirar instrucciones específicas del fallo y del resultado de la sesión, conservar solo las condiciones generales del plan y una falla provocada aislada, ejecutar de nuevo ambas sesiones reales y registrar resultados observados. La prueba debe comprobar nota, dos fallos de misma causa y tramo 2 sin iniciar. `./verify` pasó en revisión.
+
+$ node pruebas/continuidad/protocolo.mjs codex-constructor
+ok sesión real: continuidad completó dos tramos en una invocación independiente
+ok sesión real: fallo provocado dejó plan parcial, nota y tramo 2 intacto
+evidencia: pruebas/continuidad/evidencia-real.md
+exit 0
+
+Sesiones reales añadidas tras DEVUELTO: éxito completó los tramos 1 y 2 (94.05 s, ambas casillas [x]); fallo aislado dejó el plan parcial, dos resultados `VERIFY_CHECK_FAILED`, el paso pendiente y no creó `segundo.txt` (63.93 s). Retornos y notas observados, junto a la evidencia histórica: `pruebas/continuidad/evidencia-real.md`.
+
+$ ./verify
+ok A4: contrato nuevo y compatibilidad con el contrato anterior
+ok A2: 17 condiciones del modo continuo y compatibilidad verificadas
+ok 13: pruebas de kit run pasaron con los CLIs simulados
+VERIFY OK
+exit 0
+
+$ git diff --check
+exit 0
+
+Resuelto tras DEVUELTO: se retiraron del plan temporal las instrucciones que anticipaban el fallo y la reacción; conserva solo condiciones generales de parada y el verificador aislado provoca el fallo. Dos sesiones nuevas del constructor real pasaron las aserciones A3; la segunda dejó nota de causa repetida y no inició el tramo 2. Se anexaron sus resultados sin reemplazar evidencia histórica. `./verify` completo volvió a pasar (exit 0), sin cambiar sus criterios ni las pruebas de aceptación.
+
+Revisión tramo 3: comprobación técnica preliminar favorable; A3 cuenta con dos sesiones reales renovadas.
+La sesión de éxito completó dos tramos y dejó puntos de control sin intervención.
+La sesión de fallo quedó parcial tras dos fallos de la misma causa; el segundo tramo no comenzó.
+`./verify` pasó nuevamente en revisión del principal, exit 0; compatibilidad de kit run cubierta.
+Pendiente: revisión final de la historia en contexto nuevo y aprobación de evidencia por Franco.
+
+Revisión final en contexto nuevo — APROBADO: A1 cumplido (formato, límites, medición y revisión); A2 cumplido (procedimiento, pausas, decisiones y puntos de control); A3 cumplido (pruebas offline y dos sesiones reales observadas).
+Las reglas están conectadas a las instrucciones del constructor y su skill; `kit run` contempla el modo continuo y conserva el modo anterior. `./verify` pasó en la revisión del principal.
+La observación real usa repositorios temporales de prueba: demuestra este recorrido con el constructor real, no sustituye una medición en un proyecto real de mayor complejidad.
+Franco revisa y aprueba la evidencia antes del cierre y su commit.
