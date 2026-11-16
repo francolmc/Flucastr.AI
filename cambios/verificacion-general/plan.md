@@ -10,7 +10,7 @@ tipo: codigo
 # Perfil de verificación rápida: convención y auditor para todos los proyectos
 
 ## Objetivo
-Que el kit pueda **comprobar** si un proyecto cumple la verificación rápida (Nivel 1, Dockerfiles con caché, tiempos y diagnóstico en `verify`) y que `preparar-proyecto` lo pida desde el inicio. Evidencia: `cambios/auditoria-verificacion-general/hallazgo.md`.
+Que el kit pueda **comprobar** si un proyecto cumple la verificación rápida (Nivel 1, Dockerfiles con caché, tiempos y diagnóstico en `verify`) y que `preparar-proyecto` lo pida desde el inicio. Evidencia: `docs/investigaciones/auditoria-verificacion-general/hallazgo.md`.
 
 ## Supuestos
 - El auditor es de solo lectura y offline: no corre Docker ni `verify`. Si Franco quiere que además mida tiempos reales, es otro plan.

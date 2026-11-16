@@ -9,7 +9,7 @@ tipo: codigo
 # Skill `disenar-experiencia` y su enlace en el flujo
 
 ## Objetivo
-El principal diseña la experiencia antes de planificar cualquier cambio que toque pantallas: deja un boceto que Franco ve en la terminal y lo aprueba en la puerta 1. Evidencia del problema: `cambios/auditoria-donfinancio-diseno/hallazgo.md`.
+El principal diseña la experiencia antes de planificar cualquier cambio que toque pantallas: deja un boceto que Franco ve en la terminal y lo aprueba en la puerta 1. Evidencia del problema: `docs/investigaciones/auditoria-donfinancio-diseno/hallazgo.md`.
 
 ## Supuestos
 - Nombre de la skill: `disenar-experiencia`. Si Franco prefiere otro, cambia la carpeta y cada mención.

@@ -9,7 +9,7 @@ tipo: codigo
 # Convención: un solo `verify` con Docker a la vez (cola con candado)
 
 ## Objetivo
-Que `preparar-proyecto` pida a todo `verify` que use Docker tomar un candado compartido antes de construir, para que dos proyectos (o dos sesiones) no compitan por memoria y CPU. Evidencia: `cambios/auditoria-tests-donfinancio/hallazgo.md` (PostgreSQL `unhealthy`, `P1017`, API `unhealthy` en DonFinancio y Byteria, con corridas de Docker intercaladas el 13-nov).
+Que `preparar-proyecto` pida a todo `verify` que use Docker tomar un candado compartido antes de construir, para que dos proyectos (o dos sesiones) no compitan por memoria y CPU. Evidencia: `docs/investigaciones/auditoria-tests-donfinancio/hallazgo.md` (PostgreSQL `unhealthy`, `P1017`, API `unhealthy` en DonFinancio y Byteria, con corridas de Docker intercaladas el 13-nov).
 
 ## Supuestos
 - El candado es `/tmp/flucastr-docker.lock` con `flock` (util-linux, presente en este equipo). Si otro equipo no lo tiene, el `verify` avisa y sigue sin cola; no falla.

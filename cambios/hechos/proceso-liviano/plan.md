@@ -9,7 +9,7 @@ tipo: codigo
 # Proceso liviano: lo pequeño se hace en línea, la revisión sigue al riesgo
 
 ## Objetivo
-Que un cambio pequeño no pase por plan, constructor ni segunda verificación completa, y que lo grande o riesgoso conserve todas las puertas. Fuente: ODD de gentle-ai ([README](https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/README.md), release v3.0.0) y la observación de Franco del 14-nov (`cambios/auditoria-burocracia/observacion.md`).
+Que un cambio pequeño no pase por plan, constructor ni segunda verificación completa, y que lo grande o riesgoso conserve todas las puertas. Fuente: ODD de gentle-ai ([README](https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/README.md), release v3.0.0) y la observación de Franco del 14-nov (`docs/investigaciones/auditoria-burocracia/observacion.md`).
 
 Además, que cada revisión mire si lo que el cambio tocó está bien hecho para su tecnología (por ejemplo, si usa Docker, que lo use de forma óptima), sin frenar ni ampliar el cambio.
 
@@ -132,6 +132,6 @@ Las líneas `ok 8k` y `ok 8l` (salida completa en el log) también pasan: «Solo
 - `ejecutar-plan/SKILL.md` no se tocó: no tiene frase equivalente a «toda edición».
 - `verify`: ningún bloque existente exigía «aunque sea de una línea» ni «toda edición»; ninguno se debilitó. El bloque 8t copia el patrón del 8l y su copia negativa usa `/g` para quitar todas las apariciones.
 - `principal.md`: la línea «Solo creas o editas…» se conserva (8k); la excepción de cambio pequeño va en la frase siguiente.
-- `docs/practicas-por-tecnologia.md`: 11 prácticas, cada una con fuente del repo o enlace, y grado de evidencia. Se usó la propuesta ya existente (`cambios/auditoria-verificacion-general/propuesta-final.md`); no se agregó nada sin fuente.
+- `docs/practicas-por-tecnologia.md`: 11 prácticas, cada una con fuente del repo o enlace, y grado de evidencia. Se usó la propuesta ya existente (`docs/investigaciones/auditoria-verificacion-general/propuesta-final.md`); no se agregó nada sin fuente.
 - Fuera de Alcance, para Franco: `AGENTS.md` (raíz, línea 7) dice que el constructor «ejecuta toda edición del plan». Sigue siendo cierto para planes; no se tocó, pero conviene alinearlo en un cambio aparte.
 - Pendiente de medición (no es un paso): `node scripts/uso.mjs --sesiones` en los 3 próximos cambios, según *Supuestos*.

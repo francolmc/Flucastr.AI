@@ -9,7 +9,7 @@ tipo: codigo
 # Observador de Docker: medir la verificación de todos los proyectos sin tocarlos
 
 ## Objetivo
-Un observador que, mientras corre, registre builds, eventos y memoria de Docker de **cualquier proyecto y stack**, y un informe que muestre dónde se va el tiempo, quién se solapa con quién y qué cayó por memoria. Sin cambiar ningún `verify`. Evidencia previa: `cambios/auditoria-verificacion-general/` (hallazgo, propuesta y `builds-2026-11-13.jsonl`).
+Un observador que, mientras corre, registre builds, eventos y memoria de Docker de **cualquier proyecto y stack**, y un informe que muestre dónde se va el tiempo, quién se solapa con quién y qué cayó por memoria. Sin cambiar ningún `verify`. Evidencia previa: `docs/investigaciones/auditoria-verificacion-general/` (hallazgo, propuesta y `builds-2026-11-13.jsonl`).
 
 ## Supuestos
 - Es solo lectura sobre Docker; no limpia, no frena ni cambia nada. Si Franco quiere además imponer límites, es el paso siguiente.

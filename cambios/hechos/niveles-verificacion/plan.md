@@ -8,7 +8,7 @@ ejecutor: constructor
 # Niveles de verificación: comprobación rápida y E2E solo al cerrar el flujo
 
 ## Objetivo
-Un cambio chico se verifica con una comprobación rápida del host (tipos, lint, tests), sin Docker. El `verify` con E2E corre solo al completar el flujo (tramo final) o cuando el plan lo declara. Evidencia: `cambios/auditoria-codex-permisos-esperas/hallazgo.md` (verify de DonFinancio: ≈20 min por corrida, 43 corridas en una sesión).
+Un cambio chico se verifica con una comprobación rápida del host (tipos, lint, tests), sin Docker. El `verify` con E2E corre solo al completar el flujo (tramo final) o cuando el plan lo declara. Evidencia: `docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md` (verify de DonFinancio: ≈20 min por corrida, 43 corridas en una sesión).
 
 ## Supuestos
 - «Cambio chico»: un solo repo, hasta ≈3 archivos, sin migración, sin cambio de contrato de API ni de ruta o pantalla del recorrido. Si Franco quiere otro umbral, cambia una cifra en un paso.
