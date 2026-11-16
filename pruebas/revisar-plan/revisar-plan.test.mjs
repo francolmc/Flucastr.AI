@@ -15,6 +15,26 @@ const temporary = async (callback) => {
   try { await callback(dir); } finally { await rm(dir, { recursive: true, force: true }); }
 };
 
+const newStoryPlan = ({ files = ['src/a.js'], extra = '' } = {}) => `# Feature de prueba
+
+## Alcance
+Cambiar solo los archivos de producto declarados por historia.
+
+## Pasos
+### Tramo 1 — Historia: guardar el cambio
+Como persona usuaria quiero guardar el cambio para conservar mi trabajo.
+Dependencias: ninguna.
+Alcance: ${files.map((file) => `\`${file}\``).join(', ')}.
+Archivos: ${files.map((file) => `\`${file}\``).join(', ')}
+CUANDO guardo el cambio ENTONCES queda disponible al volver (A1).
+Aceptación:
+- A1: el cambio queda guardado; comprobar que puede volver a leerse.
+TODO:
+- [ ] Actualizar \`${files[0]}\` (A1). Comprobación: \`node --check ${files[0]}\`; exit 0.
+Verificación del tramo: \`node --test pruebas/feature.test.mjs\` — nivel 1; exit 0; cubre A1.
+Handoff: usar la base acordada y devolver la evidencia de A1.
+${extra}`;
+
 test('F13 fixture reports folder, weak steps and multiple screens', () => {
   const result = run(fixture('f13-tramo1.md'));
   assert.equal(result.status, 1, result.stderr);
@@ -33,6 +53,45 @@ test('well-cut plan has no warnings and stays byte-for-byte intact', async () =>
   assert.deepEqual(await readFile(file), before);
 });
 
+test('complete new story fixture passes without external change-plan paths', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'nuevo.md');
+  await writeFile(file, newStoryPlan());
+  const result = run(file);
+  assert.equal(result.status, 0, result.stdout);
+  assert.equal(result.stdout, '');
+
+  const stableFixture = run(fixture('historia-nueva-valida.md'));
+  assert.equal(stableFixture.status, 0, stableFixture.stdout || stableFixture.stderr);
+  assert.equal(stableFixture.stdout, '');
+}));
+
+test('new format without Pasos is rejected instead of accepted silently', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'sin-pasos.md');
+  await writeFile(file, '# Feature\n\n## Objetivo\nProbar omisiones.\n\nCUANDO sucede ENTONCES funciona (A1).\n');
+  const result = run(file);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /sin-pasos\.md:1:.*no contiene ## Pasos/);
+}));
+
+test('new story reports missing mandatory fields and TODO acceptance mapping', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'incompleto.md');
+  const source = newStoryPlan().replace('Dependencias: ninguna.\n', '').replace('Handoff: usar la base acordada y devolver la evidencia de A1.\n', '').replace('(A1). Comprobación:', '(A2). Comprobación:');
+  await writeFile(file, source);
+  const result = run(file);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /incompleto\.md:.*falta Dependencias/);
+  assert.match(result.stdout, /incompleto\.md:.*falta Handoff/);
+  assert.match(result.stdout, /incompleto\.md:.*A2 en TODO no tiene criterio/);
+}));
+
+test('legacy scenarios and global acceptance remain valid', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'antiguo.md');
+  await writeFile(file, `# Plan antiguo\n\n## Escenarios\n- La persona guarda el cambio.\n\n## Aceptación\n- A1: el cambio queda guardado.\n\n## Pasos\n### Tramo 1: guardar\nResultado: el cambio queda guardado.\nArchivos: \`src/a.js\`\n- [ ] Actualizar \`src/a.js\`. Comprobación: \`node --check src/a.js\`\n`);
+  const result = run(file);
+  assert.equal(result.status, 0, result.stdout);
+  assert.equal(result.stdout, '');
+}));
+
 test('CLI errors use exit 2 and write to stderr', async () => {
   const noArgument = spawnSync(process.execPath, [script], { encoding: 'utf8' });
   assert.equal(noArgument.status, 2);
@@ -49,6 +108,11 @@ test('three product files are allowed; four and a directory are warned', async (
   const file = path.join(dir, 'plan.md');
   await writeFile(file, base);
   assert.equal(run(file).status, 0);
+  const newStoryFile = path.join(dir, 'nuevo.md');
+  await writeFile(newStoryFile, newStoryPlan({ files: ['src/a.js', 'src/b.js', 'src/c.js', 'src/d.js'] }));
+  const newStoryFour = run(newStoryFile);
+  assert.equal(newStoryFour.status, 1);
+  assert.match(newStoryFour.stdout, /nuevo\.md:.*4 archivos/);
   await writeFile(file, base.replace('src/c.js', 'src/c.js`, `src/d.js'));
   const four = run(file);
   assert.equal(four.status, 1);

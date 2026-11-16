@@ -1110,6 +1110,7 @@ TEXTOS_TRAMOS=(
   'skills/planificar-cambio/SKILL.md|cruce'
   'skills/planificar-cambio/SKILL.md|Resuelto:'
   'skills/ejecutar-plan/SKILL.md|Si el plan trae `tramo: <n>` en el frontmatter'
+  'skills/ejecutar-plan/SKILL.md|### Tramo N — Historia:'
   'skills/ejecutar-plan/SKILL.md|vuelve a correr el mismo comando'
   'skills/ejecutar-plan/SKILL.md|Resuelto:'
   'agentes/constructor.md|COMPLETADO: plan=<ruta>; tramo=<n>; verify=pasa'

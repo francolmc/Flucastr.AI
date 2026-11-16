@@ -18,6 +18,70 @@ assert.match(constructor, /antes de empezar el paso siguiente; no acumules casil
   'A1: el contrato del constructor requiere avance visible por paso');
 assert.match(planificador, /una comprobación explícita y su resultado esperado[\s\S]*?`Verificación del tramo` es adicional y nunca sustituye la comprobación individual/,
   'A2/A3: cada paso requiere comprobación propia aunque el tramo tenga verificación');
+assert.ok(
+  skill.includes('`### Tramo N — Historia: ...` identifica una historia autocontenida')
+    && skill.includes('criterios `A#`, TODO y *Handoff*'),
+  'A4: el formato nuevo guía la ejecución por historia y handoff',
+);
+assert.ok(
+  skill.includes('En planes antiguos, sigue los pasos y aceptación declarados en su formato existente')
+    && skill.includes('`tramo-<n>.md`'),
+  'A4: los planes antiguos conservan sus pasos y archivo de tramo',
+);
+console.log('ok A4: contrato nuevo y compatibilidad con el contrato anterior');
+
+const a5 = [
+  ['dependencias reales', 'dependencias reales', 'dependencias reales'],
+  ['dependencias externas y su motivo', 'Externa — <sistema, herramienta, requisito o contrato externo necesario y motivo>', 'incluidas dependencias externas a los tramos y su motivo'],
+  ['contratos a conservar', 'Contratos a conservar:', 'contratos a conservar'],
+  ['rutas susceptibles de cambio', 'Rutas susceptibles de cambio:', 'rutas susceptibles de cambio'],
+  ['ruta usada por prueba que puede moverse o archivarse y prueba a actualizar', 'indica si puede moverse o archivarse y qué prueba debe actualizarse', 'indique si puede moverse o archivarse y qué prueba debe actualizarse'],
+  ['ejemplo concreto del resultado esperado', 'Ejemplo concreto del resultado esperado:', 'ejemplo concreto del resultado esperado'],
+];
+const templateStart = planificador.indexOf('```markdown\n', planificador.indexOf('## Pasos'));
+const templateEnd = planificador.indexOf('\n```', templateStart);
+const reviewStart = planificador.indexOf('## Antes de pedir la aprobación');
+const reviewEnd = planificador.indexOf('\nSi el constructor devuelve', reviewStart);
+assert.ok(templateStart >= 0 && templateEnd > templateStart, 'A5: falta la plantilla de historia');
+assert.ok(reviewStart >= 0 && reviewEnd > reviewStart, 'A5: falta la revisión previa a aprobación');
+
+function validarA5(text) {
+  const start = text.indexOf('```markdown\n', text.indexOf('## Pasos'));
+  const end = text.indexOf('\n```', start);
+  const template = text.slice(start, end).toLowerCase();
+  const review = text.slice(text.indexOf('## Antes de pedir la aprobación'), text.indexOf('\nSi el constructor devuelve')).toLowerCase();
+  assert.ok(template.includes('«no aplica»'), 'A5: la plantilla debe permitir «No aplica»');
+  assert.ok(review.includes('«no aplica»'), 'A5: la revisión previa debe permitir «No aplica»');
+  for (const [label, templatePhrase, reviewPhrase] of a5) {
+    assert.ok(template.includes(templatePhrase.toLowerCase()), 'A5: falta en plantilla "' + label + '"');
+    assert.ok(review.includes(reviewPhrase), 'A5: falta en revisión previa "' + label + '"');
+  }
+}
+
+function quitarEnSeccion(text, startMarker, endMarker, phrase) {
+  const start = text.indexOf(startMarker);
+  const end = text.indexOf(endMarker, start);
+  const section = text.slice(start, end);
+  assert.ok(section.toLowerCase().includes(phrase.toLowerCase()), 'A5: no se encontró "' + phrase + '" para mutar');
+  return text.slice(0, start) + section.replace(phrase, '') + text.slice(end);
+}
+
+validarA5(planificador);
+for (const [label, templatePhrase, reviewPhrase] of a5) {
+  const withoutTemplateRequirement = quitarEnSeccion(planificador, '## Pasos', '\n## Evidencia', templatePhrase);
+  assert.throws(
+    () => validarA5(withoutTemplateRequirement),
+    error => error instanceof assert.AssertionError && error.message.includes('A5: falta en plantilla "' + label + '"'),
+    'A5: quitar ' + label + ' de la plantilla debe fallar por ese requisito',
+  );
+  const withoutReviewRequirement = quitarEnSeccion(planificador, '## Antes de pedir la aprobación', '\nSi el constructor devuelve', reviewPhrase);
+  assert.throws(
+    () => validarA5(withoutReviewRequirement),
+    error => error instanceof assert.AssertionError && error.message.includes('A5: falta en revisión previa "' + label + '"'),
+    'A5: quitar ' + label + ' de la revisión debe fallar por ese requisito',
+  );
+}
+console.log('ok A5: plantilla y revisión exigen dependencias externas, contratos, rutas y ejemplo; 12 mutaciones negativas detectadas');
 
 function validarRegistroA2({ plan, paso, prefijoNota }) {
   const lines = plan.split(/\r?\n/);
