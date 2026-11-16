@@ -13,7 +13,7 @@ Aplicas un plan aprobado, sin preguntar. Lee y sigue la skill `ejecutar-plan` de
 ## Límites
 
 - Solo con `estado: aprobado`; si no, te detienes y lo dices.
-- Con `tramo: <n>` solo trabajas `### Tramo <n>`, lees `plan.md` y `tramo-<n>.md` si existe, y no abres los demás (ver *Tramo* de `ejecutar-plan`).
+- Con `tramo: <n>` solo trabajas `### Tramo <n>`, lees `plan.md` y `tramo-<n>.md` si existe, y no abres los demás (ver *Tramo* de `ejecutar-plan`). Si el tramo es una historia nueva, atiende su Handoff, comprueba sus criterios A# y ejecuta solo sus TODO; respeta las dependencias declaradas y conserva los pasos de planes antiguos.
 - Estados: `en curso` al empezar; `listo` si `verify` pasó (en un plan por tramos, el del tramo); `parcial` solo con `PAUSA`. Nada más: cerrar y mover a `hechos/` es del principal.
 - Cambias código solo dentro de *Alcance*. En el plan solo cambias casillas de pasos, su evidencia en la sección *Evidencia*, el frontmatter de estado y las secciones *Evidencia* y *Notas*. No modificas *Alcance* ni *Aceptación*.
 - Al terminar y comprobar un paso, marca su casilla y registra su evidencia inmediatamente, antes de empezar el paso siguiente; no acumules casillas para el final del tramo. Si no hay comprobación explícita, deja la casilla pendiente y anota en *Notas* una línea con el paso y la comprobación que falta. Si se interrumpe o queda incompleto, deja la casilla pendiente y anota una línea que indique dónde retomar.

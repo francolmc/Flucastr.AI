@@ -4,7 +4,7 @@ rama: feature/planes-por-feature
 base: main
 repos: [.]
 ejecutor: constructor
-tramo: 3
+tramo: 4
 tipo: codigo
 ---
 # Planes por feature
@@ -55,7 +55,7 @@ Verificación del tramo: `git diff --check` — nivel 1; exit 0 y revisión manu
 Handoff: leer Objetivo, Exploración, Decisiones y este tramo; conservar compatibilidad de planes existentes. Registrar evidencia y dudas sin modificar aceptación.
 
 ### Tramo 2 — Historia: revisar planes nuevos y antiguos
-Como principal quiero que el revisor detecte historias incompletas y respete planes antiguos. Dependencias: tramo 1.
+Como principal quiero que el revisor detecte historias incompletas y respete planes antiguos para revisar ambos formatos. Dependencias: tramo 1.
 Archivos: `scripts/revisar-plan.mjs`, `pruebas/revisar-plan/revisar-plan.test.mjs`.
 CUANDO reviso historias ENTONCES detecto campos ausentes, pasos sin comprobación y más de tres archivos de producto (A2).
 Aceptación A2: pruebas cubren un plan nuevo válido, ausencia de pasos, campos obligatorios ausentes, cuatro archivos, y un plan antiguo válido; el ejemplo pasa sin avisos. Las comprobaciones semánticas siguen siendo revisión humana.
@@ -65,16 +65,24 @@ Verificación del tramo: `node --test pruebas/revisar-plan/revisar-plan.test.mjs
 Handoff: leer la plantilla resultante y este tramo; no aceptar un archivo sin pasos por silencio. No debilitar pruebas existentes.
 
 ### Tramo 3 — Historia: mantener el contrato de ejecución
-Como constructor quiero recibir una sola historia con sus criterios y verificarla sin depender de historias futuras. Dependencias: tramos 1 y 2.
-Archivos: `skills/ejecutar-plan/SKILL.md`, `agentes/constructor.md`, `verify`, `pruebas/contrato-constructor.mjs`.
+Como constructor quiero recibir una sola historia con sus criterios para verificarla sin depender de historias futuras. Dependencias: tramos 1 y 2.
+Archivos: `skills/ejecutar-plan/SKILL.md`, `agentes/constructor.md`.
 CUANDO ejecuto una historia aprobada ENTONCES leo su handoff, compruebo sus criterios y entrego evidencia para revisión (A3).
-Aceptación A3: instrucciones de ejecución y pruebas reflejan el formato nuevo, respetan el anterior y mantienen comprobaciones negativas; `./verify` pasa y el ejemplo pasa por el revisor.
-- [ ] Actualizar `skills/ejecutar-plan/SKILL.md` para leer criterios y handoff del tramo activo (A3). Comprobación: lectura cruzada con plantilla; ejecución antigua y nueva quedan definidas.
-- [ ] Actualizar `agentes/constructor.md` para el traspaso por historia (A3). Comprobación: lectura cruzada con ejecución; conserva estados y protección de aceptación.
-- [ ] Ajustar `verify` solo donde sus literales contradigan el contrato nuevo, con negativo equivalente (A3). Comprobación: `./verify`; exit 0.
-- [ ] Ajustar `pruebas/contrato-constructor.mjs` para comprobar ambos contratos sin debilitar aceptación (A3). Comprobación: `node pruebas/contrato-constructor.mjs`; exit 0.
-Verificación del tramo: `./verify` — nivel 3; exit 0; ejecutar también `node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md`, exit 0 sin avisos; cubre A3.
-Handoff: leer este tramo y la plantilla; preservar pruebas negativas y compatibilidad. Ante un contrato no especificado, registrar la duda para el principal.
+Aceptación A3: instrucciones de ejecución reflejan el formato nuevo y respetan el anterior; conservan estados y protección de aceptación.
+- [x] Actualizar `skills/ejecutar-plan/SKILL.md` para leer criterios y handoff del tramo activo (A3). Comprobación: lectura cruzada con plantilla; ejecución antigua y nueva quedan definidas.
+- [x] Actualizar `agentes/constructor.md` para el traspaso por historia (A3). Comprobación: lectura cruzada con ejecución; conserva estados y protección de aceptación.
+Verificación del tramo: `node pruebas/contrato-constructor.mjs` y `git diff --check` — nivel 1; exit 0 y lectura cruzada de A3.
+Handoff: leer este tramo y la plantilla; preservar compatibilidad. Ante un contrato no especificado, registrar la duda para el principal.
+
+### Tramo 4 — Historia: verificar el contrato de ejecución
+Como principal quiero verificar ambos formatos para detectar regresiones en el contrato de ejecución. Dependencias: tramos 1, 2 y 3.
+Archivos: `verify`, `pruebas/contrato-constructor.mjs`.
+CUANDO verifico el kit ENTONCES compruebo los contratos anterior y nuevo y sus pruebas negativas (A4).
+Aceptación A4: pruebas comprueban ambos contratos sin debilitar aceptación; `./verify` pasa y el ejemplo pasa por el revisor.
+- [ ] Ajustar `verify` solo donde sus literales contradigan el contrato nuevo, con negativo equivalente (A4). Comprobación: `./verify`; exit 0.
+- [ ] Ajustar `pruebas/contrato-constructor.mjs` para comprobar ambos contratos sin debilitar aceptación (A4). Comprobación: `node pruebas/contrato-constructor.mjs`; exit 0.
+Verificación del tramo: `./verify` — nivel 3; exit 0; ejecutar también `node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md`, exit 0 sin avisos; cubre A4.
+Handoff: leer este tramo y las instrucciones actualizadas; preservar pruebas negativas y compatibilidad. Ante un contrato no especificado, registrar la duda para el principal.
 
 ## Evidencia
 - Tramo 2, paso 1: `$ node --test pruebas/revisar-plan/revisar-plan.test.mjs` — 10 tests, 10 pass, 0 fail; `exit 0`. El revisor identifica historias con encabezado nuevo, exige sus campos y TODO comprobables, avisa si falta `## Pasos` y conserva el tratamiento previo de tramos antiguos.
@@ -84,12 +92,22 @@ Handoff: leer este tramo y la plantilla; preservar pruebas negativas y compatibi
 - Devolución corregida: `$ node --test pruebas/revisar-plan/revisar-plan.test.mjs` — 14 tests, 14 pass, 0 fail; `exit 0`. El positivo usa `pruebas/revisar-plan/fixtures/historia-nueva-valida.md`, sin depender del plan que se archivará.
 - Comprobación explícita del ejemplo actual tras desacoplar la prueba: `$ node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md` — salida vacía; `exit 0`.
 - Dependencia del fixture: `$ rg -n "cambios/planes-por-feature/ejemplo-don-financio\\.md" pruebas/revisar-plan/revisar-plan.test.mjs` — sin coincidencias; `exit 1` (resultado esperado).
+- Tramo 3, paso 1: la sección Tramo ahora guía al constructor por historia activa, Handoff, dependencias y criterios A# y limita la ejecución a sus TODO; los planes antiguos conservan sus pasos y aceptación. Lectura cruzada con la plantilla y `$ node pruebas/contrato-constructor.mjs` — ok A1, A2, A3, A5, A4; `exit 0`. `$ git diff --check -- skills/ejecutar-plan/SKILL.md` — salida vacía; `exit 0`.
+- Tramo 3, paso 2: el handoff del agente constructor apunta a Handoff, criterios A#, TODO y dependencias de la historia activa, manteniendo ejecución antigua. Lectura cruzada con `ejecutar-plan`; `$ node pruebas/contrato-constructor.mjs` — ok A1, A2, A3, A5, A4; `exit 0`. `$ git diff --check -- agentes/constructor.md` — salida vacía; `exit 0`.
+- Verificación del tramo 3: `$ node pruebas/contrato-constructor.mjs` — ok A1, A2, A3, A5, A4; `exit 0`. `$ git diff --check` — salida vacía; `exit 0`. Lectura cruzada confirma instrucciones alineadas, compatibilidad anterior y protección de aceptación conservada.
+- Tramo 3 devuelto, corrección: `$ rg -n 'tramo-<n>\.md' skills/ejecutar-plan/SKILL.md` — encuentra el literal de compatibilidad y declara también `tramo-N.md` para el formato nuevo; `exit 0`. `$ node pruebas/contrato-constructor.mjs` — ok A1, A2, A3, A5, A4; `exit 0`. `$ git diff --check` — salida vacía; `exit 0`.
 - Tramo 1, paso 1: plantilla leída completa y cotejada con Decisiones; incluye fases, preguntas en Exploración, omisión declarada, historias con dependencias, CUANDO/ENTONCES, A#, TODO atómico, alcance de hasta 3 archivos, verificación y handoff. `git diff --check -- skills/planificar-cambio/SKILL.md`: exit 0.
 - Tramo 1, paso 2: secuencia del principal leída y cotejada con la plantilla; concentra preguntas en Exploración, exige validar antes de historias y contempla volver a explorar. Se mantienen aprobación y límites existentes. `git diff --check -- agentes/principal.md`: exit 0.
 - Verificación del tramo: `git diff --check`: exit 0. Revisión manual A1: la plantilla y el flujo principal coinciden; se preservan el estado de aprobación, restricciones de seguridad y reglas de verificación.
 - Devolución corregida: reglas 4 y 11 permiten externalizar historias si se necesita limitar el contexto; los tamaños y la cantidad de historias quedan como orientación, sin umbral obligatorio. `git diff --check -- skills/planificar-cambio/SKILL.md`: exit 0; revisión manual confirma coherencia con Decisiones y A1.
 
 ## Notas
+Tramo 3 APROBADO: A3 cumplido; instrucciones de historia activa y compatibilidad anterior presentes.
+El agente y la skill son las instrucciones reales utilizadas por el constructor.
+La lectura cruzada confirma criterios y dependencias; el contrato existente pasó con datos reales del repositorio.
+Las pruebas vecinas del contrato y `git diff --check` pasaron; verify completo queda para tramo 4.
+Siguiente: tramo 4 tras compactar o abrir sesión nueva.
+Tramo 3 DEVUELTO: `skills/ejecutar-plan/SKILL.md`, sección Tramo, eliminó el literal `tramo-<n>.md` exigido por `verify` (contrato anterior de A3); restituirlo y repetir la verificación del tramo.
 Tramo 2 APROBADO: el revisor y las pruebas cumplen A2.
 La entrada real del revisor aplica las comprobaciones a historias y planes antiguos.
 El ejemplo real pasó sin avisos y el fixture estable evita depender de la ruta archivada.
@@ -105,3 +123,10 @@ Las instrucciones están conectadas al flujo real del kit; se revisaron los arch
 La revisión manual y `git diff --check` pasaron; la compatibilidad ejecutable se comprueba en tramos 2 y 3.
 Mejora para próximo plan: declarar una comprobación de regresión de instrucciones vecinas en este tramo.
 Siguiente: tramo 2, revisor y pruebas; continuar tras compactar o abrir sesión nueva.
+Tramo 3 listo: el constructor recibe instrucciones centradas en la historia activa.
+La skill cubre Handoff, dependencias, criterios A# y TODO de la historia.
+El agente constructor conserva compatibilidad con planes antiguos y sus pasos.
+La lectura cruzada, el contrato de constructor y `git diff --check` pasaron.
+Siguiente: tramo 4, revisar contrato de ejecución y su verificación integral.
+Cuenta canónica del plan: 2 casillas pendientes, ambas del tramo 4; `awk '/^- \[ \]/{n++} END{print n+0}' cambios/planes-por-feature/plan.md` devolvió 2; `git diff --check` pasó; `exit 0`.
+Devolución tramo 3 corregida: se conserva `tramo-<n>.md` exigido por `verify` y se documenta además el nombre nuevo `tramo-N.md`.
