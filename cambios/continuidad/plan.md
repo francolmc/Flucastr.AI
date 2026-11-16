@@ -1,10 +1,10 @@
 ---
-estado: listo
+estado: aprobado
 rama: feature/continuidad
 base: main
 repos: [.]
 ejecutor: constructor
-tramo: 1
+tramo: 2
 tipo: codigo
 ---
 # Continuidad del constructor
@@ -112,12 +112,57 @@ ok A5
 ok A4
 exit 0
 
+Tramo 2, paso 1 — `agentes/constructor.md` actualizado con continuidad opcional, condiciones de avance/parada, decisiones menores y ausencia de commits entre tramos.
+$ node pruebas/contrato-constructor.mjs
+ok A4: contrato nuevo y compatibilidad con el contrato anterior
+ok A5: plantilla y revisión exigen dependencias externas, contratos, rutas y ejemplo; 12 mutaciones negativas detectadas
+registro real A2 sin comprobación: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo
+registro real A2 sin comprobación: mutación de casilla rechazada
+registro real A2 interrumpido: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo
+registro real A2 interrumpido: mutación de casilla rechazada
+ok A1
+ok A2
+ok A3
+ok A5
+ok A4
+exit 0
+
+Tramo 2, paso 2 — `skills/ejecutar-plan/SKILL.md` especifica continuidad optativa, condiciones de avance y parada, checkpoint, medición y reanudación.
+$ node pruebas/contrato-constructor.mjs
+ok A4: contrato nuevo y compatibilidad con el contrato anterior
+ok A5: plantilla y revisión exigen dependencias externas, contratos, rutas y ejemplo; 12 mutaciones negativas detectadas
+registro real A2 sin comprobación: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo
+registro real A2 sin comprobación: mutación de casilla rechazada
+registro real A2 interrumpido: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo
+registro real A2 interrumpido: mutación de casilla rechazada
+ok A1
+ok A2
+ok A3
+ok A5
+ok A4
+exit 0
+
+Tramo 2, paso 3 — `pruebas/contrato-constructor.mjs` verifica 14 condiciones del modo continuo y conserva las aserciones preexistentes.
+$ node pruebas/contrato-constructor.mjs
+ok A4: contrato nuevo y compatibilidad con el contrato anterior
+ok A2: 14 condiciones del modo continuo y compatibilidad verificadas
+ok A5: plantilla y revisión exigen dependencias externas, contratos, rutas y ejemplo; 12 mutaciones negativas detectadas
+registro real A2 sin comprobación: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo
+registro real A2 sin comprobación: mutación de casilla rechazada
+registro real A2 interrumpido: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo
+registro real A2 interrumpido: mutación de casilla rechazada
+ok A1
+ok A2
+ok A3
+ok A5
+ok A4
+exit 0
+
 ## Notas
 Revisión tramo 1: APROBADO; A1 cumplido tras corregir la revisión opcional.
 La plantilla, el principal y el README describen el modo continuo y sus límites.
-La conexión con la ejecución real corresponde al tramo 2; aún no está implementada.
 Compatibilidad existente: `node pruebas/contrato-constructor.mjs` pasó en revisión.
-Sigue el tramo 2; abrir contexto nuevo con este plan antes de delegarlo.
+La pausa por falta de medición quedó resuelta al registrar la medición previa del comando exacto en entorno local equivalente.
 Revisión tramo 1 — DEVUELTO: `skills/planificar-cambio/SKILL.md`, regla 11 y plantilla: exige `Revisión: por tramo` para riesgo alto; incumple la decisión validada de que sea opcional aunque el riesgo sea alto. La comprobación `node pruebas/contrato-constructor.mjs` pasó. Corregir la contradicción y volver a comprobar.
 Resuelto: 2026-11-16, la plantilla y la regla 11 aclaran que la revisión por tramo es opcional también para riesgo alto; `agentes/principal.md` especifica que solo se revisa entre tramos cuando el plan la exige. Revisadas todas las apariciones relacionadas en los tres archivos; la comprobación del tramo volvió a pasar.
 Tramo 1 listo: continuidad opcional, condiciones de parada, medición inicial, decisiones y puntos de control.
@@ -125,3 +170,22 @@ Archivos: `skills/planificar-cambio/SKILL.md`, `agentes/principal.md` y `README.
 Diff resumido: plantilla permite varios tramos pequeños por historia y checkpoints; principal revisa al final en contexto nuevo o por tramo si se exige.
 Verificación del tramo: `node pruebas/contrato-constructor.mjs` pasó (exit 0); pendientes raíz del índice: 0.
 Sigue Tramo 2; al cerrar la historia, el principal revisa la evidencia desde contexto nuevo.
+
+Medición previa tramo 2: comando exacto `node pruebas/contrato-constructor.mjs`, mismo repositorio y entorno local, 0,06 s, exit 0 (medido con /usr/bin/time). Estado al reanudar: git status --short muestra solo M cambios/continuidad/plan.md; git diff --stat corresponde solo al plan. Este plan no declara continuidad y mantiene las reglas vigentes; la medición se conserva para el nuevo modo.
+
+Fallo corregido en el paso 1: la aserción A4 requería una frase literal del procedimiento legado; conservé esa frase al aclarar la regla y la comprobación pasó.
+Tramo 2 listo: el constructor y la skill permiten continuidad acotada y pausas retomables; A2 quedó cubierto con 14 aserciones nuevas.
+Archivos: `agentes/constructor.md`, `skills/ejecutar-plan/SKILL.md`, `pruebas/contrato-constructor.mjs` y `cambios/continuidad/tramo-2.md`.
+Diff resumido: continuidad optativa por historia, checkpoint sin commits, medición con límite 2×, pausas por fallas/decisiones/alcance y decisiones menores anotadas.
+Verificación del tramo: `node pruebas/contrato-constructor.mjs` pasó (exit 0); `git diff --check` pasó; pendientes raíz del plan y del tramo: 0.
+El principal revisa ahora la historia desde contexto nuevo.
+
+Revisión tramo 2 — DEVUELTO: agentes/constructor.md contradice el modo continuo: la regla de edición del plan no permite modificar tramo: ni Decisiones, aunque las instrucciones nuevas lo requieren; además ordena volver a aprobado al dejar PAUSA, cuando los estados exigen parcial. Armonizar permisos y estados, conservar compatibilidad, reforzar la comprobación y volver a verificar.
+Resuelto: en continuidad, el constructor puede actualizar `tramo:` y anotar decisiones menores; al pausar deja `estado: parcial` y el principal vuelve a aprobar antes de reanudar. Planes sin continuidad conservan contenido y procedimiento. Se reforzó A2 con 3 aserciones; primera corrida falló por perder una frase literal de compatibilidad, se restauró la frase y la corrida siguiente pasó.
+Verificación tras la devolución: `node pruebas/contrato-constructor.mjs` pasó (exit 0; A2 informa 17 condiciones); `git diff --check` pasó; 0 casillas pendientes en tramo 2.
+
+Revisión tramo 2: APROBADO; A2 cubierto por instrucciones y comprobación del contrato.
+El constructor puede avanzar dentro de una historia y registrar decisiones, puntos de control y pausas.
+La integración es mediante las instrucciones reales del agente y su skill; la ejecución real se verifica en el tramo 3.
+Compatibilidad existente: node pruebas/contrato-constructor.mjs pasó en revisión.
+Sigue tramo 3 en contexto nuevo; falta comprobar el recorrido real y la pausa provocada.

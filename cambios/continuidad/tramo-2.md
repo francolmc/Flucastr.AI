@@ -12,8 +12,8 @@ CUANDO se ejecuta un plan continuo ENTONCES el constructor avanza o pausa según
 Aceptación:
 - A2: las reglas cubren avance, pausa, decisiones, checkpoint, timeout efectivo a 2× de duración medida, y planes antiguos; comprobar con `node pruebas/contrato-constructor.mjs`; esperar exit 0 y revisión del procedimiento.
 TODO:
-- [ ] Actualizar `agentes/constructor.md` con permisos precisos de tramo y registro de decisiones (A2). Comprobación: `node pruebas/contrato-constructor.mjs`; esperar exit 0.
-- [ ] Actualizar `skills/ejecutar-plan/SKILL.md` con transición, controles, medición y parada retomable (A2). Comprobación: `node pruebas/contrato-constructor.mjs`; esperar exit 0.
-- [ ] Ampliar `pruebas/contrato-constructor.mjs` para comprobar el nuevo contrato y conservar las comprobaciones preexistentes (A2). Comprobación: `node pruebas/contrato-constructor.mjs`; esperar exit 0.
+- [x] Actualizar `agentes/constructor.md` con permisos precisos de tramo y registro de decisiones (A2). Comprobación: `node pruebas/contrato-constructor.mjs`; esperar exit 0.
+- [x] Actualizar `skills/ejecutar-plan/SKILL.md` con transición, controles, medición y parada retomable (A2). Comprobación: `node pruebas/contrato-constructor.mjs`; esperar exit 0.
+- [x] Ampliar `pruebas/contrato-constructor.mjs` para comprobar el nuevo contrato y conservar las comprobaciones preexistentes (A2). Comprobación: `node pruebas/contrato-constructor.mjs`; esperar exit 0.
 Verificación del tramo: `node pruebas/contrato-constructor.mjs` — nivel 1; exit 0; cubre A2.
 Handoff: el checkpoint registra archivos, resumen de diff y verificación; la duración se toma de medida previa del mismo comando; al exceder el límite se interrumpe el proceso y se deja constancia.
