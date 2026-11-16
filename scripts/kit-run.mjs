@@ -152,7 +152,7 @@ function comando(rol, herramienta, raiz, schema) {
   const sandbox = constructor ? "workspace-write" : "read-only";
   const fin = constructor ? [] : ["--output-schema", schema];
   const sobre = process.env[`KIT_RUN_${rol}`];
-  if (sobre) return { exe: sobre, args: ["exec", "--sandbox", sandbox, "-C", raiz, ...fin, "-"] };
+  if (sobre) return { exe: sobre, args: ["exec", "--sandbox", sandbox, "-c", 'approval_policy="on-request"', "-C", raiz, ...fin, "-"] };
   if (herramienta !== "codex") {
     throw new Error(`herramienta «${herramienta}» aún sin mapear (tramo 3); define KIT_RUN_${rol}`);
   }
@@ -160,7 +160,7 @@ function comando(rol, herramienta, raiz, schema) {
     ? { modelo: resolverAgente("modelo", "constructor"), esfuerzo: resolverAgente("esfuerzo", "constructor") }
     : resolverRevisorKit("codex");
   const cfg = esfuerzo ? ["-c", `model_reasoning_effort="${esfuerzo}"`] : [];
-  return { exe: "codex", args: ["exec", "--sandbox", sandbox, "-m", modelo, ...cfg, "-C", raiz, ...fin, "-"] };
+  return { exe: "codex", args: ["exec", "--sandbox", sandbox, "-c", 'approval_policy="on-request"', "-m", modelo, ...cfg, "-C", raiz, ...fin, "-"] };
 }
 
 // tope: milisegundos; si se supera, spawnSync mata el proceso y error dice que superó el tope.

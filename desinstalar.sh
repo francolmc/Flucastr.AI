@@ -167,6 +167,21 @@ if [ -n "$PROYECTO" ]; then
           fi
         fi
         ;;
+      sandbox-claude)
+        if [ "$ruta" = "$SETTINGS" ]; then
+          quitar=1
+          hallados=$((hallados + 1))
+          clave="${extra%%=*}"
+          valor="${extra#*=}"
+          if [ "$SIMULAR" = 1 ]; then
+            decir "SIMULACIÓN: quitaría ajuste de sandbox $clave en: $SETTINGS"
+          else
+            resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-sandbox claude "$SETTINGS" "$clave" "$valor" < /dev/null)" || resultado="error"
+            decir "  ajuste de sandbox ($resultado): $clave en $SETTINGS"
+            rmdir "$PROYECTO/.claude" 2>/dev/null || true
+          fi
+        fi
+        ;;
       hook)
         # hook del validador de Claude Code de este proyecto: solo su línea settings.local.json
         if [ "$ruta" = "$AJUSTES" ] && [ "${extra:-}" = claude ]; then
@@ -284,6 +299,19 @@ while IFS=$'\t' read -r tipo ruta extra; do
         resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-deny claude "$ruta" "${extra:-}" < /dev/null)" || resultado="error"
         decir "  regla deny ($resultado): ${extra:-} en $ruta"
         rmdir "$(dirname "$ruta")" 2>/dev/null || true # .claude del proyecto, solo si quedó vacía
+      fi
+      ;;
+    sandbox-claude)
+      # Retira solo los valores exactos que el kit agregó, salvo durante una reinstalación.
+      if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
+      clave="${extra%%=*}"
+      valor="${extra#*=}"
+      if [ "$SIMULAR" = 1 ]; then
+        decir "  quitaría ajuste de sandbox $clave de: $ruta"
+      else
+        resultado="$(node "$RAIZ/scripts/resolver.mjs" quitar-sandbox claude "$ruta" "$clave" "$valor" < /dev/null)" || resultado="error"
+        decir "  ajuste de sandbox ($resultado): $clave en $ruta"
+        rmdir "$(dirname "$ruta")" 2>/dev/null || true
       fi
       ;;
     hook)

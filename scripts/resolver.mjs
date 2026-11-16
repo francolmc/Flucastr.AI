@@ -574,6 +574,21 @@ function quitarHookClaude(ruta) {
 const REGLAS_DENY_CLAUDE = [
   "Read(./.env)",
   "Read(./.env.*)",
+  "Read(./**/.env)",
+  "Read(./**/.env.*)",
+  "Read(./.ssh/**)",
+  "Read(./.aws/**)",
+  "Read(./**/.ssh/**)",
+  "Read(./**/.aws/**)",
+  "Read(~/.ssh/**)",
+  "Read(~/.aws/**)",
+  "Read(./**/*.pem)",
+  "Read(./**/*.key)",
+  "Read(./**/*.p12)",
+  "Read(./**/*.pfx)",
+  "Read(./**/id_rsa)",
+  "Read(./**/id_ed25519)",
+  "Read(./**/id_ecdsa)",
   "Bash(git commit *)",
   "Bash(git push *)",
   "Bash(git merge *)",
@@ -584,6 +599,18 @@ const REGLAS_DENY_CLAUDE = [
   "Bash(bash -c *)",
   "Bash(sh -c *)",
   "Bash(zsh -c *)",
+  "Bash(git -c * merge *)",
+];
+
+const AJUSTES_SANDBOX_CLAUDE = [
+  ["sandbox.enabled", true],
+  ["sandbox.allowUnsandboxedCommands", false],
+  ["sandbox.filesystem.denyRead", [
+    "./.env", "./.env.*", "**/.env", "**/.env.*",
+    "~/.ssh/**", "~/.aws/**",
+    "**/*.pem", "**/*.key", "**/*.p12", "**/*.pfx",
+    "**/id_rsa", "**/id_ed25519", "**/id_ecdsa",
+  ]],
 ];
 
 // Solo el settings.json de un proyecto: nunca ~/.claude/settings.json ni settings.local.json.
@@ -646,6 +673,65 @@ function quitarDenyClaude(ruta, regla) {
     escribirAtomico(ruta, nuevos);
     console.log("quitado");
   }
+}
+
+function fijarSandboxClaude(ruta, simular) {
+  comprobarNombreDenyClaude(ruta);
+  const ajustes = ajustesDeObjeto(ruta);
+  const sandbox = tiene(ajustes, "sandbox") ? ajustes.sandbox : {};
+  if (!esObjeto(sandbox)) fallar(`${ruta}: 'sandbox' no es un objeto; no lo toco`);
+  const filesystem = tiene(sandbox, "filesystem") ? sandbox.filesystem : {};
+  if (!esObjeto(filesystem)) fallar(`${ruta}: 'sandbox.filesystem' no es un objeto; no lo toco`);
+  const denyRead = tiene(filesystem, "denyRead") ? filesystem.denyRead : [];
+  if (!Array.isArray(denyRead)) fallar(`${ruta}: 'sandbox.filesystem.denyRead' no es un arreglo; no lo toco`);
+
+  const cambios = [];
+  const actual = { enabled: sandbox.enabled, allowUnsandboxedCommands: sandbox.allowUnsandboxedCommands };
+  for (const [clave, valor] of AJUSTES_SANDBOX_CLAUDE.slice(0, 2)) {
+    const propiedad = clave.split(".").at(-1);
+    if (!tiene(sandbox, propiedad)) cambios.push([clave, valor]);
+    else if (sandbox[propiedad] !== valor) console.log(`incompatible:${clave}`);
+  }
+  const faltan = AJUSTES_SANDBOX_CLAUDE[2][1].filter((patron) => !denyRead.includes(patron));
+  for (const patron of faltan) cambios.push(["sandbox.filesystem.denyRead", patron]);
+  if (!simular && cambios.length) {
+    const nuevoSandbox = { ...sandbox };
+    for (const [clave, valor] of cambios) {
+      if (clave === "sandbox.enabled" || clave === "sandbox.allowUnsandboxedCommands") {
+        nuevoSandbox[clave.split(".").at(-1)] = valor;
+      }
+    }
+    if (faltan.length) nuevoSandbox.filesystem = { ...filesystem, denyRead: [...denyRead, ...faltan] };
+    escribirAtomico(ruta, { ...ajustes, sandbox: nuevoSandbox });
+  }
+  if (!cambios.length) console.log("ya-estaba");
+  else for (const [clave, valor] of cambios) console.log(`agregado:${clave}:${JSON.stringify(valor)}`);
+}
+
+function quitarSandboxClaude(ruta, clave, valorJson) {
+  comprobarNombreDenyClaude(ruta);
+  if (!existsSync(ruta)) { console.log("omitido"); return; }
+  const ajustes = ajustesDeObjeto(ruta);
+  const valor = JSON.parse(valorJson);
+  const sandbox = ajustes.sandbox;
+  if (!esObjeto(sandbox)) { console.log("omitido"); return; }
+  const nuevosSandbox = { ...sandbox };
+  if (clave === "sandbox.filesystem.denyRead" && typeof valor === "string") {
+    const fs = sandbox.filesystem;
+    if (!esObjeto(fs) || !Array.isArray(fs.denyRead) || !fs.denyRead.includes(valor)) { console.log("omitido"); return; }
+    const restantes = [...fs.denyRead]; restantes.splice(restantes.indexOf(valor), 1);
+    const nuevoFs = { ...fs };
+    if (restantes.length) nuevoFs.denyRead = restantes; else delete nuevoFs.denyRead;
+    if (Object.keys(nuevoFs).length) nuevosSandbox.filesystem = nuevoFs; else delete nuevosSandbox.filesystem;
+  } else if (["sandbox.enabled", "sandbox.allowUnsandboxedCommands"].includes(clave)) {
+    const propiedad = clave.split(".").at(-1);
+    if (sandbox[propiedad] !== valor) { console.log("omitido"); return; }
+    delete nuevosSandbox[propiedad];
+  } else fallar(`clave sandbox no admitida: ${clave}`);
+  const nuevos = { ...ajustes };
+  if (Object.keys(nuevosSandbox).length) nuevos.sandbox = nuevosSandbox; else delete nuevos.sandbox;
+  if (Object.keys(nuevos).length) escribirAtomico(ruta, nuevos); else rmSync(ruta);
+  console.log("quitado");
 }
 
 // Instrucciones de un agente para Codex: línea de identidad y cuerpo (sin el encabezado). Las usan agente-codex e instrucciones-codex.
@@ -892,6 +978,10 @@ if (orden === "modelo" && args.length === 2) {
   fijarDenyClaude(args[1], args.length === 3);
 } else if (orden === "quitar-deny" && args[0] === "claude" && args.length === 3) {
   quitarDenyClaude(args[1], args[2]);
+} else if (orden === "fijar-sandbox" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+  fijarSandboxClaude(args[1], args.length === 3);
+} else if (orden === "quitar-sandbox" && args[0] === "claude" && args.length === 4) {
+  quitarSandboxClaude(args[1], args[2], args[3]);
 } else if (
   orden === "fijar-deny" && args[0] === "codex" &&
   (args.length === 2 || (args.length === 3 && (args[2] === "--simular" || !args[2].startsWith("--"))) ||
@@ -907,5 +997,5 @@ if (orden === "modelo" && args.length === 2) {
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | esfuerzo <agente> [codex] | revisor <herramienta> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--simular] | quitar-deny codex <rules>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | esfuerzo <agente> [codex] | revisor <herramienta> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla> | fijar-sandbox claude <settings.json> [--simular] | quitar-sandbox claude <settings.json> <clave> <valor-json> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--simular] | quitar-deny codex <rules>");
 }

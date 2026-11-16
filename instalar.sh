@@ -219,6 +219,32 @@ mig_deny() {
   return 0
 }
 
+# Sandbox Claude del proyecto migrado. El manifiesto permite retirar solo los valores agregados.
+mig_sandbox() {
+  local ajustes="$PROYECTO/.claude/settings.json" salida linea dato clave valor prefijo="" extra=()
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" fijar-sandbox claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+    echo "  AVISO: no se tocó el sandbox en $ajustes ($salida)"
+    return 0
+  fi
+  if [ "$salida" = ya-estaba ]; then
+    echo "  ${prefijo}sandbox Claude ya configurado: $ajustes"
+    return 0
+  fi
+  while IFS= read -r linea; do
+    case "$linea" in
+      agregado:*)
+        dato="${linea#agregado:}"; clave="${dato%%:*}"; valor="${dato#*:}"
+        echo "  ${prefijo}ajuste de sandbox agregado: $clave ($ajustes)"
+        mig_anotar sandbox-claude "$ajustes" "$clave" "$valor"
+        ;;
+      incompatible:*) echo "  AVISO: configuración incompatible de sandbox Claude: ${linea#incompatible:} ($ajustes)" ;;
+      *) echo "  AVISO: resultado inesperado de fijar-sandbox claude ($linea)" ;;
+    esac
+  done <<< "$salida"
+  return 0
+}
+
 # Workspace: si la raíz tiene repos hijos con .git, los lista; si la raíz no es repo, lo dice. Sin hijos, no imprime nada.
 mig_workspace() {
   local g hijos="" h
@@ -312,9 +338,11 @@ migrar() {
     local_arch="$MIG_TMP/local/settings.local.json"
   fi
   echo "Claude Code (proyecto $PROYECTO):"
+  echo "  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva."
   mig_agente "$local_arch"
   mig_hook "$local_arch"
   mig_deny
+  mig_sandbox
   echo ".gitignore:"
   mig_gitignore
 
@@ -708,7 +736,7 @@ generar_lanzador_codex() { # archivo del agente
 #!/usr/bin/env bash
 # flucastr-ai:generado - lo crea instalar.sh y lo borra desinstalar.sh
 RAIZ="$RAIZ"
-${exportar}exec codex -m "\$(node "\$RAIZ/scripts/resolver.mjs" modelo $nombre codex)"$bandera -c "developer_instructions=\$(node "\$RAIZ/scripts/resolver.mjs" instrucciones-codex "\$RAIZ/agentes/$nombre.md")" "\$@"
+${exportar}exec codex --sandbox workspace-write -c 'approval_policy="on-request"' -m "\$(node "\$RAIZ/scripts/resolver.mjs" modelo $nombre codex)"$bandera -c "developer_instructions=\$(node "\$RAIZ/scripts/resolver.mjs" instrucciones-codex "\$RAIZ/agentes/$nombre.md")" "\$@"
 EOF
     chmod +x "$destino"
     registrar archivo "$destino"
@@ -962,6 +990,45 @@ instalar_deny_claude() {
   return 0
 }
 
+# Activa el sandbox de Claude y agrega límites de lectura solo cuando no hay valores incompatibles.
+# El manifiesto conserva cada valor agregado para retirarlo sin borrar ajustes preexistentes.
+instalar_sandbox_claude() {
+  local ajustes="$PROYECTO/.claude/settings.json" salida linea clave valor prefijo=""
+  local extra=()
+  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if ! salida="$(node "$RESOLVER" fijar-sandbox claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
+    echo "  AVISO: no se pudo configurar el sandbox de Claude Code en $ajustes ($salida)"
+    return 0
+  fi
+  while IFS= read -r linea; do
+    case "$linea" in
+      agregado:*)
+        clave="${linea#agregado:}"; clave="${clave%%:*}"; valor="${linea#agregado:*:}"
+        if [ "$SIMULAR" = 1 ]; then
+          echo "  (simulación) agregaría ajuste de sandbox $clave=$valor ($ajustes)"
+        else
+          echo "  ajuste de sandbox agregado: $clave=$valor ($ajustes)"
+          if ! grep -qxF "$(printf 'sandbox-claude\t%s\t%s\t%s' "$ajustes" "$clave" "$valor")" "$NUEVO"; then
+            registrar sandbox-claude "$ajustes" "$clave=$valor"
+          fi
+        fi
+        ;;
+      incompatible:*) echo "  AVISO: ajuste incompatible de Claude Code; no se sobrescribió (${linea#incompatible:}) en $ajustes" ;;
+      ya-estaba) echo "  ajustes de sandbox de Claude Code ya estaban: $ajustes" ;;
+      *) [ -n "$linea" ] && echo "  AVISO: resultado inesperado de fijar-sandbox claude ($linea)" ;;
+    esac
+  done <<< "$salida"
+  echo "  AVISO: Claude sandbox no cubre comandos excluidos; hooks y servidores MCP se ejecutan fuera del sandbox. Revisa los allow globales amplios."
+  if [ "$(uname -s)" = Linux ]; then
+    local faltan=""
+    command -v bwrap >/dev/null 2>&1 || faltan="bwrap"
+    command -v socat >/dev/null 2>&1 && : || faltan="${faltan:+$faltan, }socat"
+    if [ -n "$faltan" ]; then
+      echo "  AVISO: faltan dependencias del sandbox de Claude Code ($faltan); el CLI puede desactivarlo y ejecutar sin sus restricciones."
+    fi
+  fi
+}
+
 # Primera línea del manifiesto: el modo con el que se instaló (lo leen desinstalar.sh y la comprobación de modo).
 registrar modo "$MODO"
 
@@ -995,6 +1062,7 @@ if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
   grep -E "^compactacion$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude:" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^hook$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude$" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^deny$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
+  grep -E "^sandbox-claude$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^codex-reglas$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   bash "$RAIZ/desinstalar.sh" --silencioso --conservar-ajustes
 fi
@@ -1014,6 +1082,7 @@ fi
 
 if [ "$INSTALAR_CLAUDE" = 1 ]; then
   echo "Claude Code ($CLAUDE_DIR)"
+  echo "  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva."
   instalar_skills "$CLAUDE_DIR/skills"
   for f in "$RAIZ"/agentes/*.md; do
     [ -f "$f" ] && generar_agente_claude "$f"
@@ -1027,6 +1096,7 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
     echo "Proyecto ($PROYECTO)"
     fijar_agente_proyecto
     instalar_deny_claude
+    instalar_sandbox_claude
     instalar_compactacion_claude
     instalar_hook_permisos_claude
     # v2: sin hook del validador de tareas (era de v1; ver legacy/v1/).
@@ -1038,6 +1108,7 @@ fi
 
 if [ "$INSTALAR_PI" = 1 ]; then
   echo "Pi ($PI_DIR)"
+  echo "  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit."
   instalar_skills "$PI_DIR/skills"
   for f in "$RAIZ"/agentes/*.md; do
     [ -f "$f" ] && generar_agente_pi "$f"
@@ -1054,6 +1125,7 @@ fi
 
 if [ "$INSTALAR_CODEX" = 1 ]; then
   echo "Codex ($CODEX_DIR)"
+  echo "  AVISO: los deny de Codex son reglas de prefijo experimentales; no bloquean la lectura general de .env. La configuración global y MCP pueden ampliar el acceso."
   instalar_skills "$CODEX_SKILLS"
   for f in "$RAIZ"/agentes/*.md; do
     [ -f "$f" ] && generar_agente_codex "$f"

@@ -8,5 +8,6 @@ pruebas/*
 !pruebas/diagnostico-sugiere/
 !pruebas/aceptacion/
 !pruebas/permisos-contrato/
+!pruebas/permisos-v2.test.mjs
 
 .codex/

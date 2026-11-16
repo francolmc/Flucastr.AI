@@ -24,6 +24,19 @@ const MAX_LISTA = 20;
 
 const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
+function disponible(comando) {
+  for (const dir of (process.env.PATH || "").split(sep)) {
+    if (!dir) continue;
+    try {
+      accessSync(join(dir, comando), constants.X_OK);
+      return true;
+    } catch {
+      // Sigue con el siguiente directorio de PATH.
+    }
+  }
+  return false;
+}
+
 // Valor de una línea «Clave: valor», con o sin guion, negrita o espacios. null si no es esa línea.
 function valorDeLinea(linea, clave) {
   const limpia = linea.replace(/\*\*/g, "").replace(/^\s*[-*+]\s+/, "").trimStart();
@@ -131,7 +144,7 @@ function permisosClaude(carpeta, avisos) {
         const texto = String(regla).trim();
         const patron = texto.match(/^Bash\((.*)\)$/i)?.[1] ?? texto;
         if (/^(?:\*|npm\s+\*|docker\s+\*|(?:bash|sh|zsh)\s+-c(?:\s+.*)?|node\s+-e(?:\s+.*)?|python(?:3)?\s+-c(?:\s+.*)?)$/i.test(patron.trim())) {
-          avisos.push("allow amplio previo en " + fuente.ruta + ": " + regla);
+          avisos.push("allow amplio previo en " + fuente.ruta + " (regla amplia detectada; se omite su contenido)");
           if (fuente.alcance.startsWith("proyecto")) allowProyecto = true;
         }
       }
@@ -151,6 +164,13 @@ function permisosClaude(carpeta, avisos) {
   }
   if (!hook) avisos.push("falta el hook de permisos de Claude en " + local);
   if (!hook && allowProyecto) avisos.push("hay allow amplias de proyecto sin el hook de permisos de Claude");
+  avisos.push("Claude: comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él; revisa también allow globales amplias.");
+  if (process.platform === "linux") {
+    const faltan = ["bwrap", "socat"].filter((comando) => !disponible(comando));
+    if (faltan.length) avisos.push(`Claude: faltan dependencias del sandbox (${faltan.join(", ")}); el CLI puede desactivarlo y ejecutar sin sus restricciones.`);
+  }
+  avisos.push("Codex: las reglas deny de prefijo no bloquean la lectura general de .env; workspace-write no equivale a aislamiento de secretos.");
+  avisos.push("Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.");
 }
 
 const FUENTES = [
