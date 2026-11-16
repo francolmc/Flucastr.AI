@@ -12,7 +12,44 @@
       "Bash(git * push *)",
       "Bash(bash -c *)",
       "Bash(sh -c *)",
-      "Bash(zsh -c *)"
+      "Bash(zsh -c *)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./.ssh/**)",
+      "Read(./.aws/**)",
+      "Read(./**/.ssh/**)",
+      "Read(./**/.aws/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.pfx)",
+      "Read(./**/id_rsa)",
+      "Read(./**/id_ed25519)",
+      "Read(./**/id_ecdsa)",
+      "Bash(git -c * merge *)"
     ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": [
+        "./.env",
+        "./.env.*",
+        "**/.env",
+        "**/.env.*",
+        "~/.ssh/**",
+        "~/.aws/**",
+        "**/*.pem",
+        "**/*.key",
+        "**/*.p12",
+        "**/*.pfx",
+        "**/id_rsa",
+        "**/id_ed25519",
+        "**/id_ecdsa"
+      ]
+    }
   }
 }
