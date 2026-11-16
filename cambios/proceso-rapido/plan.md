@@ -9,7 +9,7 @@ tipo: codigo
 # Proceso rápido por defecto: lo caro corre una vez, y nadie repite lo ya verificado
 
 ## Objetivo
-Que en cualquier proyecto el agente itere con verificación rápida por defecto, y que la corrida completa sin caché ocurra una sola vez por plan, sin repetirse si nada cambió. Evidencia: `cambios/auditoria-verificacion-general/` (6 corridas sin caché de ~20 min en una sesión de F10; el principal repite la corrida completa que el constructor ya pasó).
+Que en cualquier proyecto el agente itere con verificación rápida por defecto, y que la corrida completa sin caché ocurra una sola vez por plan, sin repetirse si nada cambió. Evidencia: `docs/investigaciones/auditoria-verificacion-general/` (6 corridas sin caché de ~20 min en una sesión de F10; el principal repite la corrida completa que el constructor ya pasó).
 
 ## Supuestos
 - Se invierte la convención: `./verify` pasa a ser **rápido** (con caché) y la aceptación sin caché se pide explícito (`./verify --aceptacion`). `VERIFY_RAPIDO=1` se sigue aceptando por compatibilidad. Si Franco prefiere dejar `./verify` como está, cambian dos pasos.

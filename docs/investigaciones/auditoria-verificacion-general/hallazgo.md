@@ -1,6 +1,6 @@
 # Auditoría general: por qué la verificación es lenta en DonFinancio, Byteria y DASH (2026-11-13)
 
-Base: `verify`, Dockerfiles y `AGENTS.md` de los tres proyectos registrados en el kit (`~/.flucastr-ai/manifiesto.txt`), logs de Codex del 12 y 13-nov, `cambios/auditoria-tests-donfinancio/hallazgo.md` y búsqueda web (pnpm, Depot, Docker, guías de Playwright). Solo lectura; no corrí ningún `verify`.
+Base: `verify`, Dockerfiles y `AGENTS.md` de los tres proyectos registrados en el kit (`~/.flucastr-ai/manifiesto.txt`), logs de Codex del 12 y 13-nov, `docs/investigaciones/auditoria-tests-donfinancio/hallazgo.md` y búsqueda web (pnpm, Depot, Docker, guías de Playwright). Solo lectura; no corrí ningún `verify`.
 
 ## Hechos (comprobados)
 | | DonFinancio | Byteria | DASH |

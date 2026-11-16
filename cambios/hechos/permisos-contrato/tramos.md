@@ -46,7 +46,7 @@ Archivos: `instalar.sh`, `scripts/permisos-hook.mjs`, `scripts/kit-run.mjs`, `sk
   - evidencia: revisión del diff; la única línea permanente restringe la garantía a permisos del kit y somete efectos internos de scripts a revisión de evidencia.
 - [x] En `nucleo/contrato/verificacion.md` añadir una línea que limite la garantía a lo instalado por el kit; comprobar que identifica permisos ajenos como excepción.
   - evidencia: esa misma línea dice “solo los permisos instalados por el kit”, diferenciando las autorizaciones ajenas.
-- [x] En `friccion.md` registrar con referencia la evidencia de Docker de Don Financio y el estado comprobado o pendiente de loopback; Comprobación: contrastar cada afirmación con `cambios/auditoria-codex-permisos-esperas/hallazgo.md`.
+- [x] En `friccion.md` registrar con referencia la evidencia de Docker de Don Financio y el estado comprobado o pendiente de loopback; Comprobación: contrastar cada afirmación con `docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md`.
   - evidencia: el registro enlaza el hallazgo que acredita 30 escalaciones Docker y deja loopback como pendiente de reproducción.
 - [x] En `verify` sustituir las comprobaciones de cantidad y lista fija por estructura y comportamiento sin eliminar las negativas pertinentes; comprobar reglas generadas y regresiones mediante `node --test pruebas/permisos-contrato/estructura.test.mjs` y `./verify`.
   - evidencia: suite del tramo 9/9, exit 0; `./verify` — `VERIFY OK`, exit 0. Se conserva la comprobación negativa de comandos protegidos y se valida estructuralmente que solo `ls` queda como `allow` seguro.

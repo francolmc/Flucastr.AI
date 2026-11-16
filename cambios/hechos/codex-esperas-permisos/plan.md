@@ -8,7 +8,7 @@ ejecutor: constructor
 # Codex: el principal espera al verify y menos permisos
 
 ## Objetivo
-En Codex, el principal espera hasta el final un `verify` largo en vez de devolver PAUSA, y las reglas `allow` del kit cubren Docker Compose, pnpm y las dos formas reales de lanzar `verify`. Evidencia: `cambios/auditoria-codex-permisos-esperas/hallazgo.md`.
+En Codex, el principal espera hasta el final un `verify` largo en vez de devolver PAUSA, y las reglas `allow` del kit cubren Docker Compose, pnpm y las dos formas reales de lanzar `verify`. Evidencia: `docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md`.
 
 ## Supuestos
 - Tope de espera del principal: 30 min en total, el mismo `background_terminal_max_timeout` de los lanzadores. Si Franco quiere otro, cambia una cifra en un paso.
