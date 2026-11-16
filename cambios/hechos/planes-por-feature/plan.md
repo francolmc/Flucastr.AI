@@ -1,10 +1,10 @@
 ---
-estado: aprobado
+estado: listo
 rama: feature/planes-por-feature
 base: main
 repos: [.]
 ejecutor: constructor
-tramo: 4
+tramo: 5
 tipo: codigo
 ---
 # Planes por feature
@@ -79,10 +79,22 @@ Como principal quiero verificar ambos formatos para detectar regresiones en el c
 Archivos: `verify`, `pruebas/contrato-constructor.mjs`.
 CUANDO verifico el kit ENTONCES compruebo los contratos anterior y nuevo y sus pruebas negativas (A4).
 Aceptación A4: pruebas comprueban ambos contratos sin debilitar aceptación; `./verify` pasa y el ejemplo pasa por el revisor.
-- [ ] Ajustar `verify` solo donde sus literales contradigan el contrato nuevo, con negativo equivalente (A4). Comprobación: `./verify`; exit 0.
-- [ ] Ajustar `pruebas/contrato-constructor.mjs` para comprobar ambos contratos sin debilitar aceptación (A4). Comprobación: `node pruebas/contrato-constructor.mjs`; exit 0.
+- [x] Ajustar `verify` solo donde sus literales contradigan el contrato nuevo, con negativo equivalente (A4). Comprobación: `./verify`; exit 0.
+- [x] Ajustar `pruebas/contrato-constructor.mjs` para comprobar ambos contratos sin debilitar aceptación (A4). Comprobación: `node pruebas/contrato-constructor.mjs`; exit 0.
 Verificación del tramo: `./verify` — nivel 3; exit 0; ejecutar también `node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md`, exit 0 sin avisos; cubre A4.
 Handoff: leer este tramo y las instrucciones actualizadas; preservar pruebas negativas y compatibilidad. Ante un contrato no especificado, registrar la duda para el principal.
+
+### Tramo 5 — Historia: preparar el contexto que evita devoluciones
+Como principal quiero identificar los riesgos concretos de cada historia para que el constructor no tenga que deducir contratos y dependencias.
+Dependencias: tramos 1 a 4 — plantilla y contrato de ejecución establecidos.
+Alcance: instrucciones de planificación y pruebas de su contrato; sin cambios al revisor ni al ejemplo.
+Archivos: `skills/planificar-cambio/SKILL.md`, `pruebas/contrato-constructor.mjs`.
+CUANDO preparo una historia ENTONCES documento sus dependencias reales, contratos a conservar, rutas susceptibles de cambio y un ejemplo concreto del resultado esperado, o declaro que alguno no aplica (A5).
+Aceptación A5: la plantilla y la revisión previa a aprobación piden esos cuatro elementos por historia; las pruebas verifican su presencia en las instrucciones sin debilitar pruebas existentes.
+- [x] Actualizar `skills/planificar-cambio/SKILL.md` con los cuatro elementos en la historia y la revisión previa (A5). Comprobación: lectura de plantilla y revisión previa; ambos cubren los cuatro y permiten declarar que no aplica.
+- [x] Ampliar `pruebas/contrato-constructor.mjs` para comprobar los cuatro elementos (A5). Comprobación: `node pruebas/contrato-constructor.mjs`; exit 0 y comprobar que una copia sin cada requisito falla por el motivo esperado.
+Verificación del tramo: `./verify` — nivel 3; exit 0; además `node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md`, exit 0 sin avisos.
+Handoff: leer las devoluciones de tramos 1 a 3 en Evidencia y Notas: umbral contradictorio, fixture atado a ruta archivada y literal de verify eliminado. Exigir análisis explícito sin prometer detección completa; conservar contratos antiguos y no modificar el revisor ni el ejemplo. Las modificaciones sin commit de tramo 4 pertenecen al mismo cambio y deben conservarse.
 
 ## Evidencia
 - Tramo 2, paso 1: `$ node --test pruebas/revisar-plan/revisar-plan.test.mjs` — 10 tests, 10 pass, 0 fail; `exit 0`. El revisor identifica historias con encabezado nuevo, exige sus campos y TODO comprobables, avisa si falta `## Pasos` y conserva el tratamiento previo de tramos antiguos.
@@ -102,6 +114,17 @@ Handoff: leer este tramo y las instrucciones actualizadas; preservar pruebas neg
 - Devolución corregida: reglas 4 y 11 permiten externalizar historias si se necesita limitar el contexto; los tamaños y la cantidad de historias quedan como orientación, sin umbral obligatorio. `git diff --check -- skills/planificar-cambio/SKILL.md`: exit 0; revisión manual confirma coherencia con Decisiones y A1.
 
 ## Notas
+Tramo 5 APROBADO: A5 cumplido tras corregir dependencias externas y rutas archivables.
+La plantilla y revisión previa son instrucciones reales de planificación del kit.
+Las 12 mutaciones comprueban omisiones; el ejemplo Don Financio pasa sin avisos.
+`./verify` pasó; omite autopruebas OpenSpec porque falta `pruebas/comparar-openspec/`.
+Siguiente: Franco revisa la evidencia y aprueba el cierre.
+Tramo 5 devuelto y corregido: la plantilla acepta dependencias externas con motivo y exige precisar movimiento/archivo de rutas usadas por pruebas y la prueba a actualizar.
+Tramo 4 APROBADO: A4 cumplido; ambos contratos y sus negativas están comprobados.
+Las comprobaciones están conectadas a `./verify` y usan las instrucciones reales del kit.
+El ejemplo de Don Financio pasó el revisor sin avisos; no se ejecutó la feature.
+`./verify` pasó; omitió las autopruebas OpenSpec porque falta `pruebas/comparar-openspec/`.
+Siguiente: Franco revisa la evidencia y aprueba el cierre.
 Tramo 3 APROBADO: A3 cumplido; instrucciones de historia activa y compatibilidad anterior presentes.
 El agente y la skill son las instrucciones reales utilizadas por el constructor.
 La lectura cruzada confirma criterios y dependencias; el contrato existente pasó con datos reales del repositorio.
@@ -129,4 +152,24 @@ El agente constructor conserva compatibilidad con planes antiguos y sus pasos.
 La lectura cruzada, el contrato de constructor y `git diff --check` pasaron.
 Siguiente: tramo 4, revisar contrato de ejecución y su verificación integral.
 Cuenta canónica del plan: 2 casillas pendientes, ambas del tramo 4; `awk '/^- \[ \]/{n++} END{print n+0}' cambios/planes-por-feature/plan.md` devolvió 2; `git diff --check` pasó; `exit 0`.
+- Tramo 4, paso 1: `$ ./verify` — `ok 11 baseline: los cuatro archivos traen sus textos nuevos`; prueba negativa confirma que una copia sin `### Tramo N — Historia:` en `skills/ejecutar-plan/SKILL.md` es rechazada; las negativas del contrato anterior (`tramo-<n>.md`) también pasan; `VERIFY OK`; `exit 0`.
+- Tramo 4, paso 2: `$ node pruebas/contrato-constructor.mjs` — `ok A4: contrato nuevo y compatibilidad con el contrato anterior`; pruebas A1, A2, A3, A5 y A4 pasaron; `exit 0`.
+- Verificación del tramo 4: `$ ./verify` — las pruebas del contrato nuevo y anterior pasaron; `VERIFY OK`; `exit 0`.
+- Ejemplo real: `$ node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md` — salida vacía, sin avisos; `exit 0`.
+- Tramo 5, corrección del paso 1: lectura de `skills/planificar-cambio/SKILL.md`, plantilla y revisión previa; ambas exigen dependencias externas con su motivo, contratos, rutas susceptibles de cambio y ejemplo, y precisan si una ruta usada por pruebas puede moverse/archivarse y qué prueba actualizar; `No aplica` sigue permitido.
+- Tramo 5, corrección del paso 2: `$ node pruebas/contrato-constructor.mjs` — A1–A5 pasan; seis requisitos se validan en plantilla y revisión; las 12 mutaciones negativas fallan por el requisito omitido; `exit 0`.
+- Verificación corregida del tramo 5: `$ ./verify` — pruebas de contrato y revisor incluidas; `VERIFY OK`; `exit 0`.
+- Ejemplo real tras la corrección: `$ node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md` — salida vacía, sin avisos; `exit 0`.
+- Cuenta canónica tras la corrección: `$ awk '/^- \[ \]/{n++} END{print n+0}' cambios/planes-por-feature/plan.md` — `0`; `$ git diff --check` — salida vacía; ambos `exit 0`.
+- Cuenta canónica: `$ awk '/^- \[ \]/{n++} END{print n+0}' cambios/planes-por-feature/plan.md` — `0`; `exit 0`.
 Devolución tramo 3 corregida: se conserva `tramo-<n>.md` exigido por `verify` y se documenta además el nombre nuevo `tramo-N.md`.
+Tramo 4 listo: el verificador exige el encabezado de historia nueva y conserva la comprobación del literal antiguo.
+Las pruebas negativas confirman que quitar cualquiera de esos contratos hace fallar la comprobación.
+`pruebas/contrato-constructor.mjs` comprueba la lectura por historia y compatibilidad de planes anteriores.
+`./verify` y la revisión explícita del ejemplo Don Financio pasaron sin avisos.
+Cuenta canónica del plan: 0 casillas pendientes; `awk '/^- \[ \]/{n++} END{print n+0}' cambios/planes-por-feature/plan.md` devolvió 0; `exit 0`.
+Tramo 5 listo tras corregir la devolución; se conserva el cambio no comprometido de tramo 4.
+La plantilla cubre dependencias externas y el destino de rutas de pruebas que puedan moverse o archivarse.
+`node pruebas/contrato-constructor.mjs` pasó A1–A5 y las 12 mutaciones negativas; `./verify` terminó con `VERIFY OK`.
+El ejemplo real Don Financio pasó `revisar-plan` sin avisos; no se modificó el ejemplo ni el revisor.
+Siguiente: revisión del principal y cierre del plan.

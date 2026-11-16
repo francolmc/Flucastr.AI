@@ -62,7 +62,10 @@ Cada historia es un `### Tramo N — Historia: <resultado>` y puede construirse 
 ```markdown
 ### Tramo 1 — Historia: <resultado útil>
 Como <usuario> quiero <capacidad> para <valor>.
-Dependencias: ninguna | Tramo <N> — <resultado requerido y motivo>.
+Dependencias: ninguna («No aplica») | Tramo <N> — <resultado requerido y motivo> | Externa — <sistema, herramienta, requisito o contrato externo necesario y motivo>; identifica las dependencias reales.
+Contratos a conservar: <interfaces y comportamientos que deben mantenerse; o «No aplica»>.
+Rutas susceptibles de cambio: <rutas concretas que probablemente cambien; si una prueba usa una ruta, indica si puede moverse o archivarse y qué prueba debe actualizarse; o «No aplica»>.
+Ejemplo concreto del resultado esperado: <acción o entrada y resultado observable; o «No aplica»>.
 Alcance: <hasta tres archivos de producto; identificar cuáles>
 Archivos: <rutas de los archivos de producto, separadas por comas>
 CUANDO <situación> ENTONCES <resultado observable> (A1)
@@ -118,6 +121,6 @@ Al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `esta
 
 ## Antes de pedir la aprobación
 
-Aplica la Prueba de ejecutabilidad (regla 7) y anota el ejecutor. Relee el plan como si fueras el constructor sin contexto: ¿qué tendrías que adivinar? Corrige eso. Comprueba el cruce de cada historia: CUANDO/ENTONCES, A#, TODO, archivo y comprobación; cada criterio debe quedar cubierto por un paso y verificación, y las dependencias deben estar ordenadas. Confirma que cada historia declara hasta tres archivos de producto y que no hay A# huérfanas ni contradicciones. Luego detente y di a Franco la ruta del plan. Con su «sí», cambia `estado: aprobado`.
+Aplica la Prueba de ejecutabilidad (regla 7) y anota el ejecutor. Relee el plan como si fueras el constructor sin contexto: ¿qué tendrías que adivinar? Corrige eso. Comprueba el cruce de cada historia: CUANDO/ENTONCES, A#, TODO, archivo y comprobación; cada criterio debe quedar cubierto por un paso y verificación, y las dependencias deben estar ordenadas. Para cada historia, comprueba que documenta sus dependencias reales, incluidas dependencias externas a los tramos y su motivo, los contratos a conservar, las rutas susceptibles de cambio y un ejemplo concreto del resultado esperado; si una prueba usa una ruta, comprueba que indique si puede moverse o archivarse y qué prueba debe actualizarse. En cualquiera de esos campos puede indicar «No aplica». Confirma que cada historia declara hasta tres archivos de producto y que no hay A# huérfanas ni contradicciones. Luego detente y di a Franco la ruta del plan. Con su «sí», cambia `estado: aprobado`.
 
 Si el constructor devuelve `parcial`, corriges el plan y lo vuelves a `estado: aprobado` antes de relanzar: el constructor solo arranca con `aprobado`. Al relanzar tras una `PAUSA` no agregues texto sobre condiciones de detención («límite real», «checkpoint»): solo cuál es el siguiente paso.
