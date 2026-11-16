@@ -4,7 +4,7 @@ rama: feature/planes-por-feature
 base: main
 repos: [.]
 ejecutor: constructor
-tramo: 2
+tramo: 3
 tipo: codigo
 ---
 # Planes por feature
@@ -59,8 +59,8 @@ Como principal quiero que el revisor detecte historias incompletas y respete pla
 Archivos: `scripts/revisar-plan.mjs`, `pruebas/revisar-plan/revisar-plan.test.mjs`.
 CUANDO reviso historias ENTONCES detecto campos ausentes, pasos sin comprobación y más de tres archivos de producto (A2).
 Aceptación A2: pruebas cubren un plan nuevo válido, ausencia de pasos, campos obligatorios ausentes, cuatro archivos, y un plan antiguo válido; el ejemplo pasa sin avisos. Las comprobaciones semánticas siguen siendo revisión humana.
-- [ ] Actualizar `scripts/revisar-plan.mjs` para reconocer el formato nuevo y el antiguo, y rechazar omisiones del nuevo (A2). Comprobación: `node --test pruebas/revisar-plan/revisar-plan.test.mjs`; exit 0.
-- [ ] Ampliar `pruebas/revisar-plan/revisar-plan.test.mjs` con positivos y negativos descritos en A2 (A2). Comprobación: `node --test pruebas/revisar-plan/revisar-plan.test.mjs`; exit 0 y casos negativos detectados.
+- [x] Actualizar `scripts/revisar-plan.mjs` para reconocer el formato nuevo y el antiguo, y rechazar omisiones del nuevo (A2). Comprobación: `node --test pruebas/revisar-plan/revisar-plan.test.mjs`; exit 0.
+- [x] Ampliar `pruebas/revisar-plan/revisar-plan.test.mjs` con positivos y negativos descritos en A2 (A2). Comprobación: `node --test pruebas/revisar-plan/revisar-plan.test.mjs`; exit 0 y casos negativos detectados.
 Verificación del tramo: `node --test pruebas/revisar-plan/revisar-plan.test.mjs` — nivel 1; exit 0; cubre A2.
 Handoff: leer la plantilla resultante y este tramo; no aceptar un archivo sin pasos por silencio. No debilitar pruebas existentes.
 
@@ -77,12 +77,29 @@ Verificación del tramo: `./verify` — nivel 3; exit 0; ejecutar también `node
 Handoff: leer este tramo y la plantilla; preservar pruebas negativas y compatibilidad. Ante un contrato no especificado, registrar la duda para el principal.
 
 ## Evidencia
+- Tramo 2, paso 1: `$ node --test pruebas/revisar-plan/revisar-plan.test.mjs` — 10 tests, 10 pass, 0 fail; `exit 0`. El revisor identifica historias con encabezado nuevo, exige sus campos y TODO comprobables, avisa si falta `## Pasos` y conserva el tratamiento previo de tramos antiguos.
+- Tramo 2, paso 2: `$ node --test pruebas/revisar-plan/revisar-plan.test.mjs` — 14 tests, 14 pass, 0 fail; incluye formato nuevo válido, pasos ausentes, campos requeridos ausentes, asociación A# incorrecta, cuatro archivos y plan antiguo; `exit 0`.
+- Verificación del tramo 2: `$ node --test pruebas/revisar-plan/revisar-plan.test.mjs` — 14 tests, 14 pass, 0 fail; `exit 0`.
+- Ejemplo real: `$ node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md` — salida vacía; `exit 0`.
+- Devolución corregida: `$ node --test pruebas/revisar-plan/revisar-plan.test.mjs` — 14 tests, 14 pass, 0 fail; `exit 0`. El positivo usa `pruebas/revisar-plan/fixtures/historia-nueva-valida.md`, sin depender del plan que se archivará.
+- Comprobación explícita del ejemplo actual tras desacoplar la prueba: `$ node scripts/revisar-plan.mjs cambios/planes-por-feature/ejemplo-don-financio.md` — salida vacía; `exit 0`.
+- Dependencia del fixture: `$ rg -n "cambios/planes-por-feature/ejemplo-don-financio\\.md" pruebas/revisar-plan/revisar-plan.test.mjs` — sin coincidencias; `exit 1` (resultado esperado).
 - Tramo 1, paso 1: plantilla leída completa y cotejada con Decisiones; incluye fases, preguntas en Exploración, omisión declarada, historias con dependencias, CUANDO/ENTONCES, A#, TODO atómico, alcance de hasta 3 archivos, verificación y handoff. `git diff --check -- skills/planificar-cambio/SKILL.md`: exit 0.
 - Tramo 1, paso 2: secuencia del principal leída y cotejada con la plantilla; concentra preguntas en Exploración, exige validar antes de historias y contempla volver a explorar. Se mantienen aprobación y límites existentes. `git diff --check -- agentes/principal.md`: exit 0.
 - Verificación del tramo: `git diff --check`: exit 0. Revisión manual A1: la plantilla y el flujo principal coinciden; se preservan el estado de aprobación, restricciones de seguridad y reglas de verificación.
 - Devolución corregida: reglas 4 y 11 permiten externalizar historias si se necesita limitar el contexto; los tamaños y la cantidad de historias quedan como orientación, sin umbral obligatorio. `git diff --check -- skills/planificar-cambio/SKILL.md`: exit 0; revisión manual confirma coherencia con Decisiones y A1.
 
 ## Notas
+Tramo 2 APROBADO: el revisor y las pruebas cumplen A2.
+La entrada real del revisor aplica las comprobaciones a historias y planes antiguos.
+El ejemplo real pasó sin avisos y el fixture estable evita depender de la ruta archivada.
+Las 14 pruebas pasaron, incluidas las pruebas anteriores de comportamiento vecino.
+Siguiente: tramo 3 tras compactar o abrir sesión nueva.
+Tramo 2 listo: el positivo de historia nueva usa un fixture versionado dentro de `pruebas/revisar-plan/fixtures/`.
+La suite no depende de `cambios/planes-por-feature/ejemplo-don-financio.md`, por lo que sobrevive al archivo del cambio.
+La comprobación explícita de ese ejemplo permanece en Evidencia y pasó sin avisos en esta revisión.
+La suite pasó con casos sensibles para pasos ausentes, campos obligatorios, referencias A# y el máximo de archivos.
+Siguiente: tramo 3, ajustar el contrato de ejecución y correr su verificación completa.
 Tramo 1 APROBADO: plantilla y flujo del principal existen y coinciden con A1.
 Las instrucciones están conectadas al flujo real del kit; se revisaron los archivos productivos.
 La revisión manual y `git diff --check` pasaron; la compatibilidad ejecutable se comprueba en tramos 2 y 3.

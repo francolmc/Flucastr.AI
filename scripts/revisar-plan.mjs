@@ -10,6 +10,8 @@ Los pasos deben nombrar una ruta y una comprobación (comando entre acentos grav
 o «Comprobación:»). Las pantallas se detectan con «pantalla(s):» o con los nombres
 de F13: acceso, saldo inicial y resumen. Las capas explícitas son interfaz/UI/web,
 API y datos/base de datos. Son heurísticas textuales, no un análisis semántico.
+En historias «### Tramo N — Historia:» también comprueba los campos de la plantilla.
+Los planes antiguos sin ese encabezado mantienen las comprobaciones anteriores.
 El límite de tamaño es 8192 bytes UTF-8 por archivo de plan/tramo.`;
 
 const productPath = (value) => !/\.md\b/i.test(value) && !/(^|\/)(test|tests|pruebas|spec|specs)(\/|$)/i.test(value);
@@ -21,16 +23,23 @@ function analyze(source, file) {
   const warn = (line, message) => warnings.push(`${file}:${line}: ${message}`);
   if (Buffer.byteLength(source, 'utf8') > 8192) warn(1, 'el plan supera 8192 bytes');
 
+  const isNewStory = (line) => /^###\s+Tramo\s+\d+\s+[—–-]\s*Historia\s*:/i.test(line.trim());
+  const hasNewFormat = lines.some(isNewStory) || lines.some((line) => /^\s*(?:CUANDO\b|TODO\s*:)/i.test(line));
   const stepsHeader = lines.findIndex((line) => /^##\s+Pasos\s*$/i.test(line.trim()));
-  if (stepsHeader < 0) return warnings;
+  if (stepsHeader < 0) {
+    if (hasNewFormat) warn(1, 'el plan nuevo no contiene ## Pasos');
+    return warnings;
+  }
   let stepsEnd = lines.length;
   for (let i = stepsHeader + 1; i < lines.length; i++) {
     if (/^##\s+/.test(lines[i])) { stepsEnd = i; break; }
   }
   const chunks = [];
   const trancheHeads = [];
+  const storyHeads = [];
   for (let i = stepsHeader + 1; i < stepsEnd; i++) {
     if (/^###\s+Tramo\s+\d+/i.test(lines[i].trim())) trancheHeads.push(i);
+    if (isNewStory(lines[i])) storyHeads.push(i);
   }
   if (trancheHeads.length) {
     for (let n = 0; n < trancheHeads.length; n++) chunks.push({ start: trancheHeads[n], end: trancheHeads[n + 1] ?? stepsEnd });
@@ -40,6 +49,32 @@ function analyze(source, file) {
     const relevant = lines.slice(chunk.start, chunk.end);
     const chunkText = relevant.join('\n');
     const chunkLine = chunk.start + 1;
+    const newStory = storyHeads.includes(chunk.start);
+    if (newStory) {
+      const field = (pattern) => relevant.some((line) => pattern.test(line.trim()));
+      const requiredFields = [
+        [/^Como\s+.+\bquiero\b.+\bpara\b.+[.]?$/i, 'historia «Como … quiero … para …»'],
+        [/\bDependencias\s*:/i, 'Dependencias:'],
+        [/^Archivos\s*:/i, 'Archivos:'],
+        [/^CUANDO\s+.+\s+ENTONCES\s+.+\bA\d+\b.*$/i, 'CUANDO/ENTONCES con A#'],
+        [/^Aceptaci[oó]n(?:\s+A\d+)?\s*:/i, 'Aceptación:'],
+        [/^Verificaci[oó]n\s+del\s+tramo\s*:/i, 'Verificación del tramo:'],
+        [/^Handoff\s*:/i, 'Handoff:'],
+      ];
+      for (const [pattern, label] of requiredFields) {
+        if (!field(pattern)) warn(chunkLine, `historia nueva: falta ${label}`);
+      }
+      if (!field(/^Alcance\s*:/i) && !lines.slice(0, stepsHeader).some((line) => /^##\s+Alcance\s*$/i.test(line.trim()))) {
+        warn(chunkLine, 'historia nueva: falta Alcance:');
+      }
+      if (!/^\s*-\s*\[[ xX]\]/m.test(chunkText)) warn(chunkLine, 'historia nueva: falta TODO con pasos en casillas');
+      const criteria = [...chunkText.matchAll(/^\s*(?:[-*]\s*)?(?:Aceptaci[oó]n\s+)?A(\d+)\s*:/gim)].map((match) => `A${match[1]}`);
+      const behaviorCriteria = [...chunkText.matchAll(/\bCUANDO\b[\s\S]*?\bENTONCES\b[^\n]*?\b(A\d+)\b/gim)].map((match) => match[1]);
+      const todoCriteria = [...chunkText.matchAll(/^\s*-\s*\[[ xX]\].*?\b(A\d+)\b/gim)].map((match) => match[1]);
+      if (criteria.length === 0) warn(chunkLine, 'historia nueva: falta al menos un criterio A#');
+      for (const criterion of behaviorCriteria) if (!criteria.includes(criterion)) warn(chunkLine, `historia nueva: ${criterion} no tiene criterio de aceptación`);
+      for (const criterion of todoCriteria) if (!criteria.includes(criterion)) warn(chunkLine, `historia nueva: ${criterion} en TODO no tiene criterio de aceptación`);
+    }
     const fileDecl = relevant.findIndex((line) => /(?:^|\s)(?:[-*]\s*)?Archivos\s*:/i.test(line));
     if (fileDecl >= 0) {
       const marker = relevant[fileDecl].match(/(?:^|\s)(?:[-*]\s*)?Archivos\s*:/i);
