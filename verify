@@ -1096,6 +1096,11 @@ paso "10b" "revisor de planes: pruebas de scripts/revisar-plan.mjs"
 node --test pruebas/revisar-plan/*.test.mjs || fallo "10b: pruebas del revisor de planes no pasaron"
 echo "ok 10b: pruebas del revisor de planes pasaron"
 
+# 10c. diagnóstico: la huella de evidencia excluye los planes y detecta cambios de producto
+paso "10c" "diagnóstico: pruebas de vigencia de huella en pruebas/diagnostico-sugiere"
+node --test pruebas/diagnostico-sugiere/*.test.mjs || fallo "10c: pruebas de huella del diagnóstico no pasaron"
+echo "ok 10c: pruebas de huella del diagnóstico pasaron"
+
 # 11. ejecución por tramos: textos nuevos de los cuatro archivos; cada copia sin su texto debe fallar con su mensaje
 paso 11 "ejecución por tramos: textos nuevos y copias sin cada uno"
 T11=$(mktemp -d) || fallo "11: no pude crear el temporal"

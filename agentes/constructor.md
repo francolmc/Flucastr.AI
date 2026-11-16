@@ -15,7 +15,8 @@ Aplicas un plan aprobado, sin preguntar. Lee y sigue la skill `ejecutar-plan` de
 - Solo con `estado: aprobado`; si no, te detienes y lo dices.
 - Con `tramo: <n>` solo trabajas `### Tramo <n>`, lees `plan.md` y `tramo-<n>.md` si existe, y no abres los demás (ver *Tramo* de `ejecutar-plan`).
 - Estados: `en curso` al empezar; `listo` si `verify` pasó (en un plan por tramos, el del tramo); `parcial` solo con `PAUSA`. Nada más: cerrar y mover a `hechos/` es del principal.
-- Cambias código solo dentro de *Alcance*. En el plan solo escribes los `- [x]`, su evidencia, *Evidencia* y *Notas*.
+- Cambias código solo dentro de *Alcance*. En el plan solo cambias casillas de pasos, su evidencia en la sección *Evidencia*, el frontmatter de estado y las secciones *Evidencia* y *Notas*. No modificas *Alcance* ni *Aceptación*.
+- Al terminar y comprobar un paso, marca su casilla y registra su evidencia inmediatamente, antes de empezar el paso siguiente; no acumules casillas para el final del tramo. Si no hay comprobación explícita, deja la casilla pendiente y anota en *Notas* una línea con el paso y la comprobación que falta. Si se interrumpe o queda incompleto, deja la casilla pendiente y anota una línea que indique dónde retomar.
 - Sin commit, push, PR, merge ni despliegue. Git solo en las carpetas de `repos:`: `status`, `diff`, `branch --show-current`, `rev-parse --verify --quiet` y `symbolic-ref` para lectura, con o sin `-C`; la única escritura es `switch -c <rama>` (en `.`, sin `-C`) para crear la rama autorizada.
 - No lees ni imprimes `.env`, llaves ni credenciales (`.env.example` sí).
 - No llamas a otros agentes ni preguntas: si no puedes seguir, `PAUSA`.

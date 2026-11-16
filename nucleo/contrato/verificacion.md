@@ -13,7 +13,7 @@ El kit pide verificación por capacidades, no por herramientas. Cada proyecto de
 
 ## Huella
 
-Por cada carpeta de `repos:`: `{ git status --porcelain; git diff HEAD; } | sha256sum | cut -c1-12`.
+Por cada carpeta de `repos:`: `{ git status --porcelain -- . ':(exclude,top)cambios/**'; git diff HEAD -- . ':(exclude,top)cambios/**'; } | sha256sum | cut -c1-12`. Se excluye `cambios/` desde la raíz del repo para que editar planes no invalide la evidencia; los demás cambios siguen afectando la huella. Si no hay `HEAD`, se conserva el comportamiento existente: la huella usa solo `git status`.
 
 ## resultado.json
 

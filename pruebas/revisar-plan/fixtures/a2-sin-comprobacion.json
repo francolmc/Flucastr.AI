@@ -1,0 +1,12 @@
+{
+  "procedencia": "observación real independiente; copia literal de registros en /tmp/casillas-en-vivo-observacion",
+  "fuente": "cambios/casillas-en-vivo-real/plan.md y observaciones.log",
+  "observaciones": [
+    "COMPROBADO paso=1 estado=0000",
+    "COMPROBADO paso=2 estado=1000",
+    "COMPROBADO paso=3 estado=1100",
+    "COMPROBADO paso=4 estado=1110",
+    "FINAL estado=1111 paso5=pendiente nota=Paso 5: quedó pendiente porque no tiene una comprobación asignada; retomar cuando exista una señal verificable."
+  ],
+  "plan": "## Pasos\n- [x] Señal del paso 1 — crear la señal del primer paso. Comprobación: node pruebas/observar.mjs 1.\n- [x] Señal del paso 2 — crear la señal del segundo paso. Comprobación: node pruebas/observar.mjs 2.\n- [x] Señal del paso 3 — crear la señal del tercer paso. Comprobación: node pruebas/observar.mjs 3.\n- [x] Señal del paso 4 — crear la señal del cuarto paso. Comprobación: node pruebas/observar.mjs 4.\n- [ ] Señal del paso 5 — completar el apunte sin comprobación asignada; debe quedar pendiente.\n## Notas\nPaso 5: quedó pendiente porque no tiene una comprobación asignada; retomar cuando exista una señal verificable."
+}

@@ -32,8 +32,10 @@ Si el plan trae `tramo: <n>` en el frontmatter, ejecuta solo los pasos de `### T
 Para cada paso `- [ ]`, en orden:
 
 - Agrupa en una sola llamada las lecturas independientes del paso y lee cada archivo una vez.
-- Ritmo: lee el archivo que vas a cambiar; reproduce el estado de partida con un comando y anota su salida; cambia lo mínimo dentro de *Alcance* (nunca recortes, pospongas ni simplifiques lo pedido); vuelve a correr el mismo comando y compara con la salida anotada. Marca el paso solo si se cumple su A#.
-- Verifica cada unidad coherente al terminarla con la `Comprobación rápida` del `AGENTS.md` (Nivel 1, sin Docker) si existe; si no, con `verify`. El `verify` con Docker queda para la *Verificación final* y para `Verificación del tramo:` (cada una con el nivel que declara). Marca `- [x]` solo si el comportamiento especificado está **completo** y comprobado, y debajo agrega `  - evidencia: <archivos creados, o comando y exit N>`.
+- Ritmo: lee el archivo que vas a cambiar; reproduce el estado de partida con un comando y anota su salida; cambia lo mínimo dentro de *Alcance* (nunca recortes, pospongas ni simplifiques lo pedido); vuelve a correr el mismo comando y compara con la salida anotada.
+- Verifica cada unidad coherente al terminarla con la `Comprobación rápida` del `AGENTS.md` (Nivel 1, sin Docker) si existe; si no, con `verify`. El `verify` con Docker queda para la *Verificación final* y para `Verificación del tramo:` (cada una con el nivel que declara).
+- En cuanto un paso esté completo y su comprobación pase, marca su `- [x]` y añade la evidencia en la sección *Evidencia* del plan, antes de empezar el paso siguiente. No esperes a terminar el tramo. Cambia únicamente las casillas de pasos, su evidencia, el frontmatter `estado` y las secciones *Evidencia* y *Notas*; nunca edites *Alcance* ni *Aceptación*.
+- Si el paso no tiene una comprobación explícita, déjalo sin marcar y añade en *Notas* una línea con el paso y la comprobación que falta; no inventes una ni lo declares completo. Si se interrumpe o queda incompleto, déjalo sin marcar y añade una línea con el punto exacto para retomar.
 - Cuenta pendientes con el bloque `bash pendientes-plan` (abajo), pasando la ruta del plan como `$1`. Registra la cuenta; un error de lectura no es cero. Con pendientes, sigues salvo bloqueo permitido.
 - Corrige fallos relacionados dentro del alcance y anótalos en *Notas*.
 - Salidas largas (build, `verify`, listados): muestra solo la cola y los errores; usa opciones silenciosas cuando existan.
@@ -78,7 +80,7 @@ No adivines: pausa. Deja lo hecho como está.
 
 ## Evidencia
 
-En *Evidencia* pega cada comando de verificación como `$ <comando>`, idéntico al del plan, con su salida **real** (la cola relevante, hasta unos 1,5 KB; nunca inventada) y una última línea `exit N` con el código real.
+En *Evidencia* pega cada comando de verificación como `$ <comando>`, idéntico al del plan, con su salida **real** (la cola relevante, hasta unos 1,5 KB; nunca inventada) y una última línea `exit N` con el código real. Añade cada entrada inmediatamente al marcar el paso correspondiente.
 ## Al terminar
 
 - En *Notas*: decisiones menores que tomaste y fallos relacionados que corregiste.
