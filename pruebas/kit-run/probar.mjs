@@ -35,6 +35,8 @@ tramo: 1
 ### Tramo 1 — Prueba
 - [x] crear creado.txt
 `;
+const PLAN_CONTINUA = PLAN.replace("tramo: 1\n", "tramo: 1\ncontinuidad: continua\n")
+  .replace("- [x] crear creado.txt", "- [ ] crear primero.txt\n- [ ] crear segundo.txt");
 
 const CABECERA = `#!${process.execPath}\n`;
 const REGISTRO = `
@@ -60,6 +62,15 @@ if (estado !== "aprobado") {
 }
 writeFileSync(planPath, readFileSync(planPath, "utf8").replace(/^estado: .*$/m, "estado: en curso"));
 writeFileSync(join(process.cwd(), "creado.txt"), "hecho\\n");
+if (readFileSync(planPath, "utf8").includes("continuidad: continua")) {
+  let plan = readFileSync(planPath, "utf8").replace("- [ ] crear primero.txt", "- [x] crear primero.txt")
+    .replace("- [ ] crear segundo.txt", "- [x] crear segundo.txt")
+    .replace("tramo: 1", "tramo: 2");
+  writeFileSync(planPath, plan);
+  writeFileSync(join(process.cwd(), "segundo.txt"), "hecho\\n");
+  console.log("COMPLETADO: plan=cambios/prueba/plan.md; tramo=2; verify=pasa");
+  process.exit(0);
+}
 console.log("COMPLETADO: plan=cambios/prueba/plan.md; tramo=1; verify=pasa");
 `,
   // Verificación: falla si FAKE_VERIFY_FALLA=1.
@@ -124,7 +135,7 @@ function git(raiz, ...a) {
 
 // Repo temporal con el plan commiteado. Corre kit-run con los falsos y devuelve la salida y el registro.
 // codex: true no fija KIT_RUN_CONSTRUCTOR ni KIT_RUN_REVISOR; el script llama a `codex` del PATH (el falso).
-function correr(nombre, { plan = PLAN, env = {}, codex = false } = {}) {
+function correr(nombre, { plan = PLAN, env = {}, codex = false, kit = KIT } = {}) {
   const raiz = join(dir, nombre);
   mkdirSync(join(raiz, "cambios/prueba"), { recursive: true });
   writeFileSync(join(raiz, PLAN_REL), plan);
@@ -155,7 +166,7 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false } = {}) {
     entorno.KIT_RUN_REVISOR = exe("revisor.mjs");
   }
   if (env.KIT_RUN_TOPE_MS) entorno.KIT_RUN_TOPE_MS = env.KIT_RUN_TOPE_MS;
-  const r = spawnSync(process.execPath, [KIT, PLAN_REL, "--raiz", raiz], { encoding: "utf8", env: entorno });
+  const r = spawnSync(process.execPath, [kit, PLAN_REL, "--raiz", raiz], { encoding: "utf8", env: entorno });
   const registro = readFileSync(log, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l));
   const cuenta = (rol) => registro.filter(x => x.rol === rol).length;
   const estado = readFileSync(join(raiz, PLAN_REL), "utf8").match(/^estado: (.*)$/m)[1];
@@ -192,6 +203,50 @@ caso("A2 verify que siempre falla: 3 corridas del constructor y parcial", () => 
   const prompts = r.registro.filter(x => x.rol === "constructor").map(x => x.entrada);
   assert.ok(!prompts[0].includes("La verificación falló"));
   assert.ok(prompts[1].includes("La verificación falló") && prompts[2].includes("La verificación falló"));
+});
+
+// Continuidad: el constructor cierra todos los tramos y kit run revisa solo al final.
+caso("A7 continuidad completa: dos tramos antes de una verificación y revisión final", () => {
+  const r = correr("a7", { plan: PLAN_CONTINUA });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(r.estado, "listo");
+  assert.match(r.plan, /tramo: 2/);
+  assert.match(r.plan, /- \[x\] crear primero\.txt/);
+  assert.match(r.plan, /- \[x\] crear segundo\.txt/);
+  assert.equal(r.cuenta("constructor"), 1);
+  assert.equal(r.cuenta("verify"), 1);
+  assert.equal(r.cuenta("revisor"), 1);
+});
+
+caso("A8 continuidad: segunda falla idéntica detiene relanzamientos y deja nota", () => {
+  const r = correr("a8", { plan: PLAN_CONTINUA, env: { FAKE_VERIFY_FALLA: "1" } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /motivo=verify/);
+  assert.match(r.plan, /PAUSA \(verify\): la verificación repitió la misma causa/);
+  assert.equal(r.cuenta("constructor"), 2);
+  assert.equal(r.cuenta("verify"), 2);
+  assert.equal(r.cuenta("revisor"), 0);
+  assert.equal(r.estado, "parcial");
+});
+
+caso("M1 mutación sensible: quitar la parada por causa repetida es rechazado", () => {
+  const mutado = join(fileURLToPath(new URL("../../scripts/", import.meta.url)), ".kit-run-sin-parada.mjs");
+  const original = readFileSync(KIT, "utf8");
+  const guardia = "if (continuidad && fallosVerificacion.has(causa)) {";
+  assert.ok(original.includes(guardia), "la mutación debe encontrar la guarda de continuidad");
+  writeFileSync(mutado, original.replace(guardia, "if (false && continuidad && fallosVerificacion.has(causa)) {"));
+  try {
+    const r = correr("m1", { plan: PLAN_CONTINUA, env: { FAKE_VERIFY_FALLA: "1" }, kit: mutado });
+    assert.equal(r.cuenta("constructor"), 3, "la mutación deja pasar el reintento que el contrato prohíbe");
+    assert.equal(r.cuenta("verify"), 3);
+    assert.doesNotMatch(r.plan, /PAUSA \(verify\): la verificación repitió la misma causa/);
+    assert.throws(() => {
+      assert.equal(r.cuenta("constructor"), 2, "contrato A8: segunda causa idéntica debe detener");
+      assert.match(r.plan, /PAUSA \(verify\): la verificación repitió la misma causa/);
+    }, /segunda causa idéntica debe detener/);
+  } finally {
+    rmSync(mutado, { force: true });
+  }
 });
 
 // A3: revisor de solo lectura.

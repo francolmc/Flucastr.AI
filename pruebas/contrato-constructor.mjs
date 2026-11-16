@@ -30,6 +30,37 @@ assert.ok(
 );
 console.log('ok A4: contrato nuevo y compatibilidad con el contrato anterior');
 
+const continuidad = [
+  ['opt-in conserva la ejecución de un tramo por defecto', 'Por defecto, una ejecución termina al cerrar el tramo activo'],
+  ['continuidad se limita a la misma historia', 'no avances a otra historia'],
+  ['checkpoint por tramo y sin commits', 'punto de control con archivos tocados, resumen del diff y comprobación; no hagas commit'],
+  ['revisión al final o pausa entre tramos si el plan lo exige', '`Revisión: por tramo`'],
+  ['medición previa de la misma comprobación', 'duración previa registrada para la comprobación exacta en entorno equivalente'],
+  ['límite efectivo de dos veces la duración', 'timeout <2x-segundos>s <comando>'],
+  ['segunda falla por la misma causa pausa', 'vuelve a fallar por la misma causa, pausa'],
+  ['salida de alcance o decisión de Franco pausa', 'Pausa también si hace falta salir del alcance o una decisión de Franco'],
+  ['dudas menores se registran y siguen', 'dudas menores dentro del alcance se registran bajo `Decisiones` y no interrumpen el avance'],
+  ['la pausa deja una reanudación retomable', 'deja una nota retomable'],
+];
+for (const [label, phrase] of continuidad) {
+  assert.ok(skill.includes(phrase), `A2: la skill debe cubrir ${label}`);
+}
+assert.ok(constructor.includes('continuidad: continua') && constructor.includes('no pases a otra historia'),
+  'A2: el constructor permite continuidad solo dentro de la historia aprobada');
+assert.ok(constructor.includes('punto de control con archivos tocados') && constructor.includes('No hagas commits entre tramos'),
+  'A2: el constructor exige checkpoint y conserva la prohibición de commits');
+assert.ok(constructor.includes('falla dos veces por la misma causa') && constructor.includes('supera dos veces la duración medida'),
+  'A2: el constructor detiene el avance en segunda falla o timeout');
+assert.ok(constructor.includes('también puedes actualizar `tramo:`') && constructor.includes('añadir dudas menores resueltas a *Decisiones*'),
+  'A2: el constructor autoriza los cambios de tramo y decisiones necesarios, solo en continuidad');
+assert.ok(constructor.includes('al dejar `PAUSA`, pon `estado: parcial`') && constructor.includes('vuelve a aprobar el plan antes de reanudar'),
+  'A2: la pausa queda parcial y la reanudación requiere aprobación del principal');
+assert.ok(skill.includes('cámbialo a `parcial` al pausar') && skill.includes('En planes sin continuidad conserva el procedimiento y contenido del plan existente'),
+  'A2: la skill alinea estados y conserva compatibilidad de planes antiguos');
+assert.ok(skill.includes('En planes antiguos, sigue los pasos y aceptación declarados en su formato existente'),
+  'A2: los planes antiguos conservan el procedimiento existente');
+console.log(`ok A2: ${continuidad.length + 7} condiciones del modo continuo y compatibilidad verificadas`);
+
 const a5 = [
   ['dependencias reales', 'dependencias reales', 'dependencias reales'],
   ['dependencias externas y su motivo', 'Externa — <sistema, herramienta, requisito o contrato externo necesario y motivo>', 'incluidas dependencias externas a los tramos y su motivo'],
