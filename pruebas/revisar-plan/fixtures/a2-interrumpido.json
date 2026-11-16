@@ -1,0 +1,14 @@
+{
+  "procedencia": "observación real independiente; copia literal de registros en /tmp/casillas-interrupcion",
+  "fuente": "cambios/observacion-interrupcion/plan.md, salida.txt y salida de node pruebas/estado.mjs",
+  "observaciones": [
+    "Operación iniciada; salida parcial escrita.",
+    "Interrupción recibida; la comprobación termina con código 130.",
+    "casilla=pendiente",
+    "salida=fase=procesamiento parcial",
+    "nota_constructor=- Escenario temporal sin .git; continué conforme a ejecutar-plan.\n- El paso se interrumpió con salida parcial `fase=procesamiento parcial` y código 130; casilla pendiente. Para retomar, reiniciar las señales `pruebas/operacion-iniciada` y `pruebas/interrumpir` y volver a ejecutar la comprobación.",
+    "operacion_iniciada=true",
+    "interrupcion_solicitada=true"
+  ],
+  "plan": "## Pasos\n- [ ] Procesar el registro de entrada y producir `salida.txt`. Comprobación: `node pruebas/procesar.mjs`.\n## Notas\n- Escenario temporal sin `.git`; continué conforme a ejecutar-plan.\n- El paso se interrumpió con salida parcial `fase=procesamiento parcial` y código 130; casilla pendiente. Para retomar, reiniciar las señales `pruebas/operacion-iniciada` y `pruebas/interrumpir` y volver a ejecutar la comprobación."
+}

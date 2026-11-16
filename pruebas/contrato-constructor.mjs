@@ -19,43 +19,65 @@ assert.match(constructor, /antes de empezar el paso siguiente; no acumules casil
 assert.match(planificador, /una comprobación explícita y su resultado esperado[\s\S]*?`Verificación del tramo` es adicional y nunca sustituye la comprobación individual/,
   'A2/A3: cada paso requiere comprobación propia aunque el tramo tenga verificación');
 
-function validarA2({ plan, paso, nota }) {
+function validarRegistroA2({ plan, paso, prefijoNota }) {
   const lines = plan.split(/\r?\n/);
   const step = lines.find(line => /^- \[[ x]\] /.test(line) && line.slice(6).startsWith(paso));
   assert.ok(step, `A2: debe existir ${paso}`);
   assert.match(step, /^- \[ \] /, `A2: ${paso} debe quedar sin marcar`);
   const notesStart = lines.indexOf('## Notas');
   assert.notEqual(notesStart, -1, 'A2: debe existir la sección Notas');
-  const notes = lines.slice(notesStart + 1).filter(line => line.startsWith(`- ${paso}`));
+  const notes = lines.slice(notesStart + 1).filter(line => line.trim().replace(/^- /, '').startsWith(prefijoNota));
   assert.equal(notes.length, 1, `A2: ${paso} debe tener una sola nota retomable`);
-  assert.equal(notes[0], `- ${nota}`, `A2: nota incorrecta para ${paso}`);
+  assert.ok(!notes[0].includes('\n'), `A2: la nota de ${paso} debe ocupar una sola línea`);
 }
 
-const sinComprobacion = [
-  '# Plan de prueba',
-  '## Pasos',
-  '- [ ] Paso 1: preparar fixture',
-  '## Notas',
-  '- Paso 1: falta comprobación explícita; retomar definiendo una señal verificable.',
-].join('\n');
-const interrumpido = [
-  '# Plan de prueba',
-  '## Pasos',
-  '- [ ] Paso 2: ejecutar recorrido. Comprobación: node recorrido.mjs; termina con exit 0.',
-  '## Notas',
-  '- Paso 2: interrumpido durante el recorrido; retomar revisando el estado del fixture.',
-].join('\n');
-validarA2({ plan: sinComprobacion, paso: 'Paso 1:', nota: 'Paso 1: falta comprobación explícita; retomar definiendo una señal verificable.' });
-validarA2({ plan: interrumpido, paso: 'Paso 2:', nota: 'Paso 2: interrumpido durante el recorrido; retomar revisando el estado del fixture.' });
-console.log('ok A2 sin comprobación: casilla pendiente y nota de reanudación');
-console.log('ok A2 interrumpido: casilla pendiente y nota de reanudación');
-const marcaAnticipada = sinComprobacion.replace('- [ ] Paso 1:', '- [x] Paso 1:');
-assert.throws(
-  () => validarA2({ plan: marcaAnticipada, paso: 'Paso 1:', nota: 'Paso 1: falta comprobación explícita; retomar definiendo una señal verificable.' }),
-  error => error instanceof assert.AssertionError && /A2: Paso 1: debe quedar sin marcar/.test(error.message),
-  'A2: el caso mutante que marca antes de comprobar debe fallar',
-);
-console.log('ok A2 mutante: marcar anticipadamente se rechaza');
+const fixtures = [
+  {
+  archivo: 'a2-sin-comprobacion.json',
+    paso: 'Señal del paso 5',
+    prefijoNota: 'Paso 5: quedó pendiente porque no tiene una comprobación asignada;',
+    salida: 'A2 sin comprobación',
+    requiere: [
+      'COMPROBADO paso=1 estado=0000',
+      'COMPROBADO paso=2 estado=1000',
+      'COMPROBADO paso=3 estado=1100',
+      'COMPROBADO paso=4 estado=1110',
+      'FINAL estado=1111 paso5=pendiente',
+    ],
+  },
+  {
+    archivo: 'a2-interrumpido.json',
+    paso: 'Procesar el registro de entrada',
+    prefijoNota: 'El paso se interrumpió con salida parcial',
+    salida: 'A2 interrumpido',
+    requiere: [
+      'Interrupción recibida; la comprobación termina con código 130.',
+      'casilla=pendiente',
+      'salida=fase=procesamiento parcial',
+      'operacion_iniciada=true',
+      'interrupcion_solicitada=true',
+    ],
+  },
+];
+for (const fixture of fixtures) {
+  const registro = JSON.parse(readFileSync(new URL(`./revisar-plan/fixtures/${fixture.archivo}`, import.meta.url), 'utf8'));
+  assert.match(registro.procedencia, /^observación real independiente;/, `${fixture.salida}: falta procedencia de ejecución real`);
+  assert.ok(registro.fuente && registro.observaciones.length > 0, `${fixture.salida}: falta fuente u observaciones`);
+  for (const observacion of fixture.requiere) {
+    assert.ok(registro.observaciones.some(line => line.includes(observacion)), `${fixture.salida}: falta observación ${observacion}`);
+  }
+  validarRegistroA2({ plan: registro.plan, paso: fixture.paso, prefijoNota: fixture.prefijoNota });
+  console.log(`registro real ${fixture.salida}: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo`);
+
+  const mutado = registro.plan.replace('- [ ] ', '- [x] ');
+  assert.notEqual(mutado, registro.plan, `${fixture.salida}: no se encontró casilla pendiente para mutar`);
+  assert.throws(
+    () => validarRegistroA2({ plan: mutado, paso: fixture.paso, prefijoNota: fixture.prefijoNota }),
+    error => error instanceof assert.AssertionError && error.message.includes('debe quedar sin marcar'),
+    `${fixture.salida}: marcar anticipadamente debe fallar`,
+  );
+  console.log(`registro real ${fixture.salida}: mutación de casilla rechazada`);
+}
 
 const matches = [...skill.matchAll(/```bash pendientes-plan\n([\s\S]*?)\n```/g)];
 assert.equal(matches.length, 1, 'debe existir exactamente un bloque canónico bash pendientes-plan');
