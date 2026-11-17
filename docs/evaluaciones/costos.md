@@ -111,5 +111,3 @@ Hallazgos del piloto:
 - Dos PAUSA iniciales de `kit run` dejaron el plan en `en curso`. Corregido en #67.
 - Una PAUSA de alcance por base atrasada.
 - `./verify` dentro del sandbox del constructor falla con `spawnSync bash EPERM`. Sin corregir.
-
-Siguiente paso: medir un cambio de código mayor antes del tramo 3 de `cambios/kit-run/plan.md`.
