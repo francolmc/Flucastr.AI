@@ -1,0 +1,1 @@
+Elimina `base/registro.json`.

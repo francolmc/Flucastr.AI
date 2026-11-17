@@ -1,0 +1,18 @@
+{
+  "validos": [
+    {
+      "id": "valido",
+      "ruta": "controles/valido"
+    }
+  ],
+  "invalidos": [
+    {
+      "id": "invalido",
+      "ruta": "controles/invalido"
+    },
+    {
+      "id": "modificado",
+      "ruta": "controles/modificado"
+    }
+  ]
+}

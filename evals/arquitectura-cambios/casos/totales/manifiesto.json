@@ -1,0 +1,7 @@
+{
+  "id": "totales",
+  "base": ["base/subtotal.cjs", "base/resumen.cjs"],
+  "variantes": ["actual", "fragmentada", "breve"],
+  "criterios": ["subtotal(items) suma precio por cantidad", "lista vacía produce 0", "resumen usa subtotal y muestra Total: 125", "version conserva 1"],
+  "tramos": ["implementar subtotal(items)", "integrarlo en resumen y comprobar CLI"]
+}

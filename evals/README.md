@@ -19,3 +19,7 @@ La autoprueba usa un ejecutable `codex` falso, fixtures y resultados temporales,
 ## Comparación con OpenSpec
 
 `pruebas/comparar-openspec/` no existe en este checkout; por tanto, no hay resultados de esa comparación que catalogar aquí.
+
+## Piloto de arquitectura de cambios
+
+El [piloto offline](arquitectura-cambios/README.md) contiene cuatro casos y tres presentaciones de contexto para una comparación futura con modelos pequeños. Su autoprueba valida los oráculos y controles sintéticos, pero no ejecuta modelos ni mide qué formato funciona mejor.
