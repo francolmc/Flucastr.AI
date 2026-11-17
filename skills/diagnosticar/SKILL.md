@@ -1,11 +1,11 @@
 ---
 name: diagnosticar
-description: "Diagnostica un proyecto contra el contrato de verificación (qué capacidades faltan, cuánto cuesta hoy y una sola mejora), a pedido y solo en lectura. Úsala si Franco pide «diagnostica»."
+description: "Diagnostica un proyecto contra el contrato de verificación (qué capacidades faltan, cuánto cuesta hoy y una sola mejora), a pedido y solo en lectura. Úsala si la persona usuaria pide «diagnostica»."
 ---
 
 # Diagnosticar un proyecto
 
-Cuándo: solo a pedido de Franco («diagnostica»). No corre al planificar ni al construir. Es solo lectura: no escribe archivos, no corre `verify` y no bloquea nada. Lo que sí bloquea está en `agentes/principal.md`, «Qué bloquea y qué no».
+Cuándo: solo a pedido de la persona usuaria («diagnostica»). No corre al planificar ni al construir. Es solo lectura: no escribe archivos, no corre `verify` y no bloquea nada. Lo que sí bloquea está en `agentes/principal.md`, «Qué bloquea y qué no».
 
 ## Cómo
 

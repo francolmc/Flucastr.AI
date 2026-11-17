@@ -172,7 +172,7 @@ comprobar_contenido() { # carpeta extraída
 # Solo las rutas de la lista permitida; pruebas/, definitions/, features/ y README.md no se copian.
 copiar_permitidas() { # origen destino
   local o="$1" d="$2" f
-  for f in agentes skills scripts; do
+  for f in agentes skills scripts tools adapters core; do
     if [ -d "$o/$f" ]; then cp -R "$o/$f" "$d/$f"; fi
   done
   for f in instalar.sh desinstalar.sh instalar-remoto.sh modelos.json; do

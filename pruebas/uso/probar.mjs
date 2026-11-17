@@ -264,7 +264,7 @@ prueba("A5c", "Sin tarifa del modelo, creditos es null (no 0); los sondeos se mi
 });
 
 prueba("A5d", "Tarifas ilegibles avisan y dejan creditos en null sin salir con error", () => {
-  const r = correr(["--herramienta", "codex", "--codex-dir", join(fixtures, "codex-sondeos"), "--sesiones", "--json", "--tarifas", join(tmp, "no-existe.json")]);
+  const r = correr(["--desde", "2026-01-01", "--herramienta", "codex", "--codex-dir", join(fixtures, "codex-sondeos"), "--sesiones", "--json", "--tarifas", join(tmp, "no-existe.json")]);
   assert.equal(r.status, 0, `exit ${r.status}: ${r.stderr}`);
   const json = JSON.parse(r.stdout);
   assert.ok(json.avisos.some((a) => /no pude leer las tarifas/.test(a)), `avisos: ${JSON.stringify(json.avisos)}`);

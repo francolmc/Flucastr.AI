@@ -1,0 +1,27 @@
+# Tramo 57 — Separar registro de instalación (borrador)
+
+## Pasos
+
+### Tramo 57 — Historia: Separar registro de instalación
+Como mantenedor quiero aislar registro de instalación para entender su responsabilidad sin cambiar la instalación.
+Dependencias: tramo 56 revisado y matriz del tramo 56. Contratos: cargar módulos con `source` en el mismo proceso, preservar opciones de shell, variables globales, llamadas, errores, trampas, rutas públicas y salida; usar exclusivamente fixtures aislados. Ejemplo: instalación seguida de desinstalación produce el mismo manifiesto y árbol que la referencia.
+Alcance: `instalar.sh` y `tools/install/manifest.sh`; pruebas pertinentes y evidencia.
+Archivos: `instalar.sh` y `tools/install/manifest.sh`.
+CUANDO se ejecuten los escenarios de instalación ENTONCES registro de instalación conserva comportamiento y efectos (A57).
+Aceptación A57: funciones `guardar_manifiesto y registrar` aisladas, matriz del tramo 56 equivalente, sin debilitar pruebas; módulo de hasta 300 líneas o justificación explícita.
+TODO:
+- [x] Extraer `guardar_manifiesto y registrar` a `tools/install/manifest.sh` y cargarlo en `instalar.sh` antes de su primera llamada, conservando el orden de ejecución (A57). Comprobación: revisar el diff; Conservar la asignación de NUEVO y la instalación del trap en sus posiciones originales; no alterar formato ni orden del manifiesto.
+- [x] En `cambios/estructura-repo/tramo-56.md`, comparar íntegramente la matriz frente a su referencia, incluidos stdout, stderr, códigos, archivos, permisos y enlaces (A57). Comprobación: registrar resultados y diferencias autorizadas.
+- [x] Ejecutar `bash -n instalar.sh` y `bash -n tools/install/manifest.sh` (A57). Comprobación: ambos retornan 0.
+- [x] Ejecutar `./verify` en el aislamiento del tramo 1 (A57). Comprobación: esperar código 0 y coincidencia con línea base salvo excepciones aprobadas.
+- [x] Ejecutar `bash ./instalar.sh --simular` en ese aislamiento (A57). Comprobación: esperar código 0 y coincidencia con línea base salvo excepciones aprobadas.
+Verificación del tramo: `./verify` — nivel 3; además matriz y simulación. Duración: medida en tramo 1.
+Handoff: registrar archivos, resultados y diferencias autorizadas; detenerse para revisión.
+
+## Evidencia
+- Paso 1: diff revisado. `NUEVO="$(mktemp)"` sigue antes del `source`, y `trap guardar_manifiesto EXIT` conserva su ubicación inmediatamente después de cargar la función. Ambos cuerpos se trasladaron literalmente; el formato tabulado de `registrar` no cambia. `tools/install/manifest.sh` tiene 13 líneas (límite A57: 300). `git diff --check -- instalar.sh tools/install/manifest.sh`: sin salida; `exit 0`.
+- Paso 3: `$ bash -n instalar.sh && bash -n tools/install/manifest.sh`; ambos chequeos de sintaxis pasaron, `exit 0`.
+- Paso 4: `$ bash cambios/estructura-repo/reproducir-linea-base.sh` ejecutó `./verify` en Bubblewrap; código 0 y coincidencia con la línea base salvo el mensaje exacto aprobado del escenario 9.
+- Paso 5: el mismo control aislado ejecutó dos `bash ./instalar.sh --simular`; salidas y efectos repetibles e iguales a la referencia. Resultado global `Simulaciones repetibles y verify coinciden con linea-base/; aplica solo la excepción exacta del escenario 9.`, `exit 0` en 47.6 s.
+- Paso 2, comparación estricta reanudada: `capturar-instalador.sh` prepara el repositorio exclusivamente sintético con `git add -f`, `write-tree`/`read-tree` y `update-index --assume-unchanged` para fijar el caché de estadísticas antes de ejecutar la operación. No modifica el índice después de la migración ni omite efectos: el manifiesto sigue capturando `.git/index` completo. Comando aislado ejecutado desde `/work` (Node resuelto como `/home/franco/.local/share/fnm/node-versions/v24.22.1/installation/bin/node`): `$ bwrap --unshare-all --die-with-parent --ro-bind /usr /usr --proc /proc --dev /dev --tmpfs /tmp --dir /home --dir /home/test --dir /home/test/codex --dir /Users --dir /runtime --ro-bind /home/franco/.local/share/fnm/node-versions/v24.22.1/installation/bin/node /runtime/node --ro-bind /bin /bin --ro-bind /lib /lib --ro-bind /lib64 /lib64 --bind /tmp/tramo57-matriz-_zvnj1_b/work /work --chdir /work --clearenv --setenv HOME /home/test --setenv CODEX_HOME /home/test/codex --setenv PATH /work/fakebin:/runtime:/usr/bin:/bin --setenv LANG C.UTF-8 --setenv TZ UTC /usr/bin/bash /work/run-matrix.sh`: 32 casos por captura, anterior reconstruido, actual y repetición actual; salida `REPETICIÓN ACTUAL: idéntica` y `COMPARACIÓN ESTRICTA: idéntica (cmp exit 0)`, `exit 0`. Los tres archivos íntegros tienen SHA-256 `86281d90253ea2aa8a61688b957ab03df2b1d24309400eed7f0f4e732ce6ef10`. Migración real: código 0, stderr vacío; `.git/index` antes `b5c938a2860e84c23322908f172854fe4e47a0374024e2f3ce9439d538870032` (640 bytes, modo 644), después `bdcba1cf9a3ef510eed8f4154a04ac4962e42c480d6a4a1b54383576ed2e4387` (656 bytes, modo 644); `old/v1/` y sus contenidos figuran íntegros en el árbol final. La comparación conserva stdout, stderr, argumentos, códigos, archivos, modos, enlaces, tamaños y todos los hashes, sin filtrar ni normalizar diferencias.
+- `$ bash -n cambios/estructura-repo/capturar-instalador.sh`: sin errores, `exit 0`. `$ bash cambios/estructura-repo/reproducir-linea-base.sh` (ejecutado con `timeout 95`): `verify coincide salvo el mensaje exacto autorizado del escenario 9.`; `Simulaciones repetibles y verify coinciden con linea-base/; aplica solo la excepción exacta del escenario 9.`, `exit 0` (47.8 s).

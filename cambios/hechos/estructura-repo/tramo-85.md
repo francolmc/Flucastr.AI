@@ -1,0 +1,24 @@
+# Tramo 85 — Consolidar skills/definir-proyecto/SKILL.md en core/skills/define-project/SKILL.md (borrador)
+
+## Pasos
+
+### Tramo 85 — Historia: Consolidar skills/definir-proyecto/SKILL.md en core/skills/define-project/SKILL.md
+Como mantenedor quiero una fuente identificable en `core/` para conservar el acceso de instalaciones existentes.
+Dependencias: tramo 84 revisado, aislamiento del tramo 1 y matriz del tramo 56. Contratos: mantener `skills/definir-proyecto/SKILL.md` como archivo regular versionado con bytes y permisos iguales a `core/skills/define-project/SKILL.md`; conservar nombres públicos de skills, referencias relativas y comportamiento; no usar enlaces simbólicos. No acceder a proyectos ni HOME reales. Ejemplo: una instalación anterior que referencia `skills/definir-proyecto/SKILL.md` sigue leyendo exactamente el mismo contenido.
+Alcance: `core/skills/define-project/SKILL.md` y el inventario de equivalencias `tools/core-compatibility.json`; pruebas pertinentes. `skills/definir-proyecto/SKILL.md` permanece intacto en este tramo.
+Archivos: `core/skills/define-project/SKILL.md`, `tools/core-compatibility.json`.
+CUANDO se cargue `skills/definir-proyecto/SKILL.md` desde una instalación previa o un paquete remoto ENTONCES obtiene el mismo contenido y recursos que antes (A85).
+Aceptación A85: el archivo nuevo es idéntico byte a byte y con permisos equivalentes al anterior; el inventario incluye el par y la comprobación del tramo 82 lo valida; no cambian la salida ni la cobertura.
+TODO:
+- [x] Copiar `skills/definir-proyecto/SKILL.md` a `core/skills/define-project/SKILL.md` como archivo regular y añadir el par exacto al inventario, sin alterar contenidos ni referencias (A85). Comprobación: `cmp` retorna 0 y los modos coinciden.
+- [x] Ejecutar la comprobación de equivalencias y la prueba offline de instalación remota con archivo válido, y comprobar que una instalación previa aislada sigue resolviendo `skills/definir-proyecto/SKILL.md` (A85). Comprobación: todas retornan 0; el paquete contiene ambas rutas como archivos regulares.
+- [x] Comparar los escenarios pertinentes de `cambios/estructura-repo/tramo-56.md`, incluyendo salida, errores, código, enlaces y contenido generado (A85). Comprobación: coincide con la referencia salvo las diferencias autorizadas.
+- [x] Ejecutar `./verify` y `bash ./instalar.sh --simular` en el aislamiento del tramo 1 (A85). Comprobación: ambos retornan 0 y coinciden con la referencia salvo las diferencias autorizadas.
+Verificación del tramo: `./verify` — nivel 3; además prueba offline, matriz y simulación. Duración: medida en tramo 1.
+Handoff: registrar archivos, resultados y diferencias; detenerse para revisión.
+
+## Evidencia
+- Paso 1: `$ cmp skills/definir-proyecto/SKILL.md core/skills/define-project/SKILL.md && test "$(stat -c '%a' skills/definir-proyecto/SKILL.md)" = "$(stat -c '%a' core/skills/define-project/SKILL.md)" && stat -c '%a %F %n' skills/definir-proyecto/SKILL.md core/skills/define-project/SKILL.md && node --check tools/verify/core-compatibility.mjs && node tools/verify/core-compatibility.mjs`: ambas rutas son archivos regulares modo `644`; `cmp`, modos, sintaxis y comprobador del inventario actualizado pasaron (`exit 0`). La fuente `skills/definir-proyecto/SKILL.md` permanece intacta.
+- Paso 2: `$ node --check tools/verify/core-compatibility.mjs && node tools/verify/core-compatibility.mjs && python3 -B` (prueba Bubblewrap sobre `check_remote_copy` con copia de `core/` al tar sintético): todo pasó (`exit 0`). La instalación y `instalar.sh --copiar --simular` pasaron sin red; paquete instalado con `skills/definir-proyecto/SKILL.md` y `core/skills/define-project/SKILL.md` como archivos regulares y bytes idénticos a la fuente; la ruta antigua leyó el contenido. Salidas: `copia remota del kit real: tools/ y adapters/ conservados; rutas excluidas ausentes; instalar.sh --copiar --simular pasó; resolver instalado obtuvo modelo y modelo-esfuerzo desde su raíz con cwd conflictivo; sin red` y `define-project remote package: ambas rutas regulares, bytes idénticos; skills/definir-proyecto/SKILL.md resolvió contenido`. Origen, HOME, tar e instalación fueron sintéticos.
+- Paso 3: `$ python3 -B cambios/estructura-repo/comprobar-a3.py`: `exit 0`. La matriz A56 conservó instalación remota, estado sin escrituras, actualización, mensajes y árbol previo, y los 10 rechazos negativos; sin red. También pasaron copia remota del kit, autoprueba sintética del medidor; OpenSpec fue omitido sin abrir su árbol ausente.
+- Paso 4: `$ timeout 95 bash cambios/estructura-repo/reproducir-linea-base.sh`: `exit 0` en 45,7 s. En el aislamiento Bubblewrap del tramo 1, `./verify` coincidió con la referencia salvo el mensaje exacto aprobado del escenario 9; las dos simulaciones `bash ./instalar.sh --simular` fueron repetibles y coincidieron con la referencia. Sin red ni acceso a HOME o proyectos reales.

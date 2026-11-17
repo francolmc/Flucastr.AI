@@ -38,7 +38,7 @@ const continuidad = [
   ['medición previa de la misma comprobación', 'duración previa registrada para la comprobación exacta en entorno equivalente'],
   ['límite efectivo de dos veces la duración', 'timeout <2x-segundos>s <comando>'],
   ['segunda falla por la misma causa pausa', 'vuelve a fallar por la misma causa, pausa'],
-  ['salida de alcance o decisión de Franco pausa', 'Pausa también si hace falta salir del alcance o una decisión de Franco'],
+  ['salida de alcance o decisión de la persona usuaria pausa', 'Pausa también si hace falta salir del alcance o una decisión de la persona usuaria'],
   ['dudas menores se registran y siguen', 'dudas menores dentro del alcance se registran bajo `Decisiones` y no interrumpen el avance'],
   ['la pausa deja una reanudación retomable', 'deja una nota retomable'],
 ];

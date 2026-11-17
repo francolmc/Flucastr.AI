@@ -1,11 +1,11 @@
 ---
 name: disenar-experiencia
-description: "Diseña la experiencia de una interfaz antes de planificarla: deja `docs/experiencia.md` (una vez por proyecto) y `cambios/<nombre>/pantallas.md` (por cambio) con un boceto ASCII que Franco aprueba en la terminal. Úsala si el proyecto tiene interfaz nueva o el cambio agrega o reordena pantallas."
+description: "Diseña la experiencia de una interfaz antes de planificarla: deja `docs/experiencia.md` (una vez por proyecto) y `cambios/<nombre>/pantallas.md` (por cambio) con un boceto ASCII que la persona usuaria aprueba en la terminal. Úsala si el proyecto tiene interfaz nueva o el cambio agrega o reordena pantallas."
 ---
 
 # Diseñar la experiencia
 
-Franco trabaja en la terminal: lo único que ve de una pantalla es lo que pegas en tu respuesta. Por eso el diseño se hace en texto, antes de planificar, y se aprueba en la puerta 1.
+La persona usuaria trabaja en la terminal: lo único que ve de una pantalla es lo que pegas en tu respuesta. Por eso el diseño se hace en texto, antes de planificar, y se aprueba en la puerta 1.
 
 ## Cuándo usarla
 
@@ -72,7 +72,7 @@ Textos exactos: cada etiqueta, título y mensaje, copiado tal cual.
 Acción principal: una. Acciones secundarias: lista corta.
 ```
 
-El boceto se pega también en tu respuesta cuando pides la puerta 1. No basta con enlazar el archivo: Franco lo aprueba en la terminal.
+El boceto se pega también en tu respuesta cuando pides la puerta 1. No basta con enlazar el archivo: la persona usuaria lo aprueba en la terminal.
 
 ## Reglas de oficio
 

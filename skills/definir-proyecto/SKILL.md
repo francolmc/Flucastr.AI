@@ -1,6 +1,6 @@
 ---
 name: definir-proyecto
-description: "Define un proyecto nuevo (repo vacío o casi): hace hasta 5 preguntas cerradas, escribe `AGENTS.md` y `docs/proyecto.md`, deja la raíz lista y se detiene a esperar a Franco. Úsala si la carpeta no tiene `AGENTS.md` ni código."
+description: "Define un proyecto nuevo (repo vacío o casi): hace hasta 5 preguntas cerradas, escribe `AGENTS.md` y `docs/proyecto.md`, deja la raíz lista y se detiene a esperar a la persona usuaria. Úsala si la carpeta no tiene `AGENTS.md` ni código."
 ---
 
 # Definir un proyecto nuevo
@@ -11,7 +11,7 @@ Trabajas en dos tiempos. No los mezcles.
 
 ## Primer tiempo: preguntar (no escribas nada)
 
-1. Lee lo que Franco dijo y lo que la carpeta ya tiene. No preguntes lo que el contexto ya responde.
+1. Lee lo que dijo la persona usuaria y lo que la carpeta ya tiene. No preguntes lo que el contexto ya responde.
 2. Haz hasta 5 preguntas cerradas, con 2 a 4 opciones cada una. La propuesta por defecto va primera y dice «(Recomendada)».
 3. La primera pregunta es siempre: «¿Es un repo o un workspace con varios repos?». Nunca decidas tú, aunque el contexto lo insinúe.
 4. Las demás salen solo de lo que falte: stack, quién usa el sistema, alcance del MVP, datos y acceso (p. ej. login o link por correo), dónde se despliega. Si el proyecto tiene interfaz, incluye «quién lo usa y cuál es su tarea frecuente» entre las preguntas, salvo que el contexto ya lo diga.
