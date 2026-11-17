@@ -1,0 +1,6 @@
+{
+  "id": "saludo",
+  "base": ["base/app.cjs"],
+  "variantes": ["actual", "fragmentada", "breve"],
+  "criterios": ["saludo imprime Hola, equipo", "version conserva 1", "ambos comandos terminan con código 0"]
+}

@@ -1,0 +1,6 @@
+{
+  "id": "permisos",
+  "base": ["base/permisos.cjs"],
+  "variantes": ["actual", "fragmentada", "breve"],
+  "criterios": ["solo el dueño activo edita", "un documento archivado nunca se edita"]
+}
