@@ -1,0 +1,1602 @@
+--simular
+0
+ARGS --simular
+BEFORE
+
+STDOUT
+SIMULACIÓN: no se escribe nada.
+SIMULACIÓN: se escribirá <TEMP>/--simular-home/.flucastr-ai/raiz
+Claude Code (<TEMP>/--simular-home/.claude)
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  enlazado: <TEMP>/--simular-home/.claude/skills/definir-proyecto
+  enlazado: <TEMP>/--simular-home/.claude/skills/diagnosticar
+  enlazado: <TEMP>/--simular-home/.claude/skills/disenar-experiencia
+  enlazado: <TEMP>/--simular-home/.claude/skills/ejecutar-plan
+  enlazado: <TEMP>/--simular-home/.claude/skills/migrar-proyecto
+  enlazado: <TEMP>/--simular-home/.claude/skills/planificar-cambio
+  enlazado: <TEMP>/--simular-home/.claude/skills/preparar-proyecto
+  agente generado: <TEMP>/--simular-home/.claude/agents/constructor.md (modelo: claude-haiku-5-5)
+  lanzador generado: <TEMP>/--simular-home/.local/bin/claude-constructor (esfuerzo: high)
+  agente generado: <TEMP>/--simular-home/.claude/agents/principal.md (modelo: claude-sonnet-5-5)
+  lanzador generado: <TEMP>/--simular-home/.local/bin/claude-principal (esfuerzo: medium)
+  AVISO: <TEMP>/--simular-home/.local/bin no está en tu PATH; agrégalo para usar los comandos claude-<agente>.
+Pi (<TEMP>/--simular-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  enlazado: <TEMP>/--simular-home/.pi/agent/skills/definir-proyecto
+  enlazado: <TEMP>/--simular-home/.pi/agent/skills/diagnosticar
+  enlazado: <TEMP>/--simular-home/.pi/agent/skills/disenar-experiencia
+  enlazado: <TEMP>/--simular-home/.pi/agent/skills/ejecutar-plan
+  enlazado: <TEMP>/--simular-home/.pi/agent/skills/migrar-proyecto
+  enlazado: <TEMP>/--simular-home/.pi/agent/skills/planificar-cambio
+  enlazado: <TEMP>/--simular-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <TEMP>/--simular-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <TEMP>/--simular-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <TEMP>/--simular-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <TEMP>/--simular-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  (simulación) compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<TEMP>/--simular-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  (simulación) compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<TEMP>/--simular-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <TEMP>/--simular-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex (<TEMP>/--simular-home/.codex)
+  AVISO: los deny de Codex son reglas de prefijo experimentales; no bloquean la lectura general de .env. La configuración global y MCP pueden ampliar el acceso.
+  enlazado: <TEMP>/--simular-home/.agents/skills/definir-proyecto
+  enlazado: <TEMP>/--simular-home/.agents/skills/diagnosticar
+  enlazado: <TEMP>/--simular-home/.agents/skills/disenar-experiencia
+  enlazado: <TEMP>/--simular-home/.agents/skills/ejecutar-plan
+  enlazado: <TEMP>/--simular-home/.agents/skills/migrar-proyecto
+  enlazado: <TEMP>/--simular-home/.agents/skills/planificar-cambio
+  enlazado: <TEMP>/--simular-home/.agents/skills/preparar-proyecto
+  agente generado: <TEMP>/--simular-home/.codex/agents/constructor.toml (modelo: gpt-6-luna)
+  lanzador generado: <TEMP>/--simular-home/.local/bin/codex-constructor (modelo: gpt-6-luna, esfuerzo: high, compacta en: 100000)
+  agente generado: <TEMP>/--simular-home/.codex/agents/principal.toml (modelo: gpt-6.1-terra)
+  lanzador generado: <TEMP>/--simular-home/.local/bin/codex-principal (modelo: gpt-6.1-terra, esfuerzo: medium, compacta en: 60000)
+  lanzador generado: <TEMP>/--simular-home/.local/bin/kit-run (herramienta: codex)
+  AVISO: <TEMP>/--simular-home/.local/bin no está en tu PATH; agrégalo para usar los comandos codex-<agente> y kit-run.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+  Codex:       codex-principal (o el agente como rol: ~/.codex/agents)
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+
+---
+--solo_claude_--simular
+0
+ARGS --solo claude --simular
+BEFORE
+
+STDOUT
+SIMULACIÓN: no se escribe nada.
+SIMULACIÓN: se escribirá <TEMP>/--solo_claude_--simular-home/.flucastr-ai/raiz
+Claude Code (<TEMP>/--solo_claude_--simular-home/.claude)
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  enlazado: <TEMP>/--solo_claude_--simular-home/.claude/skills/definir-proyecto
+  enlazado: <TEMP>/--solo_claude_--simular-home/.claude/skills/diagnosticar
+  enlazado: <TEMP>/--solo_claude_--simular-home/.claude/skills/disenar-experiencia
+  enlazado: <TEMP>/--solo_claude_--simular-home/.claude/skills/ejecutar-plan
+  enlazado: <TEMP>/--solo_claude_--simular-home/.claude/skills/migrar-proyecto
+  enlazado: <TEMP>/--solo_claude_--simular-home/.claude/skills/planificar-cambio
+  enlazado: <TEMP>/--solo_claude_--simular-home/.claude/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_claude_--simular-home/.claude/agents/constructor.md (modelo: claude-haiku-5-5)
+  lanzador generado: <TEMP>/--solo_claude_--simular-home/.local/bin/claude-constructor (esfuerzo: high)
+  agente generado: <TEMP>/--solo_claude_--simular-home/.claude/agents/principal.md (modelo: claude-sonnet-5-5)
+  lanzador generado: <TEMP>/--solo_claude_--simular-home/.local/bin/claude-principal (esfuerzo: medium)
+  AVISO: <TEMP>/--solo_claude_--simular-home/.local/bin no está en tu PATH; agrégalo para usar los comandos claude-<agente>.
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+
+---
+--solo_pi_--simular
+0
+ARGS --solo pi --simular
+BEFORE
+
+STDOUT
+SIMULACIÓN: no se escribe nada.
+SIMULACIÓN: se escribirá <TEMP>/--solo_pi_--simular-home/.flucastr-ai/raiz
+Claude Code: no encontrado, se omite.
+Pi (<TEMP>/--solo_pi_--simular-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  enlazado: <TEMP>/--solo_pi_--simular-home/.pi/agent/skills/definir-proyecto
+  enlazado: <TEMP>/--solo_pi_--simular-home/.pi/agent/skills/diagnosticar
+  enlazado: <TEMP>/--solo_pi_--simular-home/.pi/agent/skills/disenar-experiencia
+  enlazado: <TEMP>/--solo_pi_--simular-home/.pi/agent/skills/ejecutar-plan
+  enlazado: <TEMP>/--solo_pi_--simular-home/.pi/agent/skills/migrar-proyecto
+  enlazado: <TEMP>/--solo_pi_--simular-home/.pi/agent/skills/planificar-cambio
+  enlazado: <TEMP>/--solo_pi_--simular-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_pi_--simular-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <TEMP>/--solo_pi_--simular-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <TEMP>/--solo_pi_--simular-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <TEMP>/--solo_pi_--simular-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  (simulación) compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<TEMP>/--solo_pi_--simular-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  (simulación) compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<TEMP>/--solo_pi_--simular-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <TEMP>/--solo_pi_--simular-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+
+---
+--solo_codex_--simular
+0
+ARGS --solo codex --simular
+BEFORE
+
+STDOUT
+SIMULACIÓN: no se escribe nada.
+SIMULACIÓN: se escribirá <TEMP>/--solo_codex_--simular-home/.flucastr-ai/raiz
+Claude Code: no encontrado, se omite.
+Pi: no encontrado, se omite.
+Codex (<TEMP>/--solo_codex_--simular-home/.codex)
+  AVISO: los deny de Codex son reglas de prefijo experimentales; no bloquean la lectura general de .env. La configuración global y MCP pueden ampliar el acceso.
+  enlazado: <TEMP>/--solo_codex_--simular-home/.agents/skills/definir-proyecto
+  enlazado: <TEMP>/--solo_codex_--simular-home/.agents/skills/diagnosticar
+  enlazado: <TEMP>/--solo_codex_--simular-home/.agents/skills/disenar-experiencia
+  enlazado: <TEMP>/--solo_codex_--simular-home/.agents/skills/ejecutar-plan
+  enlazado: <TEMP>/--solo_codex_--simular-home/.agents/skills/migrar-proyecto
+  enlazado: <TEMP>/--solo_codex_--simular-home/.agents/skills/planificar-cambio
+  enlazado: <TEMP>/--solo_codex_--simular-home/.agents/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_codex_--simular-home/.codex/agents/constructor.toml (modelo: gpt-6-luna)
+  lanzador generado: <TEMP>/--solo_codex_--simular-home/.local/bin/codex-constructor (modelo: gpt-6-luna, esfuerzo: high, compacta en: 100000)
+  agente generado: <TEMP>/--solo_codex_--simular-home/.codex/agents/principal.toml (modelo: gpt-6.1-terra)
+  lanzador generado: <TEMP>/--solo_codex_--simular-home/.local/bin/codex-principal (modelo: gpt-6.1-terra, esfuerzo: medium, compacta en: 60000)
+  lanzador generado: <TEMP>/--solo_codex_--simular-home/.local/bin/kit-run (herramienta: codex)
+  AVISO: <TEMP>/--solo_codex_--simular-home/.local/bin no está en tu PATH; agrégalo para usar los comandos codex-<agente> y kit-run.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+  Codex:       codex-principal (o el agente como rol: ~/.codex/agents)
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+
+---
+--solo_claude
+0
+ARGS --solo claude
+BEFORE
+
+STDOUT
+  raíz del kit: <TEMP>/--solo_claude-home/.flucastr-ai/raiz (/work)
+Claude Code (<TEMP>/--solo_claude-home/.claude)
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  enlazado: <TEMP>/--solo_claude-home/.claude/skills/definir-proyecto
+  enlazado: <TEMP>/--solo_claude-home/.claude/skills/diagnosticar
+  enlazado: <TEMP>/--solo_claude-home/.claude/skills/disenar-experiencia
+  enlazado: <TEMP>/--solo_claude-home/.claude/skills/ejecutar-plan
+  enlazado: <TEMP>/--solo_claude-home/.claude/skills/migrar-proyecto
+  enlazado: <TEMP>/--solo_claude-home/.claude/skills/planificar-cambio
+  enlazado: <TEMP>/--solo_claude-home/.claude/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_claude-home/.claude/agents/constructor.md (modelo: claude-haiku-5-5)
+  lanzador generado: <TEMP>/--solo_claude-home/.local/bin/claude-constructor (esfuerzo: high)
+  agente generado: <TEMP>/--solo_claude-home/.claude/agents/principal.md (modelo: claude-sonnet-5-5)
+  lanzador generado: <TEMP>/--solo_claude-home/.local/bin/claude-principal (esfuerzo: medium)
+  AVISO: <TEMP>/--solo_claude-home/.local/bin no está en tu PATH; agrégalo para usar los comandos claude-<agente>.
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 /work/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 /work/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 d2d6a82311a9812a4902d553faec89c30cc8b5404a2fffbdf1d46fccd1e7d0c7 932
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+---
+--solo_pi
+0
+ARGS --solo pi
+BEFORE
+
+STDOUT
+  raíz del kit: <TEMP>/--solo_pi-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+Pi (<TEMP>/--solo_pi-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  enlazado: <TEMP>/--solo_pi-home/.pi/agent/skills/definir-proyecto
+  enlazado: <TEMP>/--solo_pi-home/.pi/agent/skills/diagnosticar
+  enlazado: <TEMP>/--solo_pi-home/.pi/agent/skills/disenar-experiencia
+  enlazado: <TEMP>/--solo_pi-home/.pi/agent/skills/ejecutar-plan
+  enlazado: <TEMP>/--solo_pi-home/.pi/agent/skills/migrar-proyecto
+  enlazado: <TEMP>/--solo_pi-home/.pi/agent/skills/planificar-cambio
+  enlazado: <TEMP>/--solo_pi-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_pi-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <TEMP>/--solo_pi-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <TEMP>/--solo_pi-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <TEMP>/--solo_pi-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<TEMP>/--solo_pi-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<TEMP>/--solo_pi-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <TEMP>/--solo_pi-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 dbe98a6129bc12e0dec1be8d948adbdee7695966f77ec8de6682a8199e2d433b 1109
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 f823304bbf25f222551adab655f13f765c36e1430053ed7da5c0dda493f0dee6 299
+F .local/bin/pi-principal 755 eedfd8770939f890a6fc3c41aedff80f783ee7d5a26f5d21998036ea434aef73 295
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 /work/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 /work/skills/preparar-proyecto
+---
+--solo_codex
+0
+ARGS --solo codex
+BEFORE
+
+STDOUT
+  raíz del kit: <TEMP>/--solo_codex-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+Pi: no encontrado, se omite.
+Codex (<TEMP>/--solo_codex-home/.codex)
+  AVISO: los deny de Codex son reglas de prefijo experimentales; no bloquean la lectura general de .env. La configuración global y MCP pueden ampliar el acceso.
+  enlazado: <TEMP>/--solo_codex-home/.agents/skills/definir-proyecto
+  enlazado: <TEMP>/--solo_codex-home/.agents/skills/diagnosticar
+  enlazado: <TEMP>/--solo_codex-home/.agents/skills/disenar-experiencia
+  enlazado: <TEMP>/--solo_codex-home/.agents/skills/ejecutar-plan
+  enlazado: <TEMP>/--solo_codex-home/.agents/skills/migrar-proyecto
+  enlazado: <TEMP>/--solo_codex-home/.agents/skills/planificar-cambio
+  enlazado: <TEMP>/--solo_codex-home/.agents/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_codex-home/.codex/agents/constructor.toml (modelo: gpt-6-luna)
+  lanzador generado: <TEMP>/--solo_codex-home/.local/bin/codex-constructor (modelo: gpt-6-luna, esfuerzo: high, compacta en: 100000)
+  agente generado: <TEMP>/--solo_codex-home/.codex/agents/principal.toml (modelo: gpt-6.1-terra)
+  lanzador generado: <TEMP>/--solo_codex-home/.local/bin/codex-principal (modelo: gpt-6.1-terra, esfuerzo: medium, compacta en: 60000)
+  lanzador generado: <TEMP>/--solo_codex-home/.local/bin/kit-run (herramienta: codex)
+  AVISO: <TEMP>/--solo_codex-home/.local/bin no está en tu PATH; agrégalo para usar los comandos codex-<agente> y kit-run.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+  Codex:       codex-principal (o el agente como rol: ~/.codex/agents)
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .agents 755
+D .agents/skills 755
+L .agents/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .agents/skills/diagnosticar 777 /work/skills/diagnosticar
+L .agents/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .agents/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .agents/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .agents/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .agents/skills/preparar-proyecto 777 /work/skills/preparar-proyecto
+D .codex 755
+D .codex/agents 755
+F .codex/agents/constructor.toml 644 34b10493b66b77d1c9616ea24565f2b5458d8a6d3cb48eb83707b392da43303d 4941
+F .codex/agents/principal.toml 644 2e2f528021033dc9eae9889c776695522500fcda853d089195a4033738352efe 17905
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 02948221d5a703174fc7895af751b9988737193abab6c2616e009f1e0bb62a9c 986
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/codex-constructor 755 eb17bc9aabd7ded551cf6c14cdf0943374b844af7085fadd7b4b1b8d69b3d89f 482
+F .local/bin/codex-principal 755 8e3b747c662eb5e4e61a911d08a4088a2c6e999b6b0702375036368923c8dc6b 479
+F .local/bin/kit-run 755 a9cffcabad50ecfbf5aea20c346892754aca924d61f305a0301ea715c57d2e5a 147
+---
+--copiar
+0
+ARGS --copiar
+BEFORE
+
+STDOUT
+modelos.json personal creado: <TEMP>/--copiar-home/.flucastr-ai/modelos.json
+  raíz del kit: <TEMP>/--copiar-home/.flucastr-ai/raiz (/work)
+Claude Code (<TEMP>/--copiar-home/.claude)
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  copiado: <TEMP>/--copiar-home/.claude/skills/definir-proyecto
+  copiado: <TEMP>/--copiar-home/.claude/skills/diagnosticar
+  copiado: <TEMP>/--copiar-home/.claude/skills/disenar-experiencia
+  copiado: <TEMP>/--copiar-home/.claude/skills/ejecutar-plan
+  copiado: <TEMP>/--copiar-home/.claude/skills/migrar-proyecto
+  copiado: <TEMP>/--copiar-home/.claude/skills/planificar-cambio
+  copiado: <TEMP>/--copiar-home/.claude/skills/preparar-proyecto
+  agente generado: <TEMP>/--copiar-home/.claude/agents/constructor.md (modelo: claude-haiku-5-5)
+  lanzador generado: <TEMP>/--copiar-home/.local/bin/claude-constructor (esfuerzo: high)
+  agente generado: <TEMP>/--copiar-home/.claude/agents/principal.md (modelo: claude-sonnet-5-5)
+  lanzador generado: <TEMP>/--copiar-home/.local/bin/claude-principal (esfuerzo: medium)
+  AVISO: <TEMP>/--copiar-home/.local/bin no está en tu PATH; agrégalo para usar los comandos claude-<agente>.
+Pi (<TEMP>/--copiar-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  copiado: <TEMP>/--copiar-home/.pi/agent/skills/definir-proyecto
+  copiado: <TEMP>/--copiar-home/.pi/agent/skills/diagnosticar
+  copiado: <TEMP>/--copiar-home/.pi/agent/skills/disenar-experiencia
+  copiado: <TEMP>/--copiar-home/.pi/agent/skills/ejecutar-plan
+  copiado: <TEMP>/--copiar-home/.pi/agent/skills/migrar-proyecto
+  copiado: <TEMP>/--copiar-home/.pi/agent/skills/planificar-cambio
+  copiado: <TEMP>/--copiar-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <TEMP>/--copiar-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <TEMP>/--copiar-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <TEMP>/--copiar-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <TEMP>/--copiar-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<TEMP>/--copiar-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<TEMP>/--copiar-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <TEMP>/--copiar-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex (<TEMP>/--copiar-home/.codex)
+  AVISO: los deny de Codex son reglas de prefijo experimentales; no bloquean la lectura general de .env. La configuración global y MCP pueden ampliar el acceso.
+  copiado: <TEMP>/--copiar-home/.agents/skills/definir-proyecto
+  copiado: <TEMP>/--copiar-home/.agents/skills/diagnosticar
+  copiado: <TEMP>/--copiar-home/.agents/skills/disenar-experiencia
+  copiado: <TEMP>/--copiar-home/.agents/skills/ejecutar-plan
+  copiado: <TEMP>/--copiar-home/.agents/skills/migrar-proyecto
+  copiado: <TEMP>/--copiar-home/.agents/skills/planificar-cambio
+  copiado: <TEMP>/--copiar-home/.agents/skills/preparar-proyecto
+  agente generado: <TEMP>/--copiar-home/.codex/agents/constructor.toml (modelo: gpt-6-luna)
+  lanzador generado: <TEMP>/--copiar-home/.local/bin/codex-constructor (modelo: gpt-6-luna, esfuerzo: high, compacta en: 100000)
+  agente generado: <TEMP>/--copiar-home/.codex/agents/principal.toml (modelo: gpt-6.1-terra)
+  lanzador generado: <TEMP>/--copiar-home/.local/bin/codex-principal (modelo: gpt-6.1-terra, esfuerzo: medium, compacta en: 60000)
+  lanzador generado: <TEMP>/--copiar-home/.local/bin/kit-run (herramienta: codex)
+  AVISO: <TEMP>/--copiar-home/.local/bin no está en tu PATH; agrégalo para usar los comandos codex-<agente> y kit-run.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+  Codex:       codex-principal (o el agente como rol: ~/.codex/agents)
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .agents 755
+D .agents/skills 755
+D .agents/skills/definir-proyecto 755
+F .agents/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .agents/skills/diagnosticar 755
+F .agents/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .agents/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .agents/skills/disenar-experiencia 755
+F .agents/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .agents/skills/ejecutar-plan 755
+F .agents/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .agents/skills/migrar-proyecto 755
+F .agents/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .agents/skills/planificar-cambio 755
+F .agents/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .agents/skills/preparar-proyecto 755
+F .agents/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .agents/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+D .claude/skills/definir-proyecto 755
+F .claude/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .claude/skills/diagnosticar 755
+F .claude/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .claude/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .claude/skills/disenar-experiencia 755
+F .claude/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .claude/skills/ejecutar-plan 755
+F .claude/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .claude/skills/migrar-proyecto 755
+F .claude/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .claude/skills/planificar-cambio 755
+F .claude/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .claude/skills/preparar-proyecto 755
+F .claude/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .claude/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+D .codex 755
+D .codex/agents 755
+F .codex/agents/constructor.toml 644 34b10493b66b77d1c9616ea24565f2b5458d8a6d3cb48eb83707b392da43303d 4941
+F .codex/agents/principal.toml 644 2e2f528021033dc9eae9889c776695522500fcda853d089195a4033738352efe 17905
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 d9433affcb178283fe85955600140f6e09145389e0147c835447bb31a89a7e74 2851
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 204990c1df7b56e150c353ac53a15bb0525c132750edcf2af76367e02a1a3ec0 228
+F .local/bin/claude-principal 755 be3d0d85234856df5ee389dad16e925f9f33c25efb70b9efc1fd313360620344 228
+F .local/bin/codex-constructor 755 a95a0d04131716e79071c03d5a32e629bc3462ff581847e0a215b7308aeeba74 568
+F .local/bin/codex-principal 755 b1a4e3e4997feece56e5d94717ec6cf4cbdcf970ca0078a654381673a3f7e645 565
+F .local/bin/kit-run 755 a9cffcabad50ecfbf5aea20c346892754aca924d61f305a0301ea715c57d2e5a 147
+F .local/bin/pi-constructor 755 ad3432e2238b3b561c85dbb30c52d1f9721bc7f1ec0c3e6f6aac67a11ea3a9dc 385
+F .local/bin/pi-principal 755 dc55ae916df89c7f8b0b6222c20e70a692360b493bf7628e6d42816d380c06ef 381
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+D .pi/agent/skills/definir-proyecto 755
+F .pi/agent/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/agent/skills/diagnosticar 755
+F .pi/agent/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/agent/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/agent/skills/disenar-experiencia 755
+F .pi/agent/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/agent/skills/ejecutar-plan 755
+F .pi/agent/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/agent/skills/migrar-proyecto 755
+F .pi/agent/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/agent/skills/planificar-cambio 755
+F .pi/agent/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/agent/skills/preparar-proyecto 755
+F .pi/agent/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/agent/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+---
+--solo_claude_--copiar
+0
+ARGS --solo claude --copiar
+BEFORE
+
+STDOUT
+modelos.json personal creado: <TEMP>/--solo_claude_--copiar-home/.flucastr-ai/modelos.json
+  raíz del kit: <TEMP>/--solo_claude_--copiar-home/.flucastr-ai/raiz (/work)
+Claude Code (<TEMP>/--solo_claude_--copiar-home/.claude)
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  copiado: <TEMP>/--solo_claude_--copiar-home/.claude/skills/definir-proyecto
+  copiado: <TEMP>/--solo_claude_--copiar-home/.claude/skills/diagnosticar
+  copiado: <TEMP>/--solo_claude_--copiar-home/.claude/skills/disenar-experiencia
+  copiado: <TEMP>/--solo_claude_--copiar-home/.claude/skills/ejecutar-plan
+  copiado: <TEMP>/--solo_claude_--copiar-home/.claude/skills/migrar-proyecto
+  copiado: <TEMP>/--solo_claude_--copiar-home/.claude/skills/planificar-cambio
+  copiado: <TEMP>/--solo_claude_--copiar-home/.claude/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_claude_--copiar-home/.claude/agents/constructor.md (modelo: claude-haiku-5-5)
+  lanzador generado: <TEMP>/--solo_claude_--copiar-home/.local/bin/claude-constructor (esfuerzo: high)
+  agente generado: <TEMP>/--solo_claude_--copiar-home/.claude/agents/principal.md (modelo: claude-sonnet-5-5)
+  lanzador generado: <TEMP>/--solo_claude_--copiar-home/.local/bin/claude-principal (esfuerzo: medium)
+  AVISO: <TEMP>/--solo_claude_--copiar-home/.local/bin no está en tu PATH; agrégalo para usar los comandos claude-<agente>.
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+D .claude/skills/definir-proyecto 755
+F .claude/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .claude/skills/diagnosticar 755
+F .claude/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .claude/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .claude/skills/disenar-experiencia 755
+F .claude/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .claude/skills/ejecutar-plan 755
+F .claude/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .claude/skills/migrar-proyecto 755
+F .claude/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .claude/skills/planificar-cambio 755
+F .claude/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .claude/skills/preparar-proyecto 755
+F .claude/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .claude/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .claude/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 28310676e35fd6a4917e90ff21584eb7b2b6669ccf340af19f03553954060f55 1072
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 2314764f0067dbb93c3a6506f269cffeb6e9291241755f8cabed6b3df3e74a80 242
+F .local/bin/claude-principal 755 0a6aacb1775b3710072ca6762a8e75e9357b30c35b21c1bbee780b43ff6bd180 242
+---
+--solo_pi_--copiar
+0
+ARGS --solo pi --copiar
+BEFORE
+
+STDOUT
+modelos.json personal creado: <TEMP>/--solo_pi_--copiar-home/.flucastr-ai/modelos.json
+  raíz del kit: <TEMP>/--solo_pi_--copiar-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+Pi (<TEMP>/--solo_pi_--copiar-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  copiado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/skills/definir-proyecto
+  copiado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/skills/diagnosticar
+  copiado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/skills/disenar-experiencia
+  copiado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/skills/ejecutar-plan
+  copiado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/skills/migrar-proyecto
+  copiado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/skills/planificar-cambio
+  copiado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <TEMP>/--solo_pi_--copiar-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <TEMP>/--solo_pi_--copiar-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <TEMP>/--solo_pi_--copiar-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<TEMP>/--solo_pi_--copiar-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<TEMP>/--solo_pi_--copiar-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <TEMP>/--solo_pi_--copiar-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 270da8097f13e5df0be2e47d4f35d00c0dc3ce53e8311f84c470daa9380e1b67 1267
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 0477ee2bcb402e9b9b80454e835c808885b224887baf81e4dab78cf461408731 395
+F .local/bin/pi-principal 755 87fe8243ad362b3314452b2df5322906e3e7180c2f539f46dfd049dc30dfefda 391
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+D .pi/agent/skills/definir-proyecto 755
+F .pi/agent/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/agent/skills/diagnosticar 755
+F .pi/agent/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/agent/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/agent/skills/disenar-experiencia 755
+F .pi/agent/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/agent/skills/ejecutar-plan 755
+F .pi/agent/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/agent/skills/migrar-proyecto 755
+F .pi/agent/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/agent/skills/planificar-cambio 755
+F .pi/agent/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/agent/skills/preparar-proyecto 755
+F .pi/agent/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/agent/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+---
+--solo_codex_--copiar
+0
+ARGS --solo codex --copiar
+BEFORE
+
+STDOUT
+modelos.json personal creado: <TEMP>/--solo_codex_--copiar-home/.flucastr-ai/modelos.json
+  raíz del kit: <TEMP>/--solo_codex_--copiar-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+Pi: no encontrado, se omite.
+Codex (<TEMP>/--solo_codex_--copiar-home/.codex)
+  AVISO: los deny de Codex son reglas de prefijo experimentales; no bloquean la lectura general de .env. La configuración global y MCP pueden ampliar el acceso.
+  copiado: <TEMP>/--solo_codex_--copiar-home/.agents/skills/definir-proyecto
+  copiado: <TEMP>/--solo_codex_--copiar-home/.agents/skills/diagnosticar
+  copiado: <TEMP>/--solo_codex_--copiar-home/.agents/skills/disenar-experiencia
+  copiado: <TEMP>/--solo_codex_--copiar-home/.agents/skills/ejecutar-plan
+  copiado: <TEMP>/--solo_codex_--copiar-home/.agents/skills/migrar-proyecto
+  copiado: <TEMP>/--solo_codex_--copiar-home/.agents/skills/planificar-cambio
+  copiado: <TEMP>/--solo_codex_--copiar-home/.agents/skills/preparar-proyecto
+  agente generado: <TEMP>/--solo_codex_--copiar-home/.codex/agents/constructor.toml (modelo: gpt-6-luna)
+  lanzador generado: <TEMP>/--solo_codex_--copiar-home/.local/bin/codex-constructor (modelo: gpt-6-luna, esfuerzo: high, compacta en: 100000)
+  agente generado: <TEMP>/--solo_codex_--copiar-home/.codex/agents/principal.toml (modelo: gpt-6.1-terra)
+  lanzador generado: <TEMP>/--solo_codex_--copiar-home/.local/bin/codex-principal (modelo: gpt-6.1-terra, esfuerzo: medium, compacta en: 60000)
+  lanzador generado: <TEMP>/--solo_codex_--copiar-home/.local/bin/kit-run (herramienta: codex)
+  AVISO: <TEMP>/--solo_codex_--copiar-home/.local/bin no está en tu PATH; agrégalo para usar los comandos codex-<agente> y kit-run.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+  Codex:       codex-principal (o el agente como rol: ~/.codex/agents)
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .agents 755
+D .agents/skills 755
+D .agents/skills/definir-proyecto 755
+F .agents/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .agents/skills/diagnosticar 755
+F .agents/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .agents/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .agents/skills/disenar-experiencia 755
+F .agents/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .agents/skills/ejecutar-plan 755
+F .agents/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .agents/skills/migrar-proyecto 755
+F .agents/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .agents/skills/planificar-cambio 755
+F .agents/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .agents/skills/preparar-proyecto 755
+F .agents/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .agents/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .agents/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+D .codex 755
+D .codex/agents 755
+F .codex/agents/constructor.toml 644 34b10493b66b77d1c9616ea24565f2b5458d8a6d3cb48eb83707b392da43303d 4941
+F .codex/agents/principal.toml 644 2e2f528021033dc9eae9889c776695522500fcda853d089195a4033738352efe 17905
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 adee0487f9e172b2f80ca09fbea02e7be254c80ea3900983911e6dc5521eafff 1135
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/codex-constructor 755 54b41297f487a13857c111eca2912df8117c7bb7d4e641671a41b76ffc6d51fc 581
+F .local/bin/codex-principal 755 f212347a46f5f1d18282370fb9af18dd9864564bebe25649a9feeaa8d2f107fe 578
+F .local/bin/kit-run 755 a9cffcabad50ecfbf5aea20c346892754aca924d61f305a0301ea715c57d2e5a 147
+---
+absent_claude
+0
+ARGS --solo claude
+BEFORE
+
+STDOUT
+  raíz del kit: <TEMP>/absent_claude-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 8a7176bc5b4d914755235b51993900c8976d70ec590129bf78ccd6f749d8f212 74
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+---
+absent_pi
+0
+ARGS --solo pi
+BEFORE
+
+STDOUT
+  raíz del kit: <TEMP>/absent_pi-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 d7de49d9de04bc98cd6ffb2a095a6dfffef38b7017c375825a2de2368410b1df 70
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+---
+absent_codex
+0
+ARGS --solo codex
+BEFORE
+
+STDOUT
+  raíz del kit: <TEMP>/absent_codex-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 9281f7cab31880c684b4d779df9d933af259e218c5c36196660eb1eedc4ed9e1 73
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+---
+reject_--wat
+1
+ARGS --wat
+BEFORE
+
+STDOUT
+
+STDERR
+Opción desconocida: --wat
+AFTER
+
+---
+reject_--solo_nope
+1
+ARGS --solo nope
+BEFORE
+
+STDOUT
+
+STDERR
+--solo acepta: claude, pi o codex
+AFTER
+
+---
+reject_--migrar_tmpnope_--copiar
+1
+ARGS --migrar /tmp/nope --copiar
+BEFORE
+
+STDOUT
+
+STDERR
+--migrar necesita una carpeta que exista
+AFTER
+
+---
+reject_--skills-proyecto
+1
+ARGS --skills-proyecto
+BEFORE
+
+STDOUT
+
+STDERR
+--skills-proyecto necesita --proyecto <ruta>
+AFTER
+
+---
+reject_--migrar_tmp_--proyecto_tmp
+1
+ARGS --migrar /tmp --proyecto /tmp
+BEFORE
+
+STDOUT
+
+STDERR
+--migrar solo trabaja sobre el proyecto con Claude Code: no se combina con --proyecto, --skills-proyecto, --copiar, --solo ni --agente
+AFTER
+
+---
+reject_--migrar_tmp_--skills-proyecto
+1
+ARGS --migrar /tmp --skills-proyecto
+BEFORE
+
+STDOUT
+
+STDERR
+--skills-proyecto necesita --proyecto <ruta>
+AFTER
+
+---
+reject_--migrar_tmp_--solo_claude
+1
+ARGS --migrar /tmp --solo claude
+BEFORE
+
+STDOUT
+
+STDERR
+--migrar solo trabaja sobre el proyecto con Claude Code: no se combina con --proyecto, --skills-proyecto, --copiar, --solo ni --agente
+AFTER
+
+---
+reject_--migrar_tmp_--copiar
+1
+ARGS --migrar /tmp --copiar
+BEFORE
+
+STDOUT
+
+STDERR
+--migrar solo trabaja sobre el proyecto con Claude Code: no se combina con --proyecto, --skills-proyecto, --copiar, --solo ni --agente
+AFTER
+
+---
+reject_--migrar_tmp_--agente_principal
+1
+ARGS --migrar /tmp --agente principal
+BEFORE
+
+STDOUT
+
+STDERR
+--migrar solo trabaja sobre el proyecto con Claude Code: no se combina con --proyecto, --skills-proyecto, --copiar, --solo ni --agente
+AFTER
+
+---
+reject_--solo_claude_--skills-proyecto
+1
+ARGS --solo claude --skills-proyecto
+BEFORE
+
+STDOUT
+
+STDERR
+--skills-proyecto necesita --proyecto <ruta>
+AFTER
+
+---
+reject_--solo_codex_--skills-proyecto
+1
+ARGS --solo codex --skills-proyecto
+BEFORE
+
+STDOUT
+
+STDERR
+--skills-proyecto necesita --proyecto <ruta>
+AFTER
+
+---
+project_skills_install
+0
+ARGS --solo pi --proyecto <TEMP>/project-flow-project --skills-proyecto
+BEFORE
+D .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi 755
+D .pi/agent 755
+F .pi/agent/settings.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi/skills 755
+D .pi/skills/preexistente 755
+F .pi/skills/preexistente/SKILL.md 644 724dada98b9ce9bbae5bf371171bae942874d92957afdc3c545770043ba9f6f8 13
+STDOUT
+  raíz del kit: <TEMP>/project-flow-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+  (--proyecto necesita Claude Code; no se fijó el agente)
+Pi (<TEMP>/project-flow-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/definir-proyecto
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/diagnosticar
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/disenar-experiencia
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/ejecutar-plan
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/migrar-proyecto
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/planificar-cambio
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <TEMP>/project-flow-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <TEMP>/project-flow-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <TEMP>/project-flow-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <TEMP>/project-flow-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<TEMP>/project-flow-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<TEMP>/project-flow-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <TEMP>/project-flow-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex: no encontrado, se omite.
+  (--proyecto no fijó reglas de Codex: Codex no está instalado)
+
+Skills de Pi en el proyecto (<TEMP>/project-flow-project)
+  copiado: <TEMP>/project-flow-project/.pi/skills/definir-proyecto
+  copiado: <TEMP>/project-flow-project/.pi/skills/diagnosticar
+  copiado: <TEMP>/project-flow-project/.pi/skills/disenar-experiencia
+  copiado: <TEMP>/project-flow-project/.pi/skills/ejecutar-plan
+  copiado: <TEMP>/project-flow-project/.pi/skills/migrar-proyecto
+  copiado: <TEMP>/project-flow-project/.pi/skills/planificar-cambio
+  copiado: <TEMP>/project-flow-project/.pi/skills/preparar-proyecto
+  AVISO: el proyecto no es un repo git; no hay nada que excluir.
+  Las copias en .pi/skills/ no se editan: se rehacen al reinstalar. Pi pedirá confiar en el proyecto (/trust).
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 8e79fbc57aafab9e4beddadf035b1d6cf9c8563a6d25bf0d171e9f0f978bc731 1773
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 f823304bbf25f222551adab655f13f765c36e1430053ed7da5c0dda493f0dee6 299
+F .local/bin/pi-principal 755 eedfd8770939f890a6fc3c41aedff80f783ee7d5a26f5d21998036ea434aef73 295
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 /work/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 /work/skills/preparar-proyectoD .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi 755
+D .pi/agent 755
+F .pi/agent/settings.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi/skills 755
+D .pi/skills/definir-proyecto 755
+F .pi/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/skills/diagnosticar 755
+F .pi/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/skills/disenar-experiencia 755
+F .pi/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/skills/ejecutar-plan 755
+F .pi/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/skills/migrar-proyecto 755
+F .pi/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/skills/planificar-cambio 755
+F .pi/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/skills/preexistente 755
+F .pi/skills/preexistente/SKILL.md 644 724dada98b9ce9bbae5bf371171bae942874d92957afdc3c545770043ba9f6f8 13
+D .pi/skills/preparar-proyecto 755
+F .pi/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+---
+project_skills_reinstall
+0
+ARGS --solo pi --proyecto <TEMP>/project-flow-project --skills-proyecto
+BEFORE
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 8e79fbc57aafab9e4beddadf035b1d6cf9c8563a6d25bf0d171e9f0f978bc731 1773
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 f823304bbf25f222551adab655f13f765c36e1430053ed7da5c0dda493f0dee6 299
+F .local/bin/pi-principal 755 eedfd8770939f890a6fc3c41aedff80f783ee7d5a26f5d21998036ea434aef73 295
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 /work/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 /work/skills/preparar-proyectoD .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi 755
+D .pi/agent 755
+F .pi/agent/settings.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi/skills 755
+D .pi/skills/definir-proyecto 755
+F .pi/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/skills/diagnosticar 755
+F .pi/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/skills/disenar-experiencia 755
+F .pi/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/skills/ejecutar-plan 755
+F .pi/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/skills/migrar-proyecto 755
+F .pi/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/skills/planificar-cambio 755
+F .pi/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/skills/preexistente 755
+F .pi/skills/preexistente/SKILL.md 644 724dada98b9ce9bbae5bf371171bae942874d92957afdc3c545770043ba9f6f8 13
+D .pi/skills/preparar-proyecto 755
+F .pi/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+STDOUT
+Quitando la instalación anterior...
+  raíz del kit: <TEMP>/project-flow-home/.flucastr-ai/raiz (/work)
+Claude Code: no encontrado, se omite.
+  (--proyecto necesita Claude Code; no se fijó el agente)
+Pi (<TEMP>/project-flow-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/definir-proyecto
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/diagnosticar
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/disenar-experiencia
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/ejecutar-plan
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/migrar-proyecto
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/planificar-cambio
+  enlazado: <TEMP>/project-flow-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <TEMP>/project-flow-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <TEMP>/project-flow-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <TEMP>/project-flow-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <TEMP>/project-flow-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<TEMP>/project-flow-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<TEMP>/project-flow-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <TEMP>/project-flow-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex: no encontrado, se omite.
+  (--proyecto no fijó reglas de Codex: Codex no está instalado)
+
+Skills de Pi en el proyecto (<TEMP>/project-flow-project)
+  copiado: <TEMP>/project-flow-project/.pi/skills/definir-proyecto
+  copiado: <TEMP>/project-flow-project/.pi/skills/diagnosticar
+  copiado: <TEMP>/project-flow-project/.pi/skills/disenar-experiencia
+  copiado: <TEMP>/project-flow-project/.pi/skills/ejecutar-plan
+  copiado: <TEMP>/project-flow-project/.pi/skills/migrar-proyecto
+  copiado: <TEMP>/project-flow-project/.pi/skills/planificar-cambio
+  copiado: <TEMP>/project-flow-project/.pi/skills/preparar-proyecto
+  AVISO: el proyecto no es un repo git; no hay nada que excluir.
+  Las copias en .pi/skills/ no se editan: se rehacen al reinstalar. Pi pedirá confiar en el proyecto (/trust).
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 8e79fbc57aafab9e4beddadf035b1d6cf9c8563a6d25bf0d171e9f0f978bc731 1773
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 f823304bbf25f222551adab655f13f765c36e1430053ed7da5c0dda493f0dee6 299
+F .local/bin/pi-principal 755 eedfd8770939f890a6fc3c41aedff80f783ee7d5a26f5d21998036ea434aef73 295
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 /work/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 /work/skills/preparar-proyectoD .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi 755
+D .pi/agent 755
+F .pi/agent/settings.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi/skills 755
+D .pi/skills/definir-proyecto 755
+F .pi/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/skills/diagnosticar 755
+F .pi/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/skills/disenar-experiencia 755
+F .pi/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/skills/ejecutar-plan 755
+F .pi/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/skills/migrar-proyecto 755
+F .pi/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/skills/planificar-cambio 755
+F .pi/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/skills/preexistente 755
+F .pi/skills/preexistente/SKILL.md 644 724dada98b9ce9bbae5bf371171bae942874d92957afdc3c545770043ba9f6f8 13
+D .pi/skills/preparar-proyecto 755
+F .pi/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+---
+project_skills_uninstall
+0
+ARGS desinstalar.sh --proyecto <TEMP>/project-flow-project
+BEFORE
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 8e79fbc57aafab9e4beddadf035b1d6cf9c8563a6d25bf0d171e9f0f978bc731 1773
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 f823304bbf25f222551adab655f13f765c36e1430053ed7da5c0dda493f0dee6 299
+F .local/bin/pi-principal 755 eedfd8770939f890a6fc3c41aedff80f783ee7d5a26f5d21998036ea434aef73 295
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 /work/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 /work/skills/preparar-proyectoD .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi 755
+D .pi/agent 755
+F .pi/agent/settings.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi/skills 755
+D .pi/skills/definir-proyecto 755
+F .pi/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/skills/diagnosticar 755
+F .pi/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/skills/disenar-experiencia 755
+F .pi/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/skills/ejecutar-plan 755
+F .pi/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/skills/migrar-proyecto 755
+F .pi/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/skills/planificar-cambio 755
+F .pi/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/skills/preexistente 755
+F .pi/skills/preexistente/SKILL.md 644 724dada98b9ce9bbae5bf371171bae942874d92957afdc3c545770043ba9f6f8 13
+D .pi/skills/preparar-proyecto 755
+F .pi/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+STDOUT
+  quitado: <TEMP>/project-flow-project/.pi/skills/definir-proyecto
+  quitado: <TEMP>/project-flow-project/.pi/skills/diagnosticar
+  quitado: <TEMP>/project-flow-project/.pi/skills/disenar-experiencia
+  quitado: <TEMP>/project-flow-project/.pi/skills/ejecutar-plan
+  quitado: <TEMP>/project-flow-project/.pi/skills/migrar-proyecto
+  quitado: <TEMP>/project-flow-project/.pi/skills/planificar-cambio
+  quitado: <TEMP>/project-flow-project/.pi/skills/preparar-proyecto
+  (las copias no se editan: si cambiaste algo dentro, se pierde)
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 644 a50194f8f9533de83025adc66de607b1e2b64f9d2153e9730f731347a08595a7 1151
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 f823304bbf25f222551adab655f13f765c36e1430053ed7da5c0dda493f0dee6 299
+F .local/bin/pi-principal 755 eedfd8770939f890a6fc3c41aedff80f783ee7d5a26f5d21998036ea434aef73 295
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 /work/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 /work/skills/preparar-proyectoD .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi 755
+D .pi/agent 755
+F .pi/agent/settings.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .pi/skills 755
+D .pi/skills/preexistente 755
+F .pi/skills/preexistente/SKILL.md 644 724dada98b9ce9bbae5bf371171bae942874d92957afdc3c545770043ba9f6f8 13
+---
+global_uninstall
+0
+ARGS desinstalar.sh 
+BEFORE
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 644 a50194f8f9533de83025adc66de607b1e2b64f9d2153e9730f731347a08595a7 1151
+F .flucastr-ai/raiz 644 d4af26ffb49880d7899d7a38c48c4d8b8e4eb999e189940949f713f84905c16d 6
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 f823304bbf25f222551adab655f13f765c36e1430053ed7da5c0dda493f0dee6 299
+F .local/bin/pi-principal 755 eedfd8770939f890a6fc3c41aedff80f783ee7d5a26f5d21998036ea434aef73 295
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 /work/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 /work/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 /work/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 /work/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 /work/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 /work/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 /work/skills/preparar-proyecto
+STDOUT
+  quitado: <TEMP>/project-flow-home/.flucastr-ai/raiz
+  quitado: <TEMP>/project-flow-home/.pi/agent/skills/definir-proyecto
+  quitado: <TEMP>/project-flow-home/.pi/agent/skills/diagnosticar
+  quitado: <TEMP>/project-flow-home/.pi/agent/skills/disenar-experiencia
+  quitado: <TEMP>/project-flow-home/.pi/agent/skills/ejecutar-plan
+  quitado: <TEMP>/project-flow-home/.pi/agent/skills/migrar-proyecto
+  quitado: <TEMP>/project-flow-home/.pi/agent/skills/planificar-cambio
+  quitado: <TEMP>/project-flow-home/.pi/agent/skills/preparar-proyecto
+  quitado: <TEMP>/project-flow-home/.pi/agent/agents/constructor.md
+  quitado: <TEMP>/project-flow-home/.local/bin/pi-constructor
+  quitado: <TEMP>/project-flow-home/.pi/agent/agents/principal.md
+  quitado: <TEMP>/project-flow-home/.local/bin/pi-principal
+  compactación de Pi (quitado): openai/gpt-6.1-sol
+  compactación de Pi (archivo-quitado): openai/gpt-6-luna
+Listo. Reinicia Claude Code y Pi.
+STDERR
+
+AFTER
+D .local 755
+D .local/bin 755
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+D .pi/agent/skills 755
+---
+migration_simulation
+0
+ARGS --migrar <TEMP>/migration-simulation-project --simular
+BEFORE
+D .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+F .gitignore 644 c95b74032c438c7a91af14ef1af75c773ccd775ad81bf98a2a1fbdd1d75ea38d 7
+D definitions 755
+F definitions/BACKLOG.md 644 2d27fbdf4e8ca207afbfa388ca9172fbcc6c70e534af2476b3b704f87debadcf 3
+D features 755
+D features/f 755
+F features/f/task-1.md 644 2dd6cd6c5ed22422e8088e1247bfe795ae9518ef0bfd7fc854195c0fe75f1f5c 6
+D registro 755
+F registro/datos.txt 644 e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f 8
+D src 755
+F src/main.txt 644 ef8aed55fba64258003f3479ff60a060ddb8301d170110a0d2dfa0ce4ea04eb3 4
+STDOUT
+SIMULACIÓN: no se escribe nada. Esto es lo que haría:
+Migrar <TEMP>/migration-simulation-project a la v2
+Mover a old/v1/ (nada se borra; src/ no se toca):
+  movería: definitions -> old/v1/definitions
+  movería: features -> old/v1/features
+  movería: registro -> old/v1/registro
+Claude Code (proyecto <TEMP>/migration-simulation-project):
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  (simulación) agente predeterminado fijado: principal (<TEMP>/migration-simulation-project/.claude/settings.local.json)
+  (simulación) sin hook de v1 que quitar: <TEMP>/migration-simulation-project/.claude/settings.local.json
+  (simulación) regla deny de Claude Code agregada: Read(./.env) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./.env.*) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/.env) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/.env.*) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./.ssh/**) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./.aws/**) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/.ssh/**) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/.aws/**) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(~/.ssh/**) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(~/.aws/**) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/*.pem) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/*.key) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/*.p12) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/*.pfx) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/id_rsa) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/id_ed25519) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Read(./**/id_ecdsa) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(git commit *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(git push *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(git merge *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(gh pr create *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(gh pr merge *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(git * commit *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(git * push *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(bash -c *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(sh -c *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(zsh -c *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) regla deny de Claude Code agregada: Bash(git -c * merge *) (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.enabled (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.allowUnsandboxedCommands (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+  (simulación) ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-simulation-project/.claude/settings.json)
+.gitignore:
+  (simulación) agregaría .claude/settings.local.json a <TEMP>/migration-simulation-project/.gitignore
+  crearía: <TEMP>/migration-simulation-project/cambios/
+Trabajo a medias (solo se lista; no se convierte aquí):
+  ninguno
+SIMULACIÓN: no se escribió nada.
+STDERR
+
+AFTER
+D .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+F .gitignore 644 c95b74032c438c7a91af14ef1af75c773ccd775ad81bf98a2a1fbdd1d75ea38d 7
+D definitions 755
+F definitions/BACKLOG.md 644 2d27fbdf4e8ca207afbfa388ca9172fbcc6c70e534af2476b3b704f87debadcf 3
+D features 755
+D features/f 755
+F features/f/task-1.md 644 2dd6cd6c5ed22422e8088e1247bfe795ae9518ef0bfd7fc854195c0fe75f1f5c 6
+D registro 755
+F registro/datos.txt 644 e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f 8
+D src 755
+F src/main.txt 644 ef8aed55fba64258003f3479ff60a060ddb8301d170110a0d2dfa0ce4ea04eb3 4
+---
+migration_real
+0
+ARGS --migrar <TEMP>/migration-real-project
+BEFORE
+D .claude 755
+F .claude/settings.local.json 644 68027a40914d85cd359af34404d1aaab7da3195e0ac21d4bdef6110e09e41b47 18
+D .git 755
+F .git/HEAD 644 f6f2b945f6c411b02ba3da9c7ace88dcf71b6af65ba2e0d89aa82900042b5a10 23
+F .git/config 644 cfe7ba1238c9a78be7535d7c63bcaf5a4d5011d46b07c9b45d3bbf7d6c312dfe 92
+F .git/description 644 85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee 73
+D .git/hooks 755
+F .git/hooks/applypatch-msg.sample 755 0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7 478
+F .git/hooks/commit-msg.sample 755 1f74d5e9292979b573ebd59741d46cb93ff391acdd083d340b94370753d92437 896
+F .git/hooks/fsmonitor-watchman.sample 755 e0549964e93897b519bd8e333c037e51fff0f88ba13e086a331592bf801fa1d0 4726
+F .git/hooks/post-update.sample 755 81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5 189
+F .git/hooks/pre-applypatch.sample 755 e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475 424
+F .git/hooks/pre-commit.sample 755 57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b 1649
+F .git/hooks/pre-merge-commit.sample 755 d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53 416
+F .git/hooks/pre-push.sample 755 ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a 1374
+F .git/hooks/pre-rebase.sample 755 4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3 4898
+F .git/hooks/pre-receive.sample 755 a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989 544
+F .git/hooks/prepare-commit-msg.sample 755 e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619 1492
+F .git/hooks/push-to-checkout.sample 755 a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f 2783
+F .git/hooks/sendemail-validate.sample 755 44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92 2308
+F .git/hooks/update.sample 755 8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106 3650
+F .git/index 644 760dc58a1c5f2c8d281e3df7d2967caa53c4d09dd293e50bd67b146dc38cb7e1 552
+D .git/info 755
+F .git/info/exclude 644 6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1 240
+D .git/objects 755
+D .git/objects/0d 755
+F .git/objects/0d/82d79c85ddd508d1887e8a65e37c86cb72985d 444 ae04cc93b928325d48cfbc35c428455a4cd3e74489b3a615d14e8d94d4a66fa4 22
+D .git/objects/62 755
+F .git/objects/62/6799f0f85326a8c1fc522db584e86cdfccd51f 444 b6fdecc33017066291292e6ed4a9c691951d1f7c6c4f883d8ebe735da83a17ee 18
+D .git/objects/85 755
+F .git/objects/85/de9cf93344b897ee6b677d44c645d747f82b0c 444 b2bed229a35bb9cb06d8c90ca202d1dd90beca7f1a0655e5a1a1fcb9e8ec2a8b 19
+D .git/objects/bc 755
+F .git/objects/bc/75049f6e391933733ec43127c08e2117a14bb6 444 7d89c3d366f0c91c9c8dd5b5086e92267dac88c32ac4c68a99ad766e61fd5d9f 21
+D .git/objects/c6 755
+F .git/objects/c6/ef015e6146866cbaee93431b8f38debf37101f 444 d4e932c5ac5427e421e5715d3721f79a101b4bd7271c7efa8c9dd7dd639a25f3 34
+D .git/objects/ee 755
+F .git/objects/ee/8c1ee49b4799bbd170233915a897c19e3b55e1 444 9c295da59a15a7123840b2a1ab7d3d9161ecf33b02a6ae669f5840508dcf7ce8 23
+D .git/objects/info 755
+D .git/objects/pack 755
+D .git/refs 755
+D .git/refs/heads 755
+D .git/refs/tags 755
+F .gitignore 644 c95b74032c438c7a91af14ef1af75c773ccd775ad81bf98a2a1fbdd1d75ea38d 7
+D definitions 755
+F definitions/BACKLOG.md 644 2d27fbdf4e8ca207afbfa388ca9172fbcc6c70e534af2476b3b704f87debadcf 3
+D features 755
+D features/f 755
+F features/f/task-1.md 644 2dd6cd6c5ed22422e8088e1247bfe795ae9518ef0bfd7fc854195c0fe75f1f5c 6
+D registro 755
+F registro/datos.txt 644 e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f 8
+D src 755
+F src/main.txt 644 ef8aed55fba64258003f3479ff60a060ddb8301d170110a0d2dfa0ce4ea04eb3 4
+STDOUT
+Migrar <TEMP>/migration-real-project a la v2
+Mover a old/v1/ (nada se borra; src/ no se toca):
+  movido (git mv): definitions -> old/v1/definitions
+  movido (git mv): features -> old/v1/features
+  movido (git mv): registro -> old/v1/registro
+Claude Code (proyecto <TEMP>/migration-real-project):
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  agente predeterminado fijado: principal (<TEMP>/migration-real-project/.claude/settings.local.json)
+  sin hook de v1 que quitar: <TEMP>/migration-real-project/.claude/settings.local.json
+  regla deny de Claude Code agregada: Read(./.env) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.env.*) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.env) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.env.*) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.ssh/**) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.aws/**) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.ssh/**) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.aws/**) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(~/.ssh/**) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(~/.aws/**) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.pem) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.key) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.p12) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.pfx) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_rsa) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_ed25519) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_ecdsa) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git commit *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git push *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git merge *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(gh pr create *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(gh pr merge *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git * commit *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git * push *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(bash -c *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(sh -c *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(zsh -c *) (<TEMP>/migration-real-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git -c * merge *) (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.enabled (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.allowUnsandboxedCommands (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead (<TEMP>/migration-real-project/.claude/settings.json)
+.gitignore:
+  agregada .claude/settings.local.json a <TEMP>/migration-real-project/.gitignore
+  creado: <TEMP>/migration-real-project/cambios/
+Trabajo a medias (solo se lista; no se convierte aquí):
+  ninguno
+Migración lista. Lo de v1 está en <TEMP>/migration-real-project/old/v1/ (sin borrar). Siguiente: skill migrar-proyecto (AGENTS.md, verify, planes).
+STDERR
+
+AFTER
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 644 803bd70bf641c246e25c2b57617131896c438ceaf9d84134d7c84d56e4984a3b 2871D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 9cead8554d228ec9e5751556dd0fde498ccebcf27ee51cb4129abc3b9a2c9b9c 47
+D .git 755
+F .git/HEAD 644 f6f2b945f6c411b02ba3da9c7ace88dcf71b6af65ba2e0d89aa82900042b5a10 23
+F .git/config 644 cfe7ba1238c9a78be7535d7c63bcaf5a4d5011d46b07c9b45d3bbf7d6c312dfe 92
+F .git/description 644 85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee 73
+D .git/hooks 755
+F .git/hooks/applypatch-msg.sample 755 0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7 478
+F .git/hooks/commit-msg.sample 755 1f74d5e9292979b573ebd59741d46cb93ff391acdd083d340b94370753d92437 896
+F .git/hooks/fsmonitor-watchman.sample 755 e0549964e93897b519bd8e333c037e51fff0f88ba13e086a331592bf801fa1d0 4726
+F .git/hooks/post-update.sample 755 81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5 189
+F .git/hooks/pre-applypatch.sample 755 e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475 424
+F .git/hooks/pre-commit.sample 755 57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b 1649
+F .git/hooks/pre-merge-commit.sample 755 d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53 416
+F .git/hooks/pre-push.sample 755 ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a 1374
+F .git/hooks/pre-rebase.sample 755 4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3 4898
+F .git/hooks/pre-receive.sample 755 a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989 544
+F .git/hooks/prepare-commit-msg.sample 755 e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619 1492
+F .git/hooks/push-to-checkout.sample 755 a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f 2783
+F .git/hooks/sendemail-validate.sample 755 44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92 2308
+F .git/hooks/update.sample 755 8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106 3650
+F .git/index 644 2469a85e860d088ae310a2a16d927c4f83bc2e2d4dde91c15026d01652a15288 568
+D .git/info 755
+F .git/info/exclude 644 6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1 240
+D .git/objects 755
+D .git/objects/0d 755
+F .git/objects/0d/82d79c85ddd508d1887e8a65e37c86cb72985d 444 ae04cc93b928325d48cfbc35c428455a4cd3e74489b3a615d14e8d94d4a66fa4 22
+D .git/objects/62 755
+F .git/objects/62/6799f0f85326a8c1fc522db584e86cdfccd51f 444 b6fdecc33017066291292e6ed4a9c691951d1f7c6c4f883d8ebe735da83a17ee 18
+D .git/objects/85 755
+F .git/objects/85/de9cf93344b897ee6b677d44c645d747f82b0c 444 b2bed229a35bb9cb06d8c90ca202d1dd90beca7f1a0655e5a1a1fcb9e8ec2a8b 19
+D .git/objects/bc 755
+F .git/objects/bc/75049f6e391933733ec43127c08e2117a14bb6 444 7d89c3d366f0c91c9c8dd5b5086e92267dac88c32ac4c68a99ad766e61fd5d9f 21
+D .git/objects/c6 755
+F .git/objects/c6/ef015e6146866cbaee93431b8f38debf37101f 444 d4e932c5ac5427e421e5715d3721f79a101b4bd7271c7efa8c9dd7dd639a25f3 34
+D .git/objects/ee 755
+F .git/objects/ee/8c1ee49b4799bbd170233915a897c19e3b55e1 444 9c295da59a15a7123840b2a1ab7d3d9161ecf33b02a6ae669f5840508dcf7ce8 23
+D .git/objects/info 755
+D .git/objects/pack 755
+D .git/refs 755
+D .git/refs/heads 755
+D .git/refs/tags 755
+F .gitignore 644 dc436a274f16b408726e69942abe1c7df9811299faa2818b55a8fb7d4927181c 35
+D cambios 755
+D old 755
+D old/v1 755
+D old/v1/definitions 755
+F old/v1/definitions/BACKLOG.md 644 2d27fbdf4e8ca207afbfa388ca9172fbcc6c70e534af2476b3b704f87debadcf 3
+D old/v1/features 755
+D old/v1/features/f 755
+F old/v1/features/f/task-1.md 644 2dd6cd6c5ed22422e8088e1247bfe795ae9518ef0bfd7fc854195c0fe75f1f5c 6
+D old/v1/registro 755
+F old/v1/registro/datos.txt 644 e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f 8
+D src 755
+F src/main.txt 644 ef8aed55fba64258003f3479ff60a060ddb8301d170110a0d2dfa0ce4ea04eb3 4
+---
+remote_bad_archive
+1
+ARGS instalar-remoto.sh 
+BEFORE
+
+STDOUT
+Descargando 0000000000000000000000000000000000000000...
+STDERR
+RECHAZADO: el paquete no se puede leer como tar.gz.
+AFTER
+D .flucastr-ai 755
+---

@@ -1,26 +1,17 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { huella } from './huella-reference.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const diagnosticar = path.join(root, 'skills/diagnosticar/diagnosticar.mjs');
 const contrato = readFileSync(path.join(root, 'nucleo/contrato/verificacion.md'), 'utf8');
-const pathspec = ['--', '.', ':(exclude,top)cambios/**'];
-
 function git(dir, args) {
   return execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-}
-
-function huella(dir) {
-  const status = git(dir, ['status', '--porcelain', ...pathspec]);
-  let diff = '';
-  try { diff = git(dir, ['diff', 'HEAD', ...pathspec]); } catch { /* Sin HEAD, solo cuenta status. */ }
-  return createHash('sha256').update(Buffer.concat([Buffer.from(status), Buffer.from(diff)])).digest('hex').slice(0, 12);
 }
 
 function diagnostico(dir) {

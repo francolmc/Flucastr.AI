@@ -1,0 +1,25 @@
+SIMULACIÓN: no se escribe nada.
+SIMULACIÓN: se escribirá <SANDBOX_HOME>/.flucastr-ai/raiz
+Claude Code: no encontrado, se omite.
+Pi: no encontrado, se omite.
+Codex (<SANDBOX_HOME>/codex)
+  AVISO: los deny de Codex son reglas de prefijo experimentales; no bloquean la lectura general de .env. La configuración global y MCP pueden ampliar el acceso.
+  enlazado: <SANDBOX_HOME>/.agents/skills/definir-proyecto
+  enlazado: <SANDBOX_HOME>/.agents/skills/diagnosticar
+  enlazado: <SANDBOX_HOME>/.agents/skills/disenar-experiencia
+  enlazado: <SANDBOX_HOME>/.agents/skills/ejecutar-plan
+  enlazado: <SANDBOX_HOME>/.agents/skills/migrar-proyecto
+  enlazado: <SANDBOX_HOME>/.agents/skills/planificar-cambio
+  enlazado: <SANDBOX_HOME>/.agents/skills/preparar-proyecto
+  agente generado: <SANDBOX_HOME>/codex/agents/constructor.toml (modelo: gpt-6-luna)
+  lanzador generado: <SANDBOX_HOME>/.local/bin/codex-constructor (modelo: gpt-6-luna, esfuerzo: high, compacta en: 100000)
+  agente generado: <SANDBOX_HOME>/codex/agents/principal.toml (modelo: gpt-6.1-terra)
+  lanzador generado: <SANDBOX_HOME>/.local/bin/codex-principal (modelo: gpt-6.1-terra, esfuerzo: medium, compacta en: 60000)
+  lanzador generado: <SANDBOX_HOME>/.local/bin/kit-run (herramienta: codex)
+  AVISO: <SANDBOX_HOME>/.local/bin no está en tu PATH; agrégalo para usar los comandos codex-<agente> y kit-run.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+  Codex:       codex-principal (o el agente como rol: ~/.codex/agents)
+Si cambias modelos.json, vuelve a correr: bash instalar.sh

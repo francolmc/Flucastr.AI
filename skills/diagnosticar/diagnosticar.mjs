@@ -4,11 +4,11 @@
 // Uso: node diagnosticar.mjs [carpeta] [--json]
 
 import { existsSync, readFileSync, readdirSync, statSync, realpathSync, accessSync, constants } from "node:fs";
-import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { builtinModules } from "node:module";
 import { join, resolve, relative, sep } from "node:path";
 import { homedir } from "node:os";
+import { recorrer, huellaActual } from "./fingerprint.mjs";
+import { leerResultado } from "./result.mjs";
 
 const CAPACIDADES = [
   { id: "Rápida", clave: "comprobacion rapida" },
@@ -16,8 +16,6 @@ const CAPACIDADES = [
   { id: "Aceptación", clave: "aceptacion" },
   { id: "Evidencia", clave: "evidencia" },
 ];
-const NIVELES = ["rapida", "servicio", "aceptacion"];
-const FALLOS = ["ninguno", "entorno", "dependencia", "prueba", "tiempo"];
 const CARPETAS_ACEPTACION = ["aceptacion", "acceptance", "e2e"];
 const SALTAR = new Set(["node_modules", "dist", "build", "coverage"]);
 const MAX_LISTA = 20;
@@ -48,74 +46,6 @@ function valorDeLinea(linea, clave) {
 
 function spans(valor) {
   return [...valor.matchAll(/`([^`]+)`/g)].map((m) => m[1].trim());
-}
-
-// Recorre la carpeta sin seguir enlaces ni entrar en carpetas ocultas o de dependencias.
-function recorrer(dir, base, saltar, visita) {
-  let entradas;
-  try {
-    entradas = readdirSync(dir, { withFileTypes: true });
-  } catch {
-    return;
-  }
-  for (const e of entradas) {
-    if (e.name.startsWith(".") || saltar.has(e.name)) continue;
-    const ruta = join(dir, e.name);
-    if (e.isDirectory()) recorrer(ruta, base, saltar, visita);
-    else if (e.isFile()) visita(ruta, relative(base, ruta));
-  }
-}
-
-// Huella del contrato: excluye cambios/ de status y diff, conservando los demás cambios.
-// null si la carpeta no es la raíz de un repo o git no responde.
-function huellaActual(carpeta) {
-  try {
-    const opts = { stdio: ["ignore", "pipe", "ignore"], maxBuffer: 256 * 1024 * 1024 };
-    const env = { ...process.env, GIT_OPTIONAL_LOCKS: "0" };
-    const paths = ["--", ".", ":(exclude,top)cambios/**"];
-    const top = execFileSync("git", ["-C", carpeta, "rev-parse", "--show-toplevel"], opts).toString().trim();
-    if (realpathSync(top) !== realpathSync(carpeta)) return null;
-    const st = execFileSync("git", ["-C", carpeta, "status", "--porcelain", ...paths], { ...opts, env });
-    let df = Buffer.alloc(0);
-    try {
-      df = execFileSync("git", ["-C", carpeta, "diff", "HEAD", ...paths], { ...opts, env });
-    } catch {
-      // sin HEAD (repo recién creado): la huella usa solo el estado
-    }
-    return createHash("sha256").update(Buffer.concat([st, df])).digest("hex").slice(0, 12);
-  } catch {
-    return null;
-  }
-}
-
-function validarResultado(obj) {
-  const motivos = [];
-  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return ["no es un objeto JSON"];
-  if (typeof obj.huella !== "string" || !/^[0-9a-f]{12}$/.test(obj.huella)) motivos.push("huella debe ser 12 hex en minúsculas");
-  if (!NIVELES.includes(obj.nivel)) motivos.push(`nivel "${obj.nivel}" no es rapida|servicio|aceptacion`);
-  if (typeof obj.fase !== "string") motivos.push("fase debe ser texto");
-  if (typeof obj.ok !== "boolean") motivos.push("ok debe ser booleano");
-  if (!FALLOS.includes(obj.fallo)) motivos.push(`fallo "${obj.fallo}" no es ninguno|entorno|dependencia|prueba|tiempo`);
-  return motivos;
-}
-
-function leerResultado(carpeta, rutaRel) {
-  const ruta = join(carpeta, rutaRel);
-  const base = { tipo: "resultado", ruta: rutaRel };
-  if (!existsSync(ruta)) return { ...base, estado: "no existe" };
-  let obj;
-  try {
-    obj = JSON.parse(readFileSync(ruta, "utf8"));
-  } catch (e) {
-    return { ...base, estado: "invalido", motivos: [`no es JSON válido: ${e.message}`] };
-  }
-  const motivos = validarResultado(obj);
-  if (motivos.length) return { ...base, estado: "invalido", motivos };
-  const actual = huellaActual(carpeta);
-  let huella;
-  if (actual === null) huella = "no disponible";
-  else huella = obj.huella === actual ? "vigente" : "obsoleta";
-  return { ...base, estado: "valido", huella, huellaValor: obj.huella, nivel: obj.nivel, fase: obj.fase, ok: obj.ok, fallo: obj.fallo };
 }
 
 function aceptacion(carpeta) {

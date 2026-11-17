@@ -1,0 +1,249 @@
+== 1. modelos.json parsea y agentes coinciden ==
+agentes: constructor, principal
+== 2. sintaxis de instalar.sh y desinstalar.sh ==
+ok instalar.sh
+ok desinstalar.sh
+== 2b. ayuda de instalar.sh completa e idéntica para ambos alias ==
+ok 2b: alias iguales, opciones dinámicas documentadas, prueba negativa y ayuda aislada sin Node/modelos
+== 3. resolver Claude Code y Pi por agente ==
+ok constructor Claude Code claude-haiku-5-5
+ok esfuerzo constructor Claude Code high
+ok skills constructor Claude Code
+ok constructor Pi openai/gpt-6-luna
+ok esfuerzo constructor Pi high
+ok skills constructor Pi
+ok principal Claude Code claude-sonnet-5-5
+ok esfuerzo principal Claude Code medium
+ok principal Pi openai/gpt-6.1-terra
+ok esfuerzo principal Pi medium
+ok lanzador Pi usa modelo-esfuerzo
+-- 3c. prueba negativa de skills
+ok prueba negativa: sin skills, el chequeo rechaza (Claude Code y Pi)
+-- 3d. pruebas negativas de esfuerzo
+ok prueba negativa: esfuerzo 'turbo' rechazado
+ok prueba negativa: 'effort:' y 'thinking:' en la cabecera rechazados (Claude Code y Pi)
+== 4. skills con SKILL.md, name y description ==
+ok definir-proyecto
+ok diagnosticar
+ok disenar-experiencia
+ok ejecutar-plan
+ok migrar-proyecto
+ok planificar-cambio
+ok preparar-proyecto
+== 5. instalar.sh --simular no escribe lo que instala ==
+ok autoprueba: reacciona a añadir y cambiar; ignora transcripts e history
+-- 5b. instalar.sh --simular sobre el home real
+ok instantánea sin cambios (0 líneas)
+== 6. reglas deny del proyecto (instalar, reinstalar, desinstalar, JSON roto) ==
+ok escenario 1: sin archivo -> 28 reglas y 28 líneas deny
+ok escenario 2: se conservan allow, otra clave y deny propios; solo se registran las agregadas
+ok escenario 3: reinstalar deja el archivo y las líneas deny iguales
+ok escenario 4: desinstalar devuelve el archivo original (con su Bash(git push *)) o no deja archivo
+ok escenario 5: JSON inválido -> no se toca, se avisa, no aborta
+ok escenario 6: actualización de 7 a 28 reglas; se agregan y registran solo las 21 nuevas
+ok escenario 7: las 7 del usuario sin manifiesto -> se agregan 21; desinstalar deja las 7
+== 6b. matriz negativa de permisos v2 con archivos y reglas ficticios ==
+Matriz sintética: Claude sandbox y 28 deny configurados (lectura de secretos, incluidos anidados, SSH/AWS y llaves, además de bloqueos Bash); lectura real y precedencia frente a allow global requieren prueba de sesión CLI.
+Integración instalar/reinstalar/desinstalar en HOME y proyecto ficticios: sandbox y deny del kit retirados; ajustes propios conservados.
+Matriz Codex por execpolicy (codex-cli 0.169.0): [{"comando":"git commit -m fake","resultado":"forbidden"},{"comando":"git push origin rama-falsa","resultado":"forbidden"},{"comando":"git merge rama-falsa","resultado":"forbidden"},{"comando":"gh pr create","resultado":"forbidden"},{"comando":"gh pr merge 123","resultado":"forbidden"},{"comando":"bash -c git commit","resultado":"forbidden"},{"comando":"sh -c git commit","resultado":"forbidden"},{"comando":"zsh -c git commit","resultado":"forbidden"},{"comando":"git -C <SANDBOX_TMP> commit -m fake","resultado":"forbidden"},{"comando":"git -c user.name=fake commit -m fake","resultado":"forbidden"},{"comando":"git -c user.name=fake merge rama-falsa","resultado":"forbidden"},{"comando":"cat <SANDBOX_TMP>","resultado":"no probado: execpolicy solo evalúa comandos; no evalúa lectura por herramienta de archivos"},{"comando":"cat <SANDBOX_TMP>","resultado":"no probado: execpolicy solo evalúa comandos; no evalúa lectura por herramienta de archivos"},{"comando":"cat <SANDBOX_TMP>","resultado":"no probado: execpolicy solo evalúa comandos; no evalúa lectura por herramienta de archivos"},{"comando":"cat <SANDBOX_TMP>","resultado":"no probado: execpolicy solo evalúa comandos; no evalúa lectura por herramienta de archivos"}]
+Matriz de herramienta: Codex CLI argumentos/config = workspace-write + on-request; revisor = read-only; sesión que lea ficheros o ejecute comandos = no probada (sin sesión Codex).
+Aviso sandbox Linux: instalador y diagnosticar comprueban bwrap/socat y advierten que el CLI puede ejecutar sin restricciones si falta una dependencia.
+✔ sandbox Claude se fusiona, se reinstala y se retira sin tocar valores ajenos (<DURATION>ms)
+✔ instalar, reinstalar y desinstalar Claude preserva valores sandbox ajenos (<DURATION>ms)
+✔ Codex evalúa reglas directas y registra el límite de lectura de archivos (<DURATION>ms)
+✔ comandos de lanzamiento declaran workspace-write y aprobaciones on-request (<DURATION>ms)
+✔ instalador y diagnóstico advierten si falta una dependencia del sandbox Linux (<DURATION>ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms <DURATION>
+== 7. migración a v2 (--migrar, --simular, repetición, sin v1) ==
+ok escenario 1: old/v1 con las tres carpetas, agente principal, sin hook, 28 deny, cambios/, lista de trabajo a medias
+ok escenario 2: repetir dice «old/v1 ya existe» y no cambia el árbol
+ok escenario 3: solo definitions/ -> se mueve y no hay error
+ok escenario 4: sin v1 -> «nada que migrar», sin cambios
+ok escenario 5: --simular imprime el plan y no cambia el árbol
+ok escenario 6: --migrar con --proyecto da error y no cambia nada
+ok escenario 7: workspace -> old/v1 de la raíz, hijos intactos, log con hijos y raíz sin repo
+ok escenario 7b: --simular en workspace no cambia el árbol y sale el aviso de AGENTS.md
+ok escenario 8: .gitignore con línea repetida no duplica y conserva las demás
+ok escenario 8b y 8c: .gitignore sin salto final y sin .gitignore quedan con la línea una vez; sin AGENTS.md no hay aviso
+omitido: escenario 9 (Cleaner no existe en este equipo)
+== 8. workspaces (detección con find, textos clave de los archivos del cambio) ==
+ok 8a: workspace con dos hijos con .git -> find devuelve 2
+grep: <SANDBOX_TMP> No such file or directory
+ok 8b: textos clave presentes (incluido el modo remoto y Despliegue); copias sin repos:, sin «Descartado», sin definir-proyecto o sin VERIFY_TARGET fallan la comprobación
+ok 8c negativa 1: skill sin contador rechazado
+ok 8c negativa 2: whitelist Git obsoleta rechazada
+ok 8c negativa 3: prohibición de relectura obsoleta rechazada
+ok 8c: contador canónico y negativas aisladas de los límites antiguos
+ok 8d: ejecutor:, 20 palabras (sin 60 palabras), ventana propia y pi-constructor presentes; copia sin ejecutor: falla
+ok 8e: VERIFY_RAPIDO, docker system prune prohibido y timeoutMs presentes; el agente de Claude resuelve; copia sin VERIFY_RAPIDO falla
+ok 8f: ceremonia de cierre, abrir el PR y rama base presentes; copia sin «ceremonia de cierre» falla
+ok 8g: Prueba de ejecutabilidad en planificar-cambio y principal, y carga de ejecutar-plan presentes; copia sin la prueba falla
+ok 8h: rama base documentada; copia sin base falla
+== 3e. claude-<agente> y pi-<agente> con esfuerzo; reinstalar refresca; archivo sin marca se respeta ==
+ok 3e: effort y thinking low->max al reinstalar, --effort en claude-constructor, archivo sin marca intacto, desinstalar limpia
+== 3f. Codex: TOML y lanzadores con modelo y esfuerzo; reinstalar refresca; --simular no escribe; desinstalar deja lo ajeno; reglas ==
+ok constructor codex TOML (modelo y esfuerzo de modelos.json)
+ok principal codex TOML (modelo y esfuerzo de modelos.json)
+ok 3f: TOML y lanzador Codex; modelo/esfuerzo, workspace-write, aprobaciones on-request y argumentos
+ok 3f: compactar_en de modelos.json va en codex-constructor una sola vez (reinstalar no duplica); sin compactar_en no aparece
+ok 3f: umbral por agente (principal 60000, constructor 100000 general) y espera larga de comandos en ambos lanzadores
+✔ las reglas allow no contienen intérpretes ni comodines ajenos a lo generado (<DURATION>ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms <DURATION>
+ok 3f: execpolicy conserva las denegaciones protegidas, solo permite ls, y no autoriza pruebas, Docker ni intérpretes por prefijo
+ok 3f: reinstalar con low refresca el TOML y codex-constructor, sin duplicar el umbral
+ok 3f: reinstalar sin cambios no altera el HOME ni el proyecto
+ok 3f: --simular anuncia el TOML y no escribe en el HOME ni en el proyecto
+ok 3f: desinstalar quita los TOML, lanzadores, skills y reglas del kit; deja ajeno.toml, la skill ajena y otra.rules
+-- 3g. pruebas negativas de Codex
+ok 3g: sin esfuerzo, esfuerzo distinto, 'ultra' y perfil faltante de Codex se rechazan con su mensaje
+== 3h. reglas de Codex de proyectos registrados: instalar las refresca; un proyecto borrado solo avisa ==
+ok 3h: instalar sin --proyecto refresca las reglas del proyecto registrado y elimina la allow obsoleta
+ok 3h: proyecto registrado borrado: AVISO y exit 0; el registro se conserva
+ok A4: contrato nuevo y compatibilidad con el contrato anterior
+ok A2: 17 condiciones del modo continuo y compatibilidad verificadas
+ok A5: plantilla y revisión exigen dependencias externas, contratos, rutas y ejemplo; 12 mutaciones negativas detectadas
+registro real A2 sin comprobación: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo
+registro real A2 sin comprobación: mutación de casilla rechazada
+registro real A2 interrumpido: casilla pendiente y nota de una línea validadas; no vuelve a ejecutar el modelo
+registro real A2 interrumpido: mutación de casilla rechazada
+ok A1
+ok A2
+ok A3
+ok A5
+ok A4
+ok 8i: planificar-cambio dice «salvo que <PERSON>» sin «Falla la 2 o la 4»; principal dice «petición expresa»; copia con «Falla la 2 o la 4» falla
+ok 8k: principal con «Solo creas o editas», «APROBADO», «no corriges» y «una sola espera»; copias sin la lista o con la frase vieja fallan
+ok 8l: principal con «yield_time_ms: 300000» y «no cuentan»; copia sin la receta falla
+ok 8m: niveles de verificación en planificar-cambio, «Sin esa línea» en preparar-proyecto y Comprobación rápida en ejecutar-plan; copia sin «Niveles de verificación» falla
+ok 8n: principal con «vuelve a esperar en el mismo turno» en el paso 4; copia sin la frase falla
+ok 8o: disenar-experiencia con sus cadenas, enlazada en planificar-cambio, definir-proyecto y principal; copia sin «40 columnas» falla
+== 9a. migrar-proyecto: lista de reglas descartadas y prohibición de copiarlas ==
+ok 9a: migrar-proyecto trae «Reglas de v1 que descarté», «no las copies» y Fxx; una copia sin la lista falla
+== 10. autopruebas offline del runner OpenSpec, sin inferencia ==
+AVISO 10: falta pruebas/comparar-openspec/ (pruebas/ está en .gitignore); paso omitido
+== 10b. revisor de planes: pruebas de scripts/revisar-plan.mjs ==
+✔ F13 fixture reports folder, weak steps and multiple screens (<DURATION>ms)
+✔ well-cut plan has no warnings and stays byte-for-byte intact (<DURATION>ms)
+✔ complete new story fixture passes without external change-plan paths (<DURATION>ms)
+✔ new format without Pasos is rejected instead of accepted silently (<DURATION>ms)
+✔ new story reports missing mandatory fields and TODO acceptance mapping (<DURATION>ms)
+✔ legacy scenarios and global acceptance remain valid (<DURATION>ms)
+✔ CLI errors use exit 2 and write to stderr (<DURATION>ms)
+✔ three product files are allowed; four and a directory are warned (<DURATION>ms)
+✔ step checks may be on a subline; missing route and check each warn on step line (<DURATION>ms)
+✔ a backticked filename is not a check, and tranche verification does not satisfy the last step (<DURATION>ms)
+✔ Archivos declaration is parsed when it follows Resultado on the same line (<DURATION>ms)
+✔ one screen and one layer are allowed; multiple screens and layers warn (<DURATION>ms)
+✔ 8192 bytes are allowed and 8193 bytes are warned at line 1 (<DURATION>ms)
+✔ tranches are checked separately and other sections are ignored (<DURATION>ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms <DURATION>
+ok 10b: pruebas del revisor de planes pasaron
+== 10c. diagnóstico: pruebas de vigencia de huella en pruebas/diagnostico-sugiere ==
+✔ the contract and diagnostic exclude tracked edits and new files under cambios/ (<DURATION>ms)
+✔ a repository without HEAD keeps the status-only fingerprint behavior (<DURATION>ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms <DURATION>
+ok 10c: pruebas de huella del diagnóstico pasaron
+== 11. ejecución por tramos: textos nuevos y copias sin cada uno ==
+ok 11 baseline: los cuatro archivos traen sus textos nuevos
+ok 11 negativa: copia sin «### Tramo N» en skills/planificar-cambio/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «tramo: 1» en skills/planificar-cambio/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «cruce» en skills/planificar-cambio/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «Resuelto:» en skills/planificar-cambio/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «Si el plan trae `tramo: <n>` en el frontmatter» en skills/ejecutar-plan/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «### Tramo N — Historia:» en skills/ejecutar-plan/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «vuelve a correr el mismo comando» en skills/ejecutar-plan/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «Resuelto:» en skills/ejecutar-plan/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «COMPLETADO: plan=<ruta>; tramo=<n>; verify=pasa» en agentes/constructor.md rechazada con su mensaje
+ok 11 negativa: copia sin «Revisión por tramo» en agentes/principal.md rechazada con su mensaje
+ok 11 negativa: copia sin «tramo: <n>» en agentes/principal.md rechazada con su mensaje
+ok 11 negativa: copia sin «tramo: <n>» en agentes/constructor.md rechazada con su mensaje
+ok 11 negativa: copia sin «tramo=<n>» en agentes/constructor.md rechazada con su mensaje
+ok 11 negativa: copia sin «una sola espera» en agentes/principal.md rechazada con su mensaje
+ok 11 negativa: copia sin «send_message» en agentes/principal.md rechazada con su mensaje
+ok 11 negativa: copia sin «Salidas largas» en agentes/constructor.md rechazada con su mensaje
+ok 11 negativa: copia sin «tramo-<n>.md» en agentes/constructor.md rechazada con su mensaje
+ok 11 negativa: copia sin «tramo-N.md» en skills/planificar-cambio/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «/compact» en skills/planificar-cambio/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «tramo-<n>.md» en skills/ejecutar-plan/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «/compact» en skills/ejecutar-plan/SKILL.md rechazada con su mensaje
+ok 11 negativa: copia sin «Salidas largas» en skills/ejecutar-plan/SKILL.md rechazada con su mensaje
+== 12. medidor de costos: pruebas de scripts/uso.mjs sobre fixtures ==
+ok A1: Claude: mensaje duplicado contado una vez y subagente con rol sub
+ok A2: Codex: último total acumulado, llamadas = eventos con info, filtro por herramienta
+ok A3: Pi: suma de 2 mensajes, error por límite fuera de los tokens y 1 aviso
+ok A4a: Robustez: línea corrupta (en el fixture) y archivo con mtime antiguo ignorados
+ok A4b: Robustez: carpeta de Claude ausente avisa y el resto se suma
+ok A4c: Robustez: con todas las carpetas ausentes sale con código 1
+ok A4d: Opciones inválidas salen con código 2
+ok A5: Credenciales de Codex: no se leen ni aparecen en texto ni en JSON
+ok A6: Calibración de cuota: sesiones exclusivas sin baja, puntos y tokens, aviso de muestra pequeña
+ok A6b: Calibración: la sesión que baja queda fuera también sin la cruzada
+ok A3s: Sesiones de Codex: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0
+ok A8: Sesiones de Claude Code y de Pi: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0; sin --herramienta salen las tres
+ok A7: Cuota de Codex: aviso con 85 % (umbral 70), sin aviso con 40 %, sin dato no avisa; --umbral lo cambia
+ok A2v: Ventana de 5 horas de Codex: aviso con 85 % (umbral 70), sin aviso con 40 %, sin dato no avisa; --umbral lo cambia
+ok A5a: Créditos y sondeos de Codex con la tarifa de scripts/tarifas.json
+ok A5b: Créditos y sondeos de Pi con tarifa de fixture; una tarifa distinta cambia creditos (sensibilidad)
+ok A5c: Sin tarifa del modelo, creditos es null (no 0); los sondeos se miden igual; tarifas.json trae las tres tarifas
+ok A5d: Tarifas ilegibles avisan y dejan creditos en null sin salir con error
+ok A4i: Medidor de invasión: ediciones fuera de cambios/ y corridas de ./verify por sesión principal, en las tres herramientas
+pruebas del medidor: 19 de 19 ok
+ok 12: pruebas del medidor pasaron sobre los fixtures
+== 13. kit run: arnés con constructor, verify y revisor simulados ==
+ok A1 ciclo completo: listo, constructor una vez, revisor en solo lectura
+ok A2 verify que siempre falla: 3 corridas del constructor y parcial
+ok A7 continuidad completa: dos tramos antes de una verificación y revisión final
+ok A8 continuidad: segunda falla idéntica detiene relanzamientos y deja nota
+ok M1 mutación sensible: quitar la parada por causa repetida es rechazado
+ok A3a revisor que intenta escribir con sandbox read-only: la escritura se rechaza y aprueba
+ok A3b revisor que escribe aunque el sandbox sea read-only: el árbol cambió, parcial
+ok A3c DEVUELTO una vez: vuelve al constructor con los defectos y aprueba
+ok A3d DEVUELTO siempre: cupo de 2 agotado, parcial sin más corridas
+ok A5a revisor que devuelve texto no JSON: parcial sin aprobar
+ok A5b APROBADO con defectos: viola el esquema, parcial
+ok A5c veredicto con clave extra: viola el esquema, parcial
+ok C1 mapeo codex: constructor en workspace-write, revisor en read-only con esquema, modelo del agente
+ok C2 tope de tiempo: el constructor que no termina se corta, parcial sin relanzar
+ok A6 el constructor ve aprobado al arrancar en las 3 corridas
+ok uso: plan en curso se rechaza sin cambiarlo
+ok V2 revisor con nivel bajo: Luna low; el constructor no cambia
+ok V3 sin kit_run el revisor usa el modelo y esfuerzo del principal
+ok V4 nivel inválido en kit_run.revisor: exit 2 y plan intacto
+ok V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>
+kit-run: 20 casos pasaron
+ok 13: pruebas de kit run pasaron con los CLIs simulados
+== 8r. observador de Docker: informe sobre el fixture, ciclo con docker falso y copia sin oom ==
+ok 8r A1-A3: el informe del fixture coincide con LEEME.txt (medianas, máximos, caché, OOM, solape y pico)
+ok 8r negativa: la copia sin oom no muestra OOM
+ok 8r A4: start, status, segundo start sin duplicar y stop; archivos creados y el PID ya no existe
+== 8t. cambio pequeño: definición, riesgo y prácticas por tecnología ==
+ok 8t: principal con la definición de cambio pequeño, riesgo alto y Mejora sugerida; el documento de prácticas tiene ≥8 niveles; copia sin «cambio pequeño» falla
+VERIFY OK

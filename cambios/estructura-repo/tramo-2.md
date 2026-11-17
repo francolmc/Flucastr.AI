@@ -13,11 +13,15 @@ Archivos: ninguno.
 CUANDO se examine cada consumidor ENTONCES queda trazado con su estrategia y comprobación, sin mover el archivo (A2).
 Aceptación A2: La matriz identifica archivo y línea para cada referencia, comando o enlace público y su comprobación existente; registrar también las referencias dinámicas y las que no se puedan resolver.
 TODO:
-- [ ] Registrar en `cambios/estructura-repo/consumidores.md` los consumidores de rutas vigentes encontrados por `rg`, incluidos instaladores, resolver, lanzadores, pruebas y enlaces instalados. (A2). Comprobación: revisar la matriz frente a `rg` y los puntos de entrada; esperar cobertura trazable.
-- [ ] Ejecutar `./verify` aislado (A2). Comprobación: esperar código 0 y resultados equivalentes a la línea base.
-- [ ] Ejecutar `bash ./instalar.sh --simular` aislado (A2). Comprobación: esperar código 0 y resultados equivalentes a la línea base.
+- [x] Registrar en `cambios/estructura-repo/consumidores.md` los consumidores de rutas vigentes encontrados por `rg`, incluidos instaladores, resolver, lanzadores, pruebas y enlaces instalados. (A2). Comprobación: inventarios reproducibles por ocurrencia estática y constructores de ruta, más filas analíticas con comprobaciones y límites explícitos.
+- [x] Ejecutar `./verify` aislado (A2). Comprobación: la receta terminó correctamente y confirmó salida idéntica a la referencia tras normalizaciones aprobadas; termina en `VERIFY OK`.
+- [x] Ejecutar `bash ./instalar.sh --simular` aislado (A2). Comprobación: las dos simulaciones repetidas coinciden entre sí y con ambas referencias guardadas.
 Verificación del tramo: `./verify` — nivel 3 por petición del usuario; además comparar simulación. Duración: medida en tramo 1.
 Handoff: registrar resultados y dudas no resueltas; detenerse antes de cambiar producto si falta un consumidor o estrategia.
 
 ## Evidencia
-Pendiente.
+- `consumidores.md`: matriz trazada por fuente y línea, agrupada por entradas públicas, fuentes/adaptadores, herramientas y pruebas. Los índices anexos enumeran 1947 coincidencias estáticas y 337 usos de constructores con una referencia archivo/línea por ocurrencia, sin copiar texto fuente.
+- `rg` con patrones documentados confirma las coincidencias por ocurrencia en el alcance. Se inspeccionaron los consumidores de resolver, kit-run, permisos-hook, uso, suites activas de aceptación, revisor/diagnóstico y literales congelados relevantes de `verify`; las limitaciones y pruebas están asociadas en la matriz.
+- Referencias sin inspección interior declaradas: OpenSpec no está presente en este checkout; las rutas de proyectos instalados externos no se inventariaron. Se excluyeron deliberadamente secretos, proyectos reales, `old/v1/registro/` y `pruebas/.temporales/`.
+- `bash cambios/estructura-repo/reproducir-linea-base.sh`: finalizó con el mensaje `Simulaciones repetibles y verify coinciden con linea-base/.`; por tanto pasaron `./verify` aislado y las dos simulaciones, con comparación de salida completa frente a las salidas persistidas del tramo 1. La salida de verificación comparada termina en `VERIFY OK`.
+- No se modificó producto: se añadieron la matriz y los índices archivo/línea, y se actualizó la evidencia del plan/tramo dentro de `cambios/estructura-repo/`.

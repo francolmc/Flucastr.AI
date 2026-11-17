@@ -1,0 +1,68 @@
+{
+  "isolation": {
+    "bubblewrap": "0.11.1",
+    "node": "v24.22.1",
+    "codex": "0.169.0",
+    "awk": "GNU Awk 5.3.2",
+    "network": "unshared"
+  },
+  "simulation": {
+    "exit_codes": [
+      0,
+      0
+    ],
+    "outputs_identical": true,
+    "files": {
+      "instalar-simular-1.txt": {
+        "bytes": 1669,
+        "sha256": "4ddb35d1afccb61db1902c74a07c55494aef6d33e6052287658078fe7426e282"
+      },
+      "instalar-simular-2.txt": {
+        "bytes": 1669,
+        "sha256": "4ddb35d1afccb61db1902c74a07c55494aef6d33e6052287658078fe7426e282"
+      },
+      "verify.txt": {
+        "bytes": 18981,
+        "sha256": "c440e729af2ab1a499cff0ae9b449488eedb2749274e0f32f1b63e9273f7c5fa"
+      }
+    }
+  },
+  "verify": {
+    "exit_code": 0,
+    "ends_with": "VERIFY OK",
+    "measured_seconds": 35.37,
+    "file": {
+      "bytes": 18981,
+      "sha256": "c440e729af2ab1a499cff0ae9b449488eedb2749274e0f32f1b63e9273f7c5fa"
+    }
+  },
+  "recipe": {
+    "path": "reproducir-linea-base.sh",
+    "syntax_check": "passed",
+    "capture_run": "passed",
+    "comparison_runs": 2,
+    "normalizations": [
+      "/home/test => <SANDBOX_HOME>",
+      "/Users paths => <PROJECT_PATH>",
+      "/tmp paths => <SANDBOX_TMP>",
+      "personal names => <PERSON>",
+      "volatile Node durations => <DURATION>"
+    ],
+    "comparison": "all three sanitized outputs matched byte for byte"
+  },
+  "sanitization_check": {
+    "private_checkout_paths_found": false,
+    "personal_names_found": false,
+    "files_in_temporary_copy": 784
+  },
+  "fixture": {
+    "codex_auth": "synthetic marker; original excluded"
+  },
+  "excluded": [
+    ".git",
+    "old/v1/registro/",
+    "pruebas/.temporales/",
+    "secrets and credentials",
+    "projects outside checkout"
+  ]
+}

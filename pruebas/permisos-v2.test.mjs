@@ -136,16 +136,19 @@ test("Codex evalúa reglas directas y registra el límite de lectura de archivos
 });
 
 test("comandos de lanzamiento declaran workspace-write y aprobaciones on-request", () => {
-  const instalar = readFileSync(join(KIT, "instalar.sh"), "utf8");
-  const kitRun = readFileSync(join(KIT, "scripts/kit-run.mjs"), "utf8");
-  assert.match(instalar, /exec codex --sandbox workspace-write -c 'approval_policy="on-request"'/);
-  assert.match(kitRun, /"-c", 'approval_policy="on-request"'/);
-  assert.match(kitRun, /constructor \? "workspace-write" : "read-only"/);
+  const launcherCodex = readFileSync(join(KIT, "adapters/codex/install-launcher.sh"), "utf8");
+  const kitRunCommands = readFileSync(join(KIT, "tools/run/commands.mjs"), "utf8");
+  assert.match(launcherCodex, /exec codex --sandbox workspace-write -c 'approval_policy="on-request"'/);
+  assert.match(kitRunCommands, /"-c", 'approval_policy="on-request"'/);
+  assert.match(kitRunCommands, /constructor \? "workspace-write" : "read-only"/);
   console.log("Matriz de herramienta: Codex CLI argumentos/config = workspace-write + on-request; revisor = read-only; sesión que lea ficheros o ejecute comandos = no probada (sin sesión Codex).");
 });
 
 test("instalador y diagnóstico advierten si falta una dependencia del sandbox Linux", () => {
-  const instalar = readFileSync(join(KIT, "instalar.sh"), "utf8");
+  const instalar = [
+    readFileSync(join(KIT, "instalar.sh"), "utf8"),
+    readFileSync(join(KIT, "adapters/claude-code/install-sandbox.sh"), "utf8"),
+  ].join("\n");
   const diagnosticar = readFileSync(join(KIT, "skills/diagnosticar/diagnosticar.mjs"), "utf8");
   for (const dependencia of ["bwrap", "socat"]) {
     assert.ok(instalar.includes(`command -v ${dependencia}`), `instalador no revisa ${dependencia}`);

@@ -79,7 +79,7 @@ Corre `./verify` en un clon limpio o con el árbol sin artefactos de build. Un `
 - El recorrido se divide en «Lectura» (siempre) y «Escritura» (la que crea datos). Sin `VERIFY_PERMITIR_ESCRITURA=1`, la escritura se omite con un aviso `OMITIDO` y `verify` termina bien solo si la lectura pasó: `VERIFY OK (solo lectura)`.
 - Con `VERIFY_PERMITIR_ESCRITURA=1` corre también la escritura. Sus datos de prueba son correos `verify-<pid>@example.invalid` y cualquier nombre con prefijo `verify-`, para borrarlos después. `verify` no garantiza limpiar el entorno remoto.
 - Un recorrido declara si escribe con `# VERIFY_ESCRIBE: sí` o `no` en su primera línea. Si falta, se trata como `sí`.
-- El principal no corre `VERIFY_TARGET` contra producción. La comprobación posterior al despliegue la corre Franco.
+- El principal no corre `VERIFY_TARGET` contra producción. La comprobación posterior al despliegue la corre la persona usuaria.
 
 ## 4. Workspaces (carpeta que no es repo y contiene varios)
 
@@ -91,7 +91,7 @@ Detección (un hecho, no una decisión):
 find . -maxdepth 2 -name .git -not -path './.git'
 ```
 
-- Si la raíz no tiene `.git` y hay hijos con `.git`, es un workspace y **pregunta a Franco** (opciones cerradas, la recomendada es «sí»): «¿Hacemos la raíz repo propio?». No ejecutes `git init` sin su respuesta.
+- Si la raíz no tiene `.git` y hay hijos con `.git`, es un workspace y **pregunta a la persona usuaria** (opciones cerradas, la recomendada es «sí»): «¿Hacemos la raíz repo propio?». No ejecutes `git init` sin su respuesta.
   - Sí: `git init` en la raíz y un `.gitignore` que liste cada hijo con `.git` como `/<carpeta>/`, más `.claude/settings.local.json`. No hagas commit.
   - No: la raíz queda sin repo; el plan de los cambios de la raíz no recibe rama (ver `ejecutar-plan`, paso 2).
 - Si es un solo repo, nada de esto aplica: `repos: [.]` en los planes.
@@ -123,6 +123,6 @@ Ante «prepárame el despliegue», el principal escribe `cambios/revision-despli
 - Migraciones pendientes.
 - Endpoints de salud (`/health` y la página principal).
 - Qué cubre `verify` y qué NO cubre: proveedores externos, OAuth y correo real.
-- La comprobación posterior con `VERIFY_TARGET`, que corre Franco.
+- La comprobación posterior con `VERIFY_TARGET`, que corre la persona usuaria.
 
 El principal no despliega, no toca producción y no ejecuta `VERIFY_TARGET` contra producción.

@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
-# docker falso para las pruebas del observador: imprime salida fija y termina solo.
+# docker falso para las pruebas del observador: imprime salida fija y termina solo,
+# salvo el proceso events cuando una prueba solicita retenerlo para verificar stop.
 # No toca Docker real. events y buildx history salen de ../datos/; stats y logs/inspect son fijos.
 DATOS="$(cd "$(dirname "$0")/../datos" && pwd)"
+if [ -n "${OBSERVER_FIXTURE_PID_LOG:-}" ]; then
+  printf '%s\n' "$$" >> "$OBSERVER_FIXTURE_PID_LOG"
+fi
 case "$1 $2" in
   "events "*)
     cat "$DATOS/eventos.jsonl"
+    if [ -n "${OBSERVER_FIXTURE_HOLD_EVENTS:-}" ]; then
+      exec sleep 60
+    fi
     ;;
   "stats "*)
     echo '{"BlockIO":"0B / 0B","CPUPerc":"12.00%","Container":"f09web","ID":"f09web","MemPerc":"7.7%","MemUsage":"300MiB / 3.8GiB","Name":"f09-1-web-1","NetIO":"1kB / 1kB","PIDs":"10"}'

@@ -1,0 +1,62 @@
+[
+  {
+    "source": "core/contracts/verificacion.md",
+    "compatibility": "nucleo/contrato/verificacion.md"
+  },
+  {
+    "source": "core/agents/constructor.md",
+    "compatibility": "agentes/constructor.md"
+  },
+  {
+    "source": "core/agents/principal.md",
+    "compatibility": "agentes/principal.md"
+  },
+  {
+    "source": "core/skills/define-project/SKILL.md",
+    "compatibility": "skills/definir-proyecto/SKILL.md"
+  },
+  {
+    "source": "core/skills/diagnose/SKILL.md",
+    "compatibility": "skills/diagnosticar/SKILL.md"
+  },
+  {
+    "source": "core/skills/diagnose/diagnosticar.mjs",
+    "compatibility": "skills/diagnosticar/diagnosticar.mjs"
+  },
+  {
+    "source": "core/skills/diagnose/fingerprint.mjs",
+    "compatibility": "skills/diagnosticar/fingerprint.mjs"
+  },
+  {
+    "source": "core/skills/diagnose/result.mjs",
+    "compatibility": "skills/diagnosticar/result.mjs"
+  },
+  {
+    "source": "core/skills/design-experience/SKILL.md",
+    "compatibility": "skills/disenar-experiencia/SKILL.md"
+  },
+  {
+    "source": "core/skills/execute-plan/SKILL.md",
+    "compatibility": "skills/ejecutar-plan/SKILL.md"
+  },
+  {
+    "source": "core/skills/migrate-project/SKILL.md",
+    "compatibility": "skills/migrar-proyecto/SKILL.md"
+  },
+  {
+    "source": "core/skills/plan-change/SKILL.md",
+    "compatibility": "skills/planificar-cambio/SKILL.md"
+  },
+  {
+    "source": "core/skills/prepare-project/SKILL.md",
+    "compatibility": "skills/preparar-proyecto/SKILL.md"
+  },
+  {
+    "source": "core/skills/prepare-project/referencia.md",
+    "compatibility": "skills/preparar-proyecto/referencia.md"
+  },
+  {
+    "source": "core/recipes/node-pnpm.md",
+    "compatibility": "nucleo/recetas/node-pnpm.md"
+  }
+]

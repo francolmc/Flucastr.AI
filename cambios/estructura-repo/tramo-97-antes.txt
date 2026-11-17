@@ -1,0 +1,1216 @@
+Matriz de desinstalación; fixture raíz <FIXTURE>; HOME y proyectos sintéticos; herramientas claude/pi/codex simuladas.
+
+CASE absent_manifest
+EXIT 0
+ARGS <REPO>/desinstalar.sh --todo
+BEFORE HOME
+D .flucastr-ai 755
+F .flucastr-ai/modelos.json 644 53d5fe75b5d743fd391b07e813c0fa617745983c1af5698fad4611a5ad855957 9
+BEFORE PROJECT
+(no project)
+STDOUT
+Nada que desinstalar: no hay manifiesto en <FIXTURE>/absent-home/.flucastr-ai/manifiesto.txt.
+STDERR
+AFTER HOME
+
+AFTER PROJECT
+(no project)
+---
+
+CASE install_repo
+EXIT 0
+ARGS <REPO>/instalar.sh --solo pi
+BEFORE HOME
+
+BEFORE PROJECT
+(no project)
+STDOUT
+  raíz del kit: <FIXTURE>/repo-home/.flucastr-ai/raiz (<REPO>)
+Claude Code: no encontrado, se omite.
+Pi (<FIXTURE>/repo-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  enlazado: <FIXTURE>/repo-home/.pi/agent/skills/definir-proyecto
+  enlazado: <FIXTURE>/repo-home/.pi/agent/skills/diagnosticar
+  enlazado: <FIXTURE>/repo-home/.pi/agent/skills/disenar-experiencia
+  enlazado: <FIXTURE>/repo-home/.pi/agent/skills/ejecutar-plan
+  enlazado: <FIXTURE>/repo-home/.pi/agent/skills/migrar-proyecto
+  enlazado: <FIXTURE>/repo-home/.pi/agent/skills/planificar-cambio
+  enlazado: <FIXTURE>/repo-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <FIXTURE>/repo-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <FIXTURE>/repo-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <FIXTURE>/repo-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <FIXTURE>/repo-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<FIXTURE>/repo-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<FIXTURE>/repo-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <FIXTURE>/repo-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+AFTER HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 32c6ebd9d727b7e27a0d3ea877824ad5142f32c4ab5ee6c258909ced5585901d 1431
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 a1e950fa9d91f83261af5c1e287cec7e2b77d1741e451ad93e0f71875ce05f8b 333
+F .local/bin/pi-principal 755 a82df9b0dfa81aeb3e5fac8d549f358f23e8cfcd51bd68de32f4268fb1a936fe 329
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+AFTER PROJECT
+(no project)
+---
+
+CASE repo_simulate
+EXIT 0
+ARGS <REPO>/desinstalar.sh --simular
+BEFORE HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 32c6ebd9d727b7e27a0d3ea877824ad5142f32c4ab5ee6c258909ced5585901d 1431
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 a1e950fa9d91f83261af5c1e287cec7e2b77d1741e451ad93e0f71875ce05f8b 333
+F .local/bin/pi-principal 755 a82df9b0dfa81aeb3e5fac8d549f358f23e8cfcd51bd68de32f4268fb1a936fe 329
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+BEFORE PROJECT
+(no project)
+STDOUT
+SIMULACIÓN: no se borra nada.
+  quitado: <FIXTURE>/repo-home/.flucastr-ai/raiz
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/definir-proyecto
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/diagnosticar
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/disenar-experiencia
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/ejecutar-plan
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/migrar-proyecto
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/planificar-cambio
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/preparar-proyecto
+  quitado: <FIXTURE>/repo-home/.pi/agent/agents/constructor.md
+  quitado: <FIXTURE>/repo-home/.local/bin/pi-constructor
+  quitado: <FIXTURE>/repo-home/.pi/agent/agents/principal.md
+  quitado: <FIXTURE>/repo-home/.local/bin/pi-principal
+  quitaría la compactación de Pi: openai/gpt-6.1-sol (<FIXTURE>/repo-home/.pi/agent/settings.json)
+  quitaría la compactación de Pi: openai/gpt-6-luna (<FIXTURE>/repo-home/.pi/agent/settings.json)
+STDERR
+AFTER HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 32c6ebd9d727b7e27a0d3ea877824ad5142f32c4ab5ee6c258909ced5585901d 1431
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 a1e950fa9d91f83261af5c1e287cec7e2b77d1741e451ad93e0f71875ce05f8b 333
+F .local/bin/pi-principal 755 a82df9b0dfa81aeb3e5fac8d549f358f23e8cfcd51bd68de32f4268fb1a936fe 329
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+AFTER PROJECT
+(no project)
+---
+
+CASE repo_remove
+EXIT 0
+ARGS <REPO>/desinstalar.sh
+BEFORE HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 32c6ebd9d727b7e27a0d3ea877824ad5142f32c4ab5ee6c258909ced5585901d 1431
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 a1e950fa9d91f83261af5c1e287cec7e2b77d1741e451ad93e0f71875ce05f8b 333
+F .local/bin/pi-principal 755 a82df9b0dfa81aeb3e5fac8d549f358f23e8cfcd51bd68de32f4268fb1a936fe 329
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+L .pi/agent/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .pi/agent/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .pi/agent/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .pi/agent/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .pi/agent/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .pi/agent/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .pi/agent/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+BEFORE PROJECT
+(no project)
+STDOUT
+  quitado: <FIXTURE>/repo-home/.flucastr-ai/raiz
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/definir-proyecto
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/diagnosticar
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/disenar-experiencia
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/ejecutar-plan
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/migrar-proyecto
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/planificar-cambio
+  quitado: <FIXTURE>/repo-home/.pi/agent/skills/preparar-proyecto
+  quitado: <FIXTURE>/repo-home/.pi/agent/agents/constructor.md
+  quitado: <FIXTURE>/repo-home/.local/bin/pi-constructor
+  quitado: <FIXTURE>/repo-home/.pi/agent/agents/principal.md
+  quitado: <FIXTURE>/repo-home/.local/bin/pi-principal
+  compactación de Pi (quitado): openai/gpt-6.1-sol
+  compactación de Pi (archivo-quitado): openai/gpt-6-luna
+Listo. Reinicia Claude Code y Pi.
+STDERR
+AFTER HOME
+D .local 755
+D .local/bin 755
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+D .pi/agent/skills 755
+AFTER PROJECT
+(no project)
+---
+
+CASE install_copy
+EXIT 0
+ARGS <REPO>/instalar.sh --copiar --solo pi
+BEFORE HOME
+
+BEFORE PROJECT
+(no project)
+STDOUT
+modelos.json personal creado: <FIXTURE>/copy-home/.flucastr-ai/modelos.json
+  raíz del kit: <FIXTURE>/copy-home/.flucastr-ai/raiz (<REPO>)
+Claude Code: no encontrado, se omite.
+Pi (<FIXTURE>/copy-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  copiado: <FIXTURE>/copy-home/.pi/agent/skills/definir-proyecto
+  copiado: <FIXTURE>/copy-home/.pi/agent/skills/diagnosticar
+  copiado: <FIXTURE>/copy-home/.pi/agent/skills/disenar-experiencia
+  copiado: <FIXTURE>/copy-home/.pi/agent/skills/ejecutar-plan
+  copiado: <FIXTURE>/copy-home/.pi/agent/skills/migrar-proyecto
+  copiado: <FIXTURE>/copy-home/.pi/agent/skills/planificar-cambio
+  copiado: <FIXTURE>/copy-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <FIXTURE>/copy-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <FIXTURE>/copy-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <FIXTURE>/copy-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <FIXTURE>/copy-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<FIXTURE>/copy-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<FIXTURE>/copy-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <FIXTURE>/copy-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+AFTER HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 2494a8fb59d6f2adda2182fa06e8ae9128db4c295a12b7c362cda00bf5b29375 1463
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 50bdfe6571eb3bec17027b52999e5979d698dc7be39a94a1e9c297d8e6e90610 443
+F .local/bin/pi-principal 755 48c0fbe6ff8a907a42947c2357578b4c573182e354d20495e1ebb207a358045a 439
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+D .pi/agent/skills/definir-proyecto 755
+F .pi/agent/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/agent/skills/diagnosticar 755
+F .pi/agent/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/agent/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/agent/skills/disenar-experiencia 755
+F .pi/agent/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/agent/skills/ejecutar-plan 755
+F .pi/agent/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/agent/skills/migrar-proyecto 755
+F .pi/agent/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/agent/skills/planificar-cambio 755
+F .pi/agent/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/agent/skills/preparar-proyecto 755
+F .pi/agent/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/agent/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+AFTER PROJECT
+(no project)
+---
+
+CASE copy_simulate
+EXIT 0
+ARGS <REPO>/desinstalar.sh --simular
+BEFORE HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 2494a8fb59d6f2adda2182fa06e8ae9128db4c295a12b7c362cda00bf5b29375 1463
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 50bdfe6571eb3bec17027b52999e5979d698dc7be39a94a1e9c297d8e6e90610 443
+F .local/bin/pi-principal 755 48c0fbe6ff8a907a42947c2357578b4c573182e354d20495e1ebb207a358045a 439
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+D .pi/agent/skills/definir-proyecto 755
+F .pi/agent/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/agent/skills/diagnosticar 755
+F .pi/agent/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/agent/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/agent/skills/disenar-experiencia 755
+F .pi/agent/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/agent/skills/ejecutar-plan 755
+F .pi/agent/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/agent/skills/migrar-proyecto 755
+F .pi/agent/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/agent/skills/planificar-cambio 755
+F .pi/agent/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/agent/skills/preparar-proyecto 755
+F .pi/agent/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/agent/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+BEFORE PROJECT
+(no project)
+STDOUT
+SIMULACIÓN: no se borra nada.
+  quitado: <FIXTURE>/copy-home/.flucastr-ai/raiz
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/definir-proyecto
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/diagnosticar
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/disenar-experiencia
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/ejecutar-plan
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/migrar-proyecto
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/planificar-cambio
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/preparar-proyecto
+  quitado: <FIXTURE>/copy-home/.pi/agent/agents/constructor.md
+  quitado: <FIXTURE>/copy-home/.local/bin/pi-constructor
+  quitado: <FIXTURE>/copy-home/.pi/agent/agents/principal.md
+  quitado: <FIXTURE>/copy-home/.local/bin/pi-principal
+  quitaría la compactación de Pi: openai/gpt-6.1-sol (<FIXTURE>/copy-home/.pi/agent/settings.json)
+  quitaría la compactación de Pi: openai/gpt-6-luna (<FIXTURE>/copy-home/.pi/agent/settings.json)
+STDERR
+AFTER HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 2494a8fb59d6f2adda2182fa06e8ae9128db4c295a12b7c362cda00bf5b29375 1463
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 50bdfe6571eb3bec17027b52999e5979d698dc7be39a94a1e9c297d8e6e90610 443
+F .local/bin/pi-principal 755 48c0fbe6ff8a907a42947c2357578b4c573182e354d20495e1ebb207a358045a 439
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+D .pi/agent/skills/definir-proyecto 755
+F .pi/agent/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/agent/skills/diagnosticar 755
+F .pi/agent/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/agent/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/agent/skills/disenar-experiencia 755
+F .pi/agent/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/agent/skills/ejecutar-plan 755
+F .pi/agent/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/agent/skills/migrar-proyecto 755
+F .pi/agent/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/agent/skills/planificar-cambio 755
+F .pi/agent/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/agent/skills/preparar-proyecto 755
+F .pi/agent/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/agent/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+AFTER PROJECT
+(no project)
+---
+
+CASE copy_remove
+EXIT 0
+ARGS <REPO>/desinstalar.sh
+BEFORE HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 2494a8fb59d6f2adda2182fa06e8ae9128db4c295a12b7c362cda00bf5b29375 1463
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 50bdfe6571eb3bec17027b52999e5979d698dc7be39a94a1e9c297d8e6e90610 443
+F .local/bin/pi-principal 755 48c0fbe6ff8a907a42947c2357578b4c573182e354d20495e1ebb207a358045a 439
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+D .pi/agent/skills/definir-proyecto 755
+F .pi/agent/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/agent/skills/diagnosticar 755
+F .pi/agent/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/agent/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/agent/skills/disenar-experiencia 755
+F .pi/agent/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/agent/skills/ejecutar-plan 755
+F .pi/agent/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/agent/skills/migrar-proyecto 755
+F .pi/agent/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/agent/skills/planificar-cambio 755
+F .pi/agent/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/agent/skills/preparar-proyecto 755
+F .pi/agent/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/agent/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+BEFORE PROJECT
+(no project)
+STDOUT
+  quitado: <FIXTURE>/copy-home/.flucastr-ai/raiz
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/definir-proyecto
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/diagnosticar
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/disenar-experiencia
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/ejecutar-plan
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/migrar-proyecto
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/planificar-cambio
+  quitado: <FIXTURE>/copy-home/.pi/agent/skills/preparar-proyecto
+  quitado: <FIXTURE>/copy-home/.pi/agent/agents/constructor.md
+  quitado: <FIXTURE>/copy-home/.local/bin/pi-constructor
+  quitado: <FIXTURE>/copy-home/.pi/agent/agents/principal.md
+  quitado: <FIXTURE>/copy-home/.local/bin/pi-principal
+  compactación de Pi (quitado): openai/gpt-6.1-sol
+  compactación de Pi (archivo-quitado): openai/gpt-6-luna
+Listo. Reinicia Claude Code y Pi.
+STDERR
+AFTER HOME
+D .flucastr-ai 755
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+D .local 755
+D .local/bin 755
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+D .pi/agent/skills 755
+AFTER PROJECT
+(no project)
+---
+
+CASE install_todo
+EXIT 0
+ARGS <REPO>/instalar.sh --copiar --solo pi
+BEFORE HOME
+
+BEFORE PROJECT
+(no project)
+STDOUT
+modelos.json personal creado: <FIXTURE>/todo-home/.flucastr-ai/modelos.json
+  raíz del kit: <FIXTURE>/todo-home/.flucastr-ai/raiz (<REPO>)
+Claude Code: no encontrado, se omite.
+Pi (<FIXTURE>/todo-home/.pi/agent)
+  AVISO: Pi no tiene protecciones equivalentes de sandbox ni reglas deny en este kit.
+  copiado: <FIXTURE>/todo-home/.pi/agent/skills/definir-proyecto
+  copiado: <FIXTURE>/todo-home/.pi/agent/skills/diagnosticar
+  copiado: <FIXTURE>/todo-home/.pi/agent/skills/disenar-experiencia
+  copiado: <FIXTURE>/todo-home/.pi/agent/skills/ejecutar-plan
+  copiado: <FIXTURE>/todo-home/.pi/agent/skills/migrar-proyecto
+  copiado: <FIXTURE>/todo-home/.pi/agent/skills/planificar-cambio
+  copiado: <FIXTURE>/todo-home/.pi/agent/skills/preparar-proyecto
+  agente generado: <FIXTURE>/todo-home/.pi/agent/agents/constructor.md (modelo: openai/gpt-6-luna)
+  lanzador generado: <FIXTURE>/todo-home/.local/bin/pi-constructor (modelo: openai/gpt-6-luna)
+  agente generado: <FIXTURE>/todo-home/.pi/agent/agents/principal.md (modelo: openai/gpt-6.1-terra)
+  lanzador generado: <FIXTURE>/todo-home/.local/bin/pi-principal (modelo: openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6.1-sol reserveTokens=172000 (<FIXTURE>/todo-home/.pi/agent/settings.json)
+  OMITIDO (modelos.json no declara la ventana de openai/gpt-6.1-terra)
+  compactación fijada: openai/gpt-6-luna reserveTokens=172000 (<FIXTURE>/todo-home/.pi/agent/settings.json)
+  Pi no relee settings.json en caliente: abre Pi de nuevo o usa /reload. Aplica a esos modelos también fuera del kit; desinstalar.sh lo quita.
+  AVISO: <FIXTURE>/todo-home/.local/bin no está en tu PATH; agrégalo para usar los comandos pi-<agente>.
+Codex: no encontrado, se omite.
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+AFTER HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 65ebd20fceacb580d1f7c3631f1c43572d208ecf385602f2a58ddba2bc76f9ef 1463
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 48b0cce4ea4e601e582969799f5f0f61bfaaf7dfb13c9dd0102fa82865405ca3 443
+F .local/bin/pi-principal 755 aa905668fbdb3c8067a8b98771838badead71300d656536d3ed35fb717a6d350 439
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+D .pi/agent/skills/definir-proyecto 755
+F .pi/agent/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/agent/skills/diagnosticar 755
+F .pi/agent/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/agent/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/agent/skills/disenar-experiencia 755
+F .pi/agent/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/agent/skills/ejecutar-plan 755
+F .pi/agent/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/agent/skills/migrar-proyecto 755
+F .pi/agent/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/agent/skills/planificar-cambio 755
+F .pi/agent/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/agent/skills/preparar-proyecto 755
+F .pi/agent/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/agent/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+AFTER PROJECT
+(no project)
+---
+
+CASE todo_remove
+EXIT 0
+ARGS <REPO>/desinstalar.sh --todo
+BEFORE HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 65ebd20fceacb580d1f7c3631f1c43572d208ecf385602f2a58ddba2bc76f9ef 1463
+F .flucastr-ai/modelos.json 644 a7a3d5dbd021b4c3d147bc24a52fff97915ee39f91e88ed4647c7806524d4a09 2557
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/pi-constructor 755 48b0cce4ea4e601e582969799f5f0f61bfaaf7dfb13c9dd0102fa82865405ca3 443
+F .local/bin/pi-principal 755 aa905668fbdb3c8067a8b98771838badead71300d656536d3ed35fb717a6d350 439
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+F .pi/agent/agents/constructor.md 644 8e58f1e5135eaeba39ba11a70386eb3bcb4e25bc4a84670d1d15d3835c5f8b0b 4945
+F .pi/agent/agents/principal.md 644 df186e47ff12a92800f7f9700cae097bccc2c037be7add82a61e8b45633a2c87 17786
+F .pi/agent/settings.json 644 7ebfe9d865df00e756406768f8b01514eaeac2d77922db6a110b5e528fa26105 196
+D .pi/agent/skills 755
+D .pi/agent/skills/definir-proyecto 755
+F .pi/agent/skills/definir-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/definir-proyecto/SKILL.md 644 3cd8c97cb4647c4b89d8ecbea7b4813b912e7e1c4974a148543e9e7d9ea4e532 3013
+D .pi/agent/skills/diagnosticar 755
+F .pi/agent/skills/diagnosticar/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/diagnosticar/SKILL.md 644 87e72b48e996429ff80a022c8c81c46caeaf12801f0815c3ef33e07e5b24a333 1591
+F .pi/agent/skills/diagnosticar/diagnosticar.mjs 644 8110f82de8458a5be74dda49e8a24c8ef307088e85a3f5c91153f6d241294d22 15284
+D .pi/agent/skills/disenar-experiencia 755
+F .pi/agent/skills/disenar-experiencia/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/disenar-experiencia/SKILL.md 644 65f85436fe12c8c9015b3c1d84518ab27a693081f35f97b6347c94ff4f9eb048 4205
+D .pi/agent/skills/ejecutar-plan 755
+F .pi/agent/skills/ejecutar-plan/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/ejecutar-plan/SKILL.md 644 d8823f2c2ac75f69f1c4575837cf7f363987c0c643cc6bc6363d927aadb5b0c0 9412
+D .pi/agent/skills/migrar-proyecto 755
+F .pi/agent/skills/migrar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/migrar-proyecto/SKILL.md 644 c1acafd5970cc056364feb47e1dcbea9beee5461e4dd7ef0bc56d15650653a3b 5957
+D .pi/agent/skills/planificar-cambio 755
+F .pi/agent/skills/planificar-cambio/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/planificar-cambio/SKILL.md 644 e5880167ddfebb4b5f2a786bbeb68bb832799b65f2693f7ead09bdcd9986c9b0 18738
+D .pi/agent/skills/preparar-proyecto 755
+F .pi/agent/skills/preparar-proyecto/.flucastr-ai 644 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0
+F .pi/agent/skills/preparar-proyecto/SKILL.md 644 b9ec0146d6fb8e9c0a4333344671f6ff19bd61d46bd1f7a0adb982651dedf49b 7539
+F .pi/agent/skills/preparar-proyecto/referencia.md 644 9daa8b68f4c89849bba12bbc9a633b2701023fec26e379e5145619150e010589 5580
+BEFORE PROJECT
+(no project)
+STDOUT
+  quitado: <FIXTURE>/todo-home/.flucastr-ai/raiz
+  quitado: <FIXTURE>/todo-home/.pi/agent/skills/definir-proyecto
+  quitado: <FIXTURE>/todo-home/.pi/agent/skills/diagnosticar
+  quitado: <FIXTURE>/todo-home/.pi/agent/skills/disenar-experiencia
+  quitado: <FIXTURE>/todo-home/.pi/agent/skills/ejecutar-plan
+  quitado: <FIXTURE>/todo-home/.pi/agent/skills/migrar-proyecto
+  quitado: <FIXTURE>/todo-home/.pi/agent/skills/planificar-cambio
+  quitado: <FIXTURE>/todo-home/.pi/agent/skills/preparar-proyecto
+  quitado: <FIXTURE>/todo-home/.pi/agent/agents/constructor.md
+  quitado: <FIXTURE>/todo-home/.local/bin/pi-constructor
+  quitado: <FIXTURE>/todo-home/.pi/agent/agents/principal.md
+  quitado: <FIXTURE>/todo-home/.local/bin/pi-principal
+  compactación de Pi (quitado): openai/gpt-6.1-sol
+  compactación de Pi (archivo-quitado): openai/gpt-6-luna
+Listo. Reinicia Claude Code y Pi.
+STDERR
+AFTER HOME
+D .local 755
+D .local/bin 755
+D .pi 755
+D .pi/agent 755
+D .pi/agent/agents 755
+D .pi/agent/skills 755
+AFTER PROJECT
+(no project)
+---
+
+CASE project_install
+EXIT 0
+ARGS <REPO>/instalar.sh --solo claude --proyecto <FIXTURE>/project --agente principal
+BEFORE HOME
+
+BEFORE PROJECT
+
+STDOUT
+  raíz del kit: <FIXTURE>/project-home/.flucastr-ai/raiz (<REPO>)
+Claude Code (<FIXTURE>/project-home/.claude)
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  enlazado: <FIXTURE>/project-home/.claude/skills/definir-proyecto
+  enlazado: <FIXTURE>/project-home/.claude/skills/diagnosticar
+  enlazado: <FIXTURE>/project-home/.claude/skills/disenar-experiencia
+  enlazado: <FIXTURE>/project-home/.claude/skills/ejecutar-plan
+  enlazado: <FIXTURE>/project-home/.claude/skills/migrar-proyecto
+  enlazado: <FIXTURE>/project-home/.claude/skills/planificar-cambio
+  enlazado: <FIXTURE>/project-home/.claude/skills/preparar-proyecto
+  agente generado: <FIXTURE>/project-home/.claude/agents/constructor.md (modelo: claude-haiku-5-5)
+  lanzador generado: <FIXTURE>/project-home/.local/bin/claude-constructor (esfuerzo: high)
+  agente generado: <FIXTURE>/project-home/.claude/agents/principal.md (modelo: claude-sonnet-5-5)
+  lanzador generado: <FIXTURE>/project-home/.local/bin/claude-principal (esfuerzo: medium)
+  AVISO: <FIXTURE>/project-home/.local/bin no está en tu PATH; agrégalo para usar los comandos claude-<agente>.
+Proyecto (<FIXTURE>/project)
+  agente predeterminado fijado: <FIXTURE>/project/.claude/settings.local.json -> principal
+  regla deny de Claude Code agregada: Read(./.env) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.env.*) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.env) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.env.*) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.ssh/**) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.aws/**) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.ssh/**) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.aws/**) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(~/.ssh/**) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(~/.aws/**) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.pem) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.key) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.p12) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.pfx) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_rsa) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_ed25519) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_ecdsa) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git commit *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git push *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git merge *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(gh pr create *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(gh pr merge *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git * commit *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git * push *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(bash -c *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(sh -c *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(zsh -c *) (<FIXTURE>/project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git -c * merge *) (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.enabled=true (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.allowUnsandboxedCommands=false (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="./.env" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="./.env.*" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/.env" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/.env.*" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="~/.ssh/**" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="~/.aws/**" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/*.pem" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/*.key" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/*.p12" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/*.pfx" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/id_rsa" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/id_ed25519" (<FIXTURE>/project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/id_ecdsa" (<FIXTURE>/project/.claude/settings.json)
+  AVISO: Claude sandbox no cubre comandos excluidos; hooks y servidores MCP se ejecutan fuera del sandbox. Revisa los allow globales amplios.
+  compactación de Claude Code fijada: autoCompactWindow=133000 (<FIXTURE>/project/.claude/settings.local.json)
+  hook de permisos conservadores fijado: <FIXTURE>/project/.claude/settings.local.json
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+  (--proyecto no fijó reglas de Codex: Codex no está instalado)
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+AFTER HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 c3485d982bdc7d58a7409cb875e1e64c40d9f51a1f6d59fa34bac656d9272614 6198
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+AFTER PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 2a132d40f1b709a49debb6deec40ce5cfb4521afce1226191a420e687b355130 785
+---
+
+CASE project_simulate
+EXIT 0
+ARGS <REPO>/desinstalar.sh --proyecto <FIXTURE>/project --simular
+BEFORE HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 c3485d982bdc7d58a7409cb875e1e64c40d9f51a1f6d59fa34bac656d9272614 6198
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+BEFORE PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 2a132d40f1b709a49debb6deec40ce5cfb4521afce1226191a420e687b355130 785
+STDOUT
+SIMULACIÓN: quitaría el agente 'principal' de: <FIXTURE>/project/.claude/settings.local.json
+SIMULACIÓN: quitaría la regla deny 'Read(./.env)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./.env.*)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/.env)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/.env.*)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./.ssh/**)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./.aws/**)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/.ssh/**)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/.aws/**)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(~/.ssh/**)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(~/.aws/**)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/*.pem)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/*.key)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/*.p12)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/*.pfx)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/id_rsa)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/id_ed25519)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Read(./**/id_ecdsa)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(git commit *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(git push *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(git merge *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(gh pr create *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(gh pr merge *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(git * commit *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(git * push *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(bash -c *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(sh -c *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(zsh -c *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la regla deny 'Bash(git -c * merge *)' de: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.enabled en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.allowUnsandboxedCommands en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría ajuste de sandbox sandbox.filesystem.denyRead en: <FIXTURE>/project/.claude/settings.json
+SIMULACIÓN: quitaría la compactación de Claude Code de: <FIXTURE>/project/.claude/settings.local.json
+SIMULACIÓN: no se borra nada.
+STDERR
+AFTER HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 c3485d982bdc7d58a7409cb875e1e64c40d9f51a1f6d59fa34bac656d9272614 6198
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+AFTER PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 2a132d40f1b709a49debb6deec40ce5cfb4521afce1226191a420e687b355130 785
+---
+
+CASE project_remove
+EXIT 0
+ARGS <REPO>/desinstalar.sh --proyecto <FIXTURE>/project
+BEFORE HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 c3485d982bdc7d58a7409cb875e1e64c40d9f51a1f6d59fa34bac656d9272614 6198
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+BEFORE PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 2a132d40f1b709a49debb6deec40ce5cfb4521afce1226191a420e687b355130 785
+STDOUT
+  ajuste de proyecto (quitado): <FIXTURE>/project/.claude/settings.local.json
+  regla deny (quitado): Read(./.env) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./.env.*) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/.env) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/.env.*) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./.ssh/**) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./.aws/**) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/.ssh/**) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/.aws/**) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(~/.ssh/**) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(~/.aws/**) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/*.pem) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/*.key) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/*.p12) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/*.pfx) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/id_rsa) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/id_ed25519) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Read(./**/id_ecdsa) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(git commit *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(git push *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(git merge *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(gh pr create *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(gh pr merge *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(git * commit *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(git * push *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(bash -c *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(sh -c *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(zsh -c *) en <FIXTURE>/project/.claude/settings.json
+  regla deny (quitado): Bash(git -c * merge *) en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.enabled en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.allowUnsandboxedCommands en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  ajuste de sandbox (quitado): sandbox.filesystem.denyRead en <FIXTURE>/project/.claude/settings.json
+  compactación de Claude Code (quitado): <FIXTURE>/project/.claude/settings.local.json
+STDERR
+AFTER HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 644 38af1108ee47d3fe548e3ddce0c29cafadc6c2392b0f8e10ae267071a361f766 1196
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+AFTER PROJECT
+D .claude 755
+F .claude/settings.local.json 644 18c61158bddcce4acb1d53456ad5105c127f29ba84bd304f5f9e5a7d01b1e3d9 730
+---
+
+CASE reinstall_first
+EXIT 0
+ARGS <REPO>/instalar.sh --solo claude --proyecto <FIXTURE>/reinstall-project --agente principal
+BEFORE HOME
+
+BEFORE PROJECT
+
+STDOUT
+  raíz del kit: <FIXTURE>/reinstall-home/.flucastr-ai/raiz (<REPO>)
+Claude Code (<FIXTURE>/reinstall-home/.claude)
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/definir-proyecto
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/diagnosticar
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/disenar-experiencia
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/ejecutar-plan
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/migrar-proyecto
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/planificar-cambio
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/preparar-proyecto
+  agente generado: <FIXTURE>/reinstall-home/.claude/agents/constructor.md (modelo: claude-haiku-5-5)
+  lanzador generado: <FIXTURE>/reinstall-home/.local/bin/claude-constructor (esfuerzo: high)
+  agente generado: <FIXTURE>/reinstall-home/.claude/agents/principal.md (modelo: claude-sonnet-5-5)
+  lanzador generado: <FIXTURE>/reinstall-home/.local/bin/claude-principal (esfuerzo: medium)
+  AVISO: <FIXTURE>/reinstall-home/.local/bin no está en tu PATH; agrégalo para usar los comandos claude-<agente>.
+Proyecto (<FIXTURE>/reinstall-project)
+  agente predeterminado fijado: <FIXTURE>/reinstall-project/.claude/settings.local.json -> principal
+  regla deny de Claude Code agregada: Read(./.env) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.env.*) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.env) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.env.*) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.ssh/**) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./.aws/**) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.ssh/**) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/.aws/**) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(~/.ssh/**) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(~/.aws/**) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.pem) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.key) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.p12) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/*.pfx) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_rsa) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_ed25519) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Read(./**/id_ecdsa) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git commit *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git push *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git merge *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(gh pr create *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(gh pr merge *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git * commit *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git * push *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(bash -c *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(sh -c *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(zsh -c *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  regla deny de Claude Code agregada: Bash(git -c * merge *) (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.enabled=true (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.allowUnsandboxedCommands=false (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="./.env" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="./.env.*" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/.env" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/.env.*" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="~/.ssh/**" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="~/.aws/**" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/*.pem" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/*.key" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/*.p12" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/*.pfx" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/id_rsa" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/id_ed25519" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  ajuste de sandbox agregado: sandbox.filesystem.denyRead="**/id_ecdsa" (<FIXTURE>/reinstall-project/.claude/settings.json)
+  AVISO: Claude sandbox no cubre comandos excluidos; hooks y servidores MCP se ejecutan fuera del sandbox. Revisa los allow globales amplios.
+  compactación de Claude Code fijada: autoCompactWindow=133000 (<FIXTURE>/reinstall-project/.claude/settings.local.json)
+  hook de permisos conservadores fijado: <FIXTURE>/reinstall-project/.claude/settings.local.json
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+  (--proyecto no fijó reglas de Codex: Codex no está instalado)
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+AFTER HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 4f7b3a164a711f68c5e75a586dec69aace124efafafc92566c979ebbf98f42db 6672
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+AFTER PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 a1cee3510dcf7109ae117cf017c638b2b9f2c7fd8e5daac5e901f23822851c40 805
+---
+
+CASE reinstall_again
+EXIT 0
+ARGS <REPO>/instalar.sh --solo claude --proyecto <FIXTURE>/reinstall-project --agente principal
+BEFORE HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 4f7b3a164a711f68c5e75a586dec69aace124efafafc92566c979ebbf98f42db 6672
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+BEFORE PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 a1cee3510dcf7109ae117cf017c638b2b9f2c7fd8e5daac5e901f23822851c40 805
+STDOUT
+Quitando la instalación anterior...
+  raíz del kit: <FIXTURE>/reinstall-home/.flucastr-ai/raiz (<REPO>)
+Claude Code (<FIXTURE>/reinstall-home/.claude)
+  AVISO: reglas allow globales amplias pueden autorizar comandos; comandos excluidos del sandbox, hooks y servidores MCP operan fuera de él. Revisa la configuración efectiva.
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/definir-proyecto
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/diagnosticar
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/disenar-experiencia
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/ejecutar-plan
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/migrar-proyecto
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/planificar-cambio
+  enlazado: <FIXTURE>/reinstall-home/.claude/skills/preparar-proyecto
+  agente generado: <FIXTURE>/reinstall-home/.claude/agents/constructor.md (modelo: claude-haiku-5-5)
+  lanzador generado: <FIXTURE>/reinstall-home/.local/bin/claude-constructor (esfuerzo: high)
+  agente generado: <FIXTURE>/reinstall-home/.claude/agents/principal.md (modelo: claude-sonnet-5-5)
+  lanzador generado: <FIXTURE>/reinstall-home/.local/bin/claude-principal (esfuerzo: medium)
+  AVISO: <FIXTURE>/reinstall-home/.local/bin no está en tu PATH; agrégalo para usar los comandos claude-<agente>.
+Proyecto (<FIXTURE>/reinstall-project)
+  ya estaba fijado: <FIXTURE>/reinstall-project/.claude/settings.local.json
+  reglas deny de Claude Code ya estaban: <FIXTURE>/reinstall-project/.claude/settings.json
+  ajustes de sandbox de Claude Code ya estaban: <FIXTURE>/reinstall-project/.claude/settings.json
+  AVISO: Claude sandbox no cubre comandos excluidos; hooks y servidores MCP se ejecutan fuera del sandbox. Revisa los allow globales amplios.
+  compactación de Claude Code ya estaba fijada: <FIXTURE>/reinstall-project/.claude/settings.local.json
+  hook de permisos conservadores ya estaba fijado: <FIXTURE>/reinstall-project/.claude/settings.local.json
+Pi: no encontrado, se omite.
+Codex: no encontrado, se omite.
+  (--proyecto no fijó reglas de Codex: Codex no está instalado)
+
+Listo. Reinicia Claude Code y Pi.
+  Claude Code: claude --agent principal   (o fijarlo en un proyecto: bash instalar.sh --proyecto <ruta>)
+  Pi:          pi-principal
+Si cambias modelos.json, vuelve a correr: bash instalar.sh
+STDERR
+AFTER HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 d853b382ac856bcc5255bfda573a136e549cb814170a91cdf65114fbabc8bfcf 6672
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+AFTER PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 a1cee3510dcf7109ae117cf017c638b2b9f2c7fd8e5daac5e901f23822851c40 805
+---
+
+CASE preserve_adjustments
+EXIT 0
+ARGS <REPO>/desinstalar.sh --conservar-ajustes
+BEFORE HOME
+D .claude 755
+D .claude/agents 755
+F .claude/agents/constructor.md 644 945e2e8a5619792c5585edebca22b33891b1823a667c12575b4ad866a4c66aaa 4950
+F .claude/agents/principal.md 644 95d86e40ababee1582822656172de59cbb4b88c11e44ab12dc1cfc7dd4ba3239 17787
+D .claude/skills 755
+L .claude/skills/definir-proyecto 777 <REPO>/skills/definir-proyecto
+L .claude/skills/diagnosticar 777 <REPO>/skills/diagnosticar
+L .claude/skills/disenar-experiencia 777 <REPO>/skills/disenar-experiencia
+L .claude/skills/ejecutar-plan 777 <REPO>/skills/ejecutar-plan
+L .claude/skills/migrar-proyecto 777 <REPO>/skills/migrar-proyecto
+L .claude/skills/planificar-cambio 777 <REPO>/skills/planificar-cambio
+L .claude/skills/preparar-proyecto 777 <REPO>/skills/preparar-proyecto
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 600 d853b382ac856bcc5255bfda573a136e549cb814170a91cdf65114fbabc8bfcf 6672
+F .flucastr-ai/raiz 644 73c13cc3610d30123e55179cec7f6cd227516904b3269b7693954159dfe1a155 40
+D .local 755
+D .local/bin 755
+F .local/bin/claude-constructor 755 1542c41107b4254484e28418364a709715fe3776cb581bf15d64978e840d13a6 142
+F .local/bin/claude-principal 755 602373dfc2d63b354d4eac2f343d4e6c11b9a119d814e6d446cf23f82b116c3f 142
+BEFORE PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 a1cee3510dcf7109ae117cf017c638b2b9f2c7fd8e5daac5e901f23822851c40 805
+STDOUT
+  quitado: <FIXTURE>/reinstall-home/.flucastr-ai/raiz
+  quitado: <FIXTURE>/reinstall-home/.claude/skills/definir-proyecto
+  quitado: <FIXTURE>/reinstall-home/.claude/skills/diagnosticar
+  quitado: <FIXTURE>/reinstall-home/.claude/skills/disenar-experiencia
+  quitado: <FIXTURE>/reinstall-home/.claude/skills/ejecutar-plan
+  quitado: <FIXTURE>/reinstall-home/.claude/skills/migrar-proyecto
+  quitado: <FIXTURE>/reinstall-home/.claude/skills/planificar-cambio
+  quitado: <FIXTURE>/reinstall-home/.claude/skills/preparar-proyecto
+  quitado: <FIXTURE>/reinstall-home/.claude/agents/constructor.md
+  quitado: <FIXTURE>/reinstall-home/.local/bin/claude-constructor
+  quitado: <FIXTURE>/reinstall-home/.claude/agents/principal.md
+  quitado: <FIXTURE>/reinstall-home/.local/bin/claude-principal
+Listo. Reinicia Claude Code y Pi.
+STDERR
+AFTER HOME
+D .claude 755
+D .claude/agents 755
+D .claude/skills 755
+D .local 755
+D .local/bin 755
+AFTER PROJECT
+D .claude 755
+F .claude/settings.json 644 0baeed3e1d6b937cd6102d8f43548243c9432354ad89e0c4e50e96574bc63bac 1195
+F .claude/settings.local.json 644 a1cee3510dcf7109ae117cf017c638b2b9f2c7fd8e5daac5e901f23822851c40 805
+---
+
+CASE foreign_path
+EXIT 0
+ARGS <REPO>/desinstalar.sh
+BEFORE HOME
+D .flucastr-ai 755
+F .flucastr-ai/manifiesto.txt 644 4c7dc1e47b7e41a432ef7a4f8ba03ba3223e22b0ee16aab3747a11a0556e4d7b 96
+BEFORE PROJECT
+
+STDOUT
+  omitido (no tiene la marca de archivo generado): <FIXTURE>/foreign-target/owned-by-other
+Listo. Reinicia Claude Code y Pi.
+STDERR
+AFTER HOME
+
+AFTER PROJECT
+
+---
+
+CASE unknown_option
+EXIT 1
+ARGS <REPO>/desinstalar.sh --unknown
+BEFORE HOME
+
+BEFORE PROJECT
+(no project)
+STDOUT
+STDERR
+Opción desconocida: --unknown
+AFTER HOME
+
+AFTER PROJECT
+(no project)
+---
+
+CASE missing_project
+EXIT 1
+ARGS <REPO>/desinstalar.sh --proyecto
+BEFORE HOME
+
+BEFORE PROJECT
+(no project)
+STDOUT
+STDERR
+--proyecto necesita una carpeta que exista
+AFTER HOME
+
+AFTER PROJECT
+(no project)
+---
+
+MATRIX_CASES 18

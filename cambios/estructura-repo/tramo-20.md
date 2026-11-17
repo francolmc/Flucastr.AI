@@ -13,13 +13,29 @@ Archivos: `verify`, `tools/verify/migration-contract.sh`.
 CUANDO se ejecute `./verify` ENTONCES esta fase conserva su resultado y posición en el flujo completo (A20).
 Aceptación A20: el bloque se carga exactamente una vez en el punto original y `./verify` y la simulación coinciden con la línea base aislada.
 TODO:
-- [ ] Copiar a `tools/verify/migration-contract.sh` desde el comentario `# 9a. migración:` hasta inmediatamente antes de `10. arnés OpenSpec` (A20). Comprobación: comparar con el bloque original de Git, líneas 1070–1084; esperar contenido idéntico.
-- [ ] Sustituir ese bloque en `verify` por `source tools/verify/migration-contract.sh` (A20). Comprobación: inspeccionar el diff; esperar una carga en la misma posición y ningún cambio de lógica.
-- [ ] Comprobar `bash -n verify` y `bash -n tools/verify/migration-contract.sh` (A20). Comprobación: esperar código 0.
-- [ ] Ejecutar `./verify` en el entorno aislado (A20). Comprobación: esperar código 0 y resultados equivalentes a la referencia.
-- [ ] Ejecutar `bash ./instalar.sh --simular` en el mismo entorno (A20). Comprobación: esperar código 0 y salida y efectos equivalentes a la referencia.
++ [x] Copiar a `tools/verify/migration-contract.sh` desde el comentario `# 9a. migración:` hasta inmediatamente antes de `10. arnés OpenSpec` (A20). Comprobación: comparar con el bloque original de Git, líneas 1070–1084; esperar contenido idéntico.
++ [x] Sustituir ese bloque en `verify` por `source tools/verify/migration-contract.sh` (A20). Comprobación: inspeccionar el diff; esperar una carga en la misma posición y ningún cambio de lógica.
++ [x] Comprobar `bash -n verify` y `bash -n tools/verify/migration-contract.sh` (A20). Comprobación: esperar código 0.
++ [x] Ejecutar `./verify` en el entorno aislado (A20). Comprobación: esperar código 0 y resultados equivalentes a la referencia.
++ [x] Ejecutar `bash ./instalar.sh --simular` en el mismo entorno (A20). Comprobación: esperar código 0 y salida y efectos equivalentes a la referencia.
 Verificación del tramo: `./verify` — nivel 3, por petición del usuario después de cada movimiento; además comparar la simulación. Duración: medida en tramo 1.
 Handoff: registrar archivos, diff, resultados y duración; detenerse para revisión antes del siguiente tramo. Ante diferencia no explicada, no avanzar.
 
 ## Evidencia
-Pendiente.
+- `$ diff -u <(git show HEAD:verify | sed -n '1070,1084p') tools/verify/migration-contract.sh`
+  *(sin salida; bloque idéntico, 15 líneas y 1139 bytes incluyendo separador)*
+  `exit 0`
+- `$ bash cambios/estructura-repo/reproducir-linea-base.sh`
+  `Simulaciones repetibles y verify coinciden con linea-base/.`
+  `exit 0`
+- `$ bash cambios/estructura-repo/reproducir-linea-base.sh`
+  `La receta corrió dos simulaciones de instalación aisladas y las comparó junto con verify; simulaciones y efectos coinciden byte por byte con las referencias, aplicando normalizaciones declaradas.`
+  `Simulaciones repetibles y verify coinciden con linea-base/.`
+  `exit 0`
+- `$ bash -n verify && bash -n tools/verify/migration-contract.sh`
+  `bash -n verify: OK`
+  `bash -n tools/verify/migration-contract.sh: OK`
+  `exit 0`
+- `$ python3 - <<'PY'` (aserciones de carga única y posición; inspección del diff acotada a 9a)
+  `source única en la posición original de 9a; bloque reemplazado sin contenido ejecutable residual`
+  `exit 0`

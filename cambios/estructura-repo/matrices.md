@@ -18,6 +18,8 @@ Usar `node scripts/resolver.mjs`, `modelos.json` del checkout y archivos sintét
 | `fijar-deny`, `quitar-deny` para Codex | archivo ausente, marcado por el kit y archivo ajeno; con y sin AGENTS sintético, simulación y repetición. |
 | orden desconocida | sin argumentos y orden inexistente; error y ausencia de escrituras. |
 
+La captura ejecutable de tramo 27 está en `capturar-matriz-resolver.mjs`, con la receta aislada `ejecutar-matriz-resolver.sh` y resultados sanitizados en `matriz-resolver.jsonl`. Los casos de Claude usan los nombres que exige el contrato del resolver: `settings.local.json` para hooks y `settings.json` para deny/sandbox. Los casos de archivo ausente aplican y repiten los cambios desde un fixture sin ese archivo; las secuencias de eliminación comprueban que se conserva el ajuste sintético ajeno.
+
 En cada familia mutadora comparar el árbol antes y después de simulación y errores; registrar cualquier efecto original y exigir la misma conducta tras cada extracción. Una simulación no debe modificar archivos. Para el resto comparar exactamente contra la captura original, sin suponer un código genérico de error. Complementar con `./verify`, cuyas pruebas existentes cubren los contratos instalados.
 
 ## Kit run (tramo 48)
@@ -31,6 +33,10 @@ Para cada caso crear HOME y proyecto nuevos dentro del aislamiento, con ejecutab
 ## Bootstrap remoto (tramo 99)
 
 Crear `<TEMP>/origin/sha` con 40 caracteres hexadecimales y `<TEMP>/origin/kit.tar.gz` como paquete sintético con la misma estructura que espera el instalador. Usar `HOME=<TEMP>/home FLUCASTR_ORIGEN=<TEMP>/origin bash instalar-remoto.sh`, sin red, partiendo de HOME nuevo por caso. Capturar `--mostrar-urls`, `--estado`, instalación inicial, repetición al día y actualización con otro SHA y paquete. Probar `--actualizar` sin instalación, referencia inválida, SHA ausente o inválido, tar ausente o ilegible y paquetes con ruta absoluta, `..`, enlace simbólico y enlace duro. Para cada rechazo conservar el árbol y versión previos; si el comportamiento original cambia algún archivo temporal, registrar exactamente ese efecto como referencia y exigir que no cambie la instalación válida. Usar paquetes creados exclusivamente con contenido sintético. Las URLs son salida del programa, no se consultan.
+
+### Resultado sintético previo a movimientos (tramo 3)
+
+`python3 -B cambios/estructura-repo/comprobar-a3.py` ejecuta la matriz en Bubblewrap, sin red y sobre HOME/origen/paquetes creados para cada caso. Los diez rechazos son: actualización sin instalación; referencia inválida; SHA ausente; SHA inválido; tar ausente; tar ilegible; ruta absoluta; componente `..`; enlace simbólico; enlace duro. Para cada rechazo compara el snapshot completo anterior y posterior, incluidos versión, rutas, tipo, permisos, enlaces y hashes. Resultado registrado: diez de diez preservan el estado sintético previo; también pasan `--mostrar-urls`, `--estado` sin escrituras, instalación, repetición y actualización. Es cobertura del comportamiento local con fixtures; no consulta URLs, publicación, servidor ni artefactos reales, y no valida globs de una estructura futura.
 
 ## Comparación continua
 
