@@ -24,7 +24,7 @@ Una tercera prueba con credencial OAuth sintética reproduce que Pi omite `max_o
 ## Matriz de aceptación
 
 | ID | Evidencia actual | Resultado |
-| --- | --- | --- |
+| --- |
 | A1 | `./verify` con SDK/proveedor/fetch simulados | Exit 0; no llamadas reales |
 | A2 | Manifiesto de 12 IDs/6 pares; preparación de 3 casos × 2 brazos; contexto separado; sesión y herramientas efectivas comprobadas | Pasa offline; no mide rendimiento |
 | A3 | Positivos y mutaciones funcionales en oráculos aislados | Pasa; no confundir con éxito de un modelo |

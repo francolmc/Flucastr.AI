@@ -113,7 +113,7 @@ Son observaciones y resultados publicados por el proyecto, no una demostración 
 ## 3. Otros enfoques que aportan algo diferente
 
 | Enfoque | Diferencia concreta en las instrucciones revisadas | Qué tomar como idea | Coste o incompatibilidad |
-| --- | --- | --- | --- |
+| --- |
 | **GSD** | Revisión del plan antes de ejecutar y verificación hacia atrás desde el objetivo; requisitos → tareas → artefactos → conexiones → datos reales. | No basta con «existe el endpoint y existe la UI»: comprobar que están conectados y llevan datos reales. | Más artefactos y coordinación; sus umbrales de tamaño son heurísticas, no leyes. No copiar commits automáticos. |
 | **Superpowers** | Implementador fresco por tarea, revisión de cumplimiento y calidad tras cada tarea, revisión global final y ledger ligado al plan. | Separar autor de juez; reanudar solo el registro del plan correcto. | Más contextos, tokens y latencia. Su autonomía para dictar `Ruling` y seguir contradice nuestra reserva de decisiones de producto a la persona usuaria. |
 | **GitHub Spec Kit** | `analyze` compara spec, plan y tareas: ambigüedad, contradicciones, requisitos sin tarea y tareas sin requisito, bajo una constitución. | Detectar pérdida o invención de trabajo **antes** de entregarlo al ejecutor. | Una matriz consistente puede seguir describiendo una solución equivocada; varios documentos pueden divergir. El análisis es una operación explícita, no asumir que siempre ocurrió. |
@@ -145,7 +145,7 @@ Esto ayuda a resolver una tensión real: el principal no puede prever todos los 
 Hay que separar cuatro niveles: instrucciones inspeccionadas, mecanismo plausible, resultados reportados y resultados reproducidos. Esta investigación llega a los tres primeros, no al cuarto.
 
 | Fuente | Resultado publicado | Qué permite concluir | Qué no permite concluir |
-| --- | --- | --- | --- |
+| --- |
 | OpenSpec #2134 | Mejora grande de cumplimiento en su batería con skills beta. | El diseño de skills/contexto puede importar mucho. | Que OpenSpec supere a nuestro kit o dé un 98,5 % de éxito general. |
 | Gentle AI / Gentle Shell | Ejemplos de enrutamiento n=1, corrección de pérdida de requisitos y comparación propia con Codex CLI. | Hay fallos concretos que justifican referencia canónica y proceso proporcional. | Que ODD sea siempre más rápido, barato o correcto. |
 | Superpowers, evaluación de ledger | Prueba de presión con cinco subagentes nuevos por brazo y puntuación manual. | Evidencia local de comportamiento de recuperación. | Superioridad global en programación. |
@@ -177,7 +177,7 @@ Por eso **«añadir escenarios», «decir que termine» o «pedir que verifique�
 Ideas para conversar, no cambios autorizados:
 
 | Prioridad de discusión | Idea | Diferencia frente a lo actual | Fallo que atacaría |
-| --- | --- | --- | --- |
+| --- |
 | Alta | **Intención aprobada protegida**, separada de pasos/notas revisables. | La autoridad ya existe en las reglas; BMAD muestra cómo distinguirla dentro del documento. | Reescribir aceptación para poder declarar terminado. |
 | Alta | **Referencia canónica con IDs estables** desde pedido/escenario hasta tarea y evidencia. | Ya hay A# y un único plan; falta considerar si cada paso conserva explícitamente su vínculo y si un coordinador introduce resúmenes sustitutivos. | Perder detalles, repetir aclaraciones o ejecutar tareas sin justificación. |
 | Alta | **Cobertura por resultado y conexiones**, antes y después de implementar. | El alcance integral ya lo pide; GSD ofrece una forma explícita de buscar enlaces y datos reales ausentes. | «Cada pieza está» pero el producto no funciona. |

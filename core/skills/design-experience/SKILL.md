@@ -1,6 +1,6 @@
 ---
-name: disenar-experiencia
-description: "Design the experience of a UI before planning: create `docs/experiencia.md` (once per project) and `cambios/<name>/pantallas.md` (per change) with an ASCII sketch that the user approves in the terminal. Use for a project with a new UI or a change that adds or reorders screens."
+name: design-experience
+description: "Design the experience of a UI before planning: create `docs/experiencia.md` (once per project) and `changes/<name>/pantallas.md` (per change) with an ASCII sketch that the user approves in the terminal. Use for a project with a new UI or a change that adds or reorders screens."
 ---
 
 # Design the Experience
@@ -17,7 +17,7 @@ The user works in the terminal: the only view of a screen they get is what you p
 
 1. Read what exists: `docs/experiencia.md`, `docs/proyecto.md`, `AGENTS.md`, and the screens affected by the change.
 2. Ask only about missing information, using at most 3 closed questions (2 to 4 options, recommended first). Do not ask what context already answers: who uses it, their frequent task, or what tool they use today.
-3. If real evidence exists (a finding in `cambios/<name>/hallazgo.md`, an audit, or a screenshot), use it before your intuition.
+3. If real evidence exists (a finding in `changes/<name>/hallazgo.md`, an audit, or a screenshot), use it before your intuition.
 
 ## Template: `docs/experiencia.md` (once per project)
 
@@ -100,4 +100,4 @@ Check every item against the sketches before requesting Gate 1:
 
 1. Paste sketches for changed screens into your response, with the checklist completed.
 2. Give the path to `pantallas.md` (and `docs/experiencia.md` if you wrote it).
-3. Ask in the user's current language whether they approve the experience. Wait for the answer. With approval, include `pantallas.md` in planning (`planificar-cambio`, rule 14); if changes are requested, edit it and paste it again.
+3. Ask in the user's current language whether they approve the experience. Wait for the answer. With approval, include `pantallas.md` in planning (`plan-change`, rule 14); if changes are requested, edit it and paste it again.

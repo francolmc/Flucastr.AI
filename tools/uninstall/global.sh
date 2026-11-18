@@ -22,7 +22,7 @@ while IFS=$'\t' read -r tipo ruta extra; do
       fi
       ;;
     directorio)
-      # copia de una skill (modo descarga o --skills-proyecto): solo se borra si es carpeta real con la marca, no un enlace
+      # copia de una skill (modo descarga o --project-skills): solo se borra si es carpeta real con la marca, no un enlace
       if [ -d "$ruta" ] && [ ! -L "$ruta" ] && [ -f "$ruta/.flucastr-ai" ]; then
         if [ "$SIMULAR" = 0 ]; then rm -rf "$ruta"; limpiar_pi_vacio "$ruta"; fi
         decir "  quitado: $ruta"
@@ -31,7 +31,7 @@ while IFS=$'\t' read -r tipo ruta extra; do
       fi
       ;;
     exclusion)
-      # línea de .git/info/exclude que añadió --skills-proyecto: se quita solo esa línea exacta
+      # línea de .git/info/exclude que añadió --project-skills: se quita solo esa línea exacta
       if [ -n "${extra:-}" ] && [ -f "$ruta" ] && grep -qxF -- "$extra" "$ruta"; then
         if [ "$SIMULAR" = 0 ]; then
           grep -vxF -- "$extra" "$ruta" > "$ruta.tmp" || true
@@ -47,7 +47,7 @@ while IFS=$'\t' read -r tipo ruta extra; do
       fi
       ;;
     deny)
-      # regla deny de Claude Code de un proyecto (settings.json), salvo --conservar-ajustes
+      # regla deny de Claude Code de un proyecto (settings.json), salvo --keep-settings
       if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
       if [ "$SIMULAR" = 1 ]; then
         decir "  quitaría la regla deny '${extra:-}' de: $ruta"
@@ -71,7 +71,7 @@ while IFS=$'\t' read -r tipo ruta extra; do
       fi
       ;;
     hook)
-      # hook del validador de Claude Code de un proyecto (settings.local.json), salvo --conservar-ajustes
+      # hook del validador de Claude Code de un proyecto (settings.local.json), salvo --keep-settings
       if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
       if [ "$SIMULAR" = 1 ]; then
         decir "  quitaría el hook de Claude Code de: $ruta"
@@ -82,7 +82,7 @@ while IFS=$'\t' read -r tipo ruta extra; do
       fi
       ;;
     codex-reglas)
-      # reglas deny de Codex de un proyecto (.codex/rules/flucastr.rules), salvo --conservar-ajustes
+      # reglas deny de Codex de un proyecto (.codex/rules/flucastr.rules), salvo --keep-settings
       if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
       if [ "$SIMULAR" = 1 ]; then
         decir "  quitaría las reglas de Codex: $ruta"
@@ -97,7 +97,7 @@ while IFS=$'\t' read -r tipo ruta extra; do
       # solo registro: la línea se va con el manifiesto (las copias tienen sus propias líneas directorio)
       ;;
     compactacion)
-      # compactación automática: Pi (ajuste global, siempre) y Claude Code (ajuste del proyecto, salvo --conservar-ajustes)
+      # compactación automática: Pi (ajuste global, siempre) y Claude Code (ajuste del proyecto, salvo --keep-settings)
       case "${extra:-}" in
         pi:*)
           spec="${extra#pi:}"
@@ -156,7 +156,7 @@ if [ "$SIMULAR" = 0 ]; then
   if [ "$MODO_INSTALADO" = descarga ] && [ "$CONSERVAR_AJUSTES" = 0 ]; then
     rm -f "$ESTADO_DIR/version" "$ESTADO_DIR/kit.anterior"
   fi
-  if [ "$TODO" = 1 ]; then rm -f "$ESTADO_DIR/modelos.json"; fi
+  if [ "$TODO" = 1 ]; then rm -f "$ESTADO_DIR/models.json"; fi
   if [ "$MODO_INSTALADO" = descarga ] && [ "$CONSERVAR_AJUSTES" = 0 ]; then
     # kit puede ser la carpeta de este propio script: se borra lo último. El bloque termina en exit,
     # así bash no lee más líneas de un archivo que ya no existe.

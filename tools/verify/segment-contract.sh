@@ -2,28 +2,28 @@
 paso 11 "ejecución por tramos: textos nuevos y copias sin cada uno"
 T11=$(mktemp -d) || fallo "11: no pude crear el temporal"
 TEXTOS_TRAMOS=(
-  'skills/planificar-cambio/SKILL.md|### Tramo N'
-  'skills/planificar-cambio/SKILL.md|tramo: 1'
-  'skills/planificar-cambio/SKILL.md|cross-layer flow'
-  'skills/planificar-cambio/SKILL.md|Resuelto:'
-  'skills/ejecutar-plan/SKILL.md|If the plan frontmatter contains `tramo: <n>`'
-  'skills/ejecutar-plan/SKILL.md|### Tramo N — Historia:'
-  'skills/ejecutar-plan/SKILL.md|rerun the same command and compare'
-  'skills/ejecutar-plan/SKILL.md|Resuelto:'
-  'agentes/constructor.md|COMPLETADO: plan=<path>; tramo=<n>; verify=pasa'
-  'agentes/principal.md|Per-tranche review'
-  'agentes/principal.md|tramo: <n>'
-  'agentes/constructor.md|tramo: <n>'
-  'agentes/constructor.md|tramo=<n>'
-  'agentes/principal.md|one long wait'
-  'agentes/principal.md|send_message'
-  'agentes/constructor.md|Long output'
-  'agentes/constructor.md|tramo-<n>.md'
-  'skills/planificar-cambio/SKILL.md|tramo-N.md'
-  'skills/planificar-cambio/SKILL.md|/compact'
-  'skills/ejecutar-plan/SKILL.md|tramo-<n>.md'
-  'skills/ejecutar-plan/SKILL.md|/compact'
-  'skills/ejecutar-plan/SKILL.md|For long output'
+  'core/skills/plan-change/SKILL.md|### Segment N'
+  'core/skills/plan-change/SKILL.md|segment: 1'
+  'core/skills/plan-change/SKILL.md|cross-layer flow'
+  'core/skills/plan-change/SKILL.md|Resuelto:'
+  'core/skills/execute-plan/SKILL.md|If the plan frontmatter contains `segment: <n>`'
+  'core/skills/execute-plan/SKILL.md|### Segment N — Story:'
+  'core/skills/execute-plan/SKILL.md|rerun the same command and compare'
+  'core/skills/execute-plan/SKILL.md|Resuelto:'
+  'core/agents/builder.md|DONE: plan=<path>; segment=<n>; verify=pasa'
+  'core/agents/planner.md|Per-segment review'
+  'core/agents/planner.md|segment: <n>'
+  'core/agents/builder.md|segment: <n>'
+  'core/agents/builder.md|segment=<n>'
+  'core/agents/planner.md|one long wait'
+  'core/agents/planner.md|send_message'
+  'core/agents/builder.md|Long output'
+  'core/agents/builder.md|tramo-<n>.md'
+  'core/skills/plan-change/SKILL.md|tramo-N.md'
+  'core/skills/plan-change/SKILL.md|/compact'
+  'core/skills/execute-plan/SKILL.md|tramo-<n>.md'
+  'core/skills/execute-plan/SKILL.md|/compact'
+  'core/skills/execute-plan/SKILL.md|For long output'
 )
 textos_tramos() { # $1: raíz del kit; nombra cada texto que falta y devuelve 1 si falta alguno
   local r=$1 par f t rc=0
@@ -35,7 +35,7 @@ textos_tramos() { # $1: raíz del kit; nombra cada texto que falta y devuelve 1 
 }
 copiar_tramos() { # $1: destino; copia los cuatro archivos con su ruta relativa
   local f
-  for f in skills/planificar-cambio/SKILL.md skills/ejecutar-plan/SKILL.md agentes/principal.md agentes/constructor.md; do
+  for f in core/skills/plan-change/SKILL.md core/skills/execute-plan/SKILL.md core/agents/planner.md core/agents/builder.md; do
     mkdir -p "$1/$(dirname "$f")"; cp "$f" "$1/$f"
   done
 }

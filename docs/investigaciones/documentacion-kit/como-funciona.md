@@ -9,13 +9,13 @@ Un kit de dos agentes (`principal` y `constructor`) y seis skills que se instala
 
 ## 2. Mapa del repositorio
 | Ruta | Para qué sirve | Tamaño |
-| --- | --- | --- |
+| --- |
 | `agentes/principal.md`, `agentes/constructor.md` | Las instrucciones de cada agente | 67 y 35 líneas |
 | `skills/` (6) | Procedimientos que los agentes cargan: `planificar-cambio`, `ejecutar-plan`, `preparar-proyecto`, `definir-proyecto`, `migrar-proyecto`, `disenar-experiencia` | 42–115 líneas cada una |
 | `modelos.json` | Fuente única de qué modelo y esfuerzo usa cada agente en cada herramienta | 65 líneas |
-| `instalar.sh` / `desinstalar.sh` | Instalan agentes, skills, lanzadores y reglas de permisos | 1.092 líneas |
+| `install.sh` / `uninstall.sh` | Instalan agentes, skills, lanzadores y reglas de permisos | 1.092 líneas |
 | `verify` | Comprueba el propio kit (offline, ~1.200 líneas, bloques 1 a 8t) | |
-| `scripts/` | `resolver.mjs` (traduce niveles a modelos y reglas de Codex), `kit-run.mjs` (ejecuta un plan en Codex de punta a punta), `uso.mjs` (mide tokens y créditos), `observar.mjs` (mide Docker) | |
+| `scripts/` | `resolver.mjs` (traduce niveles a modelos y reglas de Codex), `kit-run.mjs` (ejecuta un plan en Codex de punta a punta), `usage.mjs` (mide tokens y créditos), `observe.mjs` (mide Docker) | |
 | `docs/` | Prácticas por tecnología, reglas deny, `kit run`, evaluaciones e investigaciones | |
 | `cambios/` | Un directorio por cambio con su `plan.md`; `hechos/` es el archivo | |
 | `old/v1/` | La versión 1, no se ejecuta | |
@@ -79,16 +79,16 @@ Reglas del buen plan (resumen de las 14 de `planificar-cambio`): un solo plan po
 - Pi y Codex: gpt-6.1-sol / gpt-6.1-terra / gpt-6-luna.
 Hoy: principal = nivel medio, esfuerzo `medium`; constructor = nivel bajo, esfuerzo `high`.
 
-`instalar.sh` crea agentes (copia), skills (enlaces), lanzadores `claude-/pi-/codex-<agente>` y, con `--proyecto`, reglas deny (sin commit/push/merge/PR, sin `bash -c`, sin leer `.env` en Claude). Codex además recibe reglas `allow` por prefijo (`./verify`, `docker compose …`, `pnpm …`): son la causa de que algunos comandos pidan permiso y otros no.
+`install.sh` crea agentes (copia), skills (enlaces), lanzadores `claude-/pi-/codex-<agente>` y, con `--project`, reglas deny (sin commit/push/merge/PR, sin `bash -c`, sin leer `.env` en Claude). Codex además recibe reglas `allow` por prefijo (`./verify`, `docker compose …`, `pnpm …`): son la causa de que algunos comandos pidan permiso y otros no.
 
 **`kit run`** (solo Codex): ejecuta constructor → verificación → revisión de solo lectura, con hasta 2 relanzamientos. Existe y pasa sus pruebas simuladas; en una corrida real de piloto la revisión costó 6,6 veces la del constructor (meta: 3).
 
 ## 8. Medición
-- `node scripts/uso.mjs [--sesiones]`: tokens y créditos por día, proyecto y modelo.
-- `node scripts/observar.mjs start|status|stop|informe`: observador de Docker de solo lectura (memoria, OOM, unhealthy, caché de builds). **Hoy está corriendo.** Muere con reinicio o `wsl --shutdown`.
+- `node scripts/usage.mjs [--sessions]`: tokens y créditos por día, proyecto y modelo.
+- `node scripts/observe.mjs start|status|stop|informe`: observador de Docker de solo lectura (memoria, OOM, unhealthy, caché de builds). **Hoy está corriendo.** Muere con reinicio o `wsl --shutdown`.
 
 ## 9. Cómo se garantiza que el kit mismo funciona
-`./verify` del kit comprueba, sin red: que `modelos.json` coincide con los agentes, que las skills están completas, que `instalar.sh --simular` no escribe, las reglas deny, y que cada regla de texto importante sigue escrita (bloques 8k, 8l, 8t…, cada uno con una copia negativa que debe fallar). **No mide si el modelo obedece**: solo que el texto está.
+`./verify` del kit comprueba, sin red: que `modelos.json` coincide con los agentes, que las skills están completas, que `install.sh --dry-run` no escribe, las reglas deny, y que cada regla de texto importante sigue escrita (bloques 8k, 8l, 8t…, cada uno con una copia negativa que debe fallar). **No mide si el modelo obedece**: solo que el texto está.
 
 ## 10. Lo que NO está probado
 - Una sesión completa de Codex con el kit actual (hay uso real, no una evaluación).
@@ -105,7 +105,7 @@ Hoy: principal = nivel medio, esfuerzo `medium`; constructor = nivel bajo, esfue
 
 ## 12. Dónde se puede mejorar (ordenado por evidencia, no por gusto)
 | # | Mejora | Evidencia | Costo |
-| --- | --- | --- | --- |
+| --- |
 | 1 | Corregir las 4 inconsistencias de arriba (y un chequeo en `verify` para modelos/esfuerzo) | Hallazgo directo de hoy | Bajo |
 | 2 | Reducir el costo de revisión (6,6× el del constructor): prefijo fijo de ≈19 mil tokens | Medido en el piloto A4 | Medio; hipótesis sin probar |
 | 3 | Evitar que el recorrido de navegador falle sin decir qué recibió (`ERR_ASSERTION` mudo) | 4 devoluciones en F10 y 2 fallos de hoy | Bajo, en cada proyecto |

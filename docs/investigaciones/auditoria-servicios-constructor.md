@@ -11,7 +11,7 @@ El constructor dejó una **base productiva sustancial que se conservó**, pero *
 ## Cronología
 
 | Momento | Qué pasó |
-| --- | --- |
+| --- |
 | Primera delegación | Solo `Plan:` y `Rama:`. |
 | Primera PAUSA (0/16, «acceso») | **Real, pero causada por la preparación**: el prompt del constructor permitía solo consultar/crear rama y no los comandos para acreditar base limpia y al día; además había un cambio pendiente en `AGENTS.md`. No era fallo del código. |
 | Construcción inicial | PAUSA de diseño tras intentos de renderizado; 21 archivos / 126 tests verdes, que no acreditan UI ni aceptación. |
@@ -39,7 +39,7 @@ El constructor dejó una **base productiva sustancial que se conservó**, pero *
 ## Qué demuestran las pruebas y qué no
 
 | Evidencia | Sí demuestra | No demuestra |
-| --- | --- | --- |
+| --- |
 | Tests/check/build verdes del constructor | Código compilable y contratos unitarios cubiertos | Que el contrato visual y de interacción estuviera terminado |
 | Cuatro UI verdes de la última reanudación | Escenarios limitados de componentes reales en composición sintética | Página real completa, documentos con datos, errores y refresco |
 | Aceptación final (143 tests, check 0, build, 36 casos Chromium) | Que el estado posterior a las correcciones del principal pasó | Integración autenticada con servidor, persistencia real, paridad funcional integral |

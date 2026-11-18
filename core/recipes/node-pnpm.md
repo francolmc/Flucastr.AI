@@ -1,6 +1,6 @@
 # Node/pnpm Recipe
 
-This Node/pnpm recipe is an example, not a requirement. Read it only when the project's stack is Node. The verification contract remains in `nucleo/contrato/verificacion.md`.
+This Node/pnpm recipe is an example, not a requirement. Read it only when the project's stack is Node. The verification contract remains in `core/contracts/verification.md`.
 
 ## Install from the lockfile
 

@@ -1,7 +1,7 @@
-# Reglas deny de Claude Code del proyecto: las mismas que instala --proyecto (fijar-deny).
+# Reglas deny de Claude Code del proyecto: las mismas que instala --project (fijar-deny).
 mig_deny() {
   local ajustes="$PROYECTO/.claude/settings.json" salida linea regla prefijo="" extra=()
-  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if [ "$SIMULAR" = 1 ]; then extra=(--dry-run); prefijo="(simulación) "; fi
   if ! salida="$(node "$RESOLVER" fijar-deny claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
     echo "  AVISO: no se tocó $ajustes ($salida)"
     return 0
@@ -26,7 +26,7 @@ mig_deny() {
 # Sandbox Claude del proyecto migrado. El manifiesto permite retirar solo los valores agregados.
 mig_sandbox() {
   local ajustes="$PROYECTO/.claude/settings.json" salida linea dato clave valor prefijo="" extra=()
-  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if [ "$SIMULAR" = 1 ]; then extra=(--dry-run); prefijo="(simulación) "; fi
   if ! salida="$(node "$RESOLVER" fijar-sandbox claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
     echo "  AVISO: no se tocó el sandbox en $ajustes ($salida)"
     return 0

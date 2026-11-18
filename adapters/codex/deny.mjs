@@ -18,7 +18,7 @@ const PREFIJOS_DENY_CODEX = [
   ["sh", "-c"],
   ["zsh", "-c"],
 ];
-const MARCA_CODEX = "# flucastr-ai:generado - no editar; se regenera con instalar.sh";
+const MARCA_CODEX = "# flucastr-ai:generado - no editar; se regenera con install.sh";
 
 function comandosCapacidad(agentsPath) {
   if (!agentsPath || !existsSync(agentsPath)) return [];

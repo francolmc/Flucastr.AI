@@ -30,7 +30,7 @@ El runner usa Node local y ejecuta código de los controles sintéticos de confi
 Cada caso tiene una base, un manifiesto, controles separados y estos tres paquetes:
 
 | Presentación | Archivos | Forma |
-| --- | --- | --- |
+| --- |
 | `actual` | `plan.md` y `lecturas.md` | Exploración, tamaño, alcance, aceptación y plan en el flujo habitual. |
 | `fragmentada` | `exploracion.md`, `spec.md`, `plan.md`, `lecturas.md` | Exploración separada del comportamiento/delta y del plan. |
 | `breve` | `cambio.md` y `lecturas.md` | Contexto integrado en un documento corto. |

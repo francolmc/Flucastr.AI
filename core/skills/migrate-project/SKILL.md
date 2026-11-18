@@ -1,26 +1,26 @@
 ---
-name: migrar-proyecto
-description: "Complete a project's v1-to-v2 migration after `bash instalar.sh --migrar <project>`: shorten its AGENTS.md, propose its verify command, and turn in-progress work into draft plans. Use after running --migrar on a project."
+name: migrate-project
+description: "Complete a project's v1-to-v2 migration after `bash install.sh --migrate <project>`: shorten its AGENTS.md, propose its verify command, and turn in-progress work into draft plans. Use after running --migrate on a project."
 ---
 
 # Migrate a Project from v1 to v2
 
-`instalar.sh --migrar` has already moved v1 files to `old/v1/` (without deleting them), removed the v1 hook, installed the `principal` agent and deny rules, and created `cambios/`. This skill does what the script cannot: understand the project and prepare it for v2 work.
+`install.sh --migrate` has already moved v1 files to `old/v1/` (without deleting them), removed the v1 hook, installed the `planner` agent and deny rules, and created `changes/`. This skill does what the script cannot: understand the project and prepare it for v2 work.
 
 Do not do here, without asking, anything the script did not do: do not touch `src/`, delete anything in `old/v1/`, or commit, push, or create a PR.
 
 ## 1. In-progress work
 
-Run `bash instalar.sh --migrar <proyecto> --simular` if its output is not available. Its “Trabajo a medias” section lists:
+Run `bash install.sh --migrate <proyecto> --dry-run` if its output is not available. Its “Trabajo a medias” section lists:
 
-- tasks in `old/v1/features/*/task-*.md` with status `aprobada`, `en curso`, or `bloqueada`;
+- tasks in `old/v1/features/*/task-*.md` with status `aprobada`, `in progress`, or `bloqueada`;
 - features in `old/v1/definitions/BACKLOG.md` whose Estado is not `hecha` or `completada`.
 
 That list is the only inventory. Do not open `old/v1/registro/`; read it only if the user explicitly asks.
 
 ## 2. Workspace (if applicable)
 
-If `instalar.sh --migrar` printed “Workspace: repos hijos: …”, the root is a workspace. Load `preparar-proyecto`, section 4, and follow its own-repository rule.
+If `install.sh --migrate` printed “Workspace: repos hijos: …”, the root is a workspace. Load `prepare-project`, section 4, and follow its own-repository rule.
 
 - If the root is not a repository, ask the user in their current language using closed options (recommend “yes”). Do not run `git init` without their answer.
   - Yes: run `git init` at the root and create `.gitignore` as described in that section. Do not commit.
@@ -29,7 +29,7 @@ If `instalar.sh --migrar` printed “Workspace: repos hijos: …”, the root is
 
 ## 3. AGENTS.md
 
-Read `old/v1/definitions/PROJECT.md`, `ARCHITECTURE.md`, `BACKLOG.md`, and `STATUS.md` (only what is needed; continue without any file that does not exist). Use them to write a root `AGENTS.md` for the project, about 40 lines maximum, using the `preparar-proyecto` format: what the project is, structure and stack, commands, the line `Verificar todo desde cero: ./verify`, and rules (agents do not commit, push, create PRs, merge, or deploy; do not read `.env` or keys; branches `feature/`, `fix/`, `chore/`, `docs/`).
+Read `old/v1/definitions/PROJECT.md`, `ARCHITECTURE.md`, `BACKLOG.md`, and `STATUS.md` (only what is needed; continue without any file that does not exist). Use them to write a root `AGENTS.md` for the project, about 40 lines maximum, using the `prepare-project` format: what the project is, structure and stack, commands, the line `Verificar todo desde cero: ./verify`, and rules (agents do not commit, push, create PRs, merge, or deploy; do not read `.env` or keys; branches `feature/`, `fix/`, `chore/`, `docs/`).
 
 Preserve from the old `AGENTS.md` and `old/v1/definitions/`: what the project is, its structure, stack, commands, domain-specific constraints, and v2 hard rules (no commit, push, PR, merge, or deployment; do not read `.env` or keys).
 
@@ -48,16 +48,16 @@ If any of `old/v1/definitions/PROJECT.md`, `REPOS.md`, or `ARCHITECTURE.md` exis
 
 ## 5. Comando verify
 
-Load `preparar-proyecto` and follow its `verify` step. Propose the command based on what the project already has (scripts, Makefile, tests). **Do not invent one**: if you cannot test it from scratch (clean build, startup, and a real user journey), record it as a pending plan in `cambios/` and tell the user.
+Load `prepare-project` and follow its `verify` step. Propose the command based on what the project already has (scripts, Makefile, tests). **Do not invent one**: if you cannot test it from scratch (clean build, startup, and a real user journey), record it as a pending plan in `changes/` and tell the user.
 
 ## 6. Convert in-progress work into plans
 
-For each item from section 1, create a plan with `planificar-cambio` at `cambios/<name>/plan.md` and set `estado: borrador`. Create one plan per item, using a short lowercase hyphenated name. Each plan needs `repos:` in its frontmatter: use the folder from the v1 task's `repo:` column, if present; use `[.]` for a single repository and also when the item affects only the root. Cite only paths you have inspected and confirm they exist in the current project; if an `old/v1/` path is no longer valid, say so in the plan instead of copying it.
+For each item from section 1, create a plan with `plan-change` at `changes/<name>/plan.md` and set `status: draft`. Create one plan per item, using a short lowercase hyphenated name. Each plan needs `repos:` in its frontmatter: use the folder from the v1 task's `repo:` column, if present; use `[.]` for a single repository and also when the item affects only the root. Cite only paths you have inspected and confirm they exist in the current project; if an `old/v1/` path is no longer valid, say so in the plan instead of copying it.
 
 If an item is too large for one plan, do not split it silently: record it in the plan as awaiting a user decision.
 
 ## 7. User approval gate
 
-When finished, stop. Briefly summarize what is in `AGENTS.md`, whether `verify` exists or is pending, and the list of draft plans. Include the `Reglas de v1 que descarté` list (or `ninguna`) and ask the user to confirm it; they can restore a useful rule manually. The user approves plans one by one (changing `estado: borrador` to `aprobado`); do not approve or execute them yourself.
+When finished, stop. Briefly summarize what is in `AGENTS.md`, whether `verify` exists or is pending, and the list of draft plans. Include the `Reglas de v1 que descarté` list (or `ninguna`) and ask the user to confirm it; they can restore a useful rule manually. The user approves plans one by one (changing `status: draft` to `approved`); do not approve or execute them yourself.
 
-If this skill is used by a Pi subagent, declare it under `skills:` in the calling agent. No agent under `agentes/` currently uses it.
+If this skill is used by a Pi subagent, declare it under `skills:` in the calling agent. No agent under `core/agents/` currently uses it.

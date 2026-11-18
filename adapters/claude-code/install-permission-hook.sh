@@ -7,13 +7,13 @@ instalar_hook_permisos_claude() {
     return 0
   fi
   local salida
-  if ! salida="$(node "$RAIZ/scripts/permisos-hook.mjs" instalar "$PROYECTO" 2>&1)"; then
-    node "$RAIZ/scripts/permisos-hook.mjs" quitar "$PROYECTO" >/dev/null 2>&1 || true
+  if ! salida="$(node "$RAIZ/scripts/permissions-hook.mjs" instalar "$PROYECTO" 2>&1)"; then
+    node "$RAIZ/scripts/permissions-hook.mjs" quitar "$PROYECTO" >/dev/null 2>&1 || true
     echo "  AVISO: no se activó la política preaprobada de Claude Code ($salida)"
     return 0
   fi
-  if ! verificacion="$(node "$RAIZ/scripts/permisos-hook.mjs" comprobar "$PROYECTO" 2>&1)" || [ "$verificacion" != "instalado" ]; then
-    node "$RAIZ/scripts/permisos-hook.mjs" quitar "$PROYECTO" >/dev/null 2>&1 || true
+  if ! verificacion="$(node "$RAIZ/scripts/permissions-hook.mjs" comprobar "$PROYECTO" 2>&1)" || [ "$verificacion" != "instalado" ]; then
+    node "$RAIZ/scripts/permissions-hook.mjs" quitar "$PROYECTO" >/dev/null 2>&1 || true
     echo "  AVISO: no se activó la política preaprobada de Claude Code; el hook no quedó verificado ($verificacion)"
     return 0
   fi
@@ -22,7 +22,7 @@ instalar_hook_permisos_claude() {
     ya-estaba) echo "  hook de permisos conservadores ya estaba fijado: $PROYECTO/.claude/settings.local.json" ;;
     *) echo "  AVISO: no se activó la política preaprobada de Claude Code (respuesta inesperada: $salida)" ;;
   esac
-  if auditoria="$(node "$RAIZ/scripts/permisos-hook.mjs" auditar "$PROYECTO" 2>&1)"; then
+  if auditoria="$(node "$RAIZ/scripts/permissions-hook.mjs" auditar "$PROYECTO" 2>&1)"; then
     node -e 'const a=JSON.parse(process.argv[1]); for (const h of a.hallazgos) if (h.tipo === "allow-amplia") console.log("  AVISO: allow amplio previo en " + h.ruta + ": " + h.regla); for (const e of a.errores) console.log("  AVISO: no se pudo revisar configuración en " + e.ruta + ": " + e.error)' "$auditoria"
   else
     echo "  AVISO: no se pudieron revisar los allow previos de Claude Code ($auditoria)"

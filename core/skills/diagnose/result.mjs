@@ -1,15 +1,21 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { huellaActual } from "./fingerprint.mjs";
+import { fingerprintCurrent } from "./fingerprint.mjs";
 
 const NIVELES = ["rapida", "servicio", "aceptacion"];
 const FALLOS = ["ninguno", "entorno", "dependencia", "prueba", "tiempo"];
 
+// The kit writes `fingerprint`. Older files used `huella`; it is still read as a legacy key.
+export function fingerprintOf(obj) {
+  return typeof obj.fingerprint === "string" ? obj.fingerprint : obj.huella;
+}
+
 export function validarResultado(obj) {
   const motivos = [];
   if (!obj || typeof obj !== "object" || Array.isArray(obj)) return ["no es un objeto JSON"];
-  if (typeof obj.huella !== "string" || !/^[0-9a-f]{12}$/.test(obj.huella)) motivos.push("huella debe ser 12 hex en minúsculas");
-  if (!NIVELES.includes(obj.nivel)) motivos.push(`nivel "${obj.nivel}" no es rapida|servicio|aceptacion`);
+  const value = fingerprintOf(obj);
+  if (typeof value !== "string" || !/^[0-9a-f]{12}$/.test(value)) motivos.push("fingerprint debe ser 12 hex en minúsculas");
+  if (!NIVELES.includes(obj.level)) motivos.push(`nivel "${obj.level}" no es rapida|servicio|aceptacion`);
   if (typeof obj.fase !== "string") motivos.push("fase debe ser texto");
   if (typeof obj.ok !== "boolean") motivos.push("ok debe ser booleano");
   if (!FALLOS.includes(obj.fallo)) motivos.push(`fallo "${obj.fallo}" no es ninguno|entorno|dependencia|prueba|tiempo`);
@@ -28,9 +34,10 @@ export function leerResultado(carpeta, rutaRel) {
   }
   const motivos = validarResultado(obj);
   if (motivos.length) return { ...base, estado: "invalido", motivos };
-  const actual = huellaActual(carpeta);
-  let huella;
-  if (actual === null) huella = "no disponible";
-  else huella = obj.huella === actual ? "vigente" : "obsoleta";
-  return { ...base, estado: "valido", huella, huellaValor: obj.huella, nivel: obj.nivel, fase: obj.fase, ok: obj.ok, fallo: obj.fallo };
+  const actual = fingerprintCurrent(carpeta);
+  const value = fingerprintOf(obj);
+  let status;
+  if (actual === null) status = "no disponible";
+  else status = value === actual ? "vigente" : "obsoleta";
+  return { ...base, estado: "valido", fingerprintStatus: status, fingerprintValue: value, level: obj.level, fase: obj.fase, ok: obj.ok, fallo: obj.fallo };
 }

@@ -1,4 +1,4 @@
-# Instantánea de lo que instalar.sh escribe: cada ruta vigilada (sin seguir enlaces),
+# Instantánea de lo que install.sh escribe: cada ruta vigilada (sin seguir enlaces),
 # el destino de cada enlace simbólico y el hash de cada archivo (siguiendo enlaces).
 # Las rutas salen de $HOME, PI_CODING_AGENT_DIR y CODEX_HOME al llamarla. Las que no existen cuentan como vacías.
 instantanea() {

@@ -8,93 +8,93 @@ const ESFUERZO_CODEX = { max: "xhigh" };
 export function crearResolucionModelos(raiz) {
   function rutaModelos() {
     const forzada = process.env.FLUCASTR_MODELOS;
-    return forzada ? forzada : join(raiz, "modelos.json");
+    return forzada ? forzada : join(raiz, "models.json");
   }
 
   function leerConfig() {
     try {
       return JSON.parse(readFileSync(rutaModelos(), "utf8"));
     } catch (e) {
-      fallar(`no pude leer modelos.json (${e.message})`);
+      fallar(`no pude leer models.json (${e.message})`);
     }
   }
 
   // nivel -> perfil -> modelo, con respaldo si el perfil no define ese nivel.
-  // `a` es la entrada de modelos.json (agentes[agente] o kit_run.revisor); `agente` solo sirve para los mensajes.
+  // `a` es la entrada de models.json (agents[agente] o kit_run.reviewer); `agente` solo sirve para los mensajes.
   function modeloDe(c, a, agente, herramienta) {
-    const perfiles = c.perfiles ?? {};
+    const perfiles = c.profiles ?? {};
 
-    const nivel = a.nivel ?? c.nivel_por_defecto;
-    if (!(c.niveles ?? []).includes(nivel)) {
-      fallar(`el nivel '${nivel}' del agente '${agente}' no está en 'niveles'`);
+    const nivel = a.level ?? c.default_level;
+    if (!(c.levels ?? []).includes(nivel)) {
+      fallar(`el nivel '${nivel}' del agente '${agente}' no está en 'levels'`);
     }
 
     // el perfil propio del agente solo vale si es de esta herramienta
-    let perfilId = a.perfil;
-    if (!perfilId || perfiles[perfilId]?.herramienta !== herramienta) {
-      perfilId = (c.perfil_por_defecto ?? {})[herramienta];
+    let perfilId = a.profile;
+    if (!perfilId || perfiles[perfilId]?.tool !== herramienta) {
+      perfilId = (c.default_profile ?? {})[herramienta];
     }
     if (!perfilId) {
-      fallar(`no hay perfil para la herramienta '${herramienta}': define 'perfil_por_defecto.${herramienta}' en modelos.json (o 'agentes.${agente}.perfil')`);
+      fallar(`no hay perfil para la herramienta '${herramienta}': define 'default_profile.${herramienta}' en models.json (o 'agents.${agente}.profile')`);
     }
 
     const perfil = perfiles[perfilId];
-    if (!perfil) fallar(`el perfil '${perfilId}' no existe en 'perfiles'`);
-    if (perfil.herramienta !== herramienta) {
-      fallar(`el perfil '${perfilId}' es de '${perfil.herramienta}', no de '${herramienta}'`);
+    if (!perfil) fallar(`el perfil '${perfilId}' no existe en 'profiles'`);
+    if (perfil.tool !== herramienta) {
+      fallar(`el perfil '${perfilId}' es de '${perfil.tool}', no de '${herramienta}'`);
     }
 
-    for (const n of [nivel, ...((c.respaldo ?? {})[nivel] ?? [])]) {
-      if (perfil.modelos?.[n]) return perfil.modelos[n];
+    for (const n of [nivel, ...((c.fallback ?? {})[nivel] ?? [])]) {
+      if (perfil.models?.[n]) return perfil.models[n];
     }
-    fallar(`el perfil '${perfilId}' no define un modelo para el nivel '${nivel}' ni sus respaldos`);
+    fallar(`el perfil '${perfilId}' no define un modelo para el nivel '${nivel}' ni sus fallback`);
   }
 
   function resolverModelo(agente, herramienta) {
     const c = leerConfig();
-    return modeloDe(c, (c.agentes ?? {})[agente] ?? {}, agente, herramienta);
+    return modeloDe(c, (c.agents ?? {})[agente] ?? {}, agente, herramienta);
   }
 
-  // Esfuerzo de una entrada de modelos.json (agentes[agente] o kit_run.revisor), o "" si no declara ninguno:
+  // Esfuerzo de una entrada de models.json (agents[agente] o kit_run.reviewer), o "" si no declara ninguno:
   // entonces la herramienta usa el suyo.
   function esfuerzoEn(c, a, agente) {
-    const esfuerzo = a.esfuerzo;
+    const esfuerzo = a.effort;
     if (esfuerzo === undefined) return "";
-    if (!(c.esfuerzos ?? []).includes(esfuerzo)) {
-      fallar(`el esfuerzo '${esfuerzo}' del agente '${agente}' no está en 'esfuerzos'`);
+    if (!(c.efforts ?? []).includes(esfuerzo)) {
+      fallar(`el esfuerzo '${esfuerzo}' del agente '${agente}' no está en 'efforts'`);
     }
     return esfuerzo;
   }
 
   function resolverEsfuerzo(agente) {
     const c = leerConfig();
-    return esfuerzoEn(c, (c.agentes ?? {})[agente] ?? {}, agente);
+    return esfuerzoEn(c, (c.agents ?? {})[agente] ?? {}, agente);
   }
 
-  // Revisor de kit run: kit_run.revisor de modelos.json, con la misma resolución que un agente.
-  // Sin esa clave, el revisor es el agente principal, como antes. Devuelve { modelo, esfuerzo } sin traducir.
+  // Revisor de kit run: kit_run.reviewer de models.json, con la misma resolución que un agente.
+  // Sin esa clave, el revisor es el agente planner, como antes. Devuelve { modelo, esfuerzo } sin traducir.
   function resolverRevisor(herramienta) {
     const c = leerConfig();
-    const propio = c.kit_run?.revisor;
+    const propio = c.kit_run?.reviewer;
     if (propio === undefined) {
-      const principal = (c.agentes ?? {}).principal ?? {};
-      return { modelo: modeloDe(c, principal, "principal", herramienta), esfuerzo: esfuerzoEn(c, principal, "principal") };
+      const planner = (c.agents ?? {}).planner ?? {};
+      return { modelo: modeloDe(c, planner, "planner", herramienta), effort: esfuerzoEn(c, planner, "planner") };
     }
-    if (!esObjeto(propio)) fallar("'kit_run.revisor' no es un objeto");
-    return { modelo: modeloDe(c, propio, "kit_run.revisor", herramienta), esfuerzo: esfuerzoEn(c, propio, "kit_run.revisor") };
+    if (!esObjeto(propio)) fallar("'kit_run.reviewer' no es un objeto");
+    return { modelo: modeloDe(c, propio, "kit_run.reviewer", herramienta), effort: esfuerzoEn(c, propio, "kit_run.reviewer") };
   }
 
-  // Umbral de compactación de Codex del agente (agentes[agente].compactar_en ?? perfil.compactar_en ?? compactar_en),
+  // Umbral de compactación de Codex del agente (agents[agente].compact_at ?? perfil.compact_at ?? compact_at),
   // o "" si no hay uno válido. Lo usa el lanzador codex-<agente> con -c model_auto_compact_token_limit=<valor>.
   function compactarCodex(agente) {
     const c = leerConfig();
-    const perfiles = c.perfiles ?? {};
-    const propio = (c.agentes ?? {})[agente] ?? {};
-    let perfilId = propio.perfil;
-    if (!perfilId || perfiles[perfilId]?.herramienta !== "codex") {
-      perfilId = (c.perfil_por_defecto ?? {}).codex;
+    const perfiles = c.profiles ?? {};
+    const propio = (c.agents ?? {})[agente] ?? {};
+    let perfilId = propio.profile;
+    if (!perfilId || perfiles[perfilId]?.tool !== "codex") {
+      perfilId = (c.default_profile ?? {}).codex;
     }
-    const compactar = propio.compactar_en ?? (perfiles[perfilId] ?? {}).compactar_en ?? c.compactar_en;
+    const compactar = propio.compact_at ?? (perfiles[perfilId] ?? {}).compact_at ?? c.compact_at;
     return esEntero(compactar) ? String(compactar) : "";
   }
 

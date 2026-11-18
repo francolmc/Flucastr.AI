@@ -54,7 +54,7 @@ Un estudio empírico sobre SWE-bench Verified encontró parches aceptados por la
 
 ## 2. Cómo trabajamos hoy: del pedido al lanzamiento
 
-Archivos examinados: `agentes/principal.md`, `skills/planificar-cambio/SKILL.md`, `agentes/constructor.md`, `skills/ejecutar-plan/SKILL.md`, `modelos.json`, `verify`, `friccion.md` y planes históricos de `cambios/hechos/` relevantes al contrato, plazos y help.
+Archivos examinados: `agentes/principal.md`, `skills/planificar-cambio/SKILL.md`, `agentes/constructor.md`, `skills/ejecutar-plan/SKILL.md`, `modelos.json`, `verify`, `friction.md` y planes históricos de `cambios/hechos/` relevantes al contrato, plazos y help.
 
 1. El principal investiga, lee código y obtiene evidencia inicial.
 2. Escribe un plan con objetivo, supuestos, alcance, decisiones, escenarios, verificación y pasos.

@@ -6,9 +6,9 @@ const RESERVA_MINIMA_PI = 16384;
 // Modelos de Pi de todos los perfiles con herramienta "pi", sin repetidos, en orden del archivo. Valor: su perfil.
 export function candidatosPi(c) {
   const vistos = new Map();
-  for (const perfil of Object.values(c.perfiles ?? {})) {
-    if (perfil.herramienta !== "pi") continue;
-    for (const modelo of Object.values(perfil.modelos ?? {})) {
+  for (const perfil of Object.values(c.profiles ?? {})) {
+    if (perfil.tool !== "pi") continue;
+    for (const modelo of Object.values(perfil.models ?? {})) {
       if (!vistos.has(modelo)) vistos.set(modelo, perfil);
     }
   }
@@ -35,16 +35,16 @@ export function planFijarPi(ajustes, candidatos, c, creado) {
       lineas.push(`omitido-usuario:${modelo}`);
       continue;
     }
-    if (!esEntero(perfil.ventanas?.[modelo])) {
+    if (!esEntero(perfil.windows?.[modelo])) {
       lineas.push(`omitido-ventana:${modelo}`);
       continue;
     }
-    const compactar = perfil.compactar_en ?? c.compactar_en;
+    const compactar = perfil.compact_at ?? c.compact_at;
     if (!esEntero(compactar)) {
       lineas.push(`omitido-umbral:${modelo}`);
       continue;
     }
-    const reserve = perfil.ventanas[modelo] - compactar;
+    const reserve = perfil.windows[modelo] - compactar;
     if (reserve < RESERVA_MINIMA_PI) {
       lineas.push(`omitido-umbral:${modelo}`);
       continue;

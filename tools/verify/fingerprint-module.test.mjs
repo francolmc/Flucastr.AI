@@ -5,25 +5,25 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { huella } from '../../pruebas/diagnostico-sugiere/huella-reference.mjs';
-import { huellaActual, recorrer } from '../../skills/diagnosticar/fingerprint.mjs';
+import { fingerprint } from '../../tests/diagnosis-suggests/fingerprint-reference.mjs';
+import { fingerprintCurrent, recorrer } from '../../core/skills/diagnose/fingerprint.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 function temporaryRepo(callback, { commit = true } = {}) {
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'diagnostico-huella-modulo-'));
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'diagnostico-fingerprint-modulo-'));
   const git = (args) => spawnSync('git', ['-C', dir, ...args], { encoding: 'utf8' });
   try {
     assert.equal(git(['init', '-q']).status, 0);
     writeFileSync(path.join(dir, '.gitignore'), 'resultado.json\n');
     mkdirSync(path.join(dir, 'src'), { recursive: true });
     writeFileSync(path.join(dir, 'src/app.js'), 'export const value = 1;\n');
-    mkdirSync(path.join(dir, 'cambios/demo'), { recursive: true });
-    writeFileSync(path.join(dir, 'cambios/demo/plan.md'), '## Plan\n');
+    mkdirSync(path.join(dir, 'changes/demo'), { recursive: true });
+    writeFileSync(path.join(dir, 'changes/demo/plan.md'), '## Plan\n');
     if (commit) {
       for (const args of [
         ['config', 'user.name', 'Huella Test'],
-        ['config', 'user.email', 'huella@example.test'],
+        ['config', 'user.email', 'fingerprint@example.test'],
         ['add', '.'],
         ['commit', '-qm', 'base'],
       ]) assert.equal(git(args).status, 0);
@@ -35,7 +35,7 @@ function temporaryRepo(callback, { commit = true } = {}) {
 }
 
 test('fingerprint module import has no output or diagnostic execution', () => {
-  const moduleUrl = new URL('../../skills/diagnosticar/fingerprint.mjs', import.meta.url).href;
+  const moduleUrl = new URL('../../core/skills/diagnose/fingerprint.mjs', import.meta.url).href;
   const result = spawnSync(process.execPath, ['--input-type=module', '-e', 'await import(process.argv[1])', moduleUrl], { encoding: 'utf8' });
   assert.equal(result.error, undefined, `module import did not start: ${result.error}`);
   assert.equal(result.status, 0, result.stderr);
@@ -70,13 +70,13 @@ test('recorrer visits regular files and skips hidden, dependency, build and link
   }
 });
 
-test('huellaActual matches the independent fingerprint calculation with and without HEAD', () => {
+test('fingerprintCurrent matches the independent fingerprint calculation with and without HEAD', () => {
   for (const commit of [true, false]) temporaryRepo((dir) => {
-    assert.equal(huellaActual(dir), huella(dir));
-    mkdirSync(path.join(dir, 'cambios', 'nuevo'), { recursive: true });
-    writeFileSync(path.join(dir, 'cambios', 'nuevo', 'plan.md'), 'excluded\n');
-    assert.equal(huellaActual(dir), huella(dir));
+    assert.equal(fingerprintCurrent(dir), fingerprint(dir));
+    mkdirSync(path.join(dir, 'changes', 'nuevo'), { recursive: true });
+    writeFileSync(path.join(dir, 'changes', 'nuevo', 'plan.md'), 'excluded\n');
+    assert.equal(fingerprintCurrent(dir), fingerprint(dir));
     writeFileSync(path.join(dir, 'src/app.js'), 'export const changed = true;\n');
-    assert.equal(huellaActual(dir), huella(dir));
+    assert.equal(fingerprintCurrent(dir), fingerprint(dir));
   }, { commit });
 });

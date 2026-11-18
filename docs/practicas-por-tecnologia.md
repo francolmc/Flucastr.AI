@@ -2,7 +2,7 @@
 
 > Los nombres se anonimizaron; se conservan fechas y cifras.
 
-Lista que el principal consulta al revisar un cambio que toca una tecnología de aquí (`agentes/principal.md`, paso 5). Sirve para anotar «Mejora sugerida», no para bloquear.
+Lista que el planner consulta al revisar un cambio que toca una tecnología de aquí (`core/agents/planner.md`, paso 5). Sirve para anotar «Mejora sugerida», no para bloquear.
 
 Reglas de la lista:
 
@@ -41,7 +41,7 @@ Reglas de la lista:
 
 ### Esperar a la base con `service_healthy`
 - Práctica: `depends_on` con `condition: service_healthy` y un `healthcheck` con `pg_isready` antes de migrar o arrancar la API.
-- Fuente: [docs de Docker Compose, orden de arranque](https://docs.docker.com/compose/how-tos/startup-order.md); uso en `skills/preparar-proyecto/referencia.md`.
+- Fuente: [docs de Docker Compose, orden de arranque](https://docs.docker.com/compose/how-tos/startup-order.md); uso en `core/skills/prepare-project/reference.md`.
 - Nivel: oficial
 
 ### Logs antes de limpiar
@@ -69,6 +69,6 @@ Reglas de la lista:
 ## Comprobación rápida (cualquier stack)
 
 ### Línea `Comprobación rápida:` en AGENTS.md
-- Práctica: declarar en `AGENTS.md` una línea `Comprobación rápida:` con tipos, lint y pruebas del host, sin Docker, para que el Nivel 1 de `planificar-cambio` (regla 13) exista.
+- Práctica: declarar en `AGENTS.md` una línea `Comprobación rápida:` con tipos, lint y pruebas del host, sin Docker, para que el Nivel 1 de `plan-change` (regla 13) exista.
 - Fuente: [guías de harness engineering](https://agentic-ai.readthedocs.io/en/latest/AgentHarness/harness-engineering) (blog); 3 de 5 fallos de F04 vistos por `tsc` o lint (`docs/investigaciones/auditoria-verificacion-general/propuesta-final.md`, §1).
 - Nivel: blog

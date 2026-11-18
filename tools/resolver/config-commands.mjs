@@ -1,5 +1,5 @@
 export function fijarAgente(args, { leerAjustes, mkdirSync, dirname, writeFileSync }) {
-  // Con --sobrescribir reemplaza otro agente ya fijado (lo usa --migrar) y dice cuál era.
+  // Con --sobrescribir reemplaza otro agente ya fijado (lo usa --migrate) y dice cuál era.
   const [ruta, agente] = args;
   const ajustes = leerAjustes(ruta);
   if (ajustes.agent === agente) {
@@ -41,22 +41,22 @@ export function compararModelos(args, { leerJson }) {
   if (typeof propio.version === "number" && typeof nuevo.version === "number" && nuevo.version > propio.version) {
     lineas.push(`version: personal ${propio.version}, publicado ${nuevo.version}`);
   }
-  for (const agente of Object.keys(nuevo.agentes ?? {})) {
-    if (!tiene(propio.agentes, agente)) lineas.push(`agente nuevo: ${agente}`);
+  for (const agente of Object.keys(nuevo.agents ?? {})) {
+    if (!tiene(propio.agents, agente)) lineas.push(`agente nuevo: ${agente}`);
   }
-  for (const perfil of Object.keys(nuevo.perfiles ?? {})) {
-    if (!tiene(propio.perfiles, perfil)) lineas.push(`perfil nuevo: ${perfil}`);
+  for (const perfil of Object.keys(nuevo.profiles ?? {})) {
+    if (!tiene(propio.profiles, perfil)) lineas.push(`perfil nuevo: ${perfil}`);
   }
   // Esfuerzo por agente: avisa si el publicado lo trae y el personal no.
-  for (const agente of Object.keys(nuevo.agentes ?? {})) {
-    if (!tiene(nuevo.agentes[agente], "esfuerzo")) continue;
-    if (!tiene(propio.agentes?.[agente] ?? {}, "esfuerzo")) lineas.push(`campo nuevo: esfuerzo (agente ${agente})`);
+  for (const agente of Object.keys(nuevo.agents ?? {})) {
+    if (!tiene(nuevo.agents[agente], "effort")) continue;
+    if (!tiene(propio.agents?.[agente] ?? {}, "effort")) lineas.push(`campo nuevo: esfuerzo (agente ${agente})`);
   }
-  // Campos del modelos.json publicado que el personal no trae: compactar_en y ventanas (por perfil).
-  if (tiene(nuevo, "compactar_en") && !tiene(propio, "compactar_en")) lineas.push("campo nuevo: compactar_en");
-  for (const [perfil, datos] of Object.entries(nuevo.perfiles ?? {})) {
-    if (!tiene(datos, "ventanas") || !tiene(propio.perfiles, perfil)) continue;
-    if (!tiene(propio.perfiles[perfil], "ventanas")) lineas.push(`campo nuevo: ventanas (perfil ${perfil})`);
+  // Campos del models.json publicado que el personal no trae: compact_at y windows (por perfil).
+  if (tiene(nuevo, "compact_at") && !tiene(propio, "compact_at")) lineas.push("campo nuevo: compact_at");
+  for (const [perfil, datos] of Object.entries(nuevo.profiles ?? {})) {
+    if (!tiene(datos, "windows") || !tiene(propio.profiles, perfil)) continue;
+    if (!tiene(propio.profiles[perfil], "windows")) lineas.push(`campo nuevo: windows (perfil ${perfil})`);
   }
   for (const linea of lineas) console.log(linea);
 }

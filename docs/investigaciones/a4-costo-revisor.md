@@ -7,7 +7,7 @@ Solo documentación. Etiquetas: **medido** (rollouts de Codex del 2026-11-10 y s
 Revisor `gpt-6.1-sol`, esfuerzo `low`, 3 llamadas al modelo por revisión. Constructor `gpt-6-luna`, esfuerzo `medium`. Tarifas Sol (documentado): 50 entrada, 2,5 en caché y 250 salida, en créditos por 1M de tokens.
 
 | Revisión | Entrada total | En caché | Entrada sin caché | Salida (razonamiento) | Créditos |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- |
 | 1 | 64.501 | 40.576 | 23.925 → 1,196 | 323 (43) → 0,081 | 1,378 |
 | 2 | 60.803 | 38.528 | 22.275 → 1,114 | 163 (0) → 0,041 | 1,251 |
 
@@ -26,7 +26,7 @@ Lectura (**medido**):
 Medido con `codex -m gpt-6.1-sol -c model_reasoning_effort="low" debug prompt-input` en la raíz del repo, sin prompt de usuario. La salida son unos 78.400 caracteres de JSON. Tamaño por componente, en caracteres (**medido**; no en tokens):
 
 | Componente | Caracteres | Parte |
-| --- | --- | --- |
+| --- |
 | Definiciones de herramientas (`functions`, `clock`, `collaboration`) | 25.970 | 33 % |
 | Instrucciones de sistema de Codex | 21.524 | 27 % |
 | Lista de skills (84 entradas) | 18.177 | 23 % |
@@ -75,10 +75,10 @@ Cinco mediciones mínimas:
 
 ## 6. Medición 1: caché entre revisiones
 
-Medido con `codex exec` con la config del revisor (`gpt-6.1-sol`, esfuerzo `low`, `--sandbox read-only`, `-C` en la raíz, sin `--output-schema`), prompt trivial, tres corridas seguidas (B a 7 s de A, C a 7 s de B). Primer evento `token_count` de cada rollout; créditos con la fórmula de `scripts/uso.mjs` y `scripts/tarifas.json` (entrada sin caché a 50, caché a 2,5, salida a 250, por 1M).
+Medido con `codex exec` con la config del revisor (`gpt-6.1-sol`, esfuerzo `low`, `--sandbox read-only`, `-C` en la raíz, sin `--output-schema`), prompt trivial, tres corridas seguidas (B a 7 s de A, C a 7 s de B). Primer evento `token_count` de cada rollout; créditos con la fórmula de `scripts/usage.mjs` y `scripts/tarifas.json` (entrada sin caché a 50, caché a 2,5, salida a 250, por 1M).
 
 | Corrida | Hora (UTC-3) | Prompt | Entrada | En caché | % en caché | Créditos |
-| --- | --- | --- | --- | --- | --- | --- |
+| --- | --- |
 | A | 02:38:06 | «Responde solo: OK» | 17.756 | 0 | 0 % | 0,889 |
 | B | 02:38:17 | «Responde solo: OK» | 18.299 | 7.168 | 39 % | 0,576 |
 | C | 02:38:24 | «Responde solo: LISTO» | 18.300 | 7.168 | 39 % | 0,576 |
@@ -94,7 +94,7 @@ Hipótesis, no hecho: si el prefijo compartido fuera mayor, la caché bajaría e
 Config del revisor (`gpt-6.1-sol`, esfuerzo `low`, `--sandbox read-only`, `-C` en la raíz, prompt «Responde solo: OK»). Primer `token_count` del rollout; créditos con `scripts/tarifas.json`. Hora UTC-3.
 
 | Corrida | Separación desde la anterior | Entrada | En caché | % en caché | Créditos |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- |
 | T0 (fin 02:47:27) | ≈9 min desde la última de la sección 6 | 17.756 | 7.168 | 40 % | 0,549 |
 | T1 (02:48:27) | 1 min | 18.299 | 0 | 0 % | 0,916 |
 | T2 (02:53:32) | 5 min | 18.299 | 0 | 0 % | 0,916 |
@@ -109,7 +109,7 @@ Conclusión (**medido**): en esta serie la caché ya no aparece a 1 min de separ
 Config del revisor igual que la sección 7. Perfil mínimo: `--ignore-user-config --ephemeral -c skills.bundled.enabled=false -c skills.include_instructions=false`. Hora UTC-3. Créditos con `scripts/tarifas.json`. M0 va sin `--json`: con `--ephemeral` no hay rollout y no da desglose de caché.
 
 | Corrida | Config | Entrada | En caché | % en caché | Créditos |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- |
 | T0 (02:47) | actual | 17.756 | 7.168 | 40 % | 0,549 |
 | T1 (02:48) | actual | 18.299 | 0 | 0 % | 0,916 |
 | M0 (03:18) | mínimo, sin `--json` | no desglosada | no desglosada | — | ≤ 0,173 |

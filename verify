@@ -43,6 +43,8 @@ source tools/verify/verification-contracts.sh
 # 9a. migración: la skill migrar-proyecto muestra «Reglas de v1 que descarté», prohíbe copiar las reglas de flujo y no trae Fxx como regla; una copia sin la lista debe fallar
 source tools/verify/migration-contract.sh
 
+source tools/verify/names-migration.sh
+
 source tools/verify/offline-selftests.sh
 
 source tools/verify/segment-contract.sh

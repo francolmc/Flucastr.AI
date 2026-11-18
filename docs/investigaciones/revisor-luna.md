@@ -14,7 +14,7 @@ S se corrió dos veces en paralelo por error (dos procesos del runner). Hubo 24 
 ## Resultados (medido)
 
 | Condición | Sembrados detectados (de 6) | Falsas alarmas (de 6 limpios) | Costo medio por caso (créditos) |
-| --- | --- | --- | --- |
+| --- |
 | S | 6 | 1 (c11) | 0,574 (3 corridas limpias) |
 | L1 | 5 (falla c05) | 1 (c12) | 0,049 (12 corridas) |
 | L2 | 4 (fallan c01 y c05) | 1 (c11) | 0,052 (12 corridas) |

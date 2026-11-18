@@ -8,7 +8,7 @@ mig_workspace() {
   if [ -z "$hijos" ]; then return 0; fi
   echo "Workspace: repos hijos: $hijos"
   if [ ! -e "$PROYECTO/.git" ]; then
-    echo "La raíz no es repo: la skill migrar-proyecto te preguntará si la hacemos repo propio (este script no la crea)"
+    echo "La raíz no es repo: la skill migrate-project te preguntará si la hacemos repo propio (este script no la crea)"
   fi
   return 0
 }
@@ -34,7 +34,7 @@ mig_gitignore() {
 # Aviso si el AGENTS.md de la raíz sigue siendo de v1 (menciona definitions/, features/ o registro/).
 mig_aviso_agents() {
   if [ -f "$PROYECTO/AGENTS.md" ] && grep -qE 'definitions/|features/|registro/' "$PROYECTO/AGENTS.md"; then
-    echo "AVISO: AGENTS.md sigue siendo de v1 y apunta a rutas movidas: ejecuta la skill migrar-proyecto"
+    echo "AVISO: AGENTS.md sigue siendo de v1 y apunta a rutas movidas: ejecuta la skill migrate-project"
   fi
   return 0
 }

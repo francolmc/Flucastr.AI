@@ -6,7 +6,7 @@ Base: `verify`, Dockerfiles y `AGENTS.md` de los tres proyectos registrados en e
 
 ## Hechos (comprobados)
 | | Proyecto.Finanzas | Proyecto.Plataforma | Proyecto.Móvil |
-| --- | --- | --- | --- |
+| --- |
 | Dockerfiles | 3 | 6 | 7 |
 | Manifiestos antes de instalar | **No** (`COPY . .` antes de `pnpm install`) | Sí (`npm ci`) | Sí (en API y Backoffice) |
 | Caché de paquetes (`--mount=type=cache`) | No | No | No |

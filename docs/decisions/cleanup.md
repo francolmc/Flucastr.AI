@@ -5,7 +5,7 @@
 Las copias de compatibilidad enumeradas abajo son duplicados intencionales: consumidores instalados y rutas públicas todavía usan ambas ubicaciones. No se elimina ninguna. El manifiesto `tools/core-compatibility.json` es el inventario autoritativo; cada par fue revisado y el comprobador compara rutas, contenido y permisos ejecutables.
 
 | Ruta nueva (`core/`) | Ruta compatible conservada | Motivo y consumidor |
-| --- | --- | --- |
+| --- |
 | `core/contracts/verificacion.md` | `nucleo/contrato/verificacion.md` | Contrato referenciado por los proyectos e instrucciones del kit. |
 | `core/agents/constructor.md` | `agentes/constructor.md` | Ruta heredada del agente constructor. |
 | `core/agents/principal.md` | `agentes/principal.md` | Ruta heredada del agente principal. |
@@ -29,13 +29,13 @@ El archivo fuente del inventario tiene 15 pares. La búsqueda de consumidores se
 El inventario se obtuvo con `find` y `wc -l`, excluyendo `.git/`, `old/v1/registro/` y `pruebas/.temporales/`. Se conservaron los archivos históricos y evidencias; no se encontraron motivos suficientes para borrar ni moverlos.
 
 | Líneas | Archivo | Clasificación y razón de conservación |
-| ---: | --- | --- |
+| ---: | --- |
 | 1001 | `scripts/resolver.mjs` | Entrypoint con consumidores en instalador, comandos y adaptadores; las extracciones previas mantienen esa ruta pública. |
-| 420 | `instalar.sh` | Instalador público invocado y documentado por el kit. |
-| 322 | `instalar-remoto.sh` | Excepción por contrato: bootstrap distribuido y ejecutado antes de descargar `tools/`; extraer dependencias rompería ese flujo (ver tramo 100). |
-| 318 | `scripts/uso.mjs` | CLI pública; conserva análisis de argumentos y coordinación mientras las operaciones viven en `tools/usage/` (ver `structure.md`). |
+| 420 | `install.sh` | Instalador público invocado y documentado por el kit. |
+| 322 | `install-remote.sh` | Excepción por contrato: bootstrap distribuido y ejecutado antes de descargar `tools/`; extraer dependencias rompería ese flujo (ver tramo 100). |
+| 318 | `scripts/usage.mjs` | CLI pública; conserva análisis de argumentos y coordinación mientras las operaciones viven en `tools/usage/` (ver `structure.md`). |
 | 428 | `pruebas/kit-run/probar.mjs` | Runner de pruebas invocado por la verificación de `kit run`; contiene escenarios y aserciones activas. |
-| 319 | `pruebas/uso/probar.mjs` | Runner de pruebas de `scripts/uso.mjs`, invocado por la verificación de uso. |
+| 319 | `pruebas/uso/probar.mjs` | Runner de pruebas de `scripts/usage.mjs`, invocado por la verificación de uso. |
 | 360 | `pruebas/revisor-luna/medir.mjs` | Harness de evaluación reproducible; documentado bajo `evals/` y mantenido como herramienta de medición. |
 | 313 | `cambios/estructura-repo/comprobar-a3.py` | Harness de auditoría y evidencia del cambio actual; no es módulo del producto. |
 | 747 | `cambios/estructura-repo/plan.md` | Índice y evidencia acumulada del cambio; conservar para revisión. |

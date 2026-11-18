@@ -35,7 +35,7 @@ function mediana(xs) {
 
 export function crearInforme(dir, desde, { leerJsonl, join, EVENTOS, MUESTRAS, BUILDS }) {
   const corte = desde ? Date.parse(`${desde}T00:00:00Z`) : -Infinity;
-  if (Number.isNaN(corte)) throw new Error(`--desde debe ser AAAA-MM-DD: ${desde}`);
+  if (Number.isNaN(corte)) throw new Error(`--since debe ser AAAA-MM-DD: ${desde}`);
 
   const todosEventos = leerJsonl(join(dir, EVENTOS)).map((e) => ({ ...e, ms: Number(e.time) * 1000 }));
   const eventos = todosEventos.filter((e) => e.ms >= corte);
