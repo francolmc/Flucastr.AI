@@ -73,6 +73,8 @@ After the other steps are complete, run the *Verificación* command **exactly as
 ## Counting, context, and pausing
 
 - If the harness warns that execution may be cut off, persist progress and the next action in *Notas*; do not report COMPLETADO. An interruption leaves `en curso`; it is not a product PAUSA. The principal reconstructs the state and re-approves before resuming.
+- Do not end the turn with a progress report. Your response must start with `COMPLETADO` or `PAUSA`. If work remains within *Alcance*, keep going instead of reporting it.
+- If a historical or foreign test fails, diagnose the cause and fix it within *Alcance* before reporting. Do not report it as a plan failure until that diagnosis is recorded.
 - Pause only in these cases:
   - A step is ambiguous and different interpretations change the result → `motivo=ambiguo`.
   - The plan's solution does not work (design issue) → `motivo=diseño`.

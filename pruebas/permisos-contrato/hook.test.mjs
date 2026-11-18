@@ -83,18 +83,19 @@ test("un ejecutable local sin extensión queda protegido frente a cambios", t =>
   assert.equal(decision(raiz, comando), "ask");
 });
 
-test("acciones directas protegidas y lecturas que pueden incluir secretos piden aprobación", t => {
+test("acciones directas protegidas de Bash siguen pidiendo aprobación; Read, Grep y Glob no pasan por el hook", t => {
   const raiz = proyecto(t);
   for (const command of ["git commit -m test", "git push", "git merge main", "gh pr create", "vercel deploy", "cat .env"]) {
     assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command } }), "ask", command);
   }
-  assert.equal(decision(raiz, { tool_name: "Read", tool_input: { file_path: ".env" } }), "ask");
-  assert.equal(decision(raiz, { tool_name: "Grep", tool_input: { pattern: "token", path: "." } }), "ask");
-  assert.equal(decision(raiz, { tool_name: "Glob", tool_input: { pattern: "**/*" } }), "ask");
+  // `.env` lo protegen las reglas deny y el sandbox, no este hook.
+  assert.equal(decision(raiz, { tool_name: "Read", tool_input: { file_path: ".env" } }), "normal");
+  assert.equal(decision(raiz, { tool_name: "Grep", tool_input: { pattern: "token", path: "." } }), "normal");
+  assert.equal(decision(raiz, { tool_name: "Glob", tool_input: { pattern: "**/*" } }), "normal");
   assert.equal(decision(raiz, { tool_name: "Read", tool_input: { file_path: "AGENTS.md" } }), "normal");
   writeFileSync(join(raiz, ".env"), "dummy=secret\n");
   symlinkSync(".env", join(raiz, "alias.txt"));
-  assert.equal(decision(raiz, { tool_name: "Read", tool_input: { file_path: "alias.txt" } }), "ask");
+  assert.equal(decision(raiz, { tool_name: "Read", tool_input: { file_path: "alias.txt" } }), "normal");
 });
 
 test("instala hooks sin pisar entradas ajenas, es idempotente y kit run exige esa política", t => {
@@ -109,26 +110,30 @@ test("instala hooks sin pisar entradas ajenas, es idempotente y kit run exige es
   const config = JSON.parse(readFileSync(settings, "utf8"));
   assert.equal(config.theme, "dark");
   assert.deepEqual(config.permissions.allow, ["Bash(*)"]);
-  assert.equal(config.hooks.PreToolUse.length, 3);
+  assert.equal(config.hooks.PreToolUse.length, 2);
   assert.equal(config.hooks.PreToolUse[0].hooks[0].command, "echo ajeno");
-  assert.ok(config.hooks.PreToolUse.slice(1).every(e => e.hooks[0].onFailure === "block"));
+  assert.equal(config.hooks.PreToolUse[1].matcher, "Bash");
+  assert.equal(config.hooks.PreToolUse[1].hooks[0].onFailure, "block");
   const falloHook = spawnSync(process.execPath, [HOOK, "decision", "--project", raiz], { input: "{", encoding: "utf8" });
   assert.equal(falloHook.status, 1);
 
-  // Un solo matcher del kit no cuenta como instalado: se completa con la pareja exacta.
+  // Una instalación antigua con dos matchers del kit (Bash y Read|Grep|Glob) no cuenta como instalada:
+  // se repara a un solo matcher Bash y conserva las entradas ajenas.
+  const kitBash = config.hooks.PreToolUse[1];
+  const kitLectura = { matcher: "Read|Grep|Glob", hooks: [kitBash.hooks[0]] };
   config.hooks.PreToolUse = [config.hooks.PreToolUse[0], {
-    ...config.hooks.PreToolUse[1],
-    hooks: [...config.hooks.PreToolUse[1].hooks, { type: "command", command: "echo vecino" }],
-  }];
+    ...kitBash,
+    hooks: [...kitBash.hooks, { type: "command", command: "echo vecino" }],
+  }, kitLectura];
   writeFileSync(settings, JSON.stringify(config));
   assert.equal(execFileSync(process.execPath, [HOOK, "comprobar", raiz], { encoding: "utf8" }).trim(), "ausente");
   assert.equal(instalar(), "fijado");
   const reparado = JSON.parse(readFileSync(settings, "utf8"));
-  assert.equal(reparado.hooks.PreToolUse.length, 4);
+  assert.equal(reparado.hooks.PreToolUse.length, 3);
   assert.equal(reparado.hooks.PreToolUse[0].hooks[0].command, "echo ajeno");
   assert.equal(reparado.hooks.PreToolUse[1].hooks[0].command, "echo vecino");
   assert.equal(reparado.hooks.PreToolUse[2].matcher, "Bash");
-  assert.equal(reparado.hooks.PreToolUse[3].matcher, "Read|Grep|Glob");
+  assert.ok(!reparado.hooks.PreToolUse.some(e => e.matcher === "Read|Grep|Glob"));
 
   const env = { ...process.env, KIT_RUN_CONSTRUCTOR: "/bin/true", KIT_RUN_REVISOR: "/bin/true" };
   rmSync(settings);
