@@ -3,3 +3,4 @@ pruebas/*
 tests/.tmp/
 
 .codex/
+.claude/
