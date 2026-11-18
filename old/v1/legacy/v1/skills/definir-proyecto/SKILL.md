@@ -16,14 +16,14 @@ Pregunta, máximo cinco por turno y de más a menos importante:
 - **Problema:** ¿qué duele hoy y a quién?
 - **Usuarios:** ¿quién lo usa y con qué frecuencia?
 - **«Funcionando»:** ¿qué se debería poder hacer, de forma observable, para decir que sirve?
-- **Restricciones:** tiempo, costo, tecnologías que Franco ya domina, dónde se despliega.
+- **Restricciones:** tiempo, costo, tecnologías que la persona usuaria ya domina, dónde se despliega.
 - **Lo que ya existe:** sistemas, datos o APIs con los que debe convivir.
 
 Si una respuesta abre otra duda, no preguntes de nuevo: déjala en «Decisiones para Franco».
 
 ### 2. Proposal
 
-Presenta dos o tres enfoques. Para cada uno: en qué consiste, ventajas, costos o riesgos, y en qué situación sería la mejor opción. Luego recomienda uno y explica por qué. **Espera la elección de Franco** antes de escribir el documento.
+Presenta dos o tres enfoques. Para cada uno: en qué consiste, ventajas, costos o riesgos, y en qué situación sería la mejor opción. Luego recomienda uno y explica por qué. **Espera la elección de la persona usuaria** antes de escribir el documento.
 
 ### 3. Escribir `definitions/PROJECT.md`
 

@@ -1,5 +1,7 @@
 # Diagnóstico F40: rama de la tarea 1
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Leído: `skills/ejecutar-tarea/SKILL.md` (líneas 10-18), `agentes/constructor.md` (sección «Cómo trabajas», punto 1), `agentes/coordinador.md` (líneas 40-68), `pruebas/comprobaciones/contrato-constructor.mjs` (reglas 5, 10, 11, 13, 14).
 
 ## Confirmado
@@ -20,7 +22,7 @@ Leído: `skills/ejecutar-tarea/SKILL.md` (líneas 10-18), `agentes/constructor.m
 - Con el orden actual, si el entorno falla, la tarea queda `bloqueada` antes de crear la rama. Es coherente con el dato de F37 que da la *Contexto* de la tarea (n=1 bloqueada por entorno, sin rama; n=2 creó la rama con `git switch -c`). No abrí F37: las reglas de lectura excluyen tareas `hecha` ajenas.
 - Con el orden actual, un encargo sin `Rama:` no crea la rama en la tarea 1. El coordinador escribe `Rama:` «si aplica» (`coordinador.md:60`), así que una omisión en el encargo es la causa más probable de «la rama no existe». No está reproducido con un modelo real.
 - Mover la rama antes del entorno no evita el caso de un encargo sin `Rama:`.
-- Por confirmar con el caso de Franco: fecha, feature, si el encargo traía `Rama:` y si el entorno falló antes del paso de rama.
+- Por confirmar con el caso de la persona usuaria: fecha, feature, si el encargo traía `Rama:` y si el entorno falló antes del paso de rama.
 
 ## Recomendación
-B) mantener el orden: el texto actual cumple lo pedido (entorno, rama, `en curso`), y el hueco está en que el encargo puede llegar sin `Rama:`, lo que cambiar de orden no arregla; esa decisión es otra tarea, con el caso de Franco.
+B) mantener el orden: el texto actual cumple lo pedido (entorno, rama, `en curso`), y el hueco está en que el encargo puede llegar sin `Rama:`, lo que cambiar de orden no arregla; esa decisión es otra tarea, con el caso de la persona usuaria.

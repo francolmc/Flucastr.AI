@@ -1,6 +1,9 @@
 # task-03 — README: higiene de contexto en lenguaje neutro
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `## Higiene de contexto y compactación` del README (con sus subsecciones) mezcla primera persona («No tengo que teclear nada», «lo que ya definiste») con detalle técnico correcto. Se reescribe el estilo para cualquier lector, sin cambiar un solo dato técnico (valores, rutas, versiones, comandos, tabla).
 
@@ -83,6 +86,6 @@ Cambios aplicados (solo frases con primera persona o estilo personal; ningún va
 
 Huecos menores: la frase «con la copia que tenías antes» (`### Después de instalar, comprobar`) queda en segunda persona de tuteo, que es el estilo decidido para instrucciones; no se cambió.
 
-Nota sobre el criterio «un número mayor o igual que 5»: el comando `grep -c` cuenta líneas y da 3; las apariciones de los números son 6. Se cumple el espíritu del criterio (los números siguen en el README), pero el comando de Verificación da 3 y no 5; anotado para que Franco lo valore.
+Nota sobre el criterio «un número mayor o igual que 5»: el comando `grep -c` cuenta líneas y da 3; las apariciones de los números son 6. Se cumple el espíritu del criterio (los números siguen en el README), pero el comando de Verificación da 3 y no 5; anotado para que la persona usuaria lo valore.
 
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

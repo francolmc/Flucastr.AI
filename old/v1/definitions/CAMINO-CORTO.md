@@ -1,22 +1,22 @@
 # Camino corto para cambios triviales
 
 > Estado: borrador por aprobar (puerta 1). Autor: `arquitecto`, una sola pasada, 2026-11-02. Sin código.
-> Origen: encargo de Franco (*confirmado*); lectura de `formato-tarea.mjs`, `formato-evidencia.mjs`, `validar-tarea.mjs`, `registrar.mjs` (regex de `Registro:`), `coordinador.md`, `planificador.md`, `WORKFLOW.md` §3, §6, §9.3, `CONTRATOS.md`, `CONSUMO.md` (*confirmado*). No leído: `consumo.mjs`, `ejecutar-tarea`, `descomponer-feature`, `formato-fuente.mjs` (lo que dependa de ellos va como *a verificar*).
+> Origen: encargo de la persona usuaria (*confirmado*); lectura de `formato-tarea.mjs`, `formato-evidencia.mjs`, `validar-tarea.mjs`, `registrar.mjs` (regex de `Registro:`), `coordinador.md`, `planificador.md`, `WORKFLOW.md` §3, §6, §9.3, `CONTRATOS.md`, `CONSUMO.md` (*confirmado*). No leído: `consumo.mjs`, `ejecutar-tarea`, `descomponer-feature`, `formato-fuente.mjs` (lo que dependa de ellos va como *a verificar*).
 
 ## 1. Idea
 
-Hoy toda tarea lleva diez secciones, `Fuente:` y dos pasadas del validador, aunque cambie una línea. El camino corto es un **perfil del mismo validador**: una tarea de siete a ocho secciones que `validar-tarea.mjs` acepta solo si cumple criterios mecánicos. No hay rol, estado ni archivo nuevos; el `coordinador` no cambia (0 B). Las puertas y el modo yolo quedan como están. Fuera de alcance (decidido con Franco): nivel de modelo por tarea y presupuesto por tamaño (F29).
+Hoy toda tarea lleva diez secciones, `Fuente:` y dos pasadas del validador, aunque cambie una línea. El camino corto es un **perfil del mismo validador**: una tarea de siete a ocho secciones que `validar-tarea.mjs` acepta solo si cumple criterios mecánicos. No hay rol, estado ni archivo nuevos; el `coordinador` no cambia (0 B). Las puertas y el modo yolo quedan como están. Fuera de alcance (decidido con la persona usuaria): nivel de modelo por tarea y presupuesto por tamaño (F29).
 
 ## 2. Flujo
 
 ```mermaid
 flowchart LR
   P["planificador"] -- "tarea con 'Camino: corto'" --> V["validar-tarea.mjs (--corta o --fuente)"]
-  V -- "exit 0: perfil corto" --> G["puerta 3 (Franco)"]
+  V -- "exit 0: perfil corto" --> G["puerta 3 (persona usuaria)"]
   V -- "exit 1: motivos" --> P
   G -- "aprobada" --> C["constructor"]
   C -- "tarea lista, Registro:" --> E["validar-tarea.mjs --evidencia"]
-  E -- "exit 0" --> G4["puerta 4 (Franco) o yolo"]
+  E -- "exit 0" --> G4["puerta 4 (persona usuaria) o yolo"]
 ```
 
 ## 3. Quién clasifica
@@ -38,11 +38,11 @@ flowchart LR
 | K6 | ≤3 pasos, *Descripción* ≤5 líneas, tarea ≤2048 caracteres | Fuerza brevedad; la larga permite 8 pasos y 8192 |
 | K7 | Reglas comunes vigentes: línea 1 y 2, sin `TBD`/`a definir`/`según corresponda`, *Fuera de alcance:* con texto | Lo esencial no se relaja |
 
-*Descartados:* decidir por extensión de archivo (un `.md` puede ser contrato) o por palabras de la *Descripción* (juicio disfrazado). *Qué cambiaría K6:* si Franco ve tareas cortas rechazadas por poco, subir a 3072 (decisión 1).
+*Descartados:* decidir por extensión de archivo (un `.md` puede ser contrato) o por palabras de la *Descripción* (juicio disfrazado). *Qué cambiaría K6:* si la persona usuaria ve tareas cortas rechazadas por poco, subir a 3072 (decisión 1).
 
 ## 5. Lista protegida (K4)
 
-Constante `RUTAS_PROTEGIDAS` en el módulo nuevo, por prefijo: `scripts/`, `agentes/`, `skills/`, `definitions/`, `pruebas/`, `.github/`; y por nombre: `AGENTS.md`, `instalar.sh`, `initialize.sh`, `package.json`, `package-lock.json`, cualquier `*.sh` y cualquier `.env*`. Añadí `pruebas/` y los instaladores a lo pedido porque también cambian el comportamiento del kit o debilitan sus guardas (*inferido*). Es lista negra: lo desconocido pasa a corta, y lo atrapa la puerta 3 de Franco, que sigue siendo una a una. Fallar aquí es seguro: la tarea vuelve al camino largo.
+Constante `RUTAS_PROTEGIDAS` en el módulo nuevo, por prefijo: `scripts/`, `agentes/`, `skills/`, `definitions/`, `pruebas/`, `.github/`; y por nombre: `AGENTS.md`, `instalar.sh`, `initialize.sh`, `package.json`, `package-lock.json`, cualquier `*.sh` y cualquier `.env*`. Añadí `pruebas/` y los instaladores a lo pedido porque también cambian el comportamiento del kit o debilitan sus guardas (*inferido*). Es lista negra: lo desconocido pasa a corta, y lo atrapa la puerta 3 de la persona usuaria, que sigue siendo una a una. Fallar aquí es seguro: la tarea vuelve al camino largo.
 
 ## 6. La tarea mínima
 
@@ -104,9 +104,9 @@ Feature candidata «Camino corto» (número lo asigna el backlog). Todas tocan `
 2. **`formato-corta.mjs`**: perfil corto y `motivosCorta` (K1 a K6, `RUTAS_PROTEGIDAS`). Verificación: fixtures válida, y una inválida por criterio; la tarea de §6 pasa.
 3. **CLI**: `--corta` y despacho por marcador en `--fuente`/simple; pruebas de salida 0/1/2; el instalador copia `formato-corta.mjs` (import estático: si falta, **todo** `validar-tarea.mjs` falla). Depende de 2.
 4. **Skill `camino-corto`** + puntero en `descomponer-feature` + manifiesto de frases + topes de bytes. Depende de 3.
-5. **`registrar.mjs` deriva `camino`** y `REGISTRO.md` lo documenta (esa edición de `definitions/` la hace Franco o pasa por puerta 1). Independiente de 1 a 4.
+5. **`registrar.mjs` deriva `camino`** y `REGISTRO.md` lo documenta (esa edición de `definitions/` la hace la persona usuaria o pasa por puerta 1). Independiente de 1 a 4.
 6. **`consumo.mjs` separa por `camino`**. Depende de 5.
-7. **Medición** en una feature real con ≥8 cortas; informe pegado por Franco.
+7. **Medición** en una feature real con ≥8 cortas; informe pegado por la persona usuaria.
 
 ## 11. Riesgos
 
@@ -114,11 +114,11 @@ Feature candidata «Camino corto» (número lo asigna el backlog). Todas tocan `
 - **Módulo no instalado** rompe la puerta 3 entera: prueba de instalación en la tarea 3 (mismo riesgo *a verificar* de F29).
 - **Inflación de «cortas»**: acotada por K1 a K6 y por la puerta 3. **Subclasificación** (todo largo) solo pierde el ahorro.
 - **«Ninguna» falsa en K3**: el `constructor` responde `DECISION:`; se mide en §8.
-- **Lista negra incompleta** en repos de producto: aceptado, la atrapa Franco en la puerta 3.
+- **Lista negra incompleta** en repos de producto: aceptado, la atrapa la persona usuaria en la puerta 3.
 - **`ejecutar-tarea`/`descomponer-feature` o pruebas con fixtures de diez secciones** podrían suponer la plantilla larga (*no leído*): se revisa en la tarea 4.
 - **Pi**: que cargue la skill a pedido no está verificado (mismo *supuesto* que F28).
 
-## 12. Decisiones para Franco
+## 12. Decisiones para la persona usuaria
 
 1. **Tope de tamaño (K6).** A) 2048 caracteres (**recomendada**). B) 1536, más estricto. C) 3072, más tareas elegibles.
 2. **Cómo se declara y despacha.** A) línea `Camino: corto` en *Contexto*, `--corta` explícita y despacho automático en `--fuente` (**recomendada**: 0 B en núcleos). B) solo `--corta` y el `coordinador` debe elegir comando (cuesta bytes que no tiene). C) marcador en la segunda línea (cambia la regla 2 de todas las tareas).

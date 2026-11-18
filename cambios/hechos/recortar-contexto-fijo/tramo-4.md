@@ -1,4 +1,6 @@
 # Tramo 4: recortes del constructor y ejecutar-plan
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 Resultado: `constructor.md` y `ejecutar-plan` sin repeticiones. Toca esos dos archivos y, si hace falta, `verify`.
 
 ## Pasos
@@ -47,4 +49,4 @@ exit 0
 - Regla de oro: antes de cada borrado, `grep -rnF` de cada texto retirado sobre `verify pruebas scripts agentes skills AGENTS.md`. Los textos retirados solo aparecían en `skills/ejecutar-plan/SKILL.md` (y, en `verify`, las dos exigencias movidas). `principal.md` y `planificar-cambio` no se tocan en este tramo.
 - Sin contradicciones: `constructor.md` y `ejecutar-plan` no se contradicen en estados, git ni retorno; el constructor manda sobre git, estados y formato, y la skill manda sobre el procedimiento.
 - Pendientes tras cerrar: 0 (contador `bash pendientes-plan` sobre `tramo-4.md`, exit 0).
-- Sigue: tramo 6 (`AGENTS.md`, `docs/reglas-deny.md` y medición final). El tramo 5 está diferido por Franco.
+- Sigue: tramo 6 (`AGENTS.md`, `docs/reglas-deny.md` y medición final). El tramo 5 está diferido por la persona usuaria.

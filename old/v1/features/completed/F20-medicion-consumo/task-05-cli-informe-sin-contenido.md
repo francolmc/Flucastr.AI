@@ -1,13 +1,16 @@
 # task-05 — CLI `node scripts/consumo.mjs --raiz <dir>` e informe sin texto de mensajes
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Cierra `scripts/consumo.mjs`: descubre las sesiones bajo una carpeta, elige el parser por formato, imprime el informe (por sesión y por rol, normalizable por tarea construida) y garantiza que la salida no contiene texto de mensajes ni de encargos. Es solo lectura. Lo ejecuta Franco (no está en la lista de comandos del `coordinador`, `definitions/WORKFLOW.md` §3.1).
+Cierra `scripts/consumo.mjs`: descubre las sesiones bajo una carpeta, elige el parser por formato, imprime el informe (por sesión y por rol, normalizable por tarea construida) y garantiza que la salida no contiene texto de mensajes ni de encargos. Es solo lectura. Lo ejecuta la persona usuaria (no está en la lista de comandos del `coordinador`, `definitions/WORKFLOW.md` §3.1).
 
 ## Contexto
 - Leer `scripts/consumo.mjs` (task-01 a 04) y, para opciones y errores, `scripts/archivar.mjs` líneas 270-330 (`leerArgumentos`, `RUTA_ESTE`, mensajes `error: …` a stderr, código 1).
 - Carpetas reales (confirmadas): Pi `~/.pi/agent/sessions/--<ruta-del-proyecto>--/` con `<ts>_<id>.jsonl` y, al lado, `subagent-artifacts/`; Claude Code `~/.claude/projects/<proyecto>/` con `<id>.jsonl` y `<id>/subagents/`. Un registro Pi comienza con `{type:"session"}`; uno de Claude Code no.
-- Cifra de aceptación que comprueba Franco (leída en la sesión de Cleaner): cortando en `--hasta 2026-11-01T00:48:34.046Z` salen 216 turnos, 26 llamadas a subagente y costo 2.088 (la sesión siguió creciendo: completa tiene 247, 30 y 2.39).
+- Cifra de aceptación que comprueba la persona usuaria (leída en la sesión de Cleaner): cortando en `--hasta 2026-11-01T00:48:34.046Z` salen 216 turnos, 26 llamadas a subagente y costo 2.088 (la sesión siguió creciendo: completa tiene 247, 30 y 2.39).
 - Tocar: `scripts/consumo.mjs`, `pruebas/comprobaciones/consumo.test.mjs`.
 
 ## Decisiones ya tomadas
@@ -20,7 +23,7 @@ Cierra `scripts/consumo.mjs`: descubre las sesiones bajo una carpeta, elige el p
 
 ## Alcance / Fuera de alcance
 Alcance: CLI, descubrimiento, informe y prueba de no-contenido.
-Fuera de alcance: comparar dos corridas o calcular la meta de §2.6 (lo hace Franco leyendo dos informes); permiso del `coordinador` para correrlo; documentación (task-06); estimar costo en Claude Code.
+Fuera de alcance: comparar dos corridas o calcular la meta de §2.6 (lo hace la persona usuaria leyendo dos informes); permiso del `coordinador` para correrlo; documentación (task-06); estimar costo en Claude Code.
 
 ## Pasos
 1. En `scripts/consumo.mjs`, agregar `leerArgumentos`, `descubrirSesiones(raiz)`, `formatearInforme(sesiones, { tareas })` y el bloque de ejecución directa.
@@ -40,7 +43,7 @@ Fuera de alcance: comparar dos corridas o calcular la meta de §2.6 (lo hace Fra
 - `node --test pruebas/comprobaciones/consumo.test.mjs` → `fail 0`.
 - `bash pruebas/rapida.sh` → última línea `rapida: N archivos en S s (tope 30 s)` con S ≤ 30 y código 0.
 - `node scripts/consumo.mjs` → stderr `error: …`, código 1.
-- Comprobación de Franco (no del constructor): `node scripts/consumo.mjs --raiz ~/.pi/agent/sessions/--Users-franco-Codes-flucastr-Flucastr.Cleaner-- --hasta 2026-11-01T00:48:34.046Z` → 216 turnos, 26 llamadas a subagente, costo ≈ US$2.09 (±5 % de 2.08).
+- Comprobación de la persona usuaria (no del constructor): `node scripts/consumo.mjs --raiz ~/.pi/agent/sessions/--Users-franco-Codes-flucastr-Flucastr.Cleaner-- --hasta 2026-11-01T00:48:34.046Z` → 216 turnos, 26 llamadas a subagente, costo ≈ US$2.09 (±5 % de 2.08).
 
 ## Evidencia
 ```
@@ -55,7 +58,7 @@ rapida: 28 archivos en 18 s (tope 30 s)
 $ node scripts/consumo.mjs   (sin --raiz)
 error: falta --raiz <dir>      código 1
 ```
-Cifra de Franco (cortando en `--hasta 2026-11-01T00:48:34.046Z` sobre `~/.pi/...--Cleaner--`): no se ejecutó; la deja Franco.
+Cifra de la persona usuaria (cortando en `--hasta 2026-11-01T00:48:34.046Z` sobre `~/.pi/...--Cleaner--`): no se ejecutó; la deja la persona usuaria.
 
 ## Notas
 - Huecos menores resueltos:

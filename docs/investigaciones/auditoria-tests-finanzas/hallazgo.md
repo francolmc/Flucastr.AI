@@ -1,4 +1,6 @@
-# Auditoría: dónde se va el tiempo de verificación en DonFinancio (2026-11-13)
+# Auditoría: dónde se va el tiempo de verificación en Proyecto.Finanzas (2026-11-13)
+
+> Los nombres se anonimizaron; se conservan fechas y cifras.
 
 Base: `verify` y `verificacion/` de la raíz, Dockerfiles de API y Web, `.dockerignore`, `package.json` de la API, y los logs de Codex del 12 y 13-nov (`~/.codex/sessions/2026/11/1[23]`), en especial la sesión `rollout-2026-11-13T00-33-15` (12 corridas de `verify`). Solo lectura: no corrí `verify`.
 
@@ -16,7 +18,7 @@ Lo que más tiempo consume no son los tests: es **instalar dependencias dentro d
    - **Los tests**: `pnpm lint && pnpm test --runInBand` (stage `checks`) → 64 a 245 s; `react-router build && node --test` de la Web → 80 a 150 s.
 3. El `Dockerfile` de la API hace `COPY . .` **antes** de `pnpm install` (líneas 5-6 y en `production-deps`). Cualquier cambio de archivo invalida la capa de instalación, incluso con `VERIFY_RAPIDO=1`. Ningún Dockerfile usa `RUN --mount=type=cache`.
 4. Los `.dockerignore` de API y Web sí excluyen `node_modules`; el contexto de build no es el problema.
-5. El `AGENTS.md` de DonFinancio no tiene la línea `Comprobación rápida`, así que el Nivel 1 (tipos, lint y tests del host, segundos) **no existe** ahí. Todo cambio, aunque sea una línea, pasa por Docker.
+5. El `AGENTS.md` de Proyecto.Finanzas no tiene la línea `Comprobación rápida`, así que el Nivel 1 (tipos, lint y tests del host, segundos) **no existe** ahí. Todo cambio, aunque sea una línea, pasa por Docker.
 6. La API tiene 8 archivos de pruebas (≈ 700 líneas, jest `--runInBand`); el peso está en `verificacion/recorrido.mjs` (1525 líneas, un solo recorrido de navegador). Un fallo lo corta y obliga a repetir todo.
 7. Ya medido antes: `verify-script.e2e-spec.ts` pasó aislada en 105 s y falló bajo carga por un `spawnSync` de 10 s. Se resolvió en F07.
 8. La npm de este entorno descarga a ~21 KiB/s (aviso `[WARN] Tarball download average speed 21 KiB/s` en el log del build). Eso multiplica el costo de cada instalación.
@@ -37,7 +39,7 @@ Lo que más tiempo consume no son los tests: es **instalar dependencias dentro d
 2. **Montar la caché de pnpm** con `RUN --mount=type=cache,target=/root/.local/share/pnpm/store` (o la ruta real del store). Incluso sin caché de capas, las descargas no se repiten. Ahorro estimado: lo que hoy se va en red lenta.
 3. **Eliminar la segunda instalación de la API**: obtener las dependencias de producción desde el stage `build` (`pnpm prune --prod` o `pnpm deploy`) en vez de reinstalar. Ahorro estimado: 5 a 10 min por corrida sin caché.
 4. **Definir la `Comprobación rápida` en el `AGENTS.md`** (host, sin Docker): lint y jest de la API, tests de la Web. Un cambio chico se verifica en segundos. El comando exacto hay que decidirlo tras probar en el host; falta saber si jest necesita PostgreSQL.
-5. **Dejar el nivel 3 (sin caché) solo para la corrida final de aceptación** y que el plan de cada tramo declare el Nivel 2. Ya lo manda `planificar-cambio` (regla 13); hoy DonFinancio lo viola en F06.
+5. **Dejar el nivel 3 (sin caché) solo para la corrida final de aceptación** y que el plan de cada tramo declare el Nivel 2. Ya lo manda `planificar-cambio` (regla 13); hoy Proyecto.Finanzas lo viola en F06.
 6. **Dividir el recorrido por bloques** o hacer que acumule fallos en vez de cortar en el primero. Ahorro estimado: 1 a 3 min por cada reintento de fallo en el recorrido.
 
 No tocar: el aislamiento entre dos identidades, la idempotencia y el cálculo financiero. Ninguna de las recomendaciones anteriores los reduce.
@@ -51,4 +53,4 @@ No tocar: el aislamiento entre dos identidades, la idempotencia y el cálculo fi
 - No verifiqué si el producto de la portada tiene defectos reales; solo el costo del ciclo.
 
 ## Siguiente
-Dos planes separados en DonFinancio: (a) Dockerfiles y caché (recomendaciones 1 a 3); (b) `Comprobación rápida` y disciplina de niveles (4 y 5). Primero conviene medir una corrida rápida real tras el cambio de Dockerfile, para confirmar el ahorro.
+Dos planes separados en Proyecto.Finanzas: (a) Dockerfiles y caché (recomendaciones 1 a 3); (b) `Comprobación rápida` y disciplina de niveles (4 y 5). Primero conviene medir una corrida rápida real tras el cambio de Dockerfile, para confirmar el ahorro.

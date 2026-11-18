@@ -1,6 +1,9 @@
 # task-04 — Comprobación del formato de BACKLOG.md y STATUS.md
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `BACKLOG.md` y `STATUS.md` son los archivos con los que el coordinador decide el paso siguiente; si cambian de forma, el flujo se desorienta sin avisar. Esta tarea (tras task-03, que ya añadió un archivo de prueba) añade validadores deterministas de su estructura (`definitions/WORKFLOW.md` §3 y §4) y una prueba que los aplica a los archivos reales si existen. Entra en la verificación rápida por el glob de `rapida.sh`.
 
@@ -45,7 +48,7 @@ Fuera de alcance: modificar `BACKLOG.md`, `STATUS.md`, `WORKFLOW.md`, las skills
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/formato-flujo.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node --input-type=module -e 'import fs from "node:fs"; import {validarBacklog,validarStatus} from "./pruebas/comprobaciones/formato-flujo.mjs"; console.log(validarBacklog(fs.readFileSync("definitions/BACKLOG.md","utf8")).length===0?"OK":"MAL", validarStatus(fs.readFileSync("definitions/STATUS.md","utf8")).length===0?"OK":"MAL")'
 node --input-type=module -e 'import fs from "node:fs"; import {validarBacklog} from "./pruebas/comprobaciones/formato-flujo.mjs"; const t=fs.readFileSync("definitions/BACKLOG.md","utf8").replace("| pendiente | |\n| F03","| pendiente | → |\n| F03"); console.log(validarBacklog(t).length>0?"RECHAZADO":"ACEPTADO")'
@@ -55,7 +58,7 @@ Salida esperada: `ℹ fail 0` con `ℹ pass` igual a `ℹ tests`; `OK OK`; `RECH
 
 ## Evidencia
 
-Corrida nueva desde `/Users/franco/Codes/flucastr/Flucastr.AI` (zsh). Se pega la salida real de cada orden de *Verificación* tal cual. No se usa `PIPESTATUS`: los códigos de salida se midieron en una corrida aparte con `>/dev/null` y `$?`.
+Corrida nueva desde `/Users/persona/Codes/flucastr/Flucastr.AI` (zsh). Se pega la salida real de cada orden de *Verificación* tal cual. No se usa `PIPESTATUS`: los códigos de salida se midieron en una corrida aparte con `>/dev/null` y `$?`.
 
 Verificación 1, `node --test pruebas/comprobaciones/formato-flujo.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"`:
 ```
@@ -103,8 +106,8 @@ Criterios:
 4. Cumplido: `rapida.sh` sale con 0, `ℹ fail 0` y `rapida: 9 archivos en 15 s (tope 30 s)`, con 15 ≤ 30.
 
 ## Notas
-- Reabierta por Franco: estado `aprobada`, pasó a `en curso` y luego a `lista para revisión`.
-- Bloqueo previo, resuelto (resumen): la ejecución anterior quedó `bloqueada` porque `definitions/BACKLOG.md` estaba en borrador con 7 features y con texto tras «borrador», y la regla 2 (1 a 6 features) y la regla 5 (`Estado del documento`) lo rechazaban. Franco corrigió el backlog a 6 features y lo aprobó (`Estado del documento: aprobado`). Esta corrida pasa; no edité `BACKLOG.md` ni `STATUS.md`.
+- Reabierta por la persona usuaria: estado `aprobada`, pasó a `en curso` y luego a `lista para revisión`.
+- Bloqueo previo, resuelto (resumen): la ejecución anterior quedó `bloqueada` porque `definitions/BACKLOG.md` estaba en borrador con 7 features y con texto tras «borrador», y la regla 2 (1 a 6 features) y la regla 5 (`Estado del documento`) lo rechazaban. la persona usuaria corrigió el backlog a 6 features y lo aprobó (`Estado del documento: aprobado`). Esta corrida pasa; no edité `BACKLOG.md` ni `STATUS.md`.
 - Revisión contra la tarea: `formato-flujo.mjs` y `formato-flujo.test.mjs` ya cubrían las reglas 1 a 5 de `validarBacklog`, las reglas 1 a 4 de `validarStatus`, las muestras válidas, las 9 variantes negativas y las dos pruebas sobre los archivos reales con `t.skip()`. No cambié código.
 - Hueco menor: la tarea no decía si `aprobado` vale como estado de documento. El validador ya lo acepta (`/^Estado del documento: (borrador|aprobado)\s*$/m`), así que lo dejé como está; la prueba real pasa con esa línea.
 - La verificación 3 ahora rechaza por la regla de dos `→` sobre un backlog real válido. Antes había un error previo, así que el rechazo no probaba esa regla.

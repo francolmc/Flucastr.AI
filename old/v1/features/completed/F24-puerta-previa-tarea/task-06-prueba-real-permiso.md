@@ -1,8 +1,11 @@
 # task-06 — Prueba real del permiso con el arnés
 repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-La regla de permisos de Claude Code compara el texto del comando; la decisión de Franco (2026-11-01) exige comprobarlo de verdad y no a mano: con el arnés `pruebas/lanzar-coordinador-claude.sh`, el comando del lanzador fijo debe ser aceptado y uno distinto, rechazado. Esta tarea añade el cuarto patrón a `--allowedTools` del arnés, corre las dos pruebas y deja el informe.
+La regla de permisos de Claude Code compara el texto del comando; la decisión de la persona usuaria (2026-11-01) exige comprobarlo de verdad y no a mano: con el arnés `pruebas/lanzar-coordinador-claude.sh`, el comando del lanzador fijo debe ser aceptado y uno distinto, rechazado. Esta tarea añade el cuarto patrón a `--allowedTools` del arnés, corre las dos pruebas y deja el informe.
 
 ## Contexto
 - Leer: `definitions/ARCHITECTURE.md`, subsección «Raíz del kit y puerta previa de tarea (F24…)», viñeta «Verificación obligatoria». De task-05 (`depende_de`), solo sus *Notas*.
@@ -15,7 +18,7 @@ La regla de permisos de Claude Code compara el texto del comando; la decisión d
 - Se añade `'Bash(node ~/.flucastr-ai/validar-tarea.mjs *)'` a `--allowedTools` y se actualiza el comentario del arnés («cuatro patrones»).
 - Dos corridas, una por caso, cada una con fixture nuevo en `pruebas/.temporales/` y su `FLUCASTR_RECORD_FILE`: (A) prompt «Corre exactamente este comando y muéstrame la salida: node ~/.flucastr-ai/validar-tarea.mjs features/F02-otra/task-01-otra.md»; (B, control negativo) mismo prompt con `node ~/.flucastr-ai/otro.mjs features/F02-otra/task-01-otra.md`.
 - Criterio: en A, el `tool_use` de Bash con ese comando existe y su `tool_result` no es una negativa de permiso (da igual si el lanzador ejecuta o falla porque el kit no está instalado: lo que se prueba es el permiso). En B, el `tool_result` es una negativa de permiso (`is_error: true`, texto sobre permisos) o el comando no se ejecuta. Se copia la negativa literal al informe.
-- Las corridas usan modelo y las exige la decisión de Franco; es la única prueba con modelo de F24. Si `claude` no está disponible o `CLAUDE_CODE_SUBAGENT_MODEL` está definida, la tarea queda `bloqueada` y se avisa.
+- Las corridas usan modelo y las exige la decisión de la persona usuaria; es la única prueba con modelo de F24. Si `claude` no está disponible o `CLAUDE_CODE_SUBAGENT_MODEL` está definida, la tarea queda `bloqueada` y se avisa.
 
 ## Decisiones abiertas
 Ninguna.
@@ -73,7 +76,7 @@ $ node --test pruebas/lanzadores.test.mjs
 ℹ fail 0
 ```
 
-Criterio 2: cumple literalmente (A aceptado; B sin ejecutarse). Limitación: B lo rechaza el modelo por el texto del agente, no el permiso de `--allowedTools`; el control no aísla el permiso. Decisión de Franco si quiere un control que sí lo haga.
+Criterio 2: cumple literalmente (A aceptado; B sin ejecutarse). Limitación: B lo rechaza el modelo por el texto del agente, no el permiso de `--allowedTools`; el control no aísla el permiso. Decisión de la persona usuaria si quiere un control que sí lo haga.
 
 ## Notas
 Hueco menor de la primera ejecución: fixtures en `pruebas/.temporales/t06-caso-a` y `t06-caso-b` (un fixture por caso). Se conservan; la repetición usa fixtures nuevos (`-r2`).

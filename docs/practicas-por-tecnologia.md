@@ -1,5 +1,7 @@
 # Prácticas por tecnología
 
+> Los nombres se anonimizaron; se conservan fechas y cifras.
+
 Lista que el principal consulta al revisar un cambio que toca una tecnología de aquí (`agentes/principal.md`, paso 5). Sirve para anotar «Mejora sugerida», no para bloquear.
 
 Reglas de la lista:
@@ -12,22 +14,22 @@ Reglas de la lista:
 
 ### Dependencias antes del código
 - Práctica: en cada Dockerfile, copiar primero el manifiesto y el lockfile, instalar dependencias y recién después copiar el código.
-- Fuente: `docs/investigaciones/auditoria-verificacion-general/propuesta-final.md` (DonFinancio: build con caché de ~27 min a 109 s, 26 pasos `CACHED`; medido el 2026-11-14).
+- Fuente: `docs/investigaciones/auditoria-verificacion-general/propuesta-final.md` (Proyecto.Finanzas: build con caché de ~27 min a 109 s, 26 pasos `CACHED`; medido el 2026-11-14).
 - Nivel: medido
 
 ### Caché de paquetes
 - Práctica: montar la caché del gestor de paquetes en el `RUN` de instalación (`RUN --mount=type=cache`), por ejemplo el store de pnpm.
-- Fuente: [BuildKit, sintaxis del Dockerfile](https://github.com/moby/buildkit/blob/1e14e513236d79803c79478a8720635967a34be4/frontend/dockerfile/docs/syntax.md); receta probada en DonFinancio (`docs/investigaciones/auditoria-verificacion-general/propuesta-final.md`, §4). Los cache mounts no viajan en la exportación de caché a registro.
+- Fuente: [BuildKit, sintaxis del Dockerfile](https://github.com/moby/buildkit/blob/1e14e513236d79803c79478a8720635967a34be4/frontend/dockerfile/docs/syntax.md); receta probada en Proyecto.Finanzas (`docs/investigaciones/auditoria-verificacion-general/propuesta-final.md`, §4). Los cache mounts no viajan en la exportación de caché a registro.
 - Nivel: oficial
 
 ### Sin `COPY . .` antes de instalar
 - Práctica: no copiar todo el proyecto (`COPY . .`) antes del paso de instalación; cualquier cambio de archivo invalida la capa de instalación.
-- Fuente: `docs/investigaciones/auditoria-tests-donfinancio/hallazgo.md` (punto 3: el Dockerfile de la API hace `COPY . .` antes de `pnpm install`).
+- Fuente: `docs/investigaciones/auditoria-tests-finanzas/hallazgo.md` (punto 3: el Dockerfile de la API hace `COPY . .` antes de `pnpm install`).
 - Nivel: medido
 
 ### Límites y `tmpfs` de la base
 - Práctica: a la base de datos con `tmpfs` darle tamaño o límite de memoria, o justificar por qué no lo necesita, porque los datos cuentan contra la RAM del contenedor y de WSL.
-- Fuente: `docs/investigaciones/auditoria-verificacion-general/propuesta-final.md`, §2 (DonFinancio: `tmpfs` sin límite). Hipótesis del P1017, sin probar.
+- Fuente: `docs/investigaciones/auditoria-verificacion-general/propuesta-final.md`, §2 (Proyecto.Finanzas: `tmpfs` sin límite). Hipótesis del P1017, sin probar.
 - Nivel: inferencia
 
 ### Limpieza de caché

@@ -1,6 +1,8 @@
 # Flucastr.AI — cómo funciona (2026-11-14)
 
-Documento de lectura para Franco. Todo lo que dice "medido" salió de corridas reales de esta semana; lo que dice "no probado" no lo hemos visto funcionar. Está escrito desde el código y los textos del repo, no desde la memoria.
+> Los nombres se anonimizaron; se conservan fechas y cifras.
+
+Documento de lectura para la persona usuaria. Todo lo que dice "medido" salió de corridas reales de esta semana; lo que dice "no probado" no lo hemos visto funcionar. Está escrito desde el código y los textos del repo, no desde la memoria.
 
 ## 1. Qué es, en una frase
 Un kit de dos agentes (`principal` y `constructor`) y seis skills que se instalan en Claude Code, Pi y Codex. El principal piensa y revisa; el constructor edita código siguiendo un plan escrito; tú apruebas el plan y revisas la evidencia. Lo único que viaja entre los agentes es `cambios/<nombre>/plan.md`.
@@ -20,18 +22,18 @@ Un kit de dos agentes (`principal` y `constructor`) y seis skills que se instala
 
 ## 3. El ciclo de un cambio
 ```
- Franco pide algo
+ la persona usuaria pide algo
         │
         ▼
  principal: entiende, lee AGENTS.md, diagnostica con evidencia
         │
-        ├── ¿cambio pequeño? (6 condiciones) ──► lo edita en línea ──► Franco commitea
+        ├── ¿cambio pequeño? (6 condiciones) ──► lo edita en línea ──► la persona usuaria commitea
         │
         ▼ (todo lo demás)
  principal escribe cambios/<n>/plan.md  (estado: borrador)
         │
         ▼
- ★ PUERTA 1: Franco dice "sí" ──► estado: aprobado
+ ★ PUERTA 1: la persona usuaria dice "sí" ──► estado: aprobado
         │
         ▼
  principal comprueba base limpia ──► lanza al constructor (subagente o ventana propia)
@@ -43,10 +45,10 @@ Un kit de dos agentes (`principal` y `constructor`) y seis skills que se instala
  principal revisa: diff + Aceptación (+ verify una vez si el riesgo es alto)
         │            └─ defecto ──► DEVUELTO (hasta 2 relanzamientos)
         ▼
- ★ PUERTA 2: Franco revisa la evidencia ──► principal cierra (AGENTS.md + mueve a hechos/)
+ ★ PUERTA 2: la persona usuaria revisa la evidencia ──► principal cierra (AGENTS.md + mueve a hechos/)
         │
         ▼
- Franco hace commit, push y PR
+ la persona usuaria hace commit, push y PR
 ```
 Por tramos: un plan largo se parte en `### Tramo N`; el constructor hace uno, el principal lo revisa, y recién entonces avanza.
 
@@ -66,7 +68,7 @@ Reglas del buen plan (resumen de las 14 de `planificar-cambio`): un solo plan po
 
 ## 6. Verificación en tres niveles
 1. **Nivel 1 `Comprobación rápida`** (línea de `AGENTS.md`): lint y pruebas en el host, sin Docker, segundos.
-2. **Nivel 2 `VERIFY_RAPIDO=1 ./verify`**: Docker con caché. Medido en DonFinancio: 109 s con los Dockerfiles nuevos.
+2. **Nivel 2 `VERIFY_RAPIDO=1 ./verify`**: Docker con caché. Medido en Proyecto.Finanzas: 109 s con los Dockerfiles nuevos.
 3. **Nivel 3 `./verify` sin caché**: aceptación final. Medido: 22–24 min, igual que antes (la caché de pnpm no se reutiliza con `--no-cache`).
 
 "Hecho" = `./verify` pasa desde cero. Tope del constructor: 3 corridas finales.
@@ -107,7 +109,7 @@ Hoy: principal = nivel medio, esfuerzo `medium`; constructor = nivel bajo, esfue
 | 1 | Corregir las 4 inconsistencias de arriba (y un chequeo en `verify` para modelos/esfuerzo) | Hallazgo directo de hoy | Bajo |
 | 2 | Reducir el costo de revisión (6,6× el del constructor): prefijo fijo de ≈19 mil tokens | Medido en el piloto A4 | Medio; hipótesis sin probar |
 | 3 | Evitar que el recorrido de navegador falle sin decir qué recibió (`ERR_ASSERTION` mudo) | 4 devoluciones en F10 y 2 fallos de hoy | Bajo, en cada proyecto |
-| 4 | Aplicar la receta de Docker a Andes (6 de 7 Dockerfiles) y DASH `MobileRider` | `grep` por líneas; sin medir | Bajo por proyecto |
+| 4 | Aplicar la receta de Docker a Proyecto.Servicios (6 de 7 Dockerfiles) y Proyecto.Móvil `Aplicación móvil` | `grep` por líneas; sin medir | Bajo por proyecto |
 | 5 | Declarar `Comprobación rápida` en los proyectos que no la tienen | Ningún proyecto la declaraba | Bajo |
 | 6 | `una-espera-write-stdin` (avisos de permiso de Codex por cada `write_stdin`) | 179–330 llamadas medidas por sesión | Medio |
 | 7 | Cortar tramos por capa | Propuesta de un informe externo; sin medir | Bajo, solo texto |

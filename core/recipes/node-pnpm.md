@@ -1,16 +1,16 @@
-# Receta de Node/pnpm
+# Node/pnpm Recipe
 
-Receta de Node/pnpm; ejemplo, no obligación. Léela solo si el stack del proyecto es Node. El contrato de verificación sigue en `nucleo/contrato/verificacion.md`.
+This Node/pnpm recipe is an example, not a requirement. Read it only when the project's stack is Node. The verification contract remains in `nucleo/contrato/verificacion.md`.
 
-## Instalación desde el lock
+## Install from the lockfile
 
-- Con `package-lock.json`: `npm ci`.
-- Con `pnpm-lock.yaml`: `pnpm install --frozen-lockfile`.
+- With `package-lock.json`: `npm ci`.
+- With `pnpm-lock.yaml`: `pnpm install --frozen-lockfile`.
 
-Instalar sin el lock puede resolver otras versiones que las probadas.
+Installing without the lockfile may resolve different versions from the ones that were tested.
 
-## Dependencias declaradas
+## Declared dependencies
 
-Declara en `package.json` todo lo que el código importa directamente. Un paquete que solo llega como dependencia de otro (por ejemplo `express` vía el adaptador de NestJS) funciona en tu máquina y falla en un build limpio.
+Declare in `package.json` every package imported directly by the code. A package that arrives only as another package's dependency (for example, `express` through the NestJS adapter) works on your machine and fails in a clean build.
 
-En TypeScript, la regla `import/no-extraneous-dependencies` de ESLint lo detecta.
+In TypeScript, ESLint's `import/no-extraneous-dependencies` rule detects this.

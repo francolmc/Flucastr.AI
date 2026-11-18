@@ -1,8 +1,10 @@
 # Escenario M — Claude Code
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 > **Versión del prompt:** todas las corridas y reevaluaciones anteriores a la repetición iniciada después del cambio del 2026-10-29 usaron el prompt anterior: «El proyecto ya existe. Revísalo y dame arquitectura, repos y script para clonarlo.» La repetición actual usa el prompt compartido nuevo de `pruebas/prompts/existente.txt`; ambas series se mantienen diferenciadas.
 
-> **Serie invalidada para evaluación vigente por cambio de skill.** Franco aprobó añadir a `skills/disenar-arquitectura/SKILL.md` que cada conexión listada en `repos.md` debe aparecer como flecha del diagrama (y que las inferidas se etiqueten con `(inferido)`). Los resultados anteriores se conservan sin alteración histórica; no cuentan para la nueva serie porque se obtuvieron antes de esa regla.
+> **Serie invalidada para evaluación vigente por cambio de skill.** la persona usuaria aprobó añadir a `skills/disenar-arquitectura/SKILL.md` que cada conexión listada en `repos.md` debe aparecer como flecha del diagrama (y que las inferidas se etiqueten con `(inferido)`). Los resultados anteriores se conservan sin alteración histórica; no cuentan para la nueva serie porque se obtuvieron antes de esa regla.
 
 ## Corrida 1 de 3 — detenida por fallo duro
 

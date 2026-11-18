@@ -40,7 +40,7 @@ export function validarStatusCompacto(texto) {
 
   if (lineas[0] !== '# Estado') motivos.push('La línea 1 debe ser «# Estado».');
 
-  const cuerpo = lineas.slice(1);
+  const cuerpo = lineas.slice(1).map((linea) => linea.replace(/^Espera a usuario: /, 'Espera a Franco: '));
 
   CLAVES.forEach((clave, i) => {
     const nombre = clave.replace(/: $/, '');

@@ -5,15 +5,20 @@ base: main
 repos: [.]
 ejecutor: constructor
 ---
+
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Contrato verificable de planificación y ejecución
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 
 ## Objetivo
 Corregir las ambigüedades del camino planificación → traspaso → ejecución → aceptación, y probar los mecanismos deterministas que hoy permiten falsos positivos. Este primer cambio no promete una mejora de fiabilidad del modelo: deja un contrato coherente y una base para medirla posteriormente.
 
 ## Supuestos
-- Se mantiene el constructor y su modelo/esfuerzo actuales; comparar niveles requerirá otro plan si Franco lo pide.
-- No se automatizan llamadas pagadas a modelos en `verify`; si Franco quiere una evaluación empírica en este cambio, cambian alcance y duración.
-- La investigación existente forma parte del cambio documental; si Franco prefiere excluirla del commit, se retira del alcance antes de ejecutar.
+- Se mantiene el constructor y su modelo/esfuerzo actuales; comparar niveles requerirá otro plan si la persona usuaria lo pide.
+- No se automatizan llamadas pagadas a modelos en `verify`; si la persona usuaria quiere una evaluación empírica en este cambio, cambian alcance y duración.
+- La investigación existente forma parte del cambio documental; si la persona usuaria prefiere excluirla del commit, se retira del alcance antes de ejecutar.
 
 ## Alcance
 Modificar `agentes/principal.md`, `agentes/constructor.md`, `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, `verify`, `AGENTS.md` y `README.md` (solo explicar contrato y tipos de prueba).
@@ -130,7 +135,7 @@ Revisión manual A6, A7 y A9 anotada en Notas; revisión externa del principal a
 - A6 PASA: inspección del agente y skill confirma Git de lectura y relecturas permitidos, pausa con pendientes solo ante bloqueos, verificación antes de marcar su paso. 8c restaura sus tres archivos y comprueba baseline positivo antes de cada mutación; no queda contaminación del fixture.
 - A7 PASA: plantilla enlaza escenario A1 a aceptación, resultado observable, comando/check y resultado esperado; exige sensibilidad relevante y no vacuidad, admite revisión manual explícita.
 - A9 PASA: documentación distingue comprobaciones deterministas de fiabilidad no medida; protocolo incluye modelo/esfuerzo, aislamiento, oráculo externo y fixture no vacío que representa el falso positivo original. No se ejecutaron ensayos con modelos ni se cambió su configuración.
-- Todos los archivos previstos existen, sin cambios fuera del alcance. Puerta 2 pendiente de Franco; no archivar ni hacer commit antes de su aprobación de esta evidencia.
+- Todos los archivos previstos existen, sin cambios fuera del alcance. Puerta 2 pendiente de la persona usuaria; no archivar ni hacer commit antes de su aprobación de esta evidencia.
 
 ### Segunda revisión del principal: aislar las nuevas negativas de 8c
 - Estado reconstruido: rama fix/fiabilidad-constructor; siete archivos rastreados modificados; documentos y prueba previstos presentes, sin archivos fuera del alcance. `./verify` independiente exit 0 y A1–A5 pasan. Las correcciones del agente y del evaluador están presentes.
@@ -145,7 +150,7 @@ Revisión manual A6, A7 y A9 anotada en Notas; revisión externa del principal a
 
 - Investigación: `docs/investigaciones/fiabilidad-constructor.md`, con fuentes primarias y separación de hechos/hipótesis.
 - Verificación inicial durante planificación: `./verify`, exit 0, `VERIFY OK`.
-- Aprobado por Franco. Base comprobada: main, `git fetch origin` correcto, `HEAD..origin/main` = 0; rama fix/fiabilidad-constructor aún inexistente. Sin cambios fuera de esta carpeta.
+- Aprobado por la persona usuaria. Base comprobada: main, `git fetch origin` correcto, `HEAD..origin/main` = 0; rama fix/fiabilidad-constructor aún inexistente. Sin cambios fuera de esta carpeta.
 - Informe guardado temporalmente en `cambios/fiabilidad-constructor/investigacion.md` para cumplir la base limpia. Al empezar, restaurarlo mediante movimiento a `docs/investigaciones/fiabilidad-constructor.md` (crear directorios si faltan); no dejar copia temporal. Este movimiento forma parte del alcance documental aprobado.
 - Errores previsibles: si una prueba textual falla por una regla retirada, actualizar ese check con su negativa correspondiente, no restaurar la contradicción. Si falla la suite en otro subsistema, diagnosticar; corregir solo si relacionado y dentro del alcance, en otro caso PAUSA con evidencia.
 - La verificación inicial detectó checks 8c y 8f desactualizados; se ajustaron al contrato consolidado. En esta reanudación, se cerraron los hallazgos A6, A5 y el fixture empírico; `node pruebas/contrato-constructor.mjs` y la corrida final de `./verify` pasaron. A3 falla con status no-cero por ruta inexistente; los errores de spawn/señales se rechazan aparte.

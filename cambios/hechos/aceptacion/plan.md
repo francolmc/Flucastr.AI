@@ -8,6 +8,8 @@ tipo: codigo
 ---
 # Capacidad Aceptación en el kit
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Que el kit declare en su `AGENTS.md` una línea `Aceptación:` cuyo comando corre un archivo por flujo, se filtra por nombre, no corta al primer fallo y resume todos los fallos al final (contrato, capacidad Aceptación). Observable: rompes una suite a propósito y el comando falla nombrando el flujo.
 
@@ -146,6 +148,6 @@ exit 0
 
 ## Resumen de cierre (para el principal)
 
-Hecho: pasos 1, 2 y 3. A1 a A5 pasan con `node --test pruebas/aceptacion/*.test.mjs` y `./verify` pasa (VERIFY OK, exit 0). Pendiente para el principal: revisar el plan y archivarlo en `cambios/hechos/` tras la aprobación de Franco. No hay bugs de producto.
+Hecho: pasos 1, 2 y 3. A1 a A5 pasan con `node --test pruebas/aceptacion/*.test.mjs` y `./verify` pasa (VERIFY OK, exit 0). Pendiente para el principal: revisar el plan y archivarlo en `cambios/hechos/` tras la aprobación de la persona usuaria. No hay bugs de producto.
 
 - Devuelto por PAUSA (diseño): `node --test <directorio>/` falla en Node 24.22.1 (MODULE_NOT_FOUND). Decisión del principal: opción 1, glob `pruebas/aceptacion/*.test.mjs`. Relanzado y completado: pasos 1 a 3 hechos, A1 a A5 y `./verify` en verde.

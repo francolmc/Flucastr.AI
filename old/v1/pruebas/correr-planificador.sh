@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Corrida del «planificador» (F42, task-06). Solo MIDE: crea el fixture de task-05 (cinco módulos en src/,
 # feature F01 sin tareas), lanza al planificador una vez con el prompt de task-05 usando el lanzador de la
-# herramienta y escribe el informe. La corrida con modelo real la hace Franco (task-07); las pruebas usan
+# herramienta y escribe el informe. La corrida con modelo real la hace la persona usuaria (task-07); las pruebas usan
 # un modelo simulado.
 # Uso: bash pruebas/correr-planificador.sh {claude-code|pi}
 # Escribe el informe con el número libre siguiente; imprime «informe: <ruta>» y «Veredicto: OK|FALLA».

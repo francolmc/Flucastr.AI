@@ -33,7 +33,7 @@ Fuera de alcance: lanzadores y corridas con modelo (task-05, task-06); cambiar `
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/coordinador-ejecucion.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 d="$(mktemp -d)"; bash pruebas/fixtures/coordinador.sh "$d/f" && (cd "$d/f" && node scripts/archivar.mjs | grep -E "F01|F02"); rm -rf "$d"
 git status --short pruebas
@@ -46,7 +46,7 @@ Rama: `git branch --show-current` → `feature/F12-coordinador-ejecuta-scripts` 
 
 Verificación (salida real, última pasada):
 ```
-$ cd /Users/franco/Codes/flucastr/Flucastr.AI
+$ cd /Users/persona/Codes/flucastr/Flucastr.AI
 $ node --test pruebas/comprobaciones/coordinador-ejecucion.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 ℹ tests 9
 ℹ pass 9

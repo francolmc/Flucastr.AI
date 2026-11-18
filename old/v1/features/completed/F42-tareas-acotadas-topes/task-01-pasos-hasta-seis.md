@@ -1,6 +1,9 @@
 # task-01 — Tope de 6 pasos en el validador de formato
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 La regla 6 de `scripts/formato-tarea.mjs` acepta hoy de 1 a 8 pasos. Pasa a 1–6 para toda tarea vigente (no `hecha` ni `cancelada`); las `hecha` y `cancelada` conservan 1–8 y no se revalidan. Primera pieza de F42: es la única que no necesita leer archivos.
 
@@ -8,14 +11,14 @@ La regla 6 de `scripts/formato-tarea.mjs` acepta hoy de 1 a 8 pasos. Pasa a 1–
 - Tocar: `scripts/formato-tarea.mjs`, `pruebas/comprobaciones/formato-tarea.test.mjs`
 - Leer: `scripts/formato-tarea.mjs@165-12`, `pruebas/comprobaciones/formato-tarea.test.mjs@56-30`
 - Regla vigente: comentario «Regla 6: entre 1 y 8 pasos numerados» y mensaje «`«Pasos» debe tener entre 1 y 8 líneas numeradas; tiene ${pasos}.`». La variable `estado` ya la devuelve `revisarCabeceraYSecciones`. La variante de prueba «regla 6: nueve pasos» (línea 58) debe seguir fallando.
-- Inventario de tareas con 7–8 pasos (confirmado el 2026-11-05 por el planificador): las 22 tareas de F38, F39 y F41 están `hecha` y ninguna pasa de 6 pasos; no hay nada que rehacer. Las `hecha` quedan exentas por decisión de Franco (`definitions/F42-TOPES.md`, «Decisiones de Franco» 3).
+- Inventario de tareas con 7–8 pasos (confirmado el 2026-11-05 por el planificador): las 22 tareas de F38, F39 y F41 están `hecha` y ninguna pasa de 6 pasos; no hay nada que rehacer. Las `hecha` quedan exentas por decisión de la persona usuaria (`definitions/F42-TOPES.md`, «Decisiones de Franco» 3).
 - Fuente: definitions/WORKFLOW.md «6. La tarea: completa y acotada»
 - Requiere: runtime:node@25
 
 ## Decisiones ya tomadas
 - Constantes exportadas `MAX_PASOS = 6` y `MAX_PASOS_EXENTAS = 8`; estados exentos: `hecha` y `cancelada`.
 - Mensaje nuevo: `«Pasos» debe tener entre 1 y ${max} líneas numeradas; tiene ${pasos}.` con `max` según el estado.
-- Error directo, sin aviso previo (Franco, 2026-11-05). No se toca la regla 7 (criterios ≤5) ni la 11 (`Tocar` ≤3), que ya existen.
+- Error directo, sin aviso previo (la persona usuaria, 2026-11-05). No se toca la regla 7 (criterios ≤5) ni la 11 (`Tocar` ≤3), que ya existen.
 
 ## Decisiones abiertas
 Ninguna.

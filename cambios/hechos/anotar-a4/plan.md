@@ -8,7 +8,9 @@ tipo: docs
 ---
 # Anotar A4 de `kit run` como no cumplido
 
-Aprobado por Franco el 2026-11-10. Va en la misma rama del piloto (`docs/piloto-kit-run`), que ya tiene `docs/kit-run.md` sin commit: no tocar esos archivos ni `cambios/`.
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
+Aprobado por la persona usuaria el 2026-11-10. Va en la misma rama del piloto (`docs/piloto-kit-run`), que ya tiene `docs/kit-run.md` sin commit: no tocar esos archivos ni `cambios/`.
 
 ## Supuestos
 - Datos del piloto (`node scripts/uso.mjs --sesiones`, 2026-11-10, Codex, plan `cambios/piloto-kit-run/plan.md`): principal `gpt-6.1-sol` 1,3784 + 1,2508 = 2,6292 créditos (2 revisiones); constructor `gpt-6-luna` 0,2264 + 0,1702 = 0,3966 créditos (2 corridas). Razón ≈ 6,6; el criterio era < 3. Ediciones y sondeos del principal: 0.

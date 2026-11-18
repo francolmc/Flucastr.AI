@@ -1,6 +1,9 @@
 # task-07 — `registrar.mjs`: estado `cancelada` y evento `cancelacion`
 repo: Flucastr.AI   depende_de: task-03, task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `registrar.mjs` descarta (cuenta como `descartados`) las tareas con `estado: cancelada` porque no está en `ESTADOS_TAREA`. Esta tarea lo agrega y emite el evento `cancelacion` con el motivo de la línea `Cancelada:`, para medir cuántas tareas se descartan y si lo hacen con motivo.
 
@@ -14,7 +17,7 @@ repo: Flucastr.AI   depende_de: task-03, task-06   estado: hecha
 - Fuente: definitions/DIAGNOSTICO-BLOQUEOS.md «5. Pieza 3 — Telemetría que da pistas»
 
 ## Decisiones ya tomadas
-- `ESTADOS_TAREA` agrega `cancelada` al final; `POR_DE_ESTADO.cancelada = 'franco'` (inferido: solo Franco la pide, igual que `aprobada` y `hecha`).
+- `ESTADOS_TAREA` agrega `cancelada` al final; `POR_DE_ESTADO.cancelada = 'franco'` (inferido: solo la persona usuaria la pide, igual que `aprobada` y `hecha`).
 - `ESQUEMA.cancelacion`: `fuente: 'notas'`, `requeridos: ['feature','tarea','sha']`, campo `motivo` con `valores: MOTIVOS_CANCELADA`. `claveDe('cancelacion')` devuelve `propios.motivo`.
 - `extraer` emite una `cancelacion` por tarea (la primera versión donde aparece una línea `Cancelada:` válida gana), aunque el estado de esa versión no sea todavía `cancelada`. Una tarea `cancelada` sin línea válida no emite `cancelacion` (así el informe detecta «cancelada sin motivo»).
 - `puertaDe` no cambia: pasar a `cancelada` no es una puerta.
@@ -75,7 +78,7 @@ exit 1
 - Corrida 1 (historia): pasos 1 a 4 hechos; la verificación falló solo en la prueba (13) por `git log --follow` (detección de renombre entre tareas parecidas: task-02 recibió `cancelacion motivo=obsoleta` de task-01). Defecto preexistente en `extraer`, fuera de *Alcance*, no corregido.
 Bloqueo: tipo=verificacion_x2; falta=-
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=falla; huecos=0; resultado=bloqueada; causa=verificacion_x2
-- Corrida 2: pasos 1 a 4 sin cambios en `scripts/registrar.mjs` ni en las pruebas (1)-(12). Prueba (13) reescrita según el Paso 4 con el escenario validado por el planificador (`/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/fcf8d866-8f65-4f96-abd5-83def002b359/scratchpad/nueva13.mjs`, leído como guía; no es de `Evita leer:`, se declara). Tres tareas de contenido distinto, cada una en su commit: task-01 c1 `aprobada` y c2 `cancelada` con `motivo=obsoleta`; task-02 c3 `cancelada` sin línea; task-03 c4 `cancelada` con `motivo=nuevo`. Comprueba también que repetir y `--reconstruir` dejan el archivo idéntico.
+- Corrida 2: pasos 1 a 4 sin cambios en `scripts/registrar.mjs` ni en las pruebas (1)-(12). Prueba (13) reescrita según el Paso 4 con el escenario validado por el planificador (`/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/fcf8d866-8f65-4f96-abd5-83def002b359/scratchpad/nueva13.mjs`, leído como guía; no es de `Evita leer:`, se declara). Tres tareas de contenido distinto, cada una en su commit: task-01 c1 `aprobada` y c2 `cancelada` con `motivo=obsoleta`; task-02 c3 `cancelada` sin línea; task-03 c4 `cancelada` con `motivo=nuevo`. Comprueba también que repetir y `--reconstruir` dejan el archivo idéntico.
 - Hueco menor: el título de (13) se amplió con «repetir y --reconstruir no duplican» para cubrir el criterio 2.
 - Verificación: 2 pasadas, ambas `ℹ fail 0`. Rápida (`pruebas/rapida.sh`): `ℹ tests 623`, `ℹ pass 616`, `ℹ fail 7`, con los 7 títulos conocidos y ninguno nuevo.
 - Modo yolo: sin rama, sin `git switch`, sin commit. No se tocó `definitions/STATUS.md`.

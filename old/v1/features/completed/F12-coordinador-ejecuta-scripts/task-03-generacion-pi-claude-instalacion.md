@@ -1,8 +1,11 @@
 # task-03 — Generación del `coordinador` en Pi y Claude Code, e instalación
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Tras task-02 el `tools:` del `coordinador` lleva tres patrones `Bash(...)`. Para Claude Code el agente generado debe conservarlos tal cual. Para Pi, Franco eligió la opción B (§3.1.1): `bash` completo sin restricción técnica; el agente generado para Pi debe declararlo de forma explícita (`Bash` sin patrones) en vez de arrastrar patrones que Pi no puede hacer cumplir y que darían una falsa sensación de contención. La tarea ajusta el generador y deja pruebas sin modelo de que ambas salidas son las esperadas y de que la instalación en entorno aislado las produce.
+Tras task-02 el `tools:` del `coordinador` lleva tres patrones `Bash(...)`. Para Claude Code el agente generado debe conservarlos tal cual. Para Pi, la persona usuaria eligió la opción B (§3.1.1): `bash` completo sin restricción técnica; el agente generado para Pi debe declararlo de forma explícita (`Bash` sin patrones) en vez de arrastrar patrones que Pi no puede hacer cumplir y que darían una falsa sensación de contención. La tarea ajusta el generador y deja pruebas sin modelo de que ambas salidas son las esperadas y de que la instalación en entorno aislado las produce.
 
 ## Contexto
 - Repo: este, único. Node 25, Bash.
@@ -36,7 +39,7 @@ Fuera de alcance: herramienta propia sin shell para Pi (opción C descartada); `
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/resolver-agentes.test.mjs pruebas/comprobaciones/modelos-agentes.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node scripts/resolver.mjs agente-pi agentes/coordinador.md | grep "^tools:"
 node scripts/resolver.mjs agente-claude agentes/coordinador.md | grep "^tools:"
@@ -64,7 +67,7 @@ model: claude-sonnet-5-5
 
 Verificación (salida real, tras el cambio):
 ```
-$ cd /Users/franco/Codes/flucastr/Flucastr.AI
+$ cd /Users/persona/Codes/flucastr/Flucastr.AI
 $ node --test pruebas/comprobaciones/resolver-agentes.test.mjs pruebas/comprobaciones/modelos-agentes.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 ℹ tests 10
 ℹ pass 10

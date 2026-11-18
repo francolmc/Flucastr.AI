@@ -8,13 +8,15 @@ tipo: codigo
 ---
 # Permisos de Docker Compose con opciones y reglas que se actualizan solas
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-Que Codex no pida permiso para `docker compose --project-name … --file … run …` (la forma real que usan Byteria y DonFinancio), y que una instalación normal refresque las reglas de los proyectos ya registrados, sin ir uno por uno.
+Que Codex no pida permiso para `docker compose --project-name … --file … run …` (la forma real que usan Proyecto.Plataforma y Proyecto.Finanzas), y que una instalación normal refresque las reglas de los proyectos ya registrados, sin ir uno por uno.
 
 ## Supuestos
-- Se permiten como prefijo `--project-name`, `-p`, `--file`, `-f`, `--env-file` y `--profile` tras `docker compose`. Es la misma exposición que ya dan `docker compose run/up/build`: cualquier compose del repo. Si Franco no la quiere, se quitan las opciones `--file` y `-f` y cambia un paso.
+- Se permiten como prefijo `--project-name`, `-p`, `--file`, `-f`, `--env-file` y `--profile` tras `docker compose`. Es la misma exposición que ya dan `docker compose run/up/build`: cualquier compose del repo. Si la persona usuaria no la quiere, se quitan las opciones `--file` y `-f` y cambia un paso.
 - `docker run` suelto sigue sin regla (el verify 3f lo exige). La vía para validar con navegador es un script de comando fijo, no `docker run`.
-- Los proyectos se toman del manifiesto del kit (`~/.flucastr-ai/manifiesto.txt`, líneas `codex-reglas`); hoy: DonFinancio, Byteria y DASH.
+- Los proyectos se toman del manifiesto del kit (`~/.flucastr-ai/manifiesto.txt`, líneas `codex-reglas`); hoy: Proyecto.Finanzas, Proyecto.Plataforma y Proyecto.Panel.
 
 ## Alcance
 Puede cambiar: `scripts/resolver.mjs` (lista `PREFIJOS_ALLOW_CODEX`), `instalar.sh` (refresco de reglas registradas), `skills/ejecutar-plan/SKILL.md`, `skills/planificar-cambio/SKILL.md`, `verify` (bloques 3f y 3g), `README.md` (una viñeta).
@@ -22,7 +24,7 @@ Fuera: `agentes/*.md`, `modelos.json`, `desinstalar.sh`, los proyectos que usan 
 
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque los cuatro sí de la prueba: requisitos y comprobaciones definidos, archivos accesibles, sin credenciales ni producción.
-- Evidencia (Byteria, sesión `rollout-2026-11-13T18-59-29`): 7 permisos en 8 min. `codex execpolicy check` con el comando real devuelve `matchedRules: []`; sin las opciones sí coincide con `["docker","compose","run"]`. Una variable de entorno delante (`COMPOSE_PROJECT_NAME=x docker compose run`) tampoco coincide, por eso no sirve como atajo.
+- Evidencia (Proyecto.Plataforma, sesión `rollout-2026-11-13T18-59-29`): 7 permisos en 8 min. `codex execpolicy check` con el comando real devuelve `matchedRules: []`; sin las opciones sí coincide con `["docker","compose","run"]`. Una variable de entorno delante (`COMPOSE_PROJECT_NAME=x docker compose run`) tampoco coincide, por eso no sirve como atajo.
 - La actualización va en la instalación normal (`bash instalar.sh`), sin bandera nueva: ya regenera agentes y lanzadores de Codex; ahora también recorre las líneas `codex-reglas` del manifiesto y llama a `fijar-deny` en cada una.
 - Una carpeta de proyecto que ya no existe, o un archivo de reglas ajeno, solo avisa y sigue; no falla la instalación (igual que `instalar_deny_codex`).
 - Convención para los planes: validar con navegador o contenedores mediante un script del repo de comando fijo (`./scripts/<nombre>.sh` o `./verify`) que haga todos los recorridos y capturas en una corrida. No se encadenan `docker run` o `compose run` sueltos.
@@ -38,7 +40,7 @@ Fuera: `agentes/*.md`, `modelos.json`, `desinstalar.sh`, los proyectos que usan 
 ## Aceptación
 | ID | Resultado observable | Comprobación | Resultado esperado |
 | --- | --- | --- | --- |
-| A1 | La forma real de Byteria se permite | `codex execpolicy check --rules <reglas generadas> -- docker compose --project-name x --profile verify --file f.yml run --rm browser y` | `"decision": "allow"` |
+| A1 | La forma real de Proyecto.Plataforma se permite | `codex execpolicy check --rules <reglas generadas> -- docker compose --project-name x --profile verify --file f.yml run --rm browser y` | `"decision": "allow"` |
 | A2 | No se abre `docker run` | mismo `execpolicy` con `docker run --rm img` | `matchedRules` vacío |
 | A3 | Refresco de proyectos registrados | en el bloque 3g (HOME temporal): reglas viejas de un proyecto registrado, correr `instalar.sh`, leer el archivo | contiene `"--project-name"` |
 | A4 | Proyecto borrado no rompe | mismo bloque, con la carpeta borrada | exit 0 y línea `AVISO` |
@@ -109,4 +111,4 @@ AVISO 10: falta pruebas/comparar-openspec/ (pruebas/ está en .gitignore); paso 
 - Un proyecto registrado cuya carpeta no existe se omite con `AVISO` y su línea del registro se conserva (no se crea la carpeta con `mkdir -p`).
 - La comprobación `AVISO 10` (falta `pruebas/comparar-openspec/`) ya existía antes del cambio y no afecta al resultado.
 - `modelos.json` tiene el cambio ajeno sin commit de antes; no se tocó.
-- Sin commit, push ni PR: lo hace Franco.
+- Sin commit, push ni PR: lo hace la persona usuaria.

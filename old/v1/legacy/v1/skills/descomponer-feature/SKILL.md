@@ -12,7 +12,7 @@ Entrada: `definitions/BACKLOG.md` (la fila con `→`), `definitions/` y los repo
 0. **Refinado (solo si se requiere).** Aplica el criterio: el refinado se requiere si puedes formular al menos una pregunta de alcance con dos o más respuestas razonables que producirían listas de tareas distintas y esa pregunta no está resuelta en `BACKLOG.md`, `PROJECT.md` ni en un `refinado.md` existente; si no puedes formularla, se omite y descompones directamente.
    - Si no se requiere, sigue al paso 1.
    - Si se requiere y no hay `features/Fxx-nombre/refinado.md` con las respuestas, no crees tareas y responde con la primera línea exacta `REFINAR: feature=Fxx; preguntas=<n>`, seguida de hasta 5 preguntas numeradas, de más a menos importante, cada una con su opción recomendada.
-   - Si el encargo trae las respuestas de Franco, escríbelas en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea; una sección por pregunta con su respuesta) y descompón. Cada tarea cita `features/Fxx-nombre/refinado.md` en *Decisiones ya tomadas*.
+   - Si el encargo trae las respuestas de la persona usuaria, escríbelas en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea; una sección por pregunta con su respuesta) y descompón. Cada tarea cita `features/Fxx-nombre/refinado.md` en *Decisiones ya tomadas*.
    - **Modo yolo:** si el encargo trae la línea `Modo yolo: activo`, no hay ronda de refinado ni supuestos. Si el refinado se requiere y no hay `features/Fxx-nombre/refinado.md`, responde con la primera línea `REFINAR: feature=Fxx; preguntas=<n>` y no crees tareas: el coordinador lo trata como escalación y detiene el modo. Si no se requiere, descompón con normalidad.
 
 1. Lee la feature y el código real de cada repo que toca. Ejecuta solo comandos sin efectos sobre archivos versionados (pruebas, lint, `--help`) para confirmar que los comandos de *Verificación* existen. Los demás se marcan «no ejecutado, inferido» en el *Contexto*. De `definitions/` lee solo la sección que toca la feature, nunca el documento entero.
@@ -39,7 +39,7 @@ repo: …   depende_de: …   estado: borrador
 ## Notas            (lo llena el constructor)
 ```
 
-Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `hecha`, `bloqueada`, `cancelada`. Tú solo escribes `borrador`; `cancelada` solo si Franco lo pide, con `Cancelada: motivo=<replanificada|obsoleta|duplicada|fuera_de_alcance|otra>` en *Notas*. `depende_de:` lleva el ID de otra tarea o `—`.
+Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `hecha`, `bloqueada`, `cancelada`. Tú solo escribes `borrador`; `cancelada` solo si la persona usuaria lo pide, con `Cancelada: motivo=<replanificada|obsoleta|duplicada|fuera_de_alcance|otra>` en *Notas*. `depende_de:` lleva el ID de otra tarea o `—`.
 
 ## Tarea que se basta sola
 
@@ -68,4 +68,4 @@ Estados válidos: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `h
 
 ## Al terminar
 
-Lista las tareas con su orden y di a Franco qué revisar (puerta 3, una por una) y dónde. Todas quedan en `borrador`.
+Lista las tareas con su orden y di a la persona usuaria qué revisar (puerta 3, una por una) y dónde. Todas quedan en `borrador`.

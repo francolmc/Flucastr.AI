@@ -1,6 +1,9 @@
 # task-02 — Prueba de contrato de la regla de rol en el agente generado (Claude Code y Pi)
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Fija con pruebas la regla de rol de task-01: el manifiesto de frases exige el puntero en `agentes/coordinador.md` y la regla en la skill, y una prueba nueva comprueba el puntero en el agente generado para Claude Code y para Pi, que el prompt no creció y que la skill conserva la regla.
 
@@ -95,6 +98,6 @@ exit 0
 ## Notas
 - Sin huecos menores. Las frases de la skill se leen de `skills/comandos-coordinador/SKILL.md` directamente; la prueba (c) comprueba las cuatro, incluida la marca `→` de `BACKLOG.md` como texto literal.
 - Los dos bloques de frases del manifiesto se agregaron con `...FRASES_ROL_F41.coordinador` y `...FRASES_ROL_F41['comandos-coordinador']` al final de sus listas, tal como dice *Decisiones ya tomadas*.
-- Sin commit, push, PR, merge ni despliegue. Franco revisa la *Evidencia* y commitea.
+- Sin commit, push, PR, merge ni despliegue. la persona usuaria revisa la *Evidencia* y commitea.
 
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

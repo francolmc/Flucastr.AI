@@ -1,8 +1,11 @@
 # task-01 — Subir el tope de WORKFLOW.md en la prueba de higiene
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`pruebas/comprobaciones/higiene-contexto.test.mjs` limita `definitions/WORKFLOW.md` a 30 720 caracteres y hoy el archivo mide 31 793, así que fallan sus 6 pruebas: la de «los archivos reales» por el tamaño, y las otras 5 porque esperan exactamente 1 error y reciben 2 (el del tamaño más el simulado). El control negativo «falla si WORKFLOW.md pasa de 30720 caracteres» además no puede armarse (`'x'.repeat` con cuenta negativa lanza `RangeError: Invalid count value`). Decisión de Franco: subir el tope a 32 000 sin tocar `WORKFLOW.md`, y dejar el control negativo vivo.
+`pruebas/comprobaciones/higiene-contexto.test.mjs` limita `definitions/WORKFLOW.md` a 30 720 caracteres y hoy el archivo mide 31 793, así que fallan sus 6 pruebas: la de «los archivos reales» por el tamaño, y las otras 5 porque esperan exactamente 1 error y reciben 2 (el del tamaño más el simulado). El control negativo «falla si WORKFLOW.md pasa de 30720 caracteres» además no puede armarse (`'x'.repeat` con cuenta negativa lanza `RangeError: Invalid count value`). Decisión de la persona usuaria: subir el tope a 32 000 sin tocar `WORKFLOW.md`, y dejar el control negativo vivo.
 
 ## Contexto
 - Tocar: `pruebas/comprobaciones/higiene-contexto.test.mjs`
@@ -82,14 +85,14 @@ exit 0
 
 ## Notas
 Bloqueo: tipo=entorno; falta=ninguno
-Causa: el comando `node ~/.flucastr-ai/entorno.mjs` exige `ninguno` y la sonda compara la versión por prefijo. El `node` del sistema es v25.8.1 (`/opt/homebrew/bin/node` y `fnm`), y no hay Node 18 instalado (Homebrew solo tiene `node` y `node@26`). No se instaló nada ni se tocó la prueba. Para desbloquear: instalar Node 18 o corregir el requisito de la tarea si Franco prefiere Node 25.
+Causa: el comando `node ~/.flucastr-ai/entorno.mjs` exige `ninguno` y la sonda compara la versión por prefijo. El `node` del sistema es v25.8.1 (`/opt/homebrew/bin/node` y `fnm`), y no hay Node 18 instalado (Homebrew solo tiene `node` y `node@26`). No se instaló nada ni se tocó la prueba. Para desbloquear: instalar Node 18 o corregir el requisito de la tarea si la persona usuaria prefiere Node 25.
 Registro: n=1; herramienta=claude-code; modo=normal; intentos=0; verificacion=falla; huecos=0; resultado=bloqueada; causa=otra
 Ejecución n=2: entorno ok; rama `chore/F37-base-verde-verificacion-rapida` creada con `git switch -c` desde `main`. Cambios: tope 30720 a 32000, título y regex del control negativo, relleno `Math.max(0, TOPE - caracteres) + 1`. Criterios 1 y 2 cumplidos (6 pasan; con 31000 fallan 6, el control vivo).
-Criterio 3 no cumplido: `git diff --stat -- . ':!features'` también lista `definitions/BACKLOG.md` y `definitions/STATUS.md`, que ya estaban modificados antes de empezar (aparecen en el git status inicial). No los toqué porque no los modifica esta tarea y no hago checkout ni reset. Franco decide cómo cerrar este punto.
+Criterio 3 no cumplido: `git diff --stat -- . ':!features'` también lista `definitions/BACKLOG.md` y `definitions/STATUS.md`, que ya estaban modificados antes de empezar (aparecen en el git status inicial). No los toqué porque no los modifica esta tarea y no hago checkout ni reset. la persona usuaria decide cómo cerrar este punto.
 Bloqueo: tipo=otra; falta=-
 Registro: n=2; herramienta=claude-code; modo=normal; intentos=1; verificacion=falla; huecos=0; resultado=bloqueada; causa=parcial
-Ejecución n=3 (reintento tras PARCIAL, decisión de Franco): el criterio 3 se verifica con `git diff --stat -- pruebas/`, que lista solo `pruebas/comprobaciones/higiene-contexto.test.mjs`; los diffs de `definitions/BACKLOG.md` y `definitions/STATUS.md` no cuentan porque los escribe el coordinador y existían antes de la tarea. Código no tocado. Criterios 1, 2 y 3 cumplidos.
+Ejecución n=3 (reintento tras PARCIAL, decisión de la persona usuaria): el criterio 3 se verifica con `git diff --stat -- pruebas/`, que lista solo `pruebas/comprobaciones/higiene-contexto.test.mjs`; los diffs de `definitions/BACKLOG.md` y `definitions/STATUS.md` no cuentan porque los escribe el coordinador y existían antes de la tarea. Código no tocado. Criterios 1, 2 y 3 cumplidos.
 Bloqueo: tipo=otra; falta=-
 Registro: n=3; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=0; resultado=bloqueada; causa=otra
-Ejecución n=4: se usó la decisión de Franco sobre el criterio 3 (`git diff --stat -- pruebas/` lista solo `pruebas/comprobaciones/higiene-contexto.test.mjs`; BACKLOG y STATUS no cuentan). Verificación completa vuelta a correr con los comandos actuales; la salida coincide con la Evidencia. Bloqueos de Notas dejados solo con `tipo` y `falta`.
+Ejecución n=4: se usó la decisión de la persona usuaria sobre el criterio 3 (`git diff --stat -- pruebas/` lista solo `pruebas/comprobaciones/higiene-contexto.test.mjs`; BACKLOG y STATUS no cuentan). Verificación completa vuelta a correr con los comandos actuales; la salida coincide con la Evidencia. Bloqueos de Notas dejados solo con `tipo` y `falta`.
 Registro: n=4; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

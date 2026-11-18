@@ -1,8 +1,10 @@
 # Fricción del flujo
 
+> Referencias personales y de proyectos anonimizadas; se conservan las cifras y fechas.
+
 Cosas que costaron o que el flujo pidió sin necesidad. Una línea cada una.
 
-- **Docker y loopback en Don Financio.** La auditoría registró 30 escalaciones Docker y atribuye la mayoría al socket fuera del sandbox; no contiene una prueba de loopback, que queda pendiente de reproducción ([hallazgo](docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md)).
+- **Docker y loopback en Proyecto.Finanzas.** La auditoría registró 30 escalaciones Docker y atribuye la mayoría al socket fuera del sandbox; no contiene una prueba de loopback, que queda pendiente de reproducción ([hallazgo](docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md)).
 
 - **Estados del plan sin vocabulario.** La plantilla trae `estado: borrador` y el flujo usa `aprobado`; el constructor puso `listo` y yo `hecho`. Nadie define la lista. Propuesta: fijar `borrador → aprobado → listo → hecho` en `planificar-cambio`.
 - **Prueba negativa pedida antes de que exista lo probado.** En `verify-del-kit` el plan tuvo que ordenar la prueba negativa a un comando que aún no existía; su evidencia solo podía llegar después de la puerta 1. Funcionó, pero el plan queda «ciego» en esa parte.

@@ -1,8 +1,11 @@
 # task-05 — README: instalación sin clonar, en lenguaje neutro
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`### Sin clonar el repo (PC de trabajo)` del README habla del PC de trabajo de Franco y termina con una «Comprobación manual» que solo él puede hacer. Se reescribe para cualquier persona que instale sin clon, conservando todos los comandos, y se retira la comprobación manual.
+`### Sin clonar el repo (PC de trabajo)` del README habla del PC de trabajo de la persona usuaria y termina con una «Comprobación manual» que solo él puede hacer. Se reescribe para cualquier persona que instale sin clon, conservando todos los comandos, y se retira la comprobación manual.
 
 ## Contexto
 - Leer: `README.md@153-45`

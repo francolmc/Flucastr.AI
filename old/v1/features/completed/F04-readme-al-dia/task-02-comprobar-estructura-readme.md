@@ -1,6 +1,9 @@
 # task-02 — Comprobación de que el árbol del README coincide con agentes/ y skills/
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 El README ya se desfasó una vez: listaba un agente cuando había cuatro. Esta tarea añade un validador determinista que compara el árbol de `## Estructura` del README con los archivos reales de `agentes/` y las carpetas de `skills/`, y una prueba que lo aplica al repo real. Entra sola en `pruebas/rapida.sh` por su glob. Evita que la próxima feature vuelva a dejar el README atrás sin que nadie lo note.
 
@@ -40,7 +43,7 @@ Fuera de alcance: modificar `README.md` (lo hace task-01), `pruebas/rapida.sh`, 
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/readme-estructura.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node --input-type=module -e 'import fs from "node:fs"; import {validarReadme} from "./pruebas/comprobaciones/readme-estructura.mjs"; const r=fs.readFileSync("README.md","utf8").replace("coordinador.md","x"); const a=fs.readdirSync("agentes").filter(n=>n.endsWith(".md")); const s=fs.readdirSync("skills",{withFileTypes:true}).filter(d=>d.isDirectory()).map(d=>d.name); console.log(validarReadme({readme:r,agentes:a,skills:s}).length>0?"RECHAZADO":"ACEPTADO")'
 bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ fail|rapida:)"
@@ -119,7 +122,7 @@ Criterios de aceptación:
 - Nota: cuatro huecos menores, ninguno cambia el alcance. No se modificó `README.md`, `pruebas/rapida.sh`, `pruebas/README.md` ni `definitions/`. No hay commit, push, PR ni merge.
 
 ### Notas del planificador (por qué esta feature y qué se descartó)
-- **Elegida: README al día + comprobación de su estructura.** Cumple lo pedido: un solo repo, 2 tareas pequeñas, útil (corrige la inconsistencia 2 de `PROJECT.md`, dolor ya documentado), no contradice la definición aprobada (no toca `definitions/` ni reglas) y ejercita las puertas de verdad: una tarea de texto revisable por Franco, una de código con `depende_de`, verificación y control negativo. Es el caso «real» más pequeño que prueba la cadena completa sin que un fallo del constructor se confunda con uno de la feature (F03 ya aisló al constructor).
-- **Descartada 1: cerrar las decisiones abiertas de F03** (estado de la tarea ante una escalación, cobertura de comandos compuestos en la allowlist, rol del bloqueo en el evaluador). Es útil, pero requiere decisiones de Franco aún no tomadas, toca `skills/ejecutar-tarea` y `agentes/constructor.md` (comportamiento del constructor) y se verifica con corridas con modelo caras; si falla, no se sabría si es la feature o el constructor, justo lo que F03/F04 separan. Candidata para una feature posterior.
+- **Elegida: README al día + comprobación de su estructura.** Cumple lo pedido: un solo repo, 2 tareas pequeñas, útil (corrige la inconsistencia 2 de `PROJECT.md`, dolor ya documentado), no contradice la definición aprobada (no toca `definitions/` ni reglas) y ejercita las puertas de verdad: una tarea de texto revisable por la persona usuaria, una de código con `depende_de`, verificación y control negativo. Es el caso «real» más pequeño que prueba la cadena completa sin que un fallo del constructor se confunda con uno de la feature (F03 ya aisló al constructor).
+- **Descartada 1: cerrar las decisiones abiertas de F03** (estado de la tarea ante una escalación, cobertura de comandos compuestos en la allowlist, rol del bloqueo en el evaluador). Es útil, pero requiere decisiones de la persona usuaria aún no tomadas, toca `skills/ejecutar-tarea` y `agentes/constructor.md` (comportamiento del constructor) y se verifica con corridas con modelo caras; si falla, no se sabría si es la feature o el constructor, justo lo que F03/F04 separan. Candidata para una feature posterior.
 - **Descartada 2: corregir el mensaje final de `instalar.sh`** (solo menciona `arquitecto`). Demasiado pequeña (una línea) para ejercitar descomposición, dependencias y verificación; queda anotada como seguimiento y fuera de alcance de task-01.
 - Qué observar en F04 (cifras de «acotada» a calibrar): si el constructor en nivel bajo completa task-02 sin huecos mayores, cuántos huecos menores anota y si la verificación textual de task-01 le basta.

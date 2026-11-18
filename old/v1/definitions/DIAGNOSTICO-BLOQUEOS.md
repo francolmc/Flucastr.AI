@@ -2,17 +2,17 @@
 
 > Estado: borrador por aprobar
 > Fecha: 2026-11-02. Una sola pasada del `arquitecto`; sin código. No depende de `CAMINO-CORTO.md`.
-> Origen: evidencia medida por Franco hoy (*confirmado*, dada en el encargo, no reinterpretada) y lectura de `formato-tarea.mjs`, `formato-evidencia.mjs`, `validar-tarea.mjs`, `registrar.mjs`, `consumo.mjs`, `agentes/constructor.md`, `skills/ejecutar-tarea`, `WORKFLOW.md`, `CONTRATOS.md` (*confirmado*). Lo marcado *inferido* no se pudo comprobar: no leí tareas de otros proyectos.
+> Origen: evidencia medida por la persona usuaria hoy (*confirmado*, dada en el encargo, no reinterpretada) y lectura de `formato-tarea.mjs`, `formato-evidencia.mjs`, `validar-tarea.mjs`, `registrar.mjs`, `consumo.mjs`, `agentes/constructor.md`, `skills/ejecutar-tarea`, `WORKFLOW.md`, `CONTRATOS.md` (*confirmado*). Lo marcado *inferido* no se pudo comprobar: no leí tareas de otros proyectos.
 
 ## 1. Diagnóstico
 
 | Hallazgo | Estado del dato |
 |---|---|
-| El bloqueo de F02 (DonFinancio) fue de **entorno** (Playwright, Node 24, Docker/WSL, puerto 55432, comando de 240 s). Ningún rol de `agentes/` puede arreglar un entorno, pero cada reintento volvió por coordinador→planificador/arquitecto, el tramo más caro | *confirmado* (Franco) |
+| El bloqueo de F02 (Proyecto.Finanzas) fue de **entorno** (Playwright, Node 24, Docker/WSL, puerto 55432, comando de 240 s). Ningún rol de `agentes/` puede arreglar un entorno, pero cada reintento volvió por coordinador→planificador/arquitecto, el tramo más caro | *confirmado* (la persona usuaria) |
 | Hoy no existe forma de declarar el entorno que exige una tarea: `Contexto` solo exige `- Tocar:` y las 10 secciones son exactas (`formato-tarea.mjs`, reglas 3 y 11) | *confirmado* (código) |
 | La regla «`lista` solo con `pasa`» **ya existe**: `formato-evidencia.mjs` exige `resultado=lista`, `causa=ninguna` y `verificacion=pasa` si el estado es `lista para revisión` o `hecha`; con `causa=parcial` exige `resultado=bloqueada` | *confirmado* (código) |
-| Entonces los tres `parcial`+`lista` se colaron por **falta de aplicación**: (a) `--evidencia` solo corre «si existe `scripts/validar-tarea.mjs`» en el repo (`ejecutar-tarea` paso 3) y esos proyectos usan el lanzador de `~/.flucastr-ai`; (b) `registrar.mjs` acepta cualquier combinación de claves y cuenta esa `lista` en la telemetría; (c) Franco puede dejar `hecha` sin correr nada | *inferido* (a, c); *confirmado* (b) |
-| `cancelada` **no** es estado del flujo: no está en `WORKFLOW.md` §6 ni en `ESTADOS_TAREA` de `registrar.mjs`, y `RE_SEGUNDA` de `formato-tarea.mjs` rechazaría `estado: cancelada`. Las 15 de DonFinancio se hicieron fuera del contrato y sin motivo | *confirmado* (grep y código) |
+| Entonces los tres `parcial`+`lista` se colaron por **falta de aplicación**: (a) `--evidencia` solo corre «si existe `scripts/validar-tarea.mjs`» en el repo (`ejecutar-tarea` paso 3) y esos proyectos usan el lanzador de `~/.flucastr-ai`; (b) `registrar.mjs` acepta cualquier combinación de claves y cuenta esa `lista` en la telemetría; (c) la persona usuaria puede dejar `hecha` sin correr nada | *inferido* (a, c); *confirmado* (b) |
+| `cancelada` **no** es estado del flujo: no está en `WORKFLOW.md` §6 ni en `ESTADOS_TAREA` de `registrar.mjs`, y `RE_SEGUNDA` de `formato-tarea.mjs` rechazaría `estado: cancelada`. Las 15 de Proyecto.Finanzas se hicieron fuera del contrato y sin motivo | *confirmado* (grep y código) |
 
 Conclusión: el costo está en planificar y diseñar (constructor 3-4 %); los bloqueos baratos de evitar (entorno, tareas descartadas, evidencia mal etiquetada) no dejan rastro de **por qué** ocurrieron. El 31-33 % del coordinador en `STATUS.md` es de F29 y queda fuera.
 
@@ -22,7 +22,7 @@ Conclusión: el costo está en planificar y diseñar (constructor 3-4 %); los bl
 flowchart LR
   T["Tarea aprobada con Requiere"] -->|"encargo con Disparó"| C["constructor paso 0"]
   C -->|"entorno.mjs exit 0"| V["Verificación"]
-  C -->|"BLOQUEO rol=franco, tipo=entorno"| F(["Franco"])
+  C -->|"BLOQUEO rol=franco, tipo=entorno"| F(["persona usuaria"])
   V -->|"pasa"| L["lista para revisión"]
   V -->|"parcial o falla"| B["bloqueada, Bloqueo: tipo"]
   B -->|"alcance, especificación, diseño"| P["planificador o arquitecto"]
@@ -55,7 +55,7 @@ flowchart LR
 
 - **Quién la propone:** el `planificador`, al descomponer, según la *Verificación* que escribe (regla en la skill `descomponer-feature`, ≤ 250 B; tope de 3584 B intacto).
 - **Quién comprueba:** `scripts/entorno.mjs <tarea>` (nuevo, función pura + CLI, sin shell; exit 0 ok, 1 falta algo, 2 uso). Sondas: `docker info`; `node --version` contra `runtime:`; intento de escucha en el puerto (ocupado = falla); resolución DNS para `red`; binario/instalación del navegador para `navegador`. Imprime `falta=docker,puerto:55432`.
-- **Cuándo y a quién avisa (decisión 1):** antes de tocar nada, y si falla el aviso va solo a Franco: `BLOQUEO: rol=franco; motivo=entorno: falta=<lista>`, tarea `bloqueada`, sin enrutar. El texto vive en `ejecutar-tarea` (constructor ≤ 3072 B: no entra a `agentes/constructor.md`).
+- **Cuándo y a quién avisa (decisión 1):** antes de tocar nada, y si falla el aviso va solo a la persona usuaria: `BLOQUEO: rol=franco; motivo=entorno: falta=<lista>`, tarea `bloqueada`, sin enrutar. El texto vive en `ejecutar-tarea` (constructor ≤ 3072 B: no entra a `agentes/constructor.md`).
 - **Cómo se registra:** línea `Bloqueo:` (ver §5), antes de `Registro:`, con `causa=otra` en este (no se toca el regex).
 - **Comandos > 240 s:** `largo:<s>` documenta el caso. Regla para el planificador: cada comando de *Verificación* se diseña para ≤ 180 s (margen bajo el corte); si una suite no cabe, se parte en comandos por subconjunto. Si el corte ocurre igual, el constructor no lo reintenta: `Bloqueo: tipo=entorno; falta=largo`, `verificacion=parcial`, resultado `bloqueada` (pieza 2).
 - **Sin `Requiere:`:** `entorno.mjs --sugerir` busca en *Verificación* (`docker`, `playwright`, `localhost:NNNN`) y sugiere la línea; no bloquea.
@@ -115,14 +115,14 @@ Los umbrales son supuestos a calibrar con datos reales.
 | Tareas de otros proyectos sin `Requiere:`/`Registro:` | Ausencia = `ninguno` / `sin_dato`; `entorno.mjs` avisa, no bloquea; `registrar.mjs --reconstruir` cuenta incoherentes como `invalidas`, no las borra |
 | El núcleo del coordinador (6977 B, tope 7168: quedan 191 B) crece | Todo texto nuevo va en skills/scripts; solo `Disparó:` toca el núcleo (≈ 40 B, se mide antes de aprobar) |
 | `rol=franco` mal enrutado por el coordinador | Prueba de contrato en B3 |
-| Sondas con falsos positivos (puerto de otra tarea) | El aviso muestra la sonda; Franco decide; el script nunca mata procesos |
+| Sondas con falsos positivos (puerto de otra tarea) | El aviso muestra la sonda; la persona usuaria decide; el script nunca mata procesos |
 
-## 8. Decisiones para Franco
+## 8. Decisiones para la persona usuaria
 
 1. **¿Quién comprueba el entorno y cuándo?**
    - A) El constructor, como paso 0, sin tocar nada (sin comando nuevo; cuesta un turno de constructor, ≈ 3-4 % del costo). **Recomendada**: evita la vuelta cara sin ampliar la lista cerrada.
    - B) El coordinador corre `node scripts/entorno.mjs <tarea>` antes de delegar (agrega un comando a la lista cerrada de `WORKFLOW.md` §3.1; es lo más barato por intento, pero ensancha el permiso).
-   - C) Solo Franco, a mano, antes de aprobar la tarea.
+   - C) Solo la persona usuaria, a mano, antes de aprobar la tarea.
 2. **¿`cancelada` pasa a ser estado del flujo?**
    - A) Sí, con `Cancelada: motivo=…` obligatorio. **Recomendada**: formaliza lo que ya ocurre y da la cifra del descarte.
    - B) No; lo descartado se borra o archiva con la razón en `BACKLOG.md`.

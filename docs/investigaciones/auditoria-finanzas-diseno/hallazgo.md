@@ -1,6 +1,8 @@
-# Auditoría: DonFinancio se construyó sin diseño de experiencia previo (2026-11-13)
+# Auditoría: Proyecto.Finanzas se construyó sin diseño de experiencia previo (2026-11-13)
 
-Base: `Flucastr.DonFinancio` (88 commits, rama `feature/F06-disponible-liquidez`), `AGENTS.md`, `docs/proyecto.md`, `old/DISENO.md`, `old/v1/definitions/PROJECT.md`, planes F04–F07 en `cambios/hechos/`, `Flucastr.DonFinancioV5.WebApp/app/`, la captura `Screenshot 2026-10-24…png` y las skills del kit.
+> Los nombres se anonimizaron; se conservan fechas y cifras.
+
+Base: `Proyecto.Finanzas` (88 commits, rama `feature/F06-disponible-liquidez`), `AGENTS.md`, `docs/proyecto.md`, `old/DISENO.md`, `old/v1/definitions/PROJECT.md`, planes F04–F07 en `cambios/hechos/`, `Proyecto.FinanzasV5.WebApp/app/`, la captura `Screenshot 2026-10-24…png` y las skills del kit.
 
 ## Hechos (comprobados)
 1. **El modelo mental del dueño existe y está en la raíz del repo, sin usar.** `ControlGastos.xlsx` y su captura muestran una matriz mes × concepto: ingresos arriba, egresos abajo (luz, agua, hipotecario, suscripciones, con fecha de pago resaltada), «Haber» y «Acumulado» por mes, y un bloque «Cuadratura: Tengo / Diferencia». Es lo que la persona ya sabe leer. `old/v1/definitions/PROJECT.md` dice «PDF/XLSX no abiertos; método privado no validado». Yo vi la captura; no abrí el xlsx.
@@ -16,18 +18,18 @@ El kit optimiza que el constructor no adivine contratos, cálculos y errores, y 
 ## Lo que no verifiqué
 - No abrí la app corriendo ni comprobé en pantalla cómo se ve en móvil.
 - No abrí `ControlGastos.xlsx`; solo la captura.
-- No sé qué hace hoy la persona con la app a diario: eso solo lo sabe Franco.
+- No sé qué hace hoy la persona con la app a diario: eso solo lo sabe la persona usuaria.
 
 ## Propuesta: skill `disenar-experiencia` para el principal
 **Cuándo:** (a) en un proyecto nuevo con interfaz, después de `definir-proyecto`; (b) en cualquier cambio que agregue o reordene pantallas, antes de `planificar-cambio`.
 
 **Qué produce:**
 - `docs/experiencia.md` (una vez por proyecto): quién usa, las 3–5 tareas frecuentes, su modelo mental actual (aquí, la planilla), vocabulario permitido y prohibido, mapa de pantallas, principios.
-- `cambios/<nombre>/pantallas.md` (por feature): por cada pantalla, objetivo, boceto (ASCII o HTML estático que Franco pueda ver), estados vacío/carga/error/éxito, textos exactos, móvil primero (390 px).
+- `cambios/<nombre>/pantallas.md` (por feature): por cada pantalla, objetivo, boceto (ASCII o HTML estático que la persona usuaria pueda ver), estados vacío/carga/error/éxito, textos exactos, móvil primero (390 px).
 
 **Reglas de oficio que impone:** una tarea principal por pantalla; lo frecuente a un toque, lo raro escondido; no mostrar al mismo tiempo más de un formulario; lenguaje de la persona, no del sistema; heurísticas de usabilidad y WCAG como lista de comprobación.
 
-**Conexión con el flujo:** `planificar-cambio` exige un enlace a `pantallas.md` si el cambio toca UI; la puerta 1 incluye que Franco vea el boceto; la *Aceptación* suma filas de experiencia (tarea completable en N pasos, sin términos prohibidos, captura a 390 px sin desborde).
+**Conexión con el flujo:** `planificar-cambio` exige un enlace a `pantallas.md` si el cambio toca UI; la puerta 1 incluye que la persona usuaria vea el boceto; la *Aceptación* suma filas de experiencia (tarea completable en N pasos, sin términos prohibidos, captura a 390 px sin desborde).
 
-## Para DonFinancio (plan aparte, después de la skill)
+## Para Proyecto.Finanzas (plan aparte, después de la skill)
 Un cambio de «experiencia» que parta de la planilla: vista por mes con ingresos/egresos/haber/acumulado y un solo flujo para registrar, en lugar de apilar secciones. No toca el cálculo de la API.

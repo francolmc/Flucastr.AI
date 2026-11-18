@@ -1,4 +1,6 @@
 # Tramo 3: principal a nivel bajo
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 Resultado: el principal usa el modelo de nivel bajo en las tres herramientas. Toca `modelos.json` (solo `agentes.principal.nivel`), `AGENTS.md` y `README.md` (solo donde dicen «nivel medio»).
 
 ## Pasos
@@ -11,7 +13,7 @@ Resultado: el principal usa el modelo de nivel bajo en las tres herramientas. To
 - [x] Actualizar «nivel medio» → «nivel bajo» del principal en `AGENTS.md` y `README.md` y buscar otras menciones con `grep -rn "nivel medio" AGENTS.md README.md agentes skills` (A9)
   - evidencia: `AGENTS.md` línea 7 y `README.md` línea 9 dicen «nivel bajo» para el principal; `grep -rn "nivel medio" AGENTS.md README.md agentes skills`, exit 1 (sin coincidencias)
 - [x] Agregar a `AGENTS.md` una línea: principal en nivel bajo desde 2026-11-09, «por ahora», revertir con una línea de `modelos.json` (A9)
-  - evidencia: `AGENTS.md` línea 7 (misma línea del bullet «Dos agentes») añade: «El principal está en nivel bajo desde 2026-11-09, «por ahora» (pedido de Franco): se mide y se revierte poniendo `"nivel": "medio"` en `agentes.principal` de `modelos.json`.»
+  - evidencia: `AGENTS.md` línea 7 (misma línea del bullet «Dos agentes») añade: «El principal está en nivel bajo desde 2026-11-09, «por ahora» (pedido de la persona usuaria): se mide y se revierte poniendo `"nivel": "medio"` en `agentes.principal` de `modelos.json`.»
 
 Verificación del tramo: `./verify` (A9, A4).
 

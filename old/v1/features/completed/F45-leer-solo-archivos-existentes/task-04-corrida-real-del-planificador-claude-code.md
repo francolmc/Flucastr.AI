@@ -1,6 +1,9 @@
 # task-04 — Corrida real del planificador con claude-code
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Comprueba con el modelo real que, con la skill y el mensaje nuevos, el planificador de claude-code ya no pone en `Leer` archivos inexistentes. Gasta créditos: solo se ejecuta si el encargo trae la frase literal «Franco autoriza la prueba real de F45»; sin ella, el constructor se detiene antes de lanzar nada.
 
@@ -16,7 +19,7 @@ Comprueba con el modelo real que, con la skill y el mensaje nuevos, el planifica
 ## Decisiones ya tomadas
 - Sin la frase «Franco autoriza la prueba real de F45» en el encargo: `BLOQUEO: rol=franco; motivo=entorno: falta la autorización de la prueba real de F45`, sin lanzar ninguna corrida.
 - Si la precondición de modelos falla (salida 2): `BLOQUEO: rol=franco; motivo=entorno: reinstalar los agentes`.
-- No se ajustan prompts, skills, validador ni topes para obtener `OK`. Con `Veredicto: FALLA`, no se edita nada: la tarea queda `lista para revisión` con el informe en *Evidencia* y la causa en *Notas*; Franco decide.
+- No se ajustan prompts, skills, validador ni topes para obtener `OK`. Con `Veredicto: FALLA`, no se edita nada: la tarea queda `lista para revisión` con el informe en *Evidencia* y la causa en *Notas*; la persona usuaria decide.
 - Se corre una sola vez.
 
 ## Decisiones abiertas
@@ -53,7 +56,7 @@ exit 0
 
 $ bash pruebas/correr-planificador.sh claude-code
 modelos de agentes instalados vigentes
-informe: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-05-planificador-claude-code-7.md
+informe: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-05-planificador-claude-code-7.md
 Veredicto: OK
 exit 0
 

@@ -8,14 +8,16 @@ tramo: 3
 ---
 # El principal planifica y revisa; no ejecuta
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 El principal deja de editar código, pruebas y documentos del producto, de depurar entornos y de rehacer la verificación del constructor. Revisa con diff y una sola corrida de `verify`, devuelve los defectos y se detiene con un veredicto. Aplica a Claude Code, Codex y Pi (los tres leen el mismo `agentes/principal.md`).
 
 ## Supuestos
-- Evidencia (Codex, 9 nov, README de Memory-AI): el constructor hizo el cambio por 0,7 créditos; el principal gastó 10 en 58 llamadas revisando, editó el README, escribió un script que levantó un servidor, corrió el `verify` con Docker para un cambio de documentos y depuró imágenes. También editó `test/pi-context.test.ts` y `test/memory-actions.test.ts` en revisiones de código.
+- Evidencia (Codex, 9 nov, README de Proyecto.Memoria): el constructor hizo el cambio por 0,7 créditos; el principal gastó 10 en 58 llamadas revisando, editó el README, escribió un script que levantó un servidor, corrió el `verify` con Docker para un cambio de documentos y depuró imágenes. También editó `test/pi-context.test.ts` y `test/memory-actions.test.ts` en revisiones de código.
 - Causa (dos investigaciones externas y el texto propio): `agentes/principal.md` autoriza esas conductas («Sin límites de trabajo», «editas lo que el trabajo pida», «lo haces tú», «comprobación propia… que el plan no dictó») y no da criterio de parada.
-- Todo defecto se devuelve al constructor, incluso una errata de una línea; si Franco prefiere una excepción, cambia un párrafo de `tramo-1.md`.
-- Bloqueos duros (hooks, `tools` por agente) y `cambios/kit-run/` se deciden después de medir con el tramo 3. Si Franco los quiere ya, se agrega un tramo.
+- Todo defecto se devuelve al constructor, incluso una errata de una línea; si la persona usuaria prefiere una excepción, cambia un párrafo de `tramo-1.md`.
+- Bloqueos duros (hooks, `tools` por agente) y `cambios/kit-run/` se deciden después de medir con el tramo 3. Si la persona usuaria los quiere ya, se agrega un tramo.
 - Los precios Sol/Luna de `scripts/tarifas.json` son 10x (caché) y 20x (entrada y salida).
 
 ## Alcance
@@ -25,8 +27,8 @@ Fuera: `modelos.json`, `instalar.sh`, `scripts/resolver.mjs`, otras skills (`def
 ## Decisiones ya tomadas
 - La restricción va en el texto del principal y en la revisión acotada; los bloqueos duros esperan a la medición (en Codex los subagentes heredan el sandbox del padre y sus hooks no son una frontera completa).
 - El principal sigue corriendo `verify` una vez porque la evidencia del constructor es autoinformada; lo que se elimina es el sondeo, la depuración y las comprobaciones propias. En `tipo: docs` esa corrida es la verificación liviana del plan.
-- Escribe solo en `cambios/<nombre>/`, y en `AGENTS.md` y `docs/proyecto.md` durante el cierre o cuando `definir-proyecto`/`preparar-proyecto` se lo indiquen. `ejecutor: principal` sigue existiendo solo por petición expresa de Franco.
-- Máximo 2 relanzamientos por defectos; después el cambio queda `parcial` y se avisa a Franco.
+- Escribe solo en `cambios/<nombre>/`, y en `AGENTS.md` y `docs/proyecto.md` durante el cierre o cuando `definir-proyecto`/`preparar-proyecto` se lo indiquen. `ejecutor: principal` sigue existiendo solo por petición expresa de la persona usuaria.
+- Máximo 2 relanzamientos por defectos; después el cambio queda `parcial` y se avisa a la persona usuaria.
 - No se crean `evidencia.md` ni hashes: la evidencia sigue en el plan.
 - `verify` conserva todas las cadenas que ya comprueba en `agentes/principal.md` (p. ej. `Nunca decides tú`, `ceremonia de cierre`, `docker system prune`, `carga la skill \`ejecutar-plan\``).
 - Ejecutor: constructor, porque los textos exactos, los archivos y las comprobaciones están escritos en los tramos y no se toca producción ni credenciales.
@@ -120,10 +122,10 @@ exit 0
 - Tramo 2 (constructor): `tramo-2.md` no trae encabezado `### Tramo 2`; se ejecutaron sus pasos (sección «## Pasos») como los del tramo. `estado: en curso` se puso tras los pasos de edición, no al inicio (omisión menor, corregida antes del verify).
 - Tramo 2: `agentes/constructor.md` no se cambió; su *Límites* (líneas 11, 16 y 23) remite a `ejecutar-plan`.
 - Tramo 2: el paso 12 cambió solo «dentro de `cambios/<nombre>/`» por «dentro de `cambios/`» y añadió «(y el `.gitignore` del workspace)». `agentes/principal.md` queda en 7980 bytes.
-- Paso 2: la frase citada «El diagnóstico lo haces tú…» contiene «lo haces tú», que la comprobación A1 prohíbe. Se redactó «El diagnóstico es tuyo…» con el resto igual. Si Franco prefiere la frase literal, A1 falla y hay que cambiar el criterio.
+- Paso 2: la frase citada «El diagnóstico lo haces tú…» contiene «lo haces tú», que la comprobación A1 prohíbe. Se redactó «El diagnóstico es tuyo…» con el resto igual. Si la persona usuaria prefiere la frase literal, A1 falla y hay que cambiar el criterio.
 - Paso 5: el texto citado dice «no lo corriges»; se escribió «no corriges;» en la misma frase, porque A2 busca «no corriges».
 - Recorte a 7998 bytes (A6): «Lectura» se condensó en una línea del paso 1; «Cuándo preguntar» en dos frases; «Revisión por tramo» pasó de viñetas a párrafo; la espera de Codex, Claude Code y Pi en «Cómo trabajas» 4 quedó resumida. Ninguna cadena de `verify` ni de *Decisiones* se perdió.
-- Paso 19 (fuera de alcance, no cambiado): `skills/preparar-proyecto/SKILL.md` línea 90 manda crear `verify` y `cambios/` en la raíz del workspace, y `skills/definir-proyecto/SKILL.md` línea 26 crea `cambios/.gitkeep`. Ambas quedan fuera de la lista de escritura del principal (`cambios/<nombre>/`, `AGENTS.md`, `docs/proyecto.md`). Franco decide si la lista se amplía.
+- Paso 19 (fuera de alcance, no cambiado): `skills/preparar-proyecto/SKILL.md` línea 90 manda crear `verify` y `cambios/` en la raíz del workspace, y `skills/definir-proyecto/SKILL.md` línea 26 crea `cambios/.gitkeep`. Ambas quedan fuera de la lista de escritura del principal (`cambios/<nombre>/`, `AGENTS.md`, `docs/proyecto.md`). la persona usuaria decide si la lista se amplía.
 - Duración de `./verify`: no medida.
 - Fuera de tramo 1 no se tocó nada: ni `tramo-2.md`, ni `tramo-3.md`, ni las skills ni `verify`.
 - Relanzamiento 1 (constructor): `tramo-1.md` no trae encabezado `### Tramo 1`; se ejecutaron sus pasos pendientes de «Correcciones de la revisión» (5 casillas, 0 al terminar). Recortes para ≤ 8000 bytes: se quitó el porqué del costo en el párrafo inicial, la frase «El plan es el traspaso…» del paso 4, y los comandos Docker concretos del paso 5 (queda «nunca `docker system prune`»). Se restituyó la exigencia de base al día en el paso 4.
@@ -133,14 +135,14 @@ Revisión del principal, tramo 1 (DEVUELTO, relanzamiento 1 de 2):
 - Defecto 1 (formato): en *Reglas duras*, «Nunca decides tú…» y «Ante «prepárame el despliegue»…» quedaron en una sola línea (falta el salto). Además se perdió «La detección de hijos con `.git` es un hecho; la decisión es suya.»
 - Defecto 2 (regresión): se perdió la comprobación de base *al día* (`git fetch` y `git rev-list --count HEAD..origin/<base>` en 0; sin remoto se omite). `ejecutar-plan` no la trae, así que el paso 4 ya no la exige.
 - Defecto 3 (contradicción): *Revisión por tramo* dice «se corrige o se pausa» y choca con «no corriges»; debe decir «se devuelve al constructor o se pausa».
-- Notas sobre `preparar-proyecto` y `definir-proyecto` (crean `verify` y `cambios/.gitkeep`): decisión pendiente de Franco; no se cambia nada.
+- Notas sobre `preparar-proyecto` y `definir-proyecto` (crean `verify` y `cambios/.gitkeep`): decisión pendiente de la persona usuaria; no se cambia nada.
 
 Veredicto del principal, tramo 1: APROBADO (2.º intento). Defectos 1–3 corregidos (comprobados con grep en `agentes/principal.md`, 7956 bytes). Mi corrida de `./verify`: exit 0, `VERIFY OK`, medidor 18/18. Log: `/tmp/psej-t1-principal.log`.
 
 Resumen de cierre del tramo 1:
 - `agentes/principal.md` reescrito: lista de lo permitido, revisión acotada, veredicto APROBADO/DEVUELTO/PAUSA, presupuesto 6/15, máximo 2 relanzamientos.
 - 7956 bytes (hoy 9973); las 12 cadenas de `verify` siguen presentes.
-- Pendiente de Franco: ampliar o no la lista de escritura por `preparar-proyecto` y `definir-proyecto`.
+- Pendiente de la persona usuaria: ampliar o no la lista de escritura por `preparar-proyecto` y `definir-proyecto`.
 - Sigue tramo 2: `tipo: docs` y verificación liviana en `planificar-cambio` y `ejecutar-plan`.
 - Antes de lanzarlo, `/compact` o sesión nueva con la ruta del plan.
 
@@ -163,7 +165,7 @@ $ wc -c agentes/principal.md AGENTS.md
 7982 agentes/principal.md
 5574 AGENTS.md
 
-Tramo 3: `./verify` corrió dos veces con exit 0 (la primera como diagnóstico, la segunda con la salida guardada en el scratchpad). La salida completa está en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/verify-tramo3.log`.
+Tramo 3: `./verify` corrió dos veces con exit 0 (la primera como diagnóstico, la segunda con la salida guardada en el scratchpad). La salida completa está en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/verify-tramo3.log`.
 
 Notas del tramo 3 (constructor):
 - El paso «8i» que pide `tramo-3.md` ya lo usa el bloque del constructor en `verify`; el medidor de invasión quedó en el paso «8k» (no se renumeró nada).
@@ -173,4 +175,4 @@ Notas del tramo 3 (constructor):
 - Duración de `./verify`: no medida.
 - Recorte de A6: `agentes/principal.md` queda en 7982 bytes (≤ 8000); `AGENTS.md` en 5574 bytes (≤ 5600).
 
-Revisión del tramo 3 (principal): APROBADO. Diff revisado (uso.mjs, probar.mjs, fixtures, verify 8k, costos.md, AGENTS.md 5574 B, principal.md 7982 B con viñetas separadas). Mi `./verify`: exit 0, VERIFY OK, medidor 19/19 (log en el scratchpad, verify-t3-principal.log). Paso 8i quedó como 8k porque 8i ya existía. Pendiente de Franco: instalar y medir sesiones nuevas.
+Revisión del tramo 3 (principal): APROBADO. Diff revisado (uso.mjs, probar.mjs, fixtures, verify 8k, costos.md, AGENTS.md 5574 B, principal.md 7982 B con viñetas separadas). Mi `./verify`: exit 0, VERIFY OK, medidor 19/19 (log en el scratchpad, verify-t3-principal.log). Paso 8i quedó como 8k porque 8i ya existía. Pendiente de la persona usuaria: instalar y medir sesiones nuevas.

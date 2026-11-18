@@ -1,19 +1,19 @@
 ---
 name: diagnosticar
-description: "Diagnostica un proyecto contra el contrato de verificación (qué capacidades faltan, cuánto cuesta hoy y una sola mejora), a pedido y solo en lectura. Úsala si la persona usuaria pide «diagnostica»."
+description: "Diagnose a project against the verification contract (missing capabilities, current cost, and one improvement), on request and read-only. Use when the user asks for ‘diagnostica’."
 ---
 
-# Diagnosticar un proyecto
+# Diagnose a Project
 
-Cuándo: solo a pedido de la persona usuaria («diagnostica»). No corre al planificar ni al construir. Es solo lectura: no escribe archivos, no corre `verify` y no bloquea nada. Lo que sí bloquea está en `agentes/principal.md`, «Qué bloquea y qué no».
+When: only when the user asks (“diagnostica”). Do not run while planning or building. Read-only: do not write files, run `verify`, or block anything. Blocking conditions are documented in `agentes/principal.md`, “Qué bloquea y qué no”.
 
-## Cómo
+## How
 
-1. Desde la raíz del proyecto, corre el script que está junto a esta skill, en modo JSON para evaluar:
-   `node <carpeta-de-esta-skill>/diagnosticar.mjs . --json`
-   El script no ejecuta los comandos declarados: solo mira si están en `AGENTS.md`, si `resultado.json` es válido y vigente, cuántos archivos de flujo hay y las reglas de la receta Node. Si un comando debe correr, lo decides tú con contexto; no corras `verify` para esto.
-2. Responde **en la conversación**, en tres partes:
-   - **(a) Qué falta:** las capacidades `falta` (se cubren con `./verify`), `resultado.json` inválido u obsoleto, y los avisos.
-   - **(b) Cuánto cuesta hoy:** solo con datos observables: duración medida de una corrida, `git log` (arreglos que volvieron), planes en `cambios/` con `PAUSA` o `DEVUELTO`, archivos de código sin test. Sin dato, escribe `sin evidencia`. No estimes cifras.
-   - **(c) Una sola mejora recomendada:** qué es, por qué y tamaño estimado. Si no falta nada, di «sin faltas» y no propongas ninguna.
-3. No escribas ningún archivo del proyecto.
+1. From the project root, run the script next to this skill in JSON mode for evaluation:
+   `node <this-skill-folder>/diagnosticar.mjs . --json`
+   The script does not execute declared commands: it only checks whether they appear in `AGENTS.md`, whether `resultado.json` is valid and current, how many flow files exist, and Node recipe rules. If a command should be run, decide that based on context; do not run `verify` for this diagnosis.
+2. Respond **in the conversation**, in three parts:
+   - **(a) What is missing:** capabilities marked `falta`, invalid or stale `resultado.json`, and warnings.
+   - **(b) Current cost:** observable data only: measured run duration, `git log` (fixes that returned), plans in `cambios/` with `PAUSA` or `DEVUELTO`, and code files without tests. If there is no data, write “sin evidencia”. Do not estimate figures.
+   - **(c) One recommended improvement:** what it is, why, and estimated size. If nothing is missing, say “sin faltas” and do not propose an improvement.
+3. Do not write any project files.

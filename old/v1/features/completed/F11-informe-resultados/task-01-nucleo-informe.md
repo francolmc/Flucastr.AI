@@ -1,6 +1,9 @@
 # task-01 — Núcleo de `scripts/informe.mjs` y sus pruebas
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Crear `scripts/informe.mjs`: script de solo lectura sobre `registro/eventos.jsonl` que escribe `registro/informe.md` (y lo imprime) con cifras de entrega, calidad, fiabilidad, ritmo y cortes, con umbral mínimo e intervalo de Wilson. Sin bloque de consumo (task-02).
 
@@ -24,7 +27,7 @@ Crear `scripts/informe.mjs`: script de solo lectura sobre `registro/eventos.json
   - Ritmo: mediana en horas (1 decimal) de primer `tarea_estado a=aprobada` a `a=hecha`, por tarea; y de primer `feature_estado a=en curso` a `a=hecha`, por feature. Sin ambos eventos no cuenta.
   - Cortes por `modelo`, `herramienta`, `modo` (tomados de la ejecución de mayor `n` de cada tarea): `n` tareas, media de `huecos`, % `pasa` con Wilson; con `n < UMBRAL_CORTE` la fila dice `n insuficiente`, sin cifras.
 - Porcentajes con 1 decimal; Wilson como `[bajo–alto]`; mediana par = promedio de los dos centrales.
-- Cabecera `# Informe de resultados del flujo` y `eventos hasta <t máximo>` (de los datos, sin hora de generación). Solo `Fxx` y `NN`, sin títulos. Final: `## Límites de esta lectura` (ritmo = reloj del commit de Franco; `modelo` = el configurado al registrar; huecos juzgan al `planificador`; no mide motivos de devolución ni puertas 1 y 2).
+- Cabecera `# Informe de resultados del flujo` y `eventos hasta <t máximo>` (de los datos, sin hora de generación). Solo `Fxx` y `NN`, sin títulos. Final: `## Límites de esta lectura` (ritmo = reloj del commit de la persona usuaria; `modelo` = el configurado al registrar; huecos juzgan al `planificador`; no mide motivos de devolución ni puertas 1 y 2).
 - Escribe solo `<raiz>/registro/informe.md` (sobrescribe) y lo imprime. `--json` imprime `{eventosHasta, lineasNoValidas, tareas, ejecuciones, suficiente, entrega, calidad, fiabilidad, ritmo, cortes}` y escribe igual el Markdown. No abre `features/`, `STATUS.md`, `.env*` ni git.
 
 ## Alcance / Fuera de alcance

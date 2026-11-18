@@ -1,6 +1,9 @@
 # task-02 — Skill ejecutar-tarea: cota de verificación y retorno de 4 estados
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Hoy `ejecutar-tarea` solo corta si la verificación falla por la MISMA causa; con causa cambiante hubo hasta 5 pasadas (Cleaner, `task-05`). Esta tarea fija una cota: máximo 2 pasadas completas de *Verificación*. También define los 4 estados de retorno `completed | partial | blocked | interaction_required` y cómo se reflejan en el `Registro:`.
 
@@ -14,7 +17,7 @@ Hoy `ejecutar-tarea` solo corta si la verificación falla por la MISMA causa; co
 ## Decisiones ya tomadas
 - Cota: «corres como máximo 2 pasadas completas de *Verificación*; si la segunda no pasa, no corres una tercera». Queda `estado: bloqueada`, `causa=verificacion_x2`, `intentos=2`, primera línea `BLOQUEO:`.
 - Estados de retorno (nueva sección «Retorno» antes de «Línea de registro»): `completed` = `lista para revisión`; `blocked` = `BLOQUEO: rol=<rol>; motivo=<motivo>`; `interaction_required` = el formato `DECISION:` de §6 regla 2 bis, sin tocar la tarea ni escribir `Registro:`; `partial` = primera línea `PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>`, luego `Hecho:`, `Falta:` (qué falta exactamente), `Opciones:` (2 o 3 cerradas), `Recomendada: <letra>`.
-- `partial` aplica cuando hay parte del trabajo hecha y verificada y lo que falta se cierra con una opción de Franco; la cota usa siempre `BLOQUEO:`. Con `partial`: `estado: bloqueada` y `Registro:` con `resultado=bloqueada; causa=parcial`. No se añade valor a `resultado`.
+- `partial` aplica cuando hay parte del trabajo hecha y verificada y lo que falta se cierra con una opción de la persona usuaria; la cota usa siempre `BLOQUEO:`. Con `partial`: `estado: bloqueada` y `Registro:` con `resultado=bloqueada; causa=parcial`. No se añade valor a `resultado`.
 - En la lista de `causa` se añade `parcial`; en «Cuándo detenerte» se añade el ítem de la cota sin quitar los existentes.
 
 ## Decisiones abiertas

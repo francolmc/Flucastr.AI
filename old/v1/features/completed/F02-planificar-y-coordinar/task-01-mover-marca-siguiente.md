@@ -1,6 +1,9 @@
 # task-01 — El planificador mueve la marca «→» al descomponer
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Hoy nadie puede mover la marca `→` de `definitions/BACKLOG.md` cuando una feature queda `hecha`: `skills/descomponer-feature/SKILL.md` (paso 5) prohíbe tocar el backlog, `agentes/coordinador.md` solo puede editar el campo `estado`, y `definitions/STATUS.md` ya registró esa laguna. Con `→` en una feature `hecha`, el validador del backlog falla y el flujo no sabe cuál es la siguiente. Esta tarea permite al planificador mover únicamente esa marca, como parte de `descomponer-feature`.
 
@@ -13,7 +16,7 @@ Hoy nadie puede mover la marca `→` de `definitions/BACKLOG.md` cuando una feat
 ## Decisiones ya tomadas
 - Solo se edita el paso 5 de `skills/descomponer-feature/SKILL.md`. Texto exacto del paso 5 nuevo: «5. En `BACKLOG.md` solo puedes mover la marca `→`: si está en una feature `hecha`, pásala a la primera feature que no esté `hecha` (deja vacía la celda de la anterior). No cambies ningún otro campo ni fila. No muevas nada a `completed/`.»
 - Ningún otro paso, plantilla ni sección de ese archivo se modifica.
-- El campo `estado` de las features sigue siendo del coordinador con aprobación de Franco; el planificador no lo toca.
+- El campo `estado` de las features sigue siendo del coordinador con aprobación de la persona usuaria; el planificador no lo toca.
 
 ## Alcance / Fuera de alcance
 Alcance: la edición del paso 5 en un único archivo.
@@ -33,7 +36,7 @@ Fuera de alcance: modificar `agentes/planificador.md`, `agentes/coordinador.md`,
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -n "solo puedes mover la marca" skills/descomponer-feature/SKILL.md
 grep -c "No cambies \`BACKLOG.md\`" skills/descomponer-feature/SKILL.md
 git status --short skills agentes definitions
@@ -43,7 +46,7 @@ Salida esperada: una línea con el número 5 y el texto nuevo; `0`; `git status`
 
 ## Evidencia
 
-Comandos de *Verificación* ejecutados tal cual (desde `/Users/franco/Codes/flucastr/Flucastr.AI`):
+Comandos de *Verificación* ejecutados tal cual (desde `/Users/persona/Codes/flucastr/Flucastr.AI`):
 
 ```
 $ grep -n "solo puedes mover la marca" skills/descomponer-feature/SKILL.md

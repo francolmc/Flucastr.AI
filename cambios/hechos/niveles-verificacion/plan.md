@@ -7,17 +7,19 @@ ejecutor: constructor
 ---
 # Niveles de verificación: comprobación rápida y E2E solo al cerrar el flujo
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-Un cambio chico se verifica con una comprobación rápida del host (tipos, lint, tests), sin Docker. El `verify` con E2E corre solo al completar el flujo (tramo final) o cuando el plan lo declara. Evidencia: `docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md` (verify de DonFinancio: ≈20 min por corrida, 43 corridas en una sesión).
+Un cambio chico se verifica con una comprobación rápida del host (tipos, lint, tests), sin Docker. El `verify` con E2E corre solo al completar el flujo (tramo final) o cuando el plan lo declara. Evidencia: `docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md` (verify de Proyecto.Finanzas: ≈20 min por corrida, 43 corridas en una sesión).
 
 ## Supuestos
-- «Cambio chico»: un solo repo, hasta ≈3 archivos, sin migración, sin cambio de contrato de API ni de ruta o pantalla del recorrido. Si Franco quiere otro umbral, cambia una cifra en un paso.
+- «Cambio chico»: un solo repo, hasta ≈3 archivos, sin migración, sin cambio de contrato de API ni de ruta o pantalla del recorrido. Si la persona usuaria quiere otro umbral, cambia una cifra en un paso.
 - La comprobación rápida la declara cada proyecto en su `AGENTS.md` con una línea `Comprobación rápida: <comando>`. Sin esa línea, todo funciona como hoy (la verificación sigue siendo `verify`).
-- Declarar la línea en Byteria y DonFinancio queda fuera de este plan: son dos planes aparte, uno por proyecto.
+- Declarar la línea en Proyecto.Plataforma y Proyecto.Finanzas queda fuera de este plan: son dos planes aparte, uno por proyecto.
 
 ## Alcance
 Puede cambiar: `skills/planificar-cambio/SKILL.md`, `skills/preparar-proyecto/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, `agentes/principal.md`, `README.md` (una viñeta) y `verify` (bloque nuevo 8m).
-Fuera de alcance: `agentes/constructor.md`, `modelos.json`, `scripts/`, los proyectos Byteria y DonFinancio.
+Fuera de alcance: `agentes/constructor.md`, `modelos.json`, `scripts/`, los proyectos Proyecto.Plataforma y Proyecto.Finanzas.
 
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque los cuatro sí de la prueba: requisitos cubiertos, archivos accesibles, comprobaciones con resultado esperado, sin credenciales ni producción.

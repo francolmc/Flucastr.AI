@@ -1,6 +1,9 @@
 # task-06 — instalar.sh --proyecto instala el hook; desinstalar.sh lo quita
 repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `bash instalar.sh --proyecto <ruta>` deja instalado el hook del validador en `<ruta>/.claude/settings.local.json` usando `fijar-hook` de task-05, con `--simular`, registro en el manifiesto y mensajes como los de la compactación. `desinstalar.sh` lo quita de forma exacta (por proyecto y en la desinstalación completa). Nunca toca `~/.claude/settings.json`. Como el hook pasa a formar parte del `settings.local.json` del proyecto, la expectativa de `compactacion.test.mjs` caso `c` se actualiza. Los casos de ciclo de `hook-claude.test.mjs` son de task-10.
 
@@ -18,7 +21,7 @@ repo: Flucastr.AI   depende_de: task-05   estado: hecha
 - Salidas: `hook de Claude Code fijado: <ajustes>`, `ya estaba fijado`, y con `--simular` el prefijo «(simulación) » sin escribir ni registrar. Si `fijar-hook` falla, AVISO y sigue.
 - `desinstalar.sh`: tipo `hook` en ambos recorridos, vía `quitar-hook claude`; con `--proyecto` solo quita la línea de ese proyecto; borra `.claude` solo si quedó vacía; con `--simular` solo informa; la completa respeta `--conservar-ajustes`.
 - La instalación sin `--proyecto` no instala hook y conserva las líneas `hook` ya registradas.
-- Decisión de Franco (opción A) para `compactacion.test.mjs` caso `c`: el hook ahora forma parte del proyecto. En las líneas 190 y 196 la expectativa pasa a `{ agent: 'arquitecto', autoCompactWindow: 133000, hooks: { PostToolUse: [...] } }`, comprobando por separado `agent`, `autoCompactWindow` y que `Object.keys(json)` sea exactamente `['agent','autoCompactWindow','hooks']` (orden irrelevante: ordénalas) y `Object.keys(json.hooks)` sea `['PostToolUse']`. No se relaja nada más del caso (conteos de líneas `claude:`/`pi:`, borrado del archivo y de `.claude`, simetría del HOME).
+- Decisión de la persona usuaria (opción A) para `compactacion.test.mjs` caso `c`: el hook ahora forma parte del proyecto. En las líneas 190 y 196 la expectativa pasa a `{ agent: 'arquitecto', autoCompactWindow: 133000, hooks: { PostToolUse: [...] } }`, comprobando por separado `agent`, `autoCompactWindow` y que `Object.keys(json)` sea exactamente `['agent','autoCompactWindow','hooks']` (orden irrelevante: ordénalas) y `Object.keys(json.hooks)` sea `['PostToolUse']`. No se relaja nada más del caso (conteos de líneas `claude:`/`pi:`, borrado del archivo y de `.claude`, simetría del HOME).
 - No se cambia `fijar_agente_proyecto`: con un `settings.local.json` inválido, `instalar.sh --proyecto` sale con 1 sin tocar el archivo (eso lo comprueba task-10).
 
 ## Decisiones abiertas

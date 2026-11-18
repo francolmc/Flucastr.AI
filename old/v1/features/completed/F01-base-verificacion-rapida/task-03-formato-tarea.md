@@ -44,7 +44,7 @@ Fuera de alcance: modificar `rapida.sh`, `WORKFLOW.md`, las skills o las tareas 
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/formato-tarea.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node --input-type=module -e 'import fs from "node:fs"; import {validarTarea} from "./pruebas/comprobaciones/formato-tarea.mjs"; const t=fs.readFileSync("features/F01-base-verificacion-rapida/task-01-limpieza-pruebas.md","utf8").replace("Fuera de alcance:","Sin límites:"); console.log(validarTarea(t).length>0?"RECHAZADA":"ACEPTADA")'
 bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ fail|rapida:)"
@@ -53,7 +53,7 @@ Salida esperada: `ℹ fail 0` con `ℹ pass` igual a `ℹ tests` (al menos 11); 
 
 ## Evidencia
 
-Corridas desde `/Users/franco/Codes/flucastr/Flucastr.AI`, Node v25.8.1, zsh.
+Corridas desde `/Users/persona/Codes/flucastr/Flucastr.AI`, Node v25.8.1, zsh.
 
 Paso 4 (solo el archivo nuevo), `node --test pruebas/comprobaciones/formato-tarea.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"`:
 ```

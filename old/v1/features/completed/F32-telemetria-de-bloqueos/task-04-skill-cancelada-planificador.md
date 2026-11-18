@@ -1,8 +1,11 @@
 # task-04 — Skill `descomponer-feature`: estado `cancelada` con `Cancelada: motivo=`
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`cancelada` ya es un estado válido para el validador (task-03), pero ninguna skill lo describe. Esta tarea lo agrega a la lista de estados de `descomponer-feature` con su regla (solo a pedido de Franco y con motivo de lista cerrada) y registra la frase en el manifiesto de contratos, sin superar el tope de bytes.
+`cancelada` ya es un estado válido para el validador (task-03), pero ninguna skill lo describe. Esta tarea lo agrega a la lista de estados de `descomponer-feature` con su regla (solo a pedido de la persona usuaria y con motivo de lista cerrada) y registra la frase en el manifiesto de contratos, sin superar el tope de bytes.
 
 ## Contexto
 - Tocar: `skills/descomponer-feature/SKILL.md`, `pruebas/comprobaciones/frases-por-archivo.mjs`

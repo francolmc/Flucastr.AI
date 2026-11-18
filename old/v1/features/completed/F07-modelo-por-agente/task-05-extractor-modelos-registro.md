@@ -1,6 +1,9 @@
 # task-05 — Extractor de modelos por actor en el registro estructurado
 repo: Flucastr.AI   depende_de: task-03, task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `registro.mjs` devuelve un solo `model` (el del agente principal). Esta tarea añade `modelosPorActor(source, tool)`, que devuelve qué modelo respondió cada actor (principal y subagentes por nombre) según el formato **observado** en task-03 y task-04. En Pi el modelo del subagente sale del propio registro (`details.results[].model` de la herramienta `subagent`, task-04). En Claude Code el `stream-json` del lanzador no trae el modelo del subagente (task-03, corrida 2): sale de las transcripciones de Claude Code. Por eso `source` puede ser el registro principal, las líneas de transcripción, o ambos concatenados. Se prueba con líneas acotadas de esas evidencias, sin formatos inventados y sin contenido de conversación.
 
@@ -120,7 +123,7 @@ Nota sobre la segunda línea: el «solo principal» se leyó de la sesión `.jso
 
 Comprobación con datos reales de Pi: no se pudo repetir. El registro `stream-json`/`--mode json` de la corrida de task-04 (`corrida-pi.Xl8T`) ya no existe en el sistema de archivos. Los casos de Pi quedan verificados con las líneas observadas de task-04 en las pruebas (d), (d2) y (d3).
 
-Verificación 2 (`bash pruebas/rapida.sh`), salida completa en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/14b3b3bb-3945-4c18-bed2-c390112a4639/scratchpad/rapida2.out`. Final de la salida real:
+Verificación 2 (`bash pruebas/rapida.sh`), salida completa en `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/14b3b3bb-3945-4c18-bed2-c390112a4639/scratchpad/rapida2.out`. Final de la salida real:
 ```
 ✔ lanzar-constructor-claude.sh: el modelo simulado recibe argumentos y el prompt como línea única (150.742917ms)
 ✔ lanzar-constructor-claude.sh: ningún permiso concede Git mutante ni Bash genérico (12.983875ms)
@@ -158,4 +161,4 @@ Criterios de aceptación:
 - `rapida.sh` ya no falla, así que no dejó entorno en `pruebas/.temporales/`.
 - Archivos tocados por esta tarea: esta tarea (*Evidencia*, *Notas* y `estado`). `pruebas/comprobaciones/registro.mjs` y `registro.test.mjs` no se modificaron en este reintento. `definitions/STATUS.md` ya estaba modificado antes de empezar y no lo toqué. No hubo commit, push, PR, merge ni despliegue.
 
-Reescrita 2026-10-30 a pedido de Franco tras el hallazgo de task-03 (el modelo del subagente de Claude Code sale de transcripciones, no del `stream-json`). Ajustada 2026-10-30 a pedido de Franco tras task-04 (hecha): en Pi el modelo del subagente es observable en el registro (`details.results[].model`), así que la rama «no observable» pasa a ser solo un caso de prueba. Formas de línea confirmadas en el registro de la corrida de task-04. Reintento 2026-10-30: verificación repetida; ver *Evidencia*.
+Reescrita 2026-10-30 a pedido de la persona usuaria tras el hallazgo de task-03 (el modelo del subagente de Claude Code sale de transcripciones, no del `stream-json`). Ajustada 2026-10-30 a pedido de la persona usuaria tras task-04 (hecha): en Pi el modelo del subagente es observable en el registro (`details.results[].model`), así que la rama «no observable» pasa a ser solo un caso de prueba. Formas de línea confirmadas en el registro de la corrida de task-04. Reintento 2026-10-30: verificación repetida; ver *Evidencia*.

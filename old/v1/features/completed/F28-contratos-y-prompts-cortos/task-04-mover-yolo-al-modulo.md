@@ -1,6 +1,9 @@
 # task-04 — Mover las reglas del modo yolo del coordinador a su skill
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Con `modo-yolo` ya creada (task-03), el `coordinador` deja de llevar sus ~4,8 KB de reglas: queda una sección corta que ordena cargar la skill. Las cuatro frases de la regla 12 pasan en el manifiesto a `skills/modo-yolo`, y la prueba de la regla 2 de yolo lee ahora el módulo. Es el primer recorte real del núcleo.
 
@@ -13,7 +16,7 @@ Con `modo-yolo` ya creada (task-03), el `coordinador` deja de llevar sus ~4,8 KB
 - Lee solo las *Notas* de task-03.
 
 ## Decisiones ya tomadas
-- En `coordinador.md`, desde la línea `## Modo yolo` hasta el final de la regla 9, deja solo esto: `## Modo yolo`, y debajo un párrafo de 3 líneas como máximo: si Franco lo pide de forma explícita en la conversación (por ejemplo «yolo F05»), carga `modo-yolo` y síguela; si no puedes cargarla, no actúas en yolo y escalas; con yolo activo, esa skill sustituye las puertas 2, 3 y 4. Ese párrafo no repite las cuatro frases de la regla 12.
+- En `coordinador.md`, desde la línea `## Modo yolo` hasta el final de la regla 9, deja solo esto: `## Modo yolo`, y debajo un párrafo de 3 líneas como máximo: si la persona usuaria lo pide de forma explícita en la conversación (por ejemplo «yolo F05»), carga `modo-yolo` y síguela; si no puedes cargarla, no actúas en yolo y escalas; con yolo activo, esa skill sustituye las puertas 2, 3 y 4. Ese párrafo no repite las cuatro frases de la regla 12.
 - La línea 18 cambia solo el paréntesis «(sección «Modo yolo»)» por «(skill modo-yolo)», con `modo-yolo` entre comillas invertidas.
 - En `puerta-previa.test.mjs`, `REGLA_2_YOLO` se busca en `skills/modo-yolo/SKILL.md` (constante nueva `MODULO_YOLO`, incluida en `reales()`); el control negativo de `RE_PENDIENTE` se aplica a ese texto. Los requisitos del coordinador y del constructor no cambian.
 - Tope de esta tarea (solo de criterio, no se toca `topes-bytes.test.mjs`): `coordinador.md` de 14000 B o menos.

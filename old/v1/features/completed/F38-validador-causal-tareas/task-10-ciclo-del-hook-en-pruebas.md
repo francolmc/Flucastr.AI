@@ -1,6 +1,9 @@
 # task-10 — pruebas de ciclo del hook: control de JSON inválido y suite verde
 repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Cierra las pruebas de ciclo del hook en `pruebas/capa1/hook-claude.test.mjs`: instalar, reinstalar, `--simular`, hook ajeno, desinstalar y desinstalación completa (ya escritos) y el caso de control de JSON inválido, que pasa a esperar que `instalar.sh --proyecto` salga con 1 y no toque el archivo. Al terminar, `bash pruebas/rapida.sh` termina en 0.
 
@@ -14,7 +17,7 @@ Cierra las pruebas de ciclo del hook en `pruebas/capa1/hook-claude.test.mjs`: in
 - Temporales: las pruebas escriben en `pruebas/.temporales/` (ignorada por git). No uses `/tmp`.
 
 ## Decisiones ya tomadas
-- Decisión de Franco: el control pasa a «`instalar.sh --proyecto` sale con 1 y no toca el archivo». No se cambia `fijar_agente_proyecto`.
+- Decisión de la persona usuaria: el control pasa a «`instalar.sh --proyecto` sale con 1 y no toca el archivo». No se cambia `fijar_agente_proyecto`.
 - Nuevo título del caso: `ciclo: control, settings.local.json inválido: instalar sale con 1 y no toca el archivo`.
 - Aserciones del caso: `r.status === 1`; `r.stderr` coincide con `/no es JSON válido/`; el contenido del archivo sigue siendo `'{ no es json'`; `lineasHook(e).length === 0`. Se elimina la aserción sobre `AVISO`.
 - Los otros casos de ciclo no cambian.
@@ -74,7 +77,7 @@ exit 0
 ```
 
 ## Notas
-- Caso de control reescrito según la decisión de Franco: `instalar --proyecto` sale con 1, stderr `/no es JSON válido/`, archivo intacto, sin línea hook. Se quitó la aserción sobre `AVISO`. `fijar_agente_proyecto` no se tocó.
+- Caso de control reescrito según la decisión de la persona usuaria: `instalar --proyecto` sale con 1, stderr `/no es JSON válido/`, archivo intacto, sin línea hook. Se quitó la aserción sobre `AVISO`. `fijar_agente_proyecto` no se tocó.
 - Entorno: `node ~/.flucastr-ai/entorno.mjs` devolvió `ok`. La rama ya era la actual; no se ejecutó ningún comando git de escritura.
 - Temporales: quité de `pruebas/.temporales/` solo las carpetas creadas en esta ejecución (mtime reciente). Quedan ~2600 de ejecuciones anteriores, que no son mías.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

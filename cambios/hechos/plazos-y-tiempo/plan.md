@@ -6,16 +6,18 @@ ejecutor: principal
 ---
 # Plazos: planes que caben en el tiempo del subagente (Pedido 8, tramo 3 de 3)
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Los planes caben en el plazo de 30 minutos de Pi: los pasos pesados llevan duración estimada, el `verify` tiene un modo rápido con caché para iterar, el constructor declara un `timeoutMs` probado, y tras un corte el principal limpia solo los recursos Docker de su proyecto de verify.
 
 Cubre (g) del Pedido 8. Va después de `cambios/constructor-contrato` y `cambios/ejecutor-y-pasos`.
 
 ## Supuestos
-- Este plan lo ejecuta el principal (`ejecutor: principal` cuando exista el campo): hay una prueba real en Pi (paso 5) que el constructor barato no debe hacer. Si Franco prefiere el constructor con nivel `medio`, cambia solo quién lo lanza.
+- Este plan lo ejecuta el principal (`ejecutor: principal` cuando exista el campo): hay una prueba real en Pi (paso 5) que el constructor barato no debe hacer. Si la persona usuaria prefiere el constructor con nivel `medio`, cambia solo quién lo lanza.
 - `VERIFY_RAPIDO=1` solo cambia el build: usa caché de Docker en vez de `--no-cache`. Los demás escalones (arranque, recorrido) corren igual. La corrida final de aceptación va sin la variable y sin caché.
 - «Unos 20 minutos» es la suma de las duraciones estimadas de los pasos del plan; las estimaciones son del principal y pueden fallar.
-- `timeoutMs` valdrá 3 600 000 (60 min, decisión de Franco) en `constructor.md` mientras no se pruebe otro; si Pi lo rechaza o lo ignora, no se adopta y se anota en `PENDIENTES.md`.
+- `timeoutMs` valdrá 3 600 000 (60 min, decisión de la persona usuaria) en `constructor.md` mientras no se pruebe otro; si Pi lo rechaza o lo ignora, no se adopta y se anota en `PENDIENTES.md`.
 - La configuración de `~/.pi/agent/extensions/subagent/config.json` (`timeoutMs`, `checkpointBeforeDeadlineMs`) se documenta como opcional para quien use Pi, en `README.md`. El kit no la instala ni la edita.
 - Si las pruebas de Pi no se pueden correr (Pi no disponible), el campo y la configuración quedan como «no probado» en `PENDIENTES.md` y no se agregan a `constructor.md`.
 - Rama desde `main` con los tramos 1 y 2 ya fusionados o commiteados.
@@ -25,7 +27,7 @@ Cambiar: `skills/planificar-cambio/SKILL.md`, `skills/preparar-proyecto/SKILL.md
 Fuera de alcance: `ejecutar-plan`, `modelos.json`, `scripts/`, instalador, `old/`, `~/.pi/` (solo se lee y se prueba con un directorio temporal).
 
 ## Decisiones ya tomadas
-- Un solo build sin caché, en la corrida final. Porque repetirlo en cada iteración consumía el plazo en Don Financio.
+- Un solo build sin caché, en la corrida final. Porque repetirlo en cada iteración consumía el plazo en Proyecto.Finanzas.
 - Limpieza tras un corte: solo contenedores, redes y volúmenes con el prefijo del proyecto de compose de `verify`. Nunca `docker system prune`. Porque podría borrar recursos de otros proyectos.
 - Claude Code ignora `timeoutMs`; el campo no debe romper el agente generado para Claude (se comprueba con el resolver).
 

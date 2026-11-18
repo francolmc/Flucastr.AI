@@ -1,6 +1,9 @@
 # task-10 — Regresión final de F31: validadores, topes, contratos y borde `Bloqueo:`
 repo: Flucastr.AI   depende_de: task-01, task-03, task-05, task-06, task-07, task-08, task-09   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Cierra F31: comprueba que los validadores responden igual que antes sobre las 49 tareas congeladas (F24–F29, F30 y F33), que ningún tope subió, que la línea `Bloqueo:` anterior a `Registro:` no rompe el regex de 8 claves y que la rápida mantiene la base de 7 fallos conocidos.
 
@@ -9,7 +12,7 @@ Cierra F31: comprueba que los validadores responden igual que antes sobre las 49
 - Requiere: ninguno
 - `regresion-validadores.test.mjs` (confirmado): helper `tareaTerminada(notas)` (líneas ≈ 77–112) y casos de borde (a) y (b) con `validarEvidencia`; la línea `Registro:` debe ser la última de *Notas*.
 - `scripts/formato-evidencia.mjs` (confirmado): `RE_REGISTRO` de 8 claves (línea 14) y `coherenciaRegistro` (línea 18); `causa` admite `otra` en `registrar.mjs` (línea 70).
-- Base de `pruebas/rapida.sh` (confirmado por Franco): `ℹ tests 551`, `ℹ pass 544`, `ℹ fail 7` (7 fallos conocidos, no se arreglan aquí); F31 suma pruebas, así que `tests` y `pass` suben igual y `fail` sigue en 7.
+- Base de `pruebas/rapida.sh` (confirmado por la persona usuaria): `ℹ tests 551`, `ℹ pass 544`, `ℹ fail 7` (7 fallos conocidos, no se arreglan aquí); F31 suma pruebas, así que `tests` y `pass` suben igual y `fail` sigue en 7.
 - De las otras tareas lee solo las *Notas* de task-09.
 - Fuente: definitions/DIAGNOSTICO-BLOQUEOS.md «5. Pieza 3 — Telemetría que da pistas»
 

@@ -3,7 +3,12 @@ estado: listo
 rama: feature/endurecer-constructor
 repos: [.]
 ---
+
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Constructor: cuenta externa, sin PARCIAL y procedimiento en el prompt (Pedido 8, tramo 1 de 3)
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 
 ## Objetivo
 El constructor no puede parar con pasos pendientes: tras cada paso marca `[x]`, deja su evidencia y cuenta lo que falta con un comando; solo termina con la cuenta en 0 y `verify` pasando (`COMPLETADO`) o con una `PAUSA` que ofrece 2 o 3 opciones cerradas. Su procedimiento vive en su propio prompt, no en una skill que deba ir a leer.
@@ -29,7 +34,7 @@ Fuera de alcance: `preparar-proyecto`, `modelos.json`, `scripts/`, instalador, `
 
 ## Decisiones ya tomadas
 - Un modelo pequeño se detiene por impresión de «ya hice bastante», no por un fallo real. La cuenta externa lo contradice con un número, no con un juicio. Por eso `grep -c` y no una regla en prosa.
-- Sin salida fácil: no hay `PARCIAL`. Pausar exige un problema real y opciones; en Don Financio el modelo paró sin intentar nada.
+- Sin salida fácil: no hay `PARCIAL`. Pausar exige un problema real y opciones; en Proyecto.Finanzas el modelo paró sin intentar nada.
 - Si el constructor teme quedarse sin contexto, anota el avance y sigue; parar no lo resuelve.
 - El plan es el estado: se marca y registra tras CADA paso. El principal, tras una pausa o un corte, no se fía de las casillas: reconstruye con `git status` y `git diff --stat` en cada carpeta de `repos:` y los archivos esperados.
 - El procedimiento está dos veces (prompt del constructor y skill). Para que no se desfasen, `verify` exige las mismas frases clave en ambos.
@@ -78,7 +83,7 @@ Fuera de alcance: `preparar-proyecto`, `modelos.json`, `scripts/`, instalador, `
 - [x] `principal.md`, punto 5: tras una pausa o corte, reconstruir con `git status` y `git diff --stat` por carpeta de `repos:`.
   - evidencia: `agentes/principal.md`, «Cómo trabajas», punto 5 (tercer viñeta)
 - [x] `principal.md`, «Cuándo preguntar»: `PARCIAL` pasa a `PAUSA` repetida con la misma causa. Comprobar: `grep -c PARCIAL agentes/principal.md` es 0.
-  - evidencia: `agentes/principal.md`, «Cuándo preguntar a Franco»; `grep -c PARCIAL agentes/principal.md` → 0
+  - evidencia: `agentes/principal.md`, «Cuándo preguntar a la persona usuaria»; `grep -c PARCIAL agentes/principal.md` → 0
 - [x] `planificar-cambio`, líneas de `parcial` y de relanzar: `PARCIAL` pasa a `PAUSA`. Comprobar: `grep -c PARCIAL skills/planificar-cambio/SKILL.md` es 0.
   - evidencia: `skills/planificar-cambio/SKILL.md`, «Estados»; `grep -c PARCIAL skills/planificar-cambio/SKILL.md` → 0
 - [x] `verify`, `8c`: función `textos_contrato` con `grep -c '^- \[ \]'`, `siguiente=`, `no_intentado=` y `3 corridas` exigidos en `constructor.md` y en `ejecutar-plan`.
@@ -103,7 +108,7 @@ ok escenario 7: workspace -> old/v1 de la raíz, hijos intactos, log con hijos y
 ok escenario 7b: --simular en workspace no cambia el árbol y sale el aviso de AGENTS.md
 ok escenario 8: .gitignore con línea repetida no duplica y conserva las demás
 ok escenario 8b y 8c: .gitignore sin salto final y sin .gitignore quedan con la línea una vez; sin AGENTS.md no hay aviso
-ok escenario 9: copia de Cleaner -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
+ok escenario 9: copia de Proyecto.Mantenimiento -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
 == 8. workspaces (detección con find, textos clave de los archivos del cambio) ==
 ok 8a: workspace con dos hijos con .git -> find devuelve 2
 grep: /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.5fPjAgK3hd/neg3/skills/definir-proyecto/SKILL.md: No such file or directory
@@ -115,7 +120,7 @@ exit 0
 
 ## Notas
 - Rama: `feature/endurecer-constructor` ya era la activa en `.`; no se creó otra. `repos: [.]`, un solo repo.
-- `./verify` pasó antes de tocar nada (log en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/1aa070b3-7fc9-4882-b931-9be2c361154b/scratchpad/verify-base.log`).
+- `./verify` pasó antes de tocar nada (log en `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/1aa070b3-7fc9-4882-b931-9be2c361154b/scratchpad/verify-base.log`).
 - Decisión menor: el constructor con `estado` distinto de `aprobado` devuelve `PAUSA motivo=alcance` con la causa. El contrato no fijaba motivo para ese caso.
 - `verify` 8c trae dos copias negativas más que las pedidas: principal sin `git diff --stat` y constructor con una línea `PARCIAL:`.
 - Fuera de alcance, sin tocar: el 8b imprime `grep: ... neg3/skills/definir-proyecto/SKILL.md: No such file or directory`. Es la copia negativa sin esa skill y el mensaje es esperado; no altera el resultado.

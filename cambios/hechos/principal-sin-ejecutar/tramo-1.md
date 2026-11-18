@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 1 — Reescribir `agentes/principal.md`
 
 Resultado: el principal tiene lista de lo permitido, revisión acotada con veredicto y presupuesto, y ≤ 8000 bytes.

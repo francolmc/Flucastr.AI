@@ -56,8 +56,9 @@ function leerJsonl(ruta) {
 
 function leerOpciones(args, permitidas) {
   const o = {};
+  const alias = { "--data": "--datos", "--since": "--desde" };
   for (let i = 0; i < args.length; i++) {
-    const a = args[i];
+    const a = alias[args[i]] || args[i];
     if (!permitidas.includes(a)) throw new Error(`opción desconocida: ${a}`);
     const valor = args[++i];
     if (valor === undefined) throw new Error(`falta el valor de ${a}`);
@@ -170,7 +171,7 @@ function correr(dir) {
 
 async function main(argv) {
   const [orden, ...resto] = argv;
-  if (orden === "informe") {
+  if (orden === "informe" || orden === "report") {
     const o = leerOpciones(resto, ["--datos", "--desde"]);
     return informe(o.datos ? resolve(o.datos) : carpetaDatos(), o.desde);
   }

@@ -5,7 +5,7 @@ repo: Flucastr.AI   depende_de: —   estado: hecha
 Cierra la limpieza de pruebas que quedó a medias tras retirar el escenario C. Hay tres restos que no usa nadie: un informe TAP viejo y versionado que muestra I3–I5 fallando (hoy pasan 12/12), un script de comprobaciones sin ningún importador y un directorio vacío. Quitarlos deja una base más corta y sin señales engañosas antes de añadir comprobaciones nuevas.
 
 ## Contexto
-- Repo: este (`/Users/franco/Codes/flucastr/Flucastr.AI`), único repo. Node 25 y Bash. Sin red ni modelo.
+- Repo: este (`/Users/persona/Codes/flucastr/Flucastr.AI`), único repo. Node 25 y Bash. Sin red ni modelo.
 - A borrar (leídos): `pruebas/capa1/ultima-ejecucion.tap` (versionado; contiene `✖ I3`, `✖ I4`, `✖ I5`), `pruebas/comprobaciones/escenario.mjs` (versionado; no lo importa ni lo invoca ningún `.sh`, `.mjs` ni `.md` fuera de `pruebas/resultados/`; `pruebas/ejecutar.sh` usa `escenarios.mjs`, en plural), `pruebas/comprobaciones/casos-negativos/` (directorio vacío, sin versionar).
 - Suite completa actual (ejecutada por el planificador): `node --test --test-concurrency=1 pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs` → 28 pruebas, 0 fallos, ~46 s. Capa 1: `node --test --test-concurrency=1 pruebas/capa1/instalacion.test.mjs` → 12 pruebas, ~8 s.
 - Hay cambios sin commitear en el árbol (borrado de `definicion/`, agentes y skills nuevos, `pruebas/lanzar-pi.sh`): no tocarlos.
@@ -34,7 +34,7 @@ Fuera de alcance: cambiar `pruebas/capa1/instalacion.test.mjs` (incluida su pol�
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 test ! -e pruebas/capa1/ultima-ejecucion.tap && test ! -e pruebas/comprobaciones/escenario.mjs && test ! -d pruebas/comprobaciones/casos-negativos && echo BORRADOS
 grep -rn "ultima-ejecucion\|comprobaciones/escenario\.mjs\|casos-negativos/" --exclude-dir=.git --exclude-dir=.temporales --exclude-dir=resultados --exclude-dir=features . ; echo "rc=$?"
 node --test --test-concurrency=1 pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"

@@ -1,18 +1,21 @@
 # task-02 — `scripts/archivar.mjs --aplicar`: mover features terminadas
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Añade al script el modo `--aplicar [Fxx]`, que mueve la carpeta completa de cada feature candidata a `features/completed/`. Lo ejecuta Franco, nunca un agente (`definitions/WORKFLOW.md` §10.2). Solo renombra carpetas: no sobrescribe, no borra, no toca `BACKLOG.md`, `STATUS.md`, ramas ni git. Los cambios quedan sin commit para que Franco los revise y los commitee.
+Añade al script el modo `--aplicar [Fxx]`, que mueve la carpeta completa de cada feature candidata a `features/completed/`. Lo ejecuta la persona usuaria, nunca un agente (`definitions/WORKFLOW.md` §10.2). Solo renombra carpetas: no sobrescribe, no borra, no toca `BACKLOG.md`, `STATUS.md`, ramas ni git. Los cambios quedan sin commit para que la persona usuaria los revise y los commitee.
 
 ## Contexto
 - Leídos: `definitions/WORKFLOW.md` §5 y §10.2; `scripts/archivar.mjs` y `pruebas/comprobaciones/archivar.test.mjs` (creados en task-01; si no existen, detenerse con `BLOQUEO: rol=constructor; motivo=task-01 sin hacer`).
 - A tocar: `scripts/archivar.mjs` y `pruebas/comprobaciones/archivar.test.mjs`. Comando de prueba: `node --test pruebas/comprobaciones/archivar.test.mjs`.
 - `features/completed/` no existe hoy; el script la crea al mover.
 - Reutiliza `chequear(raiz)`: la lista `candidatas` y las `inconsistentes` ya aplican las cuatro condiciones de candidata; `--aplicar` no repite esa lógica.
-- La verificación real **no** corre `--aplicar` sobre este repo (movería F01–F07 a mano de Franco): se prueba solo en raíces temporales.
+- La verificación real **no** corre `--aplicar` sobre este repo (movería F01–F07 a mano de la persona usuaria): se prueba solo en raíces temporales.
 
 ## Decisiones ya tomadas
-- **Supuesto de Franco (recomendación del arquitecto):** se archiva después del PR de la feature, en su propio commit `chore/`. El script no impone cuándo; el mensaje final lo recuerda.
+- **Supuesto de la persona usuaria (recomendación del arquitecto):** se archiva después del PR de la feature, en su propio commit `chore/`. El script no impone cuándo; el mensaje final lo recuerda.
 - Sintaxis: `node scripts/archivar.mjs --aplicar` mueve todas las candidatas; `node scripts/archivar.mjs --aplicar F03` mueve solo F03; `--raiz <dir>` sigue disponible. `--aplicar` y los argumentos se leen de `process.argv.slice(2)`; el ID debe cumplir `/^F\d{2}$/`; cualquier otro argumento desconocido → `error: argumento desconocido '<x>'` por stderr y código 1 sin mover nada.
 - API exportada nueva: `aplicar(raiz, ids)` (ids = arreglo de IDs, o `null` para todas) devuelve `{ movidas: [{ id, desde, hasta }], omitidas: [{ id, motivo }] }`. Mueve con `fs.mkdirSync(completed, { recursive: true })` y `fs.renameSync(carpeta, destino)`; nada más (no copia, no borra, no `rmSync`).
 - Un ID pedido que no es candidata se omite con su motivo (el de `inconsistentes`, o «no tiene fila hecha» / «no existe la fila»); en el CLI, si se pidió un ID concreto y no se movió, código 1. Con `--aplicar` sin ID y sin candidatas: imprime «Nada que archivar.» y código 0.

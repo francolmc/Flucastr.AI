@@ -37,7 +37,7 @@ Fuera de alcance: otras reglas de coherencia (1–5), archivar o restaurar carpe
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/coherencia-features.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node --test --test-concurrency=1 pruebas/comprobaciones/*.test.mjs pruebas/*.test.mjs pruebas/capa1/*.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 git diff --stat

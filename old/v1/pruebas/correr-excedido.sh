@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Corrida de «excedido» + «A» (F36, task-02). Solo MIDE: crea el fixture de task-01, lanza el
 # coordinador dos veces (etapa 1 y etapa 2 con «A») con el lanzador de F12 de la herramienta y
-# escribe el informe. La corrida con modelo real la hace Franco; las pruebas usan un modelo simulado.
+# escribe el informe. La corrida con modelo real la hace la persona usuaria; las pruebas usan un modelo simulado.
 # Uso: bash pruebas/correr-excedido.sh {claude-code|pi} [N]   (N entero >= 1, por defecto 1)
 # Cada corrida (1..N) escribe su informe con el número libre siguiente; al final: Corridas: <ok>/<N> OK.
 set -euo pipefail

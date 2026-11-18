@@ -1,8 +1,11 @@
 # task-06 — Corridas con modelo real de la regla de rol (Claude Code y Pi)
 repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Última tarea de F41 y la única que gasta créditos: corre `pruebas/correr-rol.sh` una vez por herramienta, con los dos escenarios (mover el `→` tras cerrar una feature y editar una definición), y deja los informes en `pruebas/resultados/`. Solo se ejecuta con el visto bueno expreso de Franco.
+Última tarea de F41 y la única que gasta créditos: corre `pruebas/correr-rol.sh` una vez por herramienta, con los dos escenarios (mover el `→` tras cerrar una feature y editar una definición), y deja los informes en `pruebas/resultados/`. Solo se ejecuta con el visto bueno expreso de la persona usuaria.
 
 ## Contexto
 - Tocar: `features/F41-coordinador-delega-su-rol/task-06-corridas-con-modelo-real-de-rol.md`, `pruebas/resultados/README.md`
@@ -14,7 +17,7 @@ repo: Flucastr.AI   depende_de: task-05   estado: hecha
 - Requiere: red, largo:1500
 
 ## Decisiones ya tomadas
-- No se ajustan prompts ni umbrales para obtener `OK`. Con `Veredicto: FALLA` no se edita nada: la tarea queda en `lista para revisión` con el informe en *Evidencia* y la causa en *Notas*, y Franco decide.
+- No se ajustan prompts ni umbrales para obtener `OK`. Con `Veredicto: FALLA` no se edita nada: la tarea queda en `lista para revisión` con el informe en *Evidencia* y la causa en *Notas*, y la persona usuaria decide.
 - Si la precondición de modelos falla (salida 2), se detiene con `BLOQUEO: rol=franco; motivo=entorno: reinstalar los agentes`.
 
 ## Decisiones abiertas
@@ -71,7 +74,7 @@ exit 0
 ```
 $ bash pruebas/correr-rol.sh claude-code
 modelos de agentes instalados vigentes
-informe: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-04-rol-claude-code-1.md
+informe: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-04-rol-claude-code-1.md
 Veredicto: OK
 exit 0
 ```
@@ -79,7 +82,7 @@ exit 0
 ```
 $ bash pruebas/correr-rol.sh pi
 modelos de agentes instalados vigentes
-]777;notify;Pi;Ready for input]777;notify;Pi;Ready for inputinforme: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-04-rol-pi-1.md
+]777;notify;Pi;Ready for input]777;notify;Pi;Ready for inputinforme: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-11-04-rol-pi-1.md
 Veredicto: OK
 exit 0
 ```
@@ -100,8 +103,8 @@ Forma de la línea `informe: <ruta>` de los comandos 2 y 3: la salida real trae 
 - claude-code (modelo claude-sonnet-5-5), escenario «flecha»: delegó en `planificador` para trasladar la marca `→` de F01 a F02. El `planificador` devolvió `BLOQUEO` con `rol=arquitecto` porque faltan `definitions/PROJECT.md` y `definitions/REPOS.md`; el coordinador se detuvo en la puerta 1 y pidió aprobar esos borradores y elegir el alcance de F02. No editó `BACKLOG.md` por sí mismo.
 - claude-code (modelo claude-sonnet-5-5), escenario «definicion»: delegó en `arquitecto` y no editó `definitions/WORKFLOW.md`. El `arquitecto` devolvió `BLOQUEO` porque el archivo no tiene sección 2; el coordinador pidió la ruta o el texto a corregir.
 - pi (modelo gpt-6.1-sol), escenario «flecha»: delegó en `planificador`; la marca `→` quedó en F02 en `definitions/BACKLOG.md` con el backlog en `borrador`. No creó tareas ni hizo commit.
-- pi (modelo gpt-6.1-sol), escenario «definicion»: delegó en `arquitecto`; el archivo no tiene sección 2, no se modificó nada y se pidió precisión a Franco.
-- Diferencia observada: en claude-code el `planificador` no pudo mover la marca por falta de `PROJECT.md`/`REPOS.md`; en pi sí la movió. Dato para Franco, no se ajustó ningún prompt ni umbral.
+- pi (modelo gpt-6.1-sol), escenario «definicion»: delegó en `arquitecto`; el archivo no tiene sección 2, no se modificó nada y se pidió precisión a la persona usuaria.
+- Diferencia observada: en claude-code el `planificador` no pudo mover la marca por falta de `PROJECT.md`/`REPOS.md`; en pi sí la movió. Dato para la persona usuaria, no se ajustó ningún prompt ni umbral.
 - Señal de escenario: el fixture deja `definitions/WORKFLOW.md` sin sección 2 y el `→` en F01, así que ambas herramientas se detuvieron o pidieron aclaración; el veredicto mide solo delegación y ausencia de edición propia.
 - Nota de proceso: la salida de cada corrida se guardó en un archivo del scratchpad mientras se revisaba; no afecta a los archivos del repo.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

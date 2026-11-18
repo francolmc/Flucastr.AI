@@ -45,7 +45,7 @@ const estadoDe = (texto) => RE_ESTADO.exec(texto.split('\n')[1] ?? '')?.[1];
 // Decisión (F42, task-10): los topes de contexto cambian el veredicto y van en «Motivos»; el formato de la plantilla
 // va aparte, en «Formato ajeno a los topes», y no cambia el veredicto. Evidencia: en la corrida de Claude Code el único
 // rechazo era de plantilla (secciones, comillas de «Tocar») con topes cumplidos; contarlo como FALLA mediría la skill
-// de formato y no los topes. La sección queda visible en el informe para que Franco la vea.
+// de formato y no los topes. La sección queda visible en el informe para que la persona usuaria la vea.
 const PREFIJOS_TOPE = [
   '«Pasos» debe tener', '«Criterios de aceptación» debe tener', '«Tocar» debe tener entre', '«Leer» tiene',
   'El contexto a leer mide', 'El rango de «Leer»', 'El archivo de Leer', 'Hay más de una línea «- Leer:»',

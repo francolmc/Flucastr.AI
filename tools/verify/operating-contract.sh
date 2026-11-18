@@ -5,11 +5,11 @@ textos_contrato() { # $1: raíz del kit
   grep -qF 'awk' "$r/skills/ejecutar-plan/SKILL.md" || return 1
   grep -qF 'siguiente=' "$r/agentes/constructor.md" || return 1
   grep -qF 'no_intentado=' "$r/agentes/constructor.md" || return 1
-  grep -qF '3 corridas' "$r/skills/ejecutar-plan/SKILL.md" || return 1
+  grep -qF '3 runs' "$r/skills/ejecutar-plan/SKILL.md" || return 1
   grep -qF 'git diff' "$r/agentes/principal.md" || return 1
-  grep -qF 'Lee y sigue la skill `ejecutar-plan`' "$r/agentes/constructor.md" || return 1
-  grep -qF 'status`, `diff`, `branch --show-current`, `rev-parse --verify --quiet` y `symbolic-ref' "$r/agentes/constructor.md" || return 1
-  grep -qF 'relecturas relevantes tras cambios o recuperación' "$r/agentes/constructor.md" || return 1
+  grep -qF 'Read and follow the `ejecutar-plan` skill' "$r/agentes/constructor.md" || return 1
+  grep -qF 'status`, `diff`, `branch --show-current`, `rev-parse --verify --quiet`, and `symbolic-ref' "$r/agentes/constructor.md" || return 1
+  grep -qF 'rereading relevant material after edits or recovery' "$r/agentes/constructor.md" || return 1
   if grep -qF "grep -c '^- \[ \]'" "$r/agentes/constructor.md"; then return 1; fi
   if grep -qF 'no releas lo ya leído' "$r/agentes/constructor.md" || grep -qF 'Git permitido, solo en las carpetas de `repos:`' "$r/agentes/constructor.md"; then return 1; fi
 }
@@ -41,8 +41,8 @@ echo "ok 8c: contador canónico y negativas aisladas de los límites antiguos"
 textos_ejecutor() { # $1: raíz del kit
   local r=$1
   grep -qF 'ejecutor:' "$r/skills/planificar-cambio/SKILL.md" || return 1
-  grep -qF '20 palabras' "$r/skills/planificar-cambio/SKILL.md" || return 1
-  if grep -qF '60 palabras' "$r/skills/planificar-cambio/SKILL.md"; then return 1; fi
+  grep -qF '20 words' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  if grep -qF '60 words' "$r/skills/planificar-cambio/SKILL.md"; then return 1; fi
   grep -qF 'ejecutor: principal' "$r/agentes/principal.md" || return 1
   grep -qF 'claude-constructor' "$r/agentes/principal.md" || return 1
   grep -qF 'pi-constructor' "$r/README.md" || return 1
@@ -54,5 +54,5 @@ cp agentes/principal.md "$eneg/agentes/"
 cp README.md "$eneg/"
 sed 's/ejecutor:/ejecutor/g' skills/planificar-cambio/SKILL.md > "$eneg/skills/planificar-cambio/SKILL.md"
 if textos_ejecutor "$eneg"; then fallo "8d: una copia de planificar-cambio sin ejecutor: pasó la comprobación"; fi
-echo "ok 8d: ejecutor:, 20 palabras (sin 60 palabras), ventana propia y pi-constructor presentes; copia sin ejecutor: falla"
+echo "ok 8d: ejecutor:, 20 words (sin 60 words), ventana propia y pi-constructor presentes; copia sin ejecutor: falla"
 

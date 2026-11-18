@@ -72,7 +72,7 @@ ok escenario 7: workspace -> old/v1 de la raíz, hijos intactos, log con hijos y
 ok escenario 7b: --simular en workspace no cambia el árbol y sale el aviso de AGENTS.md
 ok escenario 8: .gitignore con línea repetida no duplica y conserva las demás
 ok escenario 8b y 8c: .gitignore sin salto final y sin .gitignore quedan con la línea una vez; sin AGENTS.md no hay aviso
-omitido: escenario 9 (Cleaner no existe en este equipo)
+omitido: escenario 9 (Proyecto.Mantenimiento no existe en este equipo)
 == 8. workspaces (detección con find, textos clave de los archivos del cambio) ==
 ok 8a: workspace con dos hijos con .git -> find devuelve 2
 grep: <SANDBOX_TMP> No such file or directory

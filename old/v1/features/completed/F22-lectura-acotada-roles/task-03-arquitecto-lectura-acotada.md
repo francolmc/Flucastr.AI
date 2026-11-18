@@ -37,7 +37,7 @@ Fuera de alcance: `planificador`, `constructor`, `coordinador` y las demás skil
 5. `bash pruebas/rapida.sh` termina con código 0 y S ≤ 30.
 
 ## Verificación
-- `cd /Users/franco/Codes/flucastr/Flucastr.AI && for f in 'Lees `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` una vez por sesión' 'lee solo esa sección con `Read` y `offset`/`limit`' 'No lees `features/` ni tareas'; do grep -cF -- "$f" agentes/arquitecto.md; done` → `1` tres veces.
+- `cd /Users/persona/Codes/flucastr/Flucastr.AI && for f in 'Lees `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` una vez por sesión' 'lee solo esa sección con `Read` y `offset`/`limit`' 'No lees `features/` ni tareas'; do grep -cF -- "$f" agentes/arquitecto.md; done` → `1` tres veces.
 - `grep -cF 'Lee cada entrada una vez' skills/disenar-arquitectura/SKILL.md` → `1`; `wc -c agentes/arquitecto.md skills/disenar-arquitectura/SKILL.md` → ≤ 4100 y ≤ 2500.
 - `node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/higiene-contexto.test.mjs` → `fail 0`.
 - `bash pruebas/rapida.sh` → código 0 y `rapida: … (tope 30 s)` con S ≤ 30 (si pasa de 30 s sin prueba fallida, repetirla una vez y anotarlo en *Notas*).

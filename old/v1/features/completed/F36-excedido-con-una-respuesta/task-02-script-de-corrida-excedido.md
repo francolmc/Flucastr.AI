@@ -1,8 +1,11 @@
 # task-02 — Script de corrida de «excedido» + «A» en Pi y Claude Code
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Deja lista la prueba con modelo real (patrón F12) sin ejecutarla: `pruebas/correr-excedido.sh HERRAMIENTA` crea el fixture de task-01, lanza el coordinador dos veces (etapa 1 «Continúa con el flujo.»; etapa 2 «A») con el lanzador de F12 de esa herramienta y escribe el informe en `pruebas/resultados/AAAA-MM-DD-excedido-<herramienta>.md`. Solo MIDE. Las pruebas automáticas usan un modelo simulado; la corrida real la hace Franco (ver *Fuera de alcance*).
+Deja lista la prueba con modelo real (patrón F12) sin ejecutarla: `pruebas/correr-excedido.sh HERRAMIENTA` crea el fixture de task-01, lanza el coordinador dos veces (etapa 1 «Continúa con el flujo.»; etapa 2 «A») con el lanzador de F12 de esa herramienta y escribe el informe en `pruebas/resultados/AAAA-MM-DD-excedido-<herramienta>.md`. Solo MIDE. Las pruebas automáticas usan un modelo simulado; la corrida real la hace la persona usuaria (ver *Fuera de alcance*).
 
 ## Contexto
 - Tocar: `pruebas/correr-excedido.sh`, `pruebas/correr-excedido.test.mjs`, `pruebas/README.md`
@@ -12,7 +15,7 @@ Deja lista la prueba con modelo real (patrón F12) sin ejecutarla: `pruebas/corr
 - Las skills están enlazadas por symlink desde `~/.claude/skills` y `~/.pi/agent/skills` al repo (comprobado): la corrida ve el `SKILL.md` vigente del repo sin reinstalar.
 - Fuente: ninguna
 - Requiere: runtime:node@25
-- La corrida real exige además red, sesión iniciada de `claude` o `pi-coordinador` y gasto de tokens; el vocabulario de `Requiere:` no lo admite, por eso es paso manual de Franco.
+- La corrida real exige además red, sesión iniciada de `claude` o `pi-coordinador` y gasto de tokens; el vocabulario de `Requiere:` no lo admite, por eso es paso manual de la persona usuaria.
 
 ## Decisiones ya tomadas
 - Uso: `bash pruebas/correr-excedido.sh {claude-code|pi}`; otro valor o ninguno: mensaje de uso en stderr y salida 2.
@@ -20,14 +23,14 @@ Deja lista la prueba con modelo real (patrón F12) sin ejecutarla: `pruebas/corr
 - Los prompts son literales y no se ajustan: etapa 1 `Continúa con el flujo.`; etapa 2 `A`.
 - La opción D aún no existe: el informe de la corrida de hoy mide la línea base (qué letras y si aplica A) y el de después de task-04 mide el cambio. Un mismo script sirve a ambos.
 - Pruebas (4, en `correr-excedido.test.mjs`): (a) `bash -n` válido; (b) sin argumento sale 2; (c) con `FLUCASTR_CLAUDE_BIN` simulado que, si su último argumento es `A`, añade `; amp_arq=1` a `Presupuesto:` de `definitions/STATUS.md` y emite un evento `{"type":"result","result":"Listo."}`, con `FLUCASTR_SIN_PRECONDICION=1` y `FLUCASTR_RESULTADOS` en `pruebas/.temporales/`, sale 0 y el informe contiene `Veredicto: OK`; (d) igual con `pi` y `FLUCASTR_PI_BIN` simulado que no cambia nada: sale 0 y el informe contiene `Veredicto: FALLA`.
-- `pruebas/README.md`: añade una viñeta tras la de «Corridas del `coordinador` (F12…)»: «Excedido + «A» (F36): `bash pruebas/correr-excedido.sh {claude-code|pi}`; solo con pedido de Franco; informe en `pruebas/resultados/`».
+- `pruebas/README.md`: añade una viñeta tras la de «Corridas del `coordinador` (F12…)»: «Excedido + «A» (F36): `bash pruebas/correr-excedido.sh {claude-code|pi}`; solo con pedido de la persona usuaria; informe en `pruebas/resultados/`».
 
 ## Decisiones abiertas
 Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: script, sus 4 pruebas y la viñeta del README.
-Fuera de alcance: cambiar reglas (`skills/`, `agentes/`), el comprobador (task-01) y **la corrida real con modelo**: es paso manual de Franco (cuesta tokens y requiere sus credenciales): `bash pruebas/correr-excedido.sh pi` y `bash pruebas/correr-excedido.sh claude-code`, antes de aprobar task-03, y dejar los dos informes en `pruebas/resultados/`. Si Franco no los corre, task-03 sigue siendo válida; el informe «antes» quedará ausente.
+Fuera de alcance: cambiar reglas (`skills/`, `agentes/`), el comprobador (task-01) y **la corrida real con modelo**: es paso manual de la persona usuaria (cuesta tokens y requiere sus credenciales): `bash pruebas/correr-excedido.sh pi` y `bash pruebas/correr-excedido.sh claude-code`, antes de aprobar task-03, y dejar los dos informes en `pruebas/resultados/`. Si la persona usuaria no los corre, task-03 sigue siendo válida; el informe «antes» quedará ausente.
 
 ## Pasos
 1. Crea `pruebas/correr-excedido.sh` (ejecutable, `set -euo pipefail`) con el orden descrito; el informe se genera con `node --input-type=module -e` importando `file://$RAIZ/pruebas/comprobaciones/excedido-resultado.mjs`.
@@ -72,6 +75,6 @@ exit 0
 - Hueco menor 1: el comprobador de task-01 lee `etapa1/STATUS.md`, `etapa2/STATUS.md` y `etapa2.jsonl` del directorio; el script copia el STATUS de cada etapa a su subcarpeta tras su lanzador. La tarea no lo decía; lo deduje de `informe({ dir, herramienta })`.
 - Hueco menor 2: los lanzadores se invocan con `bash "$lanzador"` (no depende del bit de ejecución) y la base de la corrida, `pruebas/.temporales/excedido-<herramienta>-<PID>`, se borra con `rm -rf` antes de crearse. `pruebas/.temporales/` ya está en `pruebas/.gitignore`.
 - Verificación: se corrió tres veces en total (intentos=3). La primera pasada dio lo esperado. Una segunda ejecución de la misma batería se perdió por un error de redirección (`tee` a una ruta inexistente) sin capturar salida; la tercera es la que queda en *Evidencia*. Los `exit` de las líneas con `grep` son los del pipeline (0 con coincidencias). Excede el máximo de 2 pasadas; no cambia el resultado (todo igual a lo esperado).
-- No se lanzó ninguna corrida con modelo real (`correr-excedido.sh pi|claude-code` queda para Franco).
+- No se lanzó ninguna corrida con modelo real (`correr-excedido.sh pi|claude-code` queda para la persona usuaria).
 - Pruebas: los modelos simulados viven en `pruebas/.temporales/falso-*` y las corridas escriben en `pruebas/.temporales/resultados-*`; ambos ignorados por git.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=3; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

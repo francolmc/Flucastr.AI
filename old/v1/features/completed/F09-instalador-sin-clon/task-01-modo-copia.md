@@ -66,7 +66,7 @@ feature/F09-instalador-sin-clon
 
 Verificación 1, `node --test pruebas/capa1/copia.test.mjs` (salida completa):
 ```
-Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/copia-KUQywP
+Entorno conservado: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/copia-KUQywP
 ✔ a: --copiar deja copias reales con marca; sin --copiar hay enlaces; mezclar modos se rechaza sin cambiar nada (561.342875ms)
 ✔ b: el modelos.json personal determina el modelo y no cambia al reinstalar (613.856042ms)
 ✔ c: modelos.json personal roto con instalación previa falla sin cambiar el HOME (300.019375ms)

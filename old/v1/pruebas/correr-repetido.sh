@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Corrida de «repetido» (F39, task-05). Solo MIDE: crea el fixture de task-04 (tarea rota ya rechazada
 # una vez), lanza el coordinador una vez con el prompt de task-04 usando el lanzador de F12 de la
-# herramienta y escribe el informe. La corrida con modelo real la hace Franco (task-06); las pruebas
+# herramienta y escribe el informe. La corrida con modelo real la hace la persona usuaria (task-06); las pruebas
 # usan un modelo simulado.
 # Uso: bash pruebas/correr-repetido.sh {claude-code|pi}
 # Escribe el informe con el número libre siguiente; imprime «informe: <ruta>» y «Veredicto: OK|FALLA».

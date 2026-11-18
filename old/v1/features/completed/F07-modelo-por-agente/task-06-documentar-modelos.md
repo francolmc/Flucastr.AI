@@ -1,6 +1,9 @@
 # task-06 — Documentar cómo se comprueba el modelo de cada agente
 repo: Flucastr.AI   depende_de: task-02, task-03, task-04, task-05   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Deja escrito en `pruebas/README.md` cómo comprobar que cada agente corre con el modelo de `modelos.json` (comprobación determinista y lanzadores con modelo), sin duplicar lo ya dicho.
 
@@ -9,8 +12,8 @@ Deja escrito en `pruebas/README.md` cómo comprobar que cada agente corre con el
 - Archivo a tocar: solo `pruebas/README.md`. La prueba de estructura del README es `pruebas/comprobaciones/readme-estructura.test.mjs` (`node --test`).
 
 ## Decisiones ya tomadas
-- Se añade una viñeta tras la línea de la precondición de agente instalado, de máximo 6 líneas, con: el comando `node pruebas/comprobaciones/modelos-agentes.mjs` (qué comprueba, exit 1 si hay que reinstalar), los lanzadores `pruebas/lanzar-modelos-claude.sh` y `pruebas/lanzar-modelos-pi.sh` (una corrida por herramienta, con modelo), `modelosPorActor` en `registro.mjs`, y la advertencia de que `CLAUDE_CODE_SUBAGENT_MODEL` invalida la prueba en Claude Code. La viñeta también dice (confirmado en `pruebas/lanzar-modelos-claude.sh`, línea 10, y aprobado por Franco el 2026-10-30): (1) Claude Code: la variable `FLUCASTR_PERSISTIR_SESION=1` del lanzador omite `--no-session-persistence`, porque el modelo del subagente sale de las transcripciones de `~/.claude/projects/` y la sesión debe persistir; (2) Pi: el modelo del subagente sale del propio registro `--mode json` (`result.details.results[].model` del `tool_execution_end` de `subagent`), sin transcripciones ni variable equivalente (hallazgo de task-04 y task-05, aprobado por Franco el 2026-10-30); (3) `modelosPorActor` recibe el texto del registro más, solo en Claude Code, esas líneas de transcripción.
-- No se editan `definitions/` (`WORKFLOW.md` §7 queda como está; actualizarlo es del `arquitecto` si Franco lo pide).
+- Se añade una viñeta tras la línea de la precondición de agente instalado, de máximo 6 líneas, con: el comando `node pruebas/comprobaciones/modelos-agentes.mjs` (qué comprueba, exit 1 si hay que reinstalar), los lanzadores `pruebas/lanzar-modelos-claude.sh` y `pruebas/lanzar-modelos-pi.sh` (una corrida por herramienta, con modelo), `modelosPorActor` en `registro.mjs`, y la advertencia de que `CLAUDE_CODE_SUBAGENT_MODEL` invalida la prueba en Claude Code. La viñeta también dice (confirmado en `pruebas/lanzar-modelos-claude.sh`, línea 10, y aprobado por la persona usuaria el 2026-10-30): (1) Claude Code: la variable `FLUCASTR_PERSISTIR_SESION=1` del lanzador omite `--no-session-persistence`, porque el modelo del subagente sale de las transcripciones de `~/.claude/projects/` y la sesión debe persistir; (2) Pi: el modelo del subagente sale del propio registro `--mode json` (`result.details.results[].model` del `tool_execution_end` de `subagent`), sin transcripciones ni variable equivalente (hallazgo de task-04 y task-05, aprobado por la persona usuaria el 2026-10-30); (3) `modelosPorActor` recibe el texto del registro más, solo en Claude Code, esas líneas de transcripción.
+- No se editan `definitions/` (`WORKFLOW.md` §7 queda como está; actualizarlo es del `arquitecto` si la persona usuaria lo pide).
 
 ## Alcance / Fuera de alcance
 Alcance: la viñeta en `pruebas/README.md`.

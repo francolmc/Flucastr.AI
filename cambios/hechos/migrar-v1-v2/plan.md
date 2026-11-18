@@ -4,13 +4,15 @@ rama: feature/kit-v2
 ---
 # migrar-v1-v2
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 `bash instalar.sh --migrar <proyecto> [--simular]` pasa un proyecto de la v1 a la v2 sin borrar nada, y la skill `migrar-proyecto` termina el trabajo que el script no puede hacer (AGENTS.md, verify, planes).
 
 ## Alcance
 Editar: `instalar.sh` (modo `--migrar`), `scripts/resolver.mjs` solo si falta un comando para el hook, `verify` (escalón nuevo), `AGENTS.md`, `PENDIENTES.md`.
 Crear: `skills/migrar-proyecto/SKILL.md`; `agentes/constructor.md` NO se toca.
-Fuera de alcance: `desinstalar.sh`, `old/v1/`, y el original de Cleaner (`/Users/franco/Codes/flucastr/Flucastr.Cleaner`): jamás se escribe ahí.
+Fuera de alcance: `desinstalar.sh`, `old/v1/`, y el original de Proyecto.Mantenimiento (`/Users/persona/Codes/flucastr/Proyecto.Mantenimiento`): jamás se escribe ahí.
 Este plan va **después** de `cambios/solo-v2` (ya aplicado): `old/` existe en el repo.
 
 ## Decisiones ya tomadas
@@ -37,7 +39,7 @@ Este plan va **después** de `cambios/solo-v2` (ya aplicado): `old/` existe en e
 ## Verificación
 `./verify` con un escalón nuevo («migración a v2») que arma en un temporal un proyecto v1 sintético (con las tres carpetas, un `task-` `aprobada` y otro `hecha`, hook de v1 y agente distinto en `settings.local.json`; `src/x.txt` con hash anotado) y comprueba los cinco escenarios; también falla si `--migrar --simular` modifica el árbol. Usar un HOME temporal como en el escalón 6.
 
-Prueba manual obligatoria además (va a *Evidencia*): `cp -R /Users/franco/Codes/flucastr/Flucastr.Cleaner "$(mktemp -d)/Cleaner"` y sobre esa copia `--migrar --simular` y luego `--migrar`; mostrar la lista de trabajo a medias. Cleaner tiene `definitions/`, `features/` y `src/`, pero no `registro/`, `.claude/` ni hook (por eso el sintético los cubre). Confirmar al final con `git -C` / `diff -rq` que el original no cambió (comparar `git status --short` antes y después).
+Prueba manual obligatoria además (va a *Evidencia*): `cp -R /Users/persona/Codes/flucastr/Proyecto.Mantenimiento "$(mktemp -d)/Proyecto.Mantenimiento"` y sobre esa copia `--migrar --simular` y luego `--migrar`; mostrar la lista de trabajo a medias. Proyecto.Mantenimiento tiene `definitions/`, `features/` y `src/`, pero no `registro/`, `.claude/` ni hook (por eso el sintético los cubre). Confirmar al final con `git -C` / `diff -rq` que el original no cambió (comparar `git status --short` antes y después).
 
 ## Pasos
 - [x] Leer `instalar.sh`: parseo de argumentos, función de agente por defecto, hook y deny; anotar en *Notas* qué reutiliza.
@@ -46,8 +48,8 @@ Prueba manual obligatoria además (va a *Evidencia*): `cp -R /Users/franco/Codes
 - [x] Implementar «nada que migrar» y «old/v1 ya existe» antes de cualquier cambio.
 - [x] Crear `skills/migrar-proyecto/SKILL.md` (nombre = carpeta, descripción en una frase).
 - [x] Agregar el escalón de migración a `verify`; probar que falla a propósito (p. ej. sin mover `registro/`) y revertir el fallo.
-- [x] `AGENTS.md`: skill `migrar-proyecto` y el comando `--migrar`. `PENDIENTES.md`: «migrar Cleaner real» como paso de Franco.
-- [x] Correr `./verify` y la prueba manual con la copia de Cleaner; pegar salidas en *Evidencia*.
+- [x] `AGENTS.md`: skill `migrar-proyecto` y el comando `--migrar`. `PENDIENTES.md`: «migrar Proyecto.Mantenimiento real» como paso de la persona usuaria.
+- [x] Correr `./verify` y la prueba manual con la copia de Proyecto.Mantenimiento; pegar salidas en *Evidencia*.
 
 ## Evidencia
 
@@ -77,7 +79,7 @@ $ (prueba a propósito) copia del kit con --simular que hace mkdir de cambios/, 
 FALLO: escenario 5: --simular cambió el proyecto
 exit 1
 
-$ (prueba manual) cp -R /Users/franco/Codes/flucastr/Flucastr.Cleaner "$(mktemp -d)/Cleaner"; luego, con HOME temporal, bash instalar.sh --migrar <copia> --simular y bash instalar.sh --migrar <copia>
+$ (prueba manual) cp -R /Users/persona/Codes/flucastr/Proyecto.Mantenimiento "$(mktemp -d)/Proyecto.Mantenimiento"; luego, con HOME temporal, bash instalar.sh --migrar <copia> --simular y bash instalar.sh --migrar <copia>
 SIMULACIÓN: no se escribe nada. Esto es lo que haría:
 Mover a old/v1/ (nada se borra; src/ no se toca):
   movería: definitions -> old/v1/definitions
@@ -93,20 +95,20 @@ exit 0
 $ bash instalar.sh --migrar <copia>   (corrida real sobre la copia)
 movido (git mv): definitions -> old/v1/definitions
 movido (git mv): features -> old/v1/features
-agente predeterminado fijado: principal (…/Cleaner/.claude/settings.local.json)
-sin hook de v1 que quitar: (…/Cleaner/.claude/settings.local.json)
+agente predeterminado fijado: principal (…/Proyecto.Mantenimiento/.claude/settings.local.json)
+sin hook de v1 que quitar: (…/Proyecto.Mantenimiento/.claude/settings.local.json)
 regla deny de Claude Code agregada: Read(./.env) … (12 líneas, una por regla)
-creado: …/Cleaner/cambios/
+creado: …/Proyecto.Mantenimiento/cambios/
 Trabajo a medias (solo se lista; no se convierte aquí):
   feature abierta: F04 Limpieza consentida Windows/WSL, con papelera, puntos de restauración, DISM ResetBase e hibernación como opciones sensibles (estado: pendiente) [old/v1/definitions/BACKLOG.md]
   feature abierta: F05 Diagnóstico, plan y limpieza consentida Docker Desktop local, incluidos volúmenes como opción sensible (estado: pendiente) [old/v1/definitions/BACKLOG.md]
   feature abierta: F06 Compactación VHDX manual desde Windows, con consentimiento de cierre WSL/Docker e informe de recuperación física (estado: pendiente) [old/v1/definitions/BACKLOG.md]
-Migración lista. Lo de v1 está en …/Cleaner/old/v1/ (sin borrar). Siguiente: skill migrar-proyecto (AGENTS.md, verify, planes).
+Migración lista. Lo de v1 está en …/Proyecto.Mantenimiento/old/v1/ (sin borrar). Siguiente: skill migrar-proyecto (AGENTS.md, verify, planes).
 exit 0
 
-$ comprobación del original de Cleaner: git --no-optional-locks status --short y huella de árbol (nombres + sha) antes y después
+$ comprobación del original de Proyecto.Mantenimiento: git --no-optional-locks status --short y huella de árbol (nombres + sha) antes y después
 ORIGINAL SIN CAMBIOS (status: 4 líneas, igual antes y después; árbol de 1 395 líneas, igual)
-Tasks de Cleaner: 23 con estado «hecha», ninguna abierta (por eso la lista no trae tareas). 
+Tasks de Proyecto.Mantenimiento: 23 con estado «hecha», ninguna abierta (por eso la lista no trae tareas).
 
 ## Notas
 
@@ -117,7 +119,7 @@ Tasks de Cleaner: 23 con estado «hecha», ninguna abierta (por eso la lista no 
 - Decisión propia, no estaba en el plan: `--migrar` no se combina con `--agente`, `--solo` ni `--copiar` (además de `--proyecto` y `--skills-proyecto`), con error claro.
 - Decisión propia: el movimiento usa `git mv` solo si el proyecto es git y la carpeta tiene archivos en el índice; si no, `mv`. Con `git mv` el proyecto queda con renombres en el índice (sin commit).
 - Límite conocido: si el proyecto tenía otro agente predeterminado (`otro`), la migración lo reemplaza y el manifiesto guarda `principal`; un `desinstalar.sh` posterior quita `agent` pero no restaura `otro`.
-- `skills/migrar-proyecto/SKILL.md` nueva; `AGENTS.md` y `PENDIENTES.md` actualizados. `PENDIENTES.md` añade «migrar Cleaner real» como paso de Franco.
-- La prueba manual de Cleaner se hizo con un HOME temporal para no escribir el manifiesto real. La migración real de Cleaner (la de Franco) sí escribirá `~/.flucastr-ai/manifiesto.txt`.
+- `skills/migrar-proyecto/SKILL.md` nueva; `AGENTS.md` y `PENDIENTES.md` actualizados. `PENDIENTES.md` añade «migrar Proyecto.Mantenimiento real» como paso de la persona usuaria.
+- La prueba manual de Proyecto.Mantenimiento se hizo con un HOME temporal para no escribir el manifiesto real. La migración real de Proyecto.Mantenimiento (la de la persona usuaria) sí escribirá `~/.flucastr-ai/manifiesto.txt`.
 - `verify` en el repo pasa (`exit 0`). Ningún commit, push ni PR.
 - Bash del sistema es 3.2 (macOS): el código nuevo se revisó contra esa versión (`${extra[@]+...}`, sin arreglos vacíos bajo `set -u`).

@@ -48,7 +48,7 @@ Fuera de alcance: `crear-backlog` y las demás skills; `constructor`, `arquitect
 4. `bash pruebas/rapida.sh` termina con código 0 y S ≤ 30.
 
 ## Verificación
-- `cd /Users/franco/Codes/flucastr/Flucastr.AI && for f in 'Solo lees de `definitions/` la sección que toca la feature' 'No lees tareas de otras features ni tareas `hecha`' 'Con la skill `crear-backlog` (puerta 2) sí lees `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` completos, una vez'; do grep -cF -- "$f" agentes/planificador.md; done` → `1` tres veces.
+- `cd /Users/persona/Codes/flucastr/Flucastr.AI && for f in 'Solo lees de `definitions/` la sección que toca la feature' 'No lees tareas de otras features ni tareas `hecha`' 'Con la skill `crear-backlog` (puerta 2) sí lees `PROJECT.md`, `REPOS.md` y `ARCHITECTURE.md` completos, una vez'; do grep -cF -- "$f" agentes/planificador.md; done` → `1` tres veces.
 - `for f in 'Tarea que se basta sola' 'cita en *Contexto* las líneas o firmas exactas que el ejecutor necesita' 'con su ruta y título' 'De `depende_de:` indica leer solo las *Notas* de esa tarea' '~3 archivos tocados' 'lee solo la sección que toca la feature'; do grep -cF -- "$f" skills/descomponer-feature/SKILL.md; done` → `1` seis veces.
 - `grep -c '~5 archivos' skills/descomponer-feature/SKILL.md` → `0`; `wc -c agentes/planificador.md skills/descomponer-feature/SKILL.md` → ≤ 4600 y ≤ 5600.
 - `node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/higiene-contexto.test.mjs pruebas/comprobaciones/formato-tarea.test.mjs` → `fail 0`.

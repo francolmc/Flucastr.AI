@@ -1,6 +1,9 @@
 # task-05 — `Rama:` junto a `Modo yolo:` en el encargo (coordinador y ramas-feature)
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `agentes/coordinador.md` dice que `Rama:` va en cada encargo al constructor «(salvo yolo)» y escribe «`Rama:` o `Modo yolo:`». En yolo ahora van las dos líneas. Se corrige el coordinador sin aumentar bytes (está en 7168 de 7168) y se añade a `skills/ramas-feature/SKILL.md` la frase que dice que en yolo se carga igual.
 
@@ -13,9 +16,9 @@ repo: Flucastr.AI   depende_de: task-04   estado: hecha
 - Requiere: ninguno
 
 ## Decisiones ya tomadas
-- El coordinador no pasa la rama esperada al planificador: la deriva él (decisión de Franco, 2026-11-04); aquí no se agrega nada sobre eso.
+- El coordinador no pasa la rama esperada al planificador: la deriva él (decisión de la persona usuaria, 2026-11-04); aquí no se agrega nada sobre eso.
 - Los reemplazos son los indicados, sin otras ediciones en `coordinador.md`.
-- La línea 18 («… (salvo yolo, `modo-yolo`).», regla de cambio de `estado`) se mantiene tal cual (decisión de Franco, 2026-11-04).
+- La línea 18 («… (salvo yolo, `modo-yolo`).», regla de cambio de `estado`) se mantiene tal cual (decisión de la persona usuaria, 2026-11-04).
 
 ## Decisiones abiertas
 Ninguna.
@@ -86,7 +89,7 @@ $ grep -c 'Rama:` y `Modo yolo:' agentes/coordinador.md
 2
 exit 0
 $ grep -n 'salvo yolo' agentes/coordinador.md
-18:- Cambias un `estado` **solo** con aprobación explícita de Franco en la conversación (salvo yolo, `modo-yolo`).
+18:- Cambias un `estado` **solo** con aprobación explícita de Persona en la conversación (salvo yolo, `modo-yolo`).
 exit 0
 $ wc -c agentes/coordinador.md
     7155 agentes/coordinador.md
@@ -102,7 +105,7 @@ exit 0
 
 ## Notas
 - Hecho: `agentes/coordinador.md` 7168 -> 7155 bytes (línea 59 y 60 «o» -> «y»; línea 68 sin « (salvo yolo)»). `skills/ramas-feature/SKILL.md` 1562 -> 1690 bytes (frase añadida al punto 3).
-- Resuelto: Franco decidió mantener la línea 18 de `coordinador.md` («salvo yolo, `modo-yolo`»). El planificador acotó el comando 2 y el criterio 2 a la frase de la línea 68; así se verificó en este reintento.
+- Resuelto: la persona usuaria decidió mantener la línea 18 de `coordinador.md` («salvo yolo, `modo-yolo`»). El planificador acotó el comando 2 y el criterio 2 a la frase de la línea 68; así se verificó en este reintento.
 - Rama: modo yolo, sin `git switch` ni rama nueva; sin commit.
 - Huecos menores en esta ejecución: 0.
 Bloqueo: tipo=alcance; falta=-

@@ -4,8 +4,10 @@ rama: feature/kit-v2
 ---
 # verify del kit
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-Un `./verify` en la raíz que prueba, sin Docker y sin escribir fuera del repo, que la v2 del kit (agentes, skills, modelos, instalador, resolver) está coherente. Sirve para Franco y para el constructor como definición de «hecho».
+Un `./verify` en la raíz que prueba, sin Docker y sin escribir fuera del repo, que la v2 del kit (agentes, skills, modelos, instalador, resolver) está coherente. Sirve para la persona usuaria y para el constructor como definición de «hecho».
 
 ## Alcance
 Puede crear/editar: `verify` (nuevo, ejecutable), `AGENTS.md` (solo la línea del comando), este plan (pasos, Evidencia, Notas).

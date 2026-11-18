@@ -1,6 +1,9 @@
 # task-05 — Cierre de F41 antes del modelo real: topes y suite rápida en verde
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Comprueba que ningún archivo con tope lo supera, que la regla de rol sigue en su lugar y que `bash pruebas/rapida.sh` termina en 0 (tope 90 s). Es solo verificación; un fallo se corrige en la tarea que lo causó. Es la última tarea sin costo: la siguiente gasta créditos.
 
@@ -68,7 +71,7 @@ Esperado: un número menor o igual a 5120.
 
 Comando 6:
 ```
-grep -c -E 'Franco hace solo lo suyo|antes de pedirle algo a Franco' agentes/coordinador.md skills/comandos-coordinador/SKILL.md
+grep -c -E 'Persona hace solo lo suyo|antes de pedirle algo a Persona' agentes/coordinador.md skills/comandos-coordinador/SKILL.md
 ```
 Esperado: `agentes/coordinador.md:1` y `skills/comandos-coordinador/SKILL.md:1`.
 
@@ -118,7 +121,7 @@ exit 0
 
 Comando 6:
 ```
-$ grep -c -E 'Franco hace solo lo suyo|antes de pedirle algo a Franco' agentes/coordinador.md skills/comandos-coordinador/SKILL.md
+$ grep -c -E 'Persona hace solo lo suyo|antes de pedirle algo a Persona' agentes/coordinador.md skills/comandos-coordinador/SKILL.md
 agentes/coordinador.md:1
 skills/comandos-coordinador/SKILL.md:1
 exit 0
@@ -151,7 +154,7 @@ Criterios: 1, 2, 3 y 4 cumplen.
 
 ## Notas
 - Comandos 1 a 7 corridos desde la raíz del repo con un `cd` previo al comando; el texto de cada `$` es el de *Verificación*. `entorno.mjs` imprimió `ok`.
-- Reintento: la ejecución anterior quedó bloqueada por `definitions/STATUS.md` (ítem de «Paso actual» de 156 caracteres, `formato-flujo.test.mjs:231`). Franco lo corrigió antes de este reintento; en esta pasada el test pasa. No se tocó `definitions/STATUS.md`.
+- Reintento: la ejecución anterior quedó bloqueada por `definitions/STATUS.md` (ítem de «Paso actual» de 156 caracteres, `formato-flujo.test.mjs:231`). la persona usuaria lo corrigió antes de este reintento; en esta pasada el test pasa. No se tocó `definitions/STATUS.md`.
 - Antes de la pasada oficial corrí `rapida.sh` con la salida guardada en un archivo del scratchpad; esa corrida previa dio `salida=0` y no se cuenta en `intentos`.
 - Sin decisiones abiertas. Sin cambios en archivos de producto. Sin commit.
 - La corrida con modelo real (task-06) no se ejecutó: está fuera de alcance de esta tarea.

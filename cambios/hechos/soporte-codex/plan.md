@@ -8,14 +8,16 @@ tramo: 4
 ---
 # Soporte para Codex CLI
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 `instalar.sh` configura también Codex CLI: skills, agentes `principal` y `constructor`, lanzador `codex-<agente>` con modelo y esfuerzo de `modelos.json`, y reglas deny en el proyecto. `desinstalar.sh` lo deshace. `./verify` lo comprueba sin llamar a modelos.
 
 ## Supuestos
-- Codex se detecta si existe `~/.codex` o el comando `codex` (igual que Pi). `--solo` acepta también `codex`. Si Franco quiere otra detección, cambia solo el paso 3.2.
+- Codex se detecta si existe `~/.codex` o el comando `codex` (igual que Pi). `--solo` acepta también `codex`. Si la persona usuaria quiere otra detección, cambia solo el paso 3.2.
 - Los agentes se instalan como TOML en `~/.codex/agents/<nombre>.toml` (documentado). `sandbox_mode` y permisos no se pueden fijar ahí; heredan de la sesión.
 - Skills: enlace (modo repo) o copia (modo descarga) en `~/.agents/skills`, ruta documentada de Codex. Si el tramo 1 muestra que otra ruta funciona mejor, se cambia en *Resuelto*.
-- El esfuerzo usa `model_reasoning_effort`; `max` no existe en Codex y se traduce a `xhigh`. Si Franco prefiere error en vez de traducir, cambia el paso 2.3.
+- El esfuerzo usa `model_reasoning_effort`; `max` no existe en Codex y se traduce a `xhigh`. Si la persona usuaria prefiere error en vez de traducir, cambia el paso 2.3.
 - El constructor corre en Codex como subagente (`spawn constructor`) o con la ventana propia `codex-constructor`.
 
 ## Alcance
@@ -24,7 +26,7 @@ Fuera de alcance: skills (su contenido), `old/`, `pruebas/.temporales/`, `~/.cod
 
 ## Decisiones ya tomadas
 - Lanzador `codex-<agente>` con `-m`, `-c model_reasoning_effort=` y las instrucciones del agente; sin perfil `-p`. Porque la documentación no permite abrir una sesión «como» un agente, y es el mismo patrón que `claude-<agente>`.
-- Perfil nuevo `codex-openai` en `modelos.json` con los mismos modelos que `pi-openai`; `perfil_por_defecto.codex`. Porque Franco eligió modelos GPT-6 propios.
+- Perfil nuevo `codex-openai` en `modelos.json` con los mismos modelos que `pi-openai`; `perfil_por_defecto.codex`. Porque la persona usuaria eligió modelos GPT-6 propios.
 - Reglas deny: `prefix_rule(..., decision="forbidden")` en `<proyecto>/.codex/rules/flucastr.rules`, solo con `--proyecto`. Experimentales y solo cargan en proyectos trusted: se dice en la ayuda y en `AGENTS.md`.
 - Codex lee `AGENTS.md` de forma nativa: no se genera ningún otro archivo de instrucciones del proyecto.
 - Resuelto: 2026-11-08 las reglas de Codex bloquean por prefijo: `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C`, `git -c`, `bash -c`, `sh -c`, `zsh -c` (probado en el tramo 1: un prefijo `git -C` bloquea `git -C . commit`). NO se bloquea `bash -lc`/`sh -lc`: Codex ejecuta sus comandos así y se rompería todo; por la documentación Codex divide esos scripts lineales y evalúa cada comando. Se acepta que `git -C` y `git -c` queden bloqueados aunque no sean commit. Se anota como límite en `AGENTS.md`. Lo de `.env` (leer) no tiene regla en Codex: límite documentado.
@@ -157,7 +159,7 @@ node:internal/modules/cjs/loader:1568
   throw err;
   ^
 
-Error: Cannot find module '/home/franco/Codes/flucastr/Flucastr.AI/pruebas/comparar-openspec/runner/cli.mjs'
+Error: Cannot find module '/home/persona/Codes/flucastr/Flucastr.AI/pruebas/comparar-openspec/runner/cli.mjs'
     at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
   code: 'MODULE_NOT_FOUND',
 
@@ -166,15 +168,15 @@ FALLO: 10: autopruebas offline del runner OpenSpec
 exit 1
 
 $ bash instalar.sh --simular   (tramo 3, home real; solo las líneas de Codex)
-Codex (/home/franco/.codex)
-  agente generado: /home/franco/.codex/agents/constructor.toml (modelo: gpt-6-luna)
-  lanzador generado: /home/franco/.local/bin/codex-constructor (modelo: gpt-6-luna, esfuerzo: high)
-  agente generado: /home/franco/.codex/agents/principal.toml (modelo: gpt-6.1-sol)
-  lanzador generado: /home/franco/.local/bin/codex-principal (modelo: gpt-6.1-sol, esfuerzo: medium)
+Codex (/home/persona/.codex)
+  agente generado: /home/persona/.codex/agents/constructor.toml (modelo: gpt-6-luna)
+  lanzador generado: /home/persona/.local/bin/codex-constructor (modelo: gpt-6-luna, esfuerzo: high)
+  agente generado: /home/persona/.codex/agents/principal.toml (modelo: gpt-6.1-sol)
+  lanzador generado: /home/persona/.local/bin/codex-principal (modelo: gpt-6.1-sol, esfuerzo: medium)
   Codex:       codex-principal (o el agente como rol: ~/.codex/agents)
 exit 0 (archivos modificados en ~/.flucastr-ai, ~/.codex/agents, ~/.agents/skills y ~/.local/bin tras el simulacro: 0)
 
-$ ./verify   (tramo 3; log completo en /tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/5fd0b40e-631d-4ade-88e8-a3a01983f433/scratchpad/verify-t3-1.log)
+$ ./verify   (tramo 3; log completo en /tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/5fd0b40e-631d-4ade-88e8-a3a01983f433/scratchpad/verify-t3-1.log)
 ok 11 negativa: copia sin «Revisión por tramo» en agentes/principal.md rechazada con su mensaje
 ok 11 negativa: copia sin «tramo: <n>» en agentes/principal.md rechazada con su mensaje
 ok 11 negativa: copia sin «tramo: <n>» en agentes/constructor.md rechazada con su mensaje
@@ -182,7 +184,7 @@ ok 11 negativa: copia sin «tramo=<n>» en agentes/constructor.md rechazada con 
 VERIFY OK
 exit 0
 
-$ ./verify   (tramo 4, corrida final 1 de 3; log completo en /tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/5fd0b40e-631d-4ade-88e8-a3a01983f433/scratchpad/verify-t4-final1.log)
+$ ./verify   (tramo 4, corrida final 1 de 3; log completo en /tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/5fd0b40e-631d-4ade-88e8-a3a01983f433/scratchpad/verify-t4-final1.log)
 == 3f. Codex: TOML y lanzadores con modelo y esfuerzo; reinstalar refresca; --simular no escribe; desinstalar deja lo ajeno; reglas ==
 ok constructor codex TOML (modelo y esfuerzo de modelos.json)
 ok principal codex TOML (modelo y esfuerzo de modelos.json)
@@ -237,12 +239,12 @@ Decisión que falta (para el principal antes de tramo 2): ¿las reglas deny para
 
 **Tramo 3 (constructor)**
 
-- Decisión menor: `CODEX_DIR` respeta `CODEX_HOME`, igual que `PI_CODING_AGENT_DIR` en Pi; sin él usa `~/.codex`. Las skills van siempre a `~/.agents/skills`. En esta sesión `CODEX_HOME` está definida como `/home/franco/.codex`.
+- Decisión menor: `CODEX_DIR` respeta `CODEX_HOME`, igual que `PI_CODING_AGENT_DIR` en Pi; sin él usa `~/.codex`. Las skills van siempre a `~/.agents/skills`. En esta sesión `CODEX_HOME` está definida como `/home/persona/.codex`.
 - Cambio en `verify` fuera de la lista del tramo (dentro de *Alcance*): `unset CODEX_HOME` al inicio. Sin él, los pasos que instalan en HOME temporal (paso 8, `--copiar` sin `--solo`) habrían escrito en el `~/.codex` real. El tramo 4 agrega los pasos de Codex; este `unset` debe quedarse.
 - Decisión menor: `--solo codex` también deja sin tocar los proyectos Pi con skills registradas (igual que `--solo claude`), y `--skills-proyecto` se rechaza con `--solo codex`.
 - Decisión menor: `codex-reglas` es un tipo de línea nuevo del manifiesto, una por archivo. Con `--conservar-ajustes` se conserva como `deny`.
 - Decisión menor: el lanzador fija el esfuerzo al instalar (como `claude-<agente>`) y resuelve modelo e instrucciones al lanzar (como `pi-<agente>`). Para las instrucciones se agregó la orden `instrucciones-codex` del resolver, y `esfuerzo <agente> codex` traduce `max` a `xhigh`.
-- Límite de la prueba: el lanzador se probó con un `codex` de prueba que imprime sus argumentos. No se llamó a ningún modelo, así que no se sabe si `gpt-6-luna` responde en la cuenta de Franco.
+- Límite de la prueba: el lanzador se probó con un `codex` de prueba que imprime sus argumentos. No se llamó a ningún modelo, así que no se sabe si `gpt-6-luna` responde en la cuenta de la persona usuaria.
 - Corrección de evidencia del tramo 2: `modelo-esfuerzo principal codex` hoy da `gpt-6.1-sol:medium`. La línea de evidencia del tramo 2 citaba `openai/gpt-6.1-sol:xhigh`, de antes de quitar el prefijo del perfil.
 - Observación fuera de alcance, sin cambiar: según el código de `instalar.sh`, reinstalar con `--solo` desinstala primero todo el manifiesto, también lo de las otras herramientas, y después instala solo la pedida. Lo mismo pasa hoy con `--solo pi` y `--solo claude`. No se probó con Claude; queda para decidir.
 - Observación: tras desinstalar quedan las carpetas vacías que crea el kit (`~/.local/bin`, `~/.agents/skills`, `~/.codex/agents`). Igual que con Claude y Pi; no se tocó.
@@ -259,4 +261,4 @@ Decisión que falta (para el principal antes de tramo 2): ¿las reglas deny para
 - Docs: `README.md` tiene la sección «Codex (experimental)», el lanzador `codex-<agente>` y el texto de `--solo codex`. `AGENTS.md` tiene el esfuerzo de Codex, la ventana propia, el alcance de `verify` y los límites de las reglas de Codex. `PENDIENTES.md` tiene lo sin probar y el punto «Soporte de Codex» de «Ideas».
 - Verificación: `./verify` pasa en la corrida final 1 de 3 (82 líneas `ok`, paso 10 con AVISO). Pendientes: 0. Pasos del tramo 4 marcados: 4 de 4.
 
-**Ajuste posterior (principal, 2026-11-08):** Franco probó Codex y no podía crear ramas. Causa: el sandbox deja `.git` en solo lectura (`codex sandbox git switch -c x` → `HEAD.lock: Read-only file system`), no las reglas deny. Se agregó una regla `allow` para `git switch -c` (`resolver.mjs`), `verify` la comprueba con `execpolicy` (ahora 11 `prefix_rule`) y el README lo explica. Sin probar en sesión real de Codex.
+**Ajuste posterior (principal, 2026-11-08):** la persona usuaria probó Codex y no podía crear ramas. Causa: el sandbox deja `.git` en solo lectura (`codex sandbox git switch -c x` → `HEAD.lock: Read-only file system`), no las reglas deny. Se agregó una regla `allow` para `git switch -c` (`resolver.mjs`), `verify` la comprueba con `execpolicy` (ahora 11 `prefix_rule`) y el README lo explica. Sin probar en sesión real de Codex.

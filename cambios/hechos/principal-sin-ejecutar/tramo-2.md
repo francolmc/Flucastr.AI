@@ -17,6 +17,6 @@ Archivos: `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, 
 - [x] En `agentes/principal.md`, regla «Puedes leer y correr comandos de lectura…»: cambia «dentro de `cambios/<nombre>/`» por «dentro de `cambios/`» y, tras «`docs/proyecto.md`», agrega «(y el `.gitignore` del workspace)». Así `definir-proyecto` (`cambios/.gitkeep`) y `preparar-proyecto` (`.gitignore`) quedan dentro de la lista. No agregues otra cosa. Comprueba `wc -c agentes/principal.md` ≤ 8000 y que `rg -n 'Solo creas o editas' agentes/principal.md` sigue dando una línea; si pasa de 8000, recorta una redundancia. (A1, A6)
   - evidencia: `agentes/principal.md` línea 15 («Solo creas o editas archivos dentro de `cambios/`, y el `AGENTS.md`, `docs/proyecto.md` (y el `.gitignore` del workspace)…»); `wc -c` = 7980; `rg -c 'Solo creas o editas'` = 1
 - [x] `./verify` (A1, A3, A6)
-  - evidencia: `./verify`, exit 0 (log en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/verify-t2.log`; cola: «pruebas del medidor: 18 de 18 ok», «VERIFY OK»)
+  - evidencia: `./verify`, exit 0 (log en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/verify-t2.log`; cola: «pruebas del medidor: 18 de 18 ok», «VERIFY OK»)
 
 Verificación del tramo: `./verify`; cubre A1, A3, A6.

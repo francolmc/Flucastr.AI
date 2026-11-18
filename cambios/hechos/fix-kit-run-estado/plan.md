@@ -8,7 +8,9 @@ tipo: codigo
 ---
 # Corregir el estado que `kit run` deja antes de lanzar al constructor
 
-Aprobado por Franco el 2026-11-10.
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
+Aprobado por la persona usuaria el 2026-11-10.
 
 ## Supuestos
 - `ejecutar-plan` (paso 1) se detiene si `estado` ≠ `aprobado`; es quien pone `en curso` (paso 3). `kit run` no debe adelantarse.
@@ -45,4 +47,4 @@ exit 0
 ## Notas
 - kit run: el constructor falso quedó con estado propio (aprobado → en curso) para reproducir el de ejecutar-plan; el arnés sigue sin tocar planes reales.
 - Sin mapeo claude/pi en este cambio (fuera de alcance).
-- Commit, push y PR: no hechos por el constructor; los hace Franco.
+- Commit, push y PR: no hechos por el constructor; los hace la persona usuaria.

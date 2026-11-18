@@ -1,6 +1,9 @@
 # task-04 — Una corrida real en Pi: coordinador y subagentes con el modelo de `modelos.json`
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Equivalente de task-03 para Pi: confirma con **una sola corrida** que `pi-coordinador` usa `--model` resuelto de `modelos.json` y que los subagentes lanzados con la herramienta `subagent` usan el `model` de su archivo generado en `~/.pi/agent/agents/`. `WORKFLOW.md` §7 ya observó esto una vez con el `arquitecto` pero solo en la prueba desechable; aquí queda como evidencia verificable para los tres roles.
 
@@ -13,8 +16,8 @@ Equivalente de task-03 para Pi: confirma con **una sola corrida** que `pi-coordi
 - Una sola corrida (máximo una repetición si el fallo es del lanzador). Misma carpeta temporal vacía y mismo prompt que task-03 con «herramienta `subagent`» en vez de «Agent» y sin el parámetro de modelo.
 - Tope de tiempo: 300 s con el mismo mecanismo de `lanzar-pi.sh`; el binario es `${FLUCASTR_PI_BIN:-pi-coordinador}`.
 - Precondición: `node pruebas/comprobaciones/modelos-agentes.mjs` da 0 (si no, `BLOQUEO: rol=Franco; motivo=la instalación de Pi está desactualizada, falta correr bash instalar.sh`).
-- Criterio: modelo del principal = `openai/gpt-6.1-sol`; subagente `constructor` = `openai/gpt-6-sol`; `planificador` = `openai/gpt-6.1-sol` (de `modelos.json`; si Franco lo cambió, rige `node scripts/resolver.mjs modelo <agente> pi`).
-- Si el modelo del subagente no es observable en el registro, la tarea **no** da por probado el punto: queda `lista para revisión` con la evidencia de lo observable (principal; archivo instalado del subagente; lanzador) y una nota explícita «subagente no observable en el registro», para que Franco decida.
+- Criterio: modelo del principal = `openai/gpt-6.1-sol`; subagente `constructor` = `openai/gpt-6-sol`; `planificador` = `openai/gpt-6.1-sol` (de `modelos.json`; si la persona usuaria lo cambió, rige `node scripts/resolver.mjs modelo <agente> pi`).
+- Si el modelo del subagente no es observable en el registro, la tarea **no** da por probado el punto: queda `lista para revisión` con la evidencia de lo observable (principal; archivo instalado del subagente; lanzador) y una nota explícita «subagente no observable en el registro», para que la persona usuaria decida.
 
 ## Alcance / Fuera de alcance
 Alcance: el lanzador, una corrida y su evidencia.
@@ -43,7 +46,7 @@ Esperado: sin salida / `modelos de agentes instalados vigentes` / tres modelos q
 
 ## Evidencia
 
-Corrida real (no inferida), 2026-10-30, desde una carpeta temporal vacía (`/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/14b3b3bb-3945-4c18-bed2-c390112a4639/scratchpad/corrida-pi.Xl8T`), con `FLUCASTR_RECORD_FILE=<esa carpeta>/registro.jsonl`.
+Corrida real (no inferida), 2026-10-30, desde una carpeta temporal vacía (`/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/14b3b3bb-3945-4c18-bed2-c390112a4639/scratchpad/corrida-pi.Xl8T`), con `FLUCASTR_RECORD_FILE=<esa carpeta>/registro.jsonl`.
 
 Precondición y verificación (salida real):
 ```
@@ -98,7 +101,7 @@ Criterios de aceptación:
   - El lanzador usa el prompt en línea (como `lanzar-modelos-claude.sh`), no un archivo de `prompts/`.
 - Observaciones de comportamiento, sin efecto en el criterio de modelo:
   - El constructor llamó una vez a `contact_supervisor` (coordinación con el proceso principal, no lectura ni escritura de archivos), y en el registro su resultado aparece como `exitCode: -2` mientras estaba separado; la `_meta.json` final da `exitCode: 0` y `model: openai/gpt-6-sol`.
-  - Pese a «sin usar herramientas», el constructor usó `contact_supervisor`. Dato para Franco; no cambia el resultado.
+  - Pese a «sin usar herramientas», el constructor usó `contact_supervisor`. Dato para la persona usuaria; no cambia el resultado.
 - Lo observable: modelo del principal, de planificador y de constructor. Nada queda «no observable».
 - Solo se crearon `pruebas/lanzar-modelos-pi.sh` y la *Evidencia*/*Notas*/`estado` de esta tarea. No se tocó `definitions/STATUS.md`, `task-05-extractor-modelos-registro.md`, `instalar.sh`, agentes, `modelos.json` ni la configuración de Pi. No hay commit, push, PR ni merge.
-- Para Franco: revisar la *Evidencia* de esta tarea y el archivo nuevo `pruebas/lanzar-modelos-pi.sh` antes de decidir `hecha`.
+- Para la persona usuaria: revisar la *Evidencia* de esta tarea y el archivo nuevo `pruebas/lanzar-modelos-pi.sh` antes de decidir `hecha`.

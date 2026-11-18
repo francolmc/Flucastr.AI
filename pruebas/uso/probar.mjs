@@ -60,6 +60,57 @@ function medir(extra = []) {
 const pruebas = [];
 const prueba = (id, descripcion, fn) => pruebas.push({ id, descripcion, fn });
 
+prueba("idioma", "Alias ingleses, entrada alternativa y errores equivalentes con datos aislados", () => {
+  const copia = join(tmp, "kit con espacios");
+  mkdirSync(join(copia, "scripts"), { recursive: true });
+  cpSync(script, join(copia, "scripts", "uso.mjs"));
+  cpSync(join(raiz, "scripts", "usage.mjs"), join(copia, "scripts", "usage.mjs"));
+  cpSync(join(raiz, "scripts", "tarifas.json"), join(copia, "scripts", "tarifas.json"));
+  cpSync(join(raiz, "tools", "usage"), join(copia, "tools", "usage"), { recursive: true });
+  const datos = join(tmp, "datos con espacios");
+  cpSync(fixtures, datos, { recursive: true });
+  const dirs = ["--claude-dir", join(datos, "claude"), "--codex-dir", join(datos, "codex"), "--pi-dir", join(datos, "pi")];
+  const ejecutar = (entrada, args) => {
+    const r = spawnSync(process.execPath, [join(copia, "scripts", entrada), ...dirs, ...args], { encoding: "utf8", env: { ...process.env, HOME: join(tmp, "home aislado") } });
+    if (r.error) throw r.error;
+    return { status: r.status, stdout: r.stdout, stderr: r.stderr };
+  };
+  const pares = [
+    [["--desde", "2026-01-01"], ["--since", "2026-01-01"]],
+    [["--herramienta", "pi"], ["--tool", "pi"]],
+    [["--proyecto", "proyecto-b"], ["--project", "proyecto-b"]],
+    [["--sesiones"], ["--sessions"]],
+    [["--umbral", "30"], ["--threshold", "30"]],
+    [["--tarifas", join(datos, "tarifas-prueba.json")], ["--rates", join(datos, "tarifas-prueba.json")]],
+  ];
+  for (const [es, en] of pares) {
+    for (const formato of [[], ["--json"]]) {
+      const comun = ["--desde", "2026-01-01", ...formato];
+      const esperado = ejecutar("uso.mjs", [...comun, ...es]);
+      assert.equal(esperado.status, 0);
+      if (formato.length) assert.ok(JSON.parse(esperado.stdout).filas.length > 0);
+      assert.deepStrictEqual(ejecutar("usage.mjs", [...comun, ...en]), esperado);
+    }
+  }
+  const mezclaEs = ["--desde", "2026-01-01", "--herramienta", "pi", "--proyecto", "proyecto-b", "--sesiones", "--umbral", "30", "--tarifas", join(datos, "tarifas-prueba.json"), "--json"];
+  const mezclaEn = ["--since", "2026-01-01", "--herramienta", "pi", "--project", "proyecto-b", "--sessions", "--umbral", "30", "--rates", join(datos, "tarifas-prueba.json"), "--json"];
+  assert.deepStrictEqual(ejecutar("usage.mjs", mezclaEn), ejecutar("uso.mjs", mezclaEs));
+  for (const [es, en] of pares.filter(([a]) => a.length === 2)) {
+    assert.deepStrictEqual(ejecutar("usage.mjs", [en[0]]), ejecutar("uso.mjs", [es[0]]));
+  }
+  for (const [es, en, valor] of [["--desde", "--since", "invalido"], ["--herramienta", "--tool", "otra"], ["--umbral", "--threshold", "101"]]) {
+    const resultado = ejecutar("uso.mjs", [es, valor]);
+    assert.equal(resultado.status, 2);
+    assert.deepStrictEqual(ejecutar("usage.mjs", [en, valor]), resultado);
+  }
+  const archivo = join(copia, "scripts", "uso.mjs");
+  const original = readFileSync(archivo, "utf8");
+  const mutado = original.replace('"--since": "--desde", ', "");
+  assert.notEqual(mutado, original);
+  writeFileSync(archivo, mutado);
+  assert.equal(ejecutar("usage.mjs", ["--since", "2026-01-01"]).status, 2, "quitar el alias debe detectarse");
+});
+
 prueba("A1", "Claude: mensaje duplicado contado una vez y subagente con rol sub", () => {
   const { json } = medir();
   assert.deepStrictEqual(ordenar(deHerramienta(json.filas, "claude")), esperado("claude"));

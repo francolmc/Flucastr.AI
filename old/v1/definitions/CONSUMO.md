@@ -1,5 +1,7 @@
 # Control de consumo del `coordinador` (F29)
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 Estado: borrador por aprobar (puerta 1). Autor: `arquitecto`, una sola pasada, 2026-11-02.
 
 ## 1. Idea y origen de los datos
@@ -51,23 +53,23 @@ Actualizado: <AAAA-MM-DD hh:mm>
 
 **Topes** (*supuestos*, a calibrar con la medición de la sección 6): `tope D = 2·T + 4 + ampliado`; `K ≤ 2`; `arq ≤ 2`; `plan ≤ 3` (descomponer + refinar). `aviso` cuando `D ≥ 75 %` del tope o `K = 2`; `excedido` cuando algo supera su tope. Salidas: 0 ok o aviso; 1 excedido o `STATUS.md` inválido; 2 error de uso. Base del `2·T`: la cota de dos pasadas por tarea (F26, *confirmado*).
 
-**Si `excedido`:** el `coordinador` **no delega**. En su única escritura de esa transición pone en *Escalación* la causa y tres opciones cerradas para Franco:
+**Si `excedido`:** el `coordinador` **no delega**. En su única escritura de esa transición pone en *Escalación* la causa y tres opciones cerradas para la persona usuaria:
 
 - A) ampliar el tope en N delegaciones (se anota `ampliado=N`);
 - B) replantear lo bloqueado (vuelve a `arquitecto` o `planificador`, cuenta como ronda);
 - C) cerrar la sesión aquí y revisar a mano.
 
-Sin respuesta de Franco, se detiene. *Descartado:* tope duro sin salida (frena sin que Franco decida); contar tokens (el `coordinador` no los ve; eso lo mide `consumo.mjs` después).
+Sin respuesta de la persona usuaria, se detiene. *Descartado:* tope duro sin salida (frena sin que la persona usuaria decida); contar tokens (el `coordinador` no los ve; eso lo mide `consumo.mjs` después).
 
 ## 4. (c) Una sesión por feature
 
-El estado vive en `STATUS.md`, por eso cambiar de sesión no pierde nada. El `coordinador` dice a Franco «abre sesión nueva» en tres casos, siempre tras dejar `Retomar:` escrito en la misma escritura:
+El estado vive en `STATUS.md`, por eso cambiar de sesión no pierde nada. El `coordinador` dice a la persona usuaria «abre sesión nueva» en tres casos, siempre tras dejar `Retomar:` escrito en la misma escritura:
 
-1. Franco confirma una feature `hecha` (cierre; ya es una transición).
-2. `estado=excedido` y Franco elige C.
+1. la persona usuaria confirma una feature `hecha` (cierre; ya es una transición).
+2. `estado=excedido` y la persona usuaria elige C.
 3. `estado=aviso` por `D ≥ 75 %` (corte preventivo, ver decisión 3).
 
-`Retomar:` lleva: feature, siguiente paso exacto, rama, qué espera de Franco. La sesión nueva lee `STATUS.md` primero (ya en el núcleo). *Descartado:* resumen largo en la respuesta (se pierde y cuesta turnos).
+`Retomar:` lleva: feature, siguiente paso exacto, rama, qué espera de la persona usuaria. La sesión nueva lee `STATUS.md` primero (ya en el núcleo). *Descartado:* resumen largo en la respuesta (se pierde y cuesta turnos).
 
 ## 5. (d) Dónde vive el texto
 
@@ -84,7 +86,7 @@ Cada tarea ≤ 5 KB, reversible con `git revert`; las crea el `planificador`. Or
 1. **`--presupuesto` en `validar-tarea.mjs`** (módulo puro `formato-presupuesto.mjs`; el instalador debe copiar el módulo, *a verificar*). Comprobación: pruebas con fixtures `ok`/`aviso`/`excedido`, `STATUS.md` de 1537 B o con línea faltante (exit 1) y ruta ilegible (exit 2).
 2. **Skill `control-consumo`**. Comprobación: tope de bytes de la skill, frases en el manifiesto, pruebas de estructura del kit.
 3. **Núcleo y `comandos-coordinador`**: activación, recortes, frase «al pedirte Franco un comando», comando 4. Depende de 2 (se revierte antes). Comprobación: `coordinador.md` ≤ 7168 B y contrato de roles verde.
-4. **Medición** en una feature de Cleaner con `consumo.mjs` y las líneas `Registro:`; informe pegado por Franco.
+4. **Medición** en una feature de Cleaner con `consumo.mjs` y las líneas `Registro:`; informe pegado por la persona usuaria.
 
 **Metas** (*supuestas*, línea base de Cleaner entre paréntesis):
 
@@ -104,7 +106,7 @@ Cada tarea ≤ 5 KB, reversible con `git revert`; las crea el `planificador`. Or
 - `rondas` dependen de que el `coordinador` las incremente: es el único dato sin fuente mecánica (decisión 2).
 - Los topes son supuestos; la tarea 4 los calibra.
 
-## 8. Decisiones para Franco
+## 8. Decisiones para la persona usuaria
 
 1. **Topes del presupuesto.** A) `2·T + 4` delegaciones, `K ≤ 2`, `arq ≤ 2`, `plan ≤ 3` (**recomendada**). B) más estricto: `1,5·T + 3`. C) solo aviso, sin frenar.
 2. **Rondas del `arquitecto`/`planificador`.** A) contador en la línea `Presupuesto:` del `STATUS.md` (**recomendada**). B) no contarlas y fijar solo `D` y `K`, que salen de `Registro:`.

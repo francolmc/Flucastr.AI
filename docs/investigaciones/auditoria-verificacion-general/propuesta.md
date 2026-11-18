@@ -1,8 +1,10 @@
 # Propuesta: verificación robusta y eficiente para cualquier proyecto y stack (2026-11-13)
 
+*Nombres de personas y proyectos anonimizados; fechas y cifras originales.*
+
 Parte de `hallazgo.md` (medido) y de la investigación web de hoy. Lo marcado **[fuente]** viene de una búsqueda; lo marcado **[mío]** es razonamiento propio, sin respaldo externo. Nada de esto está probado en vuestros proyectos.
 
-## Qué pidió Franco
+## Qué pidió la persona usuaria
 Un diseño que aguante: más de dos proyectos a la vez sin colapsar Docker, validaciones que no siempre necesitan Docker, y otros stacks y lenguajes. Docker se conserva para desplegar en el VPS.
 
 ## Principios
@@ -26,7 +28,7 @@ Un diseño que aguante: más de dos proyectos a la vez sin colapsar Docker, vali
 ## El contrato por proyecto (opciones)
 - **A. Líneas en `AGENTS.md`** (`Comprobación rápida: …`, `Integración: …`): ya existe una; costo mínimo; sin ejecutable único.
 - **B. `./verify` con nivel** (`./verify 1|2|3|4`): un solo punto de entrada, igual en todo stack; el proyecto implementa cada nivel como quiera. Recomendada.
-- **C. Un ejecutor de tareas** (mise, just, Moon, Nx): más potente (caché de resultados, pruebas afectadas); dependencia nueva y curva; solo vale la pena en un monorepo políglota como DASH. **[fuente]**
+- **C. Un ejecutor de tareas** (mise, just, Moon, Nx): más potente (caché de resultados, pruebas afectadas); dependencia nueva y curva; solo vale la pena en un monorepo políglota como Proyecto.Móvil. **[fuente]**
 
 ## Coordinación entre proyectos (opciones)
 - **Candado único** (el plan `cola-docker`): simple; serializa todo, incluso lo que cabría en paralelo.
@@ -47,11 +49,11 @@ El contrato B no depende del lenguaje: un proyecto Python o Rust implementa `./v
 
 ## Cómo introducirlo con poco riesgo (propuesta, no plan)
 1. Medir primero: tiempos por fase y diagnóstico al fallar en los tres `verify`.
-2. Un proyecto piloto con los cuatro carriles. Mejor DonFinancio: ya tiene el recorrido y el peor Dockerfile.
+2. Un proyecto piloto con los cuatro carriles. Mejor Proyecto.Finanzas: ya tiene el recorrido y el peor Dockerfile.
 3. Si el piloto confirma el ahorro, escribir la convención en `preparar-proyecto` y el auditor.
 4. Los otros proyectos adoptan el contrato por planes derivados del auditor.
 
-## Decisión de Franco (13-nov): sin confirmación humana en `release`
+## Decisión de la persona usuaria (13-nov): sin confirmación humana en `release`
 `./verify release` es parte del proceso y no pide permiso. El control vive **dentro de `./verify`**, no en una regla de Codex ni en un hook que pregunte:
 - **Resultado cacheado por contenido:** si ese nivel ya pasó para exactamente el mismo árbol de archivos (hash del diff), no se repite; imprime el resultado anterior.
 - **Sin repetir a ciegas:** si el último intento falló y el árbol no cambió, se niega con el mensaje «nada cambió desde el último fallo; corrige o usa `stack`».
@@ -60,10 +62,10 @@ El contrato B no depende del lenguaje: un proyecto Python o Rust implementa `./v
 - Cualquier decisión de qué nivel corre en cada tramo sigue en el plan (`Verificación del tramo:`).
 
 ## No verificado
-- Que el carril 2 acelere de verdad en DonFinancio.
+- Que el carril 2 acelere de verdad en Proyecto.Finanzas.
 - Que la memoria sea la causa de los cierres de PostgreSQL.
 - El efecto de `--no-cache` sobre los mounts de caché, y cualquier opción de builder remoto.
-- Cómo aplicar los carriles a móvil (DASH) y a WASI (Byteria).
+- Cómo aplicar los carriles a móvil (Proyecto.Móvil) y a WASI (Proyecto.Plataforma).
 
 ## Fuentes
 - https://pnpm.io/docker

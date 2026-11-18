@@ -1,6 +1,6 @@
 # mecanismos
 
-Consulta: 2026-11-05 (todas las citas). Páginas bajadas con `curl -sL` a `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/3d5d0b53-8b8d-4c92-bda3-69eff71de12b/scratchpad/f43-t03/` (fuera del repo) y buscadas con `grep -n` sobre texto extraído; los números de línea citados son de ese texto extraído. Docs locales de Pi: `/Users/franco/.pi/agent/install/releases/1.4.0/node_modules/@earendil-works/pi-coding-agent/docs`, con `grep -rn`.
+Consulta: 2026-11-05 (todas las citas). Páginas bajadas con `curl -sL` a `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/3d5d0b53-8b8d-4c92-bda3-69eff71de12b/scratchpad/f43-t03/` (fuera del repo) y buscadas con `grep -n` sobre texto extraído; los números de línea citados son de ese texto extraído. Docs locales de Pi: `/Users/persona/.pi/agent/install/releases/1.4.0/node_modules/@earendil-works/pi-coding-agent/docs`, con `grep -rn`.
 
 Etiquetas: *confirmado* = cita textual corta verificada; *supuesto* = no verificado en la documentación consultada.
 

@@ -1,6 +1,9 @@
 # task-12 — `informe.mjs --pistas`: pistas 1, 3, 4 y 5 desde `eventos.jsonl`
 repo: Flucastr.AI   depende_de: task-06, task-07   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 El informe mide resultados pero no dice qué hacer con ellos. Esta tarea agrega la opción `--pistas` y un módulo `scripts/pistas.mjs` que, solo con `registro/eventos.jsonl`, dispara las pistas accionables que no necesitan los logs de sesión: bloqueos de entorno repetidos (1), exceso de tareas canceladas (3), telemetría incompleta (4) y bloqueos por alcance o especificación (5). Las pistas 2 y 6 las agrega task-13.
 
@@ -72,7 +75,7 @@ exit 1
 
 ## Notas
 - Pasos 1 a 4 hechos. `scripts/pistas.mjs` (calcularPistas, pistas 1, 3, 4 en sus dos formas y 5). `scripts/informe.mjs`: `--pistas` en `OPCIONES_CONOCIDAS` y `leerArgumentos`; `formatearMarkdown` e `informeJson` con parámetro opcional al final. `pruebas/comprobaciones/informe-pistas.test.mjs`: 8 pruebas. Verificación pasa en la primera pasada.
-- Huecos menores: (1) 3 de 8 da 37,5 %. La regla dice «entero redondeado» y la prueba de la tarea dice «37 %»; se usó `Math.round`, que da 38 %, y la prueba afirma 38 %. Si Franco quiere 37 (truncar), es un cambio de una línea. (2) La pista 4 con sus dos formas en una misma feature emite dos entradas con `n=4`, una por medición.
+- Huecos menores: (1) 3 de 8 da 37,5 %. La regla dice «entero redondeado» y la prueba de la tarea dice «37 %»; se usó `Math.round`, que da 38 %, y la prueba afirma 38 %. Si la persona usuaria quiere 37 (truncar), es un cambio de una línea. (2) La pista 4 con sus dos formas en una misma feature emite dos entradas con `n=4`, una por medición.
 - La rápida: `ℹ tests 651` = 643 base + 8 nuevas; `ℹ pass 644`; `ℹ fail 7` con los 7 títulos conocidos, ninguno nuevo. `node --test` sale 1 y `rapida.sh` corta con `set -e` antes de su línea `rapida:`.
 - Modo yolo: sin rama, sin `git switch`, sin commit. No se tocó `definitions/STATUS.md`. No se leyó `registro/`, `.env` ni `definitions/`.
 - Incidente: al correr la rápida redirigí una salida a `/tmp/x` por error; lo borré y repetí la corrida con salida en el scratchpad. Las pruebas usan `os.tmpdir()`, como `informe.test.mjs` (en macOS es `$TMPDIR`).

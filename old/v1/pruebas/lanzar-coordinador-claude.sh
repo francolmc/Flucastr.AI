@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Lanza el agente coordinador en Claude Code con permisos explícitos (F12, task-05).
 # Los cuatro patrones de Bash (tres para scripts/ y el de validar-tarea.mjs, cuarto, como puerta previa)
-# se conceden aquí con --allowedTools por decisión de Franco (2026-10-30; el cuarto, 2026-11-01):
+# se conceden aquí con --allowedTools por decisión de la persona usuaria (2026-10-30; el cuarto, 2026-11-01):
 # el tools: del agente no concede permiso en Claude Code. Son los únicos Bash permitidos.
 # Uso: lanzar-coordinador-claude.sh "<prompt>"   (ejecutar desde el directorio del fixture)
 set -euo pipefail

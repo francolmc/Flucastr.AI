@@ -1,8 +1,11 @@
 # task-01 — Chequeos nuevos en el validador de tareas
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`validarTarea` hoy exige nueve secciones y no mira qué archivos toca la tarea ni si queda una decisión sin cerrar (S2 y S3 de la medición en Flucastr.Cleaner). Esta tarea lo deja en diez secciones (con «Decisiones abiertas», ya en la plantilla) y le suma dos chequeos: rutas a tocar y decisiones abiertas. Todo en su sitio actual; moverlo a `scripts/` es task-02.
+`validarTarea` hoy exige nueve secciones y no mira qué archivos toca la tarea ni si queda una decisión sin cerrar (S2 y S3 de la medición en Proyecto.Mantenimiento). Esta tarea lo deja en diez secciones (con «Decisiones abiertas», ya en la plantilla) y le suma dos chequeos: rutas a tocar y decisiones abiertas. Todo en su sitio actual; moverlo a `scripts/` es task-02.
 
 ## Contexto
 - Leer: `definitions/WORKFLOW.md` §6 (plantilla de diez secciones); `pruebas/comprobaciones/formato-tarea.mjs` (regla 3 usa `SECCIONES`, líneas 5-15; reglas 1-9 hasta la línea 126; la función `secciones(lineas)` devuelve `{titulo, lineas}`).

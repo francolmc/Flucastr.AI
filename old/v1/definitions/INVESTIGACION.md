@@ -1,5 +1,7 @@
 # Investigación externa: estabilizar el kit Flucastr.AI
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 > Estado: **borrador por revisar**. Fecha: 2026-11-04. Fase 2 de la auditoría (`definitions/AUDITORIA.md`): responde sus 8 preguntas (§6) más una transversal sobre complejidad de orquestación.
 > Origen: investigación web con fuentes (lista al final). Los umbrales concretos (2 repeticiones, k=5, topes en KB) son criterio derivado de las fuentes, no estándares. Ver «Advertencias» para qué está verificado y qué no.
 > Título del informe: *Flucastr.AI: cómo estabilizar el kit pasando de reglas por prompt a rieles deterministas*
@@ -8,7 +10,7 @@ El kit se estabiliza sacando los controles críticos del prompt y llevándolos a
 
 ## TL;DR
 
-- **El bucle de DonFinancio se corta con dos piezas.** La primera es un validador que corre en cada Write/Edit (hook `PostToolUse` en Claude Code, `tool_result` en Pi) y dice "bloque de código abierto en línea N sin cerrar". La segunda es un contador determinista de "misma firma de error + mismo hash del artefacto" que detiene el flujo a la 2.ª repetición y no deja que "A" (ampliar) reabra el mismo bucle. Es lo que hacen OpenHands (StuckDetector), SWE-agent (linter que rechaza la edición), Aider (máx. 3 reflexiones) y Roo Code (límite de 3 errores/repeticiones).
+- **El bucle de Proyecto.Finanzas se corta con dos piezas.** La primera es un validador que corre en cada Write/Edit (hook `PostToolUse` en Claude Code, `tool_result` en Pi) y dice "bloque de código abierto en línea N sin cerrar". La segunda es un contador determinista de "misma firma de error + mismo hash del artefacto" que detiene el flujo a la 2.ª repetición y no deja que "A" (ampliar) reabra el mismo bucle. Es lo que hacen OpenHands (StuckDetector), SWE-agent (linter que rechaza la edición), Aider (máx. 3 reflexiones) y Roo Code (límite de 3 errores/repeticiones).
 - **Menos roles y menos reglas por prompt.** Lo que funciona en 2025-2026 es "inteligencia en paralelo, escrituras en un solo hilo" (Walden Yan, "Multi-Agents: What's Actually Working", Cognition, 22 abr. 2026). Para un desarrollador solo, la arquitectura mínima estable tiene un planificador fuerte (Sonnet) que escribe planes y tareas, un constructor liviano (Haiku) que es el único que escribe código, y un orquestador que es un *script*, no un agente. Las puertas humanas bajan de 4 a 2.
 - **Medir el estado, no la respuesta.** Las evals deben correr con Haiku (el modelo de producción), con 10-20 tareas × 3-5 repeticiones en `claude -p --max-turns --max-budget-usd`. Se califica con los mismos validadores sobre los archivos resultantes y se reporta pass^k. La telemetría pasa de git a un `events.jsonl` append-only que escriben los hooks.
 
@@ -32,7 +34,7 @@ El kit se estabiliza sacando los controles críticos del prompt y llevándolos a
 ### Qué hacen otros
 
 - **OpenHands (verificado en su documentación y repositorio).** Su `StuckDetector` viene activo por defecto y analiza el historial después del último mensaje del usuario. Detecta cinco patrones, entre ellos "la misma acción produce error repetidamente (3+ veces)" y 4 pares acción-observación idénticos. Compara por contenido semántico (nombre de herramienta + contenido), no por identidad de objeto, e ignora marcas de tiempo. Los umbrales por defecto documentados en un issue del SDK son 4/3/3/6. Cuando detecta el patrón, la conversación pasa a `ConversationExecutionStatus.STUCK`. Esto también enseña algo: el detector de "bucle de error de ventana de contexto" fue un stub que siempre devolvía `False` hasta un PR de octubre de 2026, que lo marca como atascado tras 5 condensaciones fallidas seguidas. Otro issue documenta que el servidor de agentes descartaba en silencio los umbrales personalizados. **Lección: el detector también necesita pruebas.**
-- **SWE-agent (paper NeurIPS 2024, verificado).** El comando de edición integra un linter (`flake8 --select=F821,F822,F831,E111,E112,E113,E999,E902`). Si la edición introduce un error de sintaxis, la edición se revierte y el agente recibe: *"Your changes have NOT been applied… DO NOT re-run the same failed edit command. Running it again will lead to the same error."* En la ablación (SWE-bench Lite, GPT-4 Turbo) la tasa de resolución pasa de 15,0 % sin linter a 18,0 % con linter. El paper también reporta que una edición tiene 90,5 % de probabilidad de terminar bien, pero solo 57,2 % después de un primer intento fallido, y que las ediciones fallidas en cascada explican el 23,4 % de los fracasos. **Es exactamente el patrón de DonFinancio: tras el primer fallo, la probabilidad de éxito cae fuerte, así que hay que cortar temprano y cambiar de estrategia.**
+- **SWE-agent (paper NeurIPS 2024, verificado).** El comando de edición integra un linter (`flake8 --select=F821,F822,F831,E111,E112,E113,E999,E902`). Si la edición introduce un error de sintaxis, la edición se revierte y el agente recibe: *"Your changes have NOT been applied… DO NOT re-run the same failed edit command. Running it again will lead to the same error."* En la ablación (SWE-bench Lite, GPT-4 Turbo) la tasa de resolución pasa de 15,0 % sin linter a 18,0 % con linter. El paper también reporta que una edición tiene 90,5 % de probabilidad de terminar bien, pero solo 57,2 % después de un primer intento fallido, y que las ediciones fallidas en cascada explican el 23,4 % de los fracasos. **Es exactamente el patrón de Proyecto.Finanzas: tras el primer fallo, la probabilidad de éxito cae fuerte, así que hay que cortar temprano y cambiar de estrategia.**
 - **Aider (código fuente verificado).** `max_reflections = 3`, fijo en `base_coder.py`, con el contador reiniciado en cada mensaje del usuario. Los errores de lint/test se reinyectan como el siguiente mensaje al modelo, y al llegar al tope imprime "Only 3 reflections allowed, stopping." Desde la v0.47 pregunta antes de intentar corregir lint.
 - **Roo Code (PR verificado).** `consecutiveMistakeLimit` con valor por defecto 3 y un `ToolRepetitionDetector` para llamadas idénticas consecutivas. El valor 0 desactiva ambos. Hay evidencia contradictoria sobre si en la versión final comparten el mismo límite o quedan separados; en ambos casos el valor por defecto es 3.
 - **Cline (parcialmente verificado).** Un issue muestra el mensaje "Detected 5 consecutive identical calls… stopping to avoid a loop". El aviso "suave" a las 3 llamadas solo aparece en fuentes secundarias.
@@ -73,7 +75,7 @@ Una matriz de dueños que el script de flujo aplica, no el prompt:
 | Código | test falla, build roto | **Constructor** | Hasta el límite de firma (§1) |
 | Kit/skill contradictoria | `--evidencia` con la tarea "en curso" | **Humano (mantenedor del kit)** | Se registra como `defecto_kit`; nunca se reintenta |
 
-**Aplicación:** agregar `documento_dañado` y `defecto_kit` a la taxonomía de bloqueos. Con eso desaparece la etiqueta genérica "codigo" que generaba tareas de corrección inútiles. El caso de DonFinancio queda así: el hook bloquea la escritura del planificador con "fence abierto en línea 42" y el planificador lo cierra en la misma sesión. Si el archivo llegara dañado por otra vía, el constructor tiene un intento de reparación de formato, y si falla se escala con la firma.
+**Aplicación:** agregar `documento_dañado` y `defecto_kit` a la taxonomía de bloqueos. Con eso desaparece la etiqueta genérica "codigo" que generaba tareas de corrección inútiles. El caso de Proyecto.Finanzas queda así: el hook bloquea la escritura del planificador con "fence abierto en línea 42" y el planificador lo cierra en la misma sesión. Si el archivo llegara dañado por otra vía, el constructor tiene un intento de reparación de formato, y si falla se escala con la firma.
 
 ---
 
@@ -168,7 +170,7 @@ Principios: (a) **solo el primer error raíz**, no la cascada, igual que los com
 Una línea por evento, en `~/.flucastr/events/<maquina>.jsonl` (por máquina, para evitar conflictos), sincronizado por la nube que ya uses o por un repo de telemetría aparte:
 
 ```json
-{"ts":"2026-11-04T15:02:11Z","maq":"pc-casa","kit":"1.8.3","proy":"DonFinancio","feat":"F12","tarea":"task-03","evento":"bloqueo","tipo":"documento_dañado","regla":"E-FENCE-ABIERTO","firma":"a41c9e","intento":2,"agente":"constructor","modelo":"haiku"}
+{"ts":"2026-11-04T15:02:11Z","maq":"pc-casa","kit":"1.8.3","proy":"Proyecto.Finanzas","feat":"F12","tarea":"task-03","evento":"bloqueo","tipo":"documento_dañado","regla":"E-FENCE-ABIERTO","firma":"a41c9e","intento":2,"agente":"constructor","modelo":"haiku"}
 ```
 
 Eventos mínimos: `validacion` (ok/falla + regla), `reintento`, `bloqueo` (tipo + regla + firma), `escalacion` (opción elegida por el humano), `presupuesto` (rondas/tokens acumulados), `transicion` (estado anterior → nuevo) y `sesion` (inicio/fin, versión del kit). `registrar.mjs` pasa a leer este archivo, y git queda solo como evidencia de entrega. OTel de Claude Code sirve como complemento opcional para tokens y costos, no como fuente de bloqueos: no conoce tu taxonomía.
@@ -190,7 +192,7 @@ n=3 con Sonnet, cuando producción usa Haiku, y midiendo la respuesta: con eso n
 ### Patrón recomendado (barato y reproducible)
 
 - **Arnés casero:** `evals/casos/*.json` describe el repo semilla, el prompt, el agente y la verificación. `evals/correr.mjs` copia la semilla a un directorio temporal y ejecuta `claude -p --agent constructor --model haiku --max-turns 25 --max-budget-usd 0.30 --output-format json`. Después corre **los mismos validadores** sobre el árbol resultante y agrega la línea en `evals/resultados.jsonl`.
-- **Casos iniciales (12):** tarea normal; fence sin cerrar (DonFinancio); sección faltante; tarea contradictoria; test que falla por una causa real; test que falla por un defecto del entorno; presupuesto agotado; skill con instrucción contradictoria; STATUS cerca del tope; tarea que requiere tocar un archivo fuera de alcance (debe bloquearse); escalación correcta; reanudación tras compactación.
+- **Casos iniciales (12):** tarea normal; fence sin cerrar (Proyecto.Finanzas); sección faltante; tarea contradictoria; test que falla por una causa real; test que falla por un defecto del entorno; presupuesto agotado; skill con instrucción contradictoria; STATUS cerca del tope; tarea que requiere tocar un archivo fuera de alcance (debe bloquearse); escalación correcta; reanudación tras compactación.
 - **Repeticiones:** k=3 mientras iteras y k=5 antes de publicar una versión del kit. Reporta pass^k por caso. El criterio de "listo" es pass^5 = 100 % en los casos de regresión.
 - **Alternativas:** promptfoo (proveedor de shell/exec y aserciones por script) o Inspect (UK AISI) si quieres paneles. Para un desarrollador solo, el arnés casero de ~150 líneas en Node alcanza y reutiliza tus validadores.
 - **Pi:** el mismo arnés con Pi en modo no interactivo/JSON (documentado como "JSON Event Stream"). No verifiqué las banderas exactas; confírmalas en la referencia de la CLI.
@@ -292,7 +294,7 @@ Cada feature cabe en 1-3 tareas de una página y tiene una verificación objetiv
   - Códigos de regla.
   - Salida `--json`.
   - Hook `PostToolUse` (CC) y extensión `tool_result` (Pi).
-  - *Verificación:* reproducir el archivo de DonFinancio. El agente recibe `E-FENCE-ABIERTO …:42` en la primera escritura, y en las evals el caso pasa con pass^5 = 100 %.
+  - *Verificación:* reproducir el archivo de Proyecto.Finanzas. El agente recibe `E-FENCE-ABIERTO …:42` en la primera escritura, y en las evals el caso pasa con pass^5 = 100 %.
 - **F38 – Firma de error y corte por repetición.**
   - `events.jsonl`.
   - Cálculo de firma.

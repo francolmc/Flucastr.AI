@@ -83,7 +83,7 @@ Código de salida de `node --test ...` sin tubería: `0`.
 
 2. `bash pruebas/rapida.sh` (salida completa):
 ```
-Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-nN6Tq5
+Entorno conservado: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-nN6Tq5
 ✔ I1: comprobación real (55.818334ms)
 ✔ I2: comprobación real (940.707167ms)
 ✔ I3: comprobación real (905.917334ms)

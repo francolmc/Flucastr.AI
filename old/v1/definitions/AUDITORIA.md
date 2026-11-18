@@ -1,13 +1,15 @@
 # Auditoría interna del kit Flucastr.AI
 
-> Estado: **borrador por revisar**. Fecha: 2026-11-04. Disparó: Franco. Solo lectura; sin búsqueda web. Una pasada del `arquitecto`.
-> *Confirmado* = leído en el repo (ruta:línea o cita) o ejecutado en solo lectura. *Inferido* = deducido. Los hechos del caso base (DonFinancio F03 task-10) los dio Franco.
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
+> Estado: **borrador por revisar**. Fecha: 2026-11-04. Disparó: la persona usuaria. Solo lectura; sin búsqueda web. Una pasada del `arquitecto`.
+> *Confirmado* = leído en el repo (ruta:línea o cita) o ejecutado en solo lectura. *Inferido* = deducido. Los hechos del caso base (Proyecto.Finanzas F03 task-10) los dio la persona usuaria.
 > Solo ejecuté `higiene-contexto.test.mjs` y cuentas con `node` sobre `registro/eventos.jsonl`. No toqué `.env`.
 
 ## 1. Resumen
 
-1. Los seis mecanismos del caso base existen como los describió Franco (*confirmado*, §2.2, §2.7). Son huecos de diseño que se combinan.
-2. El tope de presupuesto sí frena, pero no distingue progreso de repetición: 9 rondas con `amp_plan=6` son seis respuestas «A» de Franco (*inferido*) a un freno que no dice por qué se repite.
+1. Los seis mecanismos del caso base existen como los describió la persona usuaria (*confirmado*, §2.2, §2.7). Son huecos de diseño que se combinan.
+2. El tope de presupuesto sí frena, pero no distingue progreso de repetición: 9 rondas con `amp_plan=6` son seis respuestas «A» de la persona usuaria (*inferido*) a un freno que no dice por qué se repite.
 3. No hay dueño ni procedimiento para reparar una tarea dañada, y el validador de fuente da un mensaje equivocado ante un bloque sin cerrar (*confirmado*).
 4. La telemetría existe pero está vieja y se deriva de git: el log (464 eventos) no contiene ninguna ejecución de F24–F36 (≥97 líneas `Registro:` sin ingerir) ni eventos `bloqueo`, `cancelacion` ni `escalacion`.
 5. Deriva documental confirmada y peor: `higiene-contexto.test.mjs` está **rojo hoy** (WORKFLOW 31 298 de 30 720); `rapida.sh` lo incluye (*inferido*: falla).
@@ -17,7 +19,7 @@
 
 ### 2.1 Flujo feliz (puertas 1 a 4)
 
-- **Debería:** arquitecto → planificador → constructor → Franco aprueba y commitea; el estado vive en `STATUS.md`.
+- **Debería:** arquitecto → planificador → constructor → la persona usuaria aprueba y commitea; el estado vive en `STATUS.md`.
 - **Pasa:** cumple. De 52 ejecuciones registradas, 50 `lista`, 49 con `verificacion=pasa`; 56 puertas 4 y 6 puertas 3 aprobadas (`registro/eventos.jsonl`, cuentas propias, *confirmado*). `STATUS.md` mide 537 de 1536 caracteres.
 - **Matiz:** 18 de 52 ejecuciones necesitaron 2 intentos, 1 tres y 1 cinco (F14 task-01); huecos: mediana 1, máximo 7. 49 de 52 corrieron con Haiku 5.5.
 - **Veredicto:** bueno.
@@ -28,7 +30,7 @@
 - **Pasa:**
   - Tope total 8192 solo en `validarTarea` (`formato-tarea.mjs:119-122`). `--evidencia` (`formato-evidencia.mjs`) no mide tamaño total ni el de *Evidencia*: la regla «hasta 1,5 KB» solo está en prosa (`ejecutar-tarea:25`, `WORKFLOW.md:143`). Tras escribir la evidencia, nada vuelve a medir (*confirmado*). Por eso 9775 caracteres y 2783 de evidencia pasan sin aviso.
   - Un bloque sin cerrar no se detecta. `secciones()` alterna `enCodigo` con cada línea que empiece por «```» (`formato-tarea.mjs:33-48`); un «```sh» pegado al final de un párrafo no abre en ese punto, y el cierre posterior abre uno al revés. Todo lo siguiente, incluido `## Notas`, queda «dentro del código» y el mensaje es «Falta la sección «## Notas»» (`:80-83`) y «Las secciones … deben ser exactamente estas 10…» (`:73-75`). `validarFuente` reutiliza `secciones` (`formato-fuente.mjs:6,12`) y repite el síntoma. No existe regla de fences impares (grep sin resultados, *confirmado*).
-  - Instrucción contradictoria: `ejecutar-tarea` (paso 3) manda correr `--evidencia` «antes de `lista para revisión`», con la tarea aún `en curso`, y `validarEvidencia` responde «La tarea no está terminada» (`formato-evidencia.mjs:132-134`). Esa es la salida que pegó el constructor (mecanismo *confirmado*; el acto lo dijo Franco).
+  - Instrucción contradictoria: `ejecutar-tarea` (paso 3) manda correr `--evidencia` «antes de `lista para revisión`», con la tarea aún `en curso`, y `validarEvidencia` responde «La tarea no está terminada» (`formato-evidencia.mjs:132-134`). Esa es la salida que pegó el constructor (mecanismo *confirmado*; el acto lo dijo la persona usuaria).
 - **Veredicto:** débil. Los validadores existen pero cubren el momento equivocado (el borrador) y no el documento final.
 
 ### 2.3 Decisión abierta
@@ -44,8 +46,8 @@
   - Freno por conteo: `calcularPresupuesto` (`formato-presupuesto.mjs:82-152`): `D ≤ 2T+4+amp`, `arq ≤ 2+amp_arq`, `plan ≤ 3+amp_plan`, `K ≤ 2+amp_k`. Es determinista **pero lo corre y obedece el coordinador por prompt** (`control-consumo`, ítems 3-5); el propio modelo suma las rondas al reescribir `STATUS.md` (ítem 4). Nada impide delegar sin correrlo (*confirmado*).
   - No hay detección de repetición. Grep de «sin progreso», «misma causa», «bucle», «ciclo» en `agentes/`, `skills/`, `WORKFLOW.md`, `CONSUMO.md`: solo aparece «la misma verificación falla dos veces» **dentro de una ejecución** (`ejecutar-tarea:33`, `WORKFLOW.md:152`). La cota de 2 pasadas se reinicia en cada nueva ejecución del constructor (*inferido* por el texto: «corres como máximo 2 pasadas», por ejecución). `K` cuenta tareas cuya última ejecución no fue `lista`, no repeticiones.
   - El camino `BLOQUEO: rol=constructor; motivo=codigo:` siempre produce una tarea de corrección nueva vía planificador y cuenta `plan` (`control-consumo:28`, ítem 9). Si el defecto real es del documento (caso base) y el constructor lo etiqueta `codigo`, cada vuelta crea otra tarea que no repara nada (*inferido*).
-  - En el caso base, `amp_plan=6` con tope base 3 es coherente con seis paradas y seis «A» de Franco (*inferido*; ítem 10 de `control-consumo` hace que «A» valga N=1 sin preguntar más, F36). El freno funcionó; lo que falta es que la Escalación (ítems ≤150 caracteres) diga «esta causa se repite por 4.ª vez».
-  - **Cuántas veces frenó realmente:** no se puede contar desde `registro/`: el esquema no tiene evento de presupuesto y `escalacion` solo existe si se commiteó `STATUS.md`; el log tiene 0 eventos `escalacion`, 0 `bloqueo`, 0 `cancelacion` (cuentas propias). En `features/completed/` hay mención de `excedido` solo dentro de tareas de F29, F35 y F36 que prueban el mecanismo, no de paradas reales. Las paradas reales conocidas son las que Franco reportó (Memory-AI F05, `BACKLOG.md` F35/F36; DonFinancio F03).
+  - En el caso base, `amp_plan=6` con tope base 3 es coherente con seis paradas y seis «A» de la persona usuaria (*inferido*; ítem 10 de `control-consumo` hace que «A» valga N=1 sin preguntar más, F36). El freno funcionó; lo que falta es que la Escalación (ítems ≤150 caracteres) diga «esta causa se repite por 4.ª vez».
+  - **Cuántas veces frenó realmente:** no se puede contar desde `registro/`: el esquema no tiene evento de presupuesto y `escalacion` solo existe si se commiteó `STATUS.md`; el log tiene 0 eventos `escalacion`, 0 `bloqueo`, 0 `cancelacion` (cuentas propias). En `features/completed/` hay mención de `excedido` solo dentro de tareas de F29, F35 y F36 que prueban el mecanismo, no de paradas reales. Las paradas reales conocidas son las que la persona usuaria reportó (Proyecto.Memoria F05, `BACKLOG.md` F35/F36; Proyecto.Finanzas F03).
 - **Veredicto:** débil. Freno de volumen, no de repetición.
 
 ### 2.5 `excedido` y opciones por letra (F35, F36)
@@ -59,7 +61,7 @@
 
 ### 2.6 Bloqueo de código vs de definición
 
-- **Debería:** código → constructor/planificador; definición → arquitecto; entorno → Franco.
+- **Debería:** código → constructor/planificador; definición → arquitecto; entorno → la persona usuaria.
 - **Pasa:** F31 (`entorno.mjs`) y F35 (ítem 9) separan entorno y código; `ejecutar-tarea` fija los tipos `Bloqueo: tipo=entorno|alcance|especificacion|decision_diseno|verificacion_x2|credenciales|otra` (`ejecutar-tarea:37`). No existe tipo «documento_dañado» ni «estructura». El constructor lo clasificaría `otra` o `codigo` (*inferido*). El log no tiene ningún evento `bloqueo`, pese a que F32 lo incorporó, así que ese tipado no se ha medido.
 - **Veredicto:** débil en el borde «el defecto está en el propio documento de la tarea».
 
@@ -76,7 +78,7 @@
 ### 2.8 Consumo y contexto (metas F21–F29)
 
 - **Debería:** F21: `STATUS` 52→~15 turnos, `subagents_enable` 18→1 (`CONTEXTO.md:71`); F29: `reescribir_status` ≤1,2 por delegación (`BACKLOG.md`).
-- **Pasa (*confirmado* en `reporte_mai.txt`, Pi, Memory-AI; *inferido* que F29 estaba instalada, que se archivó el 2026-11-02 11:44):**
+- **Pasa (*confirmado* en `reporte_memoria.txt`, Pi, Proyecto.Memoria; *inferido* que F29 estaba instalada, que se archivó el 2026-11-02 11:44):**
 
 | Sesión | Turnos | Delegaciones | `reescribir_status` | Por delegación | Turnos >60 k |
 |---|---|---|---|---|---|
@@ -92,7 +94,7 @@
 
 - **Debería:** cada PC deja datos comparables para diagnosticar sin acceso.
 - **Pasa:**
-  - `registrar.mjs` solo corre a pedido de Franco (`comandos-coordinador/SKILL.md`, reglas) y deriva eventos del historial de git de las tareas, `BACKLOG.md` y `STATUS.md` (`registrar.mjs:386-542`). Lo que no se commitea no existe: `REGISTRO.md` §0 ya midió que 23 de 47 tareas aparecen en un solo commit; las 9 rondas del caso base, si no se commitearon, no dejan rastro (*inferido*).
+  - `registrar.mjs` solo corre a pedido de la persona usuaria (`comandos-coordinador/SKILL.md`, reglas) y deriva eventos del historial de git de las tareas, `BACKLOG.md` y `STATUS.md` (`registrar.mjs:386-542`). Lo que no se commitea no existe: `REGISTRO.md` §0 ya midió que 23 de 47 tareas aparecen en un solo commit; las 9 rondas del caso base, si no se commitearon, no dejan rastro (*inferido*).
   - Log: 464 eventos hasta 2026-11-03T14:36; `ejecucion` solo de F10–F26 (52); hay 149 líneas `Registro:` en `features/completed/`, 97 de ellas (F24, F25, F27–F36) sin evento. F24 y F25 no figuran y no sé por qué (§5).
   - El log no guarda rondas, presupuesto, letras ni turnos; eso vive en `consumo.mjs` sobre logs de sesión fuera del repo (`reporte*.txt`, no versionados). Sin `registro/`, `registrar.mjs` reconstruye desde git si hubo commits (*inferido*, `--reconstruir`, `:609-619`).
 - **Veredicto:** débil: hay instrumentos, pero la evidencia llega a mano y tarde.
@@ -148,8 +150,8 @@ Confirmo todas tus hipótesis y sumo una:
 
 ## 5. Cosas que no pude verificar
 
-- Todo el caso base: tareas, `STATUS.md` y conversación de DonFinancio. Que Franco respondió «A» seis veces y que el constructor etiquetó el bloqueo como `codigo` son *inferencias* mías.
-- Si F29 estaba realmente instalada en el PC de las sesiones de `reporte_mai.txt`.
+- Todo el caso base: tareas, `STATUS.md` y conversación de Proyecto.Finanzas. Que la persona usuaria respondió «A» seis veces y que el constructor etiquetó el bloqueo como `codigo` son *inferencias* mías.
+- Si F29 estaba realmente instalada en el PC de las sesiones de `reporte_memoria.txt`.
 - Por qué el log no tiene `ejecucion` de F24 y F25 aunque sus tareas tienen `Registro:` válido, ni si `registrar.mjs` se corrió tras F26.
 - Cuántas veces el tope paró en proyectos fuera de este repo; no hay registro de presupuesto en ningún sitio.
 - Si `rapida.sh` completa pasa o falla además de `higiene-contexto` (no la corrí: crea carpetas temporales).

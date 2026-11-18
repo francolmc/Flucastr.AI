@@ -1,6 +1,9 @@
 # task-06 — Núcleo del coordinador y comandos: Write por transición y --presupuesto
 repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Cierra la integración en tres archivos: (1) el bloque «Formato de `definitions/STATUS.md`» del `coordinador` (que hoy manda `Edit` por sección) pasa a una línea que remite a `control-consumo` y fija «una sola vez por transición, con `Write` completo»; (2) se restituye en el núcleo el aviso `al pedirte Franco un comando` para `comandos-coordinador`; (3) el comando 4 de esa skill admite `--presupuesto` por iniciativa propia, una vez por transición. El manifiesto se actualiza en el mismo paso para no dejar pruebas que exijan `Edit` por sección.
 
@@ -17,7 +20,7 @@ Cierra la integración en tres archivos: (1) el bloque «Formato de `definitions
 - El bloque «Formato…» se reemplaza por el encabezado `## STATUS.md` y la línea «Escribes `STATUS.md` una sola vez por transición (rol, puerta o estado), con `Write` completo; formato, presupuesto y corte de sesión: `control-consumo`.»
 - La línea de `comandos-coordinador` pasa a: «Carga `comandos-coordinador` al pedirte Franco un comando, antes de `descomponer-feature`, al cerrar una feature o sin subagentes. Al delegar, carga `control-consumo`.»
 - Comando 4: `[--evidencia|--fuente|--presupuesto]`. Excepción: «el cuarto, como puerta previa y, con `--presupuesto`, una vez por transición; también en yolo». Las frases `lista cerrada`, `pedido explícito` y `no autoriza` se conservan.
-- Manifiesto: en `FRASES_COORDINADOR_F21` se quitan `con `Edit` por sección, no con `Write` completo` y `cada ítem ≤150 caracteres` (esta última ya está en la skill), y `Reescribes `STATUS.md` solo en puertas y en cambios de rol` pasa a `una sola vez por transición`; en `'agentes/coordinador'` se añaden `Al delegar, carga `control-consumo`` y `al pedirte Franco un comando`; en `'skills/comandos-coordinador'`, `--presupuesto`.
+- Manifiesto: en `FRASES_COORDINADOR_F21` se quitan `con `Edit` por sección, no con `Write` completo` y `cada ítem ≤150 caracteres` (esta última ya está en la skill), y `Reescribes `STATUS.md` solo en puertas y en cambios de rol` pasa a `una sola vez por transición`; en `'agentes/coordinador'` se añaden `Al delegar, carga `control-consumo`` y `al pedirte la persona usuaria un comando`; en `'skills/comandos-coordinador'`, `--presupuesto`.
 - El `coordinador` debe quedar en ≤ 7168 B; si no cabe, recorta redacción repetida del núcleo sin borrar reglas ni frases del manifiesto.
 
 ## Decisiones abiertas
@@ -25,7 +28,7 @@ Ninguna
 
 ## Alcance / Fuera de alcance
 Alcance: un bloque y una línea del núcleo, dos líneas de la skill y el manifiesto.
-Fuera de alcance: `tools:` del `coordinador`, `control-consumo`, los topes, `coordinador-status.test.mjs` y todo lo de `definitions/` (el enlace desde `AGENTS.md` lo hace Franco).
+Fuera de alcance: `tools:` del `coordinador`, `control-consumo`, los topes, `coordinador-status.test.mjs` y todo lo de `definitions/` (el enlace desde `AGENTS.md` lo hace la persona usuaria).
 
 ## Pasos
 1. Edita `agentes/coordinador.md` según las dos primeras decisiones y mide con `wc -c`.
@@ -42,7 +45,7 @@ Fuera de alcance: `tools:` del `coordinador`, `control-consumo`, los topes, `coo
 ```
 test $(wc -c < agentes/coordinador.md) -le 7168 && echo "ok-nucleo"; echo "exit $?"
 grep -c 'Edit` por sección' agentes/coordinador.md; echo "exit $?"
-grep -c 'al pedirte Franco un comando' agentes/coordinador.md; echo "exit $?"
+grep -c 'al pedirte Persona un comando' agentes/coordinador.md; echo "exit $?"
 node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/coordinador-turnos.test.mjs pruebas/comprobaciones/coordinador-status.test.mjs pruebas/comprobaciones/topes-bytes.test.mjs 2>&1 | grep -E '^ℹ fail'; echo "exit $?"
 bash pruebas/rapida.sh 2>&1 | grep -E '^ℹ fail'; echo "exit $?"
 ```
@@ -63,7 +66,7 @@ exit 1
 ```
 
 ```
-$ grep -c 'al pedirte Franco un comando' agentes/coordinador.md; echo "exit $?"
+$ grep -c 'al pedirte Persona un comando' agentes/coordinador.md; echo "exit $?"
 1
 exit 0
 ```

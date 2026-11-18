@@ -59,17 +59,17 @@ Archivos examinados: `agentes/principal.md`, `skills/planificar-cambio/SKILL.md`
 1. El principal investiga, lee código y obtiene evidencia inicial.
 2. Escribe un plan con objetivo, supuestos, alcance, decisiones, escenarios, verificación y pasos.
 3. Aplica una «Prueba de ejecutabilidad»: comprobaciones exactas, ausencia de dependencias desconocidas, errores previstos y exclusión de producción/credenciales.
-4. Franco aprueba. El principal comprueba rama base, limpieza y actualización remota.
+4. La persona usuaria aprueba. El principal comprueba rama base, limpieza y actualización remota.
 5. Entrega `Plan: <ruta>` y `Rama: <rama>` al constructor, sin duplicar el encargo en el mensaje.
 6. El constructor lee el plan, crea la rama, ejecuta pasos y los marca con evidencia. Cuenta pendientes con `grep -c`.
 7. Con cero pendientes ejecuta la verificación; puede corregir dentro del alcance. Tiene tope de tres corridas.
-8. Declara `COMPLETADO` o `PAUSA`. El principal vuelve a verificar y Franco revisa.
+8. Declara `COMPLETADO` o `PAUSA`. El principal vuelve a verificar y la persona usuaria revisa.
 
 **Lo que conviene conservar:** documento durable como traspaso, límites de alcance, dos puertas humanas, corrección dentro del alcance, evidencia real, rama aislada y verificación del principal.
 
 ### Configuración comprobada, sin atribuirle causalidad
 
-`modelos.json` asigna al constructor nivel bajo y esfuerzo high. `node scripts/resolver.mjs modelo-esfuerzo constructor pi` resolvió `openai/gpt-6-luna:high`. El archivo instalado `/Users/franco/.pi/agent/agents/constructor.md` contiene ese modelo, `thinking: high`, la skill y el timeout de una hora.
+`modelos.json` asigna al constructor nivel bajo y esfuerzo high. `node scripts/resolver.mjs modelo-esfuerzo constructor pi` resolvió `openai/gpt-6-luna:high`. El archivo instalado `~/.pi/agent/agents/constructor.md` contiene ese modelo, `thinking: high`, la skill y el timeout de una hora.
 
 Esto confirma concordancia entre configuración y agente instalado. No prueba qué modelo atendió cada corrida histórica ni compara capacidades con otro nivel.
 

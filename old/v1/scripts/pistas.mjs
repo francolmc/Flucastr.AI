@@ -20,8 +20,8 @@ const ACCION = {
   4: "Corre la validación con el lanzador; falta aplicar §3.",
   5: "El planificador omite decisiones: revisa `Fuente:` y *Decisiones ya tomadas*.",
   6: "Pocos bloques de ejecución para el costo de definir: junta features chicas.",
-  7: "Pásala a `Lee:` del rol o a su lista de «Qué lees» (decide Franco).",
-  8: "Lecturas extra por encima del límite: si se repite en una segunda feature, vuelve ese rol a «No leas» duro (decide Franco).",
+  7: "Pásala a `Lee:` del rol o a su lista de «Qué lees» (decide la persona usuaria).",
+  8: "Lecturas extra por encima del límite: si se repite en una segunda feature, vuelve ese rol a «No leas» duro (decide la persona usuaria).",
   9: "Declara cada lectura extra con `Lectura extra:` en el retorno.",
 };
 

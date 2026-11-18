@@ -1,8 +1,11 @@
 # task-07 — Documentar permisos del `coordinador`, README de pruebas y cierre de la feature
 repo: Flucastr.AI   depende_de: task-05, task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Deja escrito, con los resultados reales de task-05 y task-06, qué contiene y qué no contiene cada herramienta al ejecutar scripts el `coordinador`, para que Franco lo revise y sea la base de F11. Documenta en `pruebas/permisos-ejecucion.md` la sección del `coordinador` (Claude Code por patrones; Pi solo instruccional), registra las pruebas nuevas en `pruebas/README.md` y comprueba que no queda ninguna mención contradictoria al comportamiento anterior de `--aplicar`.
+Deja escrito, con los resultados reales de task-05 y task-06, qué contiene y qué no contiene cada herramienta al ejecutar scripts el `coordinador`, para que la persona usuaria lo revise y sea la base de F11. Documenta en `pruebas/permisos-ejecucion.md` la sección del `coordinador` (Claude Code por patrones; Pi solo instruccional), registra las pruebas nuevas en `pruebas/README.md` y comprueba que no queda ninguna mención contradictoria al comportamiento anterior de `--aplicar`.
 
 ## Contexto
 - Repo: este, único. Node 25. Sin modelo.
@@ -15,7 +18,7 @@ Deja escrito, con los resultados reales de task-05 y task-06, qué contiene y qu
 - Nueva sección `## Coordinador: ejecución de scripts` en `pruebas/permisos-ejecucion.md`, con estas cuatro cosas, cada una en una línea: (1) lista cerrada de los tres comandos y `Fxx` obligatorio (cita a `definitions/WORKFLOW.md` §3.1); (2) Claude Code: restricción por patrones en `tools:` del agente, con el resultado de la comprobación de task-02 y de task-05; (3) Pi: `bash` completo, contención solo instruccional, con el resultado de task-06 y la frase «un resultado limpio no demuestra contención»; (4) riesgo común: el `coordinador` ejecuta código de `scripts/` que el `constructor` puede modificar, por lo que la puerta 4 revisa `git diff scripts/`.
 - Los resultados se citan por ruta y veredicto de cada caso (aprobado/fallo), sin pegar registros ni valores del canario.
 - No se cambia ninguna regla; si la búsqueda halla una contradicción fuera de `definitions/`, se anota en *Notas* y no se corrige en esta tarea.
-- No se edita `definitions/WORKFLOW.md`; las referencias a «comprobación pendiente» de §3.1 las actualiza Franco o el `arquitecto`.
+- No se edita `definitions/WORKFLOW.md`; las referencias a «comprobación pendiente» de §3.1 las actualiza la persona usuaria o el `arquitecto`.
 
 ## Alcance / Fuera de alcance
 Alcance: las dos secciones de documentación y la búsqueda de contradicciones.
@@ -24,7 +27,7 @@ Fuera de alcance: editar `definitions/`, `README.md` (raíz), agentes, scripts o
 ## Pasos
 1. Leer los dos informes de resultados y la sección actual de `pruebas/permisos-ejecucion.md`.
 2. Añadir a `pruebas/permisos-ejecucion.md` la sección `## Coordinador: ejecución de scripts` según *Decisiones*.
-3. Añadir a `pruebas/README.md`, a continuación de la línea 9, una línea con: fixture `pruebas/fixtures/coordinador.sh`, comprobador `pruebas/comprobaciones/coordinador-ejecucion.mjs`, lanzadores `pruebas/lanzar-coordinador-claude.sh` y `pruebas/lanzar-coordinador-pi.sh`, y que las corridas con modelo son bajo pedido de Franco.
+3. Añadir a `pruebas/README.md`, a continuación de la línea 9, una línea con: fixture `pruebas/fixtures/coordinador.sh`, comprobador `pruebas/comprobaciones/coordinador-ejecucion.mjs`, lanzadores `pruebas/lanzar-coordinador-claude.sh` y `pruebas/lanzar-coordinador-pi.sh`, y que las corridas con modelo son bajo pedido de la persona usuaria.
 4. Ejecutar la búsqueda de `aplicar` y anotar en *Notas* cada mención de `--aplicar` sin `Fxx` fuera de `definitions/`, o «ninguna».
 5. Correr la suite completa y pegar la salida en *Evidencia*.
 
@@ -36,7 +39,7 @@ Fuera de alcance: editar `definitions/`, `README.md` (raíz), agentes, scripts o
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -c "Coordinador: ejecución de scripts\|solo instruccional\|coordinador-claude\|coordinador-pi" pruebas/permisos-ejecucion.md
 grep -c "fixtures/coordinador.sh\|coordinador-ejecucion.mjs\|lanzar-coordinador-claude.sh\|lanzar-coordinador-pi.sh" pruebas/README.md
 grep -c "valor-reconocible-9f3a" pruebas/permisos-ejecucion.md pruebas/README.md
@@ -75,9 +78,9 @@ Búsqueda de `aplicar` (paso 4), con el comando `grep -rn -e "aplicar" --include
 ## Notas
 - Búsqueda de `--aplicar` sin `Fxx` fuera de `definitions/` (re-verificada en esta ejecución; no corregidas, fuera de alcance):
   - `README.md:54`: «con --aplicar (lo corre Franco), mueve las features hecha a features/completed/». No menciona `Fxx`; contradice «`Fxx` obligatorio» (§3.1, decisión 2).
-  - `scripts/archivar.mjs:9-10` (cabecera): «--aplicar solo renombra carpetas» y «Lo ejecuta Franco, nunca un agente.». La segunda frase contradice §3.1, donde el `coordinador` puede correrlo a pedido de Franco. La línea 7 sí trae `Fxx`.
+  - `scripts/archivar.mjs:9-10` (cabecera): «--aplicar solo renombra carpetas» y «Lo ejecuta Franco, nunca un agente.». La segunda frase contradice §3.1, donde el `coordinador` puede correrlo a pedido de la persona usuaria. La línea 7 sí trae `Fxx`.
   - Las demás menciones (`agentes/coordinador.md`, `pruebas/comprobaciones/*`, `pruebas/lanzar-coordinador-claude.sh`) llevan `Fxx` o son pruebas de rechazo de argumentos.
-- Contradicción para Franco en `definitions/WORKFLOW.md` (no editado, línea 83): §3.1 lista los «Controles compensatorios que se piden (trabajo posterior)». Las pruebas con modelo de task-05 y task-06 ya existen; la frase sigue en futuro.
+- Contradicción para la persona usuaria en `definitions/WORKFLOW.md` (no editado, línea 83): §3.1 lista los «Controles compensatorios que se piden (trabajo posterior)». Las pruebas con modelo de task-05 y task-06 ya existen; la frase sigue en futuro.
 - Huecos menores resueltos:
   1. La línea 9 de `pruebas/README.md` trata de corridas de modelo, no del `coordinador`. Se añadieron cuatro viñetas a continuación, una por archivo, porque la verificación cuenta líneas.
   2. En `permisos-ejecucion.md`, las citas de Claude y Pi van en sub-líneas, por el mismo motivo (conteo ≥ 4).

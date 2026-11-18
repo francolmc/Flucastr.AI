@@ -42,7 +42,7 @@ Fuera de alcance: modificar `BACKLOG.md`, las tareas existentes, `rapida.sh`, `f
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/coherencia-features.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node --input-type=module -e 'import fs from "node:fs"; import {validarCoherencia} from "./pruebas/comprobaciones/coherencia-features.mjs"; const b=fs.readFileSync("definitions/BACKLOG.md","utf8").replace("| F02 |","| F09 |"); const f=fs.readdirSync("features").filter(d=>/^F\d{2}-/.test(d)).map(c=>({carpeta:c,tareas:fs.readdirSync("features/"+c).filter(n=>n.endsWith(".md")).map(n=>({archivo:n,texto:fs.readFileSync("features/"+c+"/"+n,"utf8")}))})); console.log(validarCoherencia({backlog:b,features:f}).length>0?"RECHAZADO":"ACEPTADO")'
 bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ fail|rapida:)"

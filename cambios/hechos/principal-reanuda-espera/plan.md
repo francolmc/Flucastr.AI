@@ -6,13 +6,18 @@ repos: [.]
 ejecutor: constructor
 tipo: codigo
 ---
-# El principal reanuda la espera tras responder a Franco
+
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+# El principal reanuda la espera tras responder a la persona usuaria
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 
 ## Objetivo
-Si Franco escribe al principal mientras el constructor sigue en curso, el principal responde y vuelve a esperar al constructor en el mismo turno, en vez de cerrar el turno y dejar el retorno sin recibir.
+Si la persona usuaria escribe al principal mientras el constructor sigue en curso, el principal responde y vuelve a esperar al constructor en el mismo turno, en vez de cerrar el turno y dejar el retorno sin recibir.
 
 ## Supuestos
-- Aplica a cualquier soporte, aunque el caso observado fue Codex (`wait_agent`). Si Franco lo quiere solo para Codex, se quita la frase genérica y queda la línea de Codex.
+- Aplica a cualquier soporte, aunque el caso observado fue Codex (`wait_agent`). Si la persona usuaria lo quiere solo para Codex, se quita la frase genérica y queda la línea de Codex.
 - No se cambia el presupuesto de llamadas ni la receta de espera de `verify` (paso 5): solo se añade la reanudación en el paso 4.
 
 ## Alcance
@@ -21,7 +26,7 @@ Fuera de alcance: `agentes/constructor.md`, `modelos.json`, `instalar.sh`, `scri
 
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque los cuatro sí de la prueba: requisitos cubiertos, archivos accesibles, comprobaciones con resultado esperado, sin credenciales ni producción.
-- Evidencia del fallo (DonFinancio, 12-nov, sesión Codex `rollout-2026-11-12T13-26-43-…`): a las 02:42:13Z llega «termino?», el principal llama `list_agents` (el constructor de F06 figura `running`), responde «Todavía no» y emite `task_complete` sin volver a `wait_agent`.
+- Evidencia del fallo (Proyecto.Finanzas, 12-nov, sesión Codex `rollout-2026-11-12T13-26-43-…`): a las 02:42:13Z llega «termino?», el principal llama `list_agents` (el constructor de F06 figura `running`), responde «Todavía no» y emite `task_complete` sin volver a `wait_agent`.
 - Texto a añadir al final de la viñeta de espera del paso 4, sin quitar nada de lo existente: «Si Franco te escribe mientras el constructor sigue en curso, responde en una línea y vuelve a esperar en el mismo turno; no cierres el turno con el retorno pendiente.»
 - Se conserva «una sola espera» (lo exige el bloque 8k de `verify`) y `yield_time_ms: 300000` y «no cuentan» (8l).
 

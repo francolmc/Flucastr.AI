@@ -206,6 +206,12 @@ test('Espera a Franco con más de tres ítems no es válida', () => {
   assert.ok(motivos.some((m) => m.includes('4 ítems')));
 });
 
+test('la clave genérica conserva validación y límites de la clave histórica', () => {
+  const texto = statusCompacto().replace('Espera a Franco: ninguna', 'Espera a usuario: ninguna');
+  assert.deepEqual(validarStatusCompacto(texto), []);
+  assert.ok(validarStatusCompacto(texto.replace('usuario: ninguna', 'usuario: a | b | c | d')).length > 0);
+});
+
 test('amp_arq=1 evita el excedido con arq=3', () => {
   const r = calcularPresupuesto({
     feature: 'F29',

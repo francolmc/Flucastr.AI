@@ -66,13 +66,14 @@ function leerOpciones(argv) {
     umbral: 70,
     tarifas: join(dirname(fileURLToPath(import.meta.url)), "tarifas.json"),
   };
+  const alias = { "--since": "--desde", "--tool": "--herramienta", "--project": "--proyecto", "--sessions": "--sesiones", "--threshold": "--umbral", "--rates": "--tarifas" };
   const valor = (i) => {
     const v = argv[i + 1];
-    if (v === undefined || v.startsWith("--")) fallar(`falta el valor de ${argv[i]}`, 2);
+    if (v === undefined || v.startsWith("--")) fallar(`falta el valor de ${alias[argv[i]] || argv[i]}`, 2);
     return v;
   };
   for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
+    const a = alias[argv[i]] || argv[i];
     if (a === "--json") o.json = true;
     else if (a === "-h" || a === "--help") { ayuda(); process.exit(0); }
     else if (a === "--desde") { o.desde = valor(i); i++; }

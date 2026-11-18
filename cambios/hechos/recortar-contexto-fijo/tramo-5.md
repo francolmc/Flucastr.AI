@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 5: recortes del principal y planificar-cambio
 Resultado: `principal.md` y `planificar-cambio` más cortos. Toca esos dos, `preparar-proyecto` y `verify` si hace falta.
 

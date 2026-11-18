@@ -8,13 +8,15 @@ tipo: codigo
 ---
 # Proceso rápido por defecto: lo caro corre una vez, y nadie repite lo ya verificado
 
+> Referencias personales y de proyectos anonimizadas; se conservan las cifras y fechas.
+
 ## Objetivo
 Que en cualquier proyecto el agente itere con verificación rápida por defecto, y que la corrida completa sin caché ocurra una sola vez por plan, sin repetirse si nada cambió. Evidencia: `docs/investigaciones/auditoria-verificacion-general/` (6 corridas sin caché de ~20 min en una sesión de F10; el principal repite la corrida completa que el constructor ya pasó).
 
 ## Supuestos
-- Se invierte la convención: `./verify` pasa a ser **rápido** (con caché) y la aceptación sin caché se pide explícito (`./verify --aceptacion`). `VERIFY_RAPIDO=1` se sigue aceptando por compatibilidad. Si Franco prefiere dejar `./verify` como está, cambian dos pasos.
+- Se invierte la convención: `./verify` pasa a ser **rápido** (con caché) y la aceptación sin caché se pide explícito (`./verify --aceptacion`). `VERIFY_RAPIDO=1` se sigue aceptando por compatibilidad. Si la persona usuaria prefiere dejar `./verify` como está, cambian dos pasos.
 - Este plan solo cambia el kit (textos y su chequeo). Aplicar la inversión en el `verify` de cada proyecto es un plan corto por proyecto, derivado de este.
-- Va sobre la rama `feature/medir-verificacion` (aún sin mergear) para no esperar el merge; entra en el mismo PR. Si Franco prefiere una rama aparte, se cambia `rama:` y se espera ese merge.
+- Va sobre la rama `feature/medir-verificacion` (aún sin mergear) para no esperar el merge; entra en el mismo PR. Si la persona usuaria prefiere una rama aparte, se cambia `rama:` y se espera ese merge.
 
 ## Alcance
 Puede cambiar: `skills/preparar-proyecto/SKILL.md` (sección 2), `skills/planificar-cambio/SKILL.md` (regla 13), `skills/ejecutar-plan/SKILL.md`, `agentes/principal.md` (paso 5), `README.md` (una viñeta) y `verify` (bloque 8s).

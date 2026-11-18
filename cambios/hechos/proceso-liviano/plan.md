@@ -6,16 +6,21 @@ repos: [.]
 ejecutor: constructor
 tipo: codigo
 ---
+
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Proceso liviano: lo pequeño se hace en línea, la revisión sigue al riesgo
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-Que un cambio pequeño no pase por plan, constructor ni segunda verificación completa, y que lo grande o riesgoso conserve todas las puertas. Fuente: ODD de gentle-ai ([README](https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/README.md), release v3.0.0) y la observación de Franco del 14-nov (`docs/investigaciones/auditoria-burocracia/observacion.md`).
+Que un cambio pequeño no pase por plan, constructor ni segunda verificación completa, y que lo grande o riesgoso conserve todas las puertas. Fuente: ODD de gentle-ai ([README](https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/README.md), release v3.0.0) y la observación de la persona usuaria del 14-nov (`docs/investigaciones/auditoria-burocracia/observacion.md`).
 
 Además, que cada revisión mire si lo que el cambio tocó está bien hecho para su tecnología (por ejemplo, si usa Docker, que lo use de forma óptima), sin frenar ni ampliar el cambio.
 
 ## Supuestos
-- Franco aprueba este plan = autorización expresa para `ejecutor: principal` en cambios pequeños (hoy `principal.md` lo exige expreso). Si no quiere esto, se quita el paso 1 y queda solo la revisión por riesgo.
-- «Cambio pequeño» tiene seis condiciones cerradas (topes de 2 archivos y 30 líneas, más una lista de áreas excluidas); «riesgo alto» es todo lo que no es pequeño. Franco puede cambiar los topes o la lista.
+- la persona usuaria aprueba este plan = autorización expresa para `ejecutor: principal` en cambios pequeños (hoy `principal.md` lo exige expreso). Si no quiere esto, se quita el paso 1 y queda solo la revisión por riesgo.
+- «Cambio pequeño» tiene seis condiciones cerradas (topes de 2 archivos y 30 líneas, más una lista de áreas excluidas); «riesgo alto» es todo lo que no es pequeño. la persona usuaria puede cambiar los topes o la lista.
 - Esto es de texto; no hay medición de que ahorre. Se mide después con `node scripts/uso.mjs --sesiones` en los 3 próximos cambios (éxito: un cambio pequeño cuesta 1 ventana y cero lanzamientos de constructor).
 
 ## Alcance
@@ -29,12 +34,12 @@ Fuera: proyectos, `instalar.sh`, `scripts/`, `modelos.json`, `agentes/constructo
   3. Es corrección, ajuste de texto, estilo o configuración no sensible. **Funcionalidad o comportamiento nuevo no es pequeño.**
   4. No toca: datos o esquema, migraciones, acceso/identidad/seguridad, dinero o cálculos financieros, contratos de API, rutas o pantallas del recorrido, concurrencia, dependencias o lockfiles, Dockerfile/compose/`verify`, ni despliegue.
   5. Antes de editar hay una comprobación ejecutable con su resultado esperado, escrita en una línea.
-  6. Franco no pidió plan ni constructor para ese cambio.
-- **Cómo se usa:** antes de la primera edición el principal escribe una línea `Clasificación: pequeño (cumple 1–6)` con la comprobación. Si durante el trabajo se pasa de un tope o aparece un riesgo de la condición 4, se detiene, lo dice y lo convierte en plan para el constructor. No se encadenan cambios pequeños para partir uno grande. Franco puede vetar con «por plan».
-- **Pequeño:** el principal edita y comprueba en línea, sin `plan.md` ni constructor; deja una línea en la respuesta con qué cambió y cómo lo comprobó. La puerta 2 sigue: el commit es de Franco. Las reglas duras (sin commit/push/.env) no cambian.
-- **Constructor solo con razón nombrada:** cambio no pequeño; varios tramos; verificación larga (más de ≈10 min) que conviene aislar; o Franco lo pide. **Ante la duda, constructor** (al revés que gentle-ai: aquí el límite de lo que hace el principal es estricto).
+  6. la persona usuaria no pidió plan ni constructor para ese cambio.
+- **Cómo se usa:** antes de la primera edición el principal escribe una línea `Clasificación: pequeño (cumple 1–6)` con la comprobación. Si durante el trabajo se pasa de un tope o aparece un riesgo de la condición 4, se detiene, lo dice y lo convierte en plan para el constructor. No se encadenan cambios pequeños para partir uno grande. la persona usuaria puede vetar con «por plan».
+- **Pequeño:** el principal edita y comprueba en línea, sin `plan.md` ni constructor; deja una línea en la respuesta con qué cambió y cómo lo comprobó. La puerta 2 sigue: el commit es de la persona usuaria. Las reglas duras (sin commit/push/.env) no cambian.
+- **Constructor solo con razón nombrada:** cambio no pequeño; varios tramos; verificación larga (más de ≈10 min) que conviene aislar; o la persona usuaria lo pide. **Ante la duda, constructor** (al revés que gentle-ai: aquí el límite de lo que hace el principal es estricto).
 - **Revisión por riesgo:** pequeño o `tipo: docs` → diff más la comprobación declarada, sin repetir `verify`. Riesgo alto → diff y `Verificación` del plan una vez (como hoy). Un riesgo no listado se trata como alto.
-- **Mejoras en cada revisión (no bloquean):** al revisar, el principal mira la tecnología que el cambio tocó con `docs/practicas-por-tecnologia.md` y anota en *Notas* o en su respuesta, como «Mejora sugerida», lo que encuentre. No lo corrige dentro de ese cambio ni lo devuelve por eso; Franco decide si se convierte en un cambio aparte. Máximo 3 sugerencias por revisión.
+- **Mejoras en cada revisión (no bloquean):** al revisar, el principal mira la tecnología que el cambio tocó con `docs/practicas-por-tecnologia.md` y anota en *Notas* o en su respuesta, como «Mejora sugerida», lo que encuentre. No lo corrige dentro de ese cambio ni lo devuelve por eso; la persona usuaria decide si se convierte en un cambio aparte. Máximo 3 sugerencias por revisión.
 - **La lista crece solo con evidencia:** cada práctica lleva su fuente y su nivel (medido por nosotros, documentación oficial, blog, inferencia). Inicial: Docker (dependencias antes del código, caché de paquetes, sin `COPY . .` antes de instalar, límites y `tmpfs` de la base, limpieza de caché), Compose/PostgreSQL (`service_healthy`, logs antes de limpiar), Playwright (esperas registradas antes de la acción, aserciones con reintento, mostrar lo recibido al fallar), Comprobación rápida declarada. Otra tecnología se agrega al usarla en un proyecto.
 - Se conservan: puertas 1 y 2 para lo no pequeño, tramos, «una sola espera», `yield_time_ms: 300000` y las frases que exigen los bloques 8k y 8l.
 - Ejecutor: constructor, porque los cuatro sí de la prueba: textos y comprobaciones definidos, archivos accesibles, sin credenciales ni producción.
@@ -69,7 +74,7 @@ Fuera: proyectos, `instalar.sh`, `scripts/`, `modelos.json`, `agentes/constructo
   - evidencia: `agentes/principal.md` paso 5 («**Riesgo alto:** … una sola espera», «**Riesgo bajo** (cambio pequeño o `tipo: docs`): no repites `verify`»); `grep -cF 'riesgo alto'` = 1; 8k y 8l de `verify` pasan (ver Evidencia)
 - [x] En `planificar-cambio` regla 13, cambia «hasta ≈3 archivos…» por la definición por riesgo; regla 7, `ejecutor: principal` también para cambios pequeños (A3)
   - evidencia: `grep -c '≈3 archivos' skills/planificar-cambio/SKILL.md` = 0; `grep -cF 'riesgo' skills/planificar-cambio/SKILL.md` = 1; regla 7 conserva «salvo que Franco» (8i pasa)
-- [x] Crea `docs/practicas-por-tecnologia.md`: por tecnología, la práctica en una línea, su `Fuente:` (enlace o «medido en DonFinancio, 2026-11-14») y su `Nivel:` (medido, oficial, blog, inferencia). Parte de la lista de *Decisiones*; no agregues nada sin fuente (A6)
+- [x] Crea `docs/practicas-por-tecnologia.md`: por tecnología, la práctica en una línea, su `Fuente:` (enlace o «medido en Proyecto.Finanzas, 2026-11-14») y su `Nivel:` (medido, oficial, blog, inferencia). Parte de la lista de *Decisiones*; no agregues nada sin fuente (A6)
   - evidencia: `docs/practicas-por-tecnologia.md` creado con 11 prácticas (Docker ×5, Compose/PostgreSQL ×2, Playwright ×3, Comprobación rápida ×1), cada una con fuente y una línea `- Nivel:`; `test -f` = existe; `grep -c 'Nivel:'` = 11
 - [x] En `principal.md` paso 5, añade: consulta ese documento según la tecnología tocada y anota hasta 3 «Mejora sugerida» sin devolver el cambio por ellas (A6)
   - evidencia: `agentes/principal.md` («**Mejora sugerida (no bloquea):** … consulta `docs/practicas-por-tecnologia.md` … hasta 3»); `grep -cF 'Mejora sugerida'` = 1
@@ -133,5 +138,5 @@ Las líneas `ok 8k` y `ok 8l` (salida completa en el log) también pasan: «Solo
 - `verify`: ningún bloque existente exigía «aunque sea de una línea» ni «toda edición»; ninguno se debilitó. El bloque 8t copia el patrón del 8l y su copia negativa usa `/g` para quitar todas las apariciones.
 - `principal.md`: la línea «Solo creas o editas…» se conserva (8k); la excepción de cambio pequeño va en la frase siguiente.
 - `docs/practicas-por-tecnologia.md`: 11 prácticas, cada una con fuente del repo o enlace, y grado de evidencia. Se usó la propuesta ya existente (`docs/investigaciones/auditoria-verificacion-general/propuesta-final.md`); no se agregó nada sin fuente.
-- Fuera de Alcance, para Franco: `AGENTS.md` (raíz, línea 7) dice que el constructor «ejecuta toda edición del plan». Sigue siendo cierto para planes; no se tocó, pero conviene alinearlo en un cambio aparte.
+- Fuera de Alcance, para la persona usuaria: `AGENTS.md` (raíz, línea 7) dice que el constructor «ejecuta toda edición del plan». Sigue siendo cierto para planes; no se tocó, pero conviene alinearlo en un cambio aparte.
 - Pendiente de medición (no es un paso): `node scripts/uso.mjs --sesiones` en los 3 próximos cambios, según *Supuestos*.

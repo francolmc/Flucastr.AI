@@ -1,6 +1,9 @@
 # task-03 — El coordinador orquesta el modo yolo sin puertas y se detiene ante escalaciones
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Con la activación ya escrita (task-02), el `coordinador` debe saber qué hace mientras el modo está activo (`definitions/WORKFLOW.md` §9.3): pide la descomposición al `planificador`, aprueba tareas que pasan la revisión de «completa», delega al `constructor` sin `Rama:`, marca `hecha` solo con evidencia real, trata `REFINAR:` y `CONFIRMAR:` como escalación, respeta los límites que no se omiten y deja el registro final en `STATUS.md`.
 
@@ -14,14 +17,14 @@ Con la activación ya escrita (task-02), el `coordinador` debe saber qué hace m
 - Dentro de `## Modo yolo` (a continuación de las cinco reglas de task-02) se añade la subsección `### Mientras está activo`, con estas reglas:
   1. **Se omiten las puertas 2, 3 y 4.** Sin `definitions/BACKLOG.md`, delegas `crear-backlog` al `planificador` y continúas sin esperar aprobación. Una feature del alcance sin tareas: delegas `descomponer-feature`. Todo encargo a `planificador` o `constructor` incluye la línea `Modo yolo: activo`. Al `constructor` no le pasas la línea `Rama:`. Trabajas en orden del backlog (o la feature nombrada) y de `depende_de:`, una tarea a la vez.
   2. **Revisión de «completa» (sustituye la puerta 3).** Antes de pasar una tarea de `borrador` a `aprobada`, léela y comprueba: están todas las secciones de `SECCIONES` de `pruebas/comprobaciones/formato-tarea.mjs`; «Fuera de alcance» no está vacío; no hay marcadores de pendiente (`RE_PENDIENTE` del mismo archivo); `depende_de:` es `—` o IDs de tareas existentes. Si todo pasa, escribes `aprobada`; si no, es escalación (regla 5).
-  3. **`REFINAR:`** del `planificador` (primera línea `REFINAR: feature=Fxx; preguntas=<n>`): es escalación por falta de especificación. No preguntas a Franco en medio del modo: escribes al inicio de `STATUS.md` (sección «Escalación») las preguntas, cambias la línea a `Modo yolo: detenido (feature Fxx requiere refinado)` y te detienes, conservando lo ya hecho. Franco responde (refinado normal) y puede pedir yolo de nuevo.
-  4. **`CONFIRMAR:`** del `constructor` no debería ocurrir en yolo: no se la preguntas a Franco; es escalación (regla 5).
-  5. **Escalaciones que detienen el modo:** cambio de alcance o algo no previsto; falta de credenciales o acceso; un `BLOQUEO:` que toca `definitions/` (nunca se cambian en yolo; vuelve a la puerta 1); una tarea revisada que no es «completa»; `CONFIRMAR:`. Escribes el motivo al inicio de `STATUS.md`, la línea pasa a `Modo yolo: detenido (<motivo>)` y avisas a Franco.
+  3. **`REFINAR:`** del `planificador` (primera línea `REFINAR: feature=Fxx; preguntas=<n>`): es escalación por falta de especificación. No preguntas a la persona usuaria en medio del modo: escribes al inicio de `STATUS.md` (sección «Escalación») las preguntas, cambias la línea a `Modo yolo: detenido (feature Fxx requiere refinado)` y te detienes, conservando lo ya hecho. la persona usuaria responde (refinado normal) y puede pedir yolo de nuevo.
+  4. **`CONFIRMAR:`** del `constructor` no debería ocurrir en yolo: no se la preguntas a la persona usuaria; es escalación (regla 5).
+  5. **Escalaciones que detienen el modo:** cambio de alcance o algo no previsto; falta de credenciales o acceso; un `BLOQUEO:` que toca `definitions/` (nunca se cambian en yolo; vuelve a la puerta 1); una tarea revisada que no es «completa»; `CONFIRMAR:`. Escribes el motivo al inicio de `STATUS.md`, la línea pasa a `Modo yolo: detenido (<motivo>)` y avisas a la persona usuaria.
   6. **`hecha` por evidencia (sustituye la puerta 4).** Cuando una tarea queda `lista para revisión`, lee su *Evidencia*: si contiene la salida real de cada comando de *Verificación* y esa salida coincide con lo *Esperado*, escribes `hecha` y en «Paso actual» una línea `task-NN: hecha | <ruta de la tarea>`. Si no, `bloqueada` y la línea `task-NN: bloqueada | <ruta>`, y el modo se detiene. Si el constructor respondió `BLOQUEO:` o la verificación falló dos veces por la misma causa, la tarea queda `bloqueada` y el modo se detiene.
-  7. **Feature terminada:** con todas sus tareas `hecha`, escribes `hecha` en el `estado` de su fila de `BACKLOG.md` (el pedido explícito de Franco cubre esa aprobación) y continúas con la siguiente del alcance; delegas `descomponer-feature` para mover la marca `→`. No escribes el aviso de «cierra la rama»: en yolo no hay rama de feature.
+  7. **Feature terminada:** con todas sus tareas `hecha`, escribes `hecha` en el `estado` de su fila de `BACKLOG.md` (el pedido explícito de la persona usuaria cubre esa aprobación) y continúas con la siguiente del alcance; delegas `descomponer-feature` para mover la marca `→`. No escribes el aviso de «cierra la rama»: en yolo no hay rama de feature.
   8. **Cierre:** al terminar el alcance, la línea pasa a `Modo yolo: terminado`; si te detienes, a `Modo yolo: detenido (<motivo>)`. En ambos casos «Espera a Franco» lista qué revisar y commitear (las rutas de las tareas) y dice que no hay commits: los cambios están sin commitear en la rama de la línea `Modo yolo`.
   9. **No se omiten nunca:** no lees `.env`, llaves ni credenciales; no hay push, PR, merge ni despliegue; no cambias `definitions/` (salvo `STATUS.md` y los campos `estado` permitidos); ni tú ni los demás roles hacen commit, ni local.
-- En `## Límites`, el segundo bullet («Cambias un `estado` … únicamente cuando Franco lo aprueba de forma explícita…») se amplía con esta frase final: «Excepción: en el modo yolo (sección «Modo yolo»), que Franco pidió de forma explícita, apruebas tareas y las marcas `hecha` según esa sección.» No se cambia ningún otro bullet.
+- En `## Límites`, el segundo bullet («Cambias un `estado` … únicamente cuando Franco lo aprueba de forma explícita…») se amplía con esta frase final: «Excepción: en el modo yolo (sección «Modo yolo»), que la persona usuaria pidió de forma explícita, apruebas tareas y las marcas `hecha` según esa sección.» No se cambia ningún otro bullet.
 - Se mantiene `Modo yolo: activo` como texto del encargo exactamente igual al que lee el constructor (task-01) y el planificador (task-04).
 
 ## Alcance / Fuera de alcance
@@ -99,4 +102,4 @@ Cambio en `agentes/coordinador.md`: subsección `### Mientras está activo` (nue
 - Las nueve reglas se copiaron del texto de *Decisiones ya tomadas* sin cambios de redacción.
 - Única línea de `STATUS.md` ni `definitions/` tocadas: ninguna.
 - Sin señal de tarea incompleta: no faltó ninguna decisión necesaria.
-- Pendiente de Franco: task-03 no se marca `hecha`; la revisión de la evidencia es suya.
+- Pendiente de la persona usuaria: task-03 no se marca `hecha`; la revisión de la evidencia es suya.

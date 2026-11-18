@@ -39,7 +39,7 @@ Fuera de alcance: la rama `--proyecto` (task-07), `instalar.sh`, `scripts/resolv
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 bash -n desinstalar.sh
 T=$(mktemp -d); H="$T/h"
 preparar() {

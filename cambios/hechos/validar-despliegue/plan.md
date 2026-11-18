@@ -5,15 +5,17 @@ repos: [.]
 ---
 # validar-despliegue
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 El `verify` de un proyecto puede correr solo el recorrido real contra un entorno ya desplegado (`VERIFY_TARGET=<url> ./verify`) con pasos seguros; `docs/proyecto.md` lleva una sección «Despliegue»; y ante «prepárame el despliegue» el principal escribe un plan de revisión previa, sin desplegar ni tocar producción.
 
 ## Supuestos
-- En modo remoto, si el recorrido tiene pasos que escriben y no hay `VERIFY_PERMITIR_ESCRITURA=1`, esos pasos se omiten con un aviso «OMITIDO» y `verify` termina bien solo si la parte de lectura pasó, diciendo «solo lectura». Si Franco prefiere que sin la variable termine con error, cambia una línea del esqueleto y de la skill.
+- En modo remoto, si el recorrido tiene pasos que escriben y no hay `VERIFY_PERMITIR_ESCRITURA=1`, esos pasos se omiten con un aviso «OMITIDO» y `verify` termina bien solo si la parte de lectura pasó, diciendo «solo lectura». Si la persona usuaria prefiere que sin la variable termine con error, cambia una línea del esqueleto y de la skill.
 - El recorrido declara si escribe con la línea `# VERIFY_ESCRIBE: sí` o `no` en `verify-flujo.sh`; si falta la línea, se trata como `sí` (lo seguro).
 - «Datos de prueba marcados» = correos `verify-<pid>@example.invalid` y cualquier nombre con prefijo `verify-`, para borrarlos después. `verify` no garantiza limpiar el entorno remoto.
 - `./verify` del kit solo comprueba textos clave de los archivos tocados; la prueba funcional del modo remoto la corre el principal en una carpeta temporal (no se agrega un servidor al `verify` del kit).
-- El principal no corre `VERIFY_TARGET` contra producción: el comando de comprobación posterior lo corre Franco.
+- El principal no corre `VERIFY_TARGET` contra producción: el comando de comprobación posterior lo corre la persona usuaria.
 - La sección «Despliegue» de un proyecto sin datos aún dice «pendiente» en cada punto desconocido; no inventa valores.
 
 ## Alcance
@@ -58,7 +60,7 @@ ok escenario 7: workspace -> old/v1 de la raíz, hijos intactos, log con hijos y
 ok escenario 7b: --simular en workspace no cambia el árbol y sale el aviso de AGENTS.md
 ok escenario 8: .gitignore con línea repetida no duplica y conserva las demás
 ok escenario 8b y 8c: .gitignore sin salto final y sin .gitignore quedan con la línea una vez; sin AGENTS.md no hay aviso
-ok escenario 9: copia de Cleaner -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
+ok escenario 9: copia de Proyecto.Mantenimiento -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
 == 8. workspaces (detección con find, textos clave de los archivos del cambio) ==
 ok 8a: workspace con dos hijos con .git -> find devuelve 2
 grep: /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.S5ybsWKqVM/neg3/skills/definir-proyecto/SKILL.md: No such file or directory

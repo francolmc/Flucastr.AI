@@ -1,10 +1,12 @@
 # F21 task-05 (segunda corrida): orden de dos `edit` dependientes del `coordinador` en Pi
 
-Corrida con modelo en Pi, 2026-11-01, autorizada por Franco para esta segunda corrida (una sola invocación con modelo). Se comprueba solo el supuesto (a) de `definitions/CONTEXTO.md` §2.4 y §4 (riesgo 5): Pi ejecuta en el orden indicado varias llamadas de un mismo turno. El supuesto (b) no se prueba aquí. Este informe no sobrescribe el de la primera corrida (`pruebas/resultados/2026-11-01-coordinador-menos-turnos-pi.md`).
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+Corrida con modelo en Pi, 2026-11-01, autorizada por la persona usuaria para esta segunda corrida (una sola invocación con modelo). Se comprueba solo el supuesto (a) de `definitions/CONTEXTO.md` §2.4 y §4 (riesgo 5): Pi ejecuta en el orden indicado varias llamadas de un mismo turno. El supuesto (b) no se prueba aquí. Este informe no sobrescribe el de la primera corrida (`pruebas/resultados/2026-11-01-coordinador-menos-turnos-pi.md`).
 
 ## Condiciones de la corrida
 
-- Precondición sin modelo: `command -v pi-coordinador` → `/Users/franco/.local/bin/pi-coordinador` (EXIT=0).
+- Precondición sin modelo: `command -v pi-coordinador` → `/Users/persona/.local/bin/pi-coordinador` (EXIT=0).
 - Fixture: `bash pruebas/fixtures/coordinador.sh "$T/fx"` con `T=$(mktemp -d)` (fuera del repo). `STATUS.md` inicial: `# Estado`, `## Activo`, `## Historial`.
 - Lanzador: `FLUCASTR_PI_TOPE=240 FLUCASTR_RECORD_FILE="$T/reg.jsonl" bash pruebas/lanzar-coordinador-pi.sh "<prompt>"`, desde `$T/fx`. Código de salida 0.
 - Prompt literal: «Sin delegar a subagentes y sin leer ningún archivo: en una sola respuesta, emite dos llamadas edit seguidas sobre definitions/STATUS.md, sin responder entre ellas. Primer edit: oldText `## Activo`, newText `## Activo` + salto de línea + `marca-1`. Segundo edit: oldText `marca-1` + salto de línea + línea vacía + `## Historial`, newText ese mismo texto + salto de línea + `marca-2`. No las unas en un solo edit; el segundo depende de que el primero ya se haya aplicado. Responde solo: listo.»
@@ -33,7 +35,7 @@ Estado final de `definitions/STATUS.md`: `marca-1` bajo `## Activo` y `marca-2` 
 
 Razón: el archivo final y el orden de ejecución son correctos (condiciones 1 a 3), pero la tarea pedía comprobar que Pi ejecuta en orden dos llamadas de **un mismo turno**. El modelo emitió el segundo `edit` en un turno aparte, después de ver el resultado del primero. Según la definición de la tarea, eso es NO CONCLUYENTE, no PROBADO. Esta corrida no demuestra el supuesto (a). Según la misma definición, no se repite la corrida.
 
-Nota para Franco: las condiciones 1 a 3 leídas por separado cumplen el texto de PROBADO. Lo que impide PROBADO es la condición 4. Si quiere tratar el resultado de otra forma, es su decisión; aquí se informa tal cual.
+Nota para la persona usuaria: las condiciones 1 a 3 leídas por separado cumplen el texto de PROBADO. Lo que impide PROBADO es la condición 4. Si quiere tratar el resultado de otra forma, es su decisión; aquí se informa tal cual.
 
 ## Limitación
 

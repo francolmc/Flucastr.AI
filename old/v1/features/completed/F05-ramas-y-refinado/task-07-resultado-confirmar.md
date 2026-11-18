@@ -1,6 +1,9 @@
 # task-07 — Evaluador de resultado: caso confirmar, con control negativo
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `pruebas/comprobaciones/constructor-resultado.mjs` evalúa de forma determinista los casos `feliz`, `no-aprobada`, `escalacion` y `bloqueada` del constructor. Esta tarea añade el caso `confirmar` (rama ya existente): el constructor debe responder con la línea `CONFIRMAR:` sin tocar nada. Sin modelo ni red: el evaluador compara estados simulados, como sus pruebas actuales.
 
@@ -77,7 +80,7 @@ $ node --test pruebas/comprobaciones/constructor-resultado.test.mjs pruebas/comp
 exit=0
 
 $ bash pruebas/rapida.sh; echo "exit=$?"
-Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-ljp77k
+Entorno conservado: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-ljp77k
 ✔ I1: comprobación real (61.950958ms)
 ✔ I2: comprobación real (934.3195ms)
 ✔ I3: comprobación real (1167.6515ms)

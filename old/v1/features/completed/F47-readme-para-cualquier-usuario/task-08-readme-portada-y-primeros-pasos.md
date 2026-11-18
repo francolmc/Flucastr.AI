@@ -1,15 +1,18 @@
 # task-08 — README: portada, reglas y primeros pasos para cualquiera
 repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-La portada del README (título, estado, «La idea», «Para qué existe», «Reglas», «Documentación», «Cómo se usa») está escrita en primera persona para Franco y con estado de 2026-10-30. Se reescribe para quien llega al repo sin contexto: qué es, para quién, reglas del kit y primeros pasos hasta abrir el `coordinador`. Es la última tarea: cierra con una lectura completa y la verificación rápida del repo.
+La portada del README (título, estado, «La idea», «Para qué existe», «Reglas», «Documentación», «Cómo se usa») está escrita en primera persona para la persona usuaria y con estado de 2026-10-30. Se reescribe para quien llega al repo sin contexto: qué es, para quién, reglas del kit y primeros pasos hasta abrir el `coordinador`. Es la última tarea: cierra con una lectura completa y la verificación rápida del repo.
 
 ## Contexto
 - Leer: `README.md@1-65`
 - Tocar: `README.md`
 - El rango 1-65 va del logo hasta la línea previa a `## Estructura` (la tabla de roles termina en la línea 62 y la frase «Detalle del flujo…» es la 64).
 - Confirmado por lectura: la línea 64 enlaza `[Flujo](#flujo)`, cuyo encabezado pasó a `## Flujo y modo yolo` en task-04; el enlace correcto es `#flujo-y-modo-yolo`.
-- Nombres de proyectos personales de Franco en el texto actual: Don Financio y Andes.
+- Nombres de proyectos personales de la persona usuaria en el texto actual: Proyecto.Finanzas y Proyecto.Servicios.
 - Fuente: ninguna
 - Requiere: runtime:node@25.8.1
 
@@ -40,7 +43,7 @@ Fuera de alcance: `## Estructura` y posteriores (ya hechas en tareas previas), `
 1. Rama `chore/F47-readme-para-cualquier-usuario` (comando 1).
 2. Todo el README sin primera persona (comando 2).
 3. Los enlaces internos `(#...)` apuntan a encabezados que existen (comando 3).
-4. Ninguna mención de Don Financio, Andes ni «Corte duro» (comando 4).
+4. Ninguna mención de Proyecto.Finanzas, Proyecto.Servicios ni «Corte duro» (comando 4).
 5. `bash pruebas/rapida.sh` termina en 0 (comando 5).
 
 ## Verificación
@@ -48,7 +51,7 @@ Fuera de alcance: `## Estructura` y posteriores (ya hechas en tareas previas), `
 git branch --show-current
 grep -nEiw 'mi|mis|yo|tengo|mío|mía|apruebo|PC de trabajo' README.md; echo "grep:$?"
 grep -o '](#[^)]*)' README.md | sort -u
-grep -c 'Don Financio\|Andes\|Corte duro' README.md
+grep -c 'Don Financio\|ProyectoServicios\|Corte duro' README.md
 bash pruebas/rapida.sh | tail -3
 ```
 Esperado: la rama `chore/F47-readme-para-cualquier-usuario`; solo `grep:1`; la lista de anclas, cada una con su encabezado en `README.md` (en minúsculas, espacios como guiones); `0`; la última línea empieza por `rapida:` y no hay línea `FALLA`.
@@ -80,7 +83,7 @@ exit 0
 Encabezados que existen para esas anclas (`grep -nE '^#{1,6} (Flujo y modo yolo|Higiene de contexto y compactación|Instalación)' README.md`): `123:## Instalación`, `222:## Flujo y modo yolo`, `228:## Higiene de contexto y compactación`.
 
 ```
-$ grep -c 'Don Financio\|Andes\|Corte duro' README.md
+$ grep -c 'Don Financio\|ProyectoServicios\|Corte duro' README.md
 0
 exit 1
 ```

@@ -1,6 +1,9 @@
 # task-07 — Corrección: fixture del planificador sin ambigüedad y motivo en el informe con 0 tareas
 repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Las dos corridas reales de task-10 dieron `Veredicto: FALLA; Tareas: 0` sin explicar por qué. Diagnóstico con evidencia (registro de la corrida de Claude Code, `pruebas/.temporales/planificador-claude-code-20101/registro.jsonl`, sin gastar créditos): el planificador no falló al escribir; respondió `REFINAR: feature=F01; preguntas=4` y no creó tareas, porque la feature del fixture («Medir el tiempo de cada comando en los cinco módulos de `src/` y mostrarlo con `--tiempos`») es ambigua: en `src/` no hay «comandos» ni CLI, y `PROJECT.md`/`BACKLOG.md` no lo resuelven (`descomponer-feature`, paso 0, y el modo yolo piden `REFINAR`). En Pi el último turno quedó esperando aprobación, con el mismo origen probable (*inferido*; el registro de Pi no tiene respuesta final de texto). Esta tarea (1) quita la ambigüedad del fixture, sin tocar prompts, skills ni topes, y (2) hace que el informe muestre la respuesta del planificador cuando hay 0 tareas.
 
@@ -15,7 +18,7 @@ Las dos corridas reales de task-10 dieron `Veredicto: FALLA; Tareas: 0` sin expl
 ## Decisiones ya tomadas
 - Fixture: `planificador.sh` añade a `definitions/PROJECT.md` una sección `## Decisiones de alcance` con: un «comando» es cada módulo `src/a.js` … `src/e.js` (cinco); `--tiempos` es una opción de un único punto de entrada nuevo `src/cli.js`, que ejecuta el módulo pedido y escribe `<módulo>: <ms> ms` en la salida estándar; las pruebas van con `node --test` en `pruebas/`; no hay más alcance (sin persistencia ni otros formatos). La fila F01 del `BACKLOG.md` añade en «Por qué en esta posición»: «Alcance resuelto en PROJECT.md (Decisiones de alcance).» El texto de la feature no cambia, y sigue sin existir `features/F01-demo`.
 - Informe: tras escribir el informe, si `Tareas: 0`, `correr-planificador.sh` le añade al final la sección `Respuesta del planificador:` con hasta 1500 caracteres del texto final del registro (`$base/registro.jsonl`). Claude Code: el campo `result` del evento `"type":"result"`. Pi: los bloques `type:"text"` del último mensaje `assistant` del evento `agent_end`. Si no se puede extraer, escribe `(sin texto final; registro: <ruta del registro>)`. Con tareas no añade nada.
-- No se tocan `planificador-resultado.mjs`, el lanzador, prompts, skills ni topes. Si el planificador sigue respondiendo `REFINAR`, el informe lo mostrará y Franco decide en task-10.
+- No se tocan `planificador-resultado.mjs`, el lanzador, prompts, skills ni topes. Si el planificador sigue respondiendo `REFINAR`, el informe lo mostrará y la persona usuaria decide en task-10.
 
 ## Decisiones abiertas
 Ninguna.

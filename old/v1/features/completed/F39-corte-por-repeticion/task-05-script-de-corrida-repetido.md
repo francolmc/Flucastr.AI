@@ -1,6 +1,9 @@
 # task-05 — Script de corrida `correr-repetido.sh` (sin ejecutarla con modelo real)
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Crea `pruebas/correr-repetido.sh {claude-code|pi}`: arma el fixture de task-04, lanza el coordinador con el lanzador de F12 de la herramienta y escribe el informe. Las pruebas usan un modelo simulado; la corrida real es task-06.
 
@@ -17,7 +20,7 @@ Crea `pruebas/correr-repetido.sh {claude-code|pi}`: arma el fixture de task-04, 
 - Uso `bash pruebas/correr-repetido.sh {claude-code|pi}`; otro valor o ninguno: uso en stderr y salida 2. Una sola corrida y una sola etapa, con el prompt de task-04. Base `pruebas/.temporales/repetido-<herramienta>-<PID>`; copia el `STATUS.md` final a `$base/final/STATUS.md` y deja el registro en `$base/registro.jsonl`.
 - Informe `${FLUCASTR_RESULTADOS:-pruebas/resultados}/$(date +%F)-repetido-<herramienta>-<k>.md` (primer `k` libre). Un fallo del lanzador no aborta. Imprime `informe: <ruta>` y `Veredicto: OK|FALLA`; sale 0 si escribió el informe, 2 si no.
 - Pruebas (3): (a) `bash -n`; (b) sin argumento sale 2; (c) con binario simulado que reescribe `definitions/STATUS.md` del cwd con `Escalación: esta causa se repite. C) cerrar y revisar a mano | D) cerrar incompleta` sale 0 y el informe dice `Veredicto: OK`; y con uno que no cambia nada, `Veredicto: FALLA`.
-- README: viñeta nueva tras la de F36 con `bash pruebas/correr-repetido.sh {claude-code|pi}`; solo con pedido de Franco.
+- README: viñeta nueva tras la de F36 con `bash pruebas/correr-repetido.sh {claude-code|pi}`; solo con pedido de la persona usuaria.
 
 ## Decisiones abiertas
 Ninguna.

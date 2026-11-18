@@ -1,6 +1,9 @@
 # task-02 — formato-tarea acepta features/ sin tareas activas y cierre en verde
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 La prueba «las tareas reales de features/ cumplen el formato» en `pruebas/comprobaciones/formato-tarea.test.mjs` exige al menos una tarea activa y falla con «no hay tareas reales en features/» cuando todas las features están archivadas en `features/completed/`. Se corrige igual que F16 con `coherencia-features`: `features/` sin tareas activas es válido. Es la última tarea: cierra la feature comprobando que `bash pruebas/rapida.sh` termina en 0 con 0 fallos.
 
@@ -84,8 +87,8 @@ exit 0
 Hecho: `esActiva` extraído antes de `reales` y usado con `.filter(esActiva)`; borrada `assert.ok(reales.length >= 1, ...)`; añadida la prueba «las tareas de features/completed/ no cuentan como activas». Solo se tocó `pruebas/comprobaciones/formato-tarea.test.mjs` y esta tarea.
 Pasada 1 de rapida.sh: 53 s, mismo resumen (742 pass, 0 fail), salida=1 por el tope de 30 s. Pasada 2: 41 s, mismo resultado. Se agotó la cota de 2 pasadas.
 Bloqueo: tipo=verificacion_x2; falta=-
-Causa: rapida.sh no falla por una prueba; falla por el tope de duración de 30 s (la suite tarda 41 a 53 s). El cambio de esta tarea no toca nada que dure más. Franco decide si sube el tope o acepta la suite más lenta.
+Causa: rapida.sh no falla por una prueba; falla por el tope de duración de 30 s (la suite tarda 41 a 53 s). El cambio de esta tarea no toca nada que dure más. la persona usuaria decide si sube el tope o acepta la suite más lenta.
 `validar-tarea.mjs --evidencia` rechazó la tarea con «La tarea no está terminada: estado «en curso»» antes del cambio a bloqueada. No se marcó `lista para revisión` porque `verificacion=falla`.
 Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=falla; huecos=0; resultado=bloqueada; causa=verificacion_x2
-Reintento: el tope de rapida.sh pasó a 90 s (commit 97d82fa, decisión de Franco). Con la tarea en curso, rapida.sh da 742 pass, 0 fail, 25 s, salida=0. Diff fuera de features/ y definitions/: solo formato-tarea.test.mjs (higiene-contexto no aparece). Sin huecos menores.
+Reintento: el tope de rapida.sh pasó a 90 s (commit 97d82fa, decisión de la persona usuaria). Con la tarea en curso, rapida.sh da 742 pass, 0 fail, 25 s, salida=0. Diff fuera de features/ y definitions/: solo formato-tarea.test.mjs (higiene-contexto no aparece). Sin huecos menores.
 Registro: n=2; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

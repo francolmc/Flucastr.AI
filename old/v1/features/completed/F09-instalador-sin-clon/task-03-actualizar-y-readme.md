@@ -1,12 +1,15 @@
 # task-03 — `--actualizar` atómico, aviso de `modelos.json` nuevo y documentación
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Completa `instalar-remoto.sh` con la actualización: si el sha publicado cambió, arma el kit nuevo, lo valida, lo intercambia con vuelta atrás si algo falla y avisa si el `modelos.json` publicado trae novedades respecto del personal (sin tocar el personal). Documenta el flujo en `README.md` para Franco, con la guía de comprobación manual en el PC de trabajo.
+Completa `instalar-remoto.sh` con la actualización: si el sha publicado cambió, arma el kit nuevo, lo valida, lo intercambia con vuelta atrás si algo falla y avisa si el `modelos.json` publicado trae novedades respecto del personal (sin tocar el personal). Documenta el flujo en `README.md` para la persona usuaria, con la guía de comprobación manual en el PC de trabajo.
 
 ## Contexto
-Base: `definitions/ARCHITECTURE.md` («Versión instalada y publicada», «`modelos.json` local del usuario», actualización atómica) y `definitions/PROJECT.md` («Pruebas de F09», «Lo que queda para Franco»). Supuestos (no confirmados por Franco): `main` + sha; actualización manual (sin procesos en segundo plano); comando largo; modo dual; PC de trabajo macOS/POSIX con `bash`, `node`, `curl`, `tar`.
-Leídos: `README.md` (secciones `## Estructura`, árbol que termina en `├── instalar.sh` y `└── desinstalar.sh`; `## Instalación`; redactado en primera persona de Franco), `pruebas/comprobaciones/readme-estructura.mjs` (solo compara hijos de `agentes/` y `skills/` con el disco), y el estado que deja task-02: `instalar-remoto.sh`, `pruebas/capa1/remoto.test.mjs`, formato de `version` (`sha=`, `fecha=`, `ref=`) y mensaje provisional `Hay una versión nueva; la actualización se agrega en task-03`. Comandos sobre código aún no escrito: «no ejecutado, inferido».
+Base: `definitions/ARCHITECTURE.md` («Versión instalada y publicada», «`modelos.json` local del usuario», actualización atómica) y `definitions/PROJECT.md` («Pruebas de F09», «Lo que queda para Franco»). Supuestos (no confirmados por la persona usuaria): `main` + sha; actualización manual (sin procesos en segundo plano); comando largo; modo dual; PC de trabajo macOS/POSIX con `bash`, `node`, `curl`, `tar`.
+Leídos: `README.md` (secciones `## Estructura`, árbol que termina en `├── instalar.sh` y `└── desinstalar.sh`; `## Instalación`; redactado en primera persona de la persona usuaria), `pruebas/comprobaciones/readme-estructura.mjs` (solo compara hijos de `agentes/` y `skills/` con el disco), y el estado que deja task-02: `instalar-remoto.sh`, `pruebas/capa1/remoto.test.mjs`, formato de `version` (`sha=`, `fecha=`, `ref=`) y mensaje provisional `Hay una versión nueva; la actualización se agrega en task-03`. Comandos sobre código aún no escrito: «no ejecutado, inferido».
 A tocar: `instalar-remoto.sh`, `scripts/resolver.mjs`, `pruebas/capa1/remoto.test.mjs`, `README.md`.
 
 ## Decisiones ya tomadas
@@ -18,7 +21,7 @@ A tocar: `instalar-remoto.sh`, `scripts/resolver.mjs`, `pruebas/capa1/remoto.tes
 - Aviso de `modelos.json`: nueva orden `node scripts/resolver.mjs comparar-modelos <personal> <publicado>`: imprime una línea por diferencia (`version: personal N, publicado M` si M > N; `agente nuevo: <nombre>`; `perfil nuevo: <nombre>`) y nada si no hay; siempre código 0 salvo JSON ilegible (error con el mensaje habitual de `fallar`). Si imprime algo, `instalar-remoto.sh` lo muestra tras `AVISO: el modelos.json publicado trae cambios; compáralo con el tuyo:` y la línea `  diff ~/.flucastr-ai/modelos.json ~/.flucastr-ai/kit/modelos.json`. Nunca modifica el personal.
 - README, redacción en primera persona como el resto: sección nueva `### Sin clonar el repo (PC de trabajo)` dentro de `## Instalación` con: forma de dos pasos primero (bajar `instalar-remoto.sh`, leerlo, `bash instalar-remoto.sh`), el comando largo `curl -fsSL https://raw.githubusercontent.com/francolmc/Flucastr.AI/main/instalar-remoto.sh | bash`, `--estado`, `--actualizar`, `--ref <rama|tag|sha>` (también marcha atrás), dónde vive todo (`~/.flucastr-ai/kit/`, `modelos.json` personal que nunca se pisa), `bash ~/.flucastr-ai/kit/desinstalar.sh` (`--todo` borra también `modelos.json`), el aviso de `modelos.json` nuevo, el requisito `bash`, `curl`, `tar`, `node`, y el riesgo de `curl | bash`. Más una subsección «Comprobación manual en el PC de trabajo» con 5 puntos: red que llega a `raw.githubusercontent.com`, `api.github.com` y `codeload.github.com`; el comando de una línea y el arranque de `claude --agent arquitecto` o `pi-arquitecto` con el modelo de su `modelos.json`; editar su `modelos.json`, publicar un cambio mínimo en `main`, `--estado` dice `hay versión nueva`, `--actualizar` lo trae y su `modelos.json` queda igual; política de la empresa sobre instalar agentes de IA; probar el desinstalador.
 - El árbol de `## Estructura` gana la línea `├── instalar-remoto.sh   # instala sin clonar el repo: descarga main de GitHub, verifica y actualiza` entre `instalar.sh` y `desinstalar.sh`.
-- No se documenta ni se pide en estos pasos la revisión del repo ni hacerlo público: son de Franco.
+- No se documenta ni se pide en estos pasos la revisión del repo ni hacerlo público: son de la persona usuaria.
 
 ## Alcance / Fuera de alcance
 Alcance: `--actualizar`, vuelta atrás, `comparar-modelos`, pruebas nuevas y las dos adiciones al `README.md`.
@@ -140,11 +143,11 @@ Huecos menores resueltos (decisión entre paréntesis):
 - **`comparar-modelos` con JSON ilegible del publicado**: la actualización aborta antes de mover nada (código 1, con el mensaje de `fallar`).
 - **Aviso de `modelos.json`**: se imprime después de «Actualizado», no antes; si la actualización falla, no se imprime.
 
-Lo que vi y no toqué (fuera de alcance; para Franco o para una tarea aparte):
+Lo que vi y no toqué (fuera de alcance; para la persona usuaria o para una tarea aparte):
 - **Hallazgo de task-02, causa de raíz en `instalar.sh` (task-01).** Copia el `modelos.json` del paquete a `~/.flucastr-ai/modelos.json` antes de validar los agentes (reproducido arriba). Si el paquete lo trae inválido, el personal queda roto y no se repara en corridas posteriores. `instalar-remoto.sh` ya lo bloquea antes de copiar (R10). Pero `bash instalar.sh --copiar` directo sobre un paquete así sigue dejando el personal roto. El arreglo de raíz es validar antes de copiar en `instalar.sh`; no estaba en *A tocar*.
 - **Residuo del `trap EXIT` de `instalar.sh`**: escribe el manifiesto aunque falle antes de registrar nada. El ensayo de la actualización evita que esto llegue a la vuelta atrás, pero la primera instalación sigue dejando un manifiesto vacío y el `desinstalar.sh` lo borra después (R6). Conviene arreglarlo en el mismo cambio de `instalar.sh`.
 - **`pruebas/README.md`** no menciona `remoto.test.mjs` ni cómo correrlo (fuera de alcance). Hoy se corre con `node --test pruebas/capa1/remoto.test.mjs`. Está comentado en `rapida.sh`.
 - **Margen de `rapida.sh`**: con 19 archivos queda en 23 a 25 s. Si vuelve a acercarse al tope, la siguiente candidata a sacar es `pruebas/capa1/instalacion.test.mjs` o `copia.test.mjs`, no `remoto`.
-- **La red real, la política de la empresa y el repo público** son comprobaciones manuales de Franco (ver la sección «Comprobación manual» del README). Nada de eso se probó aquí.
+- **La red real, la política de la empresa y el repo público** son comprobaciones manuales de la persona usuaria (ver la sección «Comprobación manual» del README). Nada de eso se probó aquí.
 
 Señal: la tarea estaba incompleta. Faltaban: validar el `modelos.json` también en la primera instalación (el hallazgo de task-02), qué hacer con un `kit.anterior/` que sobra de una actualización interrumpida, y qué hacer si `instalar.sh` falla después de registrar una parte de la instalación (la vuelta atrás depende de ese manifiesto parcial).

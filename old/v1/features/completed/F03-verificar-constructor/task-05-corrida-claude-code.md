@@ -1,12 +1,15 @@
 # task-05 — Corrida del constructor en Claude Code: los cuatro casos
 repo: Flucastr.AI   depende_de: task-01, task-03, task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Cierra el hueco de `definitions/WORKFLOW.md` §7 (paso 4): una corrida con modelo, una sola por caso, del constructor instalado en Claude Code sobre el fixture de task-02, evaluada con el evaluador de task-03 y lanzada con el lanzador de task-04. Los cuatro casos son: tarea completable, tarea no aprobada, escalación por alcance y `bloqueada` tras dos fallos. El resultado se deja en un informe en `pruebas/resultados/`. Si un caso falla por el rol o la skill, se informa; no se corrige aquí.
 
 ## Contexto
 - Repo: este, único repo. Precondiciones ya hechas por las tareas previas: `pruebas/fixtures/constructor.sh` (task-02), `pruebas/comprobaciones/constructor-resultado.mjs` con `leerEstado`, `extraerRespuesta` y `evaluarCaso` (task-03), `pruebas/lanzar-constructor-claude.sh` (task-04) y `pruebas/comprobaciones/contrato-constructor.mjs` (task-01).
-- El agente instalado es `~/.claude/agents/constructor.md` (leído: `model: claude-haiku-5-5`, nivel bajo de `modelos.json`, decisión de Franco en `definitions/WORKFLOW.md` §8). Si difiere de `agentes/constructor.md`, se reinstala con `bash instalar.sh` antes de correr (es el único comando que escribe fuera del repo y es el flujo normal del kit).
+- El agente instalado es `~/.claude/agents/constructor.md` (leído: `model: claude-haiku-5-5`, nivel bajo de `modelos.json`, decisión de la persona usuaria en `definitions/WORKFLOW.md` §8). Si difiere de `agentes/constructor.md`, se reinstala con `bash instalar.sh` antes de correr (es el único comando que escribe fuera del repo y es el flujo normal del kit).
 - Convención de informes: `pruebas/resultados/AAAA-MM-DD-….md` (p. ej. `2026-10-29-claude-code.md`), en español, con secciones por corrida. El nombre de este: `pruebas/resultados/<fecha de hoy, de `date +%F`>-constructor-claude-code.md`.
 - La corrida con modelo no se ha ejecutado nunca: todo lo de aquí es «no ejecutado, inferido». Costo: cuatro invocaciones de modelo en total, ni una más salvo el caso de reintento indicado abajo.
 - `definitions/WORKFLOW.md` §7: «Con modelo, una sola corrida por hito».
@@ -48,7 +51,7 @@ git status --short
 Esperado: la primera termina con `fail 0`; la segunda termina con `rapida: N archivos en S s (tope 30 s)` y código 0; la tercera lista como nuevos (`??`) solo los archivos de F03 y de las tareas previas, más `pruebas/resultados/<fecha>-constructor-claude-code.md`, y ningún cambio en `agentes/` ni `skills/` atribuible a esta tarea.
 
 ## Evidencia
-Informe: `/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-10-29-constructor-claude-code.md` (incluye resumen de la corrida anterior).
+Informe: `/Users/persona/Codes/flucastr/Flucastr.AI/pruebas/resultados/2026-10-29-constructor-claude-code.md` (incluye resumen de la corrida anterior).
 
 Corrida nueva, cuatro casos, una invocación de modelo por caso, sin reintentos. Modelo `claude-haiku-5-5` (registro). Lanzador con `Bash(echo *)` y `Bash(printf *)`.
 
@@ -84,7 +87,7 @@ Kit:
 - Un hueco menor resuelto por el constructor en `feliz`: la tarea no dice si la línea lleva salto final. Eligió `hola\n` y lo anotó en su *Notas*. No hay otros huecos; no aplica la señal de tarea incompleta.
 - Verificación del criterio 4: el kit está verde en esta corrida (tests pasan y `rapida.sh` cumple el tope).
 - Lo que cambió respecto a la corrida anterior: el permiso de `bash verificar.sh; echo …` ya no se deniega (task-06), así que `bloqueada` mide ahora dos fallos reales de `verificar.sh`. El estado en `escalacion` pasó de `en curso` a `bloqueada`: lo elige el modelo, no la skill.
-- Para Franco, revisar el informe, sobre todo *Observaciones*:
+- Para la persona usuaria, revisar el informe, sobre todo *Observaciones*:
   1. Qué estado fija la skill `ejecutar-tarea` ante escalación (hoy la corrida dejó `bloqueada` y la anterior `en curso`).
   2. Si la regla `Bash(...)` del lanzador cubre comandos compuestos en general o solo los probados aquí.
   3. Si el evaluador debe comprobar el rol de bloqueo (hoy acepta cualquier `rol=`).

@@ -1,8 +1,11 @@
 # task-04 — ejecutar-tarea: bloqueo de código o verificación con rol=constructor
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`skills/ejecutar-tarea/SKILL.md` solo nombra `rol=planificador` o `rol=arquitecto` para un `BLOQUEO:` por alcance, así que un defecto de código (en Memory-AI F05, un cliente HTTPS sin ruta) acabó tres veces en el `arquitecto`. Esta tarea añade el rol `constructor` con `motivo=codigo:` para defectos de código o de verificación del repo, incluida la cota `verificacion_x2`. El `coordinador` los enruta con el paso 9 de `control-consumo` (task-03). El archivo está a 19 B de su tope (7604 de 7623), así que lo que se añade se compensa quitando una frase redundante.
+`skills/ejecutar-tarea/SKILL.md` solo nombra `rol=planificador` o `rol=arquitecto` para un `BLOQUEO:` por alcance, así que un defecto de código (en Proyecto.Memoria F05, un cliente HTTPS sin ruta) acabó tres veces en el `arquitecto`. Esta tarea añade el rol `constructor` con `motivo=codigo:` para defectos de código o de verificación del repo, incluida la cota `verificacion_x2`. El `coordinador` los enruta con el paso 9 de `control-consumo` (task-03). El archivo está a 19 B de su tope (7604 de 7623), así que lo que se añade se compensa quitando una frase redundante.
 
 ## Contexto
 - Tocar: `skills/ejecutar-tarea/SKILL.md`, `pruebas/comprobaciones/frases-por-archivo.mjs`

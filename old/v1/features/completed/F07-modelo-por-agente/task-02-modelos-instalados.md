@@ -1,6 +1,9 @@
 # task-02 — Comprobación determinista: los agentes instalados usan el modelo de `modelos.json`
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Hoy la Capa 1 solo comprueba que el modelo resuelto «pertenece» a `modelos.json`, no que cada agente instalado (Claude Code y Pi) lleve el modelo que `modelos.json` le asigna ni que el lanzador de Pi lo resuelva al arrancar. Esta tarea añade una comprobación sin modelo ni red que compara, agente por agente, lo instalado contra lo que resuelve `scripts/resolver.mjs`, y que detecta una instalación desactualizada tras editar `modelos.json`.
 
@@ -29,7 +32,7 @@ Fuera de alcance: cambiar `instalar.sh` o `resolver.mjs`; registros de corridas 
 1. Instalación recién hecha en entorno aislado: `[]`. Prueba (a).
 2. `modelos.json` cambiado sin reinstalar: error que nombra al agente. Prueba (b). Nota: el cambio se aplica al `modelos.json` del repo temporal que usa el resolver, no a los archivos instalados.
 3. Lanzador de Pi ausente: error que nombra al lanzador. Prueba (c).
-4. El modo script sobre la instalación real sale con 0 o con 1 y mensajes legibles (no se exige 0: depende de que Franco haya reinstalado). Se comprueba ejecutándolo.
+4. El modo script sobre la instalación real sale con 0 o con 1 y mensajes legibles (no se exige 0: depende de que la persona usuaria haya reinstalado). Se comprueba ejecutándolo.
 5. `bash pruebas/rapida.sh` sigue verde dentro del tope de 30 s.
 
 ## Verificación
@@ -70,7 +73,7 @@ salida_import=0
 
 3. `bash pruebas/rapida.sh; echo "salida=$?"` (salida completa):
 ```
-Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-gyRMg9
+Entorno conservado: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-gyRMg9
 ✔ I1: comprobación real (66.259208ms)
 ✔ I2: comprobación real (1247.88ms)
 ✔ I3: comprobación real (1175.875875ms)
@@ -250,4 +253,4 @@ Criterios de aceptación:
   - El encabezado se lee entre las dos líneas `---`; cuenta solo las líneas que empiezan con `model:`.
 - Efecto colateral de la suite completa, no de esta tarea: la prueba `capa1` deja `pruebas/.temporales/capa1-gyRMg9` («Entorno conservado»). Es comportamiento existente de `pruebas/capa1/instalacion.test.mjs`; no lo cambié.
 - Fuera del alcance y sin tocar: `definitions/STATUS.md` y `features/F07-modelo-por-agente/task-01-tope-features-pendientes.md` ya tenían cambios sin confirmar antes de esta corrida. No hice commit, push, PR, merge ni despliegue. No se tocó `definitions/STATUS.md`.
-- Para revisar: la ruta de esta tarea y su *Evidencia*. Franco decide `hecha`.
+- Para revisar: la ruta de esta tarea y su *Evidencia*. la persona usuaria decide `hecha`.

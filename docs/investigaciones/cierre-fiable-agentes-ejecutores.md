@@ -1,6 +1,8 @@
 # Cómo lograr cierres fiables con un ejecutor pequeño: búsqueda en internet
 
-Fecha: 2026-11-08. Motivo: el constructor declara terminado sin estarlo, deja tareas a medias y el principal rehace (ver `auditoria-andes-constructor.md`). Complementa `cambios/hechos/comparar-openspec/investigacion/modelos-pequenos.md` y `flujos-agentes-traspaso.md`. Es una búsqueda web y dos lecturas de fuentes primarias, no un experimento nuestro.
+> Los nombres se anonimizaron; se conservan fechas y cifras.
+
+Fecha: 2026-11-08. Motivo: el constructor declara terminado sin estarlo, deja tareas a medias y el principal rehace (ver `auditoria-servicios-constructor.md`). Complementa `cambios/hechos/comparar-openspec/investigacion/modelos-pequenos.md` y `flujos-agentes-traspaso.md`. Es una búsqueda web y dos lecturas de fuentes primarias, no un experimento nuestro.
 
 Etiquetas: **[primaria]** leí la página; **[resumen]** la página me llegó resumida por un modelo; **[secundaria]** blog o resultado de buscador que no abrí.
 
@@ -36,7 +38,7 @@ Etiquetas: **[primaria]** leí la página; **[resumen]** la página me llegó re
 ## 2. Qué implica para nuestro kit
 
 1. **El problema no se arregla con más texto; sí con una compuerta.** Hay mecanismo oficial en Claude Code y uno documentado en Pi (por confirmar en el subagente). Es el plan siguiente al comprobador (`cambios/ejecucion-por-tramos/plan.md` (el comprobador de plan se descartó por ahora)).
-2. **La compuerta debe verificar más que el estado del plan.** Los hallazgos 1.2 y 1.3 piden verificación de extremo a extremo y pruebas que el ejecutor no vea. En Andes, cuatro pruebas verdes sobre un montaje propio no acreditaron la página real. Incorporar al plan: aceptación sobre el recorrido real y, cuando se pueda, una comprobación externa que el constructor no pueda editar.
+2. **La compuerta debe verificar más que el estado del plan.** Los hallazgos 1.2 y 1.3 piden verificación de extremo a extremo y pruebas que el ejecutor no vea. En Proyecto.Servicios, cuatro pruebas verdes sobre un montaje propio no acreditaron la página real. Incorporar al plan: aceptación sobre el recorrido real y, cuando se pueda, una comprobación externa que el constructor no pueda editar.
 3. **Una unidad por entrega, con lista estructurada.** Alinea con «una función por sesión» y con nuestras reglas de tramos. Evaluar si el `## Aceptación` o los pasos deben tener un estado que el constructor solo cambie con evidencia (el comprobador ya cubre parte).
 4. **La calidad del plan pesa más que el ejecutor** (si PEAR se sostiene), coherente con la auditoría: gran parte del retrabajo vino de la preparación del principal.
 5. **Subir el nivel del constructor** sigue siendo una prueba barata; la evidencia sobre qué tan lejos llega no es concluyente.
@@ -56,7 +58,7 @@ Etiquetas: **[primaria]** leí la página; **[resumen]** la página me llegó re
 
 ## 4. Segunda búsqueda: cómo se maneja al agente en sistemas que sí funcionan
 
-Pregunta de Franco: quizá el problema es cómo se le encarga el trabajo (prompt, orden), no la falta de una compuerta.
+Pregunta de la persona usuaria: quizá el problema es cómo se le encarga el trabajo (prompt, orden), no la falta de una compuerta.
 
 ### 4.1 mini-SWE-agent: el bucle lo lleva el arnés, no el modelo **[primaria: `default.yaml` leído completo]**
 - Una sola acción por turno («exactly ONE bash code block»), con una sección THOUGHT antes. La regla está al inicio del system prompt y se repite en la instrucción de la tarea.

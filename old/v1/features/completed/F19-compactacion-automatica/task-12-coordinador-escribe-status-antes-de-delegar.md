@@ -1,6 +1,9 @@
 # task-12 — El `coordinador` escribe `STATUS.md` antes de delegar
 repo: Flucastr.AI   depende_de: task-11   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Con compactación automática el estado del flujo no puede vivir en la conversación: Pi y Claude Code pueden compactar entre dos turnos de una misma corrida. Añadir a `agentes/coordinador.md` la regla de que, antes de delegar a cualquier rol, el `coordinador` deja el estado en `definitions/STATUS.md` y, tras una compactación o al empezar, retoma releyéndolo. Sin esto, la prueba con modelo de las tareas 15 y 16 no tiene qué comprobar.
 
@@ -9,13 +12,13 @@ Con compactación automática el estado del flujo no puede vivir en la conversac
 - Regla ya aprobada en `definitions/WORKFLOW.md` §3 (viñeta «Higiene de contexto»): el estado vive en `STATUS.md` y archivos, no en la conversación; el kit deja puesta la compactación automática. `WORKFLOW.md` mide 30.516 caracteres (tope 30.720): **no se toca** en esta feature.
 - Diseño: `definitions/ARCHITECTURE.md`, punto 4 de «Riesgos» (Pi puede compactar entre turnos de una misma corrida, así que el estado se escribe antes de delegar, no al final).
 - Comprobadores que leen `agentes/coordinador.md`: `pruebas/comprobaciones/contrato-roles.mjs` y `higiene-contexto.test.mjs`; el cuerpo se instala con `scripts/resolver.mjs` (la línea de identidad va antes, no afecta). Se verifican con `bash pruebas/rapida.sh`.
-- Los agentes generados de Claude Code necesitan `bash instalar.sh` para recibir el cambio (Pi lee `agentes/coordinador.md` en vivo por el lanzador `pi-coordinador`); esto lo hace Franco.
+- Los agentes generados de Claude Code necesitan `bash instalar.sh` para recibir el cambio (Pi lee `agentes/coordinador.md` en vivo por el lanzador `pi-coordinador`); esto lo hace la persona usuaria.
 
 ## Decisiones ya tomadas
 - Insertar, en «Cómo avanzas», entre el paso 1 y el 2, un paso nuevo y renumerar los siguientes (el actual 2 pasa a 3, etc.). Texto literal del paso nuevo, en una sola línea:
 
 ```
-2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea y, si aplica, `Rama:` o `Modo yolo:`) y qué debe revisar Franco. La conversación se puede compactar o cerrar entre un turno y otro: el estado vive en el archivo, no en tu memoria.
+2. **Antes de delegar, escribe en `definitions/STATUS.md`** el paso actual (rol, feature, tarea y, si aplica, `Rama:` o `Modo yolo:`) y qué debe revisar Persona. La conversación se puede compactar o cerrar entre un turno y otro: el estado vive en el archivo, no en tu memoria.
 ```
 
 - Añadir al final del párrafo de «Qué lees para decidir» esta frase literal:
@@ -45,7 +48,7 @@ Fuera de alcance: `definitions/WORKFLOW.md` (queda bajo 30.720 caracteres), otro
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -c 'Antes de delegar, escribe en `definitions/STATUS.md`' agentes/coordinador.md
 awk '/^## Cómo avanzas/{f=1;next} /^## /{f=0} f && /^[0-9]+\. /{print substr($0,1,60)}' agentes/coordinador.md
 grep -c "empieza vacía o resumida" agentes/coordinador.md
@@ -57,7 +60,7 @@ Esperado: `1`; cinco líneas numeradas del 1 al 5, con la 2 empezando por `2. **
 ## Evidencia
 Rama comprobada (`git branch --show-current`): `feature/F19-compactacion-automatica`. No hubo switch.
 
-Verificación (comando y salida real, `HOME=/Users/franco`):
+Verificación (comando y salida real, `HOME=/Users/persona`):
 
 ```
 $ grep -c 'Antes de delegar, escribe en `definitions/STATUS.md`' agentes/coordinador.md

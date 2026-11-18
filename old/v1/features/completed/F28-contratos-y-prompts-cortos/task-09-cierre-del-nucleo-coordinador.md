@@ -1,8 +1,11 @@
 # task-09 — Cerrar el núcleo del coordinador en 7168 bytes
 repo: Flucastr.AI   depende_de: task-08   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Tras las tasks 04, 06 y 08 el `coordinador` mide unos 9 KB. Esta tarea lo lleva a la meta de 7168 B recortando redacción repetida (sin quitar ninguna frase del manifiesto ni cambiar una regla) y fija el tope en la prueba de bytes. También hace obligatorios los tres módulos en esa prueba. Es la tarea que baja el costo por turno; si el costo no baja en la medición de Franco, se revierte solo ella.
+Tras las tasks 04, 06 y 08 el `coordinador` mide unos 9 KB. Esta tarea lo lleva a la meta de 7168 B recortando redacción repetida (sin quitar ninguna frase del manifiesto ni cambiar una regla) y fija el tope en la prueba de bytes. También hace obligatorios los tres módulos en esa prueba. Es la tarea que baja el costo por turno; si el costo no baja en la medición de la persona usuaria, se revierte solo ella.
 
 ## Contexto
 - Tocar: `agentes/coordinador.md`, `pruebas/comprobaciones/topes-bytes.test.mjs`
@@ -14,7 +17,7 @@ Tras las tasks 04, 06 y 08 el `coordinador` mide unos 9 KB. Esta tarea lo lleva 
 
 ## Decisiones ya tomadas
 - Meta: 7168 B o menos. Se recorta solo redacción: conectores, ejemplos y repeticiones entre filas y secciones. No se cambia ninguna regla ni se borra ninguna frase del manifiesto ni del front matter.
-- La tabla de decisión conserva una fila por cada primera línea de respuesta (`REFINAR:`, `DECISION:`/`PARCIAL:`, `BLOQUEO:`, tarea `lista para revisión`) y se añade una fila `CONFIRMAR:` de una línea (pregunta a Franco; con su sí explícito, reencarga con la skill `ramas-feature`) y la fila «Nada de lo anterior: escalación». Esas filas se pagan con los recortes.
+- La tabla de decisión conserva una fila por cada primera línea de respuesta (`REFINAR:`, `DECISION:`/`PARCIAL:`, `BLOQUEO:`, tarea `lista para revisión`) y se añade una fila `CONFIRMAR:` de una línea (pregunta a la persona usuaria; con su sí explícito, reencarga con la skill `ramas-feature`) y la fila «Nada de lo anterior: escalación». Esas filas se pagan con los recortes.
 - En `topes-bytes.test.mjs`: tope del coordinador 7168 y `opcional: false` en los tres módulos (si el archivo falta, la prueba falla).
 - Si tras recortar solo redacción el archivo no baja de 7168 B, la tarea queda `bloqueada` con `PARCIAL:` y la cifra lograda; no se amplía el tope ni se borra una regla.
 
@@ -23,7 +26,7 @@ Ninguna
 
 ## Alcance / Fuera de alcance
 Alcance: recorte de redacción en un archivo y un cambio de dos constantes en una prueba.
-Fuera de alcance: `coordinador-turnos.test.mjs` (su tope de 17920 queda como cota vieja), los módulos, `tools:`, la medición con `consumo.mjs` (la hace Franco) y todo lo de `definitions/`.
+Fuera de alcance: `coordinador-turnos.test.mjs` (su tope de 17920 queda como cota vieja), los módulos, `tools:`, la medición con `consumo.mjs` (la hace la persona usuaria) y todo lo de `definitions/`.
 
 ## Pasos
 1. Recorta redacción de `agentes/coordinador.md` y añade las dos filas indicadas; mide con `wc -c` tras cada grupo de cambios.

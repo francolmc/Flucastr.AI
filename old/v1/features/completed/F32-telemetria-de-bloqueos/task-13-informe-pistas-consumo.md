@@ -1,6 +1,9 @@
 # task-13 — `informe.mjs --consumo <dir> --pistas`: pistas 2 y 6 desde los logs
 repo: Flucastr.AI   depende_de: task-09, task-10, task-12   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Las pistas 2 (un bloqueo de entorno volvió a `planificador` o `arquitecto`) y 6 (el costo de definir supera al de ejecutar) necesitan los logs de sesión. Esta tarea las agrega a `calcularPistas` usando las corridas con `Disparó:` (task-10) y el bloque de consumo que `informe.mjs` ya calcula con `--consumo`.
 
@@ -66,7 +69,7 @@ exit 0
 Anotación: comprobación adicional, no pasada de Verificación. 12 = 8 previas más 4 nuevas (pista 2; pista 6 por costo; pista 6 por turnos; CLI con Pi sintético).
 
 ```text
-$ sh pruebas/rapida.sh > /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/fcf8d866-8f65-4f96-abd5-83def002b359/scratchpad/rapida-task13.txt 2>&1
+$ sh pruebas/rapida.sh > /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/fcf8d866-8f65-4f96-abd5-83def002b359/scratchpad/rapida-task13.txt 2>&1
 ℹ tests 655
 ℹ pass 648
 ℹ fail 7
@@ -86,7 +89,7 @@ Criterios de aceptación: 1 (pista 2 solo con planificador o arquitecto a bloque
 
 ## Notas
 - Hueco menor 1: la pista 6 es global (`feature: null`). Su línea sale como `- Pista 6: …` sin `[null]`; el JSON conserva `feature: null`.
-- Hueco menor 2: la pista 6 redondea con `Math.round`, igual que la pista 3, y la prueba afirma 65 %. Si Franco prefiere truncar, es un cambio de una línea.
+- Hueco menor 2: la pista 6 redondea con `Math.round`, igual que la pista 3, y la prueba afirma 65 %. Si la persona usuaria prefiere truncar, es un cambio de una línea.
 - Hueco menor 3: si una corrida trae `feature` nula, la pista 2 la cuenta en cada feature que tenga bloqueo de entorno de esa misma tarea. La tarea no dice otra cosa; se aplicó la regla literal.
 - Cambio interno: con `--consumo`, `descubrirSesiones` ahora corre también si n es insuficiente (antes no). El bloque «Consumo» sigue saliendo solo si `suficiente`.
 - Sin `--consumo` y con `--pistas`: la línea «(pistas 2 y 6 no evaluadas: falta --consumo <dir>)» va dentro de `## Pistas`, después de la lista o de «Sin pistas…». El JSON no cambia de forma.

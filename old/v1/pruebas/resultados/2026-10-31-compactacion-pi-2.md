@@ -1,5 +1,7 @@
 # Pi: el `coordinador` retoma desde `STATUS.md` tras una compactación (F19, task-15, intento 2)
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Corrida con modelo, 2026-10-31, en Pi. Segundo intento de la task-15. El intento 1 (`pruebas/resultados/2026-10-31-compactacion-pi.md`) dio **FALLA por umbral inviable** (1500 tokens de margen, por debajo de la base del `coordinador`); no se edita ni se borra. Este intento usa un umbral artificial de 18000 tokens, puesto solo en el `.pi/settings.json` de un fixture temporal (`mktemp -d`). `~/.pi/agent/settings.json` no se tocó, no se reinstaló nada y no se abrió ningún archivo de credenciales.
 
 El umbral es artificial: 18000 tokens de margen (ventana 272000 − `reserveTokens` 254000) y `keepRecentTokens` 3000. No se retocó para forzar un resultado.
@@ -13,7 +15,7 @@ La compactación se disparó **solo en el turno de retoma**, no en el turno 1. E
 ## Qué se corrió
 
 - Modelo (`node scripts/resolver.mjs modelo coordinador pi`): `openai/gpt-6.1-sol`, ventana declarada 272000 en `modelos.json`. El registro lo reporta como `gpt-6.1-sol`.
-- Precondiciones sin modelo: `command -v pi-coordinador` → `/Users/franco/.local/bin/pi-coordinador`; `node scripts/resolver.mjs cuerpo agentes/coordinador.md | grep -c 'Antes de delegar, escribe en'` → `1`.
+- Precondiciones sin modelo: `command -v pi-coordinador` → `/Users/persona/.local/bin/pi-coordinador`; `node scripts/resolver.mjs cuerpo agentes/coordinador.md | grep -c 'Antes de delegar, escribe en'` → `1`.
 - Fixture: `pruebas/fixtures/coordinador.sh "$T/fx"` (repo demo; `definitions/STATUS.md` mínimo, sin «Paso actual» ni «Espera a Franco»).
 - `.pi/settings.json` del fixture (solo aquí; `~/.pi/agent/settings.json` no se tocó):
   `{"compaction":{"modelOverrides":{"openai/gpt-6.1-sol":{"reserveTokens":254000,"keepRecentTokens":3000}}}}`
@@ -26,7 +28,7 @@ La compactación se disparó **solo en el turno de retoma**, no en el turno 1. E
 Dos invocaciones, el máximo permitido. No se usó la tercera (no hubo fallo de infraestructura).
 
 1. **Turno 1** (prompt literal de la tarea). Resultado: `turno1 exit=0`. El registro tiene 290 líneas.
-   Prompt: «Estás en el flujo de este proyecto. Lee, en este orden y completos, definitions/STATUS.md, definitions/BACKLOG.md, scripts/registrar.mjs y scripts/archivar.mjs. No delegues a ningún subagente. Después escribe en definitions/STATUS.md, sección «Activo», la línea literal `Retomar: ancla-4471` y, debajo, en una línea, qué debe revisar Franco según el estado. Responde solo: listo.»
+   Prompt: «Estás en el flujo de este proyecto. Lee, en este orden y completos, definitions/STATUS.md, definitions/BACKLOG.md, scripts/registrar.mjs y scripts/archivar.mjs. No delegues a ningún subagente. Después escribe en definitions/STATUS.md, sección «Activo», la línea literal `Retomar: ancla-4471` y, debajo, en una línea, qué debe revisar la persona usuaria según el estado. Responde solo: listo.»
 2. **Turno de retoma** (`CONTINUAR=1`, misma sesión, prompt literal). Resultado: `retoma exit=0`. El registro tiene 77 líneas.
    Prompt: «Tu conversación se compactó: no te fíes de lo que recuerdes. Lee definitions/STATUS.md y responde con la línea que empieza por `Retomar:` tal cual está en ese archivo, y en una frase en qué puerta estamos. No delegues a ningún subagente.»
 
@@ -53,7 +55,7 @@ Texto final de la retoma, según `registro.mjs` (`analyzeRecordFile(..., 'pi')`)
 
 > Retomar: ancla-4471
 >
-> Estamos en la puerta 2, a la espera de que Franco revise y apruebe explícitamente `definitions/BACKLOG.md`.
+> Estamos en la puerta 2, a la espera de que la persona usuaria revise y apruebe explícitamente `definitions/BACKLOG.md`.
 
 ## Lectura del resultado
 
@@ -88,8 +90,8 @@ No hubo falla intermitente de `registro.e2e.test.mjs` («2 !== 1») y no se repi
 ## Comandos (sin secretos)
 
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
-command -v pi-coordinador                                    # /Users/franco/.local/bin/pi-coordinador
+cd /Users/persona/Codes/flucastr/Flucastr.AI
+command -v pi-coordinador                                    # /Users/persona/.local/bin/pi-coordinador
 node scripts/resolver.mjs cuerpo agentes/coordinador.md | grep -c 'Antes de delegar, escribe en'   # 1
 MODELO=$(node scripts/resolver.mjs modelo coordinador pi)    # openai/gpt-6.1-sol; ventana 272000
 bash pruebas/fixtures/coordinador.sh "$T/fx"

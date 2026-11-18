@@ -1,8 +1,11 @@
 # task-01 — El tope de 6 features cuenta solo las pendientes
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`pruebas/comprobaciones/formato-flujo.mjs` exige entre 1 y 6 filas en total en `definitions/BACKLOG.md`, y `skills/crear-backlog/SKILL.md` fija «Máximo 6 features». Con F01–F06 `hecha` y F07–F10 abiertas el backlog tiene 10 filas y `bash pruebas/rapida.sh` falla en «definitions/BACKLOG.md real cumple el formato». Decisión de Franco (2026-10-29, opción 1 / opción (a) del backlog): el tope de 6 se cuenta solo sobre las features no `hecha`. Esta tarea cambia validador, pruebas y texto de la skill para que sea así y habilita task-02.
+`pruebas/comprobaciones/formato-flujo.mjs` exige entre 1 y 6 filas en total en `definitions/BACKLOG.md`, y `skills/crear-backlog/SKILL.md` fija «Máximo 6 features». Con F01–F06 `hecha` y F07–F10 abiertas el backlog tiene 10 filas y `bash pruebas/rapida.sh` falla en «definitions/BACKLOG.md real cumple el formato». Decisión de la persona usuaria (2026-10-29, opción 1 / opción (a) del backlog): el tope de 6 se cuenta solo sobre las features no `hecha`. Esta tarea cambia validador, pruebas y texto de la skill para que sea así y habilita task-02.
 
 ## Contexto
 - Repo único. Node ESM, `node:test`, sin dependencias. Leídos: `pruebas/comprobaciones/formato-flujo.mjs` (regla 2, líneas 44-48: `filas.length < 1 || filas.length > 6` y el mensaje `La tabla debe tener entre 1 y 6 features; tiene N.`), `pruebas/comprobaciones/formato-flujo.test.mjs` (test «backlog: siete features se rechazan», líneas 66-73, comprueba `e.includes('entre 1 y 6')`; el test «backlog real» está en la línea 121), `skills/crear-backlog/SKILL.md` línea 34 (`- **Máximo 6 features.** Si salen más, agrupa o deja las últimas fuera y dilo en una nota.`), `definitions/BACKLOG.md` (10 filas, 4 no `hecha`).
@@ -71,7 +74,7 @@ Criterio 4: `ℹ fail 0` (verificación 1).
 
 Criterio 5, `bash pruebas/rapida.sh` (salida final verbatim; las ~149 líneas ✔ intermedias se omiten, todas pasaron):
 ```
-Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-gvayeB
+Entorno conservado: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-gvayeB
 [… líneas ✔ de los tests de capa1, controles negativos, coherencia, agentes, skills, lanzadores y tareas …]
 ℹ tests 149
 ℹ suites 0
@@ -89,9 +92,9 @@ Incluye `modelos-agentes.test.mjs` (task-02, sin versionar): pasa dentro de las 
 
 ## Notas
 
-- Causa del bloqueo de la corrida anterior, resuelta por Franco fuera de esta tarea: la tarea estaba como `task-00-…` y `coherencia-features.mjs` exige numeración desde `task-01`. El archivo ya se renombró a `task-01-tope-features-pendientes.md`; no se tocó ninguna regla de coherencia.
+- Causa del bloqueo de la corrida anterior, resuelta por la persona usuaria fuera de esta tarea: la tarea estaba como `task-00-…` y `coherencia-features.mjs` exige numeración desde `task-01`. El archivo ya se renombró a `task-01-tope-features-pendientes.md`; no se tocó ninguna regla de coherencia.
 - Ningún hueco menor nuevo en este reintento: el código coincidía con los pasos, así que no hubo decisiones de interpretación.
-- Fuera de alcance, no tocado y reportado para `definitions/` (decisión de Franco): `definitions/WORKFLOW.md` líneas 146 y 149, `definitions/BACKLOG.md` línea 28 y `definitions/STATUS.md` todavía dicen «máximo de 6» / «hasta 6 features».
+- Fuera de alcance, no tocado y reportado para `definitions/` (decisión de la persona usuaria): `definitions/WORKFLOW.md` líneas 146 y 149, `definitions/BACKLOG.md` línea 28 y `definitions/STATUS.md` todavía dicen «máximo de 6» / «hasta 6 features».
 - `definitions/BACKLOG.md`, `definitions/STATUS.md`, `pruebas/comprobaciones/formato-flujo.mjs` (ver diff) y `skills/crear-backlog/SKILL.md` aparecen modificados en `git status`; `definitions/BACKLOG.md` y `definitions/STATUS.md` no los modificó esta tarea.
 - `rapida.sh` deja `pruebas/.temporales/capa1-gvayeB`; está ignorado por `pruebas/.gitignore`, no aparece en `git status`.
 - Este reintento no escribió en `definitions/STATUS.md`. No hubo commit, push, PR, merge ni despliegue. Git: solo `git branch --show-current` (sin `switch`, la rama ya era la actual).

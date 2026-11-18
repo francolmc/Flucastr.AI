@@ -18,6 +18,8 @@ Uso
   bash instalar.sh --migrar <ruta> [--simular]
 
 Opciones
+  Alias en inglés: --dry-run, --copy, --only, --project, --agent,
+  --project-skills y --migrate equivalen a las opciones en español siguientes.
   --simular                 Muestra las acciones sin escribir archivos.
   --copiar                  Copia las skills en vez de enlazarlas (modo descarga).
   --solo claude|pi|codex    Limita la instalación a Claude Code, Pi o Codex; no instala herramientas.
@@ -81,15 +83,15 @@ MIGRAR=""
 AGENTE_DADO=0
 while [ $# -gt 0 ]; do
   case "$1" in
-    --simular) SIMULAR=1 ;;
-    --migrar)
+    --simular | --dry-run) SIMULAR=1 ;;
+    --migrar | --migrate)
       shift
       MIGRAR="${1:-}"
       [ -d "$MIGRAR" ] || { echo "--migrar necesita una carpeta que exista" >&2; exit 1; }
       MIGRAR="$(cd "$MIGRAR" && pwd)"
       ;;
-    --copiar) MODO=descarga ;;
-    --solo)
+    --copiar | --copy) MODO=descarga ;;
+    --solo | --only)
       shift
       SOLO="${1:-}"
       case "$SOLO" in
@@ -97,18 +99,18 @@ while [ $# -gt 0 ]; do
         *) echo "--solo acepta: claude, pi o codex" >&2; exit 1 ;;
       esac
       ;;
-    --proyecto)
+    --proyecto | --project)
       shift
       PROYECTO="${1:-}"
       [ -d "$PROYECTO" ] || { echo "--proyecto necesita una carpeta que exista" >&2; exit 1; }
       PROYECTO="$(cd "$PROYECTO" && pwd)"
       ;;
-    --agente)
+    --agente | --agent)
       shift
       AGENTE="${1:-}"
       AGENTE_DADO=1
       ;;
-    --skills-proyecto) SKILLS_PROYECTO=1 ;;
+    --skills-proyecto | --project-skills) SKILLS_PROYECTO=1 ;;
     -h | --help) mostrar_ayuda; exit 0 ;;
     *) echo "Opción desconocida: $1" >&2; exit 1 ;;
   esac

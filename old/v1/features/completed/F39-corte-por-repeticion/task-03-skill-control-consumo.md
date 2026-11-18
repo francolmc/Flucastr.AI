@@ -1,6 +1,9 @@
 # task-03 — `control-consumo`: usar `--firma` y no ofrecer «A» ante una repetición
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Pone en `skills/control-consumo/SKILL.md` el contrato del corte por repetición: tras un rechazo del validador con `Firma:`, el coordinador pasa esa firma a `--presupuesto`; con `estado=repetido` escala con solo C y D y guarda la firma en `STATUS.md`. El skill está en 3832 de 4096 bytes; el cambio es mínimo para caber.
 
@@ -27,7 +30,7 @@ Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: texto del skill y 3 pruebas de contrato.
-Fuera de alcance: `agentes/coordinador.md`, scripts, `definitions/WORKFLOW.md` (lo edita Franco), cambiar letras A-D existentes, recortar otros ítems.
+Fuera de alcance: `agentes/coordinador.md`, scripts, `definitions/WORKFLOW.md` (lo edita la persona usuaria), cambiar letras A-D existentes, recortar otros ítems.
 
 ## Pasos
 1. Corre `git branch --show-current`.
@@ -76,7 +79,7 @@ exit 0
 ```
 
 ## Notas
-Replanteo (planificador, 2026-11-05): el intento previo con el alcance amplio llegó a 4254 B y se bloqueó; Franco eligió la opción B (reducir alcance, sin subir el tope). Task-04 a task-06 no dependen de lo que queda fuera: solo exigen que la Escalación diga «se repite» y ofrezca únicamente C y D.
+Replanteo (planificador, 2026-11-05): el intento previo con el alcance amplio llegó a 4254 B y se bloqueó; la persona usuaria eligió la opción B (reducir alcance, sin subir el tope). Task-04 a task-06 no dependen de lo que queda fuera: solo exigen que la Escalación diga «se repite» y ofrezca únicamente C y D.
 
 Ejecución (constructor, 2026-11-05): aplicados los tres textos exactos. Ítem 3: frase de `--firma` tras «no un fallo.». Ítem 7: `[; firma=<d>]` al final de la línea `Presupuesto:`. Ítem 11 nuevo al final. `SKILL.md` queda en 4070 B (tope 4096), sin recortar otros ítems. Pruebas añadidas en `control-consumo-letras.test.mjs`: `--firma` en el ítem 3, ítem 11 con `repetido`/`esta causa se repite`/`C)`/`D)`/`solo`, y tope de 4096 B. Huecos menores: 0.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

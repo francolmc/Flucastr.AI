@@ -1,5 +1,7 @@
 # Hook del validador — claude-code
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Modelo: claude-sonnet-5-5
 Veredicto: FALLA
 
@@ -37,8 +39,8 @@ subagente no corrigió el bloque.
 
 Mensaje del hook:
 ```
-PostToolUse:Write hook blocking error from command: "node ~/.flucastr-ai/validar-tarea.mjs --hook": [node ~/.flucastr-ai/validar-tarea.mjs --hook]: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/subagente/features/F99-demo/task-01-x.md: Hay un bloque de código abierto en línea 32, en «## Evidencia» (la escribe el constructor): falta la cerca de cierre.
-Firma: bloque-abierto|/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/subagente/features/F99-demo/task-01-x.md|7e8eb467ab13
+PostToolUse:Write hook blocking error from command: "node ~/.flucastr-ai/validar-tarea.mjs --hook": [node ~/.flucastr-ai/validar-tarea.mjs --hook]: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/subagente/features/F99-demo/task-01-x.md: Hay un bloque de código abierto en línea 32, en «## Evidencia» (la escribe el constructor): falta la cerca de cierre.
+Firma: bloque-abierto|/Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/subagente/features/F99-demo/task-01-x.md|7e8eb467ab13
 ```
 ````
 

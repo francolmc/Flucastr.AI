@@ -1,6 +1,9 @@
 # task-02 — Prueba de la línea de identidad en `resolver-agentes.test.mjs`
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Ajustar y ampliar `pruebas/comprobaciones/resolver-agentes.test.mjs` para la línea de identidad de task-01: las dos pruebas que comparan Pi con Claude Code «salvo `model:`» deben ignorar también la línea `Herramienta:` (difiere por herramienta), y tres pruebas nuevas, sin modelo, la exigen en `agente-claude`, `agente-pi` y `cuerpo`, con control negativo.
 
@@ -39,7 +42,7 @@ Fuera de alcance: `scripts/resolver.mjs` (task-01), `pruebas/rapida.sh`, otros c
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/resolver-agentes.test.mjs
 git status --short pruebas/
 bash pruebas/rapida.sh | tail -1
@@ -91,7 +94,7 @@ Control del paso 4 (en copia en el directorio temporal de la sesión, no en el r
 ✖ (10) control negativo: sin filtrar Herramienta: las salidas de Pi y Claude Code difieren
 ```
 
-Verificación de `pruebas/rapida.sh` con el HOME real (`HOME=/Users/franco`), salida completa guardada en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-salida.txt`. Comando: `bash pruebas/rapida.sh`
+Verificación de `pruebas/rapida.sh` con el HOME real (`HOME=/Users/persona`), salida completa guardada en `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-salida.txt`. Comando: `bash pruebas/rapida.sh`
 ```
 ℹ tests 227
 ℹ pass 227
@@ -111,7 +114,7 @@ Criterios de aceptación:
 - Hueco menor 1: la tarea pedía que la prueba (7) derive el modelo sin `FLUCASTR_MODELOS`, pero el helper `resolver(...)` hereda el entorno. Se añadió el helper `resolverEn(raiz, ...args)`, que quita `FLUCASTR_MODELOS` y ejecuta el `resolver.mjs` de la raíz indicada (en la prueba (7), la copia instalada). Decisión conservadora, sin cambiar los llamadores de `resolver(...)`.
 - `sinLineaModelo` conserva su nombre (lo usan (3) y (6)); solo cambia el filtro y el comentario.
 - Las pruebas (8) y (9) derivan el modelo con `resolver('modelo', nombre, herramienta)`, no lo fijan a mano; la (10) usa un filtro local de `model:` para que el control negativo no dependa del filtro nuevo.
-- Control del paso 4 hecho en copia en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/control-herramienta`, no en el repo. La copia queda en el scratchpad.
+- Control del paso 4 hecho en copia en `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/control-herramienta`, no en el repo. La copia queda en el scratchpad.
 - No se reinstaló nada en `~/.claude` ni `~/.pi`; la prueba (7) instala solo en un HOME temporal. No se tocó `rapida.sh`, `scripts/resolver.mjs`, `STATUS.md` ni otras tareas. Sin commit, push, PR, merge ni despliegue.
-- Franco debe revisar la *Evidencia* de esta tarea; `hecha` lo decide él.
+- la persona usuaria debe revisar la *Evidencia* de esta tarea; `hecha` lo decide él.
 Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

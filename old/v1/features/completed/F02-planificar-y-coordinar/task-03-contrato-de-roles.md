@@ -44,7 +44,7 @@ Fuera de alcance: modificar agentes, skills, `modelos.json`, `rapida.sh`, `insta
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/contrato-roles.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node --input-type=module -e 'import fs from "node:fs"; import {validarRoles} from "./pruebas/comprobaciones/contrato-roles.mjs"; const L=d=>Object.fromEntries(fs.readdirSync(d).filter(f=>f.endsWith(".md")).map(f=>[f.slice(0,-3),fs.readFileSync(d+"/"+f,"utf8")])); const S=Object.fromEntries(fs.readdirSync("skills").map(n=>[n,fs.readFileSync("skills/"+n+"/SKILL.md","utf8")])); const A=L("agentes"); A.coordinador=A.coordinador.split("\n").filter(l=>!(l.startsWith("|")&&l.includes("bloqueada"))).join("\n"); console.log(validarRoles({agentes:A,skills:S,modelos:JSON.parse(fs.readFileSync("modelos.json","utf8"))}).length>0?"RECHAZADO":"ACEPTADO")'
 bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ fail|rapida:)"

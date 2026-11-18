@@ -1,6 +1,9 @@
 # task-08 — Mover comandos, archivo, cierre y respaldo del coordinador a su skill
 repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Con `comandos-coordinador` creada (task-07), el `coordinador` deja de llevar sus comandos de `scripts/`, el aviso de archivo, el texto largo del cierre de feature y el respaldo sin subagentes (~3,5 KB). Queda una sección de activación y una fila de tabla más corta. Las frases de los avisos pasan en el manifiesto al módulo. La seguridad no depende del texto movido: el límite real sigue en `tools:` (`Bash(...)` en Claude Code).
 
@@ -12,8 +15,8 @@ Con `comandos-coordinador` creada (task-07), el `coordinador` deja de llevar sus
 - Lee solo las *Notas* de task-07.
 
 ## Decisiones ya tomadas
-- Las tres secciones borradas se reemplazan por una sola: `## Comandos, archivo y cierre`, con un párrafo de 4 líneas como máximo: carga `comandos-coordinador` cuando Franco pida un comando de `scripts/`, antes de delegar `descomponer-feature` (aviso de archivo), al cerrar una feature y cuando la herramienta no permita lanzar subagentes. No repite las frases del manifiesto movidas.
-- La fila «Todas las tareas de la feature» queda con una sola frase de paso: carga `comandos-coordinador` para el cierre de la feature; pide a Franco confirmar `hecha`; con su aprobación escribe `hecha` en `BACKLOG.md` y delega `descomponer-feature` para mover la marca `→`. Debe conservar `hecha` entre comillas invertidas (la regla 7 exige los seis estados en la tabla).
+- Las tres secciones borradas se reemplazan por una sola: `## Comandos, archivo y cierre`, con un párrafo de 4 líneas como máximo: carga `comandos-coordinador` cuando la persona usuaria pida un comando de `scripts/`, antes de delegar `descomponer-feature` (aviso de archivo), al cerrar una feature y cuando la herramienta no permita lanzar subagentes. No repite las frases del manifiesto movidas.
+- La fila «Todas las tareas de la feature» queda con una sola frase de paso: carga `comandos-coordinador` para el cierre de la feature; pide a la persona usuaria confirmar `hecha`; con su aprobación escribe `hecha` en `BACKLOG.md` y delega `descomponer-feature` para mover la marca `→`. Debe conservar `hecha` entre comillas invertidas (la regla 7 exige los seis estados en la tabla).
 - Manifiesto: las cuatro frases listadas pasan a la clave `skills/comandos-coordinador`.
 - Tope de criterio (sin tocar `topes-bytes.test.mjs`): `coordinador.md` de 9800 B o menos.
 

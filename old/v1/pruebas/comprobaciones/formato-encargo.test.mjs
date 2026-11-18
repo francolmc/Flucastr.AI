@@ -18,6 +18,10 @@ test('parsearDisparo reconoce las cuatro formas válidas', () => {
   assert.deepEqual(parsearDisparo('Disparó: reintento'), { origen: 'reintento' });
 });
 
+test('parsearDisparo admite el alias genérico y conserva el resultado histórico', () => {
+  assert.deepEqual(parsearDisparo('Disparó: usuario'), { origen: 'franco' });
+});
+
 test('parsearDisparo da null con formas inválidas', () => {
   assert.equal(parsearDisparo('Disparó: puerta 5'), null);
   assert.equal(parsearDisparo('Disparó: BLOQUEO task-5'), null);

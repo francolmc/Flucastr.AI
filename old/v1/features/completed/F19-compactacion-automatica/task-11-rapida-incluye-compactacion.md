@@ -32,7 +32,7 @@ Fuera de alcance: el valor del tope, otras pruebas, `pruebas/README.md` (task-16
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -1 "$R"
 grep -n "compactacion.test.mjs" pruebas/rapida.sh
 for i in 1 2 3; do R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -1 "$R"; done

@@ -1,6 +1,9 @@
 # task-14 — Recortar agentes/arquitecto.md a 3584 bytes
 repo: Flucastr.AI   depende_de: task-13   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 El `arquitecto` mide 4195 B. Sus seis principios y la tabla de skills admiten redacción más corta, y el detalle ya vive en `definir-proyecto`, `revisar-proyecto-existente`, `disenar-arquitectura` y `generar-clonar`. Esta tarea lo lleva a 3584 B sin quitar las frases de una sola pasada ni de lectura acotada, y baja su tope en la prueba de bytes. Es la última tarea de F28 que se puede construir sin tocar `definitions/`.
 
@@ -22,7 +25,7 @@ Ninguna
 
 ## Alcance / Fuera de alcance
 Alcance: un agente y una constante de prueba.
-Fuera de alcance: las skills del `arquitecto`, los otros agentes, la medición con `consumo.mjs` (la hace Franco) y todo lo de `definitions/`.
+Fuera de alcance: las skills del `arquitecto`, los otros agentes, la medición con `consumo.mjs` (la hace la persona usuaria) y todo lo de `definitions/`.
 
 ## Pasos
 1. Recorta `agentes/arquitecto.md` por secciones, midiendo con `wc -c`.
@@ -40,7 +43,7 @@ Fuera de alcance: las skills del `arquitecto`, los otros agentes, la medición c
 ```
 test $(wc -c < agentes/arquitecto.md) -le 3584 && echo "ok-arquitecto"; echo "exit $?"
 node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/topes-bytes.test.mjs 2>&1 | grep -E '^ℹ fail'; echo "exit $?"
-grep -c -e 'Una sola pasada por puerta' -e 'Otra ronda solo si Franco la pide' -e 'Tope de tamaño: 12288 bytes' agentes/arquitecto.md; echo "exit $?"
+grep -c -e 'Una sola pasada por puerta' -e 'Otra ronda solo si Persona la pide' -e 'Tope de tamaño: 12288 bytes' agentes/arquitecto.md; echo "exit $?"
 bash pruebas/rapida.sh 2>&1 | grep -E '^ℹ fail'; echo "exit $?"
 ```
 Esperado: `ok-arquitecto`, `ℹ fail 0`, un conteo con `exit 0` y `ℹ fail 7`.
@@ -62,7 +65,7 @@ exit 0
 ```
 
 ```
-$ grep -c -e 'Una sola pasada por puerta' -e 'Otra ronda solo si Franco la pide' -e 'Tope de tamaño: 12288 bytes' agentes/arquitecto.md; echo "exit $?"
+$ grep -c -e 'Una sola pasada por puerta' -e 'Otra ronda solo si Persona la pide' -e 'Tope de tamaño: 12288 bytes' agentes/arquitecto.md; echo "exit $?"
 2
 exit 0
 exit 0

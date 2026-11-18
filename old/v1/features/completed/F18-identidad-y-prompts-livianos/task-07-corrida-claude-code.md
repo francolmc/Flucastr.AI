@@ -1,6 +1,9 @@
 # task-07 — Corrida real mínima en Claude Code de la línea de identidad
 repo: Flucastr.AI   depende_de: task-01, task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Comprobar con modelo, en Claude Code, que el `coordinador` instalado conoce su identidad: al preguntarle, responde la línea «Herramienta: Claude Code | Modelo: <id> | Agente: coordinador» que `resolver.mjs agente-claude` fijó al instalar. Una sola corrida, con tope de costo explícito, en el fixture del coordinador. El resultado queda en `pruebas/resultados/2026-10-31-identidad-claude.md`.
 
@@ -10,19 +13,19 @@ Comprobar con modelo, en Claude Code, que el `coordinador` instalado conoce su i
 - Leído `pruebas/comprobaciones/registro.mjs`: `analyzeRecordFile(archivo, 'claude-code')` devuelve `{ model, finalText, … }`.
 - Formato de informe a imitar: `pruebas/resultados/2026-10-30-coordinador-claude.md`.
 - La línea esperada se deriva, no se escribe a mano: `Herramienta: Claude Code | Modelo: $(node scripts/resolver.mjs modelo coordinador claude-code) | Agente: coordinador`.
-- Corrida con modelo solo porque Franco la pidió para F18 (`BACKLOG.md`, «Alcance de F18»).
+- Corrida con modelo solo porque la persona usuaria la pidió para F18 (`BACKLOG.md`, «Alcance de F18»).
 
 ## Decisiones ya tomadas
-- **Precondición: Franco corrió `bash instalar.sh`** después de aprobar y construir task-01 a task-06 (reinstala los agentes generados con la línea de identidad y sin la línea de `modelos.json`). Se comprueba sin gastar modelo: `node scripts/resolver.mjs agente-claude agentes/coordinador.md | diff - ~/.claude/agents/coordinador.md` debe terminar sin diferencias (exit 0). Si falla: `BLOQUEO: rol=arquitecto; motivo=agente instalado de Claude Code desactualizado (Franco debe correr bash instalar.sh)` y no se gasta modelo.
+- **Precondición: la persona usuaria corrió `bash instalar.sh`** después de aprobar y construir task-01 a task-06 (reinstala los agentes generados con la línea de identidad y sin la línea de `modelos.json`). Se comprueba sin gastar modelo: `node scripts/resolver.mjs agente-claude agentes/coordinador.md | diff - ~/.claude/agents/coordinador.md` debe terminar sin diferencias (exit 0). Si falla: `BLOQUEO: rol=arquitecto; motivo=agente instalado de Claude Code desactualizado (Franco debe correr bash instalar.sh)` y no se gasta modelo.
 - Prompt literal: «Responde solo con tu línea de identidad: la primera línea de tus instrucciones, la que empieza con «Herramienta:». No leas archivos, no uses herramientas y no delegues a ningún subagente.»
 - Éxito: la última línea no vacía del texto final es exactamente la línea esperada. Cualquier otra cosa es FALLA, no se reintenta.
 - **Tope de costo: máximo 1 corrida con modelo** (una segunda solo si la primera no produjo respuesta final por causa de infraestructura, no por no cumplir). Sin `--max-budget-usd` porque el lanzador no lo admite; el tope es una corrida, un prompt de una respuesta corta y la prohibición de herramientas y subagentes. No se edita el lanzador.
 - Prohibido leer `.env` del fixture; el canario no debe aparecer en el informe (se comprueba con `grep -c`). El registro `FLUCASTR_RECORD_FILE` va a un directorio temporal fuera del repo y no se publica.
-- El informe declara: la línea fija el modelo **al instalar** (si Franco lanza con otro `--model`, la línea queda desactualizada; en Claude Code el modelo real también figura en el contexto de sistema), el modelo que reporta el registro y si coincide con la línea.
+- El informe declara: la línea fija el modelo **al instalar** (si la persona usuaria lanza con otro `--model`, la línea queda desactualizada; en Claude Code el modelo real también figura en el contexto de sistema), el modelo que reporta el registro y si coincide con la línea.
 
 ## Alcance / Fuera de alcance
 Alcance: la corrida y el informe `pruebas/resultados/2026-10-31-identidad-claude.md` (único archivo escrito en el repo).
-Fuera de alcance: reinstalar agentes (lo hace Franco), editar lanzadores, fixtures o comprobadores, probar Pi (task-08), probar yolo, cambiar `STATUS.md`.
+Fuera de alcance: reinstalar agentes (lo hace la persona usuaria), editar lanzadores, fixtures o comprobadores, probar Pi (task-08), probar yolo, cambiar `STATUS.md`.
 
 ## Pasos
 1. Comprobar la precondición con el `diff` indicado. Resultado: exit 0 (si no, `BLOQUEO` y detenerse).
@@ -39,7 +42,7 @@ Fuera de alcance: reinstalar agentes (lo hace Franco), editar lanzadores, fixtur
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node scripts/resolver.mjs agente-claude agentes/coordinador.md | diff - ~/.claude/agents/coordinador.md; echo "diff exit=$?"
 node -e "import('./pruebas/comprobaciones/registro.mjs').then(m=>{const t=m.analyzeRecordFile(process.argv[1],'claude-code').finalText.trim().split(/\\n/).filter(Boolean);console.log(t.at(-1))})" <ruta del registro>
 node scripts/resolver.mjs modelo coordinador claude-code
@@ -88,7 +91,7 @@ $ git status --short pruebas/resultados/
 ```
 El único archivo nuevo de esta tarea es `pruebas/resultados/2026-10-31-identidad-claude.md`. Los demás `??` ya estaban antes de empezar.
 
-Suite rápida con HOME real (`HOME=/Users/franco`), salida final real:
+Suite rápida con HOME real (`HOME=/Users/persona`), salida final real:
 ```
 rapida: 23 archivos en 14 s (tope 30 s)
 rapida exit=0

@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 128 — Anonimizar skills/diagnosticar/SKILL.md
 
 ## Pasos
@@ -16,5 +18,5 @@ Verificación del tramo: `./verify` — nivel 3; además la comprobación espec�
 Handoff: registrar archivos, diff, comandos y resultados; detenerse para revisión.
 
 ## Evidencia
-- Paso 1: las 2 menciones de `Franco` por copia, señaladas en `anonimizacion.md`, se sustituyeron por «la persona usuaria» en la descripción y la regla de activación. `cmp -s` y `node tools/verify/core-compatibility.mjs` pasaron; `node --test tools/verify/core-compatibility.test.mjs`: 6/6 pasaron. La búsqueda final de `Franco` no halló coincidencias (código 1 esperado, envuelto para afirmar ausencia). Se conserva que diagnosticar solo se ejecuta a pedido, en modo lectura.
+- Paso 1: las 2 menciones de `Persona` por copia, señaladas en `anonimizacion.md`, se sustituyeron por «la persona usuaria» en la descripción y la regla de activación. `cmp -s` y `node tools/verify/core-compatibility.mjs` pasaron; `node --test tools/verify/core-compatibility.test.mjs`: 6/6 pasaron. La búsqueda final de `Persona` no halló coincidencias (código 1 esperado, envuelto para afirmar ausencia). Se conserva que diagnosticar solo se ejecuta a pedido, en modo lectura.
 - Paso 2: `$ timeout 95 bash cambios/estructura-repo/reproducir-linea-base.sh` terminó con código 0 en 44,8 s. El `./verify` aislado coincide con la línea base salvo el mensaje exacto aprobado del escenario 9; las simulaciones repetibles de `bash ./instalar.sh --simular` coinciden con la referencia, con solo esa excepción. No se accedió a proyectos reales, secretos ni áreas excluidas.

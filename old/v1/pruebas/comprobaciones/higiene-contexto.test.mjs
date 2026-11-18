@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
+const LEGACY = path.join(RAIZ, 'legacy/v1');
 
 // Roles cuyo texto no puede conservar la línea sobre modelos.json (task-03).
 const ROLES = ['arquitecto', 'planificador', 'constructor', 'coordinador'];
@@ -59,10 +60,10 @@ const leer = (ruta) => fs.readFileSync(path.join(RAIZ, ruta), 'utf8');
 
 function cargarReales() {
   const agentes = {};
-  for (const rol of ROLES) agentes[rol] = leer(`agentes/${rol}.md`);
+  for (const rol of ROLES) agentes[rol] = fs.readFileSync(path.join(LEGACY, `agentes/${rol}.md`), 'utf8');
   return {
     agentes,
-    skills: leer('skills/ejecutar-tarea/SKILL.md'),
+    skills: fs.readFileSync(path.join(LEGACY, 'skills/ejecutar-tarea/SKILL.md'), 'utf8'),
     workflow: leer('definitions/WORKFLOW.md'),
   };
 }

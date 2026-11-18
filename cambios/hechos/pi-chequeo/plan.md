@@ -4,6 +4,8 @@ rama: feature/kit-v2
 ---
 # pi-chequeo
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 `./verify` falla si el constructor generado para Pi o para Claude Code pierde `skills: ejecutar-plan`; los documentos reflejan que Pi ya se probó en lo básico.
 
@@ -67,4 +69,4 @@ exit 0
 - Decisión menor: `tiene_skills` se llama solo para el agente `constructor` (el alcance pide esa comprobación solo para él), e imprime `ok skills constructor <herramienta>`. La prueba negativa corre en una subshell con temporal propio (`trap` lo borra al salir) y usa `grep -v '^skills:'` sobre una copia de `agentes/constructor.md`; no toca el archivo real.
 - Omisión mía: no cambié `estado` a `en curso` al empezar; lo dejé en `listo` al cerrar. Lo corrijo aquí para que el registro quede claro.
 - Hubo una sola corrida de `./verify` antes de documentar (la de Evidencia es la segunda); no hizo falta corregir nada.
-- `PENDIENTES.md` y `AGENTS.md` cambiaron según el plan. Ojo: el texto de `PENDIENTES.md` dice que hubo «una corrida real en Pi» porque así lo pide el plan; yo no corrí Pi en esta ejecución y no lo verifiqué. Conviene que Franco confirme esa corrida antes de dar el punto por cerrado.
+- `PENDIENTES.md` y `AGENTS.md` cambiaron según el plan. Ojo: el texto de `PENDIENTES.md` dice que hubo «una corrida real en Pi» porque así lo pide el plan; yo no corrí Pi en esta ejecución y no lo verifiqué. Conviene que la persona usuaria confirme esa corrida antes de dar el punto por cerrado.

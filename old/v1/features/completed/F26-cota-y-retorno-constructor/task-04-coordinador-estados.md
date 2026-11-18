@@ -1,8 +1,11 @@
 # task-04 — Coordinador: qué hace ante cada estado del constructor
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-El `coordinador` debe tratar `PARCIAL:` y llevar sus opciones cerradas a Franco sin reabrir al `arquitecto`. En modo normal es una pregunta a Franco (como `DECISION:`); en yolo equivale a `bloqueada` y el modo se detiene. El archivo está al límite de tamaño: hay que recortar redacción.
+El `coordinador` debe tratar `PARCIAL:` y llevar sus opciones cerradas a la persona usuaria sin reabrir al `arquitecto`. En modo normal es una pregunta a la persona usuaria (como `DECISION:`); en yolo equivale a `bloqueada` y el modo se detiene. El archivo está al límite de tamaño: hay que recortar redacción.
 
 ## Contexto
 - Tocar: `agentes/coordinador.md`, `pruebas/comprobaciones/contrato-roles.mjs`, `pruebas/comprobaciones/contrato-roles.test.mjs`
@@ -11,7 +14,7 @@ El `coordinador` debe tratar `PARCIAL:` y llevar sus opciones cerradas a Franco 
 - Formato `PARCIAL:` en `skills/ejecutar-tarea/SKILL.md` «Retorno» (task-02); leer solo las *Notas* de task-03.
 
 ## Decisiones ya tomadas
-- Fila de la línea 44: pasa a cubrir `DECISION: …` y `PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>`. Mismo tratamiento: registra en «Espera a Franco», pregunta a Franco, te detienes, no reabres al `arquitecto`. Con `PARCIAL:` la tarea queda `bloqueada` y la respuesta de Franco la devuelve a `aprobada` antes de delegar con `Decisión de Franco:`.
+- Fila de la línea 44: pasa a cubrir `DECISION: …` y `PARCIAL: tarea=task-NN; hecho=<n>; falta=<n>`. Mismo tratamiento: registra en «Espera a Franco», pregunta a la persona usuaria, te detienes, no reabres al `arquitecto`. Con `PARCIAL:` la tarea queda `bloqueada` y la respuesta de la persona usuaria la devuelve a `aprobada` antes de delegar con `Decisión de Franco:`.
 - Yolo: regla 5 añade `PARCIAL:` a las escalaciones; regla 6 pasa a `Si el constructor respondió BLOQUEO: o PARCIAL:, o la causa fue verificacion_x2, la tarea queda bloqueada y el modo se detiene.` (más corta que hoy). `BLOQUEO:` con `causa=verificacion_x2` sigue la regla de `BLOQUEO:` existente.
 - Línea `Devuelve:` añade `PARCIAL:`.
 - Recorte obligatorio: quitar la frase del paso 2 citada arriba y cualquier otra redacción redundante hasta quedar ≤ 17900 bytes. No tocar `tools:` ni las 11 frases de F21.

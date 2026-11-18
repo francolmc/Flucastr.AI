@@ -14,7 +14,7 @@ Entrada: `definitions/REPOS.md`.
 - Recibe la carpeta destino como primer argumento; si no se da, usa la carpeta actual.
 - Clona un repo solo si su carpeta no existe, y nunca pisa nada.
 - Imprime qué clonó y qué omitió.
-- **No lo ejecutes.** Puedes validar la sintaxis con `bash -n`; clonar lo hace Franco.
+- **No lo ejecutes.** Puedes validar la sintaxis con `bash -n`; clonar lo hace la persona usuaria.
 
 ## Esqueleto
 

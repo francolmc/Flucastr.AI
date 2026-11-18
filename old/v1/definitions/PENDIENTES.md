@@ -1,9 +1,11 @@
-# Pendientes de largo plazo de Franco
+# Pendientes de largo plazo de la persona usuaria
 
-> Lista de Franco. Ningún agente la lee salvo pedido explícito de Franco: no entra en «se lee siempre» (`WORKFLOW.md` §10.4) y el `coordinador` la ignora. Movida desde `STATUS.md` el 2026-10-31 (puerta 1 de `CONTEXTO.md`), textualmente.
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
+> Lista de la persona usuaria. Ningún agente la lee salvo pedido explícito de la persona usuaria: no entra en «se lee siempre» (`WORKFLOW.md` §10.4) y el `coordinador` la ignora. Movida desde `STATUS.md` el 2026-10-31 (puerta 1 de `CONTEXTO.md`), textualmente.
 
 - **Comprobación pendiente en el PC de trabajo (F17):** que Pi lea las skills desde `<proyecto>/.pi/skills/` (con `/trust`). En `testskills` ya funciona. El README aún dice «Pendiente de comprobar en el PC de trabajo».
-- **Antes de publicar el repo (tuyo):** gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Don Financio, Andes), `.gitignore`; activar 2FA y proteger `main`; aclarar los commits «intrusión». Si aparece algo: rotar la credencial primero. (El repo ya es público: revísalo cuanto antes.)
+- **Antes de publicar el repo (tuyo):** gitleaks/trufflehog sobre todo el historial y ramas; revisar `pruebas/resultados/`, correos de autor y nombres de productos o clientes (Proyecto.Finanzas, Proyecto.Servicios), `.gitignore`; activar 2FA y proteger `main`; aclarar los commits «intrusión». Si aparece algo: rotar la credencial primero. (El repo ya es público: revísalo cuanto antes.)
 - **Comprobación manual de F09 (tuya):** la descarga desde `raw` ya funciona. Falta en el PC de trabajo: `claude --agent arquitecto` / `pi-arquitecto`, `--estado` y `--actualizar`; que `modelos.json` quede igual y que la red deje pasar `api.github.com` y `codeload.github.com` (guía en `README.md`).
 - **Decisión sobre Codex:** el sondeo (`pruebas/resultados/2026-10-31-sondeo-codex.md`) recomienda soporte parcial en dos fases con un spike. Si se abre, pasa por el backlog (puerta 2) y el diseño del arquitecto (puerta 1); respeta el contrato de herramientas nuevas de `ARCHITECTURE.md` («Higiene de contexto»).
 - **Observación de consumo en Pi (en espera de datos):** (El análisis se hizo el 2026-10-31 y originó `CONTEXTO.md`.) si repites una sesión parecida, anota tu mensaje, la respuesta previa del coordinador y qué subagente se lanzó; si delegó sin escalar, abrimos una tarea para reforzar `agentes/coordinador.md`.

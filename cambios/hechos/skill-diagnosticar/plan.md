@@ -8,6 +8,8 @@ tipo: codigo
 ---
 # Skill `diagnosticar` (script de solo lectura) y retiro de `docs/mejoras.md`
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Que el principal, a pedido, corra `skills/diagnosticar/diagnosticar.mjs` en el proyecto donde está y responda en la conversación: qué capacidades faltan, cuánto cuesta hoy (con evidencia) y una sola mejora. Sin escribir archivos en el proyecto. Se retira lo que escribía `docs/mejoras.md`.
 
@@ -64,7 +66,7 @@ No toca: `verify`, `instalar.sh`, `nucleo/`, `pruebas/`, `docs/`, `scripts/`, lo
 
 ## Evidencia
 $ ./verify
-(extracto real de la salida; el log completo está en /tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/a842dec1-7b9d-422e-bc07-f171156179c8/scratchpad/verify1.log)
+(extracto real de la salida; el log completo está en /tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/a842dec1-7b9d-422e-bc07-f171156179c8/scratchpad/verify1.log)
 == 4. skills con SKILL.md, name y description ==
 ok definir-proyecto
 ok diagnosticar
@@ -127,7 +129,7 @@ exit 0
 - `--json`: un objeto por línea, con `tipo` (`capacidad`, `resultado`, `aceptacion`, `receta`, `aviso`, `error`). Así cabe también lo que no es una capacidad.
 - Huella: si la carpeta no es la raíz de su repo (el juguete está dentro del kit), queda `no disponible`; no se usa el `git status` del repo padre. Git se lee con `GIT_OPTIONAL_LOCKS=0`.
 - Verificado con copias temporales: huella `vigente` igual a `{ git status --porcelain; git diff HEAD; } | sha256sum | cut -c1-12` de la shell; `obsoleta` al cambiar el estado del repo; `no disponible` sin git.
-- Observación para Franco (no cambié el contrato): `resultado.json` entra en `git status` mientras sea untracked y no esté en `.gitignore`. Si aparece después de calcular la huella, la vuelve `obsoleta`. Conviene que el proyecto lo ignore o que se escriba antes de calcular la huella.
+- Observación para la persona usuaria (no cambié el contrato): `resultado.json` entra en `git status` mientras sea untracked y no esté en `.gitignore`. Si aparece después de calcular la huella, la vuelve `obsoleta`. Conviene que el proyecto lo ignore o que se escriba antes de calcular la huella.
 - `README.md` línea 98: «las seis skills» pasó a «las siete skills» (consecuencia de la skill nueva; `README.md` estaba en *Alcance*).
 - Se quitó en `agentes/principal.md`, *Cómo trabajas*, paso 1, la frase sobre `docs/mejoras.md`. No estaba en la lista del paso 5, pero el grep del paso 5 y A1 la exigen fuera.
 - `skills/diagnosticar/SKILL.md` no menciona `docs/mejoras.md` (A1 lo prohíbe en `skills/`).

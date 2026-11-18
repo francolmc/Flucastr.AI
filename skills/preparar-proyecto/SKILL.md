@@ -1,15 +1,15 @@
 ---
 name: preparar-proyecto
-description: "Deja un proyecto listo para trabajar con el kit: un `AGENTS.md` corto y un comando `verify` que prueba desde cero que todo funciona junto (build limpio, arranque y recorrido real). Úsala si falta `AGENTS.md` o `verify`."
+description: "Prepare a project for the kit with a short `AGENTS.md` and a `verify` command that checks the full system from scratch (clean build, startup, and a real user journey). Use when `AGENTS.md` or `verify` is missing."
 ---
 
-# Preparar un proyecto
+# Prepare a Project
 
-Dos entregables: `AGENTS.md` y `verify`. Sin ellos no hay forma fiable de saber si un cambio quedó bien.
+Two deliverables: `AGENTS.md` and `verify`. Without them, there is no reliable way to know whether a change works.
 
-## 1. AGENTS.md (máximo unas 40 líneas)
+## 1. AGENTS.md (about 40 lines maximum)
 
-Solo lo que un agente no puede deducir leyendo el código:
+Include only information an agent cannot infer by reading the code:
 
 ```markdown
 # <Proyecto>
@@ -33,96 +33,96 @@ Solo lo que un agente no puede deducir leyendo el código:
 - <Convenciones propias, solo las que no se deducen del código.>
 ```
 
-Las cuatro capacidades de verificación, una línea cada una (contrato completo en `nucleo/contrato/verificacion.md`):
+Declare each of the four verification capabilities on its own line (full contract in `core/contracts/verificacion.md`):
 
 - **Rápida** (`Comprobación rápida:`): segundos, en el host, sin servicios.
 - **Servicio** (`Servicio:`): la lógica contra dependencias reales, sin interfaz.
 - **Aceptación** (`Aceptación:`): un archivo por flujo, filtrable por nombre; resume todos los fallos al final.
 - **Evidencia** (`Evidencia:`): dónde escribe `resultado.json`.
 
-La que falte se cubre con `./verify`.
+Anything not covered above is covered by `./verify`.
 
-Si el proyecto ya existe, explóralo antes y no repitas lo que el código ya dice.
+If the project already exists, explore it first and do not repeat information already stated by the code.
 
 ## 2. verify
 
-Un único comando en la raíz (`./verify`) que **falla con código distinto de 0** en el primer escalón roto y no necesita nada de tu máquina:
+Create one command at the root (`./verify`) that **exits with a non-zero code** at the first failing stage and does not depend on anything from your machine:
 
-1. **Build limpio.** Instalación desde el lock del gestor del proyecto y build de las imágenes sin caché. `VERIFY_RAPIDO=1 ./verify` hace el build con caché para iterar; la corrida final de aceptación va siempre sin la variable. Detecta dependencias sin declarar y contextos de build incompletos.
-2. **Arranque real.** Un `docker compose` con todo el sistema: web, API, base de datos y un buzón de correo de prueba (Mailpit). Las migraciones corren al arrancar y se espera a que los servicios respondan.
-3. **Recorrido real.** El flujo clave de punta a punta, sin mocks de base de datos ni de correo.
-4. **Mismo camino que producción.** Los mismos Dockerfiles y las mismas variables de `.env.example`; solo cambian los valores.
+1. **Clean build.** Install from the project package manager's lockfile and build images without cache. `VERIFY_RAPIDO=1 ./verify` uses the build cache for iteration; the final acceptance run always omits this variable. Detect undeclared dependencies and incomplete build contexts.
+2. **Real startup.** Use `docker compose` for the complete system: web, API, database, and a test mailbox (Mailpit). Migrations run at startup, and wait for services to respond.
+3. **Real user journey.** Exercise the key end-to-end flow without database or email mocks.
+4. **Same path as production.** Use the same Dockerfiles and `.env.example` variables as production; only their values change.
 
-Contrato: `nucleo/contrato/verificacion.md`. Si existe `nucleo/recetas/<stack>.md` que coincide con el proyecto, léela; si no, sigue sin ella.
+Contract: `core/contracts/verificacion.md`. If a matching `core/recipes/<stack>.md` exists, read it; otherwise continue without one.
 
-Reglas de diseño:
+Design rules:
 
-- **Contexto de build = el repo entero** menos lo que excluya `.dockerignore`. Nunca una lista de archivos permitidos: cada olvido rompe el build.
-- Declara en el manifiesto de dependencias todo lo que el código importa directamente. Un paquete que solo llega como dependencia de otro funciona en tu máquina y falla en un build limpio.
-- Limpieza al final (`down -v`) y un proyecto de compose propio, para no pisar nada.
-- **Solo corre cuando alguien lo pide**, nunca como efecto lateral de planificar.
-- Imprime un encabezado por escalón y `VERIFY OK` al final.
+- **Build context = the entire repository**, minus files excluded by `.dockerignore`. Never use an allowlist of files: each omission can break the build.
+- Declare every directly imported package in the dependency manifest. A package available only through another dependency may work locally and fail in a clean build.
+- Clean up at the end (`down -v`) and use a dedicated Compose project to avoid interfering with other services.
+- **Run only when requested**, never as a side effect of planning.
+- Print a heading for each stage and `VERIFY OK` at the end.
 
-Hay un esqueleto para adaptar en `referencia.md`, junto a esta skill. Es un punto de partida: ajusta nombres, puertos y el recorrido a tu proyecto.
+An adaptable skeleton is provided in `referencia.md`, next to this skill. Treat it as a starting point: adjust names, ports, and the workflow to your project.
 
-## 3. Comprobar
+## 3. Verify
 
-Corre `./verify` en un clon limpio o con el árbol sin artefactos de build. Un `verify` que nunca falló no demuestra nada: rómpelo a propósito una vez (por ejemplo, quita una dependencia) y confirma que lo detecta.
+Run `./verify` in a clean clone or with a tree free of build artifacts. A `verify` command that has never failed proves nothing: deliberately break it once (for example, remove a dependency) and confirm that it detects the problem.
 
-## 3b. Modo remoto (entorno ya desplegado)
+## 3b. Remote mode (already deployed environment)
 
-`VERIFY_TARGET=<url> ./verify` no construye ni arranca nada (no llama a `docker`): corre solo `verify-flujo.sh` contra esa URL.
+`VERIFY_TARGET=<url> ./verify` does not build or start anything (it does not call `docker`): it only runs `verify-flujo.sh` against that URL.
 
-- `VERIFY_TARGET` debe empezar por `http://` o `https://`; si no, sale con error antes de hacer nada.
-- `API_URL` y `WEB_URL`, si ya están definidas, ganan; si no, toman el valor de `VERIFY_TARGET`.
-- Imprime siempre `MODO REMOTO: <url>`.
-- El recorrido se divide en «Lectura» (siempre) y «Escritura» (la que crea datos). Sin `VERIFY_PERMITIR_ESCRITURA=1`, la escritura se omite con un aviso `OMITIDO` y `verify` termina bien solo si la lectura pasó: `VERIFY OK (solo lectura)`.
-- Con `VERIFY_PERMITIR_ESCRITURA=1` corre también la escritura. Sus datos de prueba son correos `verify-<pid>@example.invalid` y cualquier nombre con prefijo `verify-`, para borrarlos después. `verify` no garantiza limpiar el entorno remoto.
-- Un recorrido declara si escribe con `# VERIFY_ESCRIBE: sí` o `no` en su primera línea. Si falta, se trata como `sí`.
-- El principal no corre `VERIFY_TARGET` contra producción. La comprobación posterior al despliegue la corre la persona usuaria.
+- `VERIFY_TARGET` must begin with `http://` or `https://`; otherwise, fail before doing anything.
+- Existing `API_URL` and `WEB_URL` values take precedence; otherwise, use `VERIFY_TARGET`.
+- Always print `MODO REMOTO: <url>`.
+- The journey has a “Lectura” (always) and “Escritura” (creates data) phase. Without `VERIFY_PERMITIR_ESCRITURA=1`, skip writes with an `OMITIDO` notice; `verify` succeeds only if reading passed: `VERIFY OK (solo lectura)`.
+- With `VERIFY_PERMITIR_ESCRITURA=1`, also run the write phase. Test data uses `verify-<pid>@example.invalid` email addresses and names prefixed with `verify-`, so they can be deleted later. `verify` does not guarantee cleanup of the remote environment.
+- The first line of a journey declares whether it writes: `# VERIFY_ESCRIBE: sí` or `no`. If absent, treat it as `sí`.
+- The principal does not run `VERIFY_TARGET` against production. The user runs the post-deployment check.
 
-## 4. Workspaces (carpeta que no es repo y contiene varios)
+## 4. Workspaces (a directory containing multiple repositories)
 
-Un workspace es una carpeta sin `.git` que contiene repos. Su raíz es la unidad de trabajo: `AGENTS.md`, `docs/proyecto.md`, `cambios/`, `verify`. Los planes listan en `repos:` las carpetas que tocan.
+A workspace is a directory without `.git` that contains repositories. Its root is the unit of work: `AGENTS.md`, `docs/proyecto.md`, `cambios/`, and `verify`. Plans list the affected folders in `repos:`.
 
-Detección (un hecho, no una decisión):
+Detection (a fact, not a decision):
 
 ```bash
 find . -maxdepth 2 -name .git -not -path './.git'
 ```
 
-- Si la raíz no tiene `.git` y hay hijos con `.git`, es un workspace y **pregunta a la persona usuaria** (opciones cerradas, la recomendada es «sí»): «¿Hacemos la raíz repo propio?». No ejecutes `git init` sin su respuesta.
-  - Sí: `git init` en la raíz y un `.gitignore` que liste cada hijo con `.git` como `/<carpeta>/`, más `.claude/settings.local.json`. No hagas commit.
-  - No: la raíz queda sin repo; el plan de los cambios de la raíz no recibe rama (ver `ejecutar-plan`, paso 2).
-- Si es un solo repo, nada de esto aplica: `repos: [.]` en los planes.
+- If the root has no `.git` and child folders do, this is a workspace and you **must ask the user** (closed choices, recommend “yes”). Do not run `git init` without their answer.
+  - Yes: run `git init` at the root and create a `.gitignore` listing each child with `.git` as `/<folder>/`, plus `.claude/settings.local.json`. Do not commit.
+  - No: the root remains outside a repository; root change plans do not get a branch (see `ejecutar-plan`, step 2).
+- If this is a single repository, none of this applies: use `repos: [.]` in plans.
 
-Flujo de un workspace existente (d):
+Workflow for an existing workspace (d):
 
-1. El principal escribe `AGENTS.md` de la raíz y `docs/proyecto.md` (qué es, repos y su rol, cómo se conectan, decisiones con su porqué).
-2. El principal enlaza los `AGENTS.md` de los hijos (y `specs/` si existen) sin reescribirlos ni moverlos.
-3. El constructor solo construye lo que falta: `verify` (que llama a cada repo por su ruta), `/health`, `.env.example`.
-4. `verify`, `cambios/` y los documentos van en la raíz.
+1. The principal writes the root `AGENTS.md` and `docs/proyecto.md` (what it is, the repositories and their roles, how they connect, and decisions with their rationale).
+2. The principal links to child `AGENTS.md` files (and `specs/`, if present) without rewriting or moving them.
+3. The constructor builds only what is missing: `verify` (which calls each repository by its path), `/health`, and `.env.example`.
+4. `verify`, `cambios/`, and the documents belong at the root.
 
-## 5. Sección «Despliegue» en docs/proyecto.md
+## 5. `Despliegue` section in docs/proyecto.md
 
-`docs/proyecto.md` lleva una sección `## Despliegue` con cinco líneas:
+`docs/proyecto.md` must have a `## Despliegue` section with five lines:
 
-1. Dónde se despliega (servicio, plataforma o host).
-2. Nombres de las variables requeridas, nunca sus valores (las de `.env.example`).
-3. Cómo se aplican las migraciones.
-4. Cómo se vuelve atrás.
-5. La comprobación posterior: `VERIFY_TARGET=<url> ./verify`.
+1. Where it is deployed (service, platform, or host).
+2. Required variable names, never their values (from `.env.example`).
+3. How migrations are applied.
+4. How to roll back.
+5. The post-deployment check: `VERIFY_TARGET=<url> ./verify`.
 
-Si el proyecto ya existe y no tiene la sección, agrégala. Cada punto que no se conoce se escribe como `pendiente`. No inventes valores.
+If the project already exists and lacks this section, add it. Write `pendiente` for each unknown item. Do not invent values.
 
-## 6. Revisión previa al despliegue
+## 6. Pre-deployment review
 
-Ante «prepárame el despliegue», el principal escribe `cambios/revision-despliegue/plan.md` en borrador, con `repos:` y solo lectura: la revisión no despliega ni toca producción. Los pasos del plan cubren:
+When asked to “prepare the deployment”, the principal writes `cambios/revision-despliegue/plan.md` as a draft, with `repos:` and read-only steps: the review does not deploy or touch production. Plan steps cover:
 
-- Variables de `.env.example` contra las que usa el código.
-- Migraciones pendientes.
-- Endpoints de salud (`/health` y la página principal).
-- Qué cubre `verify` y qué NO cubre: proveedores externos, OAuth y correo real.
-- La comprobación posterior con `VERIFY_TARGET`, que corre la persona usuaria.
+- Compare `.env.example` variables with those used by the code.
+- Check for pending migrations.
+- Check health endpoints (`/health` and the home page).
+- Record what `verify` covers and does NOT cover: external providers, OAuth, and real email.
+- Document the post-deployment `VERIFY_TARGET` check, which the user runs.
 
-El principal no despliega, no toca producción y no ejecuta `VERIFY_TARGET` contra producción.
+The principal does not deploy, touch production, or run `VERIFY_TARGET` against production.

@@ -1,11 +1,14 @@
 # task-02 — `instalar-remoto.sh`: descarga, verificación e instalación inicial
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Crea `instalar-remoto.sh`, el script que Franco ejecuta en el PC de trabajo sin clonar el repo: pregunta el sha de `main` a GitHub, descarga ese sha como `tar.gz`, lo verifica, lo deja en `~/.flucastr-ai/kit/` y corre `instalar.sh --copiar`. Escribe `~/.flucastr-ai/version` al final. Incluye `--estado`, `--mostrar-urls` y `--ref`. La actualización llega en task-03. Todo se prueba sin red con un origen local.
+Crea `instalar-remoto.sh`, el script que la persona usuaria ejecuta en el PC de trabajo sin clonar el repo: pregunta el sha de `main` a GitHub, descarga ese sha como `tar.gz`, lo verifica, lo deja en `~/.flucastr-ai/kit/` y corre `instalar.sh --copiar`. Escribe `~/.flucastr-ai/version` al final. Incluye `--estado`, `--mostrar-urls` y `--ref`. La actualización llega en task-03. Todo se prueba sin red con un origen local.
 
 ## Contexto
-Base: `definitions/ARCHITECTURE.md`, sección «Instalación sin clon desde GitHub» (descarga en dos pasos, verificación mínima, lista permitida de rutas, versión) y `definitions/PROJECT.md` («Pruebas de F09»). Supuestos (no confirmados por Franco, citados): `main` + sha como versión; actualización manual; comando largo; PC de trabajo con macOS/POSIX y `bash`, `node`, `curl`, `tar`. Su red y la política de la empresa son una comprobación manual de Franco, no de esta tarea.
+Base: `definitions/ARCHITECTURE.md`, sección «Instalación sin clon desde GitHub» (descarga en dos pasos, verificación mínima, lista permitida de rutas, versión) y `definitions/PROJECT.md` («Pruebas de F09»). Supuestos (no confirmados por la persona usuaria, citados): `main` + sha como versión; actualización manual; comando largo; PC de trabajo con macOS/POSIX y `bash`, `node`, `curl`, `tar`. Su red y la política de la empresa son una comprobación manual de la persona usuaria, no de esta tarea.
 Leídos en el repo: `instalar.sh` y `desinstalar.sh` tras task-01 (opciones `--copiar`, `--todo`; manifiesto con línea `modo`); `pruebas/capa1/instalacion.test.mjs` (patrón de entorno); `pruebas/rapida.sh` (lista de archivos, tope 30 s). Herramientas del equipo verificadas: bash 3.2 (sin arreglos asociativos), curl 8.7.1, bsdtar 3.5.3. Los comandos de esta tarea sobre archivos nuevos son «no ejecutado, inferido».
 A tocar: `instalar-remoto.sh` (nuevo), `pruebas/capa1/remoto.test.mjs` (nuevo), `pruebas/rapida.sh`.
 
@@ -110,8 +113,8 @@ Huecos menores resueltos (decisión entre paréntesis):
 - `instalar.sh` recibe `< /dev/null`, para que no lea del mismo stdin que `curl | bash` está usando para el script.
 - El control negativo de R4 se hace una vez (un paquete sano después de los tres peligrosos), no una por variante, para no sumar tiempo a `rapida.sh`.
 
-Lo que vi y no toqué (fuera de alcance; para Franco):
+Lo que vi y no toqué (fuera de alcance; para la persona usuaria):
 - `instalar.sh` (task-01) crea `~/.flucastr-ai/modelos.json` copiando el del paquete **antes** de validar los agentes. Si el paquete trae un `modelos.json` inválido, el personal queda roto y, como no se sobrescribe, una corrida posterior no lo repara. No lo probé: sale de leer el código. Conviene revisarlo en task-03 o antes.
-- `rapida.sh` queda con margen estrecho: 26 s, 28 s y 34 s en corridas distintas. Si Franco ve fallas por tiempo, la primera candidata a mover es esta prueba a un archivo propio fuera de `rapida.sh` (la tarea lo permite si no cabe).
+- `rapida.sh` queda con margen estrecho: 26 s, 28 s y 34 s en corridas distintas. Si la persona usuaria ve fallas por tiempo, la primera candidata a mover es esta prueba a un archivo propio fuera de `rapida.sh` (la tarea lo permite si no cabe).
 
 Señal: la tarea estaba incompleta. Faltaban: qué hacer si falla `instalar.sh` tras escribir el manifiesto (limpieza), validar `--ref`, y qué hacer con un `kit/` huérfano sin `version`.

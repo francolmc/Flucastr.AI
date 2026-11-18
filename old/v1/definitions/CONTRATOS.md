@@ -1,18 +1,20 @@
 # Contratos de entrega y prompts cortos (F28)
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 > Estado: borrador por aprobar (puerta 1). Fecha: 2026-11-02. Una sola pasada del `arquitecto`; sin código.
-> Origen: fila F28 de `BACKLOG.md` (*confirmado*), mediciones de Cleaner dadas por Franco (*confirmado*), lectura de `agentes/*.md`, `skills/ejecutar-tarea`, `skills/descomponer-feature`, `contrato-roles.mjs`, `formato-tarea.mjs` (*confirmado*). Lo marcado *inferido* o *supuesto* no se leyó.
+> Origen: fila F28 de `BACKLOG.md` (*confirmado*), mediciones de Cleaner dadas por la persona usuaria (*confirmado*), lectura de `agentes/*.md`, `skills/ejecutar-tarea`, `skills/descomponer-feature`, `contrato-roles.mjs`, `formato-tarea.mjs` (*confirmado*). Lo marcado *inferido* o *supuesto* no se leyó.
 
 ## 1. Idea
 
-Cada traspaso se comprueba con algo que ya existe o que un script puede comprobar; el `coordinador` solo reacciona a la primera línea de la respuesta. Los prompts se acortan moviendo lo que se usa pocas veces a módulos que se leen al activarse. No se añade rol, formato de feature ni archivo de estado nuevo (*descartado por Franco*: `FEATURE.md`).
+Cada traspaso se comprueba con algo que ya existe o que un script puede comprobar; el `coordinador` solo reacciona a la primera línea de la respuesta. Los prompts se acortan moviendo lo que se usa pocas veces a módulos que se leen al activarse. No se añade rol, formato de feature ni archivo de estado nuevo (*descartado por la persona usuaria*: `FEATURE.md`).
 
 ## 2. Contrato por traspaso
 
 | Traspaso | El emisor DEBE entregar | El receptor puede asumir | Comprobación (existe = E; nueva = N) |
 |---|---|---|---|
-| `arquitecto` → Franco → `planificador` | Documentos en `borrador` con «Decisiones para Franco» (A/B/C + recomendada); «Tamaño de la pasada» ≤ 12288 | Tras la puerta 1, toda decisión de diseño que el planificador cite está cerrada y fechada | E: `crecimiento-definiciones.mjs`; E: frases de `FRASES_UNA_PASADA` |
-| `planificador` → Franco → `constructor` | Tareas `borrador` con las diez secciones, `- Tocar:` ≤3 rutas, «Decisiones abiertas» (`Ninguna` o con `Resuelta:`), ≤8 KB; en N: línea `- Fuente:` con la sección de `definitions/` de donde sale cada decisión | El constructor no decide nada de diseño; si algo falta, es `DECISION:` o `BLOQUEO:` | E: `validar-tarea.mjs` (exit 0); N: `Fuente:` apunta a un encabezado que existe (`grep`) |
+| `arquitecto` → la persona usuaria → `planificador` | Documentos en `borrador` con «Decisiones para Franco» (A/B/C + recomendada); «Tamaño de la pasada» ≤ 12288 | Tras la puerta 1, toda decisión de diseño que el planificador cite está cerrada y fechada | E: `crecimiento-definiciones.mjs`; E: frases de `FRASES_UNA_PASADA` |
+| `planificador` → la persona usuaria → `constructor` | Tareas `borrador` con las diez secciones, `- Tocar:` ≤3 rutas, «Decisiones abiertas» (`Ninguna` o con `Resuelta:`), ≤8 KB; en N: línea `- Fuente:` con la sección de `definitions/` de donde sale cada decisión | El constructor no decide nada de diseño; si algo falta, es `DECISION:` o `BLOQUEO:` | E: `validar-tarea.mjs` (exit 0); N: `Fuente:` apunta a un encabezado que existe (`grep`) |
 | `constructor` → `coordinador` | Una de cuatro primeras líneas: `DECISION:`, `PARCIAL:`, `BLOQUEO:` o tarea `lista para revisión` con `Registro:` | La evidencia ya pasó el script; no se relee la tarea para creerle | E: `validar-tarea.mjs --evidencia`; E: cota de 2 pasadas (`verificacion_x2`) |
 | `coordinador` → cualquier rol | Encargo con skill, `Lee:`, `No leas:`, `Devuelve:`, `Rama:`/`Modo yolo:` | El rol no pregunta: responde con la primera línea de bloqueo | E: frase «Plantilla de encargo»; N (opcional): ver decisión 3 |
 
@@ -23,10 +25,10 @@ Regla común: lo que el emisor no pueda comprobar con esa columna, lo escribe co
 | Primera línea / resultado | Acción (sin leer más que lo indicado) |
 |---|---|
 | Documentos del `arquitecto` | Puerta 1: ruta en `STATUS.md`, se detiene |
-| `REFINAR:` | Pregunta a Franco, vuelve con respuestas al `planificador` |
+| `REFINAR:` | Pregunta a la persona usuaria, vuelve con respuestas al `planificador` |
 | Tareas `borrador` | `validar-tarea.mjs`: exit 0 → puerta 3; exit 1 → devuelve las líneas al `planificador`; exit 2 → escalación |
-| `DECISION:` / `PARCIAL:` | Pregunta a Franco con las opciones; con la respuesta, `aprobada` + `Decisión de Franco:`; no reabre al `arquitecto` |
-| `CONFIRMAR:` | Pregunta a Franco; con «sí» explícito, reencarga |
+| `DECISION:` / `PARCIAL:` | Pregunta a la persona usuaria con las opciones; con la respuesta, `aprobada` + `Decisión de Franco:`; no reabre al `arquitecto` |
+| `CONFIRMAR:` | Pregunta a la persona usuaria; con «sí» explícito, reencarga |
 | `BLOQUEO:` | Lo anota y lo enruta al rol; si toca `definitions/`, puerta 1 |
 | `lista para revisión` | Puerta 4 (en yolo: `--evidencia`, exit 0 → `hecha`) |
 | Nada de lo anterior | Escalación. No interpreta ni «arregla» |
@@ -55,7 +57,7 @@ Cada módulo ≤ 5 KB. La activación es explícita en el núcleo: «Si Franco p
 5. **Cierre del núcleo del `coordinador`**: tabla de §3, quitar duplicados, tope 7168. Comprobación: tope en la prueba; escenarios de `pruebas/` siguen pasando.
 6. **`Fuente:` en tareas** (si se aprueba la decisión 2): `formato-tarea.mjs` + plantilla en `descomponer-feature`. Comprobación: tarea sin `Fuente:` o con encabezado inexistente da exit 1.
 7. **Recorte de `planificador`, `constructor`, `arquitecto`** a sus metas, sin mover frases exigidas. Comprobación: topes y contrato.
-8. **Medición** en una feature de Cleaner con las reglas nuevas (ver §6). Comprobación: informe de `consumo.mjs` pegado por Franco.
+8. **Medición** en una feature de Cleaner con las reglas nuevas (ver §6). Comprobación: informe de `consumo.mjs` pegado por la persona usuaria.
 
 Los pasos 1 y 2 no cambian comportamiento; 3 a 5 son los que bajan costo; 6 es el que mejora la entrega.
 
@@ -63,14 +65,14 @@ Los pasos 1 y 2 no cambian comportamiento; 3 a 5 son los que bajan costo; 6 es e
 
 Comparar dos features de tamaño parecido, una antes y otra después de la tarea 5 (*supuesto*: hay muestra suficiente; con una sola feature la cifra es indicio, no prueba). Cifras de `scripts/consumo.mjs` (`--raiz`):
 
-| Cifra | Hoy (dado por Franco) | Meta |
+| Cifra | Hoy (dado por la persona usuaria) | Meta |
 |---|---|---|
 | Tamaño de `coordinador.md` | 17 897 B | ≤ 7168 B |
 | Turnos del `coordinador` por llamada a subagente (`turnosPorLlamada`) | ≈ 6 (803 / 131) | ≤ 4 |
 | Turnos del `coordinador` en el tramo `mas60k` | 94 % con >30 k de contexto (tramos `de30a60k` + `mas60k`) | `menos30k` ≥ 40 % |
 | Costo del `coordinador` por feature | US$9,26 en una sesión | -35 % frente a la comparable |
 | KB leídos por corrida del `planificador` | 72 | ≤ 40 |
-| Corridas del `arquitecto` por puerta | 38 en total | 1 por puerta (+1 solo si Franco la pide) |
+| Corridas del `arquitecto` por puerta | 38 en total | 1 por puerta (+1 solo si la persona usuaria la pide) |
 
 De las líneas `Registro:` (por `registrar.mjs`): `resultado=lista` 78 % → ≥ 90 %; `intentos` máximo 5 → 2; `causa=alcance` y `DECISION:` que llegan a construcción: 0 sobre decisiones que el `arquitecto` pudo cerrar; `huecos` medios por tarea ≤ 1; tareas aprobadas > 8 KB: 0 y mediana ≤ 6 KB. `reescribir_status` queda para F29.
 
@@ -82,7 +84,7 @@ Si el costo por turno no baja pero el tamaño sí, el ahorro no existía (el cac
 - Más archivos que sincronizar. Mitigación: el manifiesto y los topes fallan en la prueba.
 - Pi: que cargue skills a pedido del agente no está verificado para `coordinador` en modo sin pantalla (*supuesto*; probar en la tarea 3).
 
-## 8. Decisiones para Franco
+## 8. Decisiones para la persona usuaria
 
 1. **Dónde viven los módulos.** A) skills, una por módulo (recomendada: ya se instalan en los dos modos y herramientas, sin cambiar `instalar.sh`). B) una skill única con subcarpeta de módulos (exige rutas relativas que cambian por herramienta). C) dejar todo en el agente y solo recortar texto (ahorro ≈ 3 KB).
 2. **`Fuente:` en las tareas.** A) no añadirla. B) sí, con comprobación por script (recomendada: cierra el hueco «decisión sin cerrar llega a construcción» sin `FEATURE.md`). C) solo exigirla en yolo.

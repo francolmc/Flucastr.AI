@@ -9,38 +9,40 @@ tipo: codigo
 ---
 # Continuidad del constructor
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-Permitir que un constructor complete los tramos aprobados de una historia o plan sin intervención de Franco, con límites observables, registro retomable y revisión en contexto nuevo.
+Permitir que un constructor complete los tramos aprobados de una historia o plan sin intervención de la persona usuaria, con límites observables, registro retomable y revisión en contexto nuevo.
 
 ## Exploración
 - Las casillas en vivo existen en `agentes/constructor.md` y `skills/ejecutar-plan/SKILL.md`; `cambios/hechos/casillas-en-vivo/plan.md` conserva observaciones reales. Las pruebas automatizadas validan registros, no una nueva ejecución del modelo.
 - `skills/planificar-cambio/SKILL.md` limita cada historia a tres archivos de producto y la vincula hoy a un tramo. Los planes antiguos admiten tramos; se necesita permitir agrupar varios tramos pequeños bajo una historia sin romperlos.
 - El constructor solo puede ejecutar el tramo activo; el principal revisa cada tramo. `scripts/kit-run.mjs` orquesta por separado y relanza tras fallos; su prueba A2 exige tres corridas de verificación.
 - `./verify` ejecuta `pruebas/contrato-constructor.mjs`, que exige literalmente frases sobre casillas, formato y compatibilidad; los cambios de redacción afectados requieren actualizar sus aserciones conservando el comportamiento. También ejecuta `pruebas/kit-run/probar.mjs`, cuyo A2 exige tres corridas ante fallo; debe adaptarse para el nuevo modo sin debilitar cobertura ni compatibilidad antigua.
-- Franco eligió el 16-11-2026 revisión al final de la historia, con revisión por tramo solo si el plan la exige; punto de control con archivos, diff resumido y verificación, sugiriendo commit solo al finalizar la historia; y medición inicial del mismo comando, con pausa antes de ejecutarlo si no existe medida.
+- la persona usuaria eligió el 16-11-2026 revisión al final de la historia, con revisión por tramo solo si el plan la exige; punto de control con archivos, diff resumido y verificación, sugiriendo commit solo al finalizar la historia; y medición inicial del mismo comando, con pausa antes de ejecutarlo si no existe medida.
 
 ## Evaluación
 Revisión final recomendada: preserva la continuidad y reduce revisiones, pero detecta más tarde defectos acumulados. Una revisión por tramo detecta antes defectos y reduce acumulación, a costa de más revisiones y detener el avance hasta el veredicto. El plan podrá exigirla para riesgo alto; no es automática. El punto de control deja trazabilidad y alerta del tamaño, pero no sustituye un commit recuperable.
 
 ## Supuestos
-- El modo continuo es explícito en cada plan, para conservar planes y automatizaciones anteriores; si Franco quiere migración universal, cambian el alcance y las pruebas.
+- El modo continuo es explícito en cada plan, para conservar planes y automatizaciones anteriores; si la persona usuaria quiere migración universal, cambian el alcance y las pruebas.
 - Una historia continua puede agrupar tramos declarados en orden; cada tramo conserva su alcance, aceptación y comprobación. Si se exige otra representación, cambia la plantilla.
 - La duración medida es una línea previa por comando exacto y entorno equivalente, registrada en el plan; si no existe o no es válida, se pausa antes de esa comprobación.
 
 ## Decisiones ya tomadas
 - Las dudas menores se resuelven dentro del alcance y se registran en `Decisiones`; las decisiones de producto o de alcance requieren pausa.
 - La segunda falla de la misma causa detiene la ejecución; fallos distintos no se cuentan como iguales sin diagnóstico explícito.
-- No hay commits entre tramos; Franco decide el commit tras la historia revisada.
+- No hay commits entre tramos; la persona usuaria decide el commit tras la historia revisada.
 - Ejecutor: constructor, porque requisitos, contexto, comprobaciones y bloqueos están especificados, sin acceso a credenciales ni producción.
 
 ## Validación
-Franco confirmó las tres recomendaciones el 16-11-2026. Plan aprobado por Franco el 16-11-2026.
+la persona usuaria confirmó las tres recomendaciones el 16-11-2026. Plan aprobado por la persona usuaria el 16-11-2026.
 
 ## Alcance
 Producto: `agentes/constructor.md`, `agentes/principal.md`, `skills/ejecutar-plan/SKILL.md`, `skills/planificar-cambio/SKILL.md`, `scripts/kit-run.mjs`. Pruebas: `pruebas/contrato-constructor.mjs`, `pruebas/kit-run/probar.mjs` y nuevos archivos bajo `pruebas/continuidad/`; documentación: `README.md`. Las rutas de producto y pruebas existentes no se mueven ni archivan; actualizar las pruebas citadas si cambia el contrato. Fuera: instalación, credenciales, producción, commits y cambios de comportamiento de planes sin modo continuo salvo correcciones expresamente necesarias de compatibilidad.
 
 ## Condiciones de parada
-Para este plan rigen las reglas actuales hasta que el cambio esté aprobado y construido. En el modo nuevo: avanzar solo con verificación verde, dentro del alcance y sin decisión pendiente de Franco; parar con nota de lo hecho, lo que falta y la causa ante segunda falla por la misma causa, necesidad de salir del alcance, decisión de Franco, falta de duración medida o ejecución que supere el doble de esa duración. Conservar las demás prohibiciones y bloqueos del kit.
+Para este plan rigen las reglas actuales hasta que el cambio esté aprobado y construido. En el modo nuevo: avanzar solo con verificación verde, dentro del alcance y sin decisión pendiente de la persona usuaria; parar con nota de lo hecho, lo que falta y la causa ante segunda falla por la misma causa, necesidad de salir del alcance, decisión de la persona usuaria, falta de duración medida o ejecución que supere el doble de esa duración. Conservar las demás prohibiciones y bloqueos del kit.
 
 ## Verificación
 `./verify` — exit 0; incluye contratos y pruebas offline. Además, el recorrido real de A6 exige dos ejecuciones independientes del constructor, sin secretos ni producción; si no se puede ejecutarlas se registra PAUSA y no se presenta una simulación como evidencia real.
@@ -88,13 +90,13 @@ ok A4
 exit 0
 
 $ rg -n 'continuidad|punto de control' README.md
-18:Un cambio largo se parte en tramos pequeños (`### Tramo N`). Por defecto, el constructor ejecuta un tramo y espera la revisión del principal; un plan puede declarar `continuidad: continua` para que complete la historia aprobada de punta a punta. El plan fija condiciones de parada y mide antes la duración de cada comprobación limitante. Si la medida falta, el constructor se detiene antes de esa comprobación. Al completar la historia, el principal revisa en contexto nuevo; si es de riesgo alto, el plan puede exigir revisión por tramo, que detecta defectos antes a costa de más pausas. Cada tramo deja un punto de control con archivos tocados, resumen del diff y comprobación; sugiere un commit al final de la historia, que Franco hace manualmente.
+18:Un cambio largo se parte en tramos pequeños (`### Tramo N`). Por defecto, el constructor ejecuta un tramo y espera la revisión del principal; un plan puede declarar `continuidad: continua` para que complete la historia aprobada de punta a punta. El plan fija condiciones de parada y mide antes la duración de cada comprobación limitante. Si la medida falta, el constructor se detiene antes de esa comprobación. Al completar la historia, el principal revisa en contexto nuevo; si es de riesgo alto, el plan puede exigir revisión por tramo, que detecta defectos antes a costa de más pausas. Cada tramo deja un punto de control con archivos tocados, resumen del diff y comprobación; sugiere un commit al final de la historia, que la persona usuaria hace manualmente.
 exit 0
 
 $ rg -n 'continuidad|contexto nuevo' agentes/principal.md
-51:   - En un plan por tramos, pon `tramo: <n>` y `estado: aprobado`. Sin `continuidad: continua`, el constructor hace solo ese tramo. Con continuidad, ejecuta la historia aprobada tramo a tramo sin esperarte, mientras cada comprobación pasa, sigue dentro del alcance y no requiere una decisión de Franco; aplica las *Condiciones de parada* del plan y deja punto de control por tramo.
-57:   - `COMPLETADO`: revisa en contexto nuevo el `git diff` de los archivos del *Alcance*, la cola de la *Evidencia* y las *Notas*, y marca cada fila de Aceptación como cumplida o con defecto. En continuidad, la revisión se hace al final de la historia; si el plan declara `Revisión: por tramo` (riesgo alto), revisa el punto de control antes de permitir el tramo siguiente. La revisión final mantiene el avance continuo, pero puede descubrir defectos acumulados; la revisión por tramo los detecta antes y añade pausas y revisiones. **Riesgo alto:** corre la *Verificación* del plan una vez, en una sola espera, y lee su cola. **Riesgo bajo** (cambio pequeño o `tipo: docs`): no repites `verify`; basta el `git diff` y la comprobación declarada. No escribas scripts ni levantes servidores o contenedores. Si falla por el entorno (Docker, red, permisos), haz como máximo un diagnóstico de dos comandos y avisa a Franco. Un defecto, aunque sea de una línea, se devuelve: no corriges; anótalo en *Notas* (archivo, línea, criterio que incumple), pon el plan en `estado: aprobado` y relanza al constructor, hasta 2 relanzamientos; después deja el cambio `parcial` y di a Franco el detalle. Si todo se cumple, **puerta 2**: Franco revisa la evidencia y decide el commit.
-61:   - Plan por tramos sin continuidad: en cada `COMPLETADO: ...; tramo=<n>`, revisa el `git diff` de ese tramo, corre su `Verificación del tramo:` (el nivel que ese tramo declara; no subas de nivel por tu cuenta) y, si pasa, avanza `tramo:` al siguiente y vuelve a poner `estado: aprobado`. En continuidad, no revises ni relances entre tramos salvo que el plan marque `Revisión: por tramo`; al final de la historia revisa desde contexto nuevo. Todo tramo continuo deja punto de control con archivos tocados, diff resumido y comprobación. Al cerrar la historia deja en *Notas* un resumen de 5 líneas y pide a Franco `/compact` o una sesión nueva con `Plan: <ruta>`. La puerta 2 llega tras la última historia, con `verify` completo.
+51:   - En un plan por tramos, pon `tramo: <n>` y `estado: aprobado`. Sin `continuidad: continua`, el constructor hace solo ese tramo. Con continuidad, ejecuta la historia aprobada tramo a tramo sin esperarte, mientras cada comprobación pasa, sigue dentro del alcance y no requiere una decisión de la persona usuaria; aplica las *Condiciones de parada* del plan y deja punto de control por tramo.
+57:   - `COMPLETADO`: revisa en contexto nuevo el `git diff` de los archivos del *Alcance*, la cola de la *Evidencia* y las *Notas*, y marca cada fila de Aceptación como cumplida o con defecto. En continuidad, la revisión se hace al final de la historia; si el plan declara `Revisión: por tramo` (riesgo alto), revisa el punto de control antes de permitir el tramo siguiente. La revisión final mantiene el avance continuo, pero puede descubrir defectos acumulados; la revisión por tramo los detecta antes y añade pausas y revisiones. **Riesgo alto:** corre la *Verificación* del plan una vez, en una sola espera, y lee su cola. **Riesgo bajo** (cambio pequeño o `tipo: docs`): no repites `verify`; basta el `git diff` y la comprobación declarada. No escribas scripts ni levantes servidores o contenedores. Si falla por el entorno (Docker, red, permisos), haz como máximo un diagnóstico de dos comandos y avisa a la persona usuaria. Un defecto, aunque sea de una línea, se devuelve: no corriges; anótalo en *Notas* (archivo, línea, criterio que incumple), pon el plan en `estado: aprobado` y relanza al constructor, hasta 2 relanzamientos; después deja el cambio `parcial` y di a la persona usuaria el detalle. Si todo se cumple, **puerta 2**: la persona usuaria revisa la evidencia y decide el commit.
+61:   - Plan por tramos sin continuidad: en cada `COMPLETADO: ...; tramo=<n>`, revisa el `git diff` de ese tramo, corre su `Verificación del tramo:` (el nivel que ese tramo declara; no subas de nivel por tu cuenta) y, si pasa, avanza `tramo:` al siguiente y vuelve a poner `estado: aprobado`. En continuidad, no revises ni relances entre tramos salvo que el plan marque `Revisión: por tramo`; al final de la historia revisa desde contexto nuevo. Todo tramo continuo deja punto de control con archivos tocados, diff resumido y comprobación. Al cerrar la historia deja en *Notas* un resumen de 5 líneas y pide a la persona usuaria `/compact` o una sesión nueva con `Plan: <ruta>`. La puerta 2 llega tras la última historia, con `verify` completo.
 79:Cuando el plan exija revisión por tramo, responde con la evidencia a la vista: ¿existe lo pedido?; ¿está conectado al recorrido real (el entrypoint productivo) o es solo una función suelta?; ¿funciona con datos reales, no con un fixture a medida?; ¿sigue andando lo vecino que el tramo no debía tocar? Si una pregunta no se puede responder con el diff y la evidencia, es un defecto del plan: anótalo en *Notas* como mejora para el próximo plan. Si una respuesta es no, el tramo no avanza: se devuelve al constructor o se pausa. En revisión final, evalúa esas mismas preguntas al acabar la historia, desde contexto nuevo.
 exit 0
 
@@ -229,9 +231,9 @@ Revisión tramo 3: comprobación técnica preliminar favorable; A3 cuenta con do
 La sesión de éxito completó dos tramos y dejó puntos de control sin intervención.
 La sesión de fallo quedó parcial tras dos fallos de la misma causa; el segundo tramo no comenzó.
 `./verify` pasó nuevamente en revisión del principal, exit 0; compatibilidad de kit run cubierta.
-Pendiente: revisión final de la historia en contexto nuevo y aprobación de evidencia por Franco.
+Pendiente: revisión final de la historia en contexto nuevo y aprobación de evidencia por la persona usuaria.
 
 Revisión final en contexto nuevo — APROBADO: A1 cumplido (formato, límites, medición y revisión); A2 cumplido (procedimiento, pausas, decisiones y puntos de control); A3 cumplido (pruebas offline y dos sesiones reales observadas).
 Las reglas están conectadas a las instrucciones del constructor y su skill; `kit run` contempla el modo continuo y conserva el modo anterior. `./verify` pasó en la revisión del principal.
 La observación real usa repositorios temporales de prueba: demuestra este recorrido con el constructor real, no sustituye una medición en un proyecto real de mayor complejidad.
-Franco revisa y aprueba la evidencia antes del cierre y su commit.
+la persona usuaria revisa y aprueba la evidencia antes del cierre y su commit.

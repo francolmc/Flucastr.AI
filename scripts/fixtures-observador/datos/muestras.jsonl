@@ -1,8 +1,8 @@
-{"ts":"2026-11-13T10:00:05Z","Container":"f09web","ID":"f09web","Name":"f09-1-web-1","CPUPerc":"12.00%","MemPerc":"7.7%","MemUsage":"300MiB / 3.8GiB"}
-{"ts":"2026-11-13T10:00:05Z","Container":"f09worker","ID":"f09worker","Name":"f09-1-worker-1","CPUPerc":"3.10%","MemPerc":"3.1%","MemUsage":"120MiB / 3.8GiB"}
-{"ts":"2026-11-13T10:03:00Z","Container":"f09web","ID":"f09web","Name":"f09-1-web-1","CPUPerc":"40.00%","MemPerc":"11.5%","MemUsage":"450MiB / 3.8GiB"}
-{"ts":"2026-11-13T10:03:00Z","Container":"f09worker","ID":"f09worker","Name":"f09-1-worker-1","CPUPerc":"15.00%","MemPerc":"5.1%","MemUsage":"200MiB / 3.8GiB"}
+{"ts":"2026-11-13T10:00:05Z","Container":"proyecto-aweb","ID":"proyecto-aweb","Name":"proyecto-a-1-web-1","CPUPerc":"12.00%","MemPerc":"7.7%","MemUsage":"300MiB / 3.8GiB"}
+{"ts":"2026-11-13T10:00:05Z","Container":"proyecto-aworker","ID":"proyecto-aworker","Name":"proyecto-a-1-worker-1","CPUPerc":"3.10%","MemPerc":"3.1%","MemUsage":"120MiB / 3.8GiB"}
+{"ts":"2026-11-13T10:03:00Z","Container":"proyecto-aweb","ID":"proyecto-aweb","Name":"proyecto-a-1-web-1","CPUPerc":"40.00%","MemPerc":"11.5%","MemUsage":"450MiB / 3.8GiB"}
+{"ts":"2026-11-13T10:03:00Z","Container":"proyecto-aworker","ID":"proyecto-aworker","Name":"proyecto-a-1-worker-1","CPUPerc":"15.00%","MemPerc":"5.1%","MemUsage":"200MiB / 3.8GiB"}
 {"ts":"2026-11-13T10:03:00Z","host":{"total_mb":3900,"usada_mb":2600}}
-{"ts":"2026-11-13T10:06:00Z","Container":"bydb","ID":"bydb","Name":"byteria-2-db-1","CPUPerc":"85.00%","MemPerc":"39.5%","MemUsage":"1.5GiB / 3.8GiB"}
+{"ts":"2026-11-13T10:06:00Z","Container":"proyectobdb","ID":"proyectobdb","Name":"proyecto-b-2-db-1","CPUPerc":"85.00%","MemPerc":"39.5%","MemUsage":"1.5GiB / 3.8GiB"}
 {"ts":"2026-11-13T10:06:00Z","host":{"total_mb":3900,"usada_mb":3300}}
-{"ts":"2026-11-13T10:07:00Z","Container":"f09web","ID":"f09web","Name":"f09-1-web-1","CPUPerc":"22.00%","MemPerc":"9.7%","MemUsage":"380MiB / 3.8GiB"}
+{"ts":"2026-11-13T10:07:00Z","Container":"proyecto-aweb","ID":"proyecto-aweb","Name":"proyecto-a-1-web-1","CPUPerc":"22.00%","MemPerc":"9.7%","MemUsage":"380MiB / 3.8GiB"}

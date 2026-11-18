@@ -1,8 +1,11 @@
 # task-04 — El coordinador nombra la rama, tramita CONFIRMAR y avisa al cerrar la feature
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`agentes/coordinador.md` no sabe de ramas. Esta tarea le añade lo decidido en `definitions/WORKFLOW.md` §3 y §9.1: infiere el prefijo (`feature/`, `fix/`, `chore/`) y escribe la rama en `STATUS.md`, la pasa al constructor en el encargo, tramita la línea `CONFIRMAR:` preguntando a Franco, y cuando la última tarea de la feature queda `hecha` deja el aviso en «Espera a Franco» para que Franco cierre la rama, haga el PR y despliegue.
+`agentes/coordinador.md` no sabe de ramas. Esta tarea le añade lo decidido en `definitions/WORKFLOW.md` §3 y §9.1: infiere el prefijo (`feature/`, `fix/`, `chore/`) y escribe la rama en `STATUS.md`, la pasa al constructor en el encargo, tramita la línea `CONFIRMAR:` preguntando a la persona usuaria, y cuando la última tarea de la feature queda `hecha` deja el aviso en «Espera a Franco» para que la persona usuaria cierre la rama, haga el PR y despliegue.
 
 ## Contexto
 - Repo: este, único repo. Leído: `agentes/coordinador.md` completo (front matter con `tools: Agent(arquitecto, planificador, constructor), Read, Grep, Glob, Write, Edit, Skill`; secciones `## Límites`, `## Tabla de decisión`, `## Cómo avanzas`, `## Bloqueos`, `## Escalación`, `## Formato de definitions/STATUS.md`). La fila «Todas las tareas de la feature `hecha`» ya existe y la fila «Tarea `aprobada`» delega al constructor.
@@ -12,11 +15,11 @@ repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Decisiones ya tomadas
 - Nueva sección `## Ramas por feature` antes de `## Bloqueos`, con estas reglas (texto en español, imperativo):
-  1. Al pasar la feature a `en curso` (con la aprobación explícita de Franco, como hoy), infiere el prefijo leyendo la fila de la feature en `BACKLOG.md`: `feature/` por defecto (capacidad nueva o cambio de comportamiento), `fix/` (corrige un defecto), `chore/` (mantenimiento sin cambio de comportamiento: documentación, dependencias, limpieza, pruebas). Ante duda, `feature/`; Franco lo corrige al aprobar. Sin columna nueva en el backlog.
+  1. Al pasar la feature a `en curso` (con la aprobación explícita de la persona usuaria, como hoy), infiere el prefijo leyendo la fila de la feature en `BACKLOG.md`: `feature/` por defecto (capacidad nueva o cambio de comportamiento), `fix/` (corrige un defecto), `chore/` (mantenimiento sin cambio de comportamiento: documentación, dependencias, limpieza, pruebas). Ante duda, `feature/`; la persona usuaria lo corrige al aprobar. Sin columna nueva en el backlog.
   2. Escribe en `STATUS.md`, sección «Paso actual», la línea `Rama: <prefijo>/Fxx-nombre` (`Fxx-nombre` es el nombre de la carpeta en `features/`).
   3. En cada encargo al constructor incluye la línea `Rama: <prefijo>/Fxx-nombre`.
-  4. Cuando el constructor responda con la primera línea `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`: la registras en «Espera a Franco» de `STATUS.md`, preguntas a Franco en la conversación y te detienes. No es bloqueo ni escalación. Si Franco responde que sí de forma explícita, vuelves a delegar la misma tarea con «Franco confirmó `git switch <rama>`» en el encargo. Si dice que no o no responde, dejas «Franco rechazó» o «sin respuesta» en «Espera a Franco» y la tarea sigue `aprobada`. La confirmación vale para esa rama y esa tarea.
-  5. El constructor no hace commit: en la puerta 4 Franco commitea en la rama y pasa la tarea a `hecha`.
+  4. Cuando el constructor responda con la primera línea `CONFIRMAR: accion=git switch <rama>; motivo=<motivo>`: la registras en «Espera a Franco» de `STATUS.md`, preguntas a la persona usuaria en la conversación y te detienes. No es bloqueo ni escalación. Si la persona usuaria responde que sí de forma explícita, vuelves a delegar la misma tarea con «Franco confirmó `git switch <rama>`» en el encargo. Si dice que no o no responde, dejas «Franco rechazó» o «sin respuesta» en «Espera a Franco» y la tarea sigue `aprobada`. La confirmación vale para esa rama y esa tarea.
+  5. El constructor no hace commit: en la puerta 4 la persona usuaria commitea en la rama y pasa la tarea a `hecha`.
 - Aviso de feature completa: en la fila «Todas las tareas de la feature `hecha`» se añade, antes de pedir la confirmación de `hecha` de la feature, escribir en «Espera a Franco» la línea `Feature Fxx completa en <rama>: cierra la rama, haz el PR y despliega.` No es escalación.
 - En la fila «Tarea `aprobada`» se añade «con la línea `Rama:` en el encargo».
 - No se toca el front matter, ni el formato de `STATUS.md`, ni las demás secciones.

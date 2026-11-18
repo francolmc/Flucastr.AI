@@ -14,7 +14,7 @@
 // nombre de rama entra en un evento.
 //
 // tarea_estado.por es inferido de `a` según la regla de cada rol (no se mide):
-// aprobada y hecha = franco; en curso, lista para revisión y bloqueada = constructor; borrador = planificador.
+// aprobada y hecha = "franco" (valor histórico para la persona usuaria); en curso, lista para revisión y bloqueada = constructor; borrador = planificador.
 
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";

@@ -45,7 +45,7 @@ Esperado: la primera sin salida y código 0; la segunda con `fail 0`; la tercera
 
 ## Evidencia
 
-Comandos ejecutados en `/Users/franco/Codes/flucastr/Flucastr.AI` tras los cambios (salida real).
+Comandos ejecutados en `/Users/persona/Codes/flucastr/Flucastr.AI` tras los cambios (salida real).
 
 ```
 $ bash -n pruebas/lanzar-constructor-claude.sh
@@ -70,7 +70,7 @@ $ node --test pruebas/lanzar-constructor.test.mjs
 exit=0
 
 $ bash pruebas/rapida.sh
-Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-l2vpgJ
+Entorno conservado: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-l2vpgJ
 ✔ I1: comprobación real (82.901875ms)
 ✔ I2: comprobación real (1570.8975ms)
 ✔ I3: comprobación real (1003.5895ms)

@@ -1,6 +1,9 @@
 # task-03 — Prueba del resolver: compactación de Pi, con controles negativos
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Fijar con una prueba determinista (sin modelo ni red) lo que hacen `fijar-compactacion pi` y `quitar-compactacion pi`: valores calculados desde `modelos.json`, fusión sin pisar al usuario, bloqueo `settings.json.lock`, escritura atómica y simetría de instalar/quitar. Incluye controles negativos que demuestran que las comprobaciones sí detectan un daño. Queda dentro de `rapida.sh` sin tocarla (toma todos los `pruebas/comprobaciones/*.test.mjs`).
 
@@ -48,7 +51,7 @@ Fuera de alcance: `scripts/resolver.mjs` (si una prueba revela un defecto, `BLOQ
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 time node --test pruebas/comprobaciones/resolver-compactacion-pi.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -3 "$R"
 git status --short pruebas/comprobaciones/
@@ -94,7 +97,7 @@ Ejecución completa previa (salida real, `node --test`):
 ℹ duration_ms 1533.716458
 ```
 
-Verificación (salida real, primera pasada completa, HOME=/Users/franco):
+Verificación (salida real, primera pasada completa, HOME=/Users/la persona usuaria):
 ```
 $ time node --test pruebas/comprobaciones/resolver-compactacion-pi.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 ℹ tests 20

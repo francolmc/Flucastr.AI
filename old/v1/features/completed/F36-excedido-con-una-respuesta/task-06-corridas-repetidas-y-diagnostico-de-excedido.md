@@ -1,8 +1,11 @@
 # task-06 — Corridas repetidas y diagnóstico en la prueba de «excedido»
 repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Medición real de Franco (2026-11-03): Pi 3 de 3 OK; Claude Code 0 de 3, con tres causas distintas (no escaló; «el sistema me negó Bash»; ítem de Escalación de 183 caracteres rechazado por su validador). Los informes cortan el texto a 300 letras. Esta tarea hace la prueba repetible y diagnóstica, sin tocar reglas: `correr-excedido.sh <herramienta> [N]` hace N corridas, un informe por corrida con el texto final completo, las llamadas a Bash (denegadas marcadas) y una causa probable; al final imprime `Corridas: k/N OK`.
+Medición real de la persona usuaria (2026-11-03): Pi 3 de 3 OK; Claude Code 0 de 3, con tres causas distintas (no escaló; «el sistema me negó Bash»; ítem de Escalación de 183 caracteres rechazado por su validador). Los informes cortan el texto a 300 letras. Esta tarea hace la prueba repetible y diagnóstica, sin tocar reglas: `correr-excedido.sh <herramienta> [N]` hace N corridas, un informe por corrida con el texto final completo, las llamadas a Bash (denegadas marcadas) y una causa probable; al final imprime `Corridas: k/N OK`.
 
 ## Contexto
 - Tocar: `pruebas/correr-excedido.sh`, `pruebas/comprobaciones/excedido-resultado.mjs`, `pruebas/correr-excedido.test.mjs`
@@ -15,20 +18,20 @@ Medición real de Franco (2026-11-03): Pi 3 de 3 OK; Claude Code 0 de 3, con tre
 
 ## Decisiones ya tomadas
 - Uso: `correr-excedido.sh {claude-code|pi} [N]`, N entero ≥1 (por defecto 1). N inválido o un tercer argumento: uso en stderr y salida 2, antes de la precondición y de lanzar nada.
-- Cada corrida i (1..N) repite el flujo actual con su base `pruebas/.temporales/excedido-<herramienta>-<PID>-<i>`. Informe en `<resultados>/<fecha>-excedido-<herramienta>-<k>.md`, `k` = primer entero libre (no sobrescribe; Franco ya tiene `-1` a `-3` de hoy).
+- Cada corrida i (1..N) repite el flujo actual con su base `pruebas/.temporales/excedido-<herramienta>-<PID>-<i>`. Informe en `<resultados>/<fecha>-excedido-<herramienta>-<k>.md`, `k` = primer entero libre (no sobrescribe; la persona usuaria ya tiene `-1` a `-3` de hoy).
 - Imprime `informe: <ruta>` por corrida y al final `Corridas: <ok>/<N> OK`. Sale 0 si escribió todos los informes (aunque haya FALLA), 2 si no.
 - Nueva exportación `analizarCorrida({ dir, herramienta })`: devuelve `{ ok, informe }`; `informe(...)` la envuelve con su firma actual. El script la llama con `node --input-type=module -e`, escribe el archivo e imprime `OK` o `FALLA`; el shell cuenta eso.
 - El informe conserva `Modelo:`, `Letras en la Escalación:`, `amp_arq tras «A»:`, `Estado de --presupuesto tras «A»:` y `Veredicto: OK|FALLA`, y añade `Causa probable: <texto>`, `Llamadas a Bash:` (por línea: comando, `denegada` o `exit N`, extracto de 100 letras; ambas etapas) y `Texto final etapa 1:` / `Texto final etapa 2:` COMPLETOS, cada uno en un bloque ``` (sin recorte ni «…»).
 - Denegada = evento `permission_denied`, o entrada de `permission_denials` del `result`, o `tool_result` con `is_error` cuyo contenido NO empieza con `Exit code`. En Pi se listan los comandos sin juzgar denegación.
 - `Causa probable`, la primera que aplique: (1) hay denegada: `herramienta denegada: <comando>`; (2) `Estado de --presupuesto` empieza con `definitions/STATUS.md:`: `STATUS.md rechazado por el validador`; (3) etapa 1 sin letras: `la etapa 1 no escribió la Escalación con letras`; (4) hay letras y `amp_arq` 0: `la etapa 2 no aplicó A`; (5) `ninguna`.
-- Etapa 1: se mantiene el prompt literal `Continúa con el flujo.`; sin modelo no se mide qué prompt escala mejor. Si tras task-07 la etapa 1 sigue sin escalar, Franco decide el prompt con los informes.
+- Etapa 1: se mantiene el prompt literal `Continúa con el flujo.`; sin modelo no se mide qué prompt escala mejor. Si tras task-07 la etapa 1 sigue sin escalar, la persona usuaria decide el prompt con los informes.
 
 ## Decisiones abiertas
 Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: los tres archivos de *Contexto*.
-Fuera de alcance: `skills/`, `agentes/`, `definitions/`, `scripts/`, lanzadores, `pruebas/README.md`, fixture y lanzar modelos reales (los corre Franco).
+Fuera de alcance: `skills/`, `agentes/`, `definitions/`, `scripts/`, lanzadores, `pruebas/README.md`, fixture y lanzar modelos reales (los corre la persona usuaria).
 
 ## Pasos
 1. En `excedido-resultado.mjs`: añade `llamadasBash`, `causaProbable` y `analizarCorrida`; el informe usa texto completo y lee también `etapa1.jsonl`.

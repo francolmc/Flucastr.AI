@@ -1,6 +1,8 @@
-# Auditoría de un traspaso real: Andes (constructor → principal)
+# Auditoría de un traspaso real: Proyecto.Servicios (constructor → principal)
 
-Origen: auditoría de solo lectura hecha por el principal del proyecto Andes (cambio `cambios/paridad-tablero-detalle/plan.md`) a pedido de Franco, 2026-11-08. Resumen fiel de lo que pegó Franco; las referencias `P`/`C` son líneas de las sesiones Pi de Andes (`~/.pi/agent/sessions/--home-franco-Codes-andes--/2026-11-07T18-27-00-998Z_01a1b743-…jsonl` para el principal; `<run-id>/run-0/session.jsonl` para cada ejecución del constructor, C1–C5). No se revisaron aquí.
+> Los nombres se anonimizaron; se conservan fechas y cifras.
+
+Origen: auditoría de solo lectura hecha por el principal del proyecto Proyecto.Servicios (cambio `cambios/paridad-tablero-detalle/plan.md`) a pedido de la persona usuaria, 2026-11-08. Resumen fiel de lo que pegó la persona usuaria; las referencias `P`/`C` son líneas de las sesiones Pi de Proyecto.Servicios (`~/.pi/agent/sessions/--home-usuario-Codes-proyecto-servicios--/2026-11-07T18-27-00-998Z_01a1b743-…jsonl` para el principal; `<run-id>/run-0/session.jsonl` para cada ejecución del constructor, C1–C5). No se revisaron aquí.
 
 ## Conclusión de la auditoría
 
@@ -16,7 +18,7 @@ El constructor dejó una **base productiva sustancial que se conservó**, pero *
 | Corte por plazo | La ejecución terminó por timeout de 3.600.000 ms, no por decisión de producto. Quedaban escenarios pendientes. |
 | Reanudación | Tailwind sin configuración efectiva; el principal envió diagnósticos concretos y el constructor hizo correcciones reales. |
 | Última PAUSA | El constructor **leyó** la instrucción de recuperación ya resuelta («Acceso histórico resuelto») y aun así volvió a ofrecer «aceptar una reconstrucción posterior» como decisión pendiente. Dejó `estado: en curso` pese a devolver PAUSA. |
-| Toma por el principal | Franco: «dale, terminalo». Solo entonces `ejecutor: principal`. |
+| Toma por el principal | la persona usuaria: «dale, terminalo». Solo entonces `ejecutor: principal`. |
 
 ## Atribución por unidad (resumen)
 

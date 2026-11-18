@@ -1,5 +1,7 @@
 # Prueba real del permiso de `validar-tarea.mjs` con el arnés (F24, task-06), 2026-11-01 (repetición)
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Lanzador: `pruebas/lanzar-coordinador-claude.sh "<prompt>"`, desde un fixture nuevo por caso (`pruebas/fixtures/coordinador.sh`), con `FLUCASTR_RECORD_FILE` propio. Patrón en `--allowedTools`: `'Bash(node ~/.flucastr-ai/validar-tarea.mjs *)'`. Una corrida por caso, sin reintentos. Agente: `coordinador` de `~/.claude/agents/coordinador.md`, con «cuatro comandos» (comprobado con `grep -c "cuatro comandos" ~/.claude/agents/coordinador.md` → `1`).
 
 Fixtures y registros:
@@ -45,7 +47,7 @@ Causa en la copia instalada `~/.claude/agents/coordinador.md`:
 ## Lectura
 
 - A cumple: hay `tool_use` de Bash con el comando del lanzador y el `tool_result` no es una negativa de permiso.
-- B cumple literalmente («no ejecutarse»), pero no aísla el permiso: el modelo se niega por el texto del agente (líneas 109-122) antes de llegar a `--allowedTools`. Un control negativo que solo depende del texto no demuestra que el permiso de Claude Code rechace `otro.mjs`. Queda para decisión de Franco.
+- B cumple literalmente («no ejecutarse»), pero no aísla el permiso: el modelo se niega por el texto del agente (líneas 109-122) antes de llegar a `--allowedTools`. Un control negativo que solo depende del texto no demuestra que el permiso de Claude Code rechace `otro.mjs`. Queda para decisión de la persona usuaria.
 - El patrón `Bash(node ~/.flucastr-ai/validar-tarea.mjs *)` está en el lanzador y no se cambió para forzar el resultado.
 
 ## Verificación de la tarea

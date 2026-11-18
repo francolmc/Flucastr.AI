@@ -23,8 +23,8 @@ Kit de agentes y skills para Claude Code, Pi y Codex. Esta es la versión 2.
 
 ## Entradas principales
 
-- Instalar: `bash instalar.sh`.
-- Simular la instalación: `bash instalar.sh --simular`.
+- Instalar: `bash install.sh` (alias compatible: `bash instalar.sh`).
+- Simular la instalación: `bash install.sh --dry-run` (alias: `--simular`).
 - Verificar: `./verify`.
 - Ejecutar el constructor Pi en una ventana propia: `pi-constructor`.
 

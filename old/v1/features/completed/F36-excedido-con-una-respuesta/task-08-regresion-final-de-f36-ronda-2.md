@@ -1,6 +1,9 @@
 # task-08 — Regresión final de F36 (ronda 2)
 repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Cierra la segunda ronda de F36 como lo hizo task-05: topes de bytes, contratos y verificación rápida con los conteos medidos y ningún archivo fuera de alcance tocado. No añade comportamiento ni lanza modelos. Si algo falla por culpa de task-06 o task-07, lo anota sin corregirlo.
 
@@ -16,7 +19,7 @@ Cierra la segunda ronda de F36 como lo hizo task-05: topes de bytes, contratos y
 ## Decisiones ya tomadas
 - Esta tarea no edita archivos versionados; si una verificación falla por F36, el constructor la deja `bloqueada` con `BLOQUEO: rol=constructor; motivo=codigo:` y lo describe en *Notas*. Un séptimo fallo, o uno de nombre distinto, es regresión.
 - Esperados con tareas 01-07 hechas: rápida `ℹ tests 741`, `ℹ fail 6`; `contrato-roles` 125; `topes-bytes` 23; `coherencia-features` 13.
-- El criterio de éxito de F36 lo cierra Franco, no esta tarea: `bash pruebas/correr-excedido.sh pi 3` y `bash pruebas/correr-excedido.sh claude-code 3`, con `Corridas: 3/3 OK` en cada una (6 de 6 `Veredicto: OK`). Si una herramienta falla en las 3 corridas es bloqueo real y F36 no se da por cumplida; los informes dicen la `Causa probable`.
+- El criterio de éxito de F36 lo cierra la persona usuaria, no esta tarea: `bash pruebas/correr-excedido.sh pi 3` y `bash pruebas/correr-excedido.sh claude-code 3`, con `Corridas: 3/3 OK` en cada una (6 de 6 `Veredicto: OK`). Si una herramienta falla en las 3 corridas es bloqueo real y F36 no se da por cumplida; los informes dicen la `Causa probable`.
 
 ## Decisiones abiertas
 Ninguna.

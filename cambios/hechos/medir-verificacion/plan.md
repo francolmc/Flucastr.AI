@@ -8,13 +8,15 @@ tipo: codigo
 ---
 # Observador de Docker: medir la verificación de todos los proyectos sin tocarlos
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Un observador que, mientras corre, registre builds, eventos y memoria de Docker de **cualquier proyecto y stack**, y un informe que muestre dónde se va el tiempo, quién se solapa con quién y qué cayó por memoria. Sin cambiar ningún `verify`. Evidencia previa: `docs/investigaciones/auditoria-verificacion-general/` (hallazgo, propuesta y `builds-2026-11-13.jsonl`).
 
 ## Supuestos
-- Es solo lectura sobre Docker; no limpia, no frena ni cambia nada. Si Franco quiere además imponer límites, es el paso siguiente.
+- Es solo lectura sobre Docker; no limpia, no frena ni cambia nada. Si la persona usuaria quiere además imponer límites, es el paso siguiente.
 - Docker no emite eventos de pasos de build; las duraciones de build salen de `docker buildx history`, que conserva pocas corridas (50 en 6 h el 13-nov). Por eso el observador las copia a disco cada pocos minutos.
-- El nombre del proyecto sale de la etiqueta `com.docker.compose.project` (p. ej. `f09-<pid>-…`, `byteria-universo-verify-<pid>`, `verify_dash_<pid>`); no distingue la sesión de agente.
+- El nombre del proyecto sale de la etiqueta `com.docker.compose.project` (p. ej. `f09-<pid>-…`, `proyecto-ejemplo-verify-<pid>`, `verify_dash_<pid>`); no distingue la sesión de agente.
 - Datos locales en `~/.flucastr-ai/observador/`; nada sale del equipo.
 
 ## Alcance
@@ -57,7 +59,7 @@ Fuera: los proyectos, `instalar.sh`, agentes, skills, `modelos.json`.
 - [x] Crea `scripts/fixtures-observador/bin/docker`, un script que imite `docker events`, `stats` y `buildx history ls` con salida fija y termina solo (A4)
   - evidencia: `scripts/fixtures-observador/bin/docker` (ejecutable); con ese PATH, `docker events`, `docker stats --no-stream` y `docker buildx history ls --format json` imprimen y terminan con exit 0
 - [x] Crea `scripts/observar.mjs` con `informe`, sin dependencias, leyendo los tres archivos y calculando lo de *Decisiones* (A1, A2, A3)
-  - evidencia: `scripts/observar.mjs`; `node scripts/observar.mjs informe --datos scripts/fixtures-observador/datos` da exit 0 y su salida coincide línea a línea con la de `LEEME.txt` (diff vacío): medianas 150 s y 50 s, máximos 200 s y 60 s, caché 60% y 75%, OOM de byteria-2-db-1, solape de 5 min
+  - evidencia: `scripts/observar.mjs`; `node scripts/observar.mjs informe --datos scripts/fixtures-observador/datos` da exit 0 y su salida coincide línea a línea con la de `LEEME.txt` (diff vacío): medianas 150 s y 50 s, máximos 200 s y 60 s, caché 60% y 75%, OOM de proyecto-b-2-db-1, solape de 5 min (identificadores anonimizados)
 - [x] Añade `start`, `stop` y `status` al mismo script, con PID, muestreo, copia de `buildx history` y captura de diagnósticos (A4)
   - evidencia: `scripts/observar.mjs`; con el docker falso, `start` arranca (pid N), `status` dice «corriendo» tras 3 s, un segundo `start` dice «ya corre», `stop` dice «parado (pid N)» y `kill -0 N` falla; quedan `eventos.jsonl` (7 líneas), `muestras.jsonl` (3), `builds.jsonl` (6) y `diagnosticos/bydb.txt`
 - [x] En `verify`, bloque 8r: corre `informe` sobre el fixture y compara con `LEEME.txt`; corre el ciclo `start`/`status`/`stop` con el `docker` falso; una copia del fixture sin el `oom` no debe mostrar la línea `OOM` (A1–A4)

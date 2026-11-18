@@ -1,6 +1,9 @@
 # task-05 — Regresión final de F36
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Cierra F36 comprobando que el conjunto quedó coherente: topes de bytes respetados (en especial `control-consumo` ≤ 4096 y `agentes/coordinador.md` intacto en 7168), contratos de roles y de features verdes, la verificación rápida con solo los fallos ajenos de antes y ningún archivo fuera de alcance tocado. No añade comportamiento; solo deja la evidencia de regresión y, si algo falla por culpa de F36, lo anota sin corregirlo.
 
@@ -18,14 +21,14 @@ Cierra F36 comprobando que el conjunto quedó coherente: topes de bytes respetad
 - Esta tarea no edita archivos versionados; si una verificación falla por F36, el constructor la deja `bloqueada` con `BLOQUEO: rol=constructor; motivo=codigo:` y describe el fallo en *Notas*.
 - Los seis fallos ajenos no se corrigen aquí ni se cuentan como regresión de F36. Un séptimo fallo, o uno de nombre distinto, sí lo es.
 - Esperados con las tareas 01–04 hechas: rápida `ℹ tests 728`, `ℹ fail 6`; `contrato-roles.test.mjs` `ℹ tests 120`; `topes-bytes.test.mjs` `ℹ tests 23`.
-- Corrida con modelo: no se lanza aquí. El criterio de éxito de F36 lo cierra Franco tras aprobar: `bash pruebas/correr-excedido.sh pi` y `bash pruebas/correr-excedido.sh claude-code`, 3 corridas por herramienta, las 6 con `Veredicto: OK`. Si una herramienta falla tras 3 corridas es bloqueo real y F36 no se da por cumplida (línea base: Pi OK, Claude Code FALLA porque pedía el número N; el kit debe funcionar igual en ambas).
+- Corrida con modelo: no se lanza aquí. El criterio de éxito de F36 lo cierra la persona usuaria tras aprobar: `bash pruebas/correr-excedido.sh pi` y `bash pruebas/correr-excedido.sh claude-code`, 3 corridas por herramienta, las 6 con `Veredicto: OK`. Si una herramienta falla tras 3 corridas es bloqueo real y F36 no se da por cumplida (línea base: Pi OK, Claude Code FALLA porque pedía el número N; el kit debe funcionar igual en ambas).
 
 ## Decisiones abiertas
 Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: correr las verificaciones y pegar la evidencia.
-Fuera de alcance: corregir cualquier fallo, tocar `agentes/`, `definitions/` o `scripts/`, hacer commit, y lanzar modelos: el criterio de éxito (3 corridas por herramienta con `correr-excedido.sh`, 6 de 6 con `Veredicto: OK`) lo cierra Franco, no esta tarea.
+Fuera de alcance: corregir cualquier fallo, tocar `agentes/`, `definitions/` o `scripts/`, hacer commit, y lanzar modelos: el criterio de éxito (3 corridas por herramienta con `correr-excedido.sh`, 6 de 6 con `Veredicto: OK`) lo cierra la persona usuaria, no esta tarea.
 
 ## Pasos
 1. Lee las *Notas* de task-04.
@@ -88,5 +91,5 @@ exit 1
 - Sin regresión: ningún séptimo fallo ni nombre distinto. Los fallos de la rápida son los seis ajenos documentados en la tarea.
 - Verificación ejecutada dos veces (`intentos=2`); la segunda pasada, con `set -o pipefail`, es la que registra los códigos de salida reales.
 - No se lanzó ningún modelo (`correr-excedido.sh`, `claude`, `pi`), no se tocó ningún archivo fuera de esta tarea, ni `definitions/STATUS.md`.
-- El criterio de éxito de F36 no se verifica aquí: lo cierra Franco con `bash pruebas/correr-excedido.sh pi` y `bash pruebas/correr-excedido.sh claude-code`, 3 corridas por herramienta, las 6 con `Veredicto: OK`; si una herramienta falla tras 3 corridas es bloqueo real y no se da por cumplida. Esta tarea solo verifica lo automatizable.
+- El criterio de éxito de F36 no se verifica aquí: lo cierra la persona usuaria con `bash pruebas/correr-excedido.sh pi` y `bash pruebas/correr-excedido.sh claude-code`, 3 corridas por herramienta, las 6 con `Veredicto: OK`; si una herramienta falla tras 3 corridas es bloqueo real y no se da por cumplida. Esta tarea solo verifica lo automatizable.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

@@ -1,6 +1,9 @@
 # task-03 — Script validar-tarea.mjs
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 La puerta previa necesita un comando que el `coordinador` pueda correr sobre una o varias tareas y que responda con un código de salida, sin que el modelo lea la tarea para decidir si está completa (S7: en yolo nadie revisaba tamaño ni secciones). Esta tarea crea `scripts/validar-tarea.mjs`, un CLI delgado sobre `validarTarea`, y su prueba.
 
@@ -75,5 +78,5 @@ Criterios: 1 cumplido (tests 7/7, `fail 0`). 2 cumplido (la prueba corre con `cw
 ## Notas
 - Corrección 2026-11-01: el script se ejecuta al importarse (lo carga el lanzador fijo de task-04); `process.exitCode` en vez de `process.exit`.
 - Decisión menor: «una línea por rechazo» se implementó como una línea por motivo devuelto por `validarTarea` (formato `<ruta>: <motivo>`), no una línea por archivo.
-- Hueco menor: la *Verificación* espera `OK: 6` y el glob `task-*.md` de F24 da 7 archivos (task-01 a task-07; task-06 y task-07 se renumeraron en el árbol de trabajo). Las siete son válidas y el código es 0. No se cambió la tarea ni el validador; el «6» parece estar desactualizado y conviene que Franco lo corrija al revisar.
+- Hueco menor: la *Verificación* espera `OK: 6` y el glob `task-*.md` de F24 da 7 archivos (task-01 a task-07; task-06 y task-07 se renumeraron en el árbol de trabajo). Las siete son válidas y el código es 0. No se cambió la tarea ni el validador; el «6» parece estar desactualizado y conviene que la persona usuaria lo corrija al revisar.
 - Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

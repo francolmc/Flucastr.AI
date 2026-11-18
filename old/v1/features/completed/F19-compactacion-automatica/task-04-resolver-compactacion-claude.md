@@ -1,6 +1,9 @@
 # task-04 — `resolver.mjs`: compactación de Claude Code y aviso en `comparar-modelos`
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Completar `scripts/resolver.mjs` con la variante de Claude Code: `fijar-compactacion claude` escribe `autoCompactWindow = compactar_en + 33000` en el `settings.local.json` de un proyecto (sin pisar nada) y `quitar-compactacion claude` lo deshace. Además `comparar-modelos` avisa cuando el `modelos.json` personal no trae los campos nuevos (`compactar_en`, `ventanas`). La puerta 4 de esta tarea exige revisar `git diff scripts/`.
 
@@ -41,7 +44,7 @@ Fuera de alcance: la variante `pi` (ya hecha en task-02), `modelos.json`, `insta
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 T=$(mktemp -d)
 node scripts/resolver.mjs fijar-compactacion claude "$T/a/settings.local.json" --simular; ls -A "$T"
 node scripts/resolver.mjs fijar-compactacion claude "$T/a/settings.local.json"; cat "$T/a/settings.local.json"
@@ -65,7 +68,7 @@ Modo yolo: sin rama nueva ni `git switch`; trabajo en `feature/F19-compactacion-
 
 Sintaxis (`node --check scripts/resolver.mjs`): `CHECK_OK`.
 
-Verificación (salida real, `T=/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.iEOa4e6XOl`, HOME=/Users/franco):
+Verificación (salida real, `T=/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.iEOa4e6XOl`, HOME=/Users/la persona usuaria):
 ```
 == 1 simular
 fijado:133000

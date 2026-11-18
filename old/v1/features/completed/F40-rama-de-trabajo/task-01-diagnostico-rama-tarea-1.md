@@ -1,8 +1,11 @@
 # task-01 — Diagnóstico: por qué en modo normal la rama a veces no se crea al empezar la tarea 1
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Franco observó que, en el modo normal, la rama de la feature a veces no existe al empezar la tarea 1. La hipótesis de `definitions/F40-RAMAS.md` §D es que `ejecutar-tarea` comprueba el entorno antes de crear la rama y que el paso de rama solo corre si el encargo trae `Rama:`. Esta tarea verifica la hipótesis leyendo los textos y deja un informe corto con lo confirmado, lo inferido y una recomendación sobre el orden rama/entorno. No cambia ninguna regla: la decisión del orden se toma después, con el informe.
+la persona usuaria observó que, en el modo normal, la rama de la feature a veces no existe al empezar la tarea 1. La hipótesis de `definitions/F40-RAMAS.md` §D es que `ejecutar-tarea` comprueba el entorno antes de crear la rama y que el paso de rama solo corre si el encargo trae `Rama:`. Esta tarea verifica la hipótesis leyendo los textos y deja un informe corto con lo confirmado, lo inferido y una recomendación sobre el orden rama/entorno. No cambia ninguna regla: la decisión del orden se toma después, con el informe.
 
 ## Contexto
 - Tocar: `pruebas/resultados/2026-11-04-f40-diagnostico-rama.md`
@@ -18,7 +21,7 @@ Franco observó que, en el modo normal, la rama de la feature a veces no existe 
 - El informe tiene exactamente tres secciones `## Confirmado`, `## Inferido` y `## Recomendación`, y no supera 4096 bytes.
 - Cada afirmación de «Confirmado» cita archivo y línea que se leyó; lo deducido va en «Inferido».
 - La recomendación elige entre A) rama antes del entorno, B) mantener el orden, con una frase de motivo. No se aplica.
-- Franco puede añadir después sus casos observados; el informe los deja como «Por confirmar con el caso de Franco».
+- la persona usuaria puede añadir después sus casos observados; el informe los deja como «Por confirmar con el caso de Franco».
 
 ## Decisiones abiertas
 Ninguna.

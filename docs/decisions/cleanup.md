@@ -45,8 +45,8 @@ El inventario se obtuvo con `find` y `wc -l`, excluyendo `.git/`, `old/v1/regist
 | 917 | `cambios/estructura-repo/matriz-instalador-inicial.txt` | Evidencia de caracterización del instalador. |
 | 560 | `cambios/estructura-repo/matriz-instalador-parcial.txt` | Evidencia parcial preservada del mismo análisis. |
 | 337 | `cambios/estructura-repo/constructores-ruta.txt` | Captura de consumidores y constructores de rutas. |
-| 2155 | `old/v1/reporte_df.txt` | Archivo histórico protegido; no editar ni trasladar. |
-| 1762 | `old/v1/reporte_mai.txt` | Archivo histórico protegido; no editar ni trasladar. |
+| 2155 | `old/v1/reporte_finanzas.txt` | Archivo histórico protegido; no editar ni trasladar. |
+| 1762 | `old/v1/reporte_memoria.txt` | Archivo histórico protegido; no editar ni trasladar. |
 | 1125 | `old/v1/reporte.txt` | Archivo histórico protegido; no editar ni trasladar. |
 | 1139 | `old/v1/pruebas/comprobaciones/consumo.test.mjs` | Prueba histórica protegida. |
 | 951 | `old/v1/scripts/consumo.mjs` | Script histórico protegido. |

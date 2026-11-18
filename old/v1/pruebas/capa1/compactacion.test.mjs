@@ -34,7 +34,7 @@ function entorno(nombre) {
   for (const p of [home, pi, tmp, join(home, '.claude')]) mkdirSync(p, { recursive: true });
   armarRepo(kit);
   const env = { ...process.env, HOME: home, PI_CODING_AGENT_DIR: pi, TMPDIR: tmp, TMP: tmp, TEMP: tmp };
-  delete env.FLUCASTR_MODELOS; // ni la variable del shell de Franco debe influir en la prueba
+  delete env.FLUCASTR_MODELOS; // ni la variable del shell de la persona usuaria debe influir en la prueba
   function ejecutar(cmd, args) {
     const r = spawnSync(cmd, args, { cwd: kit, env, encoding: 'utf8', timeout: 30000 });
     if (r.error || r.signal) throw new Error(`No se pudo ejecutar ${cmd}: ${r.error ?? r.signal}`);

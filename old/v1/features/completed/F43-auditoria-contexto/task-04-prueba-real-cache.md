@@ -1,13 +1,16 @@
 # task-04 — Prueba real del caché en Claude Code y Pi
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Corre dos lanzamientos seguidos con el mismo prompt en Claude Code y otros dos en Pi, y compara `input`, `cacheRead` y `cacheWrite` del log para medir cuánto del contexto se reutiliza. Esta tarea gasta créditos del proveedor: solo se ejecuta con visto bueno expreso de Franco; sin él, el constructor se detiene antes del paso 2 sin lanzar nada. El resultado queda en `prueba.md`.
+Corre dos lanzamientos seguidos con el mismo prompt en Claude Code y otros dos en Pi, y compara `input`, `cacheRead` y `cacheWrite` del log para medir cuánto del contexto se reutiliza. Esta tarea gasta créditos del proveedor: solo se ejecuta con visto bueno expreso de la persona usuaria; sin él, el constructor se detiene antes del paso 2 sin lanzar nada. El resultado queda en `prueba.md`.
 
 ## Contexto
 - Leer: `features/F43-auditoria-contexto/mecanismos.md`, `definitions/F43-AUDITORIA.md@25-8`
 - Tocar: `features/F43-auditoria-contexto/prueba.md`
-- Binarios presentes (*confirmado* con `which`): `claude` en `/opt/homebrew/bin/claude` y `pi` en `/Users/franco/.local/bin/pi`. Forma de lanzar Pi: `pi --mode json --no-session -p "<texto>"`, como en `pruebas/lanzar-pi.sh` (no ejecutado, inferido para este prompt). Forma de Claude Code: `claude -p "<texto>" --output-format json` (no ejecutado, inferido).
+- Binarios presentes (*confirmado* con `which`): `claude` en `/opt/homebrew/bin/claude` y `pi` en `/Users/persona/.local/bin/pi`. Forma de lanzar Pi: `pi --mode json --no-session -p "<texto>"`, como en `pruebas/lanzar-pi.sh` (no ejecutado, inferido para este prompt). Forma de Claude Code: `claude -p "<texto>" --output-format json` (no ejecutado, inferido).
 - Los logs de sesión se miden con `node scripts/consumo.mjs --raiz <carpeta>` y la salida de lanzamiento se guarda fuera del repo en el directorio temporal de la sesión.
 - De `depende_de:` leer solo las *Notas* de task-03 y su sección `## Para la prueba`.
 - Fuente: definitions/F43-AUDITORIA.md «3. Verificación de caché o resumen compartido»
@@ -89,7 +92,7 @@ Criterios 1 a 4 cumplen (ver filas de `prueba.md`). Ahorro: Claude Code 100.0 % 
 ## Notas
 
 - Autorización: el encargo trae la frase «Franco autoriza la prueba real de F43». Rama comprobada con `git branch --show-current`, sin crear ni cambiar.
-- Relanzada (Franco aprobó el 2026-11-05 el modelo `openai/gpt-6-luna`): solo se relanzó Pi, con `pi --model openai/gpt-6-luna` (flag de `pi --help`). No se editaron `modelos.json` ni configuración. Pi lanzó 2 veces, sin reintentos. Los datos de Claude Code de la corrida anterior se conservan tal cual.
+- Relanzada (la persona usuaria aprobó el 2026-11-05 el modelo `openai/gpt-6-luna`): solo se relanzó Pi, con `pi --model openai/gpt-6-luna` (flag de `pi --help`). No se editaron `modelos.json` ni configuración. Pi lanzó 2 veces, sin reintentos. Los datos de Claude Code de la corrida anterior se conservan tal cual.
 - Hueco menor 1: se mantiene `PI_CACHE_RETENTION=long` (de mecanismos.md) como variable de entorno, no prompt ni tope.
 - Hueco menor 2: se suma por `responseId` (cada corrida de Pi tiene 2 respuestas del modelo, una con lectura de archivo). Para que sea comparable con Claude Code, el total de la corrida es la suma de sus respuestas.
 - Hueco menor 3: la corrida de Pi usó una herramienta de lectura (`toolUse`) aunque el prompt dice solo responder; no se cambió el prompt. Anotado como diferencia de método en *Resultado* de `prueba.md`.

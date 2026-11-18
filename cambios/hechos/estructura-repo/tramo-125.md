@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 125 — Anonimizar agentes/constructor.md
 
 ## Pasos
@@ -16,6 +18,6 @@ Verificación del tramo: `./verify` — nivel 3; además la comprobación espec�
 Handoff: registrar archivos, diff, comandos y resultados; detenerse para revisión.
 
 ## Evidencia
-- Paso 1: el inventario encontró dos referencias a `Franco` en cada copia: la regla de avance entre tramos y la condición de pausa. Ambas se sustituyeron idénticamente por `la persona usuaria`; no se cambiaron obligaciones ni permisos. `$ cmp -s agentes/constructor.md core/agents/constructor.md && node tools/verify/core-compatibility.mjs && node pruebas/contrato-constructor.mjs`: compatibilidad sin salida; suite `ok A1` a `ok A5`, incluidas comprobaciones negativas; `exit 0`.
+- Paso 1: el inventario encontró dos referencias a `Persona` en cada copia: la regla de avance entre tramos y la condición de pausa. Ambas se sustituyeron idénticamente por `la persona usuaria`; no se cambiaron obligaciones ni permisos. `$ cmp -s agentes/constructor.md core/agents/constructor.md && node tools/verify/core-compatibility.mjs && node pruebas/contrato-constructor.mjs`: compatibilidad sin salida; suite `ok A1` a `ok A5`, incluidas comprobaciones negativas; `exit 0`.
 - Paso 2: `$ timeout 95 bash cambios/estructura-repo/reproducir-linea-base.sh`: salida `verify coincide salvo el mensaje exacto autorizado del escenario 9.` y `Simulaciones repetibles y verify coinciden con linea-base/; aplica solo la excepción exacta del escenario 9.`; `exit 0` en 43,2 s, dentro del límite. La comparación aislada de códigos, salidas y efectos de `./verify` y dos simulaciones coincide con la referencia aplicando solo esa excepción.
 - Punto de control: archivos de producto `agentes/constructor.md` y `core/agents/constructor.md`; cambio textual idéntico de la persona cuyo visto bueno se requiere. Compatibilidad, contrato del constructor y reproducción aislada de línea base pasaron. Sin acceso a proyectos reales ni áreas excluidas.

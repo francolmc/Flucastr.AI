@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 133 — Anonimizar skill de planificación y contrato de verify
 
 ## Pasos
@@ -16,7 +18,7 @@ Verificación del tramo: `./verify` — nivel 3; además la comprobación espec�
 Handoff: registrar archivos, diff, comandos y resultados; detenerse para revisión.
 
 ## Evidencia
-- Paso 1: en ambas copias reemplacé todas las menciones personales por «la persona usuaria» y actualicé el literal positivo, comentario y salida de `tools/verify/agent-contracts.sh`; la prueba negativa conserva `Falla la 2 o la 4`. `cmp` confirmó copias idénticas; ausencia de `Franco` en el par; ejecución aislada del bloque `agent-contracts.sh` pasó 8i, 8k y 8l, incluyendo éxito positivo y fallo negativo (`exit 0`). La diferencia de texto es la anonimización autorizada; se conservó el contenido y el contrato.
+- Paso 1: en ambas copias reemplacé todas las menciones personales por «la persona usuaria» y actualicé el literal positivo, comentario y salida de `tools/verify/agent-contracts.sh`; la prueba negativa conserva `Falla la 2 o la 4`. `cmp` confirmó copias idénticas; ausencia de `Persona` en el par; ejecución aislada del bloque `agent-contracts.sh` pasó 8i, 8k y 8l, incluyendo éxito positivo y fallo negativo (`exit 0`). La diferencia de texto es la anonimización autorizada; se conservó el contenido y el contrato.
 - Paso 2: el comparador ahora admite solo una aparición de cada línea exacta autorizada de 8i (actual y línea base), además de conservar intacta la excepción exacta del escenario 9; toda otra línea permanece bajo comparación byte a byte. `$ bash -n cambios/estructura-repo/reproducir-linea-base.sh && timeout 95 bash cambios/estructura-repo/reproducir-linea-base.sh` terminó `exit 0` en aproximadamente 43,5 s; las dos simulaciones fueron repetibles, verify pasó y coincidió con la línea base tras retirar únicamente las dos sustituciones exactas. La prueba negativa integrada añadió texto a 8i y confirmó que se rechaza. La línea base no se modificó.
 
 Resolución: el plan ya autoriza anonimizar nombres en mensajes. Ajustar el comparador únicamente para admitir la sustitución exacta documentada en la línea 8i, exigiendo una sola aparición de cada variante y conservando la comparación de todos los demás bytes y la excepción exacta existente del escenario 9. Comprobar que una modificación adicional en 8i se rechaza; repetir el paso 2 sin alterar la línea base.

@@ -1,26 +1,26 @@
-# Contrato de verificación
+# Verification Contract
 
-La garantía cubre solo los permisos instalados por el kit; los efectos internos de scripts declarados quedan sujetos a revisión de la evidencia.
+The guarantee covers only permissions installed by the kit; internal effects of declared scripts remain subject to evidence review.
 
-El kit pide verificación por capacidades, no por herramientas. Cada proyecto declara en su `AGENTS.md`, en la sección Comandos, una línea por capacidad con el comando que la cubre. Una capacidad sin línea se cubre con `./verify`.
+The kit asks for capability-based verification, not tool-based verification. Each project declares one command per capability in the `Commands` section of its `AGENTS.md`. A capability without a line is covered by `./verify`.
 
-## Capacidades
+## Capabilities
 
-- **Rápida** (`Comprobación rápida:`): segundos, en el host, sin servicios levantados. Corresponde al Nivel 1 de `planificar-cambio`.
-- **Servicio** (`Servicio:`): la lógica contra dependencias reales (base de datos, cola, correo), sin interfaz. Corresponde al Nivel 2.
-- **Aceptación** (`Aceptación:`): un archivo por flujo, filtrable por nombre. No corta al primer fallo: resume todos al final. Corresponde al Nivel 3.
-- **Evidencia** (`Evidencia:`): dónde escribe `resultado.json` la corrida.
+- **Quick** (`Comprobación rápida:`): seconds, on the host, with no services running. Corresponds to Level 1 in `planificar-cambio`.
+- **Service** (`Servicio:`): logic against real dependencies (database, queue, email), without a UI. Corresponds to Level 2.
+- **Acceptance** (`Aceptación:`): one file per flow, filterable by name. It does not stop at the first failure; it summarizes all failures at the end. Corresponds to Level 3.
+- **Evidence** (`Evidencia:`): where the run writes `resultado.json`.
 
-## Huella
+## Fingerprint
 
-Por cada carpeta de `repos:`: `{ git status --porcelain -- . ':(exclude,top)cambios/**'; git diff HEAD -- . ':(exclude,top)cambios/**'; } | sha256sum | cut -c1-12`. Se excluye `cambios/` desde la raíz del repo para que editar planes no invalide la evidencia; los demás cambios siguen afectando la huella. Si no hay `HEAD`, se conserva el comportamiento existente: la huella usa solo `git status`.
+For each `repos:` folder: `{ git status --porcelain -- . ':(exclude,top)cambios/**'; git diff HEAD -- . ':(exclude,top)cambios/**'; } | sha256sum | cut -c1-12`. `cambios/` is excluded from the repository root so editing plans does not invalidate the evidence; other changes still affect the fingerprint. If there is no `HEAD`, preserve the existing behavior: the fingerprint uses only `git status`.
 
 ## resultado.json
 
 ```json
-{ "huella": "<12 hex>", "nivel": "rapida|servicio|aceptacion", "fase": "<etapa donde terminó>", "ok": true, "fallo": "ninguno" }
+{ "huella": "<12 hex>", "nivel": "rapida|servicio|aceptacion", "fase": "<stage where it ended>", "ok": true, "fallo": "ninguno" }
 ```
 
-- `fase` es texto libre del proyecto.
-- `fallo` es cerrado: `ninguno`, `entorno`, `dependencia`, `prueba` o `tiempo`.
-- `ok` es `true` solo si la corrida pasó completa.
+- `fase` is free-form project text.
+- `fallo` is closed: `ninguno`, `entorno`, `dependencia`, `prueba`, or `tiempo`.
+- `ok` is `true` only if the complete run passed.

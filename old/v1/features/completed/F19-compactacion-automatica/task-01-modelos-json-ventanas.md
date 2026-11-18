@@ -1,6 +1,9 @@
 # task-01 — `modelos.json` con `ventanas` y `compactar_en`
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Declarar en `modelos.json` los datos que necesita la compactación automática: la ventana de contexto de cada modelo de Pi del perfil `pi-openai` (`ventanas`) y el umbral deseado (`compactar_en`, defecto 100000). Sin esto el resolver no puede calcular `reserveTokens = ventana − compactar_en`. Es el primer paso de F19 y no cambia ninguna resolución de modelos.
 
@@ -19,7 +22,7 @@ Declarar en `modelos.json` los datos que necesita la compactación automática: 
 
 ## Alcance / Fuera de alcance
 Alcance: solo `modelos.json`.
-Fuera de alcance: `version`, niveles, agentes, el perfil `claude-code`, `scripts/resolver.mjs`, `instalar.sh`, pruebas y `~/.flucastr-ai/modelos.json` (el personal de Franco).
+Fuera de alcance: `version`, niveles, agentes, el perfil `claude-code`, `scripts/resolver.mjs`, `instalar.sh`, pruebas y `~/.flucastr-ai/modelos.json` (el personal de la persona usuaria).
 
 ## Pasos
 1. Editar `modelos.json`: añadir `"compactar_en": 100000,` tras `nivel_por_defecto`. Resultado: `node -e "console.log(require('./modelos.json').compactar_en)"` imprime `100000`.
@@ -36,7 +39,7 @@ Fuera de alcance: `version`, niveles, agentes, el perfil `claude-code`, `scripts
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node -e "const c=require('./modelos.json');const p=c.perfiles['pi-openai'];console.log(c.compactar_en, JSON.stringify(p.ventanas)); console.log(JSON.stringify(Object.keys(p.ventanas).sort())===JSON.stringify(Object.values(p.modelos).sort()))"
 for a in arquitecto planificador coordinador constructor; do for h in claude-code pi; do echo "$a $h $(node scripts/resolver.mjs modelo $a $h)"; done; done
 R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -2 "$R"

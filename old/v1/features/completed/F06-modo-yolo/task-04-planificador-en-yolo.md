@@ -1,8 +1,11 @@
 # task-04 — El planificador en modo yolo: sin ronda de refinado ni supuestos
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-En el modo yolo (`definitions/WORKFLOW.md` §9.3) no hay ventana de refinado con Franco ni se inventan supuestos: ante una feature ambigua el `planificador` devuelve `REFINAR:` y el coordinador lo trata como escalación. Además, las tareas que redacta en yolo no pueden depender de ramas ni de commits. Esta tarea deja ambas reglas en `agentes/planificador.md` y en `skills/descomponer-feature/SKILL.md`.
+En el modo yolo (`definitions/WORKFLOW.md` §9.3) no hay ventana de refinado con la persona usuaria ni se inventan supuestos: ante una feature ambigua el `planificador` devuelve `REFINAR:` y el coordinador lo trata como escalación. Además, las tareas que redacta en yolo no pueden depender de ramas ni de commits. Esta tarea deja ambas reglas en `agentes/planificador.md` y en `skills/descomponer-feature/SKILL.md`.
 
 ## Contexto
 - Repo: este, único repo. Leídos: `agentes/planificador.md` (sección `## Refinado`) y `skills/descomponer-feature/SKILL.md` (paso 0 «Refinado (solo si se requiere)» con tres sub-bullets; pasos 1–5; sección `## Completa`).

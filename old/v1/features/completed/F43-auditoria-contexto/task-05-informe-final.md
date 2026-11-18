@@ -1,13 +1,16 @@
 # task-05 — Informe final con recomendación «vale la pena / no»
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Reúne medición, análisis, mecanismos y prueba en `informe.md` y emite la recomendación «vale la pena» o «no» según el criterio del diseño, con el riesgo de contexto desactualizado. Es solo informe: no cambia ninguna regla, prompt, skill ni agente. La decisión caché sí/no es de Franco (puerta aparte); si es «sí» o si hay que recortar prompts, sale como feature `producto` nueva.
+Reúne medición, análisis, mecanismos y prueba en `informe.md` y emite la recomendación «vale la pena» o «no» según el criterio del diseño, con el riesgo de contexto desactualizado. Es solo informe: no cambia ninguna regla, prompt, skill ni agente. La decisión caché sí/no es de la persona usuaria (puerta aparte); si es «sí» o si hay que recortar prompts, sale como feature `producto` nueva.
 
 ## Contexto
 - Leer: `features/F43-auditoria-contexto/analisis.md`, `features/F43-auditoria-contexto/prueba.md`, `definitions/F43-AUDITORIA.md@25-8`
 - Tocar: `features/F43-auditoria-contexto/informe.md`
-- Criterio «vale la pena» (de `definitions/F43-AUDITORIA.md` §3): ahorro medido ≥20 % de los bytes de entrada del rol en la prueba, y mecanismo verificable (hash o fecha del archivo fuente en el resumen), y ningún prompt sube sobre su tope. Si falta alguno: «no». Umbral 20 % confirmado por Franco (2026-11-05).
+- Criterio «vale la pena» (de `definitions/F43-AUDITORIA.md` §3): ahorro medido ≥20 % de los bytes de entrada del rol en la prueba, y mecanismo verificable (hash o fecha del archivo fuente en el resumen), y ningún prompt sube sobre su tope. Si falta alguno: «no». Umbral 20 % confirmado por la persona usuaria (2026-11-05).
 - Riesgo de desactualizado: un «sí» exige que el resumen lleve el hash del original y que el rol lo descarte si no coincide; sin eso, «no».
 - De `depende_de:` leer solo las *Notas* de task-04.
 - Fuente: definitions/F43-AUDITORIA.md «3. Verificación de caché o resumen compartido»
@@ -16,7 +19,7 @@ Reúne medición, análisis, mecanismos y prueba en `informe.md` y emite la reco
 ## Decisiones ya tomadas
 - `informe.md` tiene: `## Resumen` (5 líneas máx.), `## Hallazgos` (top de fuentes y repetidas, con cifras de `analisis.md`), `## Prueba` (ahorro medido por herramienta, de `prueba.md`), `## Criterio` (los tres requisitos, cada uno cumple sí/no con su dato), `## Riesgo de desactualizado` y `## Recomendación`.
 - `## Recomendación` contiene una sola línea que empieza exactamente por `Recomendación: vale la pena` o `Recomendación: no vale la pena`, seguida del motivo en una frase.
-- Si task-04 no se ejecutó (sin autorización de Franco) o dio `n/d`, la recomendación es `Recomendación: no vale la pena` con ese motivo; no se estima el ahorro.
+- Si task-04 no se ejecutó (sin autorización de la persona usuaria) o dio `n/d`, la recomendación es `Recomendación: no vale la pena` con ese motivo; no se estima el ahorro.
 - Cierra con `## Siguiente`: si «sí», una feature `producto` nueva que toca `agentes/planificador.md` y `skills/descomponer-feature/SKILL.md` (ya tocados por F42) y requiere al `arquitecto`; si «no», cerrar F43 con este informe. Solo se propone, no se crea.
 - No se edita `BACKLOG.md`, `STATUS.md` ni `definitions/`.
 

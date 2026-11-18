@@ -46,8 +46,8 @@ gpt-6-luna tiene 4 sesiones exclusivas, menos de 5, así que el medidor avisa «
 ## Hallazgos
 
 1. **La concurrencia deja casi sin muestra.** El 2026-11-08 hubo muchas sesiones solapadas. La exclusividad deja solo 4 sesiones de gpt-6-luna en todo el rango y ninguna de gpt-6.1-sol. Para calibrar hace falta trabajo en serie: una sesión de Codex a la vez, en un bloque donde no haya otra corriendo.
-2. **`used_percent` avanza en pasos de 1 punto.** En los eventos revisados el valor es entero. Una sesión que no cambia el porcentaje da 0 aunque haya consumido cientos de miles de tokens; por ejemplo, la sesión de Memory-AI que empezó 2026-11-08 15:48 UTC (15618 tokens) quedó en 91 → 91. Cada sesión tiene un error de hasta ±1 punto, y un 0 no significa que la sesión no costó nada.
-3. **La cuota se reinicia dentro del día.** Entre las 22:07 y las 23:00 UTC del 2026-11-08 el porcentaje bajó de 97 a 1. Dos sesiones de Memory-AI cruzan ese reinicio (22:07 de gpt-6.1-sol, de 97 a 6; 22:14 de gpt-6-luna, de 98 a 4). Quedan fuera por bajada y también por cruce, así que con estos datos el control de bajada no cambia el resultado. Sin ese control, una sesión exclusiva que cruzara un reinicio restaría puntos; eso lo prueba el caso A6b del fixture.
+2. **`used_percent` avanza en pasos de 1 punto.** En los eventos revisados el valor es entero. Una sesión que no cambia el porcentaje da 0 aunque haya consumido cientos de miles de tokens; por ejemplo, la sesión de un proyecto que empezó 2026-11-08 15:48 UTC (15618 tokens) quedó en 91 → 91. Cada sesión tiene un error de hasta ±1 punto, y un 0 no significa que la sesión no costó nada.
+3. **La cuota se reinicia dentro del día.** Entre las 22:07 y las 23:00 UTC del 2026-11-08 el porcentaje bajó de 97 a 1. Dos sesiones del mismo proyecto cruzan ese reinicio (22:07 de gpt-6.1-sol, de 97 a 6; 22:14 de gpt-6-luna, de 98 a 4). Quedan fuera por bajada y también por cruce, así que con estos datos el control de bajada no cambia el resultado. Sin ese control, una sesión exclusiva que cruzara un reinicio restaría puntos; eso lo prueba el caso A6b del fixture.
 
 ## Recomendación para `modelos.json` (sugerencia, no aplicada)
 
@@ -56,7 +56,7 @@ No cambiar niveles ni esfuerzos todavía. Los datos de cuota de hoy no alcanzan 
 - Al menos 5 sesiones exclusivas por modelo con variación de cuota mayor que 0. Eso se consigue corriendo Codex en serie, un bloque de trabajo a la vez.
 - Repetir el informe con esos datos. Si la tabla de puntos por millón de tokens muestra una diferencia clara entre gpt-6-luna y gpt-6.1-sol, esa diferencia decide el cambio; si no, `modelos.json` queda como está.
 
-Franco aprueba cualquier cambio en `modelos.json` (tramo 3).
+La persona usuaria aprueba cualquier cambio en `modelos.json` (tramo 3).
 
 ## Límites
 
@@ -83,7 +83,7 @@ El principal editaba el producto, probaba y depuraba entornos en vez de revisar.
 
 Las sesiones de subagente (el constructor) no cuentan. Los fixtures de `pruebas/uso/fixtures/invasion/` fijan los casos: sin escrituras (0 y 0), escritura en `src/` con `./verify` (1 y 1; el subagente no suma) y escritura en `cambios/` (0 y 0).
 
-Línea base (9 nov, README de Memory-AI): el principal gastó 10 créditos frente a 0,7 del constructor en el mismo cambio, con 58 llamadas. Editó tres veces pruebas del producto (`test/pi-context.test.ts` y `test/memory-actions.test.ts`) en dos sesiones, y corrió `./verify` con Docker para un cambio de documentos.
+Línea base (9 nov, README de un proyecto): el principal gastó 10 créditos frente a 0,7 del constructor en el mismo cambio, con 58 llamadas. Editó tres veces pruebas del producto (`test/pi-context.test.ts` y `test/memory-actions.test.ts`) en dos sesiones, y corrió `./verify` con Docker para un cambio de documentos.
 
 Después (vacío hasta tener sesiones nuevas con el principal nuevo):
 

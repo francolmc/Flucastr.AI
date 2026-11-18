@@ -3,14 +3,19 @@ estado: listo
 rama: feature/kit-v2
 repos: [.]
 ---
+
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # workspaces-multirepo
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 
 ## Objetivo
 El kit soporta workspaces: una carpeta que no es repo y contiene varios. La raíz del workspace es la unidad de trabajo (AGENTS.md raíz, `docs/proyecto.md`, `cambios/`, `verify`), los planes dicen en qué repos tocan y el principal escribe los documentos iniciales.
 
 ## Supuestos
-- `repos:` es una lista de carpetas relativas a la raíz; `.` es la raíz. Si Franco prefiere otro nombre o formato, cambian la plantilla y 3 textos.
-- Una carpeta de `repos:` sin `.git` (p. ej. raíz que Franco decidió no hacer repo) no recibe rama: el constructor lo anota en *Notas* y sigue.
+- `repos:` es una lista de carpetas relativas a la raíz; `.` es la raíz. Si la persona usuaria prefiere otro nombre o formato, cambian la plantilla y 3 textos.
+- Una carpeta de `repos:` sin `.git` (p. ej. raíz que la persona usuaria decidió no hacer repo) no recibe rama: el constructor lo anota en *Notas* y sigue.
 - El `.gitignore` propuesto para la raíz lista cada carpeta hija con `.git` (una línea `/<carpeta>/`), más `.claude/settings.local.json`.
 - `docs/proyecto.md` es una página: qué es, repos y su rol, cómo se conectan, decisiones con su porqué.
 - Sin cambios en `instalar.sh`, `desinstalar.sh` ni `scripts/` (las reglas deny ya viven en `<raíz>/.claude/settings.json`; `git -C <hijo> switch -c` no está bloqueado).
@@ -22,7 +27,7 @@ Cambiar: `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, `
 - Plantilla del plan: frontmatter con `rama:` y `repos:`. Obligatorio; un proyecto de un repo escribe `repos: [.]`.
 - La rama se crea solo en los repos listados, con `git -C <carpeta> switch -c <rama>` (o `git switch -c` si es `.`). Si ya existe, `PAUSA acceso`, como hoy. El constructor lee `repos:` del plan; el encargo sigue siendo solo ruta y `Rama:`.
 - Si el cambio toca solo la raíz (documentos, verify), `repos: [.]`: la raíz cuenta como un repo más.
-- `preparar-proyecto` detecta repos con `find . -maxdepth 2 -name .git -not -path './.git'`. Si hay hijos y la raíz no tiene `.git`, PREGUNTA a Franco (cerrada, recomendada «sí») si hace la raíz repo propio: `git init` + `.gitignore`. Nunca lo hace sin respuesta ni hace commit.
+- `preparar-proyecto` detecta repos con `find . -maxdepth 2 -name .git -not -path './.git'`. Si hay hijos y la raíz no tiene `.git`, PREGUNTA a la persona usuaria (cerrada, recomendada «sí») si hace la raíz repo propio: `git init` + `.gitignore`. Nunca lo hace sin respuesta ni hace commit.
 - El principal nunca decide solo «repo único o varios»: lo pregunta (opciones cerradas). La detección de hijos existentes es un hecho, no una decisión.
 - En un proyecto existente el principal escribe `AGENTS.md` raíz y `docs/proyecto.md`; enlaza los `AGENTS.md` de los hijos (y `specs/`) sin reescribirlos ni moverlos. El constructor solo construye: `verify`, `/health`, `.env.example`.
 - `verify` vive en la raíz del workspace y llama a cada repo por su ruta.
@@ -37,7 +42,7 @@ Cambiar: `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, `
 ## Verificación
 1. `./verify` termina en `VERIFY OK`.
 2. Prueba real (la corre el principal al volver el constructor), fuera del repo y con el prompt del repo:
-   `d=$(mktemp -d) && cd "$d" && for r in api web; do mkdir $r && git -C $r init -q && printf '# %s\n' $r > $r/AGENTS.md; done && claude -p --append-system-prompt "$(node /Users/franco/Codes/flucastr/Flucastr.AI/scripts/resolver.mjs cuerpo /Users/franco/Codes/flucastr/Flucastr.AI/agentes/principal.md)" "Prepara este proyecto para trabajar con el kit"`
+   `d=$(mktemp -d) && cd "$d" && for r in api web; do mkdir $r && git -C $r init -q && printf '# %s\n' $r > $r/AGENTS.md; done && claude -p --append-system-prompt "$(node /Users/persona/Codes/flucastr/Flucastr.AI/scripts/resolver.mjs cuerpo /Users/persona/Codes/flucastr/Flucastr.AI/agentes/principal.md)" "Prepara este proyecto para trabajar con el kit"`
    Esperado: existen `AGENTS.md` y `docs/proyecto.md` en la raíz escritos por el principal, `api/AGENTS.md` y `web/AGENTS.md` sin cambios, no existe `.git` en la raíz y la salida propone hacerla repo y espera respuesta. Si el primer plan se escribe, trae `repos:`.
 
 ## Pasos
@@ -82,7 +87,7 @@ exit 0
 - `constructor.md`: además de `branch --show-current` y `switch -c`, permite `git -C <carpeta> rev-parse --verify --quiet refs/heads/<rama>` (solo lectura). Hace falta para detectar si la rama ya existe antes de crearla.
 - `preparar-proyecto`, sección 4: la detección se escribió como «raíz sin `.git` y hay hijos con `.git`» (un hijo basta para preguntar; la pregunta la hace el principal). El caso de un solo hijo queda cubierto por la pregunta, no por una regla aparte.
 - `verify` paso 8: 8a corre `git init` solo en un temporal que se borra al salir.
-- Franco: reinstala (`bash instalar.sh`) para que los agentes tomen el cambio.
+- la persona usuaria: reinstala (`bash instalar.sh`) para que los agentes tomen el cambio.
 
 ## Evidencia del principal (prueba real, 2026-11-06, corrida por la sesión de coordinación)
 Workspace temporal fuera del repo: `api/` y `web/` con su `.git` y un `AGENTS.md` de una línea cada uno, raíz sin `.git`. Agentes y skills tomados del repo (no de `~/.claude`). `claude -p --agent principal`, con permiso para `git init` a propósito.

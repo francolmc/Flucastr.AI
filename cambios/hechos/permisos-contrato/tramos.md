@@ -1,5 +1,7 @@
 # Pasos del plan permisos-contrato
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Pasos
 
 ### Tramo 1: contrato y generación conservadora
@@ -40,19 +42,19 @@ Archivos: `instalar.sh`, `scripts/permisos-hook.mjs`, `scripts/kit-run.mjs`, `sk
   - evidencia: `node --test pruebas/permisos-contrato/generacion.test.mjs pruebas/permisos-contrato/hook.test.mjs pruebas/permisos-contrato/estructura.test.mjs` — 9/9, exit 0; cubre hook ausente/instalación, política de `kit run`, recuperación/idempotencia y conservación de reglas/hooks ajenos.
 - [x] En `instalar.sh` y `skills/diagnosticar/diagnosticar.mjs` detectar `allow` amplias en ajustes globales y de proyecto, incluyendo `Bash(*)`, `npm *`, `docker *` y `bash -c`, e informar origen y regla exacta sin modificarlas; diagnóstico también avisa si falta hook o hay `allow` sin él. Probar con ajustes temporales y no leer credenciales.
   - evidencia: la misma suite terminó 9/9, exit 0; `hook.test.mjs` configura reglas ficticias globales, de proyecto y proyecto-local y comprueba origen, regla literal y `allow-sin-hook`.
-- [ ] En `scripts/kit-run.mjs` y `scripts/permisos-hook.mjs` preparar el retorno a autorización automática solo en `kit run` si Franco informa fallo en b, c o d; probar el retorno y la conservación de ajustes ajenos en proyecto temporal.
+- [ ] En `scripts/kit-run.mjs` y `scripts/permisos-hook.mjs` preparar el retorno a autorización automática solo en `kit run` si la persona usuaria informa fallo en b, c o d; probar el retorno y la conservación de ajustes ajenos en proyecto temporal.
 
 - [x] En `nucleo/contrato/verificacion.md` escribir una vez el alcance de la garantía y la revisión de scripts; Comprobación: leer el diff y confirmar que no se promete una protección que la herramienta no ofrece.
   - evidencia: revisión del diff; la única línea permanente restringe la garantía a permisos del kit y somete efectos internos de scripts a revisión de evidencia.
 - [x] En `nucleo/contrato/verificacion.md` añadir una línea que limite la garantía a lo instalado por el kit; comprobar que identifica permisos ajenos como excepción.
   - evidencia: esa misma línea dice “solo los permisos instalados por el kit”, diferenciando las autorizaciones ajenas.
-- [x] En `friccion.md` registrar con referencia la evidencia de Docker de Don Financio y el estado comprobado o pendiente de loopback; Comprobación: contrastar cada afirmación con `docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md`.
+- [x] En `friccion.md` registrar con referencia la evidencia de Docker de Proyecto.Finanzas y el estado comprobado o pendiente de loopback; Comprobación: contrastar cada afirmación con `docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md`.
   - evidencia: el registro enlaza el hallazgo que acredita 30 escalaciones Docker y deja loopback como pendiente de reproducción.
 - [x] En `verify` sustituir las comprobaciones de cantidad y lista fija por estructura y comportamiento sin eliminar las negativas pertinentes; comprobar reglas generadas y regresiones mediante `node --test pruebas/permisos-contrato/estructura.test.mjs` y `./verify`.
   - evidencia: suite del tramo 9/9, exit 0; `./verify` — `VERIFY OK`, exit 0. Se conserva la comprobación negativa de comandos protegidos y se valida estructuralmente que solo `ls` queda como `allow` seguro.
-- [ ] Preparar la prueba real descrita en `plan.md` y esperar los resultados de Franco; registrar a/b/c/d en Evidencia. Si b, c o d falla, aplicar y probar el retorno previsto en este mismo tramo; si a falla, corregir sin ampliar la autorización insegura.
+- [ ] Preparar la prueba real descrita en `plan.md` y esperar los resultados de la persona usuaria; registrar a/b/c/d en Evidencia. Si b, c o d falla, aplicar y probar el retorno previsto en este mismo tramo; si a falla, corregir sin ampliar la autorización insegura.
 
 Evidencia de preparación manual: los cuatro pasos están especificados en `plan.md`; no se ejecutó la sesión real y no se inventan resultados.
 
-Verificación del tramo: `node --test pruebas/permisos-contrato/generacion.test.mjs pruebas/permisos-contrato/hook.test.mjs pruebas/permisos-contrato/estructura.test.mjs` y `./verify`; además, prueba real de Franco registrada en Evidencia.
+Verificación del tramo: `node --test pruebas/permisos-contrato/generacion.test.mjs pruebas/permisos-contrato/hook.test.mjs pruebas/permisos-contrato/estructura.test.mjs` y `./verify`; además, prueba real de la persona usuaria registrada en Evidencia.
 

@@ -1,10 +1,12 @@
 # Sondeo de viabilidad: soporte a Codex (OpenAI Codex CLI)
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Fecha: 2026-10-31. Solo lectura e investigación; borrador. No se tocó código, `definitions/` ni `STATUS.md`. No se abrió `~/.codex/auth.json`. De `~/.codex/config.toml` solo se listaron los nombres de las tablas `[...]` y las claves `model*`, filtrando cualquier línea con token, key, secret o bearer.
 
 ## 0. Qué hay en este equipo y qué calidad de evidencia tiene
 
-- **Codex SÍ está instalado.** `which codex` -> `/Users/franco/.local/bin/codex` -> `~/.codex/packages/standalone/releases/0.160.0-aarch64-apple-darwin/bin/codex`; `codex --version` -> `codex-cli 0.160.0`.
+- **Codex SÍ está instalado.** `which codex` -> `/Users/persona/.local/bin/codex` -> `~/.codex/packages/standalone/releases/0.160.0-aarch64-apple-darwin/bin/codex`; `codex --version` -> `codex-cli 0.160.0`.
 - **No hay documentación local** en el paquete (solo binario, `codex-resources/voice|zsh`, `codex-path/rg`). No existe un equivalente a `docs/` de Pi. Fuentes usadas, de más a menos fiable:
   1. **Salida de comandos** (`codex --help`, `codex exec --help`, `codex features list`, `codex debug models`): evidencia firme de lo que el binario ofrece.
   2. **Archivos reales en `~/.codex/`**: `config.toml` (claves visibles), `hooks.json`, `skills/spec-driven-ai-workflow/SKILL.md`.
@@ -48,7 +50,7 @@ Fecha: 2026-10-31. Solo lectura e investigación; borrador. No se tocó código,
 | CONFIRMADO | NO VERIFICADO |
 | --- | --- |
 | `config.toml` del usuario: `model = "gpt-6-sol"`, `model_reasoning_effort = "medium"`. Flags: `-m/--model`, `-p/--profile`, `-c model="..."`. | Cómo se escribe el modelo en un archivo de rol (campo `model` en el TOML del rol; binario sugiere que sí). |
-| `codex debug models` (catálogo local, sin red): `gpt-6.1-sol`, `gpt-6-astra`, `gpt-6.1-terra`, `gpt-6-sol`, `gpt-6-luna`, `gpt-5.6-sol/terra/luna`. **Coinciden con el perfil `pi-openai`** de `modelos.json` (`gpt-6-astra` alto, `gpt-6.1-sol` medio, `gpt-6-luna` bajo), solo que **sin el prefijo `openai/`**. | Que el modelo de la cuenta de Franco permita los tres niveles (depende del plan; `gpt-reserve` y `codex-auto-review` aparecen ocultos). |
+| `codex debug models` (catálogo local, sin red): `gpt-6.1-sol`, `gpt-6-astra`, `gpt-6.1-terra`, `gpt-6-sol`, `gpt-6-luna`, `gpt-5.6-sol/terra/luna`. **Coinciden con el perfil `pi-openai`** de `modelos.json` (`gpt-6-astra` alto, `gpt-6.1-sol` medio, `gpt-6-luna` bajo), solo que **sin el prefijo `openai/`**. | Que el modelo de la cuenta de la persona usuaria permita los tres niveles (depende del plan; `gpt-reserve` y `codex-auto-review` aparecen ocultos). |
 
 **Encaje con `modelos.json`:** bueno. Un perfil nuevo `codex-openai` (`"herramienta": "codex"`) con los tres niveles y `perfil_por_defecto.codex`; `resolver.mjs` necesita aceptar `codex` como herramienta y un modo `agente-codex` que emita TOML. Alternativa de cero código nuevo en el resolver: reutilizar `pi-openai` y recortar el prefijo `openai/` (frágil, descartada).
 
@@ -109,7 +111,7 @@ Encaje en `instalar.sh`: nuevo `INSTALAR_CODEX` (detectado por `[ -d ~/.codex ]`
 
 | # | Tarea | Riesgo |
 | --- | --- | --- |
-| 0 | **Spike en el PC de Franco** (sin código del kit): comprobar los NO VERIFICADO críticos (ver sección 5) | Bajo (solo lectura/experimento), pero **decide todo** |
+| 0 | **Spike en el PC de la persona usuaria** (sin código del kit): comprobar los NO VERIFICADO críticos (ver sección 5) | Bajo (solo lectura/experimento), pero **decide todo** |
 | 1 | `modelos.json` + `resolver.mjs`: herramienta `codex`, `agente-codex`, pruebas | Bajo |
 | 2 | `instalar.sh`/`desinstalar.sh`: detección, skills de usuario por copia, `--solo codex`, manifiesto, Capa 1 | Medio (regresión sobre Claude/Pi) |
 | 3 | Lanzadores `codex-<agente>` con instrucciones + modelo | Bajo |
@@ -131,7 +133,7 @@ Total: **9 tareas** (1 spike + 8). Sin subagentes ni permisos finos (tareas 4 y 
 
 Por qué vale la pena: los tres niveles ya están en el catálogo de Codex, el formato de skills y `AGENTS.md` coinciden, y hay indicios de más control técnico que en Pi.
 
-## 5. Qué debería comprobar Franco (spike, tarea 0)
+## 5. Qué debería comprobar la persona usuaria (spike, tarea 0)
 
 1. **Roles:** crear un rol mínimo de prueba (archivo TOML con `name`, `description`, `developer_instructions`, `model`) en `~/.codex/agents/` o `<proyecto>/.codex/agents/` y ver si aparece en la lista de roles disponibles (`Available roles`) de una sesión. Si no, buscar en la documentación oficial de OpenAI («Codex subagents / custom agents») la ruta correcta.
 2. **Delegación:** pedir a un agente principal que lance ese rol y confirmar en el registro qué modelo usó el subagente.

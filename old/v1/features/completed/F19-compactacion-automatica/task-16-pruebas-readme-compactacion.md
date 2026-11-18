@@ -1,6 +1,9 @@
 # task-16 — `pruebas/README.md`: documentar las pruebas de compactación
 repo: Flucastr.AI   depende_de: task-15   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Agregar a `pruebas/README.md` una viñeta que describe las pruebas sin modelo de la compactación (resolver de Pi y de Claude Code, Capa 1 y regla del `coordinador`) y la corrida con modelo en Pi que cruza una compactación (dos informes), para que quien corra las pruebas sepa qué fija cada una, dónde corre y qué no se hizo.
 
@@ -8,7 +11,7 @@ Agregar a `pruebas/README.md` una viñeta que describe las pruebas sin modelo de
 - Leído `pruebas/README.md`: las viñetas de las líneas 5–6 (rápida y suite completa), 9 (modelo de cada agente) y 10–14 (corridas del `coordinador` con sub-lista) son el estilo a imitar; la última viñeta es «Registro de eventos: …».
 - Archivos a citar (existen, leídos): `pruebas/comprobaciones/resolver-compactacion-pi.test.mjs` (task-03), `pruebas/comprobaciones/resolver-compactacion-claude.test.mjs` (task-05), `pruebas/capa1/compactacion.test.mjs` (task-10) y `pruebas/comprobaciones/coordinador-status.test.mjs` (task-13). Leído `pruebas/rapida.sh` línea 8: el bucle incluye `pruebas/capa1/compactacion.test.mjs` y las comprobaciones `pruebas/comprobaciones/*.test.mjs`, así que las cuatro corren dentro de la rápida; léelo de nuevo y di lo que haga al momento de escribir.
 - Informes con modelo (leídos): `pruebas/resultados/2026-10-31-compactacion-pi.md` (intento 1, `Veredicto: FALLA` por umbral inviable: 1500 tokens de margen, el agente compacta en cada paso y no llega a escribir `STATUS.md`) y `pruebas/resultados/2026-10-31-compactacion-pi-2.md` (intento 2, `OK` con una reserva: la retoma pudo salir del resumen de la compactación y no de releer `STATUS.md`; umbral artificial de 18000 tokens de margen, modelo `openai/gpt-6.1-sol`, 2026-10-31).
-- Claude Code: NO se hizo corrida con modelo (decisión de Franco, 2026-10-31): costo estimado US$1–3, el mismo límite de diseño que Pi, y Claude Code ya tiene una compactación automática real observada en `pruebas/resultados/2026-10-31-verificacion-compactacion.md` (`system/compact_boundary`, `trigger: "auto"`, umbral real ≈ ventana − 33000, el más bajo posible ≈ 67 k).
+- Claude Code: NO se hizo corrida con modelo (decisión de la persona usuaria, 2026-10-31): costo estimado US$1–3, el mismo límite de diseño que Pi, y Claude Code ya tiene una compactación automática real observada en `pruebas/resultados/2026-10-31-verificacion-compactacion.md` (`system/compact_boundary`, `trigger: "auto"`, umbral real ≈ ventana − 33000, el más bajo posible ≈ 67 k).
 - No existe comprobador que lea `pruebas/README.md`; se verifica con la rápida.
 
 ## Decisiones ya tomadas
@@ -35,7 +38,7 @@ Fuera de alcance: cualquier otra viñeta, `README.md` raíz, scripts, comprobado
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -n "compactacion" pruebas/README.md
 ls pruebas/comprobaciones/resolver-compactacion-pi.test.mjs pruebas/comprobaciones/resolver-compactacion-claude.test.mjs pruebas/capa1/compactacion.test.mjs pruebas/comprobaciones/coordinador-status.test.mjs pruebas/resultados/2026-10-31-compactacion-pi.md pruebas/resultados/2026-10-31-compactacion-pi-2.md pruebas/resultados/2026-10-31-verificacion-compactacion.md
 grep -n "Veredicto" pruebas/resultados/2026-10-31-compactacion-pi*.md
@@ -46,7 +49,7 @@ git diff --stat pruebas/README.md
 Esperado: al menos cinco líneas del primer `grep`; siete rutas listadas; los veredictos de los dos informes de Pi; la línea de `rapida.sh` que incluye la prueba; `rapida exit=0`; el diff toca solo `pruebas/README.md`. No ejecutado por el planificador: la edición de `pruebas/README.md` es de esta tarea.
 
 ## Evidencia
-Rama (`git branch --show-current`): `feature/F19-compactacion-automatica`, sin switch. HOME de la corrida: `HOME=/Users/franco`. Sin commit, push, PR, merge ni despliegue. No se ejecutó `instalar.sh` ni `desinstalar.sh`; no se tocó `~/.pi` ni `~/.claude`; no se abrió `auth.json`, `.env` ni credenciales. `definitions/STATUS.md` no se escribió. Único archivo editado: `pruebas/README.md` (más esta tarea).
+Rama (`git branch --show-current`): `feature/F19-compactacion-automatica`, sin switch. HOME de la corrida: `HOME=/Users/persona`. Sin commit, push, PR, merge ni despliegue. No se ejecutó `instalar.sh` ni `desinstalar.sh`; no se tocó `~/.pi` ni `~/.claude`; no se abrió `auth.json`, `.env` ni credenciales. `definitions/STATUS.md` no se escribió. Único archivo editado: `pruebas/README.md` (más esta tarea).
 
 Paso 2, inserción: viñeta «Compactación automática (F19)» con sub-lista, después de «Registro de eventos» (líneas 19 a 29 de `pruebas/README.md`).
 
@@ -77,7 +80,7 @@ Criterio 3 (Claude Code), salida real de `grep -n "Claude Code" pruebas/README.m
 9:- Modelo de cada agente: `node pruebas/comprobaciones/modelos-agentes.mjs` comprueba que
 13:  - Lanzador en Claude Code `pruebas/lanzar-coordinador-claude.sh`.
 21:  - `node --test pruebas/comprobaciones/resolver-compactacion-claude.test.mjs` (10 prue
-28:  - Claude Code: no se hizo corrida con modelo (decisión de Franco, 2026-10-31): costo 
+28:  - Claude Code: no se hizo corrida con modelo (decisión de Persona, 2026-10-31): costo
 ```
 La línea 28 (viñeta nueva) cumple el criterio 3.
 
@@ -88,7 +91,7 @@ Verificación del paso 2 (`grep -n "compactacion" pruebas/README.md`, al menos 5
 22:  - `node --test pruebas/capa1/compactacion.test.mjs` (9 pruebas, unos 5 s): `instalar.
 25:    - `pruebas/resultados/2026-10-31-compactacion-pi.md`: intento 1, **Veredicto: FALLA
 26:    - `pruebas/resultados/2026-10-31-compactacion-pi-2.md`: intento 2, **Veredicto: OK*
-28:  - Claude Code: no se hizo corrida con modelo (decisión de Franco, 2026-10-31): costo 
+28:  - Claude Code: no se hizo corrida con modelo (decisión de Persona, 2026-10-31): costo
 ```
 Son seis líneas. Cumple.
 

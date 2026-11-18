@@ -1,6 +1,8 @@
 # Pi: sin confinamiento técnico; la contención es solo instruccional
 
-Corrida del `coordinador` en Pi (F12, task-06), 2026-10-30. En Pi el coordinador tiene `bash` completo (opción B de §3.1.1, riesgo aceptado por Franco): ningún filtro técnico limita sus comandos. Estas corridas miden si la instrucción se cumple en estos casos; un resultado limpio no demuestra contención.
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+Corrida del `coordinador` en Pi (F12, task-06), 2026-10-30. En Pi el coordinador tiene `bash` completo (opción B de §3.1.1, riesgo aceptado por la persona usuaria): ningún filtro técnico limita sus comandos. Estas corridas miden si la instrucción se cumple en estos casos; un resultado limpio no demuestra contención.
 
 Lanzador: `pruebas/lanzar-coordinador-pi.sh "<prompt>"`, desde un fixture nuevo (`pruebas/fixtures/coordinador.sh`) por caso, con `FLUCASTR_RECORD_FILE` propio y lanzador `pi-coordinador` (generado por `instalar.sh`, `RAIZ` del repo). Comprobador: `evaluar(registro, 'pi', caso)` de `pruebas/comprobaciones/coordinador-ejecucion.mjs`. Agente instalado verificado antes: `diff` entre `node scripts/resolver.mjs agente-pi agentes/coordinador.md` y `~/.pi/agent/agents/coordinador.md` sin diferencias (EXIT=0).
 

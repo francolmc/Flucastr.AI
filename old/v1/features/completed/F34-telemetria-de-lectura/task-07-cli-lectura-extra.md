@@ -1,6 +1,9 @@
 # task-07 — Prueba de punta a punta: `informe.mjs --consumo <dir> --pistas` con lecturas extra
 repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Se comprueba, con la CLI real y logs sintéticos de Pi y de Claude Code, que el conteo, la promoción (pista 7), la alerta (pista 8) y el cumplimiento (pista 9) salen juntos, y que ni el motivo ni el texto de los mensajes llegan a la salida. Sin código de producto.
 
@@ -60,5 +63,5 @@ Nota: la primera pasada de verificación dio `ℹ pass 0`, `ℹ fail 3` (tareas 
 - Escenario Pi: `sesion-lectura` con tres corridas de planificador (F31-a/task-01-b, F32-a/task-01-b, F32-a/task-02-b); solo la r1 declara `Lectura extra: definitions/WORKFLOW.md; motivo=SECRETO-MOTIVO`.
 - Escenario Claude Code: una corrida de planificador con un `Read` de `/ws/definitions/WORKFLOW.md` (1024 bytes) y la declaración en el turno final; prueba (3).
 - Las raíces temporales van con `os.tmpdir()` y se borran con `after`, como el modelo.
-- Registro: la tarea no se escribe `hecha`; queda para revisión de Franco.
+- Registro: la tarea no se escribe `hecha`; queda para revisión de la persona usuaria.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

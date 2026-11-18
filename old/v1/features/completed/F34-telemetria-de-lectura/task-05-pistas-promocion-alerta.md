@@ -1,8 +1,11 @@
 # task-05 — pistas.mjs: pistas 7 (promoción), 8 (alerta) y 9 (cumplimiento)
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`calcularPistas` suma tres pistas de lectura desde `corridas` (con `lecturaExtra` y `kb`, tasks 02 y 03): la 7 propone promover a `Lee:` un archivo leído de más con frecuencia; la 8 alerta si las lecturas extra por llamada o los KB por corrida se disparan; la 9 avisa si se declaran menos del 90 % de las lecturas extra. Decide Franco; las pistas solo sugieren.
+`calcularPistas` suma tres pistas de lectura desde `corridas` (con `lecturaExtra` y `kb`, tasks 02 y 03): la 7 propone promover a `Lee:` un archivo leído de más con frecuencia; la 8 alerta si las lecturas extra por llamada o los KB por corrida se disparan; la 9 avisa si se declaran menos del 90 % de las lecturas extra. Decide la persona usuaria; las pistas solo sugieren.
 
 ## Contexto
 - Tocar: `scripts/pistas.mjs`, `pruebas/comprobaciones/informe-pistas-lectura.test.mjs`
@@ -16,11 +19,11 @@ repo: Flucastr.AI   depende_de: task-03   estado: hecha
 ## Decisiones ya tomadas
 - Constantes exportadas: `UMBRAL_PROMOCION_CORRIDAS = 3`, `UMBRAL_PROMOCION_FEATURES = 2`, `UMBRAL_EXTRAS_POR_LLAMADA = 1`, `UMBRAL_KB = 1.25`, `UMBRAL_CUMPLIMIENTO = 0.9`.
 - Todo bajo `if (corridas)` (sin corridas no se evalúan). Una corrida sin `lecturaExtra` cuenta como 0 extras. Las tres pistas son globales (`feature: null`); se insertan en orden de rol y de ruta (alfabético) para un orden estable.
-- Pista 7, por par `(rol, ruta)`: corridas del rol con esa ruta en `extras` ≥ 3 **y** features distintas no nulas de esas corridas ≥ 2. Medición: `<rol> lee de más \`<ruta>\` en <c> corridas y <f> features`. Acción: «Pásala a `Lee:` del rol o a su lista de «Qué lees» (decide Franco).»
+- Pista 7, por par `(rol, ruta)`: corridas del rol con esa ruta en `extras` ≥ 3 **y** features distintas no nulas de esas corridas ≥ 2. Medición: `<rol> lee de más \`<ruta>\` en <c> corridas y <f> features`. Acción: «Pásala a `Lee:` del rol o a su lista de «Qué lees» (decide la persona usuaria).»
 - Pista 8, por rol, dos formas independientes (como la pista 4):
   - (a) Σ `extras.length` / n° de corridas del rol > 1 (estricto). Medición: `<rol>: <x> lecturas extra por llamada` con `x` a un decimal (`toFixed(1)`).
   - (b) media de `kb` de corridas **con** extras > 1,25 × media de `kb` de corridas **sin** extras (solo `kb` numérico; hacen falta al menos una de cada tipo y media sin extras > 0). Medición: `<rol>: <p> % más KB por corrida con lectura extra que sin ella` con `p = Math.round((con/sin - 1)*100)`. La base es la propia del rol sin extras (supuesto: el documento no fija otra base).
-  - Acción: «Lecturas extra por encima del límite: si se repite en una segunda feature, vuelve ese rol a «No leas» duro (decide Franco).»
+  - Acción: «Lecturas extra por encima del límite: si se repite en una segunda feature, vuelve ese rol a «No leas» duro (decide la persona usuaria).»
 - Pista 9, global: con Σ extras ≥ 1 y Σ declaradas / Σ extras < 0,9 (estricto). Medición: `<d> de <e> lecturas extra declaradas (<p> %)` con `p = Math.round(d*100/e)`. Acción: «Declara cada lectura extra con `Lectura extra:` en el retorno.»
 - Se agregan `7`, `8`, `9` a `ACCION`. No se tocan las pistas 1 a 6 ni `informe.mjs` (task-06).
 

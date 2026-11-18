@@ -1,8 +1,11 @@
 # task-01 — `resolver.mjs`: línea de identidad en `agente-claude`, `agente-pi` y `cuerpo`
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Para que el agente sepa en qué herramienta corre, con qué modelo y como qué agente, `scripts/resolver.mjs` escribe una línea fija «Herramienta: <Pi|Claude Code> | Modelo: <id> | Agente: <nombre>» como primera línea del cuerpo. Aplica a las tres salidas que producen un prompt: `agente-claude` y `agente-pi` (archivos instalados) y `cuerpo` (el que leen los lanzadores `pi-*`, por ejemplo `pi-coordinador`). Franco aprobó la ampliación a `cuerpo` el 2026-10-31 (opción A del refinado).
+Para que el agente sepa en qué herramienta corre, con qué modelo y como qué agente, `scripts/resolver.mjs` escribe una línea fija «Herramienta: <Pi|Claude Code> | Modelo: <id> | Agente: <nombre>» como primera línea del cuerpo. Aplica a las tres salidas que producen un prompt: `agente-claude` y `agente-pi` (archivos instalados) y `cuerpo` (el que leen los lanzadores `pi-*`, por ejemplo `pi-coordinador`). la persona usuaria aprobó la ampliación a `cuerpo` el 2026-10-31 (opción A del refinado).
 
 ## Contexto
 - Leído `scripts/resolver.mjs`: `resolverModelo(agente, herramienta)` ya devuelve el modelo (`herramienta`: `claude-code` o `pi`); las órdenes `agente-claude`/`agente-pi` derivan el agente con `basename(archivo, ".md")` y escriben `---\n${cabeceraSalida}\nmodel: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${cuerpo}`; `cuerpo` hace `process.stdout.write(partir(args[0]).cuerpo.replace(/^\s+/, ""))`.
@@ -39,7 +42,7 @@ Fuera de alcance: `pruebas/` (task-02), `instalar.sh`, `desinstalar.sh`, los lan
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --check scripts/resolver.mjs
 node scripts/resolver.mjs agente-claude agentes/coordinador.md | sed -n 7,9p
 node scripts/resolver.mjs agente-pi agentes/constructor.md | grep -n "^Herramienta:"
@@ -101,7 +104,7 @@ Criterios de aceptación:
 3. `cuerpo` de `coordinador`: empieza con `Herramienta: Pi | Modelo: openai/gpt-6.1-sol | Agente: coordinador`, seguida de línea en blanco. Cumple.
 4. `git diff --stat` de la tarea: solo `scripts/resolver.mjs`. Cumple (el resto del árbol con cambios previos de otras tareas no se tocó).
 
-Verificación completa de `pruebas/rapida.sh` con el HOME real (`HOME=/Users/franco`), salida guardada y resumen:
+Verificación completa de `pruebas/rapida.sh` con el HOME real (`HOME=/Users/persona`), salida guardada y resumen:
 ```
 ℹ tests 224
 ℹ pass 222
@@ -114,9 +117,9 @@ Diferencia real de la prueba (6), la única línea que cambia: `+ Herramienta: P
 
 ## Notas
 - Pruebas que fallan por la nueva línea, esperado y para task-02: `resolver-agentes.test.mjs` → «(3) agente sin Bash queda idéntico en ambas salidas salvo model:» y «(6) arquitecto, planificador y constructor no cambian en agente-pi (comparado con agente-claude sin model:)». No se tocó `pruebas/`.
-- Nota sobre la posición en la verificación: la línea de identidad va siempre justo después del `---` de cierre. En `coordinador` ese cierre es la línea 7 (el encabezado tiene `tools:`), y en `constructor` es la línea 6 (sin `tools:`), por eso la de Pi sale en la 7 y la de Claude Code en la 8. Comprobado con `head -9` de ambas salidas. Sin fallo; anotado para que Franco lo vea.
+- Nota sobre la posición en la verificación: la línea de identidad va siempre justo después del `---` de cierre. En `coordinador` ese cierre es la línea 7 (el encabezado tiene `tools:`), y en `constructor` es la línea 6 (sin `tools:`), por eso la de Pi sale en la 7 y la de Claude Code en la 8. Comprobado con `head -9` de ambas salidas. Sin fallo; anotado para que la persona usuaria lo vea.
 - Hueco menor 1: el encargo no decía qué nombre usar en `cuerpo`; se usa `basename(archivo, ".md")`, como en las otras órdenes. Decisión conservadora, coherente con la tarea.
 - Riesgo a vigilar (no es hueco resuelto): `cuerpo` ahora llama a `resolverModelo`, así que depende de `modelos.json` (perfil/nivel por defecto). Antes solo leía el archivo de agente. Si `modelos.json` no tiene defaults, `cuerpo` fallará; la verificación actual con el `modelos.json` del repo pasa.
 - Fijado al instalar: el modelo de la línea es el de `modelos.json` en el momento de generar `cuerpo`/`agente-*`; el `--model` manual no se refleja (límite ya descrito en ARCHITECTURE.md, punto 6).
-- No se hizo commit, push ni se reinstaló nada en `~/.claude` ni `~/.pi`. No se escribió en `STATUS.md`. `estado` cambiado a `lista para revisión`; `hecha` lo decide Franco.
+- No se hizo commit, push ni se reinstaló nada en `~/.claude` ni `~/.pi`. No se escribió en `STATUS.md`. `estado` cambiado a `lista para revisión`; `hecha` lo decide la persona usuaria.
 Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

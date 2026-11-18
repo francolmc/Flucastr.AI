@@ -37,7 +37,7 @@ Fuera de alcance: modificar `instalar.sh`, `desinstalar.sh`, `scripts/resolver.m
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test --test-concurrency=1 pruebas/capa1/instalacion.test.mjs 2>&1 | grep -E "^(✔ I7|✖ I7|ℹ (tests|pass|fail))"
 d=$(ls -dt pruebas/.temporales/capa1-* | head -1); node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1]+"/I7.json","utf8"))[0]; console.log(j.esperados.agentes.length, j.esperados.skills.length)' "$d"
 bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ (pass|fail)|rapida:)"

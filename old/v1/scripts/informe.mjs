@@ -201,11 +201,11 @@ const fmtLista = (obj) => {
 };
 
 const LIMITES = [
-  "- El ritmo es el reloj de los commits de Franco, no tiempo de trabajo; en yolo todo cae en un mismo commit.",
+  "- El ritmo es el reloj de los commits de la persona usuaria, no tiempo de trabajo; en yolo todo cae en un mismo commit.",
   "- `modelo` es el configurado al correr `registrar.mjs`, no necesariamente el que respondió.",
   "- Los huecos juzgan al `planificador` (calidad de la tarea), no al `constructor`.",
   "- No mide motivos de devolución ni las puertas 1 y 2.",
-  "- Con n pequeño los intervalos son anchos; decidir si bastan es cosa de Franco.",
+  "- Con n pequeño los intervalos son anchos; decidir si bastan es cosa de la persona usuaria.",
 ];
 
 // Bloque de consumo (aproximado). `sesiones` son las de descubrirSesiones; `n` son las tareas hechas del informe.
