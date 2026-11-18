@@ -3,7 +3,7 @@
 // declaradas cuyo comando y scripts protegidos siguen idénticos a HEAD.
 
 import { spawnSync } from "node:child_process";
-import { existsSync, lstatSync, readFileSync, writeFileSync, mkdirSync, realpathSync, statSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
@@ -154,8 +154,7 @@ function instalar(raiz) {
   }
   const command = `${COMMAND}${shellQuote(raiz)}`;
   const entrada = { matcher: "Bash", hooks: [{ type: "command", command, onFailure: "block" }] };
-  const lectura = { matcher: "Read|Grep|Glob", hooks: [{ type: "command", command, onFailure: "block" }] };
-  config.hooks = { ...hooks, PreToolUse: [...pre.map(sinHookKit), entrada, lectura].filter(Boolean) };
+  config.hooks = { ...hooks, PreToolUse: [...pre.map(sinHookKit), entrada].filter(Boolean) };
   writeFileSync(settings, `${JSON.stringify(config, null, 2)}\n`);
   if (!estaInstalado(raiz)) {
     quitar(raiz);
@@ -218,10 +217,10 @@ function estaInstalado(raiz) {
     const config = JSON.parse(readFileSync(settings, "utf8"));
     const pre = config?.hooks?.PreToolUse;
     if (!Array.isArray(pre)) return false;
-    const esperados = new Set(["Bash", "Read|Grep|Glob"]);
+    const esperados = new Set(["Bash"]);
     const comando = `${COMMAND}${shellQuote(resolve(raiz))}`;
     for (const e of pre.filter(esHookKit)) {
-      if (e.matcher !== "Bash" && e.matcher !== "Read|Grep|Glob") return false;
+      if (e.matcher !== "Bash") return false;
       if (!esperados.has(e.matcher)) return false;
       esperados.delete(e.matcher);
       if (e.hooks.length !== 1 || e.hooks[0].command !== comando || e.hooks[0].onFailure !== "block") return false;
@@ -251,24 +250,8 @@ function decidir(raiz, entrada) {
     if (comandoSeguro(raiz, cmd)) return respuesta("allow", "comando declarado y scripts verificados contra HEAD");
     return respuesta("ask", "comando no autorizado de forma segura; requiere aprobación");
   }
-  if (["Read", "Grep", "Glob"].includes(herramienta)) {
-    const ruta = input.file_path ?? input.path ?? input.pattern ?? "";
-    let destinoSecreto = false;
-    if (herramienta === "Read" && typeof ruta === "string" && ruta) {
-      destinoSecreto = esSecreto(ruta);
-      try {
-        const absoluta = isAbsolute(ruta) ? ruta : resolve(raiz, ruta);
-        const real = realpathSync(absoluta);
-        destinoSecreto ||= esSecreto(relative(raiz, real).split(sep).join("/")) || esSecreto(real);
-      } catch {
-        destinoSecreto = true;
-      }
-    }
-    if (destinoSecreto || herramienta !== "Read" || typeof ruta !== "string" || !ruta) {
-      return respuesta("ask", "lectura o búsqueda amplia puede incluir secretos; requiere aprobación");
-    }
-  }
-  // Sin decisión, Claude Code aplica su permiso normal y puede pedir aprobación.
+  // Read, Grep y Glob no pasan por este hook: `.env` lo protegen las reglas deny y el sandbox.
+  // Sin decisión, Claude Code aplica su permiso normal.
 }
 
 try {

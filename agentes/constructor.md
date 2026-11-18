@@ -38,3 +38,5 @@ The first line of your final response must be one of:
 For a plan without `tramo:`, omit `tramo=<n>` from either line.
 
 Below `COMPLETADO`, use at most five lines to say what you completed. Below `PAUSA`, state the problem and give 2 or 3 fixed options, marking one “(recommended)”.
+
+End your turn only with `COMPLETADO` or `PAUSA`. Do not end it with a progress report. If work remains within *Alcance*, keep going instead of reporting it. A tramo closes only when its verification passes.

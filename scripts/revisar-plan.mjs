@@ -12,6 +12,7 @@ de F13: acceso, saldo inicial y resumen. Las capas explícitas son interfaz/UI/w
 API y datos/base de datos. Son heurísticas textuales, no un análisis semántico.
 En historias «### Tramo N — Historia:» también comprueba los campos de la plantilla.
 Los planes antiguos sin ese encabezado mantienen las comprobaciones anteriores.
+Con dos o más tramos en ## Pasos y sin «continuidad: continua», avisa una vez.
 El límite de tamaño es 8192 bytes UTF-8 por archivo de plan/tramo.`;
 
 const productPath = (value) => !/\.md\b/i.test(value) && !/(^|\/)(test|tests|pruebas|spec|specs)(\/|$)/i.test(value);
@@ -40,6 +41,12 @@ function analyze(source, file) {
   for (let i = stepsHeader + 1; i < stepsEnd; i++) {
     if (/^###\s+Tramo\s+\d+/i.test(lines[i].trim())) trancheHeads.push(i);
     if (isNewStory(lines[i])) storyHeads.push(i);
+  }
+  const hasContinuity = lines.some((line) => /^\s*continuidad\s*:\s*continua\b/i.test(line));
+  const linkedTramos = new Set(lines.slice(stepsHeader + 1, stepsEnd).flatMap((line) => line.match(/tramo-\d+\.md/g) ?? []));
+  const tramoCount = Math.max(trancheHeads.length, linkedTramos.size);
+  if (tramoCount >= 2 && !hasContinuity) {
+    warn((trancheHeads[0] ?? stepsHeader) + 1, `el plan tiene ${tramoCount} tramos sin «continuidad: continua»; si son de una misma historia, declárala (heurística)`);
   }
   if (trancheHeads.length) {
     for (let n = 0; n < trancheHeads.length; n++) chunks.push({ start: trancheHeads[n], end: trancheHeads[n + 1] ?? stepsEnd });

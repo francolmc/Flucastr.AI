@@ -171,6 +171,22 @@ test('8192 bytes are allowed and 8193 bytes are warned at line 1', async () => t
 
 test('tranches are checked separately and other sections are ignored', async () => temporary(async (dir) => {
   const file = path.join(dir, 'plan.md');
-  await writeFile(file, `## Aceptación\n- [ ] Bad acceptance text\n\n## Pasos\n### Tramo 1\nArchivos: \`src/a.js\`\n- [ ] Editar \`src/a.js\`. Comprobación: \`node --check src/a.js\`\n### Tramo 2\nArchivos: \`src/b.js\`\n- [ ] Editar \`src/b.js\`. Comprobación: \`node --check src/b.js\`\n`);
+  await writeFile(file, `continuidad: continua\n## Aceptación\n- [ ] Bad acceptance text\n\n## Pasos\n### Tramo 1\nArchivos: \`src/a.js\`\n- [ ] Editar \`src/a.js\`. Comprobación: \`node --check src/a.js\`\n### Tramo 2\nArchivos: \`src/b.js\`\n- [ ] Editar \`src/b.js\`. Comprobación: \`node --check src/b.js\`\n`);
   assert.equal(run(file).status, 0);
+}));
+
+test('two or more tranches without continuity warn once; declared continuity or a single tranche do not', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'plan.md');
+  const body = '## Pasos\n### Tramo 1\nArchivos: `src/a.js`\n- [ ] Editar `src/a.js`. Comprobación: `node --check src/a.js`\n### Tramo 2\nArchivos: `src/b.js`\n- [ ] Editar `src/b.js`. Comprobación: `node --check src/b.js`\n';
+  await writeFile(file, body);
+  const sin = run(file);
+  assert.equal(sin.status, 1);
+  assert.match(sin.stdout, /plan\.md:\d+: el plan tiene 2 tramos sin «continuidad: continua»/);
+  assert.equal(sin.stdout.trim().split('\n').length, 1, 'el aviso de continuidad aparece una sola vez');
+  await writeFile(file, `continuidad: continua\n${body}`);
+  assert.equal(run(file).status, 0);
+  await writeFile(file, body.replace(/### Tramo 2[\s\S]*$/, ''));
+  assert.equal(run(file).status, 0);
+  await writeFile(file, '## Pasos\n1. [Tramo 1](tramo-1.md)\n2. [Tramo 2](tramo-2.md)\n');
+  assert.match(run(file).stdout, /plan\.md:\d+: el plan tiene 2 tramos sin «continuidad: continua»/);
 }));

@@ -7,6 +7,7 @@ Las reglas viven en `<proyecto>/.claude/settings.json` (compartido, va a git). S
 - Los comandos compuestos se separan por `&&`, `||`, `;`, `|`, `&` y saltos de línea, y basta que un subcomando coincida: `git add . && git commit` queda bloqueado.
 - Cubiertos (probado con Claude Code real, ver `cambios/hechos/deny-endurecido/plan.md`): `git -C . commit`, `git -c k=v commit` y `bash -c`/`sh -c`/`zsh -c`; por eso el agente no puede usar `bash -c`, y es intencional.
 - No cubren `sudo` ni `env <cmd>` (no probados). `Read(./.env)` cubre la herramienta Read y `cat/head/tail/sed/tee` en Bash, no `grep -r .` ni un script que abre `.env` (Python, Node, etc.); el kit configura restricciones de lectura en el sandbox, pero su eficacia ante esas vías no se ha comprobado.
+- El hook de Claude Code (`scripts/permisos-hook.mjs`, matcher `Bash`) solo decide sobre comandos Bash. Read, Grep y Glob no pasan por él: no piden aprobación por el hook y `.env` queda protegido solo por las reglas deny y el sandbox de este documento.
 - Subagentes: según los docs, los integrados heredan las reglas (lo leí en un resumen, no literal). No se garantiza que un `permissionMode` de subagente no la salte.
 - Los arrays `deny` de varios archivos de ajustes se combinan.
 - También bloquean los commits que la persona usuaria haga con Claude en ese proyecto; es lo esperado.
