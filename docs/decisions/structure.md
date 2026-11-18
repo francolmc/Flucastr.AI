@@ -2,7 +2,7 @@
 
 ## Estructura implementada
 
-La estructura nueva está implementada en `core/` (agentes, contratos, recetas y skills), `adapters/` (Claude Code, Codex, Pi y componentes compartidos), `tools/` (instalación, resolución de modelos, observación, ejecución, uso, verificación y desinstalación), `evals/` y `tests/`. La documentación vigente permanece en `docs/`; esta decisión vive en `docs/decisions/`. Las entradas públicas de la raíz, entre ellas `instalar.sh`, `instalar-remoto.sh`, `desinstalar.sh` y `verify`, siguen en sus rutas actuales.
+La estructura nueva está implementada en `core/` (agentes, contratos, recetas y skills), `adapters/` (Claude Code, Codex, Pi y componentes compartidos), `tools/` (instalación, resolución de modelos, observación, ejecución, uso, verificación y desinstalación), `evals/` y `tests/`. La documentación vigente permanece en `docs/`; esta decisión vive en `docs/decisions/`. Las entradas públicas de la raíz, entre ellas `install.sh`, `install-remote.sh`, `uninstall.sh` y `verify`, siguen en sus rutas actuales.
 
 ## Copias de compatibilidad
 
@@ -12,15 +12,15 @@ Las rutas nuevas de `core/` y las rutas heredadas que consumen las instalaciones
 
 ## Rutas heredadas e históricos
 
-`agentes/`, `skills/`, `nucleo/`, `scripts/`, `pruebas/` y `cambios/` son rutas implementadas que se conservan por compatibilidad con instrucciones, comandos, pruebas y planes existentes. `scripts/uso.mjs` mantiene la entrada `node scripts/uso.mjs` y coordina la interfaz CLI con las responsabilidades extraídas a `tools/usage/`.
+`agentes/`, `skills/`, `nucleo/`, `scripts/`, `pruebas/` y `cambios/` son rutas implementadas que se conservan por compatibilidad con instrucciones, comandos, pruebas y planes existentes. `scripts/usage.mjs` mantiene la entrada `node scripts/usage.mjs` y coordina la interfaz CLI con las responsabilidades extraídas a `tools/usage/`.
 
 `old/` y `cambios/hechos/` son rutas históricas existentes y permanecen en su sitio. No se trasladan ni editan como parte de esta decisión; `old/v1/` también forma parte del contrato de migración de proyectos. `changes/HISTORY.md` y `archive/README.md` ya existen como índices de orientación, y `changes/` y `archive/` contienen esos índices. Esto no traslada el registro de cambios cerrados desde `cambios/hechos/` ni el árbol histórico desde `old/`: una migración o archivo completo bajo esos destinos sigue siendo una propuesta descrita en `cambios/estructura-repo/estructura-destino.md`.
 
 ## Tamaño de módulos
 
-La guía para módulos nuevos es mantener cada archivo enfocado y, cuando sea práctico, dentro de 300 líneas. `instalar-remoto.sh` tiene 322 líneas y es una excepción justificada: se distribuye y ejecuta como un único bootstrap antes de descargar y extraer el árbol `tools/`; extraer una dependencia a ese árbol impediría que la entrada remota funcionara en ese momento. Su justificación y comprobaciones están registradas en `cambios/estructura-repo/tramo-100.md`.
+La guía para módulos nuevos es mantener cada archivo enfocado y, cuando sea práctico, dentro de 300 líneas. `install-remote.sh` tiene 322 líneas y es una excepción justificada: se distribuye y ejecuta como un único bootstrap antes de descargar y extraer el árbol `tools/`; extraer una dependencia a ese árbol impediría que la entrada remota funcionara en ese momento. Su justificación y comprobaciones están registradas en `cambios/estructura-repo/tramo-100.md`.
 
-`scripts/uso.mjs` tiene 318 líneas y conserva la entrada CLI pública, el análisis de argumentos y la coordinación del comando; las operaciones y el formato de informes ya están separados bajo `tools/usage/`. Mantener ese envoltorio en su ruta evita cambiar el comando consumido por usuarios e instaladores. La extracción restante o un cambio de entrada requiere un tramo posterior que preserve y compruebe ese contrato.
+`scripts/usage.mjs` tiene 318 líneas y conserva la entrada CLI pública, el análisis de argumentos y la coordinación del comando; las operaciones y el formato de informes ya están separados bajo `tools/usage/`. Mantener ese envoltorio en su ruta evita cambiar el comando consumido por usuarios e instaladores. La extracción restante o un cambio de entrada requiere un tramo posterior que preserve y compruebe ese contrato.
 
 ## Alcance de la decisión
 

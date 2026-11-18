@@ -1,7 +1,7 @@
 instalar_deny_claude() {
   local ajustes="$PROYECTO/.claude/settings.json" salida linea regla prefijo=""
   local extra=()
-  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if [ "$SIMULAR" = 1 ]; then extra=(--dry-run); prefijo="(simulación) "; fi
   if ! salida="$(node "$RESOLVER" fijar-deny claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
     echo "  AVISO: no se tocó $ajustes ($salida)"
     return 0

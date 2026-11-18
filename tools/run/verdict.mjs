@@ -3,7 +3,7 @@ const ESQUEMA_VEREDICTO = {
   additionalProperties: false,
   required: ["veredicto", "defectos"],
   properties: {
-    veredicto: { enum: ["APROBADO", "DEVUELTO", "PAUSA"] },
+    veredicto: { enum: ["APPROVED", "RETURNED", "PAUSED"] },
     defectos: {
       type: "array",
       items: {
@@ -32,7 +32,7 @@ function validarVeredicto(texto) {
   if (typeof datos !== "object" || datos === null || Array.isArray(datos)) return { ok: false, error: "no es un objeto" };
   const claves = Object.keys(datos).sort();
   if (claves.join(",") !== "defectos,veredicto") return { ok: false, error: `claves inesperadas: ${claves.join(",")}` };
-  if (!["APROBADO", "DEVUELTO", "PAUSA"].includes(datos.veredicto)) return { ok: false, error: `veredicto inválido: ${datos.veredicto}` };
+  if (!["APPROVED", "RETURNED", "PAUSED"].includes(datos.veredicto)) return { ok: false, error: `veredicto inválido: ${datos.veredicto}` };
   if (!Array.isArray(datos.defectos)) return { ok: false, error: "defectos no es una lista" };
   for (const d of datos.defectos) {
     const ok = d && typeof d === "object" && typeof d.archivo === "string" && Number.isInteger(d.linea)
@@ -40,8 +40,8 @@ function validarVeredicto(texto) {
       && Object.keys(d).length === 4;
     if (!ok) return { ok: false, error: "un defecto no cumple el esquema" };
   }
-  if (datos.veredicto === "APROBADO" && datos.defectos.length > 0) return { ok: false, error: "APROBADO con defectos" };
-  if (datos.veredicto === "DEVUELTO" && datos.defectos.length === 0) return { ok: false, error: "DEVUELTO sin defectos" };
+  if (datos.veredicto === "APPROVED" && datos.defectos.length > 0) return { ok: false, error: "APPROVED con defectos" };
+  if (datos.veredicto === "RETURNED" && datos.defectos.length === 0) return { ok: false, error: "RETURNED sin defectos" };
   return { ok: true, datos };
 }
 

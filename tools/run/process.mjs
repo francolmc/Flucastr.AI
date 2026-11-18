@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 
-const TOPE_MS = { CONSTRUCTOR: 45 * 60 * 1000, REVISOR: 15 * 60 * 1000, VERIFY: 30 * 60 * 1000 };
+const TOPE_MS = { BUILDER: 45 * 60 * 1000, REVIEWER: 15 * 60 * 1000, VERIFY: 30 * 60 * 1000 };
 
 function topeMs(rol) {
   const fijo = Number(process.env.KIT_RUN_TOPE_MS);

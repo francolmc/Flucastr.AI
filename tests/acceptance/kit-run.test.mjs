@@ -1,13 +1,13 @@
-// Flujo de aceptación «kit-run»: envuelve pruebas/kit-run/probar.mjs.
+// Flujo de aceptación «kit-run»: envuelve tests/kit-run/run.mjs.
 // Corre la suite existente sin cambiarla y afirma que sale con código 0.
-// Filtro por flujo: node --test --test-name-pattern=kit-run pruebas/aceptacion/
+// Filtro por flujo: node --test --test-name-pattern=kit-run tests/acceptance/
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const SUITE = fileURLToPath(new URL("../../pruebas/kit-run/probar.mjs", import.meta.url));
+const SUITE = fileURLToPath(new URL("../kit-run/run.mjs", import.meta.url));
 const RAIZ = fileURLToPath(new URL("../..", import.meta.url));
 
 test("kit-run: la suite de kit run pasa", () => {

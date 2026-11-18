@@ -1,0 +1,487 @@
+#!/usr/bin/env node
+// Arnés de kit run con builder, verificación y revisor simulados (A1, A2, A3, A5).
+// Cada caso corre scripts/kit-run.mjs en un repo git temporal con ejecutables falsos.
+// Los falsos anotan cada invocación en un registro JSON-lines; el caso lo lee y compara.
+// Sin red, sin CLIs reales, sin escribir fuera de un temporal que se borra al salir.
+
+import assert from "node:assert/strict";
+import { appendFileSync, chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { delimiter, join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { promptRevisor } from "../../tools/run/prompts.mjs";
+import { ESQUEMA_VEREDICTO } from "../../tools/run/verdict.mjs";
+
+const KIT = fileURLToPath(new URL("../../scripts/kit-run.mjs", import.meta.url));
+const PLAN_REL = "changes/prueba/plan.md";
+const PLAN = `---
+status: approved
+branch: feature/prueba
+base: main
+repos: [.]
+executor: builder
+segment: 1
+---
+# Prueba de kit run
+
+## Acceptance
+| ID | Resultado |
+| --- |
+| A1 | creado.txt existe |
+
+## Verification
+\`./verify\`
+
+## Steps
+### Segment 1 — Story: prueba
+- [x] crear creado.txt
+`;
+const PLAN_CONTINUA = PLAN.replace("segment: 1\n", "segment: 1\ncontinuity: continuous\n")
+  .replace("- [x] crear creado.txt", "- [ ] crear primero.txt\n- [ ] crear segundo.txt");
+
+const CABECERA = `#!${process.execPath}\n`;
+const REGISTRO = `
+import { appendFileSync, readFileSync } from "node:fs";
+const args = process.argv.slice(2);
+const entrada = (() => { try { return readFileSync(0, "utf8"); } catch { return ""; } })();
+export function anotar(rol, extra = {}) {
+  appendFileSync(process.env.KR_LOG, JSON.stringify({ rol, args, entrada, ...extra }) + "\\n");
+}
+`;
+const FALSOS = {
+  // Builder: crea creado.txt en la raíz del repo y devuelve DONE.
+  "builder.mjs": `${CABECERA}${REGISTRO}
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+// Como execute-plan (paso 1): solo arranca con status approved; lo pasa a in progress al empezar.
+const planPath = join(process.cwd(), "changes/prueba/plan.md");
+const estado = readFileSync(planPath, "utf8").match(/^status: (.*)$/m)[1];
+anotar("builder", { estado });
+if (estado !== "approved") {
+  console.log("PAUSED: plan=changes/prueba/plan.md; segment=1; motivo=ambiguous; hecho=0/1; siguiente=arrancar con el plan aprobado; no_intentado=el plan llegó con status " + estado);
+  process.exit(0);
+}
+writeFileSync(planPath, readFileSync(planPath, "utf8").replace(/^status: .*$/m, "status: in progress"));
+writeFileSync(join(process.cwd(), "creado.txt"), "hecho\\n");
+if (readFileSync(planPath, "utf8").includes("continuity: continuous")) {
+  let plan = readFileSync(planPath, "utf8").replace("- [ ] crear primero.txt", "- [x] crear primero.txt")
+    .replace("- [ ] crear segundo.txt", "- [x] crear segundo.txt")
+    .replace("segment: 1", "segment: 2");
+  writeFileSync(planPath, plan);
+  writeFileSync(join(process.cwd(), "segundo.txt"), "hecho\\n");
+  console.log("DONE: plan=changes/prueba/plan.md; segment=2; verify=pasa");
+  process.exit(0);
+}
+console.log("DONE: plan=changes/prueba/plan.md; segment=1; verify=pasa");
+`,
+  // Verificación: falla si FAKE_VERIFY_FALLA=1.
+  "verify.mjs": `${CABECERA}${REGISTRO}
+anotar("verify");
+if (process.env.FAKE_VERIFY_FALLA === "1") { console.log("verify: fallo simulado"); process.exit(1); }
+console.log("verify: ok");
+`,
+  // codex falso (en el PATH, sin KIT_RUN_BUILDER/REVIEWER): registra argumentos y el esquema del --output-schema.
+  // Builder: crea creado.txt y devuelve DONE; con FAKE_CODEX_CUELGA=1 no termina (prueba el tope).
+  // Revisor (con --output-schema): APPROVED.
+  "codex": `${CABECERA}${REGISTRO}
+import { readFileSync as leer, writeFileSync } from "node:fs";
+import { join } from "node:path";
+const rev = args.includes("--output-schema");
+const esquema = rev ? JSON.parse(leer(args[args.indexOf("--output-schema") + 1], "utf8")) : null;
+anotar(rev ? "reviewer" : "builder", { esquema: esquema ? Object.keys(esquema.properties) : null });
+if (rev) {
+  console.log(JSON.stringify({ veredicto: "APPROVED", defectos: [] }));
+} else if (process.env.FAKE_CODEX_CUELGA === "1") {
+  setTimeout(() => {}, 60000);
+} else {
+  writeFileSync(join(process.cwd(), "creado.txt"), "hecho\\n");
+  console.log("DONE: plan=changes/prueba/plan.md; segment=1; verify=pasa");
+}
+`,
+  // Revisor: en read-only no escribe (el sandbox rechaza la escritura); con FAKE_REVIEWER_ESCRIBE_SIEMPRE=1 escribe
+  // igual (sandbox roto). Devuelve RETURNED las primeras FAKE_DEVUELVE_HASTA veces, luego FAKE_VEREDICTO o APPROVED.
+  "revisor.mjs": `${CABECERA}${REGISTRO}
+import { writeFileSync, readFileSync as leer } from "node:fs";
+import { join } from "node:path";
+const lectura = args.includes("read-only");
+const previas = leer(process.env.KR_LOG, "utf8").split("\\n").filter(l => l.includes('"rol":"reviewer"')).length;
+const escribe = !lectura || process.env.FAKE_REVIEWER_ESCRIBE_SIEMPRE === "1";
+if (escribe) writeFileSync(join(process.cwd(), "revisor.txt"), "escrito por el revisor\\n");
+anotar("reviewer", { escribio: escribe });
+const n = previas + 1;
+if (process.env.FAKE_VEREDICTO) { console.log(process.env.FAKE_VEREDICTO); process.exit(0); }
+if (n <= Number(process.env.FAKE_DEVUELVE_HASTA || 0)) {
+  console.log(JSON.stringify({ veredicto: "RETURNED", defectos: [{ archivo: "creado.txt", linea: 1, criterio: "A1", descripcion: "falta el contenido esperado" }] }));
+} else {
+  console.log(JSON.stringify({ veredicto: "APPROVED", defectos: [] }));
+}
+`,
+};
+
+const dir = mkdtempSync(join(tmpdir(), "kit-run-prueba-"));
+const bin = join(dir, "bin");
+mkdirSync(bin);
+for (const [nombre, cuerpo] of Object.entries(FALSOS)) {
+  const ruta = join(bin, nombre);
+  writeFileSync(ruta, cuerpo);
+  chmodSync(ruta, 0o755);
+}
+const exe = (n) => join(bin, n);
+
+function git(raiz, ...a) {
+  const r = spawnSync("git", ["-c", "user.name=prueba", "-c", "user.email=prueba@example.com", ...a], { cwd: raiz, encoding: "utf8" });
+  if (r.status !== 0) throw new Error(`git ${a.join(" ")}: ${r.stderr}`);
+  return r.stdout;
+}
+
+// Repo temporal con el plan commiteado. Corre kit-run con los falsos y devuelve la salida y el registro.
+// codex: true no fija KIT_RUN_BUILDER ni KIT_RUN_REVIEWER; el script llama a `codex` del PATH (el falso).
+function correr(nombre, { plan = PLAN, env = {}, codex = false, kit = KIT, opciones = raiz => ["--root", raiz] } = {}) {
+  const raiz = join(dir, nombre);
+  mkdirSync(join(raiz, "changes/prueba"), { recursive: true });
+  writeFileSync(join(raiz, PLAN_REL), plan);
+  git(raiz, "init", "-q");
+  git(raiz, "add", "-A");
+  git(raiz, "commit", "-q", "-m", "base");
+  const log = join(dir, `${nombre}.log`);
+  writeFileSync(log, "");
+  const entorno = {
+    ...process.env,
+    KIT_RUN_VERIFY: exe("verify.mjs"),
+    KR_LOG: log,
+    FAKE_VERIFY_FALLA: "0",
+    FAKE_REVIEWER_ESCRIBE_SIEMPRE: "0",
+    FAKE_DEVUELVE_HASTA: "0",
+    FAKE_VEREDICTO: "",
+    FAKE_CODEX_CUELGA: "0",
+    ...env,
+  };
+  delete entorno.KIT_RUN_TOPE_MS;
+  if (!env.FLUCASTR_MODELOS) delete entorno.FLUCASTR_MODELOS;
+  if (codex) {
+    delete entorno.KIT_RUN_BUILDER;
+    delete entorno.KIT_RUN_REVIEWER;
+    entorno.PATH = `${bin}${delimiter}${process.env.PATH}`;
+  } else {
+    entorno.KIT_RUN_BUILDER = exe("builder.mjs");
+    entorno.KIT_RUN_REVIEWER = exe("revisor.mjs");
+  }
+  if (env.KIT_RUN_TOPE_MS) entorno.KIT_RUN_TOPE_MS = env.KIT_RUN_TOPE_MS;
+  const r = spawnSync(process.execPath, [kit, PLAN_REL, ...opciones(raiz)], { encoding: "utf8", env: entorno });
+  const registro = readFileSync(log, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l));
+  const cuenta = (rol) => registro.filter(x => x.rol === rol).length;
+  const estado = readFileSync(join(raiz, PLAN_REL), "utf8").match(/^status: (.*)$/m)[1];
+  return { status: r.status, stdout: r.stdout, stderr: r.stderr, registro, cuenta, estado, raiz, plan: readFileSync(join(raiz, PLAN_REL), "utf8") };
+}
+
+const casos = [];
+function caso(nombre, fn) { casos.push({ nombre, fn }); }
+
+function resultadoComparable(r) {
+  const normalizar = valor => JSON.parse(JSON.stringify(valor).replaceAll(r.raiz, "<raiz>")
+    .replace(/\/tmp\/kit-run-[^"\\ ]+\.json/g, "<esquema>"));
+  return normalizar({ status: r.status, stdout: r.stdout, stderr: r.stderr, estado: r.estado, registro: r.registro });
+}
+
+caso("las opciones en inglés conservan el recorrido y las mezclas con mayúsculas no cambian nada", () => {
+  const referencia = correr("opciones inglesas", { opciones: raiz => ["--tool", "codex", "--root", raiz] });
+  assert.equal(referencia.status, 0, referencia.stderr);
+  assert.equal(referencia.cuenta("builder"), 1);
+  assert.equal(referencia.cuenta("reviewer"), 1);
+  const repetida = correr("opciones inglesas repetidas", { opciones: raiz => ["--tool", "codex", "--root", raiz] });
+  assert.deepEqual(resultadoComparable(repetida), resultadoComparable(referencia));
+});
+
+caso("las opciones en español se rechazan con código 2", () => {
+  for (const opcion of ["--herramienta", "--raiz"]) {
+    const r = spawnSync(process.execPath, [KIT, PLAN_REL, opcion, "codex"], { cwd: dir, encoding: "utf8" });
+    assert.equal(r.status, 2, `${opcion} ya no debe aceptarse`);
+    assert.match(r.stderr, /opción desconocida/);
+  }
+});
+
+caso("las opciones en inglés conservan los errores con argumentos ausentes", () => {
+  for (const opcion of ["--tool", "--root"]) {
+    const r = spawnSync(process.execPath, [KIT, PLAN_REL, opcion], { cwd: dir, encoding: "utf8" });
+    assert.notEqual(r.status, 0);
+  }
+});
+
+function comprobarPromptRevisor(prompt) {
+  assert.ok(prompt.includes("Read only; do not write anything."));
+  assert.ok(prompt.includes("Return ONLY JSON that conforms to this schema, with no surrounding text:"));
+  assert.ok(prompt.includes("APPROVED") && prompt.includes("RETURNED") && prompt.includes("PAUSED"));
+}
+
+caso("prompts productivo y de evaluación coinciden y detectan instrucciones ausentes", () => {
+  const fuente = readFileSync(new URL("../luna-reviewer/measure.mjs", import.meta.url), "utf8");
+  const esquema = fuente.match(/const ESQUEMA_VEREDICTO = (\{[\s\S]*?\n\});/);
+  const funcion = fuente.match(/function promptRevisor\(planRel, diff\) \{([\s\S]*?)\n\}/);
+  assert.ok(esquema && funcion, "la evaluación debe conservar su esquema y prompt comparables");
+  const esquemaEvaluacion = Function(`return (${esquema[1]})`)();
+  assert.deepEqual(esquemaEvaluacion, ESQUEMA_VEREDICTO);
+  const evaluacion = Function("planRel", "diff", "ESQUEMA_VEREDICTO", funcion[1]);
+  const diff = "diff --git a/ejemplo b/ejemplo\n+contenido real";
+  const productivo = promptRevisor(PLAN_REL, diff, ESQUEMA_VEREDICTO);
+  assert.equal(evaluacion(PLAN_REL, diff, esquemaEvaluacion), productivo);
+  comprobarPromptRevisor(productivo);
+  assert.throws(() => comprobarPromptRevisor(productivo.replace("Read only; do not write anything.", "")));
+});
+
+// A1: ciclo completo con simulados.
+caso("A1 ciclo completo: done, builder una vez, revisor en solo lectura", () => {
+  const r = correr("a1");
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /^DONE: plan=changes\/prueba\/plan\.md; segment=1; verify=pasa/);
+  assert.equal(r.estado, "done");
+  assert.ok(existsSync(join(r.raiz, "creado.txt")), "el builder debió crear creado.txt");
+  assert.equal(r.cuenta("builder"), 1);
+  assert.equal(r.cuenta("verify"), 1);
+  assert.equal(r.cuenta("reviewer"), 1);
+  const rev = r.registro.find(x => x.rol === "reviewer");
+  assert.ok(rev.args.includes("read-only") && rev.args.includes("--output-schema"), `argumentos del revisor: ${rev.args}`);
+  assert.equal(r.registro.find(x => x.rol === "builder").entrada, `Execute plan ${PLAN_REL} (segment: 1) using the execute-plan skill. Respond with the return line.`);
+  comprobarPromptRevisor(rev.entrada);
+  assert.ok(rev.entrada.includes(JSON.stringify(ESQUEMA_VEREDICTO)) && rev.entrada.includes(`Review plan ${PLAN_REL}`));
+  assert.ok(rev.entrada.includes("--- diff ---\n"));
+  assert.match(r.stderr, /kit-run: verificación/);
+  assert.match(r.plan, /- kit run: revisión APPROVED/);
+});
+
+// A2: tope de relanzamientos. Verify siempre falla: 3 corridas del builder, partial.
+caso("A2 verify que siempre falla: 3 corridas del builder y partial", () => {
+  const r = correr("a2", { env: { FAKE_VERIFY_FALLA: "1" } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /^PAUSED: plan=changes\/prueba\/plan\.md; segment=1; motivo=verify;/);
+  assert.equal(r.cuenta("builder"), 3, "1 + 2 relanzamientos");
+  assert.equal(r.cuenta("verify"), 3);
+  assert.equal(r.cuenta("reviewer"), 0, "sin verify verde no hay revisión");
+  assert.equal(r.estado, "partial");
+  const prompts = r.registro.filter(x => x.rol === "builder").map(x => x.entrada);
+  assert.ok(!prompts[0].includes("Verification failed"));
+  for (const prompt of prompts.slice(1)) assert.ok(prompt.includes("Verification failed (exit 1). Output:\nverify: fallo simulado"));
+});
+
+// Continuidad: el builder cierra todos los tramos y kit run revisa solo al final.
+caso("A7 continuidad completa: dos tramos antes de una verificación y revisión final", () => {
+  const r = correr("a7", { plan: PLAN_CONTINUA });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(r.estado, "done");
+  assert.match(r.plan, /segment: 2/);
+  assert.match(r.plan, /- \[x\] crear primero\.txt/);
+  assert.match(r.plan, /- \[x\] crear segundo\.txt/);
+  assert.equal(r.cuenta("builder"), 1);
+  assert.equal(r.cuenta("verify"), 1);
+  assert.equal(r.cuenta("reviewer"), 1);
+});
+
+caso("A8 continuidad: segunda falla idéntica detiene relanzamientos y deja nota", () => {
+  const r = correr("a8", { plan: PLAN_CONTINUA, env: { FAKE_VERIFY_FALLA: "1" } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /motivo=verify/);
+  assert.match(r.plan, /PAUSED \(verify\): la verificación repitió la misma causa/);
+  assert.equal(r.cuenta("builder"), 2);
+  assert.equal(r.cuenta("verify"), 2);
+  assert.equal(r.cuenta("reviewer"), 0);
+  assert.equal(r.estado, "partial");
+});
+
+caso("M1 mutación sensible: quitar la parada por causa repetida es rechazado", () => {
+  const mutado = join(fileURLToPath(new URL("../../scripts/", import.meta.url)), ".kit-run-sin-parada.mjs");
+  const original = readFileSync(KIT, "utf8");
+  const guardia = "if (continuidad && fallosVerificacion.has(causa)) {";
+  assert.ok(original.includes(guardia), "la mutación debe encontrar la guarda de continuidad");
+  writeFileSync(mutado, original.replace(guardia, "if (false && continuidad && fallosVerificacion.has(causa)) {"));
+  try {
+    const r = correr("m1", { plan: PLAN_CONTINUA, env: { FAKE_VERIFY_FALLA: "1" }, kit: mutado });
+    assert.equal(r.cuenta("builder"), 3, "la mutación deja pasar el reintento que el contrato prohíbe");
+    assert.equal(r.cuenta("verify"), 3);
+    assert.doesNotMatch(r.plan, /PAUSED \(verify\): la verificación repitió la misma causa/);
+    assert.throws(() => {
+      assert.equal(r.cuenta("builder"), 2, "contrato A8: segunda causa idéntica debe detener");
+      assert.match(r.plan, /PAUSED \(verify\): la verificación repitió la misma causa/);
+    }, /segunda causa idéntica debe detener/);
+  } finally {
+    rmSync(mutado, { force: true });
+  }
+});
+
+// A3: revisor de solo lectura.
+caso("A3a revisor que intenta escribir con sandbox read-only: la escritura se rechaza y aprueba", () => {
+  const r = correr("a3a", { env: { FAKE_REVIEWER_ESCRIBE_SIEMPRE: "0" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const rev = r.registro.find(x => x.rol === "reviewer");
+  assert.equal(rev.escribio, false, "con read-only el revisor no escribe");
+  assert.equal(existsSync(join(r.raiz, "revisor.txt")), false);
+  assert.equal(r.estado, "done");
+});
+caso("A3b revisor que escribe aunque el sandbox sea read-only: el árbol cambió, partial", () => {
+  const r = correr("a3b", { env: { FAKE_REVIEWER_ESCRIBE_SIEMPRE: "1" } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /motivo=access/);
+  assert.match(r.stdout, /modificó el árbol/);
+  assert.equal(r.estado, "partial");
+});
+caso("A3c RETURNED una vez: vuelve al builder con los defectos y aprueba", () => {
+  const r = correr("a3c", { env: { FAKE_DEVUELVE_HASTA: "1" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(r.cuenta("builder"), 2);
+  assert.equal(r.cuenta("reviewer"), 2);
+  const correccion = r.registro.filter(x => x.rol === "builder")[1].entrada;
+  assert.ok(correccion.includes("The review returned these defects:\n" + JSON.stringify([{ archivo: "creado.txt", linea: 1, criterio: "A1", descripcion: "falta el contenido esperado" }], null, 2)));
+  assert.equal(r.estado, "done");
+});
+caso("A3d RETURNED siempre: cupo de 2 agotado, partial sin más corridas", () => {
+  const r = correr("a3d", { env: { FAKE_DEVUELVE_HASTA: "99" } });
+  assert.equal(r.status, 1);
+  assert.equal(r.cuenta("builder"), 3);
+  assert.equal(r.cuenta("reviewer"), 3);
+  assert.equal(r.estado, "partial");
+});
+
+// A5: sensibilidad. Veredicto inválido nunca aprueba.
+caso("A5a revisor que devuelve texto no JSON: partial sin aprobar", () => {
+  const r = correr("a5a", { env: { FAKE_VEREDICTO: "no es json" } });
+  assert.equal(r.status, 1);
+  assert.doesNotMatch(r.stdout, /DONE/);
+  assert.match(r.stdout, /PAUSED/);
+  assert.equal(r.estado, "partial");
+});
+caso("A5b APPROVED con defectos: viola el esquema, partial", () => {
+  const malo = JSON.stringify({ veredicto: "APPROVED", defectos: [{ archivo: "a", linea: 1, criterio: "c", descripcion: "d" }] });
+  const r = correr("a5b", { env: { FAKE_VEREDICTO: malo } });
+  assert.equal(r.status, 1);
+  assert.equal(r.estado, "partial");
+});
+caso("A5c veredicto con clave extra: viola el esquema, partial", () => {
+  const malo = JSON.stringify({ veredicto: "APPROVED", defectos: [], nota: "extra" });
+  const r = correr("a5c", { env: { FAKE_VEREDICTO: malo } });
+  assert.equal(r.status, 1);
+  assert.equal(r.estado, "partial");
+});
+
+// C1 (mapeo codex, A4 en el arnés): builder con workspace-write y revisor con read-only y esquema, ambos con -m.
+caso("C1 mapeo codex: builder en workspace-write, revisor en read-only con esquema, modelo del agente", () => {
+  const r = correr("c1", { codex: true });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const con = r.registro.find(x => x.rol === "builder");
+  const rev = r.registro.find(x => x.rol === "reviewer");
+  assert.ok(con.args.includes("exec") && con.args.includes("workspace-write"), `builder: ${con.args}`);
+  assert.ok(!con.args.includes("--output-schema"), "el builder no lleva esquema");
+  assert.ok(rev.args.includes("read-only") && rev.args.includes("--output-schema"), `revisor: ${rev.args}`);
+  assert.deepEqual(rev.esquema, ["veredicto", "defectos"]);
+  for (const x of [con, rev]) {
+    const i = x.args.indexOf("-m");
+    assert.ok(i >= 0 && /\S/.test(x.args[i + 1] ?? ""), `falta -m modelo: ${x.args}`);
+    assert.ok(x.args.some(a => a.startsWith("model_reasoning_effort=")), `falta el effort: ${x.args}`);
+  }
+  assert.equal(r.estado, "done");
+});
+
+// C2 (tope de tiempo externo): un builder que no termina se corta; sin relanzar y deja partial.
+caso("C2 tope de tiempo: el builder que no termina se corta, partial sin relanzar", () => {
+  const r = correr("c2", { codex: true, env: { FAKE_CODEX_CUELGA: "1", KIT_RUN_TOPE_MS: "500" } });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.match(r.stdout, /^PAUSED: plan=changes\/prueba\/plan\.md; segment=1; motivo=access;/);
+  assert.match(r.stdout, /superó el tope de 500 ms/);
+  assert.equal(r.cuenta("builder"), 1, "el tope no relanza");
+  assert.equal(r.estado, "partial");
+});
+
+// A6: el builder falso ve «approved» al arrancar en las 3 corridas (verify falla siempre).
+caso("A6 el builder ve approved al arrancar en las 3 corridas", () => {
+  const r = correr("a6", { env: { FAKE_VERIFY_FALLA: "1" } });
+  assert.equal(r.cuenta("builder"), 3, r.stdout);
+  const estados = r.registro.filter(x => x.rol === "builder").map(x => x.estado);
+  assert.deepEqual(estados, ["approved", "approved", "approved"], r.stdout);
+});
+
+// Uso: un plan que no está aprobado no se toca.
+caso("uso: plan en curso se rechaza sin cambiarlo", () => {
+  const r = correr("uso", { plan: PLAN.replace("status: approved", "status: in progress") });
+  assert.equal(r.status, 2);
+  assert.equal(r.estado, "in progress");
+  assert.equal(r.cuenta("builder"), 0);
+});
+
+// Revisor configurable (kit_run.reviewer de models.json): V2 a V5. Cada models.json temporal es una copia del del repo.
+const MODELOS_BASE = JSON.parse(readFileSync(fileURLToPath(new URL("../../models.json", import.meta.url)), "utf8"));
+function modelosTemporal(nombre, mutar) {
+  const c = structuredClone(MODELOS_BASE);
+  mutar(c);
+  const ruta = join(dir, nombre);
+  writeFileSync(ruta, JSON.stringify(c, null, 2));
+  return ruta;
+}
+// Modelo (-m) y esfuerzo (model_reasoning_effort) de una invocación del codex falso.
+function modeloYEsfuerzo(args) {
+  const m = args[args.indexOf("-m") + 1];
+  const e = args.find(a => a.startsWith("model_reasoning_effort=")).split("=")[1].replace(/"/g, "");
+  return { m, e };
+}
+
+// V2: con kit_run.reviewer en nivel bajo, el revisor va con Luna low y el builder no cambia.
+caso("V2 revisor con nivel bajo: Luna low; el builder no cambia", () => {
+  const ruta = modelosTemporal("v2.json", c => { c.kit_run.reviewer.level = "low"; });
+  const r = correr("v2", { codex: true, env: { FLUCASTR_MODELOS: ruta } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const rev = modeloYEsfuerzo(r.registro.find(x => x.rol === "reviewer").args);
+  assert.deepEqual(rev, { m: "gpt-6-luna", e: "low" });
+  const base = correr("v2base", { codex: true });
+  const conBase = modeloYEsfuerzo(base.registro.find(x => x.rol === "builder").args);
+  const con = modeloYEsfuerzo(r.registro.find(x => x.rol === "builder").args);
+  assert.deepEqual(con, conBase);
+});
+
+// V3: sin kit_run, el revisor usa el modelo y el esfuerzo del planner (lo mismo que sin la clave en el repo).
+caso("V3 sin kit_run el revisor usa el modelo y esfuerzo del planner", () => {
+  const ruta = modelosTemporal("v3.json", c => { delete c.kit_run; });
+  const r = correr("v3", { codex: true, env: { FLUCASTR_MODELOS: ruta } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const base = correr("v3base", { codex: true });
+  const rev = modeloYEsfuerzo(r.registro.find(x => x.rol === "reviewer").args);
+  const revBase = modeloYEsfuerzo(base.registro.find(x => x.rol === "reviewer").args);
+  // El modelo del revisor sin kit_run es el del planner, igual que con kit_run; el esfuerzo es el del planner (models.json).
+  assert.equal(rev.m, revBase.m);
+  assert.equal(rev.e, MODELOS_BASE.agents.planner.effort);
+});
+
+// V4: un nivel inválido sale con exit 2 antes de tocar el plan ni lanzar al builder.
+caso("V4 nivel inválido en kit_run.reviewer: exit 2 y plan intacto", () => {
+  const ruta = modelosTemporal("v4.json", c => { c.kit_run.reviewer.level = "inexistente"; });
+  const r = correr("v4", { codex: true, env: { FLUCASTR_MODELOS: ruta } });
+  assert.equal(r.status, 2, r.stdout + r.stderr);
+  assert.match(r.stderr, /inexistente/);
+  assert.equal(r.cuenta("builder"), 0);
+  assert.equal(r.plan, PLAN);
+});
+
+// V5: la nota del plan lleva revisor=<modelo>:<esfuerzo> del revisor que corrió.
+caso("V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>", () => {
+  const r = correr("v5", { codex: true });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const rev = modeloYEsfuerzo(r.registro.find(x => x.rol === "reviewer").args);
+  assert.ok(r.plan.includes(`- kit run: revisión APPROVED`), r.plan);
+  assert.ok(r.plan.includes(`revisor=${rev.m}:${rev.e}`), r.plan);
+});
+
+let fallos = 0;
+try {
+  for (const c of casos) {
+    try {
+      c.fn();
+      console.log(`ok ${c.nombre}`);
+    } catch (e) {
+      fallos++;
+      console.error(`FALLO ${c.nombre}\n${e.message}`);
+    }
+  }
+} finally {
+  rmSync(dir, { recursive: true, force: true });
+}
+if (fallos) {
+  console.error(`kit-run: ${fallos} caso(s) fallaron`);
+  process.exit(1);
+}
+console.log(`kit-run: ${casos.length} casos pasaron`);

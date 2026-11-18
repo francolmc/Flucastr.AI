@@ -1,21 +1,21 @@
-# Agente predeterminado del proyecto: queda `principal`, aunque hubiera otro. $1: archivo de ajustes a usar.
+# Agente predeterminado del proyecto: queda `planner`, aunque hubiera otro. $1: archivo de ajustes a usar.
 mig_agente() {
   local arch="$1" real="$PROYECTO/.claude/settings.local.json" salida prefijo=""
   if [ "$SIMULAR" = 1 ]; then prefijo="(simulación) "; fi
-  if ! salida="$(node "$RESOLVER" fijar-agente "$arch" principal --sobrescribir 2>&1)"; then
+  if ! salida="$(node "$RESOLVER" fijar-agente "$arch" planner --sobrescribir 2>&1)"; then
     echo "  AVISO: no se tocó $real ($salida)"
     return 0
   fi
   case "$salida" in
     fijado)
-      echo "  ${prefijo}agente predeterminado fijado: principal ($real)"
-      mig_quitar ajuste "$real"; mig_anotar ajuste "$real" principal
+      echo "  ${prefijo}agente predeterminado fijado: planner ($real)"
+      mig_quitar ajuste "$real"; mig_anotar ajuste "$real" planner
       ;;
     reemplazado:*)
-      echo "  ${prefijo}agente predeterminado cambiado de ${salida#reemplazado:} a principal ($real)"
-      mig_quitar ajuste "$real"; mig_anotar ajuste "$real" principal
+      echo "  ${prefijo}agente predeterminado cambiado de ${salida#reemplazado:} a planner ($real)"
+      mig_quitar ajuste "$real"; mig_anotar ajuste "$real" planner
       ;;
-    ya-estaba) echo "  ${prefijo}el agente predeterminado ya es principal ($real)" ;;
+    ya-estaba) echo "  ${prefijo}el agente predeterminado ya es planner ($real)" ;;
     *) echo "  AVISO: resultado inesperado de fijar-agente ($salida)" ;;
   esac
   return 0

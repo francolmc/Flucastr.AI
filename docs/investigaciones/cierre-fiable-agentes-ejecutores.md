@@ -86,7 +86,7 @@ Pregunta de la persona usuaria: quizá el problema es cómo se le encarga el tra
 
 ### 4.6 Contraste con nuestro constructor
 | mini-SWE-agent / Aider | Nuestro constructor |
-| --- | --- |
+| --- |
 | El modelo hace una cosa por turno y el arnés rechaza lo mal formado | El modelo lleva el bucle de todo el plan |
 | La tarea es código; el formato lo valida el arnés | Además del código, debe: manejar estados del plan, casillas, líneas de evidencia, contador, ramas, reglas de git, formato de retorno y decidir cuándo pausar |
 | Reproduce el problema y repite el script tras editar | Aceptación por plan, sin un primer paso «reproducir» obligatorio |

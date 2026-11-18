@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
 
 // Huella del árbol de trabajo: estado de git, diff contra HEAD y contenido de cada archivo listado.
 // null si no hay git. Sirve para detectar que el revisor escribió algo.
-function huellaArbol(raiz) {
+function fingerprintTree(raiz) {
   const top = spawnSync("git", ["rev-parse", "--show-toplevel"], { cwd: raiz, encoding: "utf8" });
   if (top.status !== 0) return null;
   const base = top.stdout.trim();
@@ -23,4 +23,4 @@ function huellaArbol(raiz) {
   return h.digest("hex");
 }
 
-export { huellaArbol };
+export { fingerprintTree };

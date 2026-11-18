@@ -8,7 +8,7 @@ generar_lanzador_kit_run() {
     mkdir -p "$BIN_DIR"
     cat > "$destino" <<EOF
 #!/usr/bin/env bash
-# flucastr-ai:generado - lo crea instalar.sh y lo borra desinstalar.sh
+# flucastr-ai:generado - lo crea install.sh y lo borra uninstall.sh
 RAIZ="$RAIZ"
 exec node "\$RAIZ/scripts/kit-run.mjs" "\$@"
 EOF

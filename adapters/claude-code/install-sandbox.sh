@@ -3,7 +3,7 @@
 instalar_sandbox_claude() {
   local ajustes="$PROYECTO/.claude/settings.json" salida linea clave valor prefijo=""
   local extra=()
-  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if [ "$SIMULAR" = 1 ]; then extra=(--dry-run); prefijo="(simulación) "; fi
   if ! salida="$(node "$RESOLVER" fijar-sandbox claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
     echo "  AVISO: no se pudo configurar el sandbox de Claude Code en $ajustes ($salida)"
     return 0

@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "_readme": "Fuente única de verdad de los modelos. Los agentes declaran level (high, medium, low), nunca un modelo. Resolución: level = agents[agente].level o default_level; perfil = agents[agente].profile si es de la misma herramienta, si no default_profile[tool]; modelo = profiles[perfil].models[level], y si falta se prueba el orden de fallback. effort = agents[agente].effort; si falta no se escribe nada y la herramienta usa el suyo; debe estar en efforts. En Codex, max se escribe como xhigh. kit_run.reviewer usa la misma resolución que un agente (level y effort); sin esa clave, el revisor de kit run es el agente planner. compact_at = tokens de contexto a los que compacta la herramienta. windows = ventana de contexto por modelo: Pi fija reserveTokens = windows − compact_at; Claude Code fija autoCompactWindow = compact_at + 33000.",
+
+  "levels": ["high", "medium", "low"],
+  "efforts": ["low", "medium", "high", "xhigh", "max"],
+  "default_level": "medium",
+  "compact_at": 100000,
+
+  "fallback": {
+    "high": ["medium", "low"],
+    "medium": ["high", "low"],
+    "low": ["medium", "high"]
+  },
+
+  "profiles": {
+    "pi-openai": {
+      "tool": "pi",
+      "provider": "openai",
+      "models": {
+        "high": "openai/gpt-6.1-sol",
+        "medium": "openai/gpt-6.1-terra",
+        "low": "openai/gpt-6-luna"
+      },
+      "windows": {
+        "openai/gpt-6-astra": 272000,
+        "openai/gpt-6.1-sol": 272000,
+        "openai/gpt-6-luna": 272000
+      }
+    },
+    "claude-code": {
+      "tool": "claude-code",
+      "provider": "anthropic",
+      "models": {
+        "high": "claude-opus-5-5",
+        "medium": "claude-sonnet-5-5",
+        "low": "claude-haiku-5-5"
+      }
+    },
+    "codex-openai": {
+      "tool": "codex",
+      "provider": "openai",
+      "models": {
+        "high": "gpt-6.1-sol",
+        "medium": "gpt-6.1-terra",
+        "low": "gpt-6-luna"
+      }
+    }
+  },
+
+  "default_profile": {
+    "pi": "pi-openai",
+    "claude-code": "claude-code",
+    "codex": "codex-openai"
+  },
+
+  "agents": {
+    "planner": { "level": "medium", "effort": "medium", "compact_at": 60000 },
+    "builder": { "level": "low", "effort": "high" }
+  },
+
+  "kit_run": {
+    "reviewer": { "level": "medium", "effort": "low" }
+  }
+}

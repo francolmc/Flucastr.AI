@@ -11,9 +11,9 @@ function frontmatter(texto) {
   return datos;
 }
 
-function fijarEstado(planPath, estado) {
+function fijarEstado(planPath, status) {
   const texto = readFileSync(planPath, "utf8");
-  writeFileSync(planPath, texto.replace(/^estado: .*$/m, `estado: ${estado}`));
+  writeFileSync(planPath, texto.replace(/^status: .*$/m, `status: ${status}`));
 }
 
 function anotarNotas(planPath, linea) {
@@ -29,9 +29,9 @@ function progreso(planPath) {
   return { hechos, total: hechos + pend };
 }
 
-// Primer código de la sección ## Verificación (p. ej. `./verify`); sin él, ./verify.
+// Primer código de la sección ## Verification (p. ej. `./verify`); sin él, ./verify.
 function comandoVerificacion(texto) {
-  const m = texto.match(/^## Verificación\n([\s\S]*?)(?=^## |$(?![\s\S]))/m);
+  const m = texto.match(/^## Verification\n([\s\S]*?)(?=^## |$(?![\s\S]))/m);
   const cod = m && m[1].match(/`([^`]+)`/);
   return cod ? cod[1] : "./verify";
 }

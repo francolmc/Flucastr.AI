@@ -5,7 +5,7 @@ import { esEntero, tiene } from "../../tools/resolver/object.mjs";
 import { escribirAtomico } from "../../tools/resolver/atomic-write.mjs";
 
 // Claude Code compacta a ventana − 33000 (informe 2026-10-31 de verificación de compactación);
-// para compactar a compactar_en se escribe compactar_en + 33000.
+// para compactar a compact_at se escribe compact_at + 33000.
 const COLCHON_CLAUDE_CODE = 33000;
 // Claude Code ignora en silencio un autoCompactWindow fuera de este rango.
 const VENTANA_MINIMA_CLAUDE_CODE = 100000;
@@ -13,8 +13,8 @@ const VENTANA_MAXIMA_CLAUDE_CODE = 1000000;
 
 // Valor de autoCompactWindow que corresponde al perfil por defecto de Claude Code, o la línea de omisión.
 function valorClaude(c) {
-  const perfil = (c.perfiles ?? {})[(c.perfil_por_defecto ?? {})["claude-code"]] ?? {};
-  const compactar = perfil.compactar_en ?? c.compactar_en;
+  const perfil = (c.profiles ?? {})[(c.default_profile ?? {})["claude-code"]] ?? {};
+  const compactar = perfil.compact_at ?? c.compact_at;
   if (!esEntero(compactar)) return { omision: "omitido-umbral" };
   const valor = compactar + COLCHON_CLAUDE_CODE;
   if (valor < VENTANA_MINIMA_CLAUDE_CODE || valor > VENTANA_MAXIMA_CLAUDE_CODE) {

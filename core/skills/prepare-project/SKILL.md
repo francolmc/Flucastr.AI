@@ -1,5 +1,5 @@
 ---
-name: preparar-proyecto
+name: prepare-project
 description: "Prepare a project for the kit with a short `AGENTS.md` and a `verify` command that checks the full system from scratch (clean build, startup, and a real user journey). Use when `AGENTS.md` or `verify` is missing."
 ---
 
@@ -24,7 +24,7 @@ Include only information an agent cannot infer by reading the code:
 - **Verificar todo desde cero: `./verify`**
 - Comprobación rápida: `...` (segundos, en el host, sin servicios). Sin esa línea el plan usa `verify`.
 - Servicio: `...` (opcional)
-- Aceptación: `...` (opcional)
+- Acceptance: `...` (opcional)
 - Evidencia: `...` (opcional; dónde escribe `resultado.json`)
 
 ## Reglas
@@ -33,12 +33,12 @@ Include only information an agent cannot infer by reading the code:
 - <Convenciones propias, solo las que no se deducen del código.>
 ```
 
-Declare each of the four verification capabilities on its own line (full contract in `core/contracts/verificacion.md`):
+Declare each of the four verification capabilities on its own line (full contract in `core/contracts/verification.md`):
 
 - **Rápida** (`Comprobación rápida:`): segundos, en el host, sin servicios.
 - **Servicio** (`Servicio:`): la lógica contra dependencias reales, sin interfaz.
-- **Aceptación** (`Aceptación:`): un archivo por flujo, filtrable por nombre; resume todos los fallos al final.
-- **Evidencia** (`Evidencia:`): dónde escribe `resultado.json`.
+- **Acceptance** (`Acceptance:`): un archivo por flujo, filtrable por nombre; resume todos los fallos al final.
+- **Evidence** (`Evidencia:`): dónde escribe `resultado.json`.
 
 Anything not covered above is covered by `./verify`.
 
@@ -53,7 +53,7 @@ Create one command at the root (`./verify`) that **exits with a non-zero code** 
 3. **Real user journey.** Exercise the key end-to-end flow without database or email mocks.
 4. **Same path as production.** Use the same Dockerfiles and `.env.example` variables as production; only their values change.
 
-Contract: `core/contracts/verificacion.md`. If a matching `core/recipes/<stack>.md` exists, read it; otherwise continue without one.
+Contract: `core/contracts/verification.md`. If a matching `core/recipes/<stack>.md` exists, read it; otherwise continue without one.
 
 Design rules:
 
@@ -63,7 +63,7 @@ Design rules:
 - **Run only when requested**, never as a side effect of planning.
 - Print a heading for each stage and `VERIFY OK` at the end.
 
-An adaptable skeleton is provided in `referencia.md`, next to this skill. Treat it as a starting point: adjust names, ports, and the workflow to your project.
+An adaptable skeleton is provided in `reference.md`, next to this skill. Treat it as a starting point: adjust names, ports, and the workflow to your project.
 
 ## 3. Verify
 
@@ -79,11 +79,11 @@ Run `./verify` in a clean clone or with a tree free of build artifacts. A `verif
 - The journey has a “Lectura” (always) and “Escritura” (creates data) phase. Without `VERIFY_PERMITIR_ESCRITURA=1`, skip writes with an `OMITIDO` notice; `verify` succeeds only if reading passed: `VERIFY OK (solo lectura)`.
 - With `VERIFY_PERMITIR_ESCRITURA=1`, also run the write phase. Test data uses `verify-<pid>@example.invalid` email addresses and names prefixed with `verify-`, so they can be deleted later. `verify` does not guarantee cleanup of the remote environment.
 - The first line of a journey declares whether it writes: `# VERIFY_ESCRIBE: sí` or `no`. If absent, treat it as `sí`.
-- The principal does not run `VERIFY_TARGET` against production. The user runs the post-deployment check.
+- The planner does not run `VERIFY_TARGET` against production. The user runs the post-deployment check.
 
 ## 4. Workspaces (a directory containing multiple repositories)
 
-A workspace is a directory without `.git` that contains repositories. Its root is the unit of work: `AGENTS.md`, `docs/proyecto.md`, `cambios/`, and `verify`. Plans list the affected folders in `repos:`.
+A workspace is a directory without `.git` that contains repositories. Its root is the unit of work: `AGENTS.md`, `docs/proyecto.md`, `changes/`, and `verify`. Plans list the affected folders in `repos:`.
 
 Detection (a fact, not a decision):
 
@@ -93,15 +93,15 @@ find . -maxdepth 2 -name .git -not -path './.git'
 
 - If the root has no `.git` and child folders do, this is a workspace and you **must ask the user** (closed choices, recommend “yes”). Do not run `git init` without their answer.
   - Yes: run `git init` at the root and create a `.gitignore` listing each child with `.git` as `/<folder>/`, plus `.claude/settings.local.json`. Do not commit.
-  - No: the root remains outside a repository; root change plans do not get a branch (see `ejecutar-plan`, step 2).
+  - No: the root remains outside a repository; root change plans do not get a branch (see `execute-plan`, step 2).
 - If this is a single repository, none of this applies: use `repos: [.]` in plans.
 
 Workflow for an existing workspace (d):
 
-1. The principal writes the root `AGENTS.md` and `docs/proyecto.md` (what it is, the repositories and their roles, how they connect, and decisions with their rationale).
-2. The principal links to child `AGENTS.md` files (and `specs/`, if present) without rewriting or moving them.
-3. The constructor builds only what is missing: `verify` (which calls each repository by its path), `/health`, and `.env.example`.
-4. `verify`, `cambios/`, and the documents belong at the root.
+1. The planner writes the root `AGENTS.md` and `docs/proyecto.md` (what it is, the repositories and their roles, how they connect, and decisions with their rationale).
+2. The planner links to child `AGENTS.md` files (and `specs/`, if present) without rewriting or moving them.
+3. The builder builds only what is missing: `verify` (which calls each repository by its path), `/health`, and `.env.example`.
+4. `verify`, `changes/`, and the documents belong at the root.
 
 ## 5. `Despliegue` section in docs/proyecto.md
 
@@ -117,7 +117,7 @@ If the project already exists and lacks this section, add it. Write `pendiente` 
 
 ## 6. Pre-deployment review
 
-When asked to “prepare the deployment”, the principal writes `cambios/revision-despliegue/plan.md` as a draft, with `repos:` and read-only steps: the review does not deploy or touch production. Plan steps cover:
+When asked to “prepare the deployment”, the planner writes `changes/revision-despliegue/plan.md` as a draft, with `repos:` and read-only steps: the review does not deploy or touch production. Plan steps cover:
 
 - Compare `.env.example` variables with those used by the code.
 - Check for pending migrations.
@@ -125,4 +125,4 @@ When asked to “prepare the deployment”, the principal writes `cambios/revisi
 - Record what `verify` covers and does NOT cover: external providers, OAuth, and real email.
 - Document the post-deployment `VERIFY_TARGET` check, which the user runs.
 
-The principal does not deploy, touch production, or run `VERIFY_TARGET` against production.
+The planner does not deploy, touch production, or run `VERIFY_TARGET` against production.

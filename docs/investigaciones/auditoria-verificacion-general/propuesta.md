@@ -15,7 +15,7 @@ Un diseño que aguante: más de dos proyectos a la vez sin colapsar Docker, vali
 
 ## Los cuatro carriles (comandos por proyecto, mismo nombre en todos)
 | Carril | Qué corre | Docker | Orden de magnitud | Quién lo usa |
-| --- | --- | --- | --- | --- |
+| --- | --- |
 | 1 `rapida` | tipos, lint, pruebas unitarias y de módulos, con las herramientas del host | No | segundos | cada paso del constructor |
 | 2 `integracion` | API y Web en el host contra dependencias en contenedor (PostgreSQL, correo) que quedan levantadas entre corridas | Solo las dependencias | 1–3 min | el tramo que conecta el flujo |
 | 3 `stack` | imágenes de producción con caché, recorrido de navegador del flujo tocado | Sí | 5–10 min | cierre de un tramo |

@@ -5,7 +5,7 @@ exclusion_de_git() { # ruta del proyecto
 }
 
 # Excluye en git, de forma local, la carpeta de una skill copiada. Solo añade la línea si no estaba
-# (si la puso el cliente, no se toca ni se registra, para que desinstalar.sh no borre una línea ajena).
+# (si la puso el cliente, no se toca ni se registra, para que uninstall.sh no borre una línea ajena).
 excluir_en_git() { # nombre de la skill
   local n="$1" archivo linea="/.pi/skills/$1/"
   archivo="$(exclusion_de_git "$PROYECTO")"
@@ -34,7 +34,7 @@ excluir_en_git() { # nombre de la skill
 instalar_skills_proyecto() { # usa $PROYECTO
   local base="$PROYECTO/.pi/skills" s n destino
   if [ "$SIMULAR" = 0 ]; then copiar_skills "$base"; fi
-  for s in "$RAIZ"/skills/*/; do
+  for s in "$RAIZ"/core/skills/*/; do
     [ -f "${s}SKILL.md" ] || continue
     n="$(basename "$s")"
     destino="$base/$n"

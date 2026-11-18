@@ -1,4 +1,4 @@
-# 6. reglas deny del proyecto: instalar.sh y desinstalar.sh reales, con un HOME temporal por escenario
+# 6. reglas deny del proyecto: install.sh y uninstall.sh reales, con un HOME temporal por escenario
 paso 6 "reglas deny del proyecto (instalar, reinstalar, desinstalar, JSON roto)"
 T6=$(mktemp -d) || fallo "no pude crear el temporal"
 trap '[ -n "${T6:-}" ] && rm -rf "$T6"' EXIT
@@ -8,12 +8,12 @@ REGLAS_DENY_NUEVAS=("Read(./**/.env)" "Read(./**/.env.*)" "Read(./.ssh/**)" "Rea
 # Cada escenario: $T6/<nombre>/home (con .claude, para que Claude Code se detecte) y $T6/<nombre>/proj
 nuevo_escenario() { mkdir -p "$T6/$1/home/.claude" "$T6/$1/proj/.claude"; }
 k6_instalar() { # carpeta del escenario
-  ( unset PI_CODING_AGENT_DIR; export HOME="$1/home"; bash instalar.sh --solo claude --proyecto "$1/proj" ) >"$1/log" 2>&1 \
-    || { cat "$1/log" >&2; fallo "instalar.sh falló en $1"; }
+  ( unset PI_CODING_AGENT_DIR; export HOME="$1/home"; bash install.sh --only claude --project "$1/proj" ) >"$1/log" 2>&1 \
+    || { cat "$1/log" >&2; fallo "install.sh falló en $1"; }
 }
 k6_desinstalar() { # carpeta del escenario
-  ( unset PI_CODING_AGENT_DIR; export HOME="$1/home"; bash desinstalar.sh --proyecto "$1/proj" ) >"$1/log" 2>&1 \
-    || { cat "$1/log" >&2; fallo "desinstalar.sh falló en $1"; }
+  ( unset PI_CODING_AGENT_DIR; export HOME="$1/home"; bash uninstall.sh --project "$1/proj" ) >"$1/log" 2>&1 \
+    || { cat "$1/log" >&2; fallo "uninstall.sh falló en $1"; }
 }
 k6_deny_lineas() { grep "^deny"$'\t' "$1/home/.flucastr-ai/manifiesto.txt" 2>/dev/null || true; }
 
@@ -111,5 +111,5 @@ node -e 'const fs = require("fs"); const r = (f) => JSON.stringify(JSON.parse(fs
 echo "ok escenario 7: las 7 del usuario sin manifiesto -> se agregan 21; desinstalar deja las 7"
 
 paso 6b "matriz negativa de permisos v2 con archivos y reglas ficticios"
-node --test pruebas/permisos-v2.test.mjs || fallo "matriz de permisos v2 falló"
+node --test tests/permissions-v2.test.mjs || fallo "matriz de permisos v2 falló"
 

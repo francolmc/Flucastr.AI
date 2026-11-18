@@ -30,7 +30,7 @@ export function arrancar(dir, entrypoint) {
     return 0;
   }
   const log = openSync(join(dir, LOG), "a");
-  const hijo = spawn(process.execPath, [entrypoint, "--correr", dir], { detached: true, stdio: ["ignore", log, log], env: process.env });
+  const hijo = spawn(process.execPath, [entrypoint, "--run", dir], { detached: true, stdio: ["ignore", log, log], env: process.env });
   hijo.unref();
   writeFileSync(join(dir, PID), `${hijo.pid}\n`);
   console.log(`arrancado (pid ${hijo.pid}); datos en ${dir}`);

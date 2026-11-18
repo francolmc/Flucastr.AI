@@ -1,6 +1,6 @@
 # 4. skills: SKILL.md con name (= carpeta) y description
 paso 4 "skills con SKILL.md, name y description"
-for dir in skills/*/; do
+for dir in core/skills/*/; do
   dir=${dir%/}
   nombre=$(basename "$dir")
   arch="$dir/SKILL.md"

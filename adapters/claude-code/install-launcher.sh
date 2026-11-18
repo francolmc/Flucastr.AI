@@ -2,7 +2,7 @@ generar_lanzador_claude() { # archivo del agente
   local archivo="$1" nombre destino esfuerzo
   nombre="$(basename "$archivo" .md)"
   destino="$BIN_DIR/claude-$nombre"
-  esfuerzo="$(node "$RESOLVER" esfuerzo "$nombre")"
+  esfuerzo="$(node "$RESOLVER" effort "$nombre")"
   if [ -e "$destino" ] || [ -L "$destino" ]; then
     echo "  OMITIDO (ya existe): $destino"
     return
@@ -14,11 +14,11 @@ generar_lanzador_claude() { # archivo del agente
     if [ -n "$esfuerzo" ]; then bandera=" --effort $esfuerzo"; fi
     cat > "$destino" <<EOF
 #!/usr/bin/env bash
-# flucastr-ai:generado - lo crea instalar.sh y lo borra desinstalar.sh
+# flucastr-ai:generado - lo crea install.sh y lo borra uninstall.sh
 ${exportar}exec claude --agent $nombre$bandera "\$@"
 EOF
     chmod +x "$destino"
     registrar archivo "$destino"
   fi
-  echo "  lanzador generado: $destino (esfuerzo: ${esfuerzo:-sin declarar})"
+  echo "  lanzador generado: $destino (effort: ${effort:-sin declarar})"
 }

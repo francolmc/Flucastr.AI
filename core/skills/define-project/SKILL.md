@@ -1,11 +1,11 @@
 ---
-name: definir-proyecto
+name: define-project
 description: "Define a new project (an empty or nearly empty repository): asks up to 5 closed questions, writes `AGENTS.md` and `docs/proyecto.md`, prepares the root, and stops to wait for the user. Use when the folder has no `AGENTS.md` and no code."
 ---
 
 # Define a New Project
 
-A “new” project has no `AGENTS.md` and no code: only an empty folder, `README`, or `.git`. If code already exists, say so and use `preparar-proyecto`.
+A “new” project has no `AGENTS.md` and no code: only an empty folder, `README`, or `.git`. If code already exists, say so and use `prepare-project`.
 
 Work in two stages. Do not combine them.
 
@@ -21,9 +21,9 @@ Work in two stages. Do not combine them.
 
 Write only these items at the root:
 
-- **`AGENTS.md`**: use the format and limit (about 40 lines) from section 1 of `preparar-proyecto`. Mark `./verify` as pending: “(pendiente: lo crea el plan del esqueleto)”. List the kit skills on one line without descriptions.
-- **`docs/proyecto.md`**: one page with these sections: Qué es, Para quién, MVP, Fuera de alcance, Decisiones (each with its reason). For a workspace, add “Repos” (folder and role). Also add “Despliegue” with its five lines (see section 5 of `preparar-proyecto`); unknown items are “pendiente”, without invented values.
-- **`cambios/`**: a folder with `.gitkeep`.
+- **`AGENTS.md`**: use the format and limit (about 40 lines) from section 1 of `prepare-project`. Mark `./verify` as pending: “(pendiente: lo crea el plan del esqueleto)”. List the kit skills on one line without descriptions.
+- **`docs/proyecto.md`**: one page with these sections: Qué es, Para quién, MVP, Fuera de alcance, Decisiones (each with its reason). For a workspace, add “Repos” (folder and role). Also add “Despliegue” with its five lines (see section 5 of `prepare-project`); unknown items are “pendiente”, without invented values.
+- **`changes/`**: a folder with `.gitkeep`.
 
 Do not create child repository folders or code: those belong to the skeleton plan.
 
@@ -37,6 +37,6 @@ Respond with:
 
 1. The exact paths of files written.
 2. “Espero tu aprobación”.
-3. The next step: if the project has a UI, run `disenar-experiencia` before the UI skeleton (it leaves `docs/experiencia.md` approved in the terminal); then create the skeleton plan (`./verify` with `preparar-proyecto`, including `repos:`). Do not write that plan before approval.
+3. The next step: if the project has a UI, run `design-experience` before the UI skeleton (it leaves `docs/experiencia.md` approved in the terminal); then create the skeleton plan (`./verify` with `prepare-project`, including `repos:`). Do not write that plan before approval.
 
 Then stop.

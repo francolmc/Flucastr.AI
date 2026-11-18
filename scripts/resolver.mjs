@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Resuelve el modelo de cada agente según modelos.json y genera los archivos por herramienta.
+// Resuelve el modelo de cada agente según models.json y genera los archivos por herramienta.
 //
 // Uso:
 //   node scripts/resolver.mjs modelo <agente> <herramienta>   imprime el modelo (herramienta: claude-code | pi)
-//   node scripts/resolver.mjs esfuerzo <agente>               imprime el esfuerzo del agente (vacío si no declara)
+//   node scripts/resolver.mjs effort <agente>                 imprime el esfuerzo del agente (vacío si no declara)
 //   node scripts/resolver.mjs modelo-esfuerzo <agente> <herramienta>  imprime modelo:esfuerzo (solo el modelo si no hay esfuerzo)
 //   node scripts/resolver.mjs agente-claude <archivo.md>      imprime el agente con el campo `model` ya resuelto (Claude Code)
 //   node scripts/resolver.mjs agente-pi <archivo.md>          igual, con el modelo de Pi (para el paquete de subagentes)
@@ -11,25 +11,25 @@
 //   node scripts/resolver.mjs fijar-agente <ajustes.json> <agente> [--sobrescribir]   deja `agent` en los ajustes de un proyecto (no pisa otro valor, salvo con --sobrescribir)
 //   node scripts/resolver.mjs quitar-agente <ajustes.json> <agente>  deshace lo anterior, solo si el valor es ese agente
 //   node scripts/resolver.mjs comparar-modelos <personal.json> <publicado.json>  imprime las diferencias que merecen aviso (nada si no hay)
-//   node scripts/resolver.mjs fijar-compactacion pi <settings.json> [--simular]  pone compaction.modelOverrides de Pi (no pisa lo del usuario)
+//   node scripts/resolver.mjs fijar-compactacion pi <settings.json> [--dry-run]  pone compaction.modelOverrides de Pi (no pisa lo del usuario)
 //   node scripts/resolver.mjs quitar-compactacion pi <settings.json> <modelo> <reserve> [creado]  deshace lo anterior, solo si el valor es ese
-//   node scripts/resolver.mjs fijar-compactacion claude <settings.json> [--simular]  pone autoCompactWindow (Claude Code) en los ajustes del proyecto
+//   node scripts/resolver.mjs fijar-compactacion claude <settings.json> [--dry-run]  pone autoCompactWindow (Claude Code) en los ajustes del proyecto
 //   node scripts/resolver.mjs quitar-compactacion claude <settings.json> <valor>  deshace lo anterior, solo si el valor es ese
-//   node scripts/resolver.mjs fijar-hook claude <settings.local.json> [--simular]  agrega el hook PostToolUse del validador (no pisa lo ajeno)
+//   node scripts/resolver.mjs fijar-hook claude <settings.local.json> [--dry-run]  agrega el hook PostToolUse del validador (no pisa lo ajeno)
 //   node scripts/resolver.mjs quitar-hook claude <settings.local.json>  deshace lo anterior, solo la entrada exacta del validador
-//   node scripts/resolver.mjs fijar-deny claude <proyecto/.claude/settings.json> [--simular]  agrega las reglas deny del kit que falten (una línea agregada:<regla> por cada una)
+//   node scripts/resolver.mjs fijar-deny claude <proyecto/.claude/settings.json> [--dry-run]  agrega las reglas deny del kit que falten (una línea agregada:<regla> por cada una)
 //   node scripts/resolver.mjs quitar-deny claude <proyecto/.claude/settings.json> <regla>  quita esa regla exacta; borra lo que quede vacío
 //   node scripts/resolver.mjs agente-codex <archivo.md>      imprime el TOML del agente para Codex (~/.codex/agents/<nombre>.toml), modelo y esfuerzo resueltos
-//   node scripts/resolver.mjs fijar-deny codex <rules> [<proyecto/AGENTS.md>] [--simular]  genera reglas conservadoras (no pisa un archivo ajeno)
+//   node scripts/resolver.mjs fijar-deny codex <rules> [<proyecto/AGENTS.md>] [--dry-run]  genera reglas conservadoras (no pisa un archivo ajeno)
 //   node scripts/resolver.mjs quitar-deny codex <proyecto/.codex/rules/flucastr.rules>  borra ese archivo solo si lleva la marca del kit
 //   modelo-esfuerzo <agente> codex: el esfuerzo sale traducido (max -> xhigh), como lo pide Codex
-//   esfuerzo <agente> codex: igual, solo el esfuerzo traducido para Codex
+//   effort <agente> codex: igual, solo el esfuerzo traducido para Codex
 //   instrucciones-codex <archivo.md>: imprime las instrucciones del agente como cadena JSON (válida como valor TOML en codex -c)
-//   revisor <herramienta>: dos líneas, modelo y esfuerzo del revisor de kit run (kit_run.revisor; sin esa clave, el de principal). Esfuerzo traducido para codex.
-//   compactar-codex <agente>: imprime el umbral de compactación de Codex del agente (compactar_en), o nada si no hay uno válido
+//   reviewer <herramienta>: dos líneas, modelo y esfuerzo del revisor de kit run (kit_run.reviewer; sin esa clave, el de planner). Esfuerzo traducido para codex.
+//   compactar-codex <agente>: imprime el umbral de compactación de Codex del agente (compact_at), o nada si no hay uno válido
 //
-// Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el modelos.json a leer;
-// si no, se lee el modelos.json del repo. Lo usa instalar.sh --copiar con el modelos.json personal.
+// Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el models.json a leer;
+// si no, se lee el models.json del repo. Lo usa install.sh --copy con el models.json personal.
 
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -832,13 +832,13 @@ const [orden, ...args] = process.argv.slice(2);
 
 if (orden === "modelo" && args.length === 2) {
   process.stdout.write(resolverModelo(args[0], args[1]) + "\n");
-} else if (orden === "esfuerzo" && (args.length === 1 || (args.length === 2 && args[1] === "codex"))) {
+} else if (orden === "effort" && (args.length === 1 || (args.length === 2 && args[1] === "codex"))) {
   // Con 'codex' el esfuerzo sale traducido para Codex (max -> xhigh); sin herramienta, tal cual.
   process.stdout.write(esfuerzoDe(args[1], resolverEsfuerzo(args[0])) + "\n");
-} else if (orden === "revisor" && args.length === 1) {
+} else if (orden === "reviewer" && args.length === 1) {
   // Dos líneas: modelo y esfuerzo del revisor de kit run (esfuerzo traducido para Codex; línea vacía si no declara).
   const r = resolverRevisor(args[0]);
-  process.stdout.write(`${r.modelo}\n${esfuerzoDe(args[0], r.esfuerzo)}\n`);
+  process.stdout.write(`${r.modelo}\n${esfuerzoDe(args[0], r.effort)}\n`);
 } else if (orden === "modelo-esfuerzo" && args.length === 2) {
   const modelo = resolverModelo(args[0], args[1]); const esfuerzo = esfuerzoDe(args[1], resolverEsfuerzo(args[0])); process.stdout.write((esfuerzo ? `${modelo}:${esfuerzo}` : modelo) + "\n"); // Modelo con el esfuerzo como sufijo (modelo:esfuerzo), que acepta `pi --model`; sin esfuerzo, solo el modelo.
 
@@ -901,7 +901,7 @@ if (orden === "modelo" && args.length === 2) {
 
 
 } else if (orden === "compactar-codex" && args.length === 1) {
-  // Umbral de compactación de Codex del agente; sale vacío si modelos.json no tiene compactar_en válido.
+  // Umbral de compactación de Codex del agente; sale vacío si models.json no tiene compact_at válido.
   process.stdout.write(compactarCodex(args[0]) + "\n");
 
 } else if (orden === "instrucciones-codex" && args.length === 1) { const agente = basename(args[0], ".md");
@@ -966,36 +966,36 @@ if (orden === "modelo" && args.length === 2) {
 
 
 
-} else if (orden === "fijar-compactacion" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+} else if (orden === "fijar-compactacion" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--dry-run"))) {
   fijarCompactacionClaude(args[1], args.length === 3, leerConfig);
 } else if (orden === "quitar-compactacion" && args[0] === "claude" && args.length === 3 && /^\d+$/.test(args[2])) {
   quitarCompactacionClaude(args[1], args[2]);
-} else if (orden === "fijar-hook" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+} else if (orden === "fijar-hook" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--dry-run"))) {
   fijarHookClaude(args[1], args.length === 3);
 } else if (orden === "quitar-hook" && args[0] === "claude" && args.length === 2) {
   quitarHookClaude(args[1]);
-} else if (orden === "fijar-deny" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+} else if (orden === "fijar-deny" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--dry-run"))) {
   fijarDenyClaude(args[1], args.length === 3);
 } else if (orden === "quitar-deny" && args[0] === "claude" && args.length === 3) {
   quitarDenyClaude(args[1], args[2]);
-} else if (orden === "fijar-sandbox" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+} else if (orden === "fijar-sandbox" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--dry-run"))) {
   fijarSandboxClaude(args[1], args.length === 3);
 } else if (orden === "quitar-sandbox" && args[0] === "claude" && args.length === 4) {
   quitarSandboxClaude(args[1], args[2], args[3]);
 } else if (
   orden === "fijar-deny" && args[0] === "codex" &&
-  (args.length === 2 || (args.length === 3 && (args[2] === "--simular" || !args[2].startsWith("--"))) ||
-    (args.length === 4 && !args[2].startsWith("--") && args[3] === "--simular"))
+  (args.length === 2 || (args.length === 3 && (args[2] === "--dry-run" || !args[2].startsWith("--"))) ||
+    (args.length === 4 && !args[2].startsWith("--") && args[3] === "--dry-run"))
 ) {
-  const opcionSimular = args.at(-1) === "--simular";
-  const agentsPath = args.length >= 3 && args[2] !== "--simular" ? args[2] : undefined;
+  const opcionSimular = args.at(-1) === "--dry-run";
+  const agentsPath = args.length >= 3 && args[2] !== "--dry-run" ? args[2] : undefined;
   fijarDenyCodex(args[1], agentsPath, opcionSimular);
 } else if (orden === "quitar-deny" && args[0] === "codex" && args.length === 2) {
   quitarDenyCodex(args[1]);
-} else if (orden === "fijar-compactacion" && args[0] === "pi" && (args.length === 2 || (args.length === 3 && args[2] === "--simular"))) {
+} else if (orden === "fijar-compactacion" && args[0] === "pi" && (args.length === 2 || (args.length === 3 && args[2] === "--dry-run"))) {
   fijarCompactacionPi(args[1], args.length === 3, leerConfig);
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | esfuerzo <agente> [codex] | revisor <herramienta> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--simular] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--simular] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--simular] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--simular] | quitar-deny claude <settings.json> <regla> | fijar-sandbox claude <settings.json> [--simular] | quitar-sandbox claude <settings.json> <clave> <valor-json> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--simular] | quitar-deny codex <rules>");
+  fallar("uso: resolver.mjs modelo <agente> <herramienta> | effort <agente> [codex] | reviewer <herramienta> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--dry-run] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--dry-run] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--dry-run] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--dry-run] | quitar-deny claude <settings.json> <regla> | fijar-sandbox claude <settings.json> [--dry-run] | quitar-sandbox claude <settings.json> <clave> <valor-json> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--dry-run] | quitar-deny codex <rules>");
 }

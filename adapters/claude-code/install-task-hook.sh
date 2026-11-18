@@ -3,7 +3,7 @@
 instalar_hook_claude() {
   local ajustes="$PROYECTO/.claude/settings.local.json" salida prefijo=""
   local extra=()
-  if [ "$SIMULAR" = 1 ]; then extra=(--simular); prefijo="(simulación) "; fi
+  if [ "$SIMULAR" = 1 ]; then extra=(--dry-run); prefijo="(simulación) "; fi
   if ! salida="$(node "$RESOLVER" fijar-hook claude "$ajustes" ${extra[@]+"${extra[@]}"} 2>&1)"; then
     echo "  AVISO: no se tocó $ajustes ($salida)"
     return 0

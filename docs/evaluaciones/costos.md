@@ -1,21 +1,21 @@
 # Costos y calibración de cuota (Codex)
 
-Informe del medidor `scripts/uso.mjs`, tramo 2 de `cambios/medidor-costos/plan.md`. Datos de los logs locales de Codex (`~/.codex/sessions`) el 2026-11-08, con eventos hasta el 2026-11-09 01:44 UTC. Los logs siguen creciendo mientras se trabaja, así que las cifras son de ese momento.
+Informe del medidor `scripts/usage.mjs`, tramo 2 de `cambios/medidor-costos/plan.md`. Datos de los logs locales de Codex (`~/.codex/sessions`) el 2026-11-08, con eventos hasta el 2026-11-09 01:44 UTC. Los logs siguen creciendo mientras se trabaja, así que las cifras son de ese momento.
 
 Reproducir:
 
 ```
-node scripts/uso.mjs --herramienta codex --desde 2026-11-01 --json
+node scripts/usage.mjs --tool codex --since 2026-11-01 --json
 ```
 
-Se calcula tokens y puntos de cuota semanal. Desde el cambio `espera-unica`, `--sesiones` añade créditos estimados por sesión (con `scripts/tarifas.json`) y sondeos; ver «Créditos y espera» más abajo. No se calcula dinero. Solo Codex tiene cuota en este medidor: Claude Code y Pi no se calibran aquí.
+Se calcula tokens y puntos de cuota semanal. Desde el cambio `espera-unica`, `--sessions` añade créditos estimados por sesión (con `scripts/tarifas.json`) y sondeos; ver «Créditos y espera» más abajo. No se calcula dinero. Solo Codex tiene cuota en este medidor: Claude Code y Pi no se calibran aquí.
 
 ## Uso desde 2026-11-01 (todos los proyectos)
 
 Día = fecha UTC del primer evento de cada sesión.
 
 | fecha | sesiones | llamadas | salida |
-| --- | --- | --- | --- |
+| --- |
 | 2026-11-01 | 1 | 5 | 1884 |
 | 2026-11-03 | 1 | 1 | 14 |
 | 2026-11-04 | 1 | 8 | 1268 |
@@ -26,7 +26,7 @@ Día = fecha UTC del primer evento de cada sesión.
 Por modelo, sumando todos los días:
 
 | modelo | sesiones | llamadas | entrada | caché leída | salida |
-| --- | --- | --- | --- | --- | --- |
+| --- | --- |
 | gpt-6-luna | 13 | 926 | 1574643 | 104747776 | 300611 |
 | gpt-6.1-sol | 5 | 710 | 698994 | 70482304 | 141190 |
 
@@ -37,7 +37,7 @@ Por modelo, sumando todos los días:
 Solo cuentan sesiones exclusivas: su intervalo primer-último evento no se cruza con otra sesión de Codex. También se descartan las sesiones donde el porcentaje de cuota baja, porque eso es un reinicio. `puntos` = porcentaje final menos inicial de la cuota secundaria; `tokens` = `total_tokens` final de la sesión.
 
 | modelo | sesiones exclusivas | tokens | puntos | puntos por millón de tokens |
-| --- | --- | --- | --- | --- |
+| --- | --- |
 | gpt-6-luna | 4 | 587306 | 0 | 0,00 (no informativo) |
 | gpt-6.1-sol | 0 | - | - | sin muestra |
 
@@ -66,7 +66,7 @@ La persona usuaria aprueba cualquier cambio en `modelos.json` (tramo 3).
 
 ## Créditos y espera
 
-`node scripts/uso.mjs --sesiones --herramienta codex --json` da por sesión `creditos` y `sondeos`.
+`node scripts/usage.mjs --sessions --tool codex --json` da por sesión `creditos` y `sondeos`.
 
 - `creditos`: tokens sin caché × entrada, más caché leída × entrada en caché, más salida × salida, todo por millón y según `scripts/tarifas.json` (fuente: `learn.chatgpt.com/codex/pricing`, fecha 2026-11-09). Es una estimación con las tarifas guardadas en ese archivo; si la fuente cambia, se actualiza el archivo. Sin tarifa para el modelo, `creditos` es `null`, no 0. Pi usa la misma tabla; Claude Code no tiene tarifas aquí, así que `null`.
 - `sondeos`: llamadas de shell con `sleep`, `tail` o `watch`, contadas una vez cada una. Es una aproximación: no separa «consultas de estado» de otros usos de `tail`. Claude Code no lo mide (`null`).
@@ -76,7 +76,7 @@ La persona usuaria aprueba cualquier cambio en `modelos.json` (tramo 3).
 
 ## Invasión del principal
 
-El principal editaba el producto, probaba y depuraba entornos en vez de revisar. `node scripts/uso.mjs --sesiones` mide por sesión principal dos columnas nuevas:
+El principal editaba el producto, probaba y depuraba entornos en vez de revisar. `node scripts/usage.mjs --sessions` mide por sesión principal dos columnas nuevas:
 
 - `ediciones_fuera`: escrituras del principal a rutas que no son `cambios/`, `AGENTS.md` ni `docs/proyecto.md`. En Codex cuentan `apply_patch` y las escrituras de shell (`cat >`, `tee`, `open(…, "w")`); en Claude Code, `Edit` y `Write`; en Pi, `edit` y `write`.
 - `corridas_verify`: llamadas a `./verify` o `npm run verify`.
@@ -88,17 +88,17 @@ Línea base (9 nov, README de un proyecto): el principal gastó 10 créditos fre
 Después (vacío hasta tener sesiones nuevas con el principal nuevo):
 
 | sesión | ediciones_fuera | corridas_verify | llamadas tras el retorno | créditos del principal ÷ créditos del constructor |
-| --- | --- | --- | --- | --- |
+| --- | --- |
 | pendiente | | | no medible aún: el medidor no separa las llamadas posteriores al retorno | |
 
 ## kit run: piloto A4
 
 Resultado: A4 no cumplido. El criterio pedía que el principal costara menos de 3 veces el constructor en el mismo cambio; no se cumple.
 
-Datos (`node scripts/uso.mjs --sesiones`, 10 nov, Codex, plan `cambios/piloto-kit-run/plan.md`):
+Datos (`node scripts/usage.mjs --sessions`, 10 nov, Codex, plan `cambios/piloto-kit-run/plan.md`):
 
 | rol | modelo | corridas | créditos |
-| --- | --- | --- | --- |
+| --- |
 | principal | `gpt-6.1-sol` | 2 revisiones (1,3784 + 1,2508) | 2,6292 |
 | constructor | `gpt-6-luna` | 2 corridas (0,2264 + 0,1702) | 0,3966 |
 

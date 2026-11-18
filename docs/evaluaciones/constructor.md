@@ -7,7 +7,7 @@ La suite de `./verify` comprueba el contrato determinista (plantillas, textos cr
 ## Casos
 
 | Caso | Fixture inicial | Encargo | Resultado esperado | Oráculo externo |
-| --- | --- | --- | --- | --- |
+| --- | --- |
 | Extractor que devuelve cero opciones | Repo aislado con fixture conocido no vacío que contiene opciones; extractor defectuoso devuelve cero elementos y la suite puede pasar vacuamente | Corregir el extractor para que descubra las opciones del fixture | Opciones conocidas extraídas y verificación verde; una omisión deliberada no puede pasar vacuamente | Oráculo externo con el conjunto esperado de opciones, fuera del repo editable; una mutación que las omite debe ser rechazada |
 | Cambio multiarchivo | Repo aislado con una petición que cruza dos archivos relacionados | Implementar el cambio end-to-end definido en un plan aprobado | Todos los archivos necesarios cambiados y comprobación final verde | Aserciones externas sobre ambos archivos y comportamiento integrado |
 | Reparación de regresión | Repo con una regresión reproducible y una prueba que la detecta | Encontrar causa raíz y reparar sin eliminar la prueba | Regresión corregida y prueba original aún presente/pasante | Reproducción externa antes/después y comparación de la prueba |
@@ -27,7 +27,7 @@ La suite de `./verify` comprueba el contrato determinista (plantillas, textos cr
 Tres intentos por caso son una muestra diagnóstica pequeña, no establecen una tasa robusta ni prueban causalidad. Publicar resultados individuales además de cualquier agregado, indicar fallos del harness y no convertir una suite determinista verde en evidencia de rendimiento.
 
 | Contrato | Caso | Intento | Modelo/esfuerzo | Resultado externo | Retorno | Motivo de terminación | Intervención principal | Duración | Coste |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| --- | --- | --- |
 | <anterior/nuevo> | <caso> | <1–3> | <efectivos> | <pasa/falla> | <resumen> | <motivo> | <ninguna/resumen> | <tiempo> | <importe o no medido> |
 
 La configuración del harness y comandos de lanzamiento se decidirán y validarán en otro plan. No se prescriben aquí comandos de lanzamiento no verificados.

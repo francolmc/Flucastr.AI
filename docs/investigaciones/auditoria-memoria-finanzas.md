@@ -28,6 +28,6 @@ El tiempo perdido de hoy **no es lentitud del modelo: son esperas de aprobación
 
 ## Opciones (decide la persona usuaria)
 
-1. **Reglas `allow` de Codex en el proyecto** para lo recurrente y de bajo riesgo: `./verify`, `npm test`, `npm run`, `git fetch`, `git status`, `git diff`, `docker ps`, `docker info`. Las instala `instalar.sh --proyecto` junto a las `forbidden` (igual que se hizo con `git switch -c`). Docker `run` queda fuera por riesgo.
+1. **Reglas `allow` de Codex en el proyecto** para lo recurrente y de bajo riesgo: `./verify`, `npm test`, `npm run`, `git fetch`, `git status`, `git diff`, `docker ps`, `docker info`. Las instala `install.sh --project` junto a las `forbidden` (igual que se hizo con `git switch -c`). Docker `run` queda fuera por riesgo.
 2. **Ventana propia para el constructor** (`codex-constructor`): las solicitudes se ven y se contestan en vivo. Sin cambios de código.
 3. **Aprobación `never` con sandbox más ancho** solo en esa ventana: menos esperas, pero quita la barrera; no se recomienda.

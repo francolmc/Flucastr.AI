@@ -1,0 +1,348 @@
+#!/usr/bin/env node
+// Pruebas del medidor scripts/usage.mjs sobre fixtures con totales conocidos (A1 a A7).
+// Uso: node tests/usage/run.mjs [--script <ruta>] [--fixtures <dir>]
+// --script y --fixtures sirven solo para la comprobación de sensibilidad (copias modificadas);
+// por defecto prueban el medidor del repo y los fixtures de esta carpeta.
+
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const aqui = dirname(fileURLToPath(import.meta.url));
+const raiz = resolve(aqui, "..", "..");
+let script = join(raiz, "scripts", "usage.mjs");
+let fixtures = join(aqui, "fixtures");
+const argv = process.argv.slice(2);
+for (let i = 0; i < argv.length; i++) {
+  if (argv[i] === "--script" && argv[i + 1]) script = resolve(argv[++i]);
+  else if (argv[i] === "--fixtures" && argv[i + 1]) fixtures = resolve(argv[++i]);
+  else { console.error(`opción desconocida o sin valor: ${argv[i]}`); process.exit(2); }
+}
+
+const SECRETO = "SECRETO-NO-LEER";
+const CAMPOS = ["herramienta", "fecha", "proyecto", "modelo", "rol", "sesiones", "llamadas", "entrada", "cache_leida", "cache_escrita", "salida"];
+
+// Totales calculados a mano a partir de los fixtures.
+const ESPERADO = [
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-a", modelo: "claude-sonnet-fixture", rol: "main", sesiones: 1, llamadas: 2, entrada: 130, cache_leida: 1500, cache_escrita: 200, salida: 70 },
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-a", modelo: "claude-haiku-fixture", rol: "sub", sesiones: 1, llamadas: 1, entrada: 10, cache_leida: 0, cache_escrita: 0, salida: 5 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-c", modelo: "gpt-codex-fixture", rol: "main", sesiones: 1, llamadas: 3, entrada: 1500, cache_leida: 1500, cache_escrita: 0, salida: 450 },
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-b", modelo: "modelo-pi-fixture", rol: "main", sesiones: 1, llamadas: 2, entrada: 600, cache_leida: 300, cache_escrita: 10, salida: 180 },
+];
+
+const clave = (f) => `${f.herramienta}|${f.modelo}|${f.rol}`;
+const ordenar = (lista) => [...lista].map((f) => Object.fromEntries(CAMPOS.map((c) => [c, f[c]]))).sort((a, b) => (clave(a) < clave(b) ? -1 : clave(a) > clave(b) ? 1 : 0));
+const deHerramienta = (lista, herr) => lista.filter((f) => f.herramienta === herr);
+const esperado = (herr) => ordenar(ESPERADO.filter((f) => f.herramienta === herr));
+
+const tmp = mkdtempSync(join(tmpdir(), "probar-uso-"));
+
+function correr(args) {
+  const r = spawnSync(process.execPath, [script, ...args], { encoding: "utf8" });
+  if (r.error) throw r.error;
+  return r;
+}
+
+function base() {
+  return ["--since", "2026-01-01", "--claude-dir", join(fixtures, "claude"), "--codex-dir", join(fixtures, "codex"), "--pi-dir", join(fixtures, "pi")];
+}
+
+// Ejecuta con --json sobre los fixtures (o con sobrescrituras posteriores, que ganan) y devuelve el JSON y el texto crudo.
+function medir(extra = []) {
+  const r = correr([...base(), ...extra, "--json"]);
+  assert.equal(r.status, 0, `exit ${r.status}: ${r.stderr}`);
+  return { json: JSON.parse(r.stdout), crudo: r.stdout };
+}
+
+const pruebas = [];
+const prueba = (id, descripcion, fn) => pruebas.push({ id, descripcion, fn });
+
+prueba("idioma", "Opciones en inglés, rechazo de las formas en español y errores equivalentes con datos aislados", () => {
+  const copia = join(tmp, "kit con espacios");
+  mkdirSync(join(copia, "scripts"), { recursive: true });
+  cpSync(script, join(copia, "scripts", "usage.mjs"));
+  cpSync(join(raiz, "scripts", "usage.mjs"), join(copia, "scripts", "usage.mjs"));
+  cpSync(join(raiz, "scripts", "rates.json"), join(copia, "scripts", "rates.json"));
+  cpSync(join(raiz, "tools", "usage"), join(copia, "tools", "usage"), { recursive: true });
+  const datos = join(tmp, "datos con espacios");
+  cpSync(fixtures, datos, { recursive: true });
+  const dirs = ["--claude-dir", join(datos, "claude"), "--codex-dir", join(datos, "codex"), "--pi-dir", join(datos, "pi")];
+  const ejecutar = (entrada, args) => {
+    const r = spawnSync(process.execPath, [join(copia, "scripts", entrada), ...dirs, ...args], { encoding: "utf8", env: { ...process.env, HOME: join(tmp, "home aislado") } });
+    if (r.error) throw r.error;
+    return { status: r.status, stdout: r.stdout, stderr: r.stderr };
+  };
+  for (const es of ["--desde", "--herramienta", "--proyecto", "--sesiones", "--umbral", "--tarifas"]) {
+    const rechazo = ejecutar("usage.mjs", [es, "1"]);
+    assert.equal(rechazo.status, 2, `${es} ya no debe aceptarse`);
+    assert.match(rechazo.stderr, /opción desconocida/);
+  }
+  const mezcla = ["--since", "2026-01-01", "--tool", "pi", "--project", "proyecto-b", "--sessions", "--threshold", "30", "--rates", join(datos, "rates-test.json"), "--json"];
+  const medido = ejecutar("usage.mjs", mezcla);
+  assert.equal(medido.status, 0, medido.stderr);
+  assert.ok(JSON.parse(medido.stdout).filas.length > 0);
+  for (const [en, valor] of [["--since", "invalido"], ["--tool", "otra"], ["--threshold", "101"]]) {
+    assert.equal(ejecutar("usage.mjs", [en, valor]).status, 2, `${en} ${valor} debe salir con código 2`);
+  }
+});
+
+prueba("A1", "Claude: mensaje duplicado contado una vez y subagente con rol sub", () => {
+  const { json } = medir();
+  assert.deepStrictEqual(ordenar(deHerramienta(json.filas, "claude")), esperado("claude"));
+});
+
+prueba("A2", "Codex: último total acumulado, llamadas = eventos con info, filtro por herramienta", () => {
+  const { json } = medir();
+  assert.deepStrictEqual(ordenar(deHerramienta(json.filas, "codex")), esperado("codex"));
+  const solo = medir(["--tool", "codex"]).json.filas;
+  assert.ok(solo.length > 0 && solo.every((f) => f.herramienta === "codex"), "--tool codex debe dejar solo filas de Codex");
+});
+
+prueba("A3", "Pi: suma de 2 mensajes, error por límite fuera de los tokens y 1 aviso", () => {
+  const { json } = medir();
+  assert.deepStrictEqual(ordenar(deHerramienta(json.filas, "pi")), esperado("pi"));
+  const limites = json.avisos.filter((a) => /límite/.test(a));
+  assert.equal(limites.length, 1, `avisos de límite: ${JSON.stringify(json.avisos)}`);
+  const filtrado = medir(["--project", "PROYECTO-B"]).json.filas;
+  assert.deepStrictEqual(ordenar(filtrado), esperado("pi"), "--project debe ignorar mayúsculas y dejar solo el proyecto");
+});
+
+prueba("A4a", "Robustez: línea corrupta (en el fixture) y archivo con mtime antiguo ignorados", () => {
+  const copia = join(tmp, "claude-con-viejo");
+  cpSync(join(fixtures, "claude"), copia, { recursive: true });
+  const viejo = join(copia, "-home-test-Codes-proyecto-a", "viejo.jsonl");
+  writeFileSync(viejo, JSON.stringify({
+    type: "assistant", requestId: "req_viejo", timestamp: "2026-11-08T10:05:00.000Z",
+    message: { id: "msg_viejo", role: "assistant", model: "claude-sonnet-fixture",
+      usage: { input_tokens: 999999, output_tokens: 999999, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 } },
+  }) + "\n");
+  const antiguo = new Date("2020-01-01T00:00:00Z");
+  utimesSync(viejo, antiguo, antiguo);
+  const { json } = medir(["--claude-dir", copia]);
+  assert.deepStrictEqual(ordenar(deHerramienta(json.filas, "claude")), esperado("claude"));
+});
+
+prueba("A4b", "Robustez: carpeta de Claude ausente avisa y el resto se suma", () => {
+  const { json } = medir(["--claude-dir", join(tmp, "no-existe")]);
+  assert.equal(deHerramienta(json.filas, "claude").length, 0);
+  assert.ok(json.avisos.some((a) => /no existe la carpeta de Claude Code/.test(a)), `avisos: ${JSON.stringify(json.avisos)}`);
+  assert.deepStrictEqual(ordenar(deHerramienta(json.filas, "codex")), esperado("codex"));
+  assert.deepStrictEqual(ordenar(deHerramienta(json.filas, "pi")), esperado("pi"));
+});
+
+prueba("A4c", "Robustez: con todas las carpetas ausentes sale con código 1", () => {
+  const r = correr(["--claude-dir", join(tmp, "a"), "--codex-dir", join(tmp, "b"), "--pi-dir", join(tmp, "c"), "--json"]);
+  assert.equal(r.status, 1, `exit ${r.status}`);
+  assert.match(r.stderr, /ninguna carpeta de sesiones existe/);
+});
+
+prueba("A4d", "Opciones inválidas salen con código 2", () => {
+  assert.equal(correr(["--since", "2026-13-01"]).status, 2);
+  assert.equal(correr(["--tool", "otra"]).status, 2);
+});
+
+prueba("A5", "Credenciales de Codex: no se leen ni aparecen en texto ni en JSON", () => {
+  assert.ok(existsSync(join(fixtures, "codex", "auth.json")), "falta el fixture auth.json");
+  const texto = correr(base());
+  assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
+  assert.ok(!texto.stdout.includes(SECRETO) && !texto.stderr.includes(SECRETO), "el texto muestra el secreto");
+  const { crudo } = medir();
+  assert.ok(!crudo.includes(SECRETO), "el JSON muestra el secreto");
+});
+
+// Calibración de cuota (fixtures/codex-cuota, 6 sesiones): 4 exclusivas y sin baja, puntos 3 + 2,5 + 1 + 4 = 10,5,
+// tokens 5000 + 3000 + 1000 + 8000 = 17000. La que baja (50 a 45) y la cruzada (13:10 a 13:40, se cruza con la que baja) no entran.
+const CUOTA_ESPERADA = [{ modelo: "gpt-cuota-fixture", puntos: 10.5, tokens: 17000, sesiones: 4 }];
+
+prueba("A6", "Calibración de cuota: sesiones exclusivas sin baja, puntos y tokens, aviso de muestra pequeña", () => {
+  const { json } = medir(["--codex-dir", join(fixtures, "codex-cuota")]);
+  assert.deepStrictEqual(json.cuota, CUOTA_ESPERADA);
+  assert.ok(json.avisos.some((a) => /muestra pequeña/.test(a)), `avisos: ${JSON.stringify(json.avisos)}`);
+});
+
+prueba("A6b", "Calibración: la sesión que baja queda fuera también sin la cruzada", () => {
+  const copia = join(tmp, "codex-cuota-sin-cruzada");
+  cpSync(join(fixtures, "codex-cuota"), copia, { recursive: true });
+  rmSync(join(copia, "sessions", "2026", "11", "08", "rollout-2026-11-08T13-10-00-cuota-cruzada.jsonl"));
+  const { json } = medir(["--codex-dir", copia]);
+  assert.deepStrictEqual(json.cuota, CUOTA_ESPERADA);
+});
+
+// Diagnóstico por sesión (fixtures/codex-sesiones). La sesión con esperas tiene 5 llamadas de espera (wait_agent, wait,
+// send_message, sleep, wait_agent) y contexto 20000, 50000, 80000, 30000, 45000: mediana 45000, máximo 80000, y una caída
+// del 40 % o más (80000 a 30000) = 1 compactación. La otra sesión no tiene esperas: 0, con contexto 10000 y 12000.
+const SESIONES_ESPERADAS = [
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, sondeos: 1, creditos: null, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1, ediciones_fuera: 0, corridas_verify: 0 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0, ediciones_fuera: 0, corridas_verify: 0 },
+];
+
+prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0", () => {
+  const { json } = medir(["--tool", "codex", "--codex-dir", join(fixtures, "codex-sesiones"), "--sessions"]);
+  assert.deepStrictEqual(json.sesiones, SESIONES_ESPERADAS);
+  const texto = correr([...base(), "--tool", "codex", "--codex-dir", join(fixtures, "codex-sesiones"), "--sessions"]);
+  assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
+  assert.match(texto.stdout, /esperas\s+contexto_mediana\s+contexto_max\s+compactaciones/);
+  assert.equal(correr(["--sessions", "--tool", "otra"]).status, 2, "--sessions con una herramienta desconocida debe salir con código 2");
+});
+
+// Diagnóstico por sesión de Claude Code y de Pi (fixtures claude-sesiones y pi-sesiones). La sesión con esperas tiene 3 esperas
+// (TaskOutput, Sleep, SendMessage; el TaskOutput repetido en dos líneas cuenta una vez; Bash no cuenta) y contexto 10000, 20000,
+// 30000, 12000, 14000: mediana 14000, máximo 30000, una caída del 40 % (30000 a 12000). Su subagente (TaskOutput) no suma.
+// Pi: contexto 400, 1500, 3300, 4200, 1000, 1200; esperas wait_for_task, sleep y send_message (read no cuenta): mediana 1350,
+// máximo 4200, una compactación (4200 a 1000). La sesión sin esperas da 0 en ambas herramientas.
+const SESIONES_CLAUDE = [
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-con-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 5, esperas: 3, sondeos: null, creditos: null, contexto_mediana: 14000, contexto_max: 30000, compactaciones: 1, ediciones_fuera: 0, corridas_verify: 0 },
+  { herramienta: "claude", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-sin-esperas.jsonl", modelo: "claude-sonnet-fixture-sesion", llamadas: 2, esperas: 0, sondeos: null, creditos: null, contexto_mediana: 5500, contexto_max: 6000, compactaciones: 0, ediciones_fuera: 0, corridas_verify: 0 },
+];
+const SESIONES_PI = [
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-con-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 6, esperas: 3, sondeos: 1, creditos: null, contexto_mediana: 1350, contexto_max: 4200, compactaciones: 1, ediciones_fuera: 0, corridas_verify: 0 },
+  { herramienta: "pi", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "sesion-pi-sin-esperas.jsonl", modelo: "modelo-pi-sesiones", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 200, contexto_max: 300, compactaciones: 0, ediciones_fuera: 0, corridas_verify: 0 },
+];
+
+prueba("A8", "Sesiones de Claude Code y de Pi: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0; sin --tool salen las tres", () => {
+  const claude = medir(["--tool", "claude", "--claude-dir", join(fixtures, "claude-sesiones"), "--sessions"]).json;
+  assert.deepStrictEqual(claude.sesiones, SESIONES_CLAUDE);
+  const pi = medir(["--tool", "pi", "--pi-dir", join(fixtures, "pi-sesiones"), "--sessions"]).json;
+  assert.deepStrictEqual(pi.sesiones, SESIONES_PI);
+  const texto = correr([...base(), "--tool", "claude", "--claude-dir", join(fixtures, "claude-sesiones"), "--sessions"]);
+  assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
+  assert.match(texto.stdout, /claude\s+2026-11-08\s+proyecto-d/);
+  const todas = medir(["--codex-dir", join(fixtures, "codex-sesiones"), "--claude-dir", join(fixtures, "claude-sesiones"), "--pi-dir", join(fixtures, "pi-sesiones"), "--sessions"]).json;
+  assert.deepStrictEqual([...new Set(todas.sesiones.map((s) => s.herramienta))].sort(), ["claude", "codex", "pi"], "sin --tool deben salir las tres herramientas");
+  assert.equal(todas.sesiones.length, SESIONES_CLAUDE.length + SESIONES_PI.length + SESIONES_ESPERADAS.length);
+});
+
+// Alerta de cuota (fixtures codex-alerta-85 y codex-alerta-40): la última sesión con dato de cuota semanal decide.
+prueba("A7", "Cuota de Codex: aviso con 85 % (umbral 70), sin aviso con 40 %, sin dato no avisa; --threshold lo cambia", () => {
+  const con85 = medir(["--codex-dir", join(fixtures, "codex-alerta-85")]).json;
+  assert.ok(con85.avisos.some((a) => a.includes("Cuota semanal de Codex en 85 %")), `avisos: ${JSON.stringify(con85.avisos)}`);
+  const con40 = medir(["--codex-dir", join(fixtures, "codex-alerta-40")]).json;
+  assert.ok(!con40.avisos.some((a) => /Cuota semanal/.test(a)), `avisos: ${JSON.stringify(con40.avisos)}`);
+  const sinDato = join(tmp, "codex-sin-cuota", "sessions", "2026", "11", "08");
+  mkdirSync(sinDato, { recursive: true });
+  writeFileSync(join(sinDato, "rollout-2026-11-08T12-00-00-sin-cuota.jsonl"), [
+    { timestamp: "2026-11-08T12:00:00.000Z", type: "session_meta", payload: { cwd: "/home/test/Codes/proyecto-e" } },
+    { timestamp: "2026-11-08T12:01:00.000Z", type: "event_msg", payload: { type: "token_count", info: { total_token_usage: { input_tokens: 100, output_tokens: 10, total_tokens: 110 } } } },
+  ].map((l) => JSON.stringify(l)).join("\n") + "\n");
+  const sin = medir(["--codex-dir", join(tmp, "codex-sin-cuota")]).json;
+  assert.ok(!sin.avisos.some((a) => /Cuota semanal/.test(a)), `sin dato no debe avisar: ${JSON.stringify(sin.avisos)}`);
+  const umbral = medir(["--codex-dir", join(fixtures, "codex-alerta-40"), "--threshold", "30"]).json;
+  assert.ok(umbral.avisos.some((a) => a.includes("Cuota semanal de Codex en 40 %")), `avisos con umbral 30: ${JSON.stringify(umbral.avisos)}`);
+});
+
+// Alerta de ventana de 5 horas (fixtures codex-ventana-85 y codex-ventana-40): usa rate_limits.primary del último evento.
+prueba("A2v", "Ventana de 5 horas de Codex: aviso con 85 % (umbral 70), sin aviso con 40 %, sin dato no avisa; --threshold lo cambia", () => {
+  const con85 = medir(["--codex-dir", join(fixtures, "codex-ventana-85")]).json;
+  assert.ok(con85.avisos.includes("Ventana de 5 horas de Codex en 85 %"), `avisos: ${JSON.stringify(con85.avisos)}`);
+  const con40 = medir(["--codex-dir", join(fixtures, "codex-ventana-40")]).json;
+  assert.ok(!con40.avisos.some((a) => /Ventana de 5 horas/.test(a)), `avisos: ${JSON.stringify(con40.avisos)}`);
+  const sinDato = join(tmp, "codex-sin-ventana", "sessions", "2026", "11", "08");
+  mkdirSync(sinDato, { recursive: true });
+  writeFileSync(join(sinDato, "rollout-2026-11-08T12-00-00-sin-ventana.jsonl"), [
+    { timestamp: "2026-11-08T12:00:00.000Z", type: "session_meta", payload: { cwd: "/home/test/Codes/proyecto-e" } },
+    { timestamp: "2026-11-08T12:01:00.000Z", type: "event_msg", payload: { type: "token_count", info: { total_token_usage: { input_tokens: 100, output_tokens: 10, total_tokens: 110 } } } },
+  ].map((l) => JSON.stringify(l)).join("\n") + "\n");
+  const sin = medir(["--codex-dir", join(tmp, "codex-sin-ventana")]).json;
+  assert.ok(!sin.avisos.some((a) => /Ventana de 5 horas/.test(a)), `sin dato no debe avisar: ${JSON.stringify(sin.avisos)}`);
+  const umbral = medir(["--codex-dir", join(fixtures, "codex-ventana-40"), "--threshold", "30"]).json;
+  assert.ok(umbral.avisos.includes("Ventana de 5 horas de Codex en 40 %"), `avisos con umbral 30: ${JSON.stringify(umbral.avisos)}`);
+});
+
+// Créditos y sondeos (fixtures codex-sondeos y pi-sondeos). Sondeo = llamada de shell con sleep, tail o watch; git status no cuenta.
+// Codex, gpt-6-luna (2,5 / 0,25 / 12,5 créditos por millón, de scripts/rates.json): con sondeos, 6000 × 2,5 + 4000 × 0,25 + 1000 × 12,5
+// = 28500 / 10^6 = 0,0285 y 3 sondeos; sin sondeos, 2000 × 2,5 + 400 × 12,5 = 10000 / 10^6 = 0,01 y 0 sondeos.
+// Pi, tarifa de rates-test.json (10 / 1 / 100): con sondeos, 2500 × 10 + 2000 × 1 + 250 × 100 = 52000 / 10^6 = 0,052 y 3 sondeos;
+// sin sondeos, 1500 × 10 + 150 × 100 = 30000 / 10^6 = 0,03 y 0 sondeos.
+const sesionesDe = (json) => json.sesiones.map((s) => ({ sesion: s.sesion, creditos: s.creditos, sondeos: s.sondeos }));
+const CODEX_SONDEOS = [
+  { sesion: "rollout-2026-11-09T10-00-00-con-sondeos.jsonl", creditos: 0.0285, sondeos: 3 },
+  { sesion: "rollout-2026-11-09T11-00-00-sin-sondeos.jsonl", creditos: 0.01, sondeos: 0 },
+];
+const PI_SONDEOS = [
+  { sesion: "sesion-pi-con-sondeos.jsonl", creditos: 0.052, sondeos: 3 },
+  { sesion: "sesion-pi-sin-sondeos.jsonl", creditos: 0.03, sondeos: 0 },
+];
+
+prueba("A5a", "Créditos y sondeos de Codex con la tarifa de scripts/rates.json", () => {
+  const { json } = medir(["--tool", "codex", "--codex-dir", join(fixtures, "codex-sondeos"), "--sessions"]);
+  assert.deepStrictEqual(sesionesDe(json), CODEX_SONDEOS);
+});
+
+prueba("A5b", "Créditos y sondeos de Pi con tarifa de fixture; una tarifa distinta cambia creditos (sensibilidad)", () => {
+  const piArgs = (tarifas) => ["--tool", "pi", "--pi-dir", join(fixtures, "pi-sondeos"), "--sessions", "--rates", tarifas];
+  const { json } = medir(piArgs(join(fixtures, "rates-test.json")));
+  assert.deepStrictEqual(sesionesDe(json), PI_SONDEOS);
+  const doble = join(tmp, "tarifas-dobles.json");
+  writeFileSync(doble, JSON.stringify({ modelos: { "modelo-pi-tarifa": { entrada: 20, entrada_cache: 2, salida: 200 } } }));
+  const conDoble = medir(piArgs(doble)).json;
+  assert.deepStrictEqual(sesionesDe(conDoble).map((s) => s.creditos), [0.104, 0.06], "con tarifas al doble, creditos debe cambiar");
+});
+
+prueba("A5c", "Sin tarifa del modelo, creditos es null (no 0); los sondeos se miden igual; rates.json trae las tres tarifas", () => {
+  const { json } = medir(["--tool", "pi", "--pi-dir", join(fixtures, "pi-sondeos"), "--sessions"]);
+  assert.deepStrictEqual(sesionesDe(json).map((s) => [s.creditos, s.sondeos]), [[null, 3], [null, 0]]);
+  const tarifas = JSON.parse(readFileSync(join(raiz, "scripts", "rates.json"), "utf8")).modelos;
+  assert.deepStrictEqual(tarifas, {
+    "gpt-6.1-sol": { entrada: 50, entrada_cache: 2.5, salida: 250 },
+    "gpt-6-luna": { entrada: 2.5, entrada_cache: 0.25, salida: 12.5 },
+    "gpt-6-astra": { entrada: 250, entrada_cache: 25, salida: 1250 },
+  });
+});
+
+prueba("A5d", "Tarifas ilegibles avisan y dejan creditos en null sin salir con error", () => {
+  const r = correr(["--since", "2026-01-01", "--tool", "codex", "--codex-dir", join(fixtures, "codex-sondeos"), "--sessions", "--json", "--rates", join(tmp, "no-existe.json")]);
+  assert.equal(r.status, 0, `exit ${r.status}: ${r.stderr}`);
+  const json = JSON.parse(r.stdout);
+  assert.ok(json.avisos.some((a) => /no pude leer las tarifas/.test(a)), `avisos: ${JSON.stringify(json.avisos)}`);
+  assert.deepStrictEqual(sesionesDe(json).map((s) => s.creditos), [null, null]);
+});
+
+// Medidor de invasión (fixtures/invasion/<escenario>/<herramienta>): sesión principal de cada herramienta con una escritura
+// o ninguna. sin-ediciones solo lee (0 y 0, nunca null); edicion-src escribe src/ y corre ./verify (1 y 1; el subagente de Claude no suma);
+// edicion-changes escribe en changes/ (0 y 0).
+const INVASION = {
+  "sin-ediciones": { ediciones_fuera: 0, corridas_verify: 0 },
+  "edicion-src": { ediciones_fuera: 1, corridas_verify: 1 },
+  "edicion-changes": { ediciones_fuera: 0, corridas_verify: 0 },
+};
+const DIR_HERRAMIENTA = { claude: "--claude-dir", codex: "--codex-dir", pi: "--pi-dir" };
+const SUBRUTA = { claude: "claude", codex: "codex", pi: "pi" };
+
+prueba("A4i", "Medidor de invasión: ediciones fuera de changes/ y corridas de ./verify por sesión principal, en las tres herramientas", () => {
+  for (const [escenario, esperado] of Object.entries(INVASION)) {
+    for (const herr of Object.keys(DIR_HERRAMIENTA)) {
+      const dir = join(fixtures, "invasion", escenario, SUBRUTA[herr]);
+      const { json } = medir(["--tool", herr, DIR_HERRAMIENTA[herr], dir, "--sessions"]);
+      assert.equal(json.sesiones.length, 1, `${escenario}/${herr}: ${JSON.stringify(json.sesiones)}`);
+      const [s] = json.sesiones;
+      assert.deepStrictEqual({ ediciones_fuera: s.ediciones_fuera, corridas_verify: s.corridas_verify }, esperado, `${escenario}/${herr}`);
+    }
+  }
+  const texto = correr([...base(), "--tool", "claude", "--claude-dir", join(fixtures, "invasion", "edicion-src", "claude"), "--sessions"]);
+  assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
+  assert.match(texto.stdout, /ediciones_fuera\s+corridas_verify/, "la tabla de --sessions debe mostrar ediciones_fuera y corridas_verify");
+});
+
+let fallos = 0;
+try {
+  for (const p of pruebas) {
+    try {
+      p.fn();
+      console.log(`ok ${p.id}: ${p.descripcion}`);
+    } catch (e) {
+      fallos++;
+      console.log(`FALLO ${p.id}: ${p.descripcion}`);
+      console.log(`  ${String(e.message).split("\n").slice(0, 8).join("\n  ")}`);
+    }
+  }
+} finally {
+  rmSync(tmp, { recursive: true, force: true });
+}
+if (fallos > 0) {
+  console.log(`FALLO: ${fallos} de ${pruebas.length} pruebas del medidor no pasaron`);
+  process.exit(1);
+}
+console.log(`pruebas del medidor: ${pruebas.length} de ${pruebas.length} ok`);

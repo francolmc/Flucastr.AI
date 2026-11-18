@@ -1,14 +1,5 @@
 .claude/settings.local.json
 pruebas/*
-!pruebas/revisar-plan/
-!pruebas/uso/
-!pruebas/kit-run/
-!pruebas/revisor-luna/
-!pruebas/contrato-constructor.mjs
-!pruebas/diagnostico-sugiere/
-!pruebas/aceptacion/
-!pruebas/permisos-contrato/
-!pruebas/permisos-v2.test.mjs
-!pruebas/continuidad/
+tests/.tmp/
 
 .codex/

@@ -13,7 +13,7 @@ export function cmd(bin, args) {
 }
 
 // Un evento merece diagnóstico si es oom, unhealthy, o un die con código distinto de 0 y 143.
-export function debeDiagnosticar(ev) {
+export function shouldDiagnose(ev) {
   const attrs = ev.Actor?.Attributes ?? {};
   const estadoEv = String(ev.status ?? ev.Action ?? "");
   if (estadoEv === "oom" || estadoEv.startsWith("health_status: unhealthy")) return true;
@@ -24,7 +24,7 @@ export function debeDiagnosticar(ev) {
   return false;
 }
 
-export function diagnosticar(dir, ev, directorioDiagnosticos) {
+export function diagnose(dir, ev, directorioDiagnosticos) {
   const id = ev.Actor?.ID ?? ev.id;
   if (!id || !/^[A-Za-z0-9._-]+$/.test(id)) return;
   const attrs = ev.Actor?.Attributes ?? {};

@@ -59,15 +59,15 @@ migrar() {
   mig_gitignore
 
   if [ "$SIMULAR" = 1 ]; then
-    echo "  crearía: $PROYECTO/cambios/"
-  elif [ -d "$PROYECTO/cambios" ]; then
-    echo "  ya existe: $PROYECTO/cambios/"
+    echo "  crearía: $PROYECTO/changes/"
+  elif [ -d "$PROYECTO/changes" ]; then
+    echo "  ya existe: $PROYECTO/changes/"
   else
-    mkdir -p "$PROYECTO/cambios"
-    echo "  creado: $PROYECTO/cambios/"
+    mkdir -p "$PROYECTO/changes"
+    echo "  creado: $PROYECTO/changes/"
   fi
 
-  # Trabajo a medias: solo se lista (no se convierte aquí). Con --simular se lee desde su sitio original.
+  # Trabajo a medias: solo se lista (no se convierte aquí). Con --dry-run se lee desde su sitio original.
   leer="$base"
   if [ "$SIMULAR" = 1 ]; then leer="$PROYECTO"; fi
   medias=""
@@ -97,7 +97,7 @@ migrar() {
   if [ "$SIMULAR" = 1 ]; then
     echo "SIMULACIÓN: no se escribió nada."
   else
-    echo "Migración lista. Lo de v1 está en $PROYECTO/old/v1/ (sin borrar). Siguiente: skill migrar-proyecto (AGENTS.md, verify, planes)."
+    echo "Migración lista. Lo de v1 está en $PROYECTO/old/v1/ (sin borrar). Siguiente: skill migrate-project (AGENTS.md, verify, planes)."
   fi
   return 0
 }

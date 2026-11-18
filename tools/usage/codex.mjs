@@ -128,7 +128,7 @@ export function crearProcesadorCodex({
       const ultima = conVentana.reduce((a, b) => (b.finMs > a.finMs ? b : a));
       if (ultima.primariaFinal >= ctx.o.umbral) ctx.avisos.push(`Ventana de 5 horas de Codex en ${ultima.primariaFinal} %`);
     }
-    // Diagnóstico por sesión (--sesiones): sin la ruta completa, solo el nombre del archivo.
+    // Diagnóstico por sesión (--sessions): sin la ruta completa, solo el nombre del archivo.
     if (ctx.o.sesiones) {
       for (const s of sesiones.filter((x) => x.fecha && x.fecha >= ctx.o.desde && coincide(ctx, x.proyecto))) {
         const t = s.total ? {

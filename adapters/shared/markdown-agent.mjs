@@ -16,10 +16,10 @@ export function generarAgenteMarkdown({
     fallar(`el 'name' del encabezado ('${nombre}') debe coincidir con el archivo ('${agente}')`);
   }
   if (/^model:/m.test(cabecera)) {
-    fallar(`${archivo} no debe declarar 'model': se define en modelos.json`);
+    fallar(`${archivo} no debe declarar 'model': se define en models.json`);
   }
   if (/^effort:/m.test(cabecera) || /^thinking:/m.test(cabecera)) {
-    fallar(`${archivo} no debe declarar 'effort' ni 'thinking': el esfuerzo se define en modelos.json`);
+    fallar(`${archivo} no debe declarar 'effort' ni 'thinking': el esfuerzo se define en models.json`);
   }
 
   const modelo = resolverModelo(agente, herramienta);
@@ -27,5 +27,5 @@ export function generarAgenteMarkdown({
   // Claude Code lleva 'effort'; Pi lleva 'thinking'. Sin esfuerzo no se escribe ninguna de las dos.
   const lineaEsfuerzo = !esfuerzo ? "" : herramienta === "pi" ? `thinking: ${esfuerzo}\n` : `effort: ${esfuerzo}\n`;
   const cabeceraSalida = herramienta === "pi" ? adaptarCabeceraPi(cabecera) : cabecera;
-  return `---\n${cabeceraSalida}\n${lineaEsfuerzo}model: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con instalar.sh\n---\n${lineaIdentidad(herramienta, agente)}\n${cuerpo}`;
+  return `---\n${cabeceraSalida}\n${lineaEsfuerzo}model: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con install.sh\n---\n${lineaIdentidad(herramienta, agente)}\n${cuerpo}`;
 }

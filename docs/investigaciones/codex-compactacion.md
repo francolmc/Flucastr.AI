@@ -9,7 +9,7 @@ Tarea de prueba (igual en todas las corridas, carpeta temporal vacía en el scra
 ## Resultados
 
 | Corrida | Ajuste | Rollout (`~/.codex/sessions/2026/11/09/`) | Compactaciones |
-| --- | --- | --- | --- |
+| --- |
 | 1 | `-c model_auto_compact_token_limit=3000` | `rollout-2026-11-09T07-25-50-01a1bfd7-c122-7753-8c22-294db1bf8442.jsonl` | 4 |
 | 2 | `-c model_post_turn_compact_threshold_percent=10` | `rollout-2026-11-09T07-27-32-01a1bfd9-4f7e-76e3-a0e7-04b238096716.jsonl` | 0 |
 | 3 | `-c model_post_turn_compact_threshold_percent=1` | `rollout-2026-11-09T07-28-07-01a1bfd9-d890-7fc0-9a66-ff0d08f37e3c.jsonl` | 1 |

@@ -34,4 +34,4 @@
 
 ## No verificado
 - Calidad del código de F04 (no se revisó el diff de fondo).
-- Consumo de Claude hoy: `uso.mjs` solo listó las dos sesiones Codex de Proyecto.Finanzas.
+- Consumo de Claude hoy: `usage.mjs` solo listó las dos sesiones Codex de Proyecto.Finanzas.

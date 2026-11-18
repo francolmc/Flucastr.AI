@@ -10,7 +10,7 @@ Reemplaza a `propuesta.md` (cuatro carriles, auditor, candado), que era demasiad
 Niveles: **M** medido por nosotros · **P** documentación oficial o del proveedor · **B** blog o guía de terceros · **I** inferencia nuestra.
 
 | Afirmación | Evidencia | Nivel |
-| --- | --- | --- |
+| --- |
 | Instalar dependencias antes de copiar el código reduce la reconstrucción | Proyecto.Finanzas: build con caché de ~27 min (mediana) a 109 s, 26 pasos `CACHED` | **M** |
 | Mismo patrón en Python (`uv sync --no-install-project` antes de copiar, `UV_LINK_MODE=copy`, cache mount en `/root/.cache/uv`) | docs de uv y de Depot ([uv](https://docs-next.astral.sh/uv/guides/integration/docker), [Depot](https://depot.dev/docs/languages/python-uv-dockerfile)) | **P**, sin probar aquí |
 | Un `--no-cache` ya no reutiliza la instalación | corridas finales de F10: 22–24 min, solo 2 pasos `CACHED` | **M** (que los cache mounts mismos se borren: sin probar; un hilo de [Docker forum](https://forums.docker.com/t/is-it-possible-to-build-without-layer-caching-but-keep-buildkits-mount-type-cache/125679) lo pregunta y no hay respuesta oficial recuperada) |
@@ -53,7 +53,7 @@ No se hace: auditor, candado de Docker, carriles, `proceso-rapido`, `una-espera-
 
 ## 6. Cómo se prueba que generaliza
 | Proyecto | Qué se prueba | Éxito |
-| --- | --- | --- |
+| --- |
 | Proyecto.Móvil `Aplicación móvil` (copia todo en L4 antes de instalar) | reordenar capas | misma corrida con caché pasa de X min a menos de la mitad |
 | Proyecto.Servicios (SvelteKit + NestJS, pnpm; 7 repos) | misma receta de Proyecto.Finanzas (6 de sus 7 Dockerfiles copian el código antes o junto con la instalación, según un `grep` por líneas, sin probar) y `Comprobación rápida` | `VERIFY_RAPIDO=1 ./verify` baja a menos de la mitad y la comprobación rápida corre sin Docker en <1 min |
 | Proyecto.Plataforma | nada nuevo de velocidad; solo la regla 4 (logs al fallar) | el próximo `unhealthy` deja logs |
