@@ -19,11 +19,11 @@ TODO=0
 PROYECTO=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    --simular) SIMULAR=1 ;;
-    --silencioso) SILENCIOSO=1 ;;
-    --todo) TODO=1 ;;
-    --conservar-ajustes) CONSERVAR_AJUSTES=1 ;; # lo usa instalar.sh al reinstalar
-    --proyecto)
+    --simular | --dry-run) SIMULAR=1 ;;
+    --silencioso | --quiet) SILENCIOSO=1 ;;
+    --todo | --all) TODO=1 ;;
+    --conservar-ajustes | --keep-settings) CONSERVAR_AJUSTES=1 ;; # lo usa instalar.sh al reinstalar
+    --proyecto | --project)
       shift
       PROYECTO="${1:-}"
       [ -d "$PROYECTO" ] || { echo "--proyecto necesita una carpeta que exista" >&2; exit 1; }

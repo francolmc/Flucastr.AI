@@ -7,13 +7,15 @@ ejecutor: constructor
 ---
 # Ejecución por tramos: un encargo estrecho por vez
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-Que el principal planifique en tramos pequeños y el constructor reciba uno por vez, con un ritmo fijo (reproducir, cambiar, volver a correr), de modo que un fallo cueste un tramo y no todo el cambio. Sale de la auditoría de Andes (`docs/investigaciones/auditoria-andes-constructor.md`) y de `cierre-fiable-agentes-ejecutores.md`, sección 4.
+Que el principal planifique en tramos pequeños y el constructor reciba uno por vez, con un ritmo fijo (reproducir, cambiar, volver a correr), de modo que un fallo cueste un tramo y no todo el cambio. Sale de la auditoría de Proyecto.Servicios (`docs/investigaciones/auditoria-servicios-constructor.md`) y de `cierre-fiable-agentes-ejecutores.md`, sección 4.
 
 ## Supuestos
-- Un solo plan aprobado contiene los tramos; Franco aprueba una vez (puerta 1) y revisa al final (puerta 2). Si prefiere aprobar cada tramo, cambian el principal (paso 6) y la regla 11.
+- Un solo plan aprobado contiene los tramos; la persona usuaria aprueba una vez (puerta 1) y revisa al final (puerta 2). Si prefiere aprobar cada tramo, cambian el principal (paso 6) y la regla 11.
 - El constructor sigue creando la rama (`switch -c`) como hoy; no se toca su lista de Git. Si falla por permisos, el principal crea la rama antes de lanzar.
-- La efectividad no se mide aquí. El primer uso real (Don Financio) se registra en `docs/evaluaciones/tramos.md`.
+- La efectividad no se mide aquí. El primer uso real (Proyecto.Finanzas) se registra en `docs/evaluaciones/tramos.md`.
 
 ## Alcance
 Puede cambiar: `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, `agentes/principal.md`, `agentes/constructor.md`, `verify`, `AGENTS.md`, `README.md` (una línea) y crear `docs/evaluaciones/tramos.md`.
@@ -24,7 +26,7 @@ Fuera: `modelos.json`, `instalar.sh`, `scripts/`, `old/`, `cambios/hechos/`, `pr
 - Se conservan los textos que `verify` ya exige (contador `pendientes-plan`, `awk`, `siguiente=`, `no_intentado=`, `3 corridas`, lista de Git del constructor, `Prueba de ejecutabilidad`, `ejecutor:`, `20 palabras`, `base:`, `rama base`, `git status`). No borrarlos.
 - Estado `listo` significa «tramo terminado y su verificación pasó». El principal vuelve a `aprobado` con `tramo: N+1`.
 - Retorno nuevo: `COMPLETADO: plan=<ruta>; tramo=<n>; verify=pasa`. La `PAUSA` conserva su formato y añade `tramo=<n>`.
-- La toma del tramo por el principal sigue siendo solo con petición expresa de Franco (regla vigente tras dos `PAUSA` iguales).
+- La toma del tramo por el principal sigue siendo solo con petición expresa de la persona usuaria (regla vigente tras dos `PAUSA` iguales).
 
 ## Escenarios
 - CUANDO el principal planifica un cambio largo ENTONCES lo escribe en `### Tramo N`, con entorno primero, aceptación sobre el recorrido real y evidencia al final (A1).
@@ -87,7 +89,7 @@ Fuera: `modelos.json`, `instalar.sh`, `scripts/`, `old/`, `cambios/hechos/`, `pr
 - [x] Añadir una línea a `AGENTS.md` y otra a `README.md` sobre la ejecución por tramos.
   - evidencia: `AGENTS.md` línea 11 («Ejecución por tramos: …») y `README.md` línea 17 («Un cambio largo se parte en tramos (`### Tramo N`)…»)
 - [x] Correr `./verify` tal cual y pegar la salida real en *Evidencia*.
-  - evidencia: `./verify`, exit 0 (salida completa en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/9660ec8c-29aa-4a44-a687-b28aa33bc5a6/scratchpad/verify-1.log`; cola en *Evidencia*)
+  - evidencia: `./verify`, exit 0 (salida completa en `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/9660ec8c-29aa-4a44-a687-b28aa33bc5a6/scratchpad/verify-1.log`; cola en *Evidencia*)
 
 ## Evidencia
 
@@ -127,4 +129,4 @@ Aceptación (greps del plan, corridos sobre los archivos ya editados):
 - Decisión menor: `tramo=<n>` va después de `plan=` en `COMPLETADO` y en `PAUSA`, y el mismo orden en `PAUSA` de `ejecutar-plan`.
 - Corrección en el paso 11 de `verify`: la primera corrida aislada falló con `unbound variable` porque bash leía `$t»` como nombre de variable; se cambió a `${t}`.
 - Corrección en el paso 11: `textos_tramos` nombra todos los textos que faltan, no solo el primero. Una línea con dos textos (la regla 11 lleva «### Tramo N» y «tramo: 1») hacía fallar la copia con el mensaje de otro texto.
-- Log completo de la corrida final: `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/9660ec8c-29aa-4a44-a687-b28aa33bc5a6/scratchpad/verify-1.log` (7,7 KB).
+- Log completo de la corrida final: `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/9660ec8c-29aa-4a44-a687-b28aa33bc5a6/scratchpad/verify-1.log` (7,7 KB).

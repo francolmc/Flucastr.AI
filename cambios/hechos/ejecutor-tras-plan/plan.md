@@ -6,14 +6,16 @@ ejecutor: principal
 ---
 # El ejecutor se decide por la calidad del plan, no por el tipo de tarea
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Primero se escribe un plan que el constructor pueda seguir sin adivinar; con el plan terminado, una prueba de cuatro preguntas decide quién lo ejecuta (ya no el tipo de tarea) y la razón queda escrita para la puerta 1.
 
 ## Supuestos
-- La prueba se aplica siempre, también cuando gana el constructor. Si Franco quiere razón solo para `principal`, cambia una frase en la regla 7.
+- La prueba se aplica siempre, también cuando gana el constructor. Si la persona usuaria quiere razón solo para `principal`, cambia una frase en la regla 7.
 - El nivel del principal (medio o alto) ya se elige en `modelos.json` (`agentes.principal.nivel`); este cambio no lo toca.
 - Fuera de alcance: el nivel de esfuerzo de los modelos (Luna rinde como Opus solo en esfuerzo máximo; Haiku 5.5 tiene `effort`). Es otro cambio, porque toca el resolver.
-- Cuando el principal ejecuta, debe cargar `ejecutar-plan` con la herramienta Skill (en `cierre-con-pr` lo hice de memoria). Si Franco lo ve de más, se quita un paso.
+- Cuando el principal ejecuta, debe cargar `ejecutar-plan` con la herramienta Skill (en `cierre-con-pr` lo hice de memoria). Si la persona usuaria lo ve de más, se quita un paso.
 
 ## Alcance
 `skills/planificar-cambio/SKILL.md`, `agentes/principal.md`, `AGENTS.md`, `verify` (bloque nuevo 8g).
@@ -60,6 +62,6 @@ Cambios: AGENTS.md, agentes/principal.md, skills/planificar-cambio/SKILL.md, ver
 
 ## Notas
 - Ejecutó el principal; cargó `ejecutar-plan` con la herramienta Skill antes del primer paso, como pide este plan.
-- Tras la aclaración de Franco, ajusté título, objetivo y una decisión del plan para decir «criterio» y no «orden nuevo».
-- Franco dijo «ahora sí» y lo tomé como el «sí» de la puerta 1.
+- Tras la aclaración de la persona usuaria, ajusté título, objetivo y una decisión del plan para decir «criterio» y no «orden nuevo».
+- la persona usuaria dijo «ahora sí» y lo tomé como el «sí» de la puerta 1.
 - Pendiente aparte: el nivel de esfuerzo de los modelos (resolver).

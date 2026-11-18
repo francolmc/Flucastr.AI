@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 131 — Anonimizar skills/migrar-proyecto/SKILL.md
 
 ## Pasos

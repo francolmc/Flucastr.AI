@@ -5,7 +5,12 @@ base: main
 repos: [.]
 ejecutor: principal
 ---
+
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Permisos v2: sandbox y límites comprobados
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 
 ## Objetivo
 Reducir las acciones directas peligrosas y la exposición de secretos durante el trabajo normal, sin activar modos que omiten aprobaciones. Comprobar con datos ficticios y registrar lo que cada herramienta realmente hace.
@@ -19,7 +24,7 @@ Claude aísla Bash; los prefijos Codex no son un deny general de lectura.
 - `instalar.sh`, `desinstalar.sh`, `scripts/resolver.mjs`, lanzadores y `scripts/kit-run.mjs` si corresponde para instalar, conservar y retirar ajustes de su propiedad sin modificar configuraciones globales.
 - `skills/diagnosticar/diagnosticar.mjs`, pruebas relacionadas y de instalación/desinstalación; `verify` únicamente para actualizar recuentos y expectativas afectadas, sin debilitar verificaciones previas.
 - `docs/reglas-deny.md` y documentación de uso pertinente; evidencia en este plan y nota en `cambios/hechos/permisos-contrato/plan.md` cuando las comprobaciones se hayan ejecutado.
-- Fuera: cambiar Pi, activar auto, bypass o yolo por defecto, modificar credenciales reales, políticas globales, ni crear infraestructura o cambiar el flujo de trabajo de Franco.
+- Fuera: cambiar Pi, activar auto, bypass o yolo por defecto, modificar credenciales reales, políticas globales, ni crear infraestructura o cambiar el flujo de trabajo de la persona usuaria.
 
 ## Decisiones y supuestos
 - Instalar para Claude sandbox habilitado y sin reintento fuera del sandbox sin autorización (`allowUnsandboxedCommands: false` si la versión documentada lo admite); combinar `permissions.deny` de lectura y `sandbox.filesystem.denyRead` para `.env`, `.env.*`, `~/.ssh`, `~/.aws` y patrones concretos de llaves habituales. Cubrir rutas anidadas y documentar patrones y compatibilidad con `.env.example`; no afirmar cobertura universal. Conservar todos los deny actuales y añadir `git -c … merge`; Comprobación: también `git -C` y las envolturas existentes.
@@ -58,7 +63,7 @@ Claude aísla Bash; los prefijos Codex no son un deny general de lectura.
 - [x] Actualizar `skills/diagnosticar/diagnosticar.mjs` y `docs/reglas-deny.md`; Comprobación: avisos con configuraciones ficticias y documentación.
   - evidencia: textos actualizados dentro del alcance y expectativas comprobadas por `./verify` (pasos 8 y 8t); exit 0.
 - [ ] Implementar matriz en `pruebas/permisos-v2.test.mjs`, actualizar `verify` y ejecutar la matriz y regresiones; Comprobación: resultados sin interacción.
-  - evidencia: `node --test pruebas/permisos-v2.test.mjs` — 5 pruebas aprobadas, 0 fallidas, exit 0. La matriz sintética conserva 28 deny de Claude y evalúa las reglas Codex. En sesión real con Codex CLI 0.169.0, `workspace-write` + `on-request`: leer el `.env` ficticio fue permitido; `git commit`, `bash -c "git commit"` y `git -c user.name=fake merge rama-falsa` fueron rechazados por la regla del proyecto; no llegaron al shim Git ni hicieron cambios. Claude Code 2.1.325 fue reintentado sin `--bare`, con `--safe-mode`, `--permission-mode dontAsk`, `--permission-prompts none`, fuentes user/project/local vacías y ajustes explícitos ficticios. La sesión alcanzó la API y llamó a herramientas: `Read` de `.env` fue rechazado (`source=config`, `reason_type=rule`); Bash para `.env`, `git commit`, `bash -c "git commit"` y `git -c … merge` fueron rechazados por reglas antes de ejecutar el shim, sin prompts ni efectos. El primer intento en sandbox de red falló con `EAI_AGAIN`; el reintento autorizado conectó y autenticó. `--bare` anterior omitía OAuth/keychain y su `authentication_failed` no demuestra falta de sesión habitual. En el último intento se habilitó la fuente `project` y se alcanzó la API, pero Claude imprimió: `Ignoring 2 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/claude-real-fake-vklQ12/project"].hasTrustDialogAccepted: true in /home/franco/.claude.json.` Se ejecutó `pwd` en el fixture; solicitudes de `.env` y Git fueron rechazadas, sin mostrar marcadores ni producir efectos. Como los allow del proyecto fueron ignorados por falta de confianza, esta corrida no prueba precedencia allow/deny ni confirma el estado efectivo del sandbox. No se aceptó el diálogo ni se modificó la configuración global, fuera del alcance. Codex permitió `.env`, limitación que queda demostrada. A5 permanece incompleto. Los resultados y comandos completos están en Evidencia.
+  - evidencia: `node --test pruebas/permisos-v2.test.mjs` — 5 pruebas aprobadas, 0 fallidas, exit 0. La matriz sintética conserva 28 deny de Claude y evalúa las reglas Codex. En sesión real con Codex CLI 0.169.0, `workspace-write` + `on-request`: leer el `.env` ficticio fue permitido; `git commit`, `bash -c "git commit"` y `git -c user.name=fake merge rama-falsa` fueron rechazados por la regla del proyecto; no llegaron al shim Git ni hicieron cambios. Claude Code 2.1.325 fue reintentado sin `--bare`, con `--safe-mode`, `--permission-mode dontAsk`, `--permission-prompts none`, fuentes user/project/local vacías y ajustes explícitos ficticios. La sesión alcanzó la API y llamó a herramientas: `Read` de `.env` fue rechazado (`source=config`, `reason_type=rule`); Bash para `.env`, `git commit`, `bash -c "git commit"` y `git -c … merge` fueron rechazados por reglas antes de ejecutar el shim, sin prompts ni efectos. El primer intento en sandbox de red falló con `EAI_AGAIN`; el reintento autorizado conectó y autenticó. `--bare` anterior omitía OAuth/keychain y su `authentication_failed` no demuestra falta de sesión habitual. En el último intento se habilitó la fuente `project` y se alcanzó la API, pero Claude imprimió: `Ignoring 2 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/claude-real-fake-vklQ12/project"].hasTrustDialogAccepted: true in /home/persona/.claude.json.` Se ejecutó `pwd` en el fixture; solicitudes de `.env` y Git fueron rechazadas, sin mostrar marcadores ni producir efectos. Como los allow del proyecto fueron ignorados por falta de confianza, esta corrida no prueba precedencia allow/deny ni confirma el estado efectivo del sandbox. No se aceptó el diálogo ni se modificó la configuración global, fuera del alcance. Codex permitió `.env`, limitación que queda demostrada. A5 permanece incompleto. Los resultados y comandos completos están en Evidencia.
 - [x] Anotar en `cambios/permisos-v2/plan.md` y en el contrato previo resultados reales; Comprobación: que cada caso tiene evidencia o impedimento.
   - evidencia: `cambios/hechos/permisos-contrato/plan.md` anota a/b/c/d como no probados en sesión Claude y explica la causa; no se observó un fallo que activara el fallback condicionado.
 - [x] Ejecutar `./verify`; Comprobación: código de salida y consignarlo en `cambios/permisos-v2/plan.md`.
@@ -73,8 +78,8 @@ Además ejecutar el comando reproducible de la matriz negativa implementada y co
 `$ command -v socat bwrap claude codex`
 /usr/bin/socat
 /usr/bin/bwrap
-/home/franco/.local/bin/claude
-/home/franco/.local/bin/codex
+/home/persona/.local/bin/claude
+/home/persona/.local/bin/codex
 exit 0
 
 `$ node --test pruebas/permisos-v2.test.mjs`
@@ -84,7 +89,7 @@ Matriz Codex por execpolicy (codex-cli 0.169.0): los once comandos Git/PR y envo
 ✔ 5 pruebas aprobadas, 0 fallidas
 exit 0
 
-`$ env PATH="/tmp/claude-real-fake-vklQ12/project/bin:$PATH" codex exec --sandbox workspace-write -c 'approval_policy="on-request"' -C /home/franco/Codes/flucastr/Flucastr.AI --ephemeral --json '<prompt de pruebas con marcadores ficticios>'`
+`$ env PATH="/tmp/claude-real-fake-vklQ12/project/bin:$PATH" codex exec --sandbox workspace-write -c 'approval_policy="on-request"' -C /home/persona/Codes/flucastr/Flucastr.AI --ephemeral --json '<prompt de pruebas con marcadores ficticios>'`
 Sesión Codex CLI 0.169.0 inicializada. Lectura de `/tmp/claude-real-fake-vklQ12/project/.env`: exit 0, `FAKE_ENV_READ_ALLOWED`. `git commit -m fake`, `bash -c "git commit -m fake"` y `git -c user.name=fake merge fake-branch`: rechazados con `Lo hace Franco: flucastr-ai no hace commit, push, merge ni PR.` Ninguno llegó al shim Git; no hubo efectos Git ni solicitudes de aprobación.
 exit 0
 
@@ -125,7 +130,7 @@ exit 0
 exit 0
 
 `$ cd /tmp/claude-real-fake-vklQ12/project && claude --print --safe-mode --permission-mode dontAsk --permission-prompts none --setting-sources project --settings /tmp/claude-real-fake-vklQ12/claude-test-settings.json --tools Read,Bash --verbose --output-format stream-json --no-session-persistence --max-turns 8 '<comprobar pwd, lectura .env ficticio y comandos protegidos>'`
-Claude Code 2.1.325, sin `--bare`, autenticó y alcanzó API/herramientas. Arranque: `Ignoring 2 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/claude-real-fake-vklQ12/project"].hasTrustDialogAccepted: true in /home/franco/.claude.json.` `pwd` ejecutó en el proyecto ficticio. Las solicitudes de lectura `.env`, `git commit`, `bash -c "git commit"` y `git -c … merge` fueron rechazadas, sin revelar marcadores ni producir efectos; como el allow del proyecto fue ignorado, esto no demuestra precedencia deny sobre allow. No se aceptó diálogo ni se modificó configuración global; sandbox efectivo no confirmado.
+Claude Code 2.1.325, sin `--bare`, autenticó y alcanzó API/herramientas. Arranque: `Ignoring 2 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/tmp/claude-real-fake-vklQ12/project"].hasTrustDialogAccepted: true in /home/persona/.claude.json.` `pwd` ejecutó en el proyecto ficticio. Las solicitudes de lectura `.env`, `git commit`, `bash -c "git commit"` y `git -c … merge` fueron rechazadas, sin revelar marcadores ni producir efectos; como el allow del proyecto fue ignorado, esto no demuestra precedencia deny sobre allow. No se aceptó diálogo ni se modificó configuración global; sandbox efectivo no confirmado.
 exit 0
 
 `$ cd /tmp/claude-real-fake-vklQ12/project && claude --print --safe-mode --permission-mode dontAsk --permission-prompts none --setting-sources project --settings /tmp/claude-real-fake-vklQ12/claude-test-settings.json --tools Read,Bash --verbose --output-format stream-json --no-session-persistence --max-turns 10 '<comprobar pwd, lectura .env ficticio, git commit, bash -c git commit y git -c merge>'`

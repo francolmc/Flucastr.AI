@@ -1,6 +1,9 @@
 # task-01 — Topes por rol ampliables en formato-presupuesto.mjs
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Hoy `ampliado=N` solo sube el tope general `D`; los topes por rol (`arq` 2, `plan` 3, `K` 2) son fijos. Esta tarea añade a la línea `Presupuesto:` los sufijos opcionales `amp_arq`, `amp_plan`, `amp_k`, que suben el tope de ese rol, y hace que `calcularPresupuesto` y `validarStatusCompacto` los entiendan. Una línea sin sufijos se comporta exactamente como hoy.
 
@@ -28,7 +31,7 @@ Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: el módulo y su prueba.
-Fuera de alcance: `scripts/validar-tarea.mjs`, `skills/`, `agentes/`, `definitions/` (incluido `definitions/CONSUMO.md`; lo actualiza Franco aparte), `pruebas/comprobaciones/frases-por-archivo.mjs`.
+Fuera de alcance: `scripts/validar-tarea.mjs`, `skills/`, `agentes/`, `definitions/` (incluido `definitions/CONSUMO.md`; lo actualiza la persona usuaria aparte), `pruebas/comprobaciones/frases-por-archivo.mjs`.
 
 ## Pasos
 1. En `scripts/formato-presupuesto.mjs` sustituye `RE_PRESUPUESTO` por la de «Decisiones ya tomadas» y haz que `calcularPresupuesto` la use con `exec` sobre la línea (grupos 5, 6 y 7 son los sufijos).

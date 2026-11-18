@@ -33,7 +33,7 @@ Fuera de alcance: `agentes/coordinador.md` (task-12), `higiene-contexto.test.mjs
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/coordinador-status.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -2 "$R"
 git status --short pruebas/comprobaciones/
@@ -66,7 +66,7 @@ $ node --test pruebas/comprobaciones/coordinador-status.test.mjs 2>&1 | grep -E 
 ```
 Pruebas aprobadas: `el archivo real cumple la regla`; `falla si falta el paso que escribe STATUS.md antes de delegar`; `falla si falta la frase de retoma desde STATUS.md`; `falla si vuelve la línea CONTEXTO:`; `falla si el paso de escribir STATUS.md queda después de delegar`. Cada control negativo afirma `errores.length === 1`, así que cada uno da un solo error.
 
-Verificación 2 (HOME real: `HOME=/Users/franco`):
+Verificación 2 (HOME real: `HOME=/Users/persona`):
 ```
 $ R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -2 "$R"
 rapida exit=0

@@ -35,7 +35,7 @@ Fuera de alcance: editar `contrato-roles.mjs`, `contrato-constructor.mjs` u otro
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/higiene-contexto.test.mjs
 grep -nE "fetch|spawn|exec" pruebas/comprobaciones/higiene-contexto.test.mjs
 bash pruebas/rapida.sh | tail -1

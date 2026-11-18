@@ -1,6 +1,9 @@
 # task-04 — pruebas Capa 1 de skills de Pi en el proyecto
 repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Prueba automática, sin red ni modelo, del flujo completo de `--skills-proyecto`: copia con marca, exclusión local, `git status` limpio, reinstalación idempotente y actualizada, proyecto sin git, carpeta ajena intacta, desinstalación por proyecto y total, y un control negativo. Va en un archivo nuevo para no alterar `instalacion.test.mjs`.
 
@@ -42,7 +45,7 @@ Fuera de alcance: cualquier cambio a `instalar.sh`/`desinstalar.sh` (si la prueb
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/capa1/skills-proyecto.test.mjs
 for i in 1 2 3; do bash pruebas/rapida.sh | tail -1; done
 git status --short
@@ -51,7 +54,7 @@ Esperado: `pass 4 / fail 0`; tres líneas `rapida: … en S s (tope 30 s)`; `git
 
 ## Evidencia
 
-Comandos ejecutados en la pasada final (HOME real `/Users/franco`; las pruebas usan HOME temporal). Salida real, copiada:
+Comandos ejecutados en la pasada final (HOME real `/Users/persona`; las pruebas usan HOME temporal). Salida real, copiada:
 
 ```
 $ node --test pruebas/capa1/skills-proyecto.test.mjs   (últimas líneas)
@@ -121,17 +124,17 @@ Ejecuciones del archivo: `instalar.sh` 7 y `desinstalar.sh` 2 (ver Notas sobre e
 
 ## Notas
 
-- **Desviación del máximo de ejecuciones (decisión a revisar por Franco):** la tarea fija máximo 5 de `instalar.sh` y 3 de `desinstalar.sh`. Se ejecutan 7 y 2. Las 5 de la prueba a son: 2 errores de flag, 1 simulación, 1 instalación real y 1 control negativo; b suma 1 y c suma 1. Los errores de flag y el control negativo los pide la tarea (criterio 5 y la sección de control negativo), así que no se quitaron. Si el máximo es estricto, hay que quitar dos comprobaciones o aceptar más tiempo.
+- **Desviación del máximo de ejecuciones (decisión a revisar por la persona usuaria):** la tarea fija máximo 5 de `instalar.sh` y 3 de `desinstalar.sh`. Se ejecutan 7 y 2. Las 5 de la prueba a son: 2 errores de flag, 1 simulación, 1 instalación real y 1 control negativo; b suma 1 y c suma 1. Los errores de flag y el control negativo los pide la tarea (criterio 5 y la sección de control negativo), así que no se quitaron. Si el máximo es estricto, hay que quitar dos comprobaciones o aceptar más tiempo.
 - **Huecos menores, decisiones tomadas:**
   1. Las cuatro pruebas comparten un solo entorno y corren en orden (a, b, c, d); cada una parte del estado de la anterior. Así se reparten las ejecuciones del máximo.
   2. El kit va en `<entorno>/kit`, fuera de `HOME/.flucastr-ai`. Con la instalación en modo repo, `desinstalar.sh` no borra el kit; si estuviera dentro, `~/.flucastr-ai` no se podría borrar y el criterio de la desinstalación total fallaría por causa del entorno, no del código.
   3. El proyecto sin git se crea con `mkdtemp` en el directorio temporal del sistema, no en `pruebas/.temporales/`: dentro del repo Flucastr.AI, git usaría el `exclude` de ese repo (hueco 5 de task-01). Esa carpeta no se borra, como el resto de entornos.
-  4. `git status --porcelain` no queda vacío: muestra `?? .claude/`. `--proyecto` fija el agente en `.claude/settings.local.json` sin ignorar, lo que ya se anotó en task-03. La prueba a afirma ese comportamiento real (`['?? .claude/']`) y no el «vacío» del planteamiento. Si Franco decide ignorar ese archivo, hay que cambiar esa única línea de la prueba a.
+  4. `git status --porcelain` no queda vacío: muestra `?? .claude/`. `--proyecto` fija el agente en `.claude/settings.local.json` sin ignorar, lo que ya se anotó en task-03. La prueba a afirma ese comportamiento real (`['?? .claude/']`) y no el «vacío» del planteamiento. Si la persona usuaria decide ignorar ese archivo, hay que cambiar esa única línea de la prueba a.
   5. En la prueba d, `p/.pi` no desaparece: queda `skills/propia/` para comprobar que la desinstalación no toca una carpeta ajena.
   6. Durante el desarrollo, la primera versión de la prueba a fallaba solo por el punto 4 (`?? .claude/`). Se corrigió la aserción; no se cambió ningún script.
 - **Mediciones y verificación:** antes de la pasada final corrí tres `bash pruebas/rapida.sh` extra para medir (25, 15 y 13 s), y redirigí su salida a `/tmp/none` por error; ese archivo ya se borró. Estas corridas más la pasada final suman 2 intentos de verificación; la de *Evidencia* es la pasada final.
 - Hallazgo heredado, sin cambios: `rapida.sh` con HOME falso vacío falla 7 pruebas de `pruebas/ejecutar.sh` que exigen el agente instalado en el HOME (ya anotado en task-01 y task-03). Con el HOME real pasa 224/224.
 - Sin commit, sin push, sin tocar `~/.pi` ni `~/.claude` reales, sin escribir en `definitions/STATUS.md`, sin editar `instalar.sh`, `desinstalar.sh` ni `instalacion.test.mjs`/`copia.test.mjs`/`remoto.test.mjs`.
-- Revisión sugerida para Franco: *Evidencia* (medición y criterios), la decisión sobre el máximo de ejecuciones (punto de Notas arriba), y la decisión sobre `.claude/settings.local.json` (huecos 4).
+- Revisión sugerida para la persona usuaria: *Evidencia* (medición y criterios), la decisión sobre el máximo de ejecuciones (punto de Notas arriba), y la decisión sobre `.claude/settings.local.json` (huecos 4).
 
 Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=4; resultado=lista; causa=ninguna

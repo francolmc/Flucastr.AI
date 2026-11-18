@@ -5,13 +5,15 @@ repos: [.]
 ---
 # definir-proyecto
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-Una skill `definir-proyecto` para proyectos nuevos (repo vacío o casi): el principal hace hasta 5 preguntas cerradas, escribe `AGENTS.md` y `docs/proyecto.md`, deja la raíz lista y se detiene a esperar a Franco. El primer plan que sigue es el esqueleto con `verify`.
+Una skill `definir-proyecto` para proyectos nuevos (repo vacío o casi): el principal hace hasta 5 preguntas cerradas, escribe `AGENTS.md` y `docs/proyecto.md`, deja la raíz lista y se detiene a esperar a la persona usuaria. El primer plan que sigue es el esqueleto con `verify`.
 
 ## Supuestos
-- La skill actúa en dos tiempos: (1) preguntas, sin escribir nada; (2) con las respuestas de Franco, escribe los documentos y se detiene. Si Franco quiere que escriba con las propuestas por defecto sin preguntar, se agrega una línea a la skill, no un paso.
+- La skill actúa en dos tiempos: (1) preguntas, sin escribir nada; (2) con las respuestas de la persona usuaria, escribe los documentos y se detiene. Si la persona usuaria quiere que escriba con las propuestas por defecto sin preguntar, se agrega una línea a la skill, no un paso.
 - Un proyecto «nuevo» es uno sin `AGENTS.md` y sin código (carpeta vacía o solo `README`/`.git`). Si hay código, la skill dice que no es su caso y manda a `preparar-proyecto`.
-- «Raíz lista» = `AGENTS.md`, `docs/proyecto.md` y `cambios/` en la raíz. No crea carpetas de repos hijos ni código: eso es el plan del esqueleto. Si Franco quiere que cree también las carpetas, cambia el alcance.
+- «Raíz lista» = `AGENTS.md`, `docs/proyecto.md` y `cambios/` en la raíz. No crea carpetas de repos hijos ni código: eso es el plan del esqueleto. Si la persona usuaria quiere que cree también las carpetas, cambia el alcance.
 - `principal.md` no declara `skills:` en su frontmatter: el principal es el agente de nivel superior, no un subagente (igual que ya hace con `planificar-cambio` y `preparar-proyecto`). Si en Pi el principal corre como subagente, se agrega `skills: definir-proyecto` ahí.
 - En `AGENTS.md` solo se listan las skills (una línea); el detalle vive en la skill.
 
@@ -21,7 +23,7 @@ Editar: `agentes/principal.md` (cargar la skill; actualizar `docs/proyecto.md` a
 Fuera de alcance: `instalar.sh`, `desinstalar.sh`, `agentes/constructor.md`, `preparar-proyecto` (solo se referencia), `old/`. No tocar la sección «Despliegue» (es del pedido 6).
 
 ## Decisiones ya tomadas
-- Preguntas: máximo 5, cerradas, 2 a 4 opciones, la propuesta por defecto primera y marcada «(Recomendada)». La primera pregunta es siempre «¿un repo o un workspace con varios repos?». Las otras salen de lo que el contexto no responda (stack, quién usa el sistema, alcance del MVP, datos/auth, dónde se despliega). No se pregunta lo que el contexto ya dice. Porque cada pregunta de más cuesta una vuelta de Franco.
+- Preguntas: máximo 5, cerradas, 2 a 4 opciones, la propuesta por defecto primera y marcada «(Recomendada)». La primera pregunta es siempre «¿un repo o un workspace con varios repos?». Las otras salen de lo que el contexto no responda (stack, quién usa el sistema, alcance del MVP, datos/auth, dónde se despliega). No se pregunta lo que el contexto ya dice. Porque cada pregunta de más cuesta una vuelta de la persona usuaria.
 - La skill nunca decide repo único o varios: lo pregunta, aunque el contexto lo insinúe (regla dura del principal).
 - `docs/proyecto.md` de una página con estas secciones: Qué es, Para quién, MVP, Fuera de alcance, Decisiones (cada una con su porqué). En un workspace añade «Repos» (carpeta y rol). Sin sección «Despliegue» todavía.
 - `AGENTS.md` con el formato y el límite de ~40 líneas de `preparar-proyecto`, con `Verificar todo desde cero: ./verify` marcado como pendiente hasta el plan del esqueleto.
@@ -31,7 +33,7 @@ Fuera de alcance: `instalar.sh`, `desinstalar.sh`, `agentes/constructor.md`, `pr
 
 ## Escenarios
 - CUANDO el contexto es el de gastos del hogar (React + NestJS + PostgreSQL, link mágico por correo) en carpeta vacía ENTONCES responde con ≤5 preguntas cerradas, la primera sobre repo único o varios, con una recomendada cada una, y no crea ningún archivo.
-- CUANDO Franco responde (p. ej. workspace con `api` y `web`) ENTONCES escribe `AGENTS.md` y `docs/proyecto.md`, crea `cambios/`, no ejecuta `git init` hasta que conteste, no crea `src/`, no hace commit y se detiene.
+- CUANDO la persona usuaria responde (p. ej. workspace con `api` y `web`) ENTONCES escribe `AGENTS.md` y `docs/proyecto.md`, crea `cambios/`, no ejecuta `git init` hasta que conteste, no crea `src/`, no hace commit y se detiene.
 - CUANDO la carpeta ya tiene código ENTONCES lo dice y manda a `preparar-proyecto`.
 
 ## Verificación
@@ -51,7 +53,7 @@ $ ./verify
 ok definir-proyecto
 ...
 == 7. migración a v2 (--migrar, --simular, repetición, sin v1) ==
-ok escenario 9: copia de Cleaner -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
+ok escenario 9: copia de Proyecto.Mantenimiento -> sin texto de workspace, aviso, git mv de definitions/ y features/, .gitignore en git status
 == 8. workspaces (detección con find, textos clave de los archivos del cambio) ==
 ok 8a: workspace con dos hijos con .git -> find devuelve 2
 grep: /var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.3yQxDYdY0d/neg3/skills/definir-proyecto/SKILL.md: No such file or directory

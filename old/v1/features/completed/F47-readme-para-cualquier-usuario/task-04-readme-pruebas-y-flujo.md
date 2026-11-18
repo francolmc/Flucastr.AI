@@ -1,6 +1,9 @@
 # task-04 — README: cómo se prueba, flujo y modo yolo
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Las secciones `## Pruebas` y `## Flujo` del README están en primera persona y no explican cómo comprobar el kit en un solo paso. Se renombran y reescriben: `## Cómo se prueba` (con la verificación rápida) y `## Flujo y modo yolo` (puertas, ramas, refinado y yolo con su advertencia).
 
@@ -84,7 +87,7 @@ Notas de verificación: la rapida pasa con exit 0 (pasada 2, con `set -o pipefai
 - Huecos menores resueltos:
   1. Redacción en tercera persona: «el `coordinador` (el único agente que se abre directamente)» en lugar de «el único agente que abro», y «para que el dueño del repo cierre la rama» en lugar de «para que yo cierre la rama». Decisión: la tarea pide tercera persona y no fija la frase exacta.
   2. Frase del modo yolo: se presenta como «El modo yolo es una advertencia» en el segundo párrafo, con la advertencia y el sin commit en la misma frase. Decisión: sigue la plantilla de *Decisiones ya tomadas* sin copiar más texto.
-- Decisión de Franco: ninguna requerida; la tarea tenía *Decisiones abiertas* en «Ninguna».
+- Decisión de la persona usuaria: ninguna requerida; la tarea tenía *Decisiones abiertas* en «Ninguna».
 - Modo yolo activo en el encargo: la rama ya era la actual; no se ejecutó ningún `git switch`. No se hizo commit, push ni merge; `STATUS.md` no se tocó.
 - Registro de la pasada 1 (sin captura de exit del `rapida.sh`) queda reemplazado por la pasada 2.
 

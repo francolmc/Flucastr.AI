@@ -1,5 +1,7 @@
 # Tramo 141 — Acortar README y preservar guía
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Pasos
 
 ### Tramo 141 — Historia: Acortar README y preservar guía
@@ -16,5 +18,5 @@ Verificación del tramo: `./verify` — nivel 3; además la comprobación espec�
 Handoff: registrar archivos, diff, comandos y resultados; detenerse para revisión.
 
 ## Evidencia
-- Paso 1: `README.md` es un índice breve con mapa de estructura, entradas `bash instalar.sh`, `bash instalar.sh --simular`, `./verify` y literal `pi-constructor`; `docs/guide.md` conserva la guía completa y sus comandos. El comprobador Python de enlaces/anclas confirmó todos los destinos internos; confirmó secciones de instalación/verificación, entradas y ausencia de “Franco” en ambos documentos. Positivo y negativo de `verify` quedaron cubiertos por la salida aislada: `ok 8d: ejecutor:, 20 palabras (sin 60 palabras), ventana propia y pi-constructor presentes; copia sin ejecutor: falla`. `git diff --check -- README.md docs/guide.md` pasó (`exit 0`).
+- Paso 1: `README.md` es un índice breve con mapa de estructura, entradas `bash instalar.sh`, `bash instalar.sh --simular`, `./verify` y literal `pi-constructor`; `docs/guide.md` conserva la guía completa y sus comandos. El comprobador Python de enlaces/anclas confirmó todos los destinos internos; confirmó secciones de instalación/verificación, entradas y ausencia de “la persona usuaria” en ambos documentos. Positivo y negativo de `verify` quedaron cubiertos por la salida aislada: `ok 8d: ejecutor:, 20 palabras (sin 60 palabras), ventana propia y pi-constructor presentes; copia sin ejecutor: falla`. `git diff --check -- README.md docs/guide.md` pasó (`exit 0`).
 - Paso 2: `$ timeout 71 bash cambios/estructura-repo/reproducir-linea-base.sh` terminó en 43,3 s (`exit 0`). Salida: `control negativo: modificación adicional en 8i rechazada.`; `verify coincide salvo las sustituciones textuales exactas autorizadas de los escenarios 9 y 8i.`; `Simulaciones repetibles y verify coinciden con linea-base/; aplica solo las excepciones textuales exactas autorizadas de los escenarios 9 y 8i.`. Receta aislada ejecutó `./verify` y dos simulaciones; códigos, salidas y efectos coincidieron con la referencia bajo esas excepciones.

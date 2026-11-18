@@ -1,8 +1,11 @@
 # task-01 — Fixture y comprobador de la prueba de «excedido» + «A»
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Primera pieza de la prueba controlada con modelo real (patrón F12): un fixture con una feature en `estado=excedido` por `arq` (3 de 2) y un comprobador que, a partir del `STATUS.md` y del registro de una corrida, dice si el coordinador (1) escribió la *Escalación* con opciones por letra y (2) ante la respuesta «A» amplió el tope (`amp_arq>=1`) sin negarse. Todo es automático, sin modelo ni red; la corrida real es la task-02 más un paso manual de Franco. Solo MIDE.
+Primera pieza de la prueba controlada con modelo real (patrón F12): un fixture con una feature en `estado=excedido` por `arq` (3 de 2) y un comprobador que, a partir del `STATUS.md` y del registro de una corrida, dice si el coordinador (1) escribió la *Escalación* con opciones por letra y (2) ante la respuesta «A» amplió el tope (`amp_arq>=1`) sin negarse. Todo es automático, sin modelo ni red; la corrida real es la task-02 más un paso manual de la persona usuaria. Solo MIDE.
 
 ## Contexto
 - Tocar: `pruebas/fixtures/excedido.sh`, `pruebas/comprobaciones/excedido-resultado.mjs`, `pruebas/comprobaciones/excedido-resultado.test.mjs`

@@ -1,6 +1,6 @@
 # Revisión del arnés, sin piloto
 
-Estado: arnés verificado por el principal, pendiente de revisión de Franco. **Piloto no ejecutado: 0/12 registros reales, sin resultados comparativos.** No se cambió el modelo aprobado ni se lanzaron más subagentes.
+Estado: arnés verificado por el principal, pendiente de revisión de la persona usuaria. **Piloto no ejecutado: 0/12 registros reales, sin resultados comparativos.** No se cambió el modelo aprobado ni se lanzaron más subagentes.
 
 ## Correcciones comprobadas
 

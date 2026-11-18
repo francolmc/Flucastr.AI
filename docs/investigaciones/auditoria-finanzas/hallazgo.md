@@ -1,4 +1,6 @@
-# Auditoría: Don Financio, F04 (2026-11-10)
+# Auditoría: Proyecto.Finanzas, F04 (2026-11-10)
+
+> Los nombres se anonimizaron; se conservan fechas y cifras.
 
 ## Hechos (comprobados)
 - Hoy: 0 commits (último, 11-08). F04 en `estado: parcial`, tramo 2 de 4, 0/16 casillas aceptadas, 3 repos con cambios sin commit.
@@ -26,10 +28,10 @@
    - (c) concurrencia y recorrido E2E.
    Lo ya escrito se reparte, no se rehace.
 2. Añadir un nivel rápido a `verify` o a los pasos del plan: `tsc` + lint + tests unitarios en el host, sin Docker, antes de cada corrida completa. El tope de 3 corridas cuenta solo las completas.
-3. Hacer un WIP commit en la rama (lo hace Franco) para que el trabajo hecho no dependa del estado del árbol.
+3. Hacer un WIP commit en la rama (lo hace la persona usuaria) para que el trabajo hecho no dependa del estado del árbol.
 4. Volver a `ejecutor: constructor` con planes chicos, y dejar de usar *Notas* como bitácora (máx. 5 líneas por tramo).
 5. Cambio al kit: en `planificar-cambio`, un tramo que toque DB + API + UI + navegador debe partirse. Ahora es solo una recomendación de tamaño.
 
 ## No verificado
 - Calidad del código de F04 (no se revisó el diff de fondo).
-- Consumo de Claude hoy: `uso.mjs` solo listó las dos sesiones Codex de DonFinancio.
+- Consumo de Claude hoy: `uso.mjs` solo listó las dos sesiones Codex de Proyecto.Finanzas.

@@ -32,7 +32,7 @@ Fuera de alcance: editar `README.md` (es `task-02`), `definitions/ARCHITECTURE.m
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 xmllint --noout assets/logo.svg; echo "rc=$?"
 wc -c < assets/logo.svg
 grep -c "<text\|<script\|href=" assets/logo.svg
@@ -41,7 +41,7 @@ git status --short
 Salida esperada: `rc=0`; un número < 1024; `0`; y en `git status` aparece `?? assets/`. Planificación: el SVG se validó con `xmllint` en un archivo temporal fuera del repo; el archivo real en `assets/`: no ejecutado, inferido.
 
 ## Evidencia
-Comando y salida reales (`cd /Users/franco/Codes/flucastr/Flucastr.AI`, rama `chore/F15-actualizar-readme`):
+Comando y salida reales (`cd /Users/persona/Codes/flucastr/Flucastr.AI`, rama `chore/F15-actualizar-readme`):
 
 ```
 $ xmllint --noout assets/logo.svg; echo "rc=$?"

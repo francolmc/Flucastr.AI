@@ -8,14 +8,16 @@ tramo: 2
 ---
 # Medidor de costos y calibración de modelos
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-Franco puede correr `node scripts/uso.mjs` y ver cuánto consumen Claude Code, Codex y Pi por día, proyecto y modelo, y cuántos puntos de cuota semanal de Codex cuesta cada modelo. Con eso se decide qué modelo usa cada agente en `modelos.json`.
+la persona usuaria puede correr `node scripts/uso.mjs` y ver cuánto consumen Claude Code, Codex y Pi por día, proyecto y modelo, y cuántos puntos de cuota semanal de Codex cuesta cada modelo. Con eso se decide qué modelo usa cada agente en `modelos.json`.
 
 ## Supuestos
-- Solo lectura y sin dependencias: Node estándar, como `scripts/resolver.mjs`. Si Franco quiere un lanzador instalado (`uso`), se agrega un paso a `instalar.sh`.
-- «Día» = fecha UTC del primer evento de la sesión (así se hizo el análisis previo). Si Franco quiere hora de Chile, cambia un cálculo.
+- Solo lectura y sin dependencias: Node estándar, como `scripts/resolver.mjs`. Si la persona usuaria quiere un lanzador instalado (`uso`), se agrega un paso a `instalar.sh`.
+- «Día» = fecha UTC del primer evento de la sesión (así se hizo el análisis previo). Si la persona usuaria quiere hora de Chile, cambia un cálculo.
 - No se calcula dinero: solo tokens y puntos de cuota; no hay tarifas conocidas.
-- `modelos.json` se edita solo en el tramo 3, con el valor concreto que Franco apruebe tras leer el informe del tramo 2 (Resuelto: 2026-11-09 Franco eligió el tramo 3 en vez de editarlo a mano).
+- `modelos.json` se edita solo en el tramo 3, con el valor concreto que la persona usuaria apruebe tras leer el informe del tramo 2 (Resuelto: 2026-11-09 la persona usuaria eligió el tramo 3 en vez de editarlo a mano).
 
 ## Alcance
 Puede cambiar: `scripts/uso.mjs` (nuevo), `pruebas/uso/` (nuevo: `probar.mjs` y `fixtures/`), `verify` (paso 12 nuevo, antes de la línea `VERIFY OK`), `docs/evaluaciones/costos.md` (nuevo), `AGENTS.md` (una línea), `.gitignore` (excepción para `pruebas/uso/`).
@@ -41,7 +43,7 @@ Prohibido leer `auth.json`, `.env` o cualquier archivo fuera de las carpetas de 
 - CUANDO hay líneas corruptas, archivos anteriores a `--desde` o una carpeta ausente ENTONCES se ignoran o avisan y el resto se suma bien (A4)
 - CUANDO la carpeta de Codex trae un `auth.json` ENTONCES su contenido nunca aparece ni se lee (A5)
 - CUANDO una sesión de Codex ve la cuota bajar o se cruza con otra ENTONCES se excluye de la calibración (A6)
-- CUANDO se corre sobre los logs reales de Franco ENTONCES los totales coinciden con el análisis previo (A7)
+- CUANDO se corre sobre los logs reales de la persona usuaria ENTONCES los totales coinciden con el análisis previo (A7)
 - CUANDO se corre `./verify` ENTONCES el paso 12 pasa y falla si el medidor se rompe (A8)
 
 ## Aceptación
@@ -53,7 +55,7 @@ Prohibido leer `auth.json`, `.env` o cualquier archivo fuera de las carpetas de 
 | A4 | Robustez | fixture con línea corrupta, archivo viejo (mtime antiguo con `touch -d`) y `--claude-dir` inexistente | exit 0, solo cuenta lo válido, aviso por la carpeta ausente; con todas ausentes exit 1 |
 | A5 | No lee credenciales | fixture codex con `auth.json` que contiene `SECRETO-NO-LEER`; revisión manual: `grep -n "auth.json\|\.env" scripts/uso.mjs` | la salida (texto y JSON) no contiene `SECRETO-NO-LEER`; el grep no muestra lecturas de esos archivos |
 | A6 | Calibración válida | fixture con 6 sesiones: 4 exclusivas válidas, 1 con cuota que baja, 1 que se cruza | `cuota` cuenta 4 sesiones y suma los puntos esperados; la que baja y la cruzada no entran; `muestra pequeña` aparece (n<5) |
-| A7 | Coincide con lo real | `node scripts/uso.mjs --herramienta codex --desde 2026-11-08 --proyecto Memory-AI --json` | para 2026-11-08: coincide con un cálculo independiente hecho en ese momento (Python sobre los mismos logs, entrada, caché leída, salida y llamadas); referencia del 2026-11-09: 10 sesiones, 1113 llamadas, salida ≈256k. Los logs crecen mientras Franco trabaja, por eso se compara contra el cálculo del momento |
+| A7 | Coincide con lo real | `node scripts/uso.mjs --herramienta codex --desde 2026-11-08 --proyecto Memory-AI --json` | para 2026-11-08: coincide con un cálculo independiente hecho en ese momento (Python sobre los mismos logs, entrada, caché leída, salida y llamadas); referencia del 2026-11-09: 10 sesiones, 1113 llamadas, salida ≈256k. Los logs crecen mientras la persona usuaria trabaja, por eso se compara contra el cálculo del momento |
 | A8 | Paso 12 de verify | `./verify` | termina en `VERIFY OK`; con `scripts/uso.mjs` roto a propósito el paso 12 falla |
 
 ## Verificación
@@ -75,7 +77,7 @@ Resultado: `node scripts/uso.mjs --json` funciona sobre fixtures de las tres her
 - [x] Agregar «paso 12» a `verify` que corre `node pruebas/uso/probar.mjs` (A8)
   - evidencia: `verify` (bloque `# 12.` antes de `VERIFY OK`); `bash -n verify`, exit 0; el comando del paso 12, exit 0 (ver *Evidencia*)
 - [x] Comprobar sensibilidad: duplicar un mensaje en un fixture temporal y ver que el test falla (A1)
-  - evidencia: con una copia del medidor sin dedupe en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/sens/uso-sin-dedupe.mjs`, `node pruebas/uso/probar.mjs --script <esa copia>` falla A1, exit 1; con un mensaje duplicado extra en un fixture temporal, el medidor real pasa, exit 0 (ver *Evidencia*)
+  - evidencia: con una copia del medidor sin dedupe en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/sens/uso-sin-dedupe.mjs`, `node pruebas/uso/probar.mjs --script <esa copia>` falla A1, exit 1; con un mensaje duplicado extra en un fixture temporal, el medidor real pasa, exit 0 (ver *Evidencia*)
 
 Verificación del tramo: `node pruebas/uso/probar.mjs` (A1–A5).
 
@@ -99,7 +101,7 @@ Resultado: `cuota` en la salida, validada con fixtures y con los logs reales, e 
 - [x] Correr el comando de A7 sobre los logs reales (solo lectura) y anotar la salida en *Evidencia* (A7)
   - evidencia: `node scripts/uso.mjs --herramienta codex --desde 2026-11-08 --proyecto Memory-AI --json`, exit 0. Suma de las filas del día 2026-11-08 (gpt-6-luna 7 sesiones, gpt-6.1-sol 3): sesiones=10, llamadas=1121, entrada=1531168, cache_leida=110778624, salida=258524. Cálculo independiente en el mismo momento con `python3 -I` sobre `~/.codex/sessions/**/rollout-*.jsonl` (script en el scratchpad, `a7/independiente.py`): sesiones=10, llamadas=1121, entrada=1531168, cache_leida=110778624, salida=258524, exit 0. Coinciden. Ver *Evidencia*
 - [x] Correr `node scripts/uso.mjs --herramienta codex --desde 2026-11-01 --json` y escribir `docs/evaluaciones/costos.md`: hallazgos, tabla de puntos por millón de tokens por modelo, tamaño de muestra y una recomendación para `modelos.json` marcada como sugerencia (A7)
-  - evidencia: `node scripts/uso.mjs --herramienta codex --desde 2026-11-01 --json`, exit 0 (salida en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/a7/informe-desde-11-01.json`); `docs/evaluaciones/costos.md` escrito. Resumen: gpt-6-luna 4 sesiones exclusivas, 587306 tokens, 0 puntos (muestra pequeña, no informativo); gpt-6.1-sol sin sesiones exclusivas. Recomendación: no cambiar `modelos.json` todavía (sugerencia)
+  - evidencia: `node scripts/uso.mjs --herramienta codex --desde 2026-11-01 --json`, exit 0 (salida en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/a7/informe-desde-11-01.json`); `docs/evaluaciones/costos.md` escrito. Resumen: gpt-6-luna 4 sesiones exclusivas, 587306 tokens, 0 puntos (muestra pequeña, no informativo); gpt-6.1-sol sin sesiones exclusivas. Recomendación: no cambiar `modelos.json` todavía (sugerencia)
 - [x] Agregar a `AGENTS.md` una línea que apunte a `scripts/uso.mjs` y a `docs/evaluaciones/costos.md` (A8)
   - evidencia: `AGENTS.md` línea 21 (`Medidor de costos (solo lectura): ...`), apunta a `scripts/uso.mjs` y `docs/evaluaciones/costos.md`
 - [x] Correr `./verify` completo (≈ varios min) y anotar el resultado (A8)
@@ -108,7 +110,7 @@ Resultado: `cuota` en la salida, validada con fixtures y con los logs reales, e 
 Verificación del tramo: `./verify` (A6–A8).
 
 ### Tramo 3: aplicar la calibración (se detalla tras el tramo 2)
-Resultado: `modelos.json` con los niveles o esfuerzos aprobados por Franco y `./verify` verde. Los pasos y la comprobación se escriben cuando exista el informe; el constructor no arranca este tramo sin ellos y sin `estado: aprobado`.
+Resultado: `modelos.json` con los niveles o esfuerzos aprobados por la persona usuaria y `./verify` verde. Los pasos y la comprobación se escriben cuando exista el informe; el constructor no arranca este tramo sin ellos y sin `estado: aprobado`.
 
 ## Evidencia
 Tramo 1 (salidas reales de esta sesión):
@@ -148,7 +150,7 @@ $ node pruebas/uso/probar.mjs >/dev/null && echo "ok 12: pruebas del medidor pas
 ok 12: pruebas del medidor pasaron sobre los fixtures
 exit 0
 
-Sensibilidad (paso 7). Copias en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/sens/`:
+Sensibilidad (paso 7). Copias en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/sens/`:
 
 $ node pruebas/uso/probar.mjs --fixtures .../sens/fx        (fixture con un mensaje duplicado extra; medidor real)
 pruebas del medidor: 8 de 8 ok
@@ -205,14 +207,14 @@ exit 1
 
 A7 (logs reales de Codex, solo lectura):
 
-$ node scripts/uso.mjs --herramienta codex --desde 2026-11-08 --proyecto Memory-AI --json
+$ node scripts/uso.mjs --herramienta codex --desde 2026-11-08 --proyecto Proyecto.Memoria --json
 (filas del día 2026-11-08: gpt-6-luna 7 sesiones y gpt-6.1-sol 3 sesiones; suma)
 sesiones=10 llamadas=1121 entrada=1531168 cache_leida=110778624 salida=258524
 cuota: [{"modelo":"gpt-6-luna","puntos":0,"tokens":15618,"sesiones":1}]
 avisos: ["Codex: muestra pequeña para gpt-6-luna (1 sesiones; se recomiendan 5 o más)"]
 exit 0
 
-$ python3 -I <scratchpad>/a7/independiente.py 2026-11-08 Memory-AI
+$ python3 -I <scratchpad>/a7/independiente.py 2026-11-08 Proyecto.Memoria
 sesiones=10 llamadas=1121 entrada=1531168 cache_leida=110778624 salida=258524
 exit 0
 
@@ -237,7 +239,7 @@ exit 0
 ## Notas
 - Al escribir el plan `git fetch` falló (sin red); no se pudo confirmar que `main` esté al día con `origin/main`. Revisar antes de crear la rama.
 - Rama (paso 2): el encargo trae `Rama: feature/medidor-costos`. Ya existía y era la rama actual, en el mismo commit que `main` (2e4cc3d). No se creó nada. Sin fetch (el agente no lo tiene permitido); `main` y `origin/main` coinciden en las referencias locales.
-- Decisión para Franco o el principal (fuera de Alcance, no lo toqué): `.gitignore` tiene `pruebas/` (línea 2) y `git status` no muestra `pruebas/uso/`. Sin cambio, el commit no incluye fixtures ni `probar.mjs`, y el paso 12 falla en un clon limpio. Opciones: `git add -f pruebas/uso` al commitear, o una excepción `!pruebas/uso/` en `.gitignore` en otro cambio.
+- Decisión para la persona usuaria o el principal (fuera de Alcance, no lo toqué): `.gitignore` tiene `pruebas/` (línea 2) y `git status` no muestra `pruebas/uso/`. Sin cambio, el commit no incluye fixtures ni `probar.mjs`, y el paso 12 falla en un clon limpio. Opciones: `git add -f pruebas/uso` al commitear, o una excepción `!pruebas/uso/` en `.gitignore` en otro cambio.
 - Sensibilidad: un mensaje duplicado en un fixture no hace fallar al medidor real (la dedupe lo cuenta una vez, que es lo correcto). La sensibilidad se comprobó con una copia del medidor sin dedupe, que falla A1.
 - Decisiones menores: `--claude-dir` y `--pi-dir` apuntan a la carpeta de proyectos. `--codex-dir` apunta a la carpeta de Codex y solo se recorren `sessions/rollout-*.jsonl`. El día de cada sesión es el primer evento en UTC, en las tres herramientas. En Pi, un error «usage limit» da aviso y no suma llamadas ni tokens. `cuota` sale `[]` hasta el tramo 2.
 - Contador canónico: 7 pendientes en el plan, todos del Tramo 2. El Tramo 1 queda en 0.
@@ -250,6 +252,6 @@ exit 0
 - A7: al principio parecía que no coincidían (7 contra 10 sesiones). Era un error de mi consulta, que tomaba solo la primera fila del día; el medidor agrupa por modelo. Sumando las filas coincide exacto con Python en el mismo momento. Sin cambios en el medidor por esto.
 - Las cifras de la nota anterior (1106 llamadas, 255022 de salida) eran de otro momento. Ahora: 1121 llamadas y 258524 de salida, con el cálculo independiente en el mismo momento. La referencia de A7 para 2026-11-09 (1113 llamadas, ≈256k) queda cerca; la diferencia parece crecimiento de los logs, sin comprobarlo.
 - Hallazgos del informe: `used_percent` avanza en pasos de 1 punto, y la cuota se reinició entre 22:07 y 23:00 UTC del 2026-11-08. Con muchas sesiones solapadas, la calibración necesita trabajo en serie.
-- `modelos.json` no se tocó. El informe recomienda no cambiarlo todavía; el tramo 3 espera la aprobación de Franco.
+- `modelos.json` no se tocó. El informe recomienda no cambiarlo todavía; el tramo 3 espera la aprobación de la persona usuaria.
 - Git: rama `feature/medidor-costos` ya activa, no se creó nada. No hice commit ni push. Quedó un `git fetch` sin hacer, como en el Tramo 1.
-- Cierre 2026-11-09: Franco cerró el cambio sin el tramo 3. La muestra exclusiva de cuota fue insuficiente (ver `docs/evaluaciones/costos.md`); `modelos.json` no se tocó. Se retoma con sesiones de Codex en serie o con otro método de calibración.
+- Cierre 2026-11-09: la persona usuaria cerró el cambio sin el tramo 3. La muestra exclusiva de cuota fue insuficiente (ver `docs/evaluaciones/costos.md`); `modelos.json` no se tocó. Se retoma con sesiones de Codex en serie o con otro método de calibración.

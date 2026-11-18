@@ -1,5 +1,7 @@
 # F43 — Informe final de la auditoría de contexto
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Fecha: 2026-11-05. Fuentes: `medicion.md` (task-01), `analisis.md` (task-02), `mecanismos.md` (task-03), `prueba.md` (task-04) y `definitions/F43-AUDITORIA.md` §3. Solo informe: no cambia reglas, prompts, skills, agentes ni topes.
 
 ## Resumen
@@ -58,4 +60,4 @@ Recomendación: no vale la pena. Motivo: no existe un resumen con hash o fecha d
 
 ## Siguiente
 
-No. Cerrar F43 con este informe. No se propone feature `producto` nueva. La decisión caché sí/no queda para Franco según la puerta aparte de `definitions/F43-AUDITORIA.md`; esta recomendación es «no».
+No. Cerrar F43 con este informe. No se propone feature `producto` nueva. La decisión caché sí/no queda para la persona usuaria según la puerta aparte de `definitions/F43-AUDITORIA.md`; esta recomendación es «no».

@@ -1,3 +1,4 @@
+[Nombres y rutas anonimizados; cifras y fechas originales.]
 pi | coordinador | 2026-10-31T22-25-43-632Z_01a19411-98ce-727e-b0a7-7abde609f8c7.jsonl
 turnos: 803
 costo: US$9.256
@@ -94,7 +95,7 @@ archivos más leídos por el coordinador (KB | lecturas | ruta):
   12.8 KB | 1 | definitions/PROJECT.md
   7.1 KB | 1 | docs/safety-contract.md
   5.4 KB | 1 | definitions/BACKLOG.md
-  5.1 KB | 1 | /Users/franco/.pi/agent/skills/descomponer-feature/SKILL.md
+  5.1 KB | 1 | /Users/usuario/.pi/agent/skills/descomponer-feature/SKILL.md
 
 pi | coordinador | session.jsonl
 turnos: 21
@@ -166,7 +167,7 @@ subagentes por rol: ninguno
 KB leídos por categoría: definiciones 8.3, tareas 32.4, otros 89.2
 KB de definitions/ leídos por el coordinador: 8.3
 archivos más leídos por el coordinador (KB | lecturas | ruta):
-  26.8 KB | 5 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  26.8 KB | 5 | /Users/usuario/.pi/agent/skills/ejecutar-tarea/SKILL.md
   26.7 KB | 3 | src/Diagnostics.psm1
   24.6 KB | 3 | features/F03-diagnostico/task-01-contrato-y-windows.md
   14.9 KB | 3 | tests/unit/Diagnostics.Tests.ps1
@@ -219,11 +220,11 @@ subagentes por rol: ninguno
 KB leídos por categoría: definiciones 2, tareas 11, otros 73.4
 KB de definitions/ leídos por el coordinador: 2
 archivos más leídos por el coordinador (KB | lecturas | ruta):
-  31.3 KB | 2 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/src/PrivilegeAuthorization.psm1
-  24 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/tests/unit/PrivilegeAuthorization.Tests.ps1
-  11 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/features/F02-barreras-seguridad/task-08-coordinacion-inerte.md
-  6.6 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/docs/safety-contract.md
-  5.4 KB | 1 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  31.3 KB | 2 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/src/PrivilegeAuthorization.psm1
+  24 KB | 1 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/tests/unit/PrivilegeAuthorization.Tests.ps1
+  11 KB | 1 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/features/F02-barreras-seguridad/task-08-coordinacion-inerte.md
+  6.6 KB | 1 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/docs/safety-contract.md
+  5.4 KB | 1 | /Users/usuario/.pi/agent/skills/ejecutar-tarea/SKILL.md
 
 pi | coordinador | session.jsonl
 turnos: 5
@@ -372,7 +373,7 @@ archivos más leídos por el coordinador (KB | lecturas | ruta):
   210.7 KB | 10 | definitions/F04-TECHNICAL-ADDENDUM.md
   104.8 KB | 3 | definitions/F04-PROPOSAL.md
   8 KB | 2 | definitions/STATUS.md
-  6.7 KB | 3 | /Users/franco/.pi/agent/skills/disenar-arquitectura/SKILL.md
+  6.7 KB | 3 | /Users/usuario/.pi/agent/skills/disenar-arquitectura/SKILL.md
   1.9 KB | 1 | AGENTS.md
 
 pi | coordinador | session.jsonl
@@ -482,7 +483,7 @@ archivos más leídos por el coordinador (KB | lecturas | ruta):
   36.6 KB | 4 | src/PrivilegeAuthorization.psm1
   20.2 KB | 4 | features/F02-barreras-seguridad/task-05e-esquema-matriz.md
   16.8 KB | 4 | docs/privilege-boundary.md
-  10.7 KB | 2 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  10.7 KB | 2 | /Users/usuario/.pi/agent/skills/ejecutar-tarea/SKILL.md
 
 pi | coordinador | session.jsonl
 turnos: 33
@@ -516,7 +517,7 @@ subagentes por rol: ninguno
 KB leídos por categoría: definiciones 3.7, tareas 0, otros 0
 KB de definitions/ leídos por el coordinador: 3.7
 archivos más leídos por el coordinador (KB | lecturas | ruta):
-  3.7 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/definitions/PROJECT.md
+  3.7 KB | 1 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/definitions/PROJECT.md
 
 pi | coordinador | session.jsonl
 turnos: 180
@@ -566,7 +567,7 @@ KB leídos por categoría: definiciones 15.1, tareas 36.8, otros 129.3
 KB de definitions/ leídos por el coordinador: 15.1
 archivos más leídos por el coordinador (KB | lecturas | ruta):
   32.3 KB | 5 | features/F03-diagnostico/task-03-transporte-diagnostic.md
-  26.8 KB | 5 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  26.8 KB | 5 | /Users/usuario/.pi/agent/skills/ejecutar-tarea/SKILL.md
   17.3 KB | 3 | src/ProcessTransport.psm1
   16.2 KB | 5 | tests/unit/DiagnosticTransport.Tests.ps1
   16 KB | 3 | docs/process-contract.md
@@ -673,7 +674,7 @@ archivos más leídos por el coordinador (KB | lecturas | ruta):
   60.8 KB | 2 | definitions/ARCHITECTURE.md
   40.2 KB | 9 | tests/unit/WslDiagnostic.Tests.ps1
   32.9 KB | 5 | features/F03-diagnostico/task-02-adaptador-raiz-wsl.md
-  26.8 KB | 5 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  26.8 KB | 5 | /Users/usuario/.pi/agent/skills/ejecutar-tarea/SKILL.md
   24.1 KB | 4 | docs/process-contract.md
 
 pi | coordinador | session.jsonl
@@ -689,11 +690,11 @@ subagentes por rol: ninguno
 KB leídos por categoría: definiciones 7, tareas 24.6, otros 122.8
 KB de definitions/ leídos por el coordinador: 7
 archivos más leídos por el coordinador (KB | lecturas | ruta):
-  17.9 KB | 2 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/src/Diagnostics.psm1
-  16.9 KB | 2 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/features/F03-diagnostico/task-04-menu-e-informe.md
-  16.5 KB | 2 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/src/ProcessTransport.psm1
-  15.4 KB | 5 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/tests/unit/Startup.Tests.ps1
-  10.7 KB | 2 | /Users/franco/.pi/agent/skills/ejecutar-tarea/SKILL.md
+  17.9 KB | 2 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/src/Diagnostics.psm1
+  16.9 KB | 2 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/features/F03-diagnostico/task-04-menu-e-informe.md
+  16.5 KB | 2 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/src/ProcessTransport.psm1
+  15.4 KB | 5 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/tests/unit/Startup.Tests.ps1
+  10.7 KB | 2 | /Users/usuario/.pi/agent/skills/ejecutar-tarea/SKILL.md
 
 pi | coordinador | session.jsonl
 turnos: 7
@@ -1050,8 +1051,8 @@ subagentes por rol: ninguno
 KB leídos por categoría: definiciones 0, tareas 10.8, otros 10.1
 KB de definitions/ leídos por el coordinador: 0
 archivos más leídos por el coordinador (KB | lecturas | ruta):
-  7.4 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/features/F01-base-ejecutable/task-01-arranque-y-pruebas.md
-  5.2 KB | 1 | /Users/franco/Codes/flucastr/Flucastr.Cleaner/.pi/skills/ejecutar-tarea/SKILL.md
+  7.4 KB | 1 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/features/F01-base-ejecutable/task-01-arranque-y-pruebas.md
+  5.2 KB | 1 | /Users/usuario/Codes/organizacion/Proyecto.Limpieza/.pi/skills/ejecutar-tarea/SKILL.md
   3.4 KB | 1 | features/F01-base-ejecutable/task-01-arranque-y-pruebas.md
   2.2 KB | 1 | docs/development.md
   1.2 KB | 1 | tests/unit/Startup.Tests.ps1
@@ -1101,7 +1102,7 @@ archivos más leídos por el coordinador (KB | lecturas | ruta):
   23.4 KB | 3 | features/F02-barreras-seguridad/task-09-validacion-matriz.md
   14.5 KB | 1 | docs/privilege-boundary.md
   7.1 KB | 1 | docs/safety-contract.md
-  5.1 KB | 1 | /Users/franco/.pi/agent/skills/descomponer-feature/SKILL.md
+  5.1 KB | 1 | /Users/usuario/.pi/agent/skills/descomponer-feature/SKILL.md
 
 pi | coordinador | session.jsonl
 turnos: 7
@@ -1119,7 +1120,7 @@ archivos más leídos por el coordinador (KB | lecturas | ruta):
   43.2 KB | 1 | definitions/ARCHITECTURE.md
   37.7 KB | 1 | definitions/F04-PROPOSAL.md
   3.6 KB | 1 | definitions/STATUS.md
-  2.2 KB | 1 | /Users/franco/.pi/agent/skills/disenar-arquitectura/SKILL.md
+  2.2 KB | 1 | /Users/usuario/.pi/agent/skills/disenar-arquitectura/SKILL.md
   1.9 KB | 1 | AGENTS.md
 
 Solo se cuentan lecturas con la herramienta read; lo leído por bash no se mide.

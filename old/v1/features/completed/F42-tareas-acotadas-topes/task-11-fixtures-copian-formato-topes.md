@@ -41,7 +41,7 @@ node --test pruebas/comprobaciones/excedido-resultado.test.mjs pruebas/comprobac
 Esperado: rama `feature/F42-tareas-acotadas-topes`; tres líneas terminadas en `:1`; `fail 0`.
 
 ## Evidencia
-Comandos ejecutados desde la raíz del repo `/Users/franco/Codes/flucastr/Flucastr.AI`.
+Comandos ejecutados desde la raíz del repo `/Users/persona/Codes/flucastr/Flucastr.AI`.
 
 ```
 $ git branch --show-current

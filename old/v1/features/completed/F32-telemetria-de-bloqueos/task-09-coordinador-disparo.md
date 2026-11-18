@@ -1,8 +1,11 @@
 # task-09 — `coordinador`: línea `Disparó:` en la plantilla de encargo
 repo: Flucastr.AI   depende_de: task-05, task-08   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Cada delegación debe decir qué la originó (una puerta, el bloqueo de una tarea, Franco o un reintento) para que `consumo.mjs` pueda medir las vueltas por bloqueo. Esta tarea agrega la línea `Disparó:` a la plantilla de encargo del núcleo del `coordinador` (decisión D4=A de Franco) sin subir el tope de 7168 bytes.
+Cada delegación debe decir qué la originó (una puerta, el bloqueo de una tarea, la persona usuaria o un reintento) para que `consumo.mjs` pueda medir las vueltas por bloqueo. Esta tarea agrega la línea `Disparó:` a la plantilla de encargo del núcleo del `coordinador` (decisión D4=A de la persona usuaria) sin subir el tope de 7168 bytes.
 
 ## Contexto
 - Tocar: `agentes/coordinador.md`, `pruebas/comprobaciones/frases-por-archivo.mjs`
@@ -16,7 +19,7 @@ Cada delegación debe decir qué la originó (una puerta, el bloqueo de una tare
 
 ## Decisiones ya tomadas
 - En el paso 3 de «Cómo avanzas», antes de «`Lee:` rutas exactas (y la sección citada); » inserta exactamente «`Disparó:` `puerta N`|`BLOQUEO task-NN`|`franco`|`reintento`; ».
-- En `frases-por-archivo.mjs` agrega `coordinador: ['`Disparó:` `puerta N`|`BLOQUEO task-NN`|`franco`|`reintento`']` a `FRASES_TELEMETRIA` y esparcirlo en la entrada `'agentes/coordinador'`.
+- En `frases-por-archivo.mjs` agrega `coordinador: ['`Disparó:` `puerta N`|`BLOQUEO task-NN`|`la persona usuaria`|`reintento`']` a `FRASES_TELEMETRIA` y esparcirlo en la entrada `'agentes/coordinador'`.
 - Si al medir el archivo supera 7168 bytes (por una diferencia de codificación), recorta redacción repetida fuera del manifiesto; no borres ninguna frase de `FRASES_POR_ARCHIVO['agentes/coordinador']`.
 
 ## Decisiones abiertas
@@ -50,8 +53,8 @@ Esperado: `ℹ fail 0` (dos veces; medido en una copia con la inserción) y `coo
 Antes de editar (medición):
 
 ```
-$ wc -c /Users/franco/Codes/flucastr/Flucastr.AI/agentes/coordinador.md
-    7105 /Users/franco/Codes/flucastr/Flucastr.AI/agentes/coordinador.md
+$ wc -c /Users/persona/Codes/flucastr/Flucastr.AI/agentes/coordinador.md
+    7105 /Users/persona/Codes/flucastr/Flucastr.AI/agentes/coordinador.md
 exit 0
 ```
 

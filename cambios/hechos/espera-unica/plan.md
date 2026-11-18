@@ -8,20 +8,22 @@ tramo: 3
 ---
 # Esperar con una sola llamada y gastar menos créditos en Claude Code, Pi y Codex
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Los agentes de los tres soportes esperan al constructor y a los comandos largos (`verify`, builds) con una sola llamada larga, sin bucles de `sleep`/`tail`/estado. El principal compacta antes y revisa más liviano. El medidor muestra créditos y sondeos por sesión para comprobarlo. Sin agentes nuevos.
 
 ## Supuestos
 - Evidencia (Codex, 8-9 nov, ≈1,2 créditos por punto de la ventana de 5 h): `wait_agent` con 10–60 s y bucles de `tail`/`sleep` fueron ≈46 % de los créditos de `sol` (principal) y 31 % de las llamadas de `luna`. Pi: 58 de 2625 llamadas `bash` fueron `sleep`/`tail`. Claude Code: no medido; si el medidor no lo ve, se anota y no se inventa.
 - Esperar con `timeout_ms: 3600000` en `wait_agent` ya funcionó en Codex (una llamada de 21 min). Una espera larga de comandos con `background_terminal_max_timeout` NO está probada: el tramo 2 la prueba; si no funciona, se deja solo la regla de texto.
-- Si Franco quiere otro valor de compactación del principal que 60000, cambia una línea de `modelos.json`.
+- Si la persona usuaria quiere otro valor de compactación del principal que 60000, cambia una línea de `modelos.json`.
 
 ## Alcance
 `agentes/principal.md`, `agentes/constructor.md`, `skills/ejecutar-plan/SKILL.md`, `instalar.sh`, `scripts/resolver.mjs`, `scripts/uso.mjs`, `modelos.json`, `pruebas/uso/`, `verify`, `docs/evaluaciones/costos.md`, `AGENTS.md`. Fuera: agentes nuevos, `.codex/config.toml` de proyectos, topes de llamadas, el tramo 5 de `recortar-contexto-fijo` (Docker, recortes de principal/planificar-cambio).
 
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque los requisitos, el contexto y las comprobaciones están en el plan y no toca credenciales ni producción.
-- No se agregan agentes (Franco; Anthropic desaconseja multiagente para código y el multiagente gasta ≈15× los tokens de un chat).
+- No se agregan agentes (la persona usuaria; Anthropic desaconseja multiagente para código y el multiagente gasta ≈15× los tokens de un chat).
 - El principal sigue en `medio`/`low` y el constructor en `bajo`/`medium`.
 - Reglas de texto sin nombres de herramienta salvo una línea por soporte: Codex `wait_agent` con `timeout_ms: 3600000` y `yield_time_ms` alto; Claude Code, comando largo con `timeout` máximo o `run_in_background` y esperar su aviso; Pi, el timeout de `bash` o la espera de fondo que ofrezca. Nunca bucles de `sleep`, `tail` o consulta de estado.
 - No debilitar pruebas de `verify`: grep antes de quitar cualquier texto (regla de oro de `recortar-contexto-fijo`).
@@ -76,7 +78,7 @@ Resultado: Codex fija la espera larga y compacta al principal antes que al const
 - [x] Extender el paso 3f de `verify` para comprobar el valor por agente y la clave nueva (A2, A3)
   - evidencia: `verify` bloque «(1c)» tras la línea 826 (umbral principal 60000 y constructor general; `background_terminal_max_timeout=1800000` en `codex-principal` y `codex-constructor`); `./verify`, exit 0 (ver *Evidencia*)
 - [x] Prueba real de A2 con `codex exec` (luna, esfuerzo low, ≈2 min) y pegar el conteo de llamadas en *Notas* (A2)
-  - evidencia: `codex exec -m gpt-6-luna -c 'model_reasoning_effort="low"' -c background_terminal_max_timeout=1800000 "...sleep 90 && echo listo..."` (salida JSON en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/a2/salida2.jsonl`), exit 0; 1 llamada de herramienta (`/bin/bash -lc 'sleep 90 && echo listo'`, `exit_code 0`, salida «listo»), sin sondeos
+  - evidencia: `codex exec -m gpt-6-luna -c 'model_reasoning_effort="low"' -c background_terminal_max_timeout=1800000 "...sleep 90 && echo listo..."` (salida JSON en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/a2/salida2.jsonl`), exit 0; 1 llamada de herramienta (`/bin/bash -lc 'sleep 90 && echo listo'`, `exit_code 0`, salida «listo»), sin sondeos
 
 Verificación del tramo: `./verify` (A2, A3, A6).
 

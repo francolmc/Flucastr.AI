@@ -1,5 +1,7 @@
 # Excedido + «A» — claude-code
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Modelo: claude-sonnet-5-5
 Letras en la Escalación: A, C, D
 amp_arq tras «A»: 1
@@ -8,13 +10,13 @@ Veredicto: OK
 Causa probable: STATUS.md rechazado por el validador
 
 Llamadas a Bash:
-- etapa 1: ls /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/excedido-claude-code-48397-1/fixture… → exit 0
-- etapa 1: ls /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/excedido-claude-code-48397-1/fixture… → exit 0
+- etapa 1: ls /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/excedido-claude-code-48397-1/fixture… → exit 0
+- etapa 1: ls /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/excedido-claude-code-48397-1/fixture… → exit 0
 - etapa 1: node ~/.flucastr-ai/validar-tarea.mjs --presupuesto features/F01-demo → exit 1
-- etapa 2: ls /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/excedido-claude-code-48397-1/fixture… → exit 0
+- etapa 2: ls /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/excedido-claude-code-48397-1/fixture… → exit 0
 - etapa 2: node ~/.flucastr-ai/validar-tarea.mjs --presupuesto features/F01-demo → exit 1
 - etapa 2: node ~/.flucastr-ai/validar-tarea.mjs --presupuesto features/F01-demo → exit 0
-- etapa 2: ls /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/excedido-claude-code-48397-1/fixture… → exit 0
+- etapa 2: ls /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/excedido-claude-code-48397-1/fixture… → exit 0
 - etapa 2: grep -n '^## ' features/F01-demo/task-02-segunda.md definitions/ARCHITECTURE.md definitions/REPOS.md → exit 2
 - etapa 2: ls definitions features/F01-demo → exit 0
 - etapa 2: node ~/.flucastr-ai/validar-tarea.mjs --presupuesto features/F01-demo → exit 1

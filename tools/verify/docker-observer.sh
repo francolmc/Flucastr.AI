@@ -13,6 +13,38 @@ esperado=$(sed -n '/^--- salida esperada ---$/,/^--- fin ---$/p' "$FIX/datos/LEE
 obtenido=$(node scripts/observar.mjs informe --datos "$FIX/datos") || fallo "8r: el informe del fixture salió con error"
 [ "$obtenido" = "$esperado" ] || { diff <(printf '%s\n' "$esperado") <(printf '%s\n' "$obtenido") >&2 || true; fallo "8r: el informe no coincide con LEEME.txt (A1 a A3)"; }
 echo "ok 8r A1-A3: el informe del fixture coincide con LEEME.txt (medianas, máximos, caché, OOM, solape y pico)"
+mkdir -p "$T8R/kit con espacios/scripts" "$T8R/kit con espacios/tools"
+cp scripts/observar.mjs scripts/observe.mjs "$T8R/kit con espacios/scripts/"
+cp -R tools/observe "$T8R/kit con espacios/tools/"
+cp -R "$FIX/datos" "$T8R/datos con espacios"
+comparar_observador() {
+  local codigo_es codigo_en
+  set +e
+  node "$T8R/kit con espacios/scripts/observar.mjs" "$@" > "$T8R/es.out" 2> "$T8R/es.err"
+  codigo_es=$?
+  node "$T8R/kit con espacios/scripts/observe.mjs" "${ingles[@]}" > "$T8R/en.out" 2> "$T8R/en.err"
+  codigo_en=$?
+  set -e
+  [ "$codigo_es" -eq "$codigo_en" ] && cmp -s "$T8R/es.out" "$T8R/en.out" && cmp -s "$T8R/es.err" "$T8R/en.err" || fallo "8r: interfaces del observador difieren"
+}
+ingles=(report --data "$T8R/datos con espacios" --since 2026-01-01)
+comparar_observador informe --datos "$T8R/datos con espacios" --desde 2026-01-01
+grep -q '^BUILDS ' "$T8R/es.out" && ! grep -Fq '(sin builds terminadas)' "$T8R/es.out" || fallo "8r: informe filtrado sin builds del fixture"
+ingles=(report --datos "$T8R/datos con espacios" --since 2026-01-01)
+comparar_observador informe --datos "$T8R/datos con espacios" --desde 2026-01-01
+for par in 'datos data' 'desde since'; do
+  read -r es en <<< "$par"
+  ingles=(report "--$en")
+  comparar_observador informe "--$es"
+done
+ingles=(report --data "$T8R/datos con espacios" --since invalida)
+comparar_observador informe --datos "$T8R/datos con espacios" --desde invalida
+grep -Fq 'observar: --desde debe ser AAAA-MM-DD' "$T8R/es.err" || fallo "8r: falta error de fecha inválida"
+ingles=(report --desconocida)
+comparar_observador informe --desconocida
+sed -i 's/"--since": "--desde"/"--removed": "--desde"/' "$T8R/kit con espacios/scripts/observar.mjs"
+if node "$T8R/kit con espacios/scripts/observe.mjs" report --data "$T8R/datos con espacios" --since 2026-01-01 > /dev/null 2>&1; then fallo "8r: retirar un alias no fue detectado"; fi
+echo "ok 8r idioma: informes, mezcla, errores y mutación de alias equivalentes con datos aislados"
 mkdir -p "$T8R/sinoom"
 grep -v '"Action":"oom"' "$FIX/datos/eventos.jsonl" > "$T8R/sinoom/eventos.jsonl"
 cp "$FIX/datos/muestras.jsonl" "$FIX/datos/builds.jsonl" "$T8R/sinoom/"

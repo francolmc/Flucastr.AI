@@ -2,7 +2,7 @@
 
 > Estado: borrador por aprobar
 > Fecha: 2026-11-02. Una sola pasada del `arquitecto`; sin código.
-> Origen: relato de Franco (*confirmado* como dicho, no verificado en logs); lectura de `CONTEXTO.md`, `CONTRATOS.md`, `DIAGNOSTICO-BLOQUEOS.md`, `agentes/*.md`, `frases-por-archivo.mjs`; tamaños medidos con `wc -c` y `topes-bytes.test.mjs` (*confirmado*). 
+> Origen: relato de la persona usuaria (*confirmado* como dicho, no verificado en logs); lectura de `CONTEXTO.md`, `CONTRATOS.md`, `DIAGNOSTICO-BLOQUEOS.md`, `agentes/*.md`, `frases-por-archivo.mjs`; tamaños medidos con `wc -c` y `topes-bytes.test.mjs` (*confirmado*).
 
 ## 1. Diagnóstico
 
@@ -26,9 +26,9 @@
 
 | Concepto | Dónde se dice | Quién lo cambia |
 |---|---|---|
-| **Límite** (lectura por defecto) | `Lee:` y `Evita leer:` del encargo; listas de «Qué lees» de cada agente | El `coordinador` por encargo; Franco, vía promoción (§5) |
-| **Permiso duro** | Texto fijo en cada agente: `.env`, llaves, credenciales, `registro/`, `features/completed/` | Solo Franco, con pedido explícito |
-| **Excepción blanda** | Skill `lectura-extra` | Franco |
+| **Límite** (lectura por defecto) | `Lee:` y `Evita leer:` del encargo; listas de «Qué lees» de cada agente | El `coordinador` por encargo; la persona usuaria, vía promoción (§5) |
+| **Permiso duro** | Texto fijo en cada agente: `.env`, llaves, credenciales, `registro/`, `features/completed/` | Solo la persona usuaria, con pedido explícito |
+| **Excepción blanda** | Skill `lectura-extra` | la persona usuaria |
 
 Reglas de la skill `lectura-extra` (≈1,2 KB, aplica a `arquitecto`, `planificador`, `constructor`; **no** al `coordinador`):
 1. Un archivo de `Evita leer:` (o de «No lees…» del agente) se lee solo si la tarea no se puede cerrar sin él; antes, `grep -n '^## '` y la sección.
@@ -36,7 +36,7 @@ Reglas de la skill `lectura-extra` (≈1,2 KB, aplica a `arquitecto`, `planifica
 3. Cada una se declara en el retorno, tras la primera línea de estado: `Lectura extra: <ruta>; motivo=<qué te falta>`.
 4. Si hace falta más, o el archivo es duro: `BLOQUEO: rol=franco; motivo=lectura: <ruta>` (no se enruta a otro rol; mismo criterio que `rol=franco` de `DIAGNOSTICO-BLOQUEOS.md` §4).
 
-Encargo del `coordinador`, dos cambios en `Plantilla de encargo`: «`Evita leer:` lo que el rol no necesita (`definitions/` salvo lo citado, tareas `hecha`)» y «No lees un archivo para pasar su contenido a otro rol: pasa la ruta en `Lee:`». Ante `BLOQUEO: motivo=lectura:`, el `coordinador` no delega la lectura a otro rol: pregunta a Franco.
+Encargo del `coordinador`, dos cambios en `Plantilla de encargo`: «`Evita leer:` lo que el rol no necesita (`definitions/` salvo lo citado, tareas `hecha`)» y «No lees un archivo para pasar su contenido a otro rol: pasa la ruta en `Lee:`». Ante `BLOQUEO: motivo=lectura:`, el `coordinador` no delega la lectura a otro rol: pregunta a la persona usuaria.
 
 ## 4. Dónde vive el texto (con tamaños)
 
@@ -54,7 +54,7 @@ Encargo del `coordinador`, dos cambios en `Plantilla de encargo`: «`Evita leer:
 
 - **Fuente primaria: lo que se leyó de verdad.** `consumo.mjs` ya calcula KB leídos por archivo y rol (*confirmado*: `CONTEXTO.md` §5 y `consumo.test.mjs`). Una lectura es «extra» si su ruta coincide con la `Evita leer:` del encargo. Es la misma extracción de líneas de cabecera del encargo que `DIAGNOSTICO-BLOQUEOS.md` pieza 3 (C3) plantea para `Disparó:`: **un solo parser** de líneas `Clave:` del encargo (`Disparó:` y `Evita leer:`), sin segundo mecanismo.
 - **`Lectura extra:` aporta el motivo y el cumplimiento**, no el conteo. Cumplimiento = lecturas extra con declaración / lecturas extra totales (meta ≥ 90 %). No se escribe en `registro/` ni se añade evento a `registrar.mjs`: `Bloqueo:` y `Disparó:` cubren otro eje (por qué se paró y quién disparó); esto es qué se leyó de más. Si una lectura bloquea, `Bloqueo: tipo=otra` ya basta.
-- **Promoción:** un archivo con lectura extra en ≥3 corridas del mismo rol y ≥2 features pasa a `Lee:` del rol (o a su lista de «Qué lees»). La pista la saca `informe.mjs --pistas` (pieza 3, C5) como una fila más; decide Franco. Umbrales *supuestos*, a calibrar.
+- **Promoción:** un archivo con lectura extra en ≥3 corridas del mismo rol y ≥2 features pasa a `Lee:` del rol (o a su lista de «Qué lees»). La pista la saca `informe.mjs --pistas` (pieza 3, C5) como una fila más; decide la persona usuaria. Umbrales *supuestos*, a calibrar.
 - **Anti-degradación:** alerta si las lecturas extra por llamada promedian >1 o los KB por corrida superan la base +25 %. Si ocurre dos veces, ese rol vuelve a «No leas» duro.
 
 ## 6. Cambios en pruebas y documentos
@@ -74,7 +74,7 @@ Encargo del `coordinador`, dos cambios en `Plantilla de encargo`: «`Evita leer:
 6. `consumo.mjs`: parser de líneas del encargo (compartido con C3), lectura extra y cumplimiento, con prueba. Depende de C3.
 7. `informe.mjs --pistas`: filas de promoción y alerta. Depende de C5.
 8. Redacción de `CONTEXTO.md` (§6), tras aprobación.
-9. Medición real de Franco en 2 features (comparar con la base de §5 de `CONTEXTO.md`).
+9. Medición real de la persona usuaria en 2 features (comparar con la base de §5 de `CONTEXTO.md`).
 
 Orden: 1 → 2–4 → 5 (después de C3) → 8; 6–7 cuando existan C3 y C5; 9 al final.
 
@@ -89,7 +89,7 @@ Orden: 1 → 2–4 → 5 (después de C3) → 8; 6–7 cuando existan C3 y C5; 9
 
 **Fuera de esta pieza:** «agentes que duermen sin cerrarse». En Claude Code un subagente no se continúa (cada `Agent` parte de cero); queda como investigación pendiente solo para Pi.
 
-## 9. Decisiones para Franco
+## 9. Decisiones para la persona usuaria
 
 1. **Dónde vive la regla.**
    - A) Skill `lectura-extra` + puntero en tres agentes. **Recomendada**: cabe en los topes y se carga al hacer falta.

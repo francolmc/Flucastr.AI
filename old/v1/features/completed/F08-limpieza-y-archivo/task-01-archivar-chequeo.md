@@ -1,6 +1,9 @@
 # task-01 — `scripts/archivar.mjs`: modo chequeo (solo lectura)
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Crea el script `scripts/archivar.mjs` con su modo por defecto, el **chequeo**: imprime cuánto pesa lo que los agentes leen siempre, qué filas `hecha` del backlog son largas, qué features son candidatas a archivar y cuáles son inconsistentes. Es solo lectura, sin efectos sobre archivos, y siempre termina con código 0 (es un aviso, no una puerta). Es la base del archivado (task-02) y de los avisos del `coordinador` (task-03). Diseño en `definitions/WORKFLOW.md` §10.2 y §10.4.
 
@@ -12,7 +15,7 @@ Crea el script `scripts/archivar.mjs` con su modo por defecto, el **chequeo**: i
 - Comando de prueba: `node --test pruebas/comprobaciones/archivar.test.mjs`.
 
 ## Decisiones ya tomadas
-- **Supuestos de Franco, según las recomendaciones del arquitecto (Franco no respondió las preguntas abiertas de §10.6):** los umbrales son punto de partida a calibrar (`STATUS.md` > 3 KB, `BACKLOG.md` > 8 KB, `AGENTS.md` > 2 KB, fila `hecha` > 300 caracteres; `definitions/*.md` > 30 KB solo informativo); y se archiva después del PR, en su propio commit `chore/` (esto último no afecta al código del script).
+- **Supuestos de la persona usuaria, según las recomendaciones del arquitecto (la persona usuaria no respondió las preguntas abiertas de §10.6):** los umbrales son punto de partida a calibrar (`STATUS.md` > 3 KB, `BACKLOG.md` > 8 KB, `AGENTS.md` > 2 KB, fila `hecha` > 300 caracteres; `definitions/*.md` > 30 KB solo informativo); y se archiva después del PR, en su propio commit `chore/` (esto último no afecta al código del script).
 - 1 KB = 1024 caracteres. Se mide en caracteres (`String.length` del texto UTF-8 leído) y líneas (`split('\n').length`, sin contar una línea vacía final).
 - Umbrales como constantes con nombre al inicio del archivo (`UMBRALES`): `STATUS.md` 3072, `BACKLOG.md` 8192, `AGENTS.md` 2048, `FILA_HECHA` 300 y `DEFINICION_INFORMATIVO` 30720.
 - Archivos medidos (rutas relativas a la raíz): `AGENTS.md`, `definitions/STATUS.md`, `definitions/BACKLOG.md` (con umbral de aviso) y el resto de `definitions/*.md` (solo informativo, con el umbral de 30720). Si un archivo no existe, se informa «no existe» y no es error.
@@ -20,7 +23,7 @@ Crea el script `scripts/archivar.mjs` con su modo por defecto, el **chequeo**: i
 - Raíz: por defecto el directorio padre de `scripts/` (`join(dirname(fileURLToPath(import.meta.url)), "..")`); la opción `--raiz <dir>` la reemplaza (existe para las pruebas).
 - API exportada: `chequear(raiz)` devuelve `{ archivos: [{ ruta, caracteres, lineas, umbral, excede, existe }], filasHecha: [{ id, largo, excede }], candidatas: [id…], inconsistentes: [{ id, motivo }], carpetasSinFilaHecha: [carpeta…] }` y `formatearInforme(resultado)` devuelve el texto. El CLI imprime `formatearInforme(chequear(raiz))` y termina en 0. Solo se ejecuta el CLI cuando el archivo es el punto de entrada (`process.argv[1]` resuelve a este archivo).
 - **Candidata (todas, o no):** (1) la fila de la feature está `hecha`; (2) existe exactamente una carpeta `features/Fxx-*` con el ID de la fila; (3) esa carpeta tiene al menos un `task-*.md` y todos tienen estado `hecha`; (4) no existe `features/completed/Fxx-*`. Si falla alguna, es **inconsistente** con un motivo en español (por ejemplo «fila hecha, pero task-03 está en curso», «fila hecha sin carpeta en features/ ni en features/completed/», «carpeta sin tareas», «el destino features/completed/F01-… ya existe», «más de una carpeta F01-*»). Una fila `hecha` sin carpeta en `features/` pero con carpeta en `features/completed/` está ya archivada: no es candidata ni inconsistente.
-- `carpetasSinFilaHecha`: carpetas `features/Fxx-*` con todas las tareas `hecha` pero cuya fila no está `hecha` (solo informa; el estado lo decide Franco).
+- `carpetasSinFilaHecha`: carpetas `features/Fxx-*` con todas las tareas `hecha` pero cuya fila no está `hecha` (solo informa; el estado lo decide la persona usuaria).
 - El chequeo nunca lee `features/completed/**` salvo para comprobar que existe el destino. Nunca escribe, mueve ni corrige estados.
 - Informe en español, con secciones «Tamaño de lo que se lee», «Filas hechas del backlog», «Candidatas a archivar», «Inconsistentes» y «Features con tareas hechas y fila no hecha». Cada archivo que excede su umbral lleva la marca `AVISO`.
 
@@ -35,7 +38,7 @@ Fuera de alcance: `--aplicar` y cualquier movimiento de carpetas (task-02); camb
 4. Implementar `candidatas`, `inconsistentes` y `carpetasSinFilaHecha` con las reglas de *Decisiones*. Resultado: cubierto por las pruebas del paso 6.
 5. Implementar `formatearInforme` y el CLI (`--raiz`). Resultado: `node scripts/archivar.mjs` imprime las cinco secciones y termina con código 0.
 6. Crear `pruebas/comprobaciones/archivar.test.mjs` con una raíz temporal armada por una función auxiliar (backlog mínimo, `AGENTS.md`, `definitions/STATUS.md`, carpetas de features con tareas de un estado dado) y estos casos: (a) feature `hecha` con todas sus tareas `hecha` → candidata; (b) fila `hecha` con una tarea `en curso` → inconsistente con el motivo que nombra la tarea; (c) fila `hecha` sin carpeta → inconsistente; (d) carpeta con todas las tareas `hecha` y fila `pendiente` → `carpetasSinFilaHecha`; (e) destino `features/completed/Fxx-*` ya existente → inconsistente; (f) `STATUS.md` de 3073 caracteres → `excede: true`, y de 3072 → `false`; (g) fila `hecha` con celda de 301 caracteres → `excede: true`; (h) archivo inexistente → `existe: false` sin lanzar; (i) el CLI con `--raiz` sobre la raíz temporal termina en 0, imprime «Candidatas a archivar» y **no cambia** el contenido del directorio (se compara la lista de rutas y tamaños antes y después). Resultado: pasan.
-7. Añadir un caso que corra `node scripts/archivar.mjs` sin `--raiz` sobre el repo real: termina en 0 y la salida contiene «Tamaño de lo que se lee» (no se afirma qué features son candidatas: cambia cuando Franco archive). Resultado: pasa.
+7. Añadir un caso que corra `node scripts/archivar.mjs` sin `--raiz` sobre el repo real: termina en 0 y la salida contiene «Tamaño de lo que se lee» (no se afirma qué features son candidatas: cambia cuando la persona usuaria archive). Resultado: pasa.
 8. Correr la *Verificación*.
 
 ## Criterios de aceptación
@@ -114,4 +117,4 @@ Criterios: (1) feature hecha con tareas hechas → candidata; con tarea en otro 
 - Antes de crear la rama, `git status --short` ya tenía cambios ajenos a la tarea: `M definitions/BACKLOG.md`, `M definitions/STATUS.md`, `?? features/F08-limpieza-y-archivo/`. No se tocaron. Después aparecieron `M` en `definitions/ARCHITECTURE.md`, `definitions/PROJECT.md` y `definitions/WORKFLOW.md`, que es la edición del arquitecto en paralelo; tampoco se tocaron. Git no ejecutó nada sobre ellos (solo `git switch -c`, que conserva el árbol de trabajo).
 - Huecos menores resueltos: (1) el umbral informativo de 30720 se aplica a todos los `definitions/*.md` salvo `STATUS.md` y `BACKLOG.md`, en orden alfabético; (2) un argumento desconocido en el CLI va a stderr y no cambia el código 0; (3) el destino de `features/completed/` se compara por el prefijo `Fxx-`, así que una carpeta ya archivada con otro sufijo también cuenta como destino existente; (4) las motivos de una feature con varias tareas no hechas se listan una por línea en «Inconsistentes».
 - Ninguna escritura fuera de `scripts/archivar.mjs` y `pruebas/comprobaciones/archivar.test.mjs`, más el campo `estado` y *Evidencia*/*Notas* de la tarea. No hubo commit, push, PR, merge ni cambios a `definitions/STATUS.md`.
-- El resultado del chequeo sobre el repo real marca F01 a F07 como candidatas: es correcto según las reglas, porque sus filas están `hecha` y sus carpetas tienen todas las tareas `hecha`. Franco decide cuándo archivar (task-02).
+- El resultado del chequeo sobre el repo real marca F01 a F07 como candidatas: es correcto según las reglas, porque sus filas están `hecha` y sus carpetas tienen todas las tareas `hecha`. la persona usuaria decide cuándo archivar (task-02).

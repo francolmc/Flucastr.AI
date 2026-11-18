@@ -1,6 +1,9 @@
 # task-08 — Regresión final de F34: rápida, topes y contratos sin empeorar
 repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Cierre de F34 sin cambios de código: se comprueba que los topes de bytes no se movieron (F34 no toca agentes ni skills) y que `pruebas/rapida.sh` no empeora: 7 fallos preexistentes y 24 pruebas nuevas.
 
@@ -22,7 +25,7 @@ Ninguna
 
 ## Alcance / Fuera de alcance
 Alcance: correr las verificaciones y registrar la evidencia.
-Fuera de alcance: editar scripts, pruebas, agentes o skills; arreglar fallos preexistentes; `definitions/` (`CONTEXTO.md` §6 queda para Franco); la medición real en Flucastr.Cleaner (pieza 9 del documento de diseño).
+Fuera de alcance: editar scripts, pruebas, agentes o skills; arreglar fallos preexistentes; `definitions/` (`CONTEXTO.md` §6 queda para la persona usuaria); la medición real en Proyecto.Mantenimiento (pieza 9 del documento de diseño).
 
 ## Pasos
 1. Corre los tres comandos de *Verificación*, uno por uno, y pégalos en *Evidencia*.
@@ -77,6 +80,6 @@ exit 1
 - No se corrigió nada (fuera de alcance: `definitions/` y `pruebas/`). Tampoco se editó `STATUS.md`.
 - Criterios: 1 cumple (topes-bytes `fail 0`); 2 cumple (102 tests, `fail 0`); 3 no cumple (`fail 8` y título nuevo).
 - Huecos menores: 0.
-- Bloqueo: la regresión viene de fuera de F34 (estado de `definitions/STATUS.md`). Franco decide si se corrige ese archivo o se acepta la base nueva.
+- Bloqueo: la regresión viene de fuera de F34 (estado de `definitions/STATUS.md`). la persona usuaria decide si se corrige ese archivo o se acepta la base nueva.
 Bloqueo: tipo=verificacion_x2; falta=-
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=falla; huecos=0; resultado=bloqueada; causa=verificacion_x2

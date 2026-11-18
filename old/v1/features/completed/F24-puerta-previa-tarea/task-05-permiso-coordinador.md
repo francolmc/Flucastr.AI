@@ -1,8 +1,11 @@
 # task-05 — Permiso del coordinador para el validador
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-El `coordinador` solo puede correr una lista cerrada de tres comandos. Decisión de Franco (2026-11-01): se añade un cuarto, el lanzador fijo del validador de tareas (`~/.flucastr-ai/validar-tarea.mjs`, task-04), con un permiso literal sin `$(…)`. Esta tarea lo declara en `tools:` y en el cuerpo del agente, y actualiza la regla 15 de `contrato-roles.mjs`, que hoy rechaza cualquier cuarto comando. La comprobación real con el arnés es task-06.
+El `coordinador` solo puede correr una lista cerrada de tres comandos. Decisión de la persona usuaria (2026-11-01): se añade un cuarto, el lanzador fijo del validador de tareas (`~/.flucastr-ai/validar-tarea.mjs`, task-04), con un permiso literal sin `$(…)`. Esta tarea lo declara en `tools:` y en el cuerpo del agente, y actualiza la regla 15 de `contrato-roles.mjs`, que hoy rechaza cualquier cuarto comando. La comprobación real con el arnés es task-06.
 
 ## Contexto
 - Leer: `definitions/ARCHITECTURE.md`, subsección «Raíz del kit y puerta previa de tarea (F24…)», viñetas «Invocación» y «Contrato». De task-04 (`depende_de`), solo sus *Notas*.

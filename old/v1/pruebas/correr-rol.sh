@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Corrida del rol del coordinador (F41, task-04). Solo MIDE: construye el fixture de task-03 una vez por
 # escenario (flecha, definicion), lanza el coordinador con el lanzador de F12 de la herramienta y escribe
-# el informe. La corrida con modelo real la hace Franco (task-06); las pruebas usan un modelo simulado.
+# el informe. La corrida con modelo real la hace la persona usuaria (task-06); las pruebas usan un modelo simulado.
 # Uso: bash pruebas/correr-rol.sh {claude-code|pi}
 # Escribe <res>/<fecha>-rol-<herramienta>-<k>.md; al final imprime «informe: <ruta>» y «Veredicto: OK|FALLA».
 set -euo pipefail

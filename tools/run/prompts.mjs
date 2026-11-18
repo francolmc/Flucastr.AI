@@ -6,8 +6,8 @@ function cola(t) {
 
 function promptConstructor(planRel, tramo, ajuste) {
   const t = tramo ? ` (tramo: ${tramo})` : "";
-  const base = `Ejecuta con la skill ejecutar-plan el plan ${planRel}${t}. Responde con la línea de retorno.`;
-  return ajuste ? `${base}\n\nCorrige antes de seguir:\n${ajuste}` : base;
+  const base = `Execute plan ${planRel}${t} using the ejecutar-plan skill. Respond with the return line.`;
+  return ajuste ? `${base}\n\nFix before continuing:\n${ajuste}` : base;
 }
 
 function claveFalloVerificacion(v) {
@@ -16,10 +16,10 @@ function claveFalloVerificacion(v) {
 
 function promptRevisor(planRel, diff, esquema) {
   return [
-    `Revisa el plan ${planRel} contra el diff que sigue. Solo lees; no escribes nada.`,
-    "Devuelve SOLO un JSON que cumpla este esquema, sin texto alrededor:",
+    `Review plan ${planRel} against the diff below. Read only; do not write anything.`,
+    "Return ONLY JSON that conforms to this schema, with no surrounding text:",
     JSON.stringify(esquema),
-    "veredicto APROBADO si lo pedido en Aceptación está hecho; DEVUELTO con defectos (archivo, línea, criterio) si no; PAUSA si falta algo que no se puede decidir.",
+    "Use veredicto APROBADO if the Aceptación requirements are met; DEVUELTO with defects (archivo, linea, criterio) otherwise; PAUSA if something missing cannot be decided.",
     "",
     "--- diff ---",
     diff,

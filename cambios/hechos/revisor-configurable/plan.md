@@ -8,14 +8,16 @@ tipo: codigo
 ---
 # Revisor de `kit run` configurable en `modelos.json` (sin agente nuevo)
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Que el modelo y el esfuerzo del revisor de `kit run` se cambien con una línea de `modelos.json`, para probar Luna `low` en cambios reales (ver `docs/investigaciones/revisor-luna.md`: Luna `low` detectó 5/6 sembrados a ≈9 % del costo de Sol `low`). **No se crea ningún agente**: no hay archivo en `agentes/`, ni lanzador, ni cambios en `instalar.sh`.
 
 ## Supuestos
 - Hoy el revisor es el agente `principal` (`comando()` en `scripts/kit-run.mjs`: `agente = constructor ? "constructor" : "principal"`). Ese comportamiento es el **valor por defecto** y no cambia.
-- Clave nueva, a nivel raíz de `modelos.json`: `"kit_run": { "revisor": { "nivel": "medio", "esfuerzo": "low" } }`. `nivel` y `esfuerzo` se validan contra `niveles` y `esfuerzos`, y se traducen con el mismo mecanismo que los agentes (perfil por herramienta, respaldo, `max` → `xhigh` en Codex). Valor del repo: `medio`/`low` (= Sol hoy). Para la prueba, Franco cambia `nivel` a `bajo` (Luna `low`); no es el valor por defecto del repo.
+- Clave nueva, a nivel raíz de `modelos.json`: `"kit_run": { "revisor": { "nivel": "medio", "esfuerzo": "low" } }`. `nivel` y `esfuerzo` se validan contra `niveles` y `esfuerzos`, y se traducen con el mismo mecanismo que los agentes (perfil por herramienta, respaldo, `max` → `xhigh` en Codex). Valor del repo: `medio`/`low` (= Sol hoy). Para la prueba, la persona usuaria cambia `nivel` a `bajo` (Luna `low`); no es el valor por defecto del repo.
 - Si la clave falta (p. ej. un `modelos.json` personal copiado con `instalar.sh --copiar`), el revisor sigue siendo `principal`, como hoy.
-- Para comparar con la revisión de Franco en los próximos `kit run`, la nota que `kit run` deja en *Notas* del plan debe incluir el modelo y el esfuerzo del revisor.
+- Para comparar con la revisión de la persona usuaria en los próximos `kit run`, la nota que `kit run` deja en *Notas* del plan debe incluir el modelo y el esfuerzo del revisor.
 - Solo herramienta `codex` (el tramo 3 de `cambios/kit-run/plan.md` sigue en espera); para Claude/Pi la clave se acepta pero no se usa.
 
 ## Alcance

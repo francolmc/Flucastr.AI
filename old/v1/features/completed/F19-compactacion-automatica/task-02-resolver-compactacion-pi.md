@@ -1,6 +1,9 @@
 # task-02 — `resolver.mjs`: `fijar-compactacion pi` y `quitar-compactacion pi`
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Añadir a `scripts/resolver.mjs` las órdenes que escriben y quitan, en el `settings.json` global de Pi, `compaction.modelOverrides["<provider>/<modelo>"].reserveTokens = ventana − compactar_en`. Fusionan sin pisar nada del usuario, toman el bloqueo `<settings.json>.lock` como Pi y escriben de forma atómica. `instalar.sh` y `desinstalar.sh` (tareas 06 y 08) solo llaman a estas órdenes. La puerta 4 de esta tarea exige revisar `git diff scripts/`.
 
@@ -9,7 +12,7 @@ Añadir a `scripts/resolver.mjs` las órdenes que escriben y quitan, en el `sett
 - Esquema de Pi (informe `pruebas/resultados/2026-10-31-verificacion-compactacion.md`, puntos 1 y 3): `{"compaction":{"enabled":bool,"reserveTokens":n,"keepRecentTokens":n,"modelOverrides":{"openai/gpt-6.1-sol":{"reserveTokens":172000}}}}`; números enteros no negativos; claves desconocidas se conservan; Pi toma el bloqueo con `mkdir <settings.json>.lock` (10 reintentos de 20 ms), relee bajo el bloqueo y escribe el archivo con 2 espacios de sangría. Un valor inválido en el override del modelo activo hace fallar a Pi: nunca se escribe algo que no sea entero.
 - Defecto de Pi: `reserveTokens` 16384; un umbral que dé menos de eso es peor que el defecto (`ARCHITECTURE.md`, «Modelo sin ventana, o umbral inaplicable»).
 - Pruebas existentes del resolver: `pruebas/comprobaciones/resolver-agentes.test.mjs` (usa `FLUCASTR_MODELOS` y `spawnSync('node', [RESOLVER, …])`). Se verifica con `node --test pruebas/comprobaciones/resolver-agentes.test.mjs` y `bash pruebas/rapida.sh`. Las pruebas nuevas de estas órdenes son la task-03.
-- Esta tarea no puede correr las órdenes nuevas contra el `settings.json` real de Franco: usar siempre una carpeta temporal.
+- Esta tarea no puede correr las órdenes nuevas contra el `settings.json` real de la persona usuaria: usar siempre una carpeta temporal.
 
 ## Decisiones ya tomadas
 - Sintaxis: `node scripts/resolver.mjs fijar-compactacion pi <settings.json> [--simular]` y `node scripts/resolver.mjs quitar-compactacion pi <settings.json> <modelo> <reserve> [creado]`.
@@ -49,7 +52,7 @@ Fuera de alcance: la variante `claude` y `comparar-modelos` (task-04), `instalar
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 T=$(mktemp -d)
 node scripts/resolver.mjs fijar-compactacion pi "$T/settings.json" --simular; ls -A "$T"
 node scripts/resolver.mjs fijar-compactacion pi "$T/settings.json"; cat "$T/settings.json"; ls -A "$T"
@@ -213,7 +216,7 @@ Criterios de aceptación:
 4. Cumple: `quitado` con el valor puesto; `omitido` con otro valor (`1`); con `creado` y archivo que queda vacío, `archivo-quitado` (caso A).
 5. Cumple: `node --test …resolver-agentes.test.mjs` → pass 10, fail 0; `rapida.sh` exit 0 (con HOME real).
 
-Notas sobre la verificación de `git diff scripts/`: solo `scripts/resolver.mjs` (232 líneas tocadas). La revisión del diff queda para la puerta 4 (Franco).
+Notas sobre la verificación de `git diff scripts/`: solo `scripts/resolver.mjs` (232 líneas tocadas). La revisión del diff queda para la puerta 4 (la persona usuaria).
 
 ## Notas
 - Candidatos (paso 1): `openai/gpt-6-astra`, `openai/gpt-6.1-sol`, `openai/gpt-6-luna` (único perfil `pi`, `pi-openai`, en el orden de `modelos`). Ventanas 272000, `compactar_en` 100000 → 172000 cada uno.

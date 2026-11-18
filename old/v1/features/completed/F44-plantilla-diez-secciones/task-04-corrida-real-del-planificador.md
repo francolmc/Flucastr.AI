@@ -1,13 +1,16 @@
 # task-04 — Corridas con modelo real del planificador (claude-code y pi)
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Única tarea de F44 que gasta créditos: corre `bash pruebas/correr-planificador.sh claude-code` y `bash pruebas/correr-planificador.sh pi` y deja los informes en `pruebas/resultados/`, para comprobar que las tareas que escribe el planificador con la plantilla corregida pasan `validar-tarea` sin rechazos de plantilla. Solo se ejecuta si el encargo trae la frase literal «Franco autoriza la prueba real de F44» y el modelo de Pi que indique Franco; sin esa frase, el constructor se detiene antes de lanzar nada.
+Única tarea de F44 que gasta créditos: corre `bash pruebas/correr-planificador.sh claude-code` y `bash pruebas/correr-planificador.sh pi` y deja los informes en `pruebas/resultados/`, para comprobar que las tareas que escribe el planificador con la plantilla corregida pasan `validar-tarea` sin rechazos de plantilla. Solo se ejecuta si el encargo trae la frase literal «Franco autoriza la prueba real de F44» y el modelo de Pi que indique la persona usuaria; sin esa frase, el constructor se detiene antes de lanzar nada.
 
 ## Contexto
 - Tocar: `features/F44-plantilla-diez-secciones/task-04-corrida-real-del-planificador.md`
 - `pruebas/correr-planificador.sh {claude-code|pi}` (F42) hace la precondición de modelos, crea el fixture de `pruebas/fixtures/planificador.sh`, lanza al planificador y escribe `pruebas/resultados/<fecha>-planificador-<herramienta>-<k>.md` con `Veredicto: OK` o `Veredicto: FALLA`; los rechazos de plantilla del validador salen aparte, bajo `Formato ajeno a los topes`.
-- Para Pi, el modelo lo fija Franco en el encargo; si el encargo no lo trae, no se lanza `pi`.
+- Para Pi, el modelo lo fija la persona usuaria en el encargo; si el encargo no lo trae, no se lanza `pi`.
 - Solo se escriben los informes que genera el script y *Evidencia* y *Notas* de esta tarea.
 - Exige red y sesión iniciada de `claude` y de `pi`; gasta tokens.
 - Fuente: definitions/WORKFLOW.md «6. La tarea: completa y acotada»
@@ -15,7 +18,7 @@ repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
 ## Decisiones ya tomadas
 - Sin la frase «Franco autoriza la prueba real de F44» en el encargo: `BLOQUEO: rol=franco; motivo=entorno: falta la autorización de la prueba real de F44`, sin lanzar ninguna corrida.
-- No se ajustan prompts, skills ni topes para obtener `OK`. Con `Veredicto: FALLA` o con líneas bajo `Formato ajeno a los topes` en la sección de decisiones del informe, no se edita nada: la tarea queda `lista para revisión` con el informe en *Evidencia* y la causa en *Notas*; Franco decide.
+- No se ajustan prompts, skills ni topes para obtener `OK`. Con `Veredicto: FALLA` o con líneas bajo `Formato ajeno a los topes` en la sección de decisiones del informe, no se edita nada: la tarea queda `lista para revisión` con el informe en *Evidencia* y la causa en *Notas*; la persona usuaria decide.
 - Si la precondición de modelos falla (salida 2): `BLOQUEO: rol=franco; motivo=entorno: reinstalar los agentes`.
 - Cada herramienta se corre una sola vez.
 
@@ -98,7 +101,7 @@ exit 1
 (exit 1 de grep -c: sin coincidencias; los cuatro dan 0.)
 
 ## Notas
-- Hueco menor 1 (decisión): el `pi-planificador` instalado resuelve `openai/gpt-6.1-sol` desde modelos.json, no `openai/gpt-6-luna` que indicó Franco. No se editaron modelos.json, configuración de Pi, scripts ni ~/.pi. Se usó FLUCASTR_PI_BIN apuntando a un envoltorio temporal fuera del repo (scratchpad) que replica pi-planificador con `--model openai/gpt-6-luna`. Franco debe saber que el instalado sigue en gpt-6.1-sol.
+- Hueco menor 1 (decisión): el `pi-planificador` instalado resuelve `openai/gpt-6.1-sol` desde modelos.json, no `openai/gpt-6-luna` que indicó la persona usuaria. No se editaron modelos.json, configuración de Pi, scripts ni ~/.pi. Se usó FLUCASTR_PI_BIN apuntando a un envoltorio temporal fuera del repo (scratchpad) que replica pi-planificador con `--model openai/gpt-6-luna`. la persona usuaria debe saber que el instalado sigue en gpt-6.1-sol.
 - Pi: `Veredicto: FALLA` (informe pi-4). Causa en el informe: línea «Leer» con formato inválido en task-01-cli-temporizado.md y task-02-pruebas-cli.md (debe ser «- Leer: `ruta`, `ruta@offset-limit`»). Formato ajeno a los topes (copiado tal cual):
   - task-01-cli-temporizado.md: «Tocar» debe listar las rutas entre comillas invertidas, separadas por «, ».
   - task-02-pruebas-cli.md: «Tocar» debe listar las rutas entre comillas invertidas, separadas por «, ».

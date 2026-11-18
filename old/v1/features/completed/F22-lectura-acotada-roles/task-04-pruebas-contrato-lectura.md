@@ -43,7 +43,7 @@ Fuera de alcance: editar agentes o skills (task-01 a 03); otras reglas de `valid
 5. Esta tarea solo modifica los dos archivos de *Contexto* (`git diff --stat -- pruebas/` lista únicamente esos dos).
 
 ## Verificación
-- `cd /Users/franco/Codes/flucastr/Flucastr.AI && node --test pruebas/comprobaciones/contrato-roles.test.mjs` → `fail 0`. Correr el mismo comando antes del paso 1 y anotar en *Notas* el número de pruebas (`# tests`); después debe ser ese número + 12.
+- `cd /Users/persona/Codes/flucastr/Flucastr.AI && node --test pruebas/comprobaciones/contrato-roles.test.mjs` → `fail 0`. Correr el mismo comando antes del paso 1 y anotar en *Notas* el número de pruebas (`# tests`); después debe ser ese número + 12.
 - `grep -c 'Regla 17' pruebas/comprobaciones/contrato-roles.mjs` → `1`.
 - `bash pruebas/rapida.sh` → código 0 y `rapida: … (tope 30 s)` con S ≤ 30.
 

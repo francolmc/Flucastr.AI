@@ -1,6 +1,9 @@
 # task-09 — `instalar.sh --proyecto`: deja puesta la compactación de Claude Code
 repo: Flucastr.AI   depende_de: task-07, task-08   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Con `--proyecto <ruta>`, además de fijar el agente predeterminado, `instalar.sh` escribe `autoCompactWindow = compactar_en + 33000` en `<proyecto>/.claude/settings.local.json` llamando a `fijar-compactacion claude` (task-04), registra la línea `compactacion … claude:<valor>` y la conserva al reinstalar sin `--proyecto`, igual que ya conserva las líneas `ajuste`. Sin `--proyecto` no se escribe nada en proyectos.
 
@@ -22,7 +25,7 @@ Con `--proyecto <ruta>`, además de fijar el agente predeterminado, `instalar.sh
   - `omitido-umbral` → `  OMITIDO (modelos.json no tiene un compactar_en válido para Claude Code)`.
   - `omitido-rango:<v>` → `  OMITIDO (autoCompactWindow=<v> queda fuera de 100000-1000000, el rango de Claude Code)`.
 - Conservación: justo debajo de la línea del `grep` de `ajuste` se añade `grep -E "^compactacion$(printf '\t')[^$(printf '\t')]*$(printf '\t')claude:" "$MANIFIESTO" >> "$NUEVO" || true`. No se copian las líneas `pi:`.
-- Limitación asumida y documentada (README, task-14): si Franco cambia `compactar_en` y reinstala con `--proyecto`, el valor ya instalado en ese proyecto se trata como del usuario (`omitido-usuario`); para cambiarlo hay que correr antes `bash desinstalar.sh --proyecto <ruta>`.
+- Limitación asumida y documentada (README, task-14): si la persona usuaria cambia `compactar_en` y reinstala con `--proyecto`, el valor ya instalado en ese proyecto se trata como del usuario (`omitido-usuario`); para cambiarlo hay que correr antes `bash desinstalar.sh --proyecto <ruta>`.
 - Nada cambia para quien no pasa `--proyecto`.
 
 ## Alcance / Fuera de alcance
@@ -45,7 +48,7 @@ Fuera de alcance: la compactación de Pi (task-08), `desinstalar.sh`, `scripts/r
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 bash -n instalar.sh
 T=$(mktemp -d); H="$T/h"; mkdir -p "$H/.claude" "$H/pi" "$T/p"
 export PI_CODING_AGENT_DIR="$H/pi"

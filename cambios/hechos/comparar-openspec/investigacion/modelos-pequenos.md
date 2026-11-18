@@ -1,5 +1,7 @@
 # Desarrollo con modelos pequeños o económicos: qué está respaldado
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Pregunta y alcance
 
 ¿Cómo obtienen buenos resultados de desarrollo con modelos como Luna, Haiku y modelos abiertos pequeños, y qué podría servir para nuestro principal → constructor?
@@ -18,7 +20,7 @@ Esto respalda probar **unidades funcionales acotadas**, no «un agente por archi
 
 El anuncio de Haiku 4.5 propone que un modelo más capaz descomponga un problema y delegue subtareas a Haiku [3]. Nuestra separación de roles tiene sentido como arquitectura; no basta para que cualquier plan completo sea una unidad adecuada para el trabajador.
 
-**Contraste con Andes:** recuperar presentación, crear un lector/DTO, construir infraestructura Docker/Playwright, reconstruir referencias, adaptar CSS y verificar formularios/documentos son varias clases de incertidumbre en una misma ejecución. El problema no era simplemente leer muchos pasos: había que descubrir y reparar infraestructura a la vez que implementar y aceptar producto.
+**Contraste con Proyecto.Servicios:** recuperar presentación, crear un lector/DTO, construir infraestructura Docker/Playwright, reconstruir referencias, adaptar CSS y verificar formularios/documentos son varias clases de incertidumbre en una misma ejecución. El problema no era simplemente leer muchos pasos: había que descubrir y reparar infraestructura a la vez que implementar y aceptar producto.
 
 ### Es necesario comprobar el modo efectivo de herramientas y razonamiento
 
@@ -105,7 +107,7 @@ Después se puede comparar Luna/Haiku u otro modelo sobre ese mismo procedimient
 
 La evidencia favorece probar **encargos delimitados, herramientas sin fricción, feedback ejecutable y evaluación externa**. También muestra que parte de los resultados publicados depende de entrenamiento especializado y varios candidatos, no de instrucciones más extensas.
 
-Nuestro constructor recibió en Andes suficiente trabajo como para producir una base reutilizable, pero además tuvo que construir el sistema que debía demostrar que esa base era correcta. Separar la incertidumbre del entorno, el avance funcional y la aceptación es una hipótesis más defendible que «el modelo pequeño necesita más órdenes». Aún requiere pruebas controladas.
+Nuestro constructor recibió en Proyecto.Servicios suficiente trabajo como para producir una base reutilizable, pero además tuvo que construir el sistema que debía demostrar que esa base era correcta. Separar la incertidumbre del entorno, el avance funcional y la aceptación es una hipótesis más defendible que «el modelo pequeño necesita más órdenes». Aún requiere pruebas controladas.
 
 ## Fuentes primarias
 

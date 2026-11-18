@@ -1,12 +1,14 @@
 # Identidad del coordinador en Pi: corrida real con `pi-coordinador`
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Corrida con modelo del `coordinador` en Pi (F18, task-08), 2026-10-31. Pregunta: ¿el coordinador conoce su identidad y responde la línea «Herramienta: Pi | Modelo: <id> | Agente: coordinador»?
 
 Precondición comprobada sin gastar modelo (salida real):
 
 ```
 $ command -v pi-coordinador
-/Users/franco/.local/bin/pi-coordinador
+/Users/persona/.local/bin/pi-coordinador
 $ node scripts/resolver.mjs cuerpo agentes/coordinador.md | head -1
 Herramienta: Pi | Modelo: openai/gpt-6.1-sol | Agente: coordinador
 $ node scripts/resolver.mjs agente-pi agentes/coordinador.md | diff - ~/.pi/agent/agents/coordinador.md; echo "diff exit=$?"
@@ -35,7 +37,7 @@ Modelo del registro: `gpt-6.1-sol` (el id con proveedor `openai/gpt-6.1-sol` es 
 
 Coste: el registro reporta `cost.total` por fila; la suma de esas filas es ≈ 0.04 USD (cálculo aproximado, puede contar actualizaciones parciales de mensaje).
 
-Nota sobre la identidad: la línea **fija el modelo al instalar**. En los archivos instalados (`~/.pi/agent/agents/*.md`, `~/.claude/agents/*.md`) la línea es un texto calculado al instalar; en los lanzadores `pi-*` el cuerpo y el `--model` se resuelven en cada lanzamiento desde el repo y `modelos.json`. Si Franco lanza con otro `--model`, la línea queda desactualizada. En Pi, el agente puede leer el modelo real con `echo "$PI_PROVIDER/$PI_MODEL"`; no se probó aquí.
+Nota sobre la identidad: la línea **fija el modelo al instalar**. En los archivos instalados (`~/.pi/agent/agents/*.md`, `~/.claude/agents/*.md`) la línea es un texto calculado al instalar; en los lanzadores `pi-*` el cuerpo y el `--model` se resuelven en cada lanzamiento desde el repo y `modelos.json`. Si la persona usuaria lanza con otro `--model`, la línea queda desactualizada. En Pi, el agente puede leer el modelo real con `echo "$PI_PROVIDER/$PI_MODEL"`; no se probó aquí.
 
 Canario: el fixture contiene un `.env` falso con un valor canario (no se reproduce aquí). No se leyó `.env`. El registro crudo (en el directorio temporal, sin publicar) tampoco contiene el canario.
 

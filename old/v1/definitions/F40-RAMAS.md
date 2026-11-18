@@ -1,6 +1,8 @@
 # F40 — Rama de trabajo también en yolo: propuesta de cambios de definición
 
-> Estado: **borrador** hasta que Franco apruebe. Puerta 1. Franco edita `WORKFLOW.md` y `AGENTS.md`; aquí solo está el texto exacto. Origen de las decisiones: Franco, 2026-11-04 (*confirmado*, `BACKLOG.md` «Alcance de F40»).
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
+> Estado: **borrador** hasta que la persona usuaria apruebe. Puerta 1. la persona usuaria edita `WORKFLOW.md` y `AGENTS.md`; aquí solo está el texto exacto. Origen de las decisiones: la persona usuaria, 2026-11-04 (*confirmado*, `BACKLOG.md` «Alcance de F40»).
 
 ## A. Texto vigente que cambia
 
@@ -61,14 +63,14 @@ Insumo del diagnóstico (primera tarea). *Confirmado* = leído en el texto; *inf
 1. *Confirmado:* en `skills/ejecutar-tarea`, «Antes de empezar» el paso 1 contiene la comprobación de **entorno** (`entorno.mjs`), y el paso 2 es «Rama de la feature»; el paso 3 pone `en curso`. Si falta algo del entorno, la skill marca `bloqueada` y termina con `BLOQUEO:` **antes** de llegar al paso 2. El orden de la skill **permite** exactamente el caso observado de F37 task-01 (entorno, luego rama). La prueba de contrato (reglas 5 y 11) solo exige «`git switch -c` antes de `en curso`» y «`no es aprobada` antes de `en curso`»; no ordena la rama respecto del entorno.
 2. *Inferido:* la rama es idempotente: al volver a ejecutar la tarea tras arreglar el entorno, el paso 2 corre. Por eso un fallo de entorno solo produce «rama no creada» si la ejecución se da por terminada en esa pasada, o si la segunda ejecución no trae `Rama:`.
 3. *Confirmado:* el paso 2 es condicional («Solo si el encargo trae la línea `Rama:`; si no la trae, no ejecutes ningún comando git de rama»). Sin `Rama:` la rama no se crea sin aviso alguno.
-4. *Confirmado:* `Rama:` en el encargo depende del `coordinador`: `coordinador.md` l.68 carga `ramas-feature` «al pasar una feature a `en curso`» y l.60 dice «`Rama:` o `Modo yolo:` si aplica». *Inferido:* si la feature ya estaba `en curso` (sesión nueva, STATUS sin `Rama:`) o Franco lanza al `constructor` a mano, el encargo sale sin `Rama:` y no hay error.
+4. *Confirmado:* `Rama:` en el encargo depende del `coordinador`: `coordinador.md` l.68 carga `ramas-feature` «al pasar una feature a `en curso`» y l.60 dice «`Rama:` o `Modo yolo:` si aplica». *Inferido:* si la feature ya estaba `en curso` (sesión nueva, STATUS sin `Rama:`) o la persona usuaria lanza al `constructor` a mano, el encargo sale sin `Rama:` y no hay error.
 5. *Confirmado:* `constructor.md` (Cómo trabajas, 1) pone antes de la skill las comprobaciones de estado, `DECISION:` y `CONFIRMAR:`; ninguna crea la rama. Una `DECISION:` abierta o una rama existente que no es la actual cortan también antes de crearla (esto último es lo esperado).
 6. *Inferido (débil):* `ejecutar-tarea` anida la rama como sub-bullets con ramas (a)–(d) tras una condición «Solo si»; un modelo puede saltarla, y no hay prueba que mire el repo, solo que el texto exista.
-7. *Por confirmar con el caso de Franco:* si el encargo de F37 task-01 llevaba `Rama:` (de eso depende 3 y 4), qué mostró `git branch --show-current` y si entorno falló antes de la rama.
+7. *Por confirmar con el caso de la persona usuaria:* si el encargo de F37 task-01 llevaba `Rama:` (de eso depende 3 y 4), qué mostró `git branch --show-current` y si entorno falló antes de la rama.
 
 Dirección de arreglo posible (no decidida): mover el paso de rama antes del de entorno (la rama es inocua y «antes de tocar nada»), o dejarlo y exigir en *Verificación* la comprobación de decisión 5, que ya detecta el defecto tras la ejecución.
 
-## E. Decisiones para Franco
+## E. Decisiones para la persona usuaria
 
 1. **Orden rama/entorno en `ejecutar-tarea`.** A) Mover la rama antes del entorno. B) Mantener el orden. C) Decidir tras el diagnóstico de la tarea 1. **Recomendada: C** (el orden está confirmado como causa posible, no probado como causa real).
 2. **Quién da la rama esperada al planificador.** A) El `coordinador` pasa `Rama:` también al encargo del `planificador` (más bytes en `coordinador.md`, que está al tope). B) El `planificador` la deriva (prefijo de la fila del backlog + carpeta `Fxx-nombre`), como dice tu decisión 5. **Recomendada: B.**
@@ -76,9 +78,9 @@ Dirección de arreglo posible (no decidida): mover el paso de rama antes del de 
 
 Tamaño de la pasada: 10476 bytes
 
-## Decisiones de Franco (2026-11-04)
+## Decisiones de la persona usuaria (2026-11-04)
 
-Estado: aprobado por Franco; WORKFLOW.md y AGENTS.md editados por el arquitecto con su autorización.
+Estado: aprobado por la persona usuaria; WORKFLOW.md y AGENTS.md editados por el arquitecto con su autorización.
 
 1. Orden rama/entorno en `ejecutar-tarea`: **C**, se decide tras el diagnóstico (primera tarea de F40); no se cambia el orden ahora.
 2. La rama esperada para los comandos de *Verificación* la deriva el **planificador** (prefijo de la fila del backlog + carpeta `Fxx-nombre`); el coordinador no la pasa en el encargo.

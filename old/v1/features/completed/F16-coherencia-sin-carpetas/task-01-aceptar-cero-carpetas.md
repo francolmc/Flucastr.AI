@@ -40,7 +40,7 @@ Fuera de alcance: `coherencia-features.mjs`, `definitions/` (incluido `BACKLOG.m
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/coherencia-features.test.mjs
 ```
 Esperado: `fail 0`, 13 pruebas (11 previas + 2 nuevas).

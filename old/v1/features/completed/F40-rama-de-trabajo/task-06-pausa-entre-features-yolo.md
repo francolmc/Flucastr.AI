@@ -1,8 +1,11 @@
 # task-06 — Yolo se detiene al terminar cada feature si quedan más en el alcance
 repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Hoy `skills/modo-yolo/SKILL.md` regla 7 dice «continúas con la siguiente del alcance» y «en yolo no hay rama de feature». Con rama por feature y sin commits de agentes, la feature siguiente heredaría el trabajo sin commitear y no aislaría nada. Decisión de Franco (2026-11-04): al terminar una feature, si quedan features en el alcance, yolo se detiene con `Modo yolo: detenido (Fxx completa: commitea y cierra la rama)`; si era la última, `Modo yolo: terminado`.
+Hoy `skills/modo-yolo/SKILL.md` regla 7 dice «continúas con la siguiente del alcance» y «en yolo no hay rama de feature». Con rama por feature y sin commits de agentes, la feature siguiente heredaría el trabajo sin commitear y no aislaría nada. Decisión de la persona usuaria (2026-11-04): al terminar una feature, si quedan features en el alcance, yolo se detiene con `Modo yolo: detenido (Fxx completa: commitea y cierra la rama)`; si era la última, `Modo yolo: terminado`.
 
 ## Contexto
 - Tocar: `skills/modo-yolo/SKILL.md`, `pruebas/comprobaciones/frases-por-archivo.mjs`

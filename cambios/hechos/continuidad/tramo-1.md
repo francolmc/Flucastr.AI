@@ -1,7 +1,7 @@
 ## Pasos
 
 ### Tramo 1 — Historia: el plan expresa continuidad y límites
-Como Franco quiero declarar tramos continuos y sus límites para controlar cuándo el constructor sigue o se detiene.
+Como persona usuaria quiero declarar tramos continuos y sus límites para controlar cuándo el constructor sigue o se detiene.
 Dependencias: ninguna.
 Contratos a conservar: planes existentes y límite de tres archivos de producto por tramo; casillas en vivo.
 Rutas susceptibles de cambio: `skills/planificar-cambio/SKILL.md`, `agentes/principal.md`, `README.md`; no mover ni archivar, actualizar `pruebas/contrato-constructor.mjs` si cambia una frase exigida.

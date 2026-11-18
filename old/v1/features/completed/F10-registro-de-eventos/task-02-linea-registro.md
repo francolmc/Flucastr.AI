@@ -1,6 +1,9 @@
 # task-02 — línea `Registro:` del constructor y evento `ejecucion`
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 El `constructor` agrega a *Notas* una línea `Registro:` por ejecución (intentos, huecos, modo, resultado y causa), que git no conserva de otra forma. Esta tarea fija esa línea en el contrato (`skills/ejecutar-tarea/SKILL.md`), la hace exigible con el validador de contrato y hace que `scripts/registrar.mjs` la lea y emita el evento `ejecucion`, con el modelo configurado. Sin permisos nuevos: *Notas* ya es suyo.
 
@@ -23,7 +26,7 @@ A tocar: `skills/ejecutar-tarea/SKILL.md`, `pruebas/comprobaciones/contrato-cons
 
 ## Alcance / Fuera de alcance
 Alcance: la subsección de la skill, la regla 15 y su variante de prueba, el evento `ejecucion`, `modeloConfigurado` y 3 pruebas.
-Fuera de alcance: `agentes/constructor.md`, `agentes/coordinador.md`, `README.md`, `pruebas/README.md`, `definitions/**`; permiso de `date` o cualquier tiempo real (decidido por Franco: no); medir el modelo realmente usado; comprobar que un modelo escriba bien la línea (se ve en la primera tarea real); el informe (F11).
+Fuera de alcance: `agentes/constructor.md`, `agentes/coordinador.md`, `README.md`, `pruebas/README.md`, `definitions/**`; permiso de `date` o cualquier tiempo real (decidido por la persona usuaria: no); medir el modelo realmente usado; comprobar que un modelo escriba bien la línea (se ve en la primera tarea real); el informe (F11).
 
 ## Pasos
 1. `skills/ejecutar-tarea/SKILL.md`: añadir `## Línea de registro` tras `## Al terminar bien`, con la plantilla, los significados, cuándo se escribe y cuándo no. Resultado: `grep -c "una línea por ejecución" skills/ejecutar-tarea/SKILL.md` imprime `1`.
@@ -118,6 +121,6 @@ Archivos tocados (los cinco de *A tocar*): `skills/ejecutar-tarea/SKILL.md`, `pr
 - Cambio en pruebas existentes: la prueba 2 espera ahora el sufijo `; 0 líneas Registro: no válidas` en el resumen, por el formato nuevo de la línea de resumen.
 - Decisión sobre la prueba 4 (aislamiento, sin cambiar su criterio): la prueba busca el literal `.env` en el código fuente del script. Por eso `scripts/registrar.mjs` no contiene `process.env` ni `...env` (usa `const { env } = process` y `Object.assign`). El comentario de la función también evita la cadena.
 - Variante de la regla 7: la variante borra solo la primera aparición de una frase. Al escribir la subsección nueva repetí «`estado: bloqueada`» y la regla 7 quedó sin error; reformulé el significado de `resultado=bloqueada` para no repetirla. Conviene no repetir frases de regla en el texto nuevo.
-- Decisión de Franco respetada: `resultado=confirmar` no existe en el enum; no se agregó permiso de `date` ni cambió ninguna lista de permisos.
+- Decisión de la persona usuaria respetada: `resultado=confirmar` no existe en el enum; no se agregó permiso de `date` ni cambió ninguna lista de permisos.
 
 Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=5; resultado=lista; causa=ninguna

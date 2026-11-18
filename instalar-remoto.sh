@@ -41,9 +41,9 @@ trap limpiar EXIT
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --estado) ACCION=estado ;;
-    --actualizar) ACCION=actualizar ;;
-    --mostrar-urls) ACCION=urls ;;
+    --estado | --status) ACCION=estado ;;
+    --actualizar | --update) ACCION=actualizar ;;
+    --mostrar-urls | --show-urls) ACCION=urls ;;
     --ref)
       shift
       REF="${1:-}"

@@ -2,7 +2,12 @@
 estado: listo
 rama: feature/kit-v2
 ---
+
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # vocabulario-y-guias
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 
 ## Objetivo
 Una sola lista de estados del plan, dicha igual en skills y agentes; una orientación honesta de tamaño del plan; y `AGENTS.md` con lo que se retira de la v1 escrito, no sobreentendido. Solo texto: ningún comportamiento de código cambia.
@@ -11,7 +16,7 @@ Una sola lista de estados del plan, dicha igual en skills y agentes; una orienta
 `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, `agentes/principal.md`, `agentes/constructor.md`, `AGENTS.md`, este plan. Fuera: scripts, `verify`, `instalar.sh`, `legacy/`, y los planes ya cerrados en `cambios/hechos/` (se dejan como están).
 
 ## Decisiones ya tomadas
-- Estados: `borrador → aprobado → en curso → listo` (o `parcial`). Quién: el principal pasa a `aprobado` con el «sí» de Franco; el constructor pasa a `en curso` y luego a `listo` o `parcial`; al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `estado`** (la carpeta es la marca; no existe el estado `hecho`).
+- Estados: `borrador → aprobado → en curso → listo` (o `parcial`). Quién: el principal pasa a `aprobado` con el «sí» de la persona usuaria; el constructor pasa a `en curso` y luego a `listo` o `parcial`; al cerrar, el principal mueve la carpeta a `cambios/hechos/` **sin cambiar `estado`** (la carpeta es la marca; no existe el estado `hecho`).
 - Tras `parcial`: el principal corrige el plan y lo vuelve a `aprobado` antes de relanzar (el constructor solo arranca con `aprobado`). Escribirlo en ambas guías.
 - Tamaño en `planificar-cambio` (regla 4 y su mención): los cambios simples caben en unos 5 KB; uno que investiga y toca varias piezas puede llegar a unos 8 KB; si pasa de eso, probablemente son dos cambios. Sin herramienta que lo mida.
 - `AGENTS.md`: reemplazar la frase del «paso 3 del rediseño» por una lista explícita de lo que se retira: `legacy/`, `definitions/`, `features/`, `pruebas/`, los scripts de la v1 (todo `scripts/` salvo `resolver.mjs`) y el README viejo; y la condición: haber usado la v2 en 2 o 3 proyectos reales. Mantener la frase sobre `registro/`. No ampliar la lista con otros archivos.

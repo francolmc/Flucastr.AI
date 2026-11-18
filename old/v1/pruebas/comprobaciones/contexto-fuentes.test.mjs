@@ -85,7 +85,7 @@ test('el prompt de un rol mide agentes/<rol>.md en KB y veces = corridas', () =>
 
 test('formatearTabla: cabecera una vez, texto ≤ 4096 bytes aunque haya muchas filas', () => {
   const filas = Array.from({ length: 500 }, (_, i) => ({
-    fuente: `/Users/franco/Codes/flucastr/Flucastr.AI/definitions/ruta-larga-${i}.md`,
+    fuente: `/Users/usuario/Codes/ejemplo/Proyecto/definitions/ruta-larga-${i}.md`,
     categoria: 'definicion', kbUnico: 1.5, veces: 3, kbTotales: 4.5, rol: 'coordinador',
   }));
   const texto = formatearTabla(filas);

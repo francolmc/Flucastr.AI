@@ -1,8 +1,11 @@
 # task-03 — control-consumo: opciones A–D con una letra y «aplica la letra sin condiciones»
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-En Memory-AI F05 (Pi), con `estado=excedido` por `arq`, el coordinador se negó a ampliar («no corresponde ampliar topes ni abrir otra feature para eludirlos») aunque la opción A lo permite con el «sí» de Franco, y no existe salida para cerrar la feature incompleta y abrir la siguiente. Esta tarea cambia la skill `control-consumo` para que (1) las opciones lleven una letra y se sumen D (cerrar incompleta y abrir la siguiente), y (2) una letra de Franco baste: se aplica sin condiciones, sin discutir ni reinterpretar. El texto va en la skill y no en `agentes/coordinador.md` (7168/7168 B).
+En Proyecto.Memoria F05 (Pi), con `estado=excedido` por `arq`, el coordinador se negó a ampliar («no corresponde ampliar topes ni abrir otra feature para eludirlos») aunque la opción A lo permite con el «sí» de la persona usuaria, y no existe salida para cerrar la feature incompleta y abrir la siguiente. Esta tarea cambia la skill `control-consumo` para que (1) las opciones lleven una letra y se sumen D (cerrar incompleta y abrir la siguiente), y (2) una letra de la persona usuaria baste: se aplica sin condiciones, sin discutir ni reinterpretar. El texto va en la skill y no en `agentes/coordinador.md` (7168/7168 B).
 
 ## Contexto
 - Tocar: `skills/control-consumo/SKILL.md`
@@ -16,9 +19,9 @@ En Memory-AI F05 (Pi), con `estado=excedido` por `arq`, el coordinador se negó 
 
 ## Decisiones ya tomadas
 - Paso 5, reemplazo completo de esa línea por: «5. Con `estado=excedido` no delegas. En *Escalación* pones la causa y las opciones, cada una con su letra: A) ampliar el tope de esa causa en N (1 si Franco no da otro): `ampliado=N` si es `D`; `amp_arq=N`, `amp_plan=N` o `amp_k=N` si es `arq`, `plan` o `K`; B) replantear lo bloqueado con `arquitecto` o `planificador` (cuenta como ronda), solo si la causa es `D` o `K`; con `arq` o `plan` no ofrezcas B; C) cerrar la sesión y revisar a mano; D) cerrar la feature como incompleta y abrir la siguiente con presupuesto propio. Termina con «Responde con una letra». Después te detienes.»
-- Paso 10 nuevo, al final del archivo: «10. Si Franco responde una letra (A, B, C o D), la aplicas sin añadir condiciones; no discutas ni reinterpretes ni pidas otra frase ni otro «sí». Esa letra es su aprobación. A: con solo la letra amplías N=1 para la causa, sin pedir el número ni más condiciones; si Franco da otro N, usas ese; suma N al `amp_*` (o `ampliado`) en la escritura siguiente, vuelve a correr `--presupuesto` y sigue el flujo. D: delega al `planificador` (`Disparó: franco`) pasar las tareas sin `hecha` a `cancelada` (`Cancelada: motivo=otra`), escribe `hecha` en la fila de la feature de `BACKLOG.md`, escribe en *Espera a Franco* que la feature se cerró INCOMPLETA y lista las tareas canceladas, para que Franco lo vea antes de archivar; anota en *Retomar* lo que quedó sin hacer y sigue con `descomponer-feature` de la siguiente (`Presupuesto:` en ceros; esa delegación no cuenta como ronda). Sin letra de Franco, no amplías ni cierras por tu cuenta.»
+- Paso 10 nuevo, al final del archivo: «10. Si Franco responde una letra (A, B, C o D), la aplicas sin añadir condiciones; no discutas ni reinterpretes ni pidas otra frase ni otro «sí». Esa letra es su aprobación. A: con solo la letra amplías N=1 para la causa, sin pedir el número ni más condiciones; si la persona usuaria da otro N, usas ese; suma N al `amp_*` (o `ampliado`) en la escritura siguiente, vuelve a correr `--presupuesto` y sigue el flujo. D: delega al `planificador` (`Disparó: franco`) pasar las tareas sin `hecha` a `cancelada` (`Cancelada: motivo=otra`), escribe `hecha` en la fila de la feature de `BACKLOG.md`, escribe en *Espera a la persona usuaria* que la feature se cerró INCOMPLETA y lista las tareas canceladas, para que la persona usuaria lo vea antes de archivar; anota en *Retomar* lo que quedó sin hacer y sigue con `descomponer-feature` de la siguiente (`Presupuesto:` en ceros; esa delegación no cuenta como ronda). Sin letra de la persona usuaria, no amplías ni cierras por tu cuenta.»
 - Medido en una copia de trabajo con exactamente estos dos textos: 3496 B. Si el resultado difiere, los textos mandan y el tamaño solo debe quedar ≤ 4096.
-- Decisión de yolo, a revisar por Franco al cierre: D usa solo estados existentes (`cancelada` con `motivo=otra`, fila `hecha`) para no tocar `definitions/WORKFLOW.md` ni el coordinador; la feature cerrada así queda `hecha` con tareas `cancelada`.
+- Decisión de yolo, a revisar por la persona usuaria al cierre: D usa solo estados existentes (`cancelada` con `motivo=otra`, fila `hecha`) para no tocar `definitions/WORKFLOW.md` ni el coordinador; la feature cerrada así queda `hecha` con tareas `cancelada`.
 - No cambies la `description`, la plantilla ni los demás pasos.
 
 ## Decisiones abiertas
@@ -26,7 +29,7 @@ Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: dos ediciones en una skill.
-Fuera de alcance: `agentes/`, `definitions/` (el cambio de estados de feature lo decide Franco), manifiesto y pruebas de contrato (task-04), `skills/descomponer-feature/` y `skills/ejecutar-tarea/` (sin margen de bytes), `scripts/`.
+Fuera de alcance: `agentes/`, `definitions/` (el cambio de estados de feature lo decide la persona usuaria), manifiesto y pruebas de contrato (task-04), `skills/descomponer-feature/` y `skills/ejecutar-tarea/` (sin margen de bytes), `scripts/`.
 
 ## Pasos
 1. Con `Edit`, reemplaza la línea del paso 5 por el texto de *Decisiones ya tomadas*.
@@ -85,5 +88,5 @@ exit 0
 - Huecos menores: ninguno. Las dos ediciones siguen *Decisiones ya tomadas* literalmente; el tamaño sale 3496 B (esperado 3496).
 - `bash pruebas/rapida.sh` salió con código 1 (real); la línea `exit 0` de arriba es la del pipeline con `grep`. Los 6 fallos son los conocidos y ajenos: «los archivos reales cumplen la regla», «falla si un agente conserva la línea de modelos.json», «falla si falta la lectura acotada en constructor», «falla si falta la lectura acotada en ejecutar-tarea», «falla si WORKFLOW.md pasa de 30720 caracteres», «falla si WORKFLOW.md conserva la frase sobre modelos.json».
 - Aviso del planificador (séptimo fallo, `R: ejecutar.sh genera fixture e instantánea y resume correctamente`): en el repo real no reproduce; en la salida de `rapida.sh` sale `✔ R: ejecutar.sh genera fixture e instantánea y resume correctamente (1607.020667ms)`. No se tocó nada por ese punto.
-- Decisión de yolo para revisar por Franco (la deja la tarea): D usa solo estados existentes (`cancelada` con `motivo=otra` y fila `hecha`), sin tocar `definitions/WORKFLOW.md` ni el coordinador.
+- Decisión de yolo para revisar por la persona usuaria (la deja la tarea): D usa solo estados existentes (`cancelada` con `motivo=otra` y fila `hecha`), sin tocar `definitions/WORKFLOW.md` ni el coordinador.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

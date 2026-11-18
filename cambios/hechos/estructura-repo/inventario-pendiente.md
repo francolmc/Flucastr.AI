@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Inventario de consumidores pendientes
 
 Este inventario es evidencia de diseño, no implica que los movimientos ya tengan tramos ejecutables. No leer ni copiar el archivo de credenciales usado como fixture; ver `aislamiento.md`.

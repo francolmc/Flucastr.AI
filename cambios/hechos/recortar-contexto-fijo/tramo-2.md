@@ -1,4 +1,6 @@
 # Tramo 2: medidor `--sesiones` en Claude Code y Pi
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 Resultado: `uso.mjs --sesiones` funciona en las tres herramientas. Toca `scripts/uso.mjs`, `pruebas/uso/`.
 
 ## Pasos
@@ -41,7 +43,7 @@ exit 0
 - Estado de partida (reproducido): `node scripts/uso.mjs --sesiones --herramienta claude` salía con código 2 («solo aplica a Codex»); `probar.mjs` 13 de 13.
 - Cambio de comportamiento: `--sesiones` sin `--herramienta` ahora sale con las tres herramientas (antes, Codex por defecto). Lo pide A8 (`--sesiones --json` sin herramienta). La cabecera y la ayuda lo dicen.
 - Pruebas tocadas sin debilitarlas: A3s ahora fija `--herramienta codex` y su resultado esperado trae `herramienta: "codex"` (más estricto). Se quitó «`--sesiones --herramienta claude` sale con 2», que ya no aplica, y se cambió por «`--herramienta otra` sale con 2» (A4d ya lo cubría). A8 es nueva.
-- Subagentes de Claude Code: no tienen fila propia en `--sesiones` y no suman en la fila de su sesión (lectura de «sin contar subagents/ en la misma fila»). La tabla normal sigue contándolos con rol `sub`. Si Franco quiere filas propias para subagentes, es decisión aparte.
+- Subagentes de Claude Code: no tienen fila propia en `--sesiones` y no suman en la fila de su sesión (lectura de «sin contar subagents/ en la misma fila»). La tabla normal sigue contándolos con rol `sub`. Si la persona usuaria quiere filas propias para subagentes, es decisión aparte.
 - Repeticiones: Claude Code repite un mensaje en varias líneas (streaming). Llamadas y contexto cuentan una vez por id de mensaje; las esperas, una vez por id de bloque `tool_use`.
 - Pi: espera = bloque `toolCall` cuyo nombre contiene wait, sleep o send (formato confirmado en los logs locales; `bg_wait` cuenta).
 - Medición real, solo lectura y sin imprimir contenido, con `node scripts/uso.mjs --sesiones --json`:

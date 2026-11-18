@@ -8,14 +8,16 @@ tipo: codigo
 ---
 # Skill `disenar-experiencia` y su enlace en el flujo
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-El principal diseña la experiencia antes de planificar cualquier cambio que toque pantallas: deja un boceto que Franco ve en la terminal y lo aprueba en la puerta 1. Evidencia del problema: `docs/investigaciones/auditoria-donfinancio-diseno/hallazgo.md`.
+El principal diseña la experiencia antes de planificar cualquier cambio que toque pantallas: deja un boceto que la persona usuaria ve en la terminal y lo aprueba en la puerta 1. Evidencia del problema: `docs/investigaciones/auditoria-finanzas-diseno/hallazgo.md`.
 
 ## Supuestos
-- Nombre de la skill: `disenar-experiencia`. Si Franco prefiere otro, cambia la carpeta y cada mención.
-- El boceto es ASCII simple (`+ - |`), de hasta 40 columnas (móvil primero), y el principal lo pega en su respuesta. Franco trabaja en Orca y solo ve la terminal.
-- HTML estático solo si Franco lo pide; no es el camino por defecto.
-- Este plan no rediseña DonFinancio: eso es un plan aparte, después de este.
+- Nombre de la skill: `disenar-experiencia`. Si la persona usuaria prefiere otro, cambia la carpeta y cada mención.
+- El boceto es ASCII simple (`+ - |`), de hasta 40 columnas (móvil primero), y el principal lo pega en su respuesta. la persona usuaria trabaja en Orca y solo ve la terminal.
+- HTML estático solo si la persona usuaria lo pide; no es el camino por defecto.
+- Este plan no rediseña Proyecto.Finanzas: eso es un plan aparte, después de este.
 
 ## Alcance
 Puede cambiar: `skills/disenar-experiencia/SKILL.md` (nuevo), `skills/planificar-cambio/SKILL.md`, `skills/definir-proyecto/SKILL.md`, `agentes/principal.md`, `AGENTS.md` (la línea de skills), `README.md` (una viñeta) y `verify` (bloque nuevo 8o).
@@ -23,8 +25,8 @@ Fuera de alcance: `agentes/constructor.md`, `modelos.json`, `instalar.sh`, `scri
 
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque los cuatro sí de la prueba: requisitos cubiertos, archivos accesibles, comprobaciones con resultado esperado, sin credenciales ni producción.
-- Alcance B (decidido por Franco): la skill más su enlace en `planificar-cambio`, `definir-proyecto` y `principal.md`.
-- Boceto ASCII por defecto (decidido por Franco): lo único que ve en Orca es la terminal.
+- Alcance B (decidido por la persona usuaria): la skill más su enlace en `planificar-cambio`, `definir-proyecto` y `principal.md`.
+- Boceto ASCII por defecto (decidido por la persona usuaria): lo único que ve en Orca es la terminal.
 - `instalar.sh` y `verify` (paso 4) ya descubren `skills/*/`; no hay que registrar la skill en ningún otro sitio.
 - Dos documentos que produce la skill: `docs/experiencia.md` (una vez por proyecto) y `cambios/<nombre>/pantallas.md` (por cambio que toca UI).
 
@@ -89,4 +91,4 @@ exit 0
 - Los pasos 2 y 3 se escribieron en el mismo `SKILL.md` que el paso 1; el contenido de cada uno está en las secciones indicadas.
 - A4 se comprobó con el bloque 8o del `verify` (copia temporal sin «40 columnas» falla); no se corrió a mano aparte.
 - Sin fallos relacionados que corregir. Sin tramos: el plan es de un solo tramo.
-- Pendiente de Franco: revisar la skill en la puerta 2; no se hizo commit.
+- Pendiente de la persona usuaria: revisar la skill en la puerta 2; no se hizo commit.

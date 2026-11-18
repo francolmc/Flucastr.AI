@@ -1,4 +1,8 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 6: AGENTS.md, reglas deny aparte y medición final
+
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
 Resultado: `AGENTS.md` corto y detalle deny en `docs/`. Toca `AGENTS.md` y `docs/reglas-deny.md`.
 
 ## Pasos
@@ -11,7 +15,7 @@ Resultado: `AGENTS.md` corto y detalle deny en `docs/`. Toca `AGENTS.md` y `docs
 - [x] Escribir en *Evidencia* la tabla antes/después de los cinco archivos (A3)
   - evidencia: tabla de *Evidencia* de este archivo (`wc -c`, 2026-11-09)
 - [x] Correr `./verify` completo (≈ varios min) y anotarlo (A4)
-  - evidencia: `./verify`, exit 0; salida completa en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/verify.log`
+  - evidencia: `./verify`, exit 0; salida completa en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/verify.log`
 
 Verificación del tramo: `./verify` (A3, A4, A6).
 
@@ -42,7 +46,7 @@ Otros checks de Aceptación, en este tramo o ya comprobados:
 - A6: `test -f docs/reglas-deny.md` ok; `grep -c "bash -c"`: `docs/reglas-deny.md:2`, `AGENTS.md:2`; el resumen de `AGENTS.md` ocupa 3 líneas y enlaza el doc.
 - A1: `grep -n "una sola llamada"` encuentra la regla en `agentes/principal.md` (línea 22) y en `skills/ejecutar-plan/SKILL.md` (línea 32); `grep -c "una vez" agentes/principal.md` = 2.
 - A9: `node scripts/resolver.mjs modelo principal codex|claude-code|pi` → `gpt-6-luna`, `claude-haiku-5-5`, `openai/gpt-6-luna`; constructor igual.
-- **A5 no se cumple en este plan**: `grep -c "docker system prune"` da 1 en `agentes/principal.md` y 0 en `skills/preparar-proyecto/SKILL.md`. La limpieza de Docker sale de `principal.md` en el tramo 5, que Franco dejó diferido. Lo deja para el principal.
+- **A5 no se cumple en este plan**: `grep -c "docker system prune"` da 1 en `agentes/principal.md` y 0 en `skills/preparar-proyecto/SKILL.md`. La limpieza de Docker sale de `principal.md` en el tramo 5, que la persona usuaria dejó diferido. Lo deja para el principal.
 
 ## Notas
 
@@ -51,7 +55,7 @@ Recortes de `AGENTS.md` (antes de cada uno, `grep -rlF` del texto en `verify pru
 1. Sección «Límites de las reglas deny» (10 líneas de detalle) → `docs/reglas-deny.md`, copia literal (`diff` IDENTICAL). En `AGENTS.md` queda un resumen de 3 líneas con el enlace.
 2. Intro: «(movida, no borrada; sus rutas internas son las originales y no se ejecuta)» → «(movida, no borrada)» y «no se ejecuta» → README, «La v1». Se pierde el aviso de que las rutas internas de la v1 son las originales: es un dato menor, no está en otro archivo.
 3. «Traspaso» (Aceptación y las dos puertas) → README, «Qué es» (puertas 1 y 2 y `## Aceptación`).
-4. «Ejecutor» → `skills/planificar-cambio/SKILL.md`, regla 7 (`ejecutor:`) y `agentes/principal.md` (el principal ejecuta solo si Franco lo pide).
+4. «Ejecutor» → `skills/planificar-cambio/SKILL.md`, regla 7 (`ejecutor:`) y `agentes/principal.md` (el principal ejecuta solo si la persona usuaria lo pide).
 5. «Tramos» (revisión por tramo y usos reales) → `planificar-cambio`, regla 11; README, «Qué es». Se conservan `tramo-N.md`, `/compact`, `compactar_en` y `docs/evaluaciones/tramos.md`.
 6. «Ventana propia» → README, «Ejecutar un plan en ventana propia» (esfuerzo no aplicado con `--agent` directo; Codex sin probar a mano). Se conserva que `instalar.sh` los crea y los regenera.
 7. «Hecho» (la definición) → README, «Verificación» (y línea 19 de `README.md`).
@@ -61,9 +65,9 @@ Recortes de `AGENTS.md` (antes de cada uno, `grep -rlF` del texto en `verify pru
 11. «Rama base» → `planificar-cambio`, regla 10. Se conservan «develop» y «liberar a main lo hace Franco a mano».
 12. «Comando verify» (lista de comprobaciones y la advertencia de fiabilidad) → README, «Verificación» (y `docs/evaluaciones/constructor.md`). Se conserva el modo remoto (`VERIFY_TARGET`, `VERIFY_PERMITIR_ESCRITURA`) con su enlace a `preparar-proyecto` 3b.
 13. «Migrar» → se quita «Después, la skill `migrar-proyecto`» (ya está en *Skills*); «agrega ... a .gitignore» pasa a «ignora ...». El comando y la lista de banderas incompatibles se conservan.
-14. «Medidor de costos» → se quita «por modelo» de la cuota semanal de Codex (el detalle está en `docs/evaluaciones/costos.md`). Es una pérdida menor de descripción; se anota por si Franco la quiere de vuelta.
+14. «Medidor de costos» → se quita «por modelo» de la cuota semanal de Codex (el detalle está en `docs/evaluaciones/costos.md`). Es una pérdida menor de descripción; se anota por si la persona usuaria la quiere de vuelta.
 15. Resumen de deny: se quitan «separan comandos compuestos» y la nota sobre Codex experimental; el detalle queda en `docs/reglas-deny.md`. Se conservan «Codex no bloquea `.env`» y «Pi no tiene equivalente».
 
 Intactos: *Reglas* de `AGENTS.md`, «Arnés de comparación con OpenSpec», «esfuerzo», la lista de skills, «Medidor» (nombre y ruta), `verify` y `pruebas/` (este tramo no los toca).
 
-Pendiente para el principal: A5 (Docker) depende del tramo 5, diferido. Si Franco quiere cerrar A5, hay que reabrir el tramo 5 o retirar A5 del plan.
+Pendiente para el principal: A5 (Docker) depende del tramo 5, diferido. Si la persona usuaria quiere cerrar A5, hay que reabrir el tramo 5 o retirar A5 del plan.

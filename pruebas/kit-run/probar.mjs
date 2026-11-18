@@ -10,6 +10,8 @@ import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { promptRevisor } from "../../tools/run/prompts.mjs";
+import { ESQUEMA_VEREDICTO } from "../../tools/run/verdict.mjs";
 
 const KIT = fileURLToPath(new URL("../../scripts/kit-run.mjs", import.meta.url));
 const PLAN_REL = "cambios/prueba/plan.md";
@@ -135,7 +137,7 @@ function git(raiz, ...a) {
 
 // Repo temporal con el plan commiteado. Corre kit-run con los falsos y devuelve la salida y el registro.
 // codex: true no fija KIT_RUN_CONSTRUCTOR ni KIT_RUN_REVISOR; el script llama a `codex` del PATH (el falso).
-function correr(nombre, { plan = PLAN, env = {}, codex = false, kit = KIT } = {}) {
+function correr(nombre, { plan = PLAN, env = {}, codex = false, kit = KIT, opciones = raiz => ["--raiz", raiz] } = {}) {
   const raiz = join(dir, nombre);
   mkdirSync(join(raiz, "cambios/prueba"), { recursive: true });
   writeFileSync(join(raiz, PLAN_REL), plan);
@@ -166,7 +168,7 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false, kit = KIT } = {}
     entorno.KIT_RUN_REVISOR = exe("revisor.mjs");
   }
   if (env.KIT_RUN_TOPE_MS) entorno.KIT_RUN_TOPE_MS = env.KIT_RUN_TOPE_MS;
-  const r = spawnSync(process.execPath, [kit, PLAN_REL, "--raiz", raiz], { encoding: "utf8", env: entorno });
+  const r = spawnSync(process.execPath, [kit, PLAN_REL, ...opciones(raiz)], { encoding: "utf8", env: entorno });
   const registro = readFileSync(log, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l));
   const cuenta = (rol) => registro.filter(x => x.rol === rol).length;
   const estado = readFileSync(join(raiz, PLAN_REL), "utf8").match(/^estado: (.*)$/m)[1];
@@ -175,6 +177,68 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false, kit = KIT } = {}
 
 const casos = [];
 function caso(nombre, fn) { casos.push({ nombre, fn }); }
+
+function resultadoComparable(r) {
+  const normalizar = valor => JSON.parse(JSON.stringify(valor).replaceAll(r.raiz, "<raiz>")
+    .replace(/\/tmp\/kit-run-[^"\\ ]+\.json/g, "<esquema>"));
+  return normalizar({ status: r.status, stdout: r.stdout, stderr: r.stderr, estado: r.estado, registro: r.registro });
+}
+
+caso("alias ingleses y opciones mezcladas conservan el recorrido", () => {
+  const referencia = correr("alias referencia con espacios", { opciones: raiz => ["--herramienta", "codex", "--raiz", raiz] });
+  assert.equal(referencia.status, 0, referencia.stderr);
+  assert.equal(referencia.cuenta("constructor"), 1);
+  assert.equal(referencia.cuenta("revisor"), 1);
+  for (const [nombre, herramienta, raiz] of [["ingles", "--tool", "--root"], ["mezcla1", "--tool", "--raiz"], ["mezcla2", "--herramienta", "--root"]]) {
+    const r = correr(`alias ${nombre} con espacios`, { opciones: ruta => [herramienta, "codex", raiz, ruta] });
+    assert.deepEqual(resultadoComparable(r), resultadoComparable(referencia));
+  }
+});
+
+caso("alias conservan errores con argumentos ausentes", () => {
+  for (const [es, en] of [["--herramienta", "--tool"], ["--raiz", "--root"]]) {
+    const ejecutar = opcion => spawnSync(process.execPath, [KIT, PLAN_REL, opcion], { cwd: dir, encoding: "utf8" });
+    const a = ejecutar(es), b = ejecutar(en);
+    assert.notEqual(a.status, 0);
+    assert.deepEqual([b.status, b.stdout, b.stderr], [a.status, a.stdout, a.stderr]);
+  }
+});
+
+caso("la comparación detecta un alias eliminado", () => {
+  const mutado = join(fileURLToPath(new URL("../../scripts/", import.meta.url)), ".kit-run-sin-alias.mjs");
+  const original = readFileSync(KIT, "utf8");
+  assert.ok(original.includes(' || x === "--tool"'));
+  writeFileSync(mutado, original.replace(' || x === "--tool"', ""));
+  try {
+    const referencia = correr("alias mutacion referencia", { opciones: raiz => ["--herramienta", "codex", "--raiz", raiz] });
+    const r = correr("alias mutacion prueba", { kit: mutado, opciones: raiz => ["--tool", "codex", "--raiz", raiz] });
+    assert.notEqual(r.status, 0);
+    assert.throws(() => assert.deepEqual(resultadoComparable(r), resultadoComparable(referencia)));
+  } finally {
+    rmSync(mutado, { force: true });
+  }
+});
+
+function comprobarPromptRevisor(prompt) {
+  assert.ok(prompt.includes("Read only; do not write anything."));
+  assert.ok(prompt.includes("Return ONLY JSON that conforms to this schema, with no surrounding text:"));
+  assert.ok(prompt.includes("APROBADO") && prompt.includes("DEVUELTO") && prompt.includes("PAUSA"));
+}
+
+caso("prompts productivo y de evaluación coinciden y detectan instrucciones ausentes", () => {
+  const fuente = readFileSync(new URL("../revisor-luna/medir.mjs", import.meta.url), "utf8");
+  const esquema = fuente.match(/const ESQUEMA_VEREDICTO = (\{[\s\S]*?\n\});/);
+  const funcion = fuente.match(/function promptRevisor\(planRel, diff\) \{([\s\S]*?)\n\}/);
+  assert.ok(esquema && funcion, "la evaluación debe conservar su esquema y prompt comparables");
+  const esquemaEvaluacion = Function(`return (${esquema[1]})`)();
+  assert.deepEqual(esquemaEvaluacion, ESQUEMA_VEREDICTO);
+  const evaluacion = Function("planRel", "diff", "ESQUEMA_VEREDICTO", funcion[1]);
+  const diff = "diff --git a/ejemplo b/ejemplo\n+contenido real";
+  const productivo = promptRevisor(PLAN_REL, diff, ESQUEMA_VEREDICTO);
+  assert.equal(evaluacion(PLAN_REL, diff, esquemaEvaluacion), productivo);
+  comprobarPromptRevisor(productivo);
+  assert.throws(() => comprobarPromptRevisor(productivo.replace("Read only; do not write anything.", "")));
+});
 
 // A1: ciclo completo con simulados.
 caso("A1 ciclo completo: listo, constructor una vez, revisor en solo lectura", () => {
@@ -188,6 +252,11 @@ caso("A1 ciclo completo: listo, constructor una vez, revisor en solo lectura", (
   assert.equal(r.cuenta("revisor"), 1);
   const rev = r.registro.find(x => x.rol === "revisor");
   assert.ok(rev.args.includes("read-only") && rev.args.includes("--output-schema"), `argumentos del revisor: ${rev.args}`);
+  assert.equal(r.registro.find(x => x.rol === "constructor").entrada, `Execute plan ${PLAN_REL} (tramo: 1) using the ejecutar-plan skill. Respond with the return line.`);
+  comprobarPromptRevisor(rev.entrada);
+  assert.ok(rev.entrada.includes(JSON.stringify(ESQUEMA_VEREDICTO)) && rev.entrada.includes(`Review plan ${PLAN_REL}`));
+  assert.ok(rev.entrada.includes("--- diff ---\n"));
+  assert.match(r.stderr, /kit-run: verificación/);
   assert.match(r.plan, /- kit run: revisión APROBADO/);
 });
 
@@ -201,8 +270,8 @@ caso("A2 verify que siempre falla: 3 corridas del constructor y parcial", () => 
   assert.equal(r.cuenta("revisor"), 0, "sin verify verde no hay revisión");
   assert.equal(r.estado, "parcial");
   const prompts = r.registro.filter(x => x.rol === "constructor").map(x => x.entrada);
-  assert.ok(!prompts[0].includes("La verificación falló"));
-  assert.ok(prompts[1].includes("La verificación falló") && prompts[2].includes("La verificación falló"));
+  assert.ok(!prompts[0].includes("Verification failed"));
+  for (const prompt of prompts.slice(1)) assert.ok(prompt.includes("Verification failed (exit 1). Output:\nverify: fallo simulado"));
 });
 
 // Continuidad: el constructor cierra todos los tramos y kit run revisa solo al final.
@@ -270,7 +339,8 @@ caso("A3c DEVUELTO una vez: vuelve al constructor con los defectos y aprueba", (
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.equal(r.cuenta("constructor"), 2);
   assert.equal(r.cuenta("revisor"), 2);
-  assert.ok(r.registro.filter(x => x.rol === "constructor")[1].entrada.includes("falta el contenido esperado"));
+  const correccion = r.registro.filter(x => x.rol === "constructor")[1].entrada;
+  assert.ok(correccion.includes("The review returned these defects:\n" + JSON.stringify([{ archivo: "creado.txt", linea: 1, criterio: "A1", descripcion: "falta el contenido esperado" }], null, 2)));
   assert.equal(r.estado, "listo");
 });
 caso("A3d DEVUELTO siempre: cupo de 2 agotado, parcial sin más corridas", () => {

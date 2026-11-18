@@ -1,12 +1,15 @@
 # task-02 — El coordinador cubre todos los estados de tarea
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 La tabla de decisión de `agentes/coordinador.md` solo cubre «feature sin tareas» y «tarea `aprobada`». Quedan sin regla: tareas en `borrador` (puerta 3 pendiente), `en curso` (sesión interrumpida), `lista para revisión` (puerta 4), `bloqueada`, y la feature con todas sus tareas `hecha`. Sin esas filas, el coordinador improvisa justo en las puertas. Esta tarea las agrega con el comportamiento ya definido en `definitions/WORKFLOW.md`, sin inventar roles ni permisos nuevos.
 
 ## Contexto
 - Repo: este, único repo. Archivo a tocar: `agentes/coordinador.md` (leído completo). Su tabla «Tabla de decisión» tiene dos columnas, `Estado observado | Paso`, con 6 filas.
-- Reglas ya vigentes en ese archivo, que no se cambian: solo escribe `definitions/STATUS.md` y el campo `estado` (solo con aprobación explícita de Franco); en una puerta se detiene y escribe en `STATUS.md` qué revisar y la ruta; el formato de `STATUS.md` es el de «Formato de `definitions/STATUS.md`».
+- Reglas ya vigentes en ese archivo, que no se cambian: solo escribe `definitions/STATUS.md` y el campo `estado` (solo con aprobación explícita de la persona usuaria); en una puerta se detiene y escribe en `STATUS.md` qué revisar y la ruta; el formato de `STATUS.md` es el de «Formato de `definitions/STATUS.md`».
 - Estados de tarea: `borrador`, `aprobada`, `en curso`, `lista para revisión`, `hecha`, `bloqueada` (`definitions/WORKFLOW.md` §6; `skills/ejecutar-tarea/SKILL.md`).
 - Orden de tareas: `depende_de:` de cada tarea (formato validado por `pruebas/comprobaciones/formato-tarea.mjs`).
 - Pruebas: `bash pruebas/rapida.sh`.
@@ -39,7 +42,7 @@ Fuera de alcance: cambiar permisos de escritura, el formato de `STATUS.md`, las 
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 awk '/^\| Estado observado/,/^$/' agentes/coordinador.md | grep -c '^|'
 node --input-type=module -e 'import fs from "node:fs"; const t=fs.readFileSync("agentes/coordinador.md","utf8").split("\n").filter(l=>l.startsWith("|")).join("\n"); const f=["borrador","aprobada","en curso","lista para revisión","hecha","bloqueada"].filter(e=>!t.includes(e)); console.log(f.length?"FALTAN: "+f.join(", "):"ESTADOS COMPLETOS")'
 git status --short agentes skills definitions

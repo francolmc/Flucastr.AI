@@ -8,15 +8,17 @@ tipo: codigo
 ---
 # Revisar planes antes de aprobarlos
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Detectar mecánicamente señales de tramos demasiado amplios o pasos sin comprobación, y hacer que el principal las revise antes de pedir aprobación.
 
 ## Supuestos
-- El F13 no llegó pegado en el mensaje; se usa el plan local de Don Financio `cambios/F13-diseno-integral/plan.md` como referencia. Si Franco aporta otra versión, comparar y ajustar la prueba.
-- Los avisos son heurísticos: un texto ambiguo puede requerir revisión humana. Si Franco quiere análisis semántico exhaustivo, cambia el alcance.
+- El F13 no llegó pegado en el mensaje; se usa el plan local de Proyecto.Finanzas `cambios/F13-diseno-integral/plan.md` como referencia. Si la persona usuaria aporta otra versión, comparar y ajustar la prueba.
+- Los avisos son heurísticos: un texto ambiguo puede requerir revisión humana. Si la persona usuaria quiere análisis semántico exhaustivo, cambia el alcance.
 
 ## Alcance
-Crear `scripts/revisar-plan.mjs` y pruebas y fixtures bajo `pruebas/revisar-plan/`; integrar esas pruebas en `verify`. Modificar `agentes/principal.md` y `skills/planificar-cambio/SKILL.md`. No modificar Don Financio ni tests de aceptación existentes.
+Crear `scripts/revisar-plan.mjs` y pruebas y fixtures bajo `pruebas/revisar-plan/`; integrar esas pruebas en `verify`. Modificar `agentes/principal.md` y `skills/planificar-cambio/SKILL.md`. No modificar Proyecto.Finanzas ni tests de aceptación existentes.
 
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque es funcionalidad nueva; el contexto, comprobaciones y errores están definidos y no requiere secretos ni producción.
@@ -68,18 +70,18 @@ Crear `scripts/revisar-plan.mjs` y pruebas y fixtures bajo `pruebas/revisar-plan
   ℹ fail 0
   exit 0
   ```
-- `$ node scripts/revisar-plan.mjs /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md`
+- `$ node scripts/revisar-plan.mjs /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md`
   ```text
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:56: Archivos: nombra una carpeta; declara rutas de archivo explícitas
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:55: el tramo cubre varias pantallas: acceso, saldo inicial, resumen
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:55: el tramo cubre varias capas: interfaz, datos
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:57: el paso no indica cómo se comprueba
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:58: el paso no nombra una ruta de archivo
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:58: el paso no indica cómo se comprueba
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:59: el paso no nombra una ruta de archivo
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:59: el paso no indica cómo se comprueba
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:60: el paso no nombra una ruta de archivo
-  /home/franco/Codes/flucastr/Flucastr.DonFinancio/cambios/F13-diseno-integral/plan.md:60: el paso no indica cómo se comprueba
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:56: Archivos: nombra una carpeta; declara rutas de archivo explícitas
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:55: el tramo cubre varias pantallas: acceso, saldo inicial, resumen
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:55: el tramo cubre varias capas: interfaz, datos
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:57: el paso no indica cómo se comprueba
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:58: el paso no nombra una ruta de archivo
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:58: el paso no indica cómo se comprueba
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:59: el paso no nombra una ruta de archivo
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:59: el paso no indica cómo se comprueba
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:60: el paso no nombra una ruta de archivo
+  /home/persona/proyectos/Proyecto.Finanzas/cambios/F13-diseno-integral/plan.md:60: el paso no indica cómo se comprueba
   ... 17 avisos adicionales de tramos 2 y 3; exit 1
   ```
 - `$ node scripts/revisar-plan.mjs pruebas/revisar-plan/fixtures/plan-correcto.md`

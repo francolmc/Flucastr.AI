@@ -41,7 +41,7 @@ Fuera de alcance: `planificador`, `arquitecto`, `coordinador` y sus skills; prue
 5. `bash pruebas/rapida.sh` termina con código 0 y S ≤ 30.
 
 ## Verificación
-- `cd /Users/franco/Codes/flucastr/Flucastr.AI && for f in 'Lees tu tarea y las rutas de su *Contexto*' 'De `depende_de:` lees solo las *Notas* de esa tarea' 'No lees `definitions/` salvo la sección que cite la tarea' 'No lees tareas `hecha` ajenas a `depende_de:`'; do grep -cF -- "$f" agentes/constructor.md; done` → `1` cuatro veces.
+- `cd /Users/persona/Codes/flucastr/Flucastr.AI && for f in 'Lees tu tarea y las rutas de su *Contexto*' 'De `depende_de:` lees solo las *Notas* de esa tarea' 'No lees `definitions/` salvo la sección que cite la tarea' 'No lees tareas `hecha` ajenas a `depende_de:`'; do grep -cF -- "$f" agentes/constructor.md; done` → `1` cuatro veces.
 - `for f in 'hasta 1,5 KB' 'de `depende_de:` lee solo las *Notas* de esa tarea'; do grep -cF -- "$f" skills/ejecutar-tarea/SKILL.md; done` → `1` dos veces; `grep -c 'una versión resumida' skills/ejecutar-tarea/SKILL.md` → `0`.
 - `wc -c agentes/constructor.md skills/ejecutar-tarea/SKILL.md` → ≤ 2900 y ≤ 5700.
 - `node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/higiene-contexto.test.mjs pruebas/comprobaciones/contrato-constructor.test.mjs` → `fail 0`.

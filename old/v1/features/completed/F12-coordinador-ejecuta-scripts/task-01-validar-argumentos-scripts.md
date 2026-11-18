@@ -1,11 +1,14 @@
 # task-01 — Validación estricta de argumentos en `archivar.mjs` y `registrar.mjs`
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Hoy `node scripts/archivar.mjs --aplicar` (sin `Fxx`) mueve todas las candidatas, y ambos scripts aceptan opciones repetidas (la última gana). Franco decidió (`definitions/WORKFLOW.md` §3.1.1, punto 2) que `--aplicar` exige siempre un `Fxx` explícito, y §3.1 pide que ambos scripts rechacen argumentos ambiguos. Esta tarea endurece el CLI de los dos scripts y lo prueba sin modelo. Es la contención que queda cuando la herramienta no restringe el comando (patrón `F*` en Claude Code, `bash` completo en Pi).
+Hoy `node scripts/archivar.mjs --aplicar` (sin `Fxx`) mueve todas las candidatas, y ambos scripts aceptan opciones repetidas (la última gana). la persona usuaria decidió (`definitions/WORKFLOW.md` §3.1.1, punto 2) que `--aplicar` exige siempre un `Fxx` explícito, y §3.1 pide que ambos scripts rechacen argumentos ambiguos. Esta tarea endurece el CLI de los dos scripts y lo prueba sin modelo. Es la contención que queda cuando la herramienta no restringe el comando (patrón `F*` en Claude Code, `bash` completo en Pi).
 
 ## Contexto
-- Repo: este (`/Users/franco/Codes/flucastr/Flucastr.AI`), único repo. Node 25, sin red ni modelo.
+- Repo: este (`/Users/persona/Codes/flucastr/Flucastr.AI`), único repo. Node 25, sin red ni modelo.
 - A tocar (leídos): `scripts/archivar.mjs` (función `leerArgumentos`, líneas ~275–296, y el comentario de uso de las líneas 4–11; el bloque CLI usa `opciones.ids.length > 0 ? opciones.ids : null`), `scripts/registrar.mjs` (`leerArgumentos` y `USO`, líneas ~537–556), `pruebas/comprobaciones/archivar.test.mjs` (usa un helper `cli(raiz, args)`), `pruebas/capa1/registrar.test.mjs` (tests numerados `(1)`…`(9)`).
 - Estado actual (ejecutado por el planificador): `node --test pruebas/comprobaciones/archivar.test.mjs` → 20 pruebas, 0 fallos; `node --test pruebas/capa1/registrar.test.mjs` → 9 pruebas, 0 fallos.
 - Hoy ambos scripts ya rechazan opciones desconocidas con código 1 y mensaje en stderr (`argumento desconocido '…'` / `opción desconocida '…'`).
@@ -40,7 +43,7 @@ Fuera de alcance: cambiar `chequear`, `aplicar` o `registrar`; tocar `agentes/`,
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 node --test pruebas/comprobaciones/archivar.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node --test pruebas/capa1/registrar.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 node scripts/archivar.mjs --aplicar; echo "rc=$?"

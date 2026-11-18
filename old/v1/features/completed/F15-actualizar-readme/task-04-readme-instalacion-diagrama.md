@@ -1,6 +1,9 @@
 # task-04 — README: instalación local y sin clonar, con diagrama
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `## Instalación` ya explica los dos caminos, pero no dice de entrada cuál usar ni los muestra juntos. Esta tarea agrega al inicio de la sección una guía de elección y un diagrama Mermaid de los dos caminos, y títulos para separar «con el repo clonado» de «sin clonar». Los comandos y las viñetas existentes no cambian.
 
@@ -49,11 +52,11 @@ Fuera de alcance: cambiar o reordenar comandos y viñetas existentes, `## Estruc
 2. Los comandos y viñetas de `## Instalación` siguen presentes: `grep -c "bash instalar.sh --simular\|bash instalar-remoto.sh --estado\|--proyecto /ruta/al/proyecto" README.md` imprime 3 o más.
 3. `grep -n "^### " README.md` lista `Con el repo clonado` antes de `Sin clonar el repo (PC de trabajo)`.
 4. Los comandos citados en el diagrama existen: `grep -c "copiar" instalar.sh instalar-remoto.sh` muestra más de 0 en ambos archivos.
-5. Las comprobaciones que tocan lo de esta tarea pasan: `node --test pruebas/comprobaciones/readme-estructura.test.mjs pruebas/comprobaciones/coherencia-features.test.mjs pruebas/comprobaciones/formato-tarea.test.mjs` termina con `ℹ fail 0`. Excepción conocida y fuera de la tarea: `formato-flujo.test.mjs` (caso «BACKLOG.md real cumple el formato») falla mientras la marca `→` esté en F15 en vez de F11 (el validador exige `→` en la primera feature no `hecha`); lo resuelve Franco, no el constructor.
+5. Las comprobaciones que tocan lo de esta tarea pasan: `node --test pruebas/comprobaciones/readme-estructura.test.mjs pruebas/comprobaciones/coherencia-features.test.mjs pruebas/comprobaciones/formato-tarea.test.mjs` termina con `ℹ fail 0`. Excepción conocida y fuera de la tarea: `formato-flujo.test.mjs` (caso «BACKLOG.md real cumple el formato») falla mientras la marca `→` esté en F15 en vez de F11 (el validador exige `→` en la primera feature no `hecha`); lo resuelve la persona usuaria, no el constructor.
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -n "^## \|^### " README.md
 node -e 'const t=require("fs").readFileSync("README.md","utf8");const n=(t.match(/^```/gm)||[]).length;console.log(n%2===0?"fences ok":"fences DESBALANCEADOS");console.log("mermaid: "+(t.match(/^```mermaid\n/gm)||[]).length)'
 grep -c "bash instalar.sh --simular\|bash instalar-remoto.sh --estado\|--proyecto /ruta/al/proyecto" README.md
@@ -61,7 +64,7 @@ grep -c "copiar" instalar.sh instalar-remoto.sh
 node --test pruebas/comprobaciones/readme-estructura.test.mjs pruebas/comprobaciones/coherencia-features.test.mjs pruebas/comprobaciones/formato-tarea.test.mjs 2>&1 | grep -E "^ℹ (pass|fail)"
 git status --short
 ```
-Salida esperada: `Con el repo clonado` antes de `Sin clonar el repo (PC de trabajo)`; `fences ok`, `mermaid: 2`; un conteo ≥ 3 y luego conteos > 0; `ℹ fail 0`; `git status` sin archivos fuera de `README.md`, `assets/`, `definitions/` y `features/F15-actualizar-readme/`. Planificación: la rápida completa hoy falla en `formato-flujo` por la marca `→` en F15 (ejecutado) y esa falla no es de esta tarea; las tres comprobaciones del criterio 5 pasan hoy (ejecutado, 31 pasan). Mermaid sin renderizar en el equipo: lo revisa Franco en GitHub.
+Salida esperada: `Con el repo clonado` antes de `Sin clonar el repo (PC de trabajo)`; `fences ok`, `mermaid: 2`; un conteo ≥ 3 y luego conteos > 0; `ℹ fail 0`; `git status` sin archivos fuera de `README.md`, `assets/`, `definitions/` y `features/F15-actualizar-readme/`. Planificación: la rápida completa hoy falla en `formato-flujo` por la marca `→` en F15 (ejecutado) y esa falla no es de esta tarea; las tres comprobaciones del criterio 5 pasan hoy (ejecutado, 31 pasan). Mermaid sin renderizar en el equipo: lo revisa la persona usuaria en GitHub.
 
 ## Evidencia
 
@@ -125,9 +128,9 @@ Criterios de aceptación:
 4. Comandos del diagrama existen: cumple (`copiar` en ambos scripts, 7 y 7).
 5. Comprobaciones de la tarea: cumple (`ℹ fail 0`, 31 pasan). La rápida completa también pasa (218/218).
 
-Mermaid sin renderizar localmente (no hay `mmdc`): validado por forma; lo revisa Franco en GitHub.
+Mermaid sin renderizar localmente (no hay `mmdc`): validado por forma; lo revisa la persona usuaria en GitHub.
 
 ## Notas
 - Hueco menor: ninguno. El contenido de *Decisiones ya tomadas* se insertó tal cual, entre `## Instalación` y el bloque bash, con el encabezado `### Con el repo clonado` justo antes del bloque bash existente. Comandos, rutas y viñetas sin cambios.
-- La excepción de criterio 5 (formato-flujo) de la tarea ya no aplica: Franco reordenó el backlog (F15 antes de F11) y la comprobación pasa.
+- La excepción de criterio 5 (formato-flujo) de la tarea ya no aplica: la persona usuaria reordenó el backlog (F15 antes de F11) y la comprobación pasa.
 - Registro: n=1; herramienta=claude-code; modo=normal; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna

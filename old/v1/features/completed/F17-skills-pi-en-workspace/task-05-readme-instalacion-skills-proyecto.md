@@ -1,6 +1,9 @@
 # task-05 — README: sección Instalación para skills de Pi en el proyecto
 repo: Flucastr.AI   depende_de: task-01, task-02, task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Documentar en la sección «Instalación» del `README.md` el flag `--skills-proyecto`: para qué sirve (Pi que no lee `~/.pi/agent/skills/` desde el workspace), cómo usarlo y deshacerlo, que las copias van fuera de git y se actualizan al reinstalar, y la condición de confianza de proyecto de Pi.
 
@@ -34,7 +37,7 @@ Fuera de alcance: otras secciones, diagrama, `definitions/`, `pruebas/README.md`
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -c -- "--skills-proyecto" README.md; grep -n "\.pi/skills\|info/exclude\|/trust\|Pendiente de comprobar" README.md
 git diff --stat README.md
 T=$(mktemp -d); mkdir -p $T/home/.claude $T/p; git -C $T/p init -q
@@ -118,8 +121,8 @@ Criterios de aceptación: 1 cumplido (4 con `--skills-proyecto`, comando de desi
   2. Lo de `.claude/settings.local.json` sin ignorar va en una viñeta nueva, no en la existente de `--proyecto`, por el mismo criterio.
   3. El párrafo del PC de trabajo es un párrafo aparte al final de la subsección (no una sola frase dentro de la lista de `--actualizar`) para no meterlo entre viñetas; tiene dos frases: la del flag y la frase exacta fijada.
   4. Se añadió que `--skills-proyecto` no se combina con `--solo claude` y que volver a correr `instalar.sh --proyecto <ruta> --skills-proyecto` rehace las copias; ambas cosas están comprobadas arriba.
-- Decisión de Franco aplicada: con `--solo claude` las copias de Pi de los proyectos registrados se borran y no se rehacen, con el registro conservado (documentado en la viñeta de «rehacen»).
-- Pendiente para Franco: el comportamiento en el PC de trabajo sigue sin verificar (frase fijada). `--actualizar` real no se corrió en esta máquina (red).
-- Revisión sugerida para Franco: *Evidencia* y `git diff README.md` (9 líneas nuevas en «Instalación»). Sin commit, sin push.
+- Decisión de la persona usuaria aplicada: con `--solo claude` las copias de Pi de los proyectos registrados se borran y no se rehacen, con el registro conservado (documentado en la viñeta de «rehacen»).
+- Pendiente para la persona usuaria: el comportamiento en el PC de trabajo sigue sin verificar (frase fijada). `--actualizar` real no se corrió en esta máquina (red).
+- Revisión sugerida para la persona usuaria: *Evidencia* y `git diff README.md` (9 líneas nuevas en «Instalación»). Sin commit, sin push.
 
 Registro: n=1; herramienta=claude-code; modo=normal; intentos=2; verificacion=pasa; huecos=4; resultado=lista; causa=ninguna

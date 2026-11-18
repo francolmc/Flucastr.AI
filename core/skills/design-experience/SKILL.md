@@ -1,59 +1,59 @@
 ---
 name: disenar-experiencia
-description: "Diseña la experiencia de una interfaz antes de planificarla: deja `docs/experiencia.md` (una vez por proyecto) y `cambios/<nombre>/pantallas.md` (por cambio) con un boceto ASCII que la persona usuaria aprueba en la terminal. Úsala si el proyecto tiene interfaz nueva o el cambio agrega o reordena pantallas."
+description: "Design the experience of a UI before planning: create `docs/experiencia.md` (once per project) and `cambios/<name>/pantallas.md` (per change) with an ASCII sketch that the user approves in the terminal. Use for a project with a new UI or a change that adds or reorders screens."
 ---
 
-# Diseñar la experiencia
+# Design the Experience
 
-La persona usuaria trabaja en la terminal: lo único que ve de una pantalla es lo que pegas en tu respuesta. Por eso el diseño se hace en texto, antes de planificar, y se aprueba en la puerta 1.
+The user works in the terminal: the only view of a screen they get is what you paste into your response. Therefore, design in text before planning and get approval at Gate 1.
 
-## Cuándo usarla
+## When to use
 
-- Proyecto nuevo con interfaz, o uno sin `docs/experiencia.md` que va a cambiar de pantallas.
-- Cambio que agrega, quita o reordena pantallas, rutas o flujos de UI.
-- No la uses para cambios de texto, color o estilo que no alteran el recorrido.
+- A new project with a UI, or a project without `docs/experiencia.md` that will change screens.
+- A change that adds, removes, or reorders screens, routes, or UI flows.
+- Do not use for text, color, or styling changes that do not alter the flow.
 
-## Antes
+## Before starting
 
-1. Lee lo que ya hay: `docs/experiencia.md`, `docs/proyecto.md`, `AGENTS.md` y las pantallas que el cambio toca.
-2. Pregunta solo lo que falte, con máximo 3 preguntas cerradas (2 a 4 opciones, la recomendada primera). No preguntes lo que el contexto ya responde: quién usa, cuál es la tarea frecuente, qué herramienta usa hoy.
-3. Si hay evidencia real (un hallazgo en `cambios/<nombre>/hallazgo.md`, una auditoría o una captura), úsala antes que tu intuición.
+1. Read what exists: `docs/experiencia.md`, `docs/proyecto.md`, `AGENTS.md`, and the screens affected by the change.
+2. Ask only about missing information, using at most 3 closed questions (2 to 4 options, recommended first). Do not ask what context already answers: who uses it, their frequent task, or what tool they use today.
+3. If real evidence exists (a finding in `cambios/<name>/hallazgo.md`, an audit, or a screenshot), use it before your intuition.
 
-## Plantilla: `docs/experiencia.md` (una vez por proyecto)
+## Template: `docs/experiencia.md` (once per project)
 
 ```markdown
 # Experiencia
 
-## Quién usa
-Persona concreta, en una o dos líneas: rol, contexto y dispositivo principal.
+## Who uses it
+A specific person in one or two lines: role, context, and primary device.
 
-## Tareas frecuentes
-3 a 5 tareas, en el orden de frecuencia (con cuántas veces al día o a la semana).
+## Frequent tasks
+3 to 5 tasks, ordered by frequency (include how many times per day or week).
 
-## Modelo mental actual
-Qué herramienta o papel usa hoy para cada tarea y qué espera encontrar.
+## Current mental model
+What tool or paper process they use for each task today and what they expect to find.
 
-## Vocabulario
-- Permitido: términos de la persona.
-- Prohibido: términos técnicos o internos que no entiende (lista corta).
+## Vocabulary
+- Allowed: the person's terms.
+- Prohibited: technical or internal terms they do not understand (short list).
 
-## Mapa de pantallas
-Árbol de pantallas con su ruta y la tarea que resuelve cada una.
+## Screen map
+A screen tree with each route and the task it solves.
 
-## Principios
-3 a 5 reglas propias del producto, cada una con su porqué en una línea.
+## Principles
+3 to 5 product-specific rules, each with its reason in one line.
 ```
 
-## Plantilla: `pantallas.md` (por cambio que toca UI)
+## Template: `pantallas.md` (for a change that touches UI)
 
-Una sección por pantalla:
+One section per screen:
 
 ```markdown
 ## <Nombre de la pantalla> (ruta: /<ruta>)
 
-Objetivo: qué logra la persona aquí, en una frase.
+Objective: what the person accomplishes here, in one sentence.
 
-Boceto (ASCII, hasta 40 columnas, móvil primero):
+Sketch (ASCII, up to 40 columns, mobile first):
 +--------------------------------------+
 | Título                               |
 |                                      |
@@ -62,42 +62,42 @@ Boceto (ASCII, hasta 40 columnas, móvil primero):
 | Acción secundaria                    |
 +--------------------------------------+
 
-Estados:
-- vacío: qué ve cuando no hay datos y qué puede hacer.
-- carga: qué ve mientras espera.
-- error: qué dice y cómo sigue.
-- éxito: qué confirma y a dónde lleva.
+States:
+- empty: what they see when there is no data and what they can do.
+- loading: what they see while waiting.
+- error: what it says and how they can continue.
+- success: what it confirms and where it takes them.
 
 Textos exactos: cada etiqueta, título y mensaje, copiado tal cual.
-Acción principal: una. Acciones secundarias: lista corta.
+Primary action: one. Secondary actions: a short list.
 ```
 
-El boceto se pega también en tu respuesta cuando pides la puerta 1. No basta con enlazar el archivo: la persona usuaria lo aprueba en la terminal.
+Also paste the sketch into your response when requesting Gate 1 approval. Linking to the file alone is not enough: the user approves it in the terminal.
 
-## Reglas de oficio
+## Craft rules
 
-- Una tarea principal por pantalla.
-- Lo frecuente, a un toque.
-- Nunca dos formularios a la vez.
-- Lenguaje de la persona, no el del código.
-- Objetivos táctiles de 44 px.
-- Los errores dicen cómo seguir, no solo qué falló.
-- Contraste y foco visibles en todo estado.
-- Diseña a 390 px primero; el escritorio es la adaptación.
+- One primary task per screen.
+- Make frequent tasks available in one tap.
+- Never show two forms at once.
+- Use the person's language, not code terminology.
+- Touch targets are 44 px.
+- Errors explain how to continue, not only what failed.
+- Keep contrast and focus visible in every state.
+- Design first for 390 px; desktop is the adaptation.
 
-## Lista de comprobación
+## Checklist
 
-Marca cada punto contra los bocetos antes de pedir la puerta 1:
+Check every item against the sketches before requesting Gate 1:
 
-- [ ] Cada pantalla tiene una tarea principal y se nombra con ella.
-- [ ] La tarea frecuente se completa en el número de pasos que dice `pantallas.md`.
-- [ ] Los estados vacío, carga, error y éxito están en cada pantalla.
-- [ ] No aparece un término prohibido de `docs/experiencia.md`.
-- [ ] Todo boceto cabe en 40 columnas.
-- [ ] Los errores dicen qué hacer después.
+- [ ] Each screen has one primary task and is named after it.
+- [ ] The frequent task takes the number of steps stated in `pantallas.md`.
+- [ ] Every screen includes empty, loading, error, and success states.
+- [ ] No prohibited term from `docs/experiencia.md` appears.
+- [ ] Every sketch fits within 40 columns.
+- [ ] Errors say what to do next.
 
-## Cierre
+## Close
 
-1. Pega en tu respuesta los bocetos de las pantallas que cambian, con su lista de comprobación marcada.
-2. Di la ruta de `pantallas.md` (y de `docs/experiencia.md` si lo escribiste).
-3. Pregunta: «¿Apruebas esta experiencia?». Espera su respuesta. Con «sí», el `pantallas.md` pasa a la planificación (`planificar-cambio`, regla 14); con cambios, lo corriges y lo vuelves a pegar.
+1. Paste sketches for changed screens into your response, with the checklist completed.
+2. Give the path to `pantallas.md` (and `docs/experiencia.md` if you wrote it).
+3. Ask in the user's current language whether they approve the experience. Wait for the answer. With approval, include `pantallas.md` in planning (`planificar-cambio`, rule 14); if changes are requested, edit it and paste it again.

@@ -1,8 +1,11 @@
 # task-04 — README al día y chequeo final de F08
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Deja el README coherente con lo que añadió F08 (`scripts/archivar.mjs`, `features/completed/`) y comprueba de punta a punta, en solo lectura, que el chequeo corre sobre el repo real. No ejecuta `--aplicar`: archivar F01–F07 lo decide y lo hace Franco.
+Deja el README coherente con lo que añadió F08 (`scripts/archivar.mjs`, `features/completed/`) y comprueba de punta a punta, en solo lectura, que el chequeo corre sobre el repo real. No ejecuta `--aplicar`: archivar F01–F07 lo decide y lo hace la persona usuaria.
 
 ## Contexto
 - Leídos: `README.md` (bloque «## Estructura»: línea `├── features/        # tareas por feature …` y `scripts/` con `│   └── resolver.mjs …`); `pruebas/comprobaciones/readme-estructura.mjs` (el validador solo compara los hijos de `agentes/` y `skills/` con el disco; las demás líneas del árbol son libres) y su prueba real en `readme-estructura.test.mjs` (lee `README.md`).
@@ -44,7 +47,7 @@ Esperado: la primera imprime el informe, `salida=0` y `sin cambios por el cheque
 Paso 1 y 2 (`grep -n "archivar.mjs\|features/completed" README.md`):
 ```
 37:├── features/        # tareas por feature (features/Fxx-nombre/task-NN-nombre.md); las terminadas, archivadas en features/completed/
-54:│   └── archivar.mjs    # chequea el contexto y, con --aplicar (lo corre Franco), mueve las features hecha a features/completed/
+54:│   └── archivar.mjs    # chequea el contexto y, con --aplicar (lo corre Persona), mueve las features hecha a features/completed/
 ```
 
 Verificación 1 (`antes=...; node scripts/archivar.mjs; echo "salida=$?"; [ ... ] && echo "sin cambios por el chequeo"`), informe real:
@@ -118,6 +121,6 @@ Criterios de aceptación:
 ## Notas
 - Hueco menor: el *Paso 1* pedía cambiar la línea de `features/` y el *Paso 2* el bloque de `scripts/`, sin indicar el orden exacto de las líneas dentro del árbol. Se mantuvo la convención `│   ├──` / `│   └──`: `resolver.mjs` queda con `├──` y `archivar.mjs` con `└──`, como indica *Decisiones ya tomadas*.
 - `git status --short` ya mostraba antes de empezar `M definitions/STATUS.md` y `M features/F08-limpieza-y-archivo/task-03-coordinador-y-planificador.md`. No los toqué; el chequeo los dejó igual.
-- El chequeo reporta `AVISO` de tamaño en BACKLOG.md, WORKFLOW.md y en las filas F03, F05, F06 y F07, y 7 candidatas a archivar (F01–F07). Es información para Franco; no se corrigió nada, como pide la tarea.
+- El chequeo reporta `AVISO` de tamaño en BACKLOG.md, WORKFLOW.md y en las filas F03, F05, F06 y F07, y 7 candidatas a archivar (F01–F07). Es información para la persona usuaria; no se corrigió nada, como pide la tarea.
 - La primera corrida de `rapida.sh` se hizo con `| tail`, y el código se perdió porque `PIPESTATUS` no existe en zsh; por eso se repitió sin tubería y se pegó el código real.
 - Las dos ediciones de README y las de esta tarea son lo único que escribí. No se tocó `definitions/STATUS.md`. Sin commit, push, PR, merge ni despliegue.

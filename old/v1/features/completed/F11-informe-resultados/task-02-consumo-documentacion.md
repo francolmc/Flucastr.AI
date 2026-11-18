@@ -1,6 +1,9 @@
 # task-02 — Bloque `--consumo`, pruebas de privacidad y documentación
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Añadir a `scripts/informe.mjs` la opción `--consumo <dir>`: bloque con costo y turnos totales, por rol y por tarea (aproximado), usando `scripts/consumo.mjs`. Probar privacidad y el bloque opcional, y documentar el comando en `README.md`.
 
@@ -20,7 +23,7 @@ Añadir a `scripts/informe.mjs` la opción `--consumo <dir>`: bloque con costo y
 
 ## Alcance / Fuera de alcance
 Alcance: `scripts/informe.mjs`, `pruebas/comprobaciones/informe-consumo.test.mjs` (nuevo), `README.md`.
-Fuera de alcance: `definitions/**` (incluye `WORKFLOW.md` §10.5 y permisos del `coordinador`: lo corre Franco); `scripts/consumo.mjs`; calibrar el umbral (lectura posterior de Franco); `pruebas/README.md`.
+Fuera de alcance: `definitions/**` (incluye `WORKFLOW.md` §10.5 y permisos del `coordinador`: lo corre la persona usuaria); `scripts/consumo.mjs`; calibrar el umbral (lectura posterior de la persona usuaria); `pruebas/README.md`.
 
 ## Pasos
 1. `informe.mjs`: aceptar `--consumo <dir>` en `leerArgumentos`; validar carpeta.
@@ -79,7 +82,7 @@ rapida: 31 archivos en 17 s (tope 30 s)
 
 Comando: `grep -n "informe.mjs" README.md`
 ```
-93:│   ├── informe.mjs    # informe de resultados del flujo desde registro/eventos.jsonl; con --consumo añade el bloque de consumo (lo corre Franco)
+93:│   ├── informe.mjs    # informe de resultados del flujo desde registro/eventos.jsonl; con --consumo añade el bloque de consumo (lo corre Persona)
 266:Junto datos de cada ejecución del flujo ... El informe que lo resume existe: `node scripts/informe.mjs [--consumo <carpeta de logs>] [--minimo <n>] [--json]`. ...
 ```
 

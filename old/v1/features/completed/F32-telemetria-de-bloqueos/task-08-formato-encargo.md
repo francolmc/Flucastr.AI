@@ -1,13 +1,16 @@
 # task-08 — Módulo `formato-encargo.mjs`: leer `Disparó:` y la tarea de un encargo
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Para saber qué disparó cada delegación y a qué tarea pertenece, `consumo.mjs` debe leer el texto del encargo del subagente sin filtrar ese texto al informe. Esta tarea crea el módulo puro que extrae solo valores cerrados (origen, puerta, tarea, feature) y nunca devuelve texto del encargo.
 
 ## Contexto
 - Tocar: `scripts/formato-encargo.mjs`, `pruebas/comprobaciones/formato-encargo.test.mjs`
 - Requiere: ninguno
-- Formato de la línea (decisión D4=A de Franco, `definitions/DIAGNOSTICO-BLOQUEOS.md` §5 y §8): `Disparó: puerta N`, `Disparó: BLOQUEO task-NN`, `Disparó: franco` o `Disparó: reintento`, en una línea del encargo.
+- Formato de la línea (decisión D4=A de la persona usuaria, `definitions/DIAGNOSTICO-BLOQUEOS.md` §5 y §8): `Disparó: puerta N`, `Disparó: BLOQUEO task-NN`, `Disparó: franco` o `Disparó: reintento`, en una línea del encargo.
 - `scripts/consumo.mjs` (confirmado): tiene `FORMA_TAREA = /task-\d{2}-[^/]*\.md$/` (línea 39) y la regla de privacidad de que el texto del encargo no sale (`CENTINELA_TEXTO` en `pruebas/comprobaciones/consumo-fixtures.mjs`).
 - Modelo de módulo puro (confirmado): `scripts/formato-requiere.mjs`.
 - Fuente: definitions/DIAGNOSTICO-BLOQUEOS.md «5. Pieza 3 — Telemetría que da pistas»

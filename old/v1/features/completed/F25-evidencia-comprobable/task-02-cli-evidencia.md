@@ -1,6 +1,9 @@
 # task-02 — Opción --evidencia en validar-tarea.mjs
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 El `coordinador` solo puede correr `node ~/.flucastr-ai/validar-tarea.mjs *` en proyectos instalados. En vez de sumar un permiso o un lanzador, `scripts/validar-tarea.mjs` gana la opción `--evidencia`, que usa `validarEvidencia` de task-01. Mismo comando, mismo lanzador, mismos códigos de salida 0/1/2.
 
@@ -95,7 +98,7 @@ exit 1
 - Huecos menores: (1) la aserción de «una sola línea» para la mezcla completa e incompleta se leyó como «ninguna línea de la completa y todas las de la incompleta», porque la tarea incompleta de la prueba da dos motivos y el CLI emite una línea por motivo (como ya define *Decisiones*). (2) Cualquier argumento que empiece por `--` sale con 2 como opción desconocida también sin `--evidencia`; antes ese caso salía con 2 por «No se puede leer». El código de salida no cambia.
 - El mensaje de uso pasó a `Uso: node validar-tarea.mjs [--evidencia] <ruta-tarea>...` (paso 1). La regex del test de uso acepta ambas formas.
 - Primera pasada de la *Verificación*: el comando 1 falló por mi aserción de la mezcla (dos líneas en vez de una); la corregí y repetí los tres comandos. Por eso `intentos=2`.
-- Autocomprobación rechazada, sin resolver aquí: el validador toma el código esperado solo de un literal `exit N` en la línea «Esperado» de la *Verificación*. La tarea dice «sale 1» en el tercer comando, así que el validador exige `exit 0` y lo rechaza. Los tres comandos sí salen como su «Esperado» describe (tercero: exit 1). Corregirlo implica cambiar la *Verificación* (`exit 1`) o el núcleo de task-01; ambos fuera del alcance de esta tarea. Decisión para Franco.
+- Autocomprobación rechazada, sin resolver aquí: el validador toma el código esperado solo de un literal `exit N` en la línea «Esperado» de la *Verificación*. La tarea dice «sale 1» en el tercer comando, así que el validador exige `exit 0` y lo rechaza. Los tres comandos sí salen como su «Esperado» describe (tercero: exit 1). Corregirlo implica cambiar la *Verificación* (`exit 1`) o el núcleo de task-01; ambos fuera del alcance de esta tarea. Decisión para la persona usuaria.
 - Repetición: la *Evidencia* se reemplazó por salidas reales de esta pasada (comando 3 con la tarea en «en curso»); el defecto de task-01 ya está corregido, así que la autocomprobación `--evidencia` ahora sale 0 con `OK: 1 tarea(s) con evidencia completa` (no añadida a *Evidencia*, pues no está en *Verificación*).
 Registro: n=2; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=0; resultado=lista; causa=ninguna
 

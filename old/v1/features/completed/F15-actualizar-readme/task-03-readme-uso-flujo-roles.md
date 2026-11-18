@@ -1,6 +1,9 @@
 # task-03 — README: uso con el flujo, los roles y su diagrama
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 El README explica el flujo en un solo párrafo largo (`## Flujo`) y no muestra cómo se usa el kit. Esta tarea agrega la sección `## Cómo se usa`, con el paso a paso, una tabla de roles y un diagrama Mermaid de las cuatro puertas, y quita de `## Flujo` la frase obsoleta sobre F04. No cambia el comportamiento del kit.
 
@@ -9,7 +12,7 @@ El README explica el flujo en un solo párrafo largo (`## Flujo`) y no muestra c
 - Hechos que se resumen (leídos): `definitions/WORKFLOW.md` §1 (cuatro puertas: definición, backlog, cada tarea, revisión), §2 (tabla de roles), §3 (el `coordinador` decide el paso según lo que falta), §9.1 (rama por feature), §9.2 (refinado), §9.3 (yolo).
 - Cómo se abre: `claude --agent coordinador` o `pi-coordinador`, desde la carpeta del proyecto (README actual, sección `## Instalación`, última viñeta).
 - Comprobación que exige el README: `pruebas/comprobaciones/readme-estructura.mjs` toma el primer bloque de código **después** de la línea exacta `## Estructura`; por eso el diagrama Mermaid va en una sección anterior y no se mueve nada dentro de `## Estructura`.
-- No hay `mmdc` en este equipo (`which mmdc` vacío): el Mermaid no se puede renderizar aquí; se valida por forma (ver *Verificación*) y Franco lo ve en GitHub.
+- No hay `mmdc` en este equipo (`which mmdc` vacío): el Mermaid no se puede renderizar aquí; se valida por forma (ver *Verificación*) y la persona usuaria lo ve en GitHub.
 
 ## Decisiones ya tomadas
 - Texto exacto de la sección nueva, que se inserta entre `## Documentación` y `## Estructura`, con una línea en blanco antes y después:
@@ -30,7 +33,7 @@ flowchart LR
     T --> P3{"Puerta 3<br/>cada tarea"}
     P3 --> C["Construir y verificar<br/>(constructor)"]
     C --> P4{"Puerta 4<br/>revisión"}
-    P4 --> F["Commit y PR<br/>(Franco)"]
+    P4 --> F["Commit y PR<br/>(la persona usuaria)"]
 ```
 
 | Rol | Qué hace | Qué no hace |
@@ -64,14 +67,14 @@ Fuera de alcance: instalación, estructura, reglas, bitácora, otros diagramas (
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -n "^## " README.md
 node -e 'const t=require("fs").readFileSync("README.md","utf8");const n=(t.match(/^```/gm)||[]).length;console.log(n%2===0?"fences ok":"fences DESBALANCEADOS");console.log("mermaid: "+(t.match(/^```mermaid\n/gm)||[]).length);console.log(/```mermaid\nflowchart LR/.test(t)?"flowchart LR ok":"sin flowchart LR")'
 grep -c "^| \`\(coordinador\|arquitecto\|planificador\|constructor\)\`" README.md
 grep -c "F04 dejó este README" README.md
 node --test pruebas/comprobaciones/readme-estructura.test.mjs 2>&1 | grep -E "^ℹ (pass|fail)"
 ```
-Salida esperada: `Cómo se usa` entre `Documentación` y `Estructura`; `fences ok`, `mermaid: 1`, `flowchart LR ok`; `4`; `0`; `ℹ fail 0`. Sin renderizador de Mermaid en este equipo: la sintaxis del diagrama no se puede ejecutar aquí (no ejecutado, inferido); Franco la revisa en la vista de GitHub o en un editor con vista previa Mermaid.
+Salida esperada: `Cómo se usa` entre `Documentación` y `Estructura`; `fences ok`, `mermaid: 1`, `flowchart LR ok`; `4`; `0`; `ℹ fail 0`. Sin renderizador de Mermaid en este equipo: la sintaxis del diagrama no se puede ejecutar aquí (no ejecutado, inferido); la persona usuaria la revisa en la vista de GitHub o en un editor con vista previa Mermaid.
 
 ## Evidencia
 
@@ -117,7 +120,7 @@ Criterios de aceptación:
 4. Cumple: `0` ocurrencias de la frase de F04.
 5. Cumple: `ℹ fail 0`.
 
-No ejecutado: render del Mermaid (`which mmdc` → sin salida; no hay renderizador en el equipo). La sintaxis queda validada solo por forma; Franco la revisa en la vista de GitHub.
+No ejecutado: render del Mermaid (`which mmdc` → sin salida; no hay renderizador en el equipo). La sintaxis queda validada solo por forma; la persona usuaria la revisa en la vista de GitHub.
 
 ## Notas
 - Cambios en `README.md` solo: se insertó `## Cómo se usa` con el texto exacto de *Decisiones ya tomadas* (entre `## Documentación` y `## Estructura`, con línea en blanco antes y después) y se borró de `## Flujo` la frase de F04 con su espacio final. El resto de `## Flujo` no se tocó.

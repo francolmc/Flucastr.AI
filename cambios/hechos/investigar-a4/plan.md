@@ -8,10 +8,12 @@ tipo: docs
 ---
 # Informe: por qué falló A4 y qué lo bajaría
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Supuestos
 - Solo documentación: un informe en `docs/investigaciones/a4-costo-revisor.md` (≤ 80 líneas). No se editan scripts ni `modelos.json`; solo se proponen cambios.
 - Distinguir siempre **medido** (rollouts), **documentado** (tarifas/mecánica del proveedor), **estimado** y **opinión**.
-- Rama nueva `docs/investigar-a4` desde `main` (Franco decide cuándo; el piloto `docs/piloto-kit-run` aún no se mergea).
+- Rama nueva `docs/investigar-a4` desde `main` (la persona usuaria decide cuándo; el piloto `docs/piloto-kit-run` aún no se mergea).
 
 ## Datos medidos (rollouts de Codex, 2026-11-10, `~/.codex/sessions/2026/11/10/`)
 Revisor `gpt-6.1-sol`, esfuerzo `low`, 3 llamadas al modelo por revisión. Tarifas Sol: 50 entrada / 2,5 en caché / 250 salida (créditos por 1M).
@@ -33,7 +35,7 @@ Si el prefijo de ≈19 k estuviera en caché, cada revisión costaría ≈0,4 cr
 - [x] Solo lectura sobre `~/.codex/sessions/` y el repo; no ejecutar `codex exec`.
   - evidencia: lectura de `~/.codex/sessions/2026/11/10/*.jsonl` (`total_token_usage`) y `codex -m gpt-6.1-sol -c model_reasoning_effort="low" debug prompt-input` (exit 0, sin `codex exec`).
 
-## Evidencia externa (resumen, de la investigación de Franco)
+## Evidencia externa (resumen, de la investigación de la persona usuaria)
 Cognition (abr 2026): revisor sin contexto compartido funciona mejor, sin costo publicado (interno). Anthropic: relectura del historial con caché; subagente nuevo paga su prefijo (≈25 k en una medición de terceros). OpenAI (dic 2025): verificar cuesta «una fracción» del generador; esfuerzo alto rinde menos en código generado. Codex `exec` trivial: 8–13 k tokens de entrada. Tarifas Sol = 20 × Luna. No existe razón revisor/constructor de referencia publicada.
 
 ## Aceptación

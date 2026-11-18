@@ -29,7 +29,7 @@ Fuera de alcance: `definitions/WORKFLOW.md` (task-04), `modelos.json`, cualquier
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -rn "no se declara aquí" agentes/
 git diff --stat agentes/
 node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobaciones/modelos-agentes.test.mjs pruebas/comprobaciones/resolver-agentes.test.mjs
@@ -38,7 +38,7 @@ Esperado: sin salida del `grep`; cuatro archivos y 8 eliminaciones; `fail 0` (no
 
 ## Evidencia
 
-Verificación de la tarea (`cd /Users/franco/Codes/flucastr/Flucastr.AI`):
+Verificación de la tarea (`cd /Users/persona/Codes/flucastr/Flucastr.AI`):
 
 ```
 $ grep -rn "no se declara aquí" agentes/
@@ -62,7 +62,7 @@ $ node --test pruebas/comprobaciones/contrato-roles.test.mjs pruebas/comprobacio
 ℹ todo 0
 ```
 
-Verificación rápida pedida por el encargo (HOME real, `HOME=/Users/franco`; las pruebas de instalación usan HOME temporal en `pruebas/.temporales/`):
+Verificación rápida pedida por el encargo (HOME real, `HOME=/Users/persona`; las pruebas de instalación usan HOME temporal en `pruebas/.temporales/`):
 
 ```
 $ bash pruebas/rapida.sh

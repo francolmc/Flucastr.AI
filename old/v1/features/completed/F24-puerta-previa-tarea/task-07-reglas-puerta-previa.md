@@ -1,6 +1,9 @@
 # task-07 — Reglas del coordinador y del constructor
 repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Con el validador y su permiso ya instalados, el `coordinador` debe usarlo antes de aprobar una tarea (también en yolo, donde sustituye la lectura manual de la regla 2), y el `constructor` ante una decisión abierta debe devolver opciones cerradas en vez de probar (S3). Esta tarea escribe esas reglas en `agentes/coordinador.md` y `agentes/constructor.md` y las fija con una prueba de texto.
 
@@ -17,7 +20,7 @@ Con el validador y su permiso ya instalados, el `coordinador` debe usarlo antes 
 - Yolo, regla 2: el comando sustituye la lectura de la tarea. Salida 0 y `depende_de:` con IDs de tareas existentes (comprobados con `Glob` de la carpeta): escribes `aprobada`. Salida 1 o 2: escalación (regla 5), con las líneas del comando como motivo. Ya no lees la tarea entera.
 - Texto de `DECISION:` copiado literal de `WORKFLOW.md` §6, regla «2 bis», sin variantes propias: ante una decisión abierta (sección «Decisiones abiertas» con algo sin resolver) el `constructor` no empieza a probar y responde con primera línea `DECISION: tarea=task-NN; abiertas=<n>`; debajo `Pregunta:`, `Motivo:`, `Opciones:` (2 o 3, `A) B) C)`, cerradas) y `Recomendada: <letra>`. Para continuar, el encargo trae la línea `Decisión de Franco:`. F26 adoptará este mismo formato como su estado `interaction_required`.
 - Detalle de aplicación: «sin resolver» = una línea sin `Resuelta:` que el encargo no cierre con `Decisión de Franco:`; entonces no cambia archivos ni prueba nada. Con esa línea, la anota en *Notas* y sigue. Una tarea sin la sección (anterior a 2026-11-01) se trata como «Ninguna».
-- `coordinador` ante `DECISION:`: la trata como `REFINAR:` (ni puerta ni bloqueo): registra la pregunta y las opciones en «Espera a Franco», se las plantea a Franco y se detiene; con la respuesta vuelve a delegar al `constructor` con `Decisión de Franco:`. No reabre al `arquitecto`. En yolo es escalación (se añade a la regla 5).
+- `coordinador` ante `DECISION:`: la trata como `REFINAR:` (ni puerta ni bloqueo): registra la pregunta y las opciones en «Espera a Franco», se las plantea a la persona usuaria y se detiene; con la respuesta vuelve a delegar al `constructor` con `Decisión de Franco:`. No reabre al `arquitecto`. En yolo es escalación (se añade a la regla 5).
 
 ## Decisiones abiertas
 Ninguna.
@@ -77,5 +80,5 @@ Criterio 2: `contrato-roles` y `coordinador-status` sin fallos; `contrato-constr
 Corrección 2026-11-01: `DECISION:` pasa al texto definitivo de `WORKFLOW.md` §6 regla «2 bis» (se quitó «sin otra»); el comando es el del lanzador fijo; depende de task-06 (permiso probado antes de usarlo).
 Hueco menor 1: la plantilla de encargo del `coordinador` (`Devuelve:`) también lista `DECISION:`, para reconocer la respuesta del constructor; no estaba en la tarea.
 Hueco menor 2: para caber en el tope de 17920 bytes de `agentes/coordinador.md` (quedaban 6) se comprimió redacción de filas y reglas existentes (puerta 3 de feature, rule 3, 4 y 8, «Archivo y contexto», «Respaldo sin subagentes», «Comandos»). No se borró ninguna regla; el archivo queda en 17871 bytes.
-Fuera de alcance, para Franco: `definitions/WORKFLOW.md` supera su tope de 30720 caracteres (31298) desde antes de esta tarea; por eso fallan 6 pruebas de `higiene-contexto`.
+Fuera de alcance, para la persona usuaria: `definitions/WORKFLOW.md` supera su tope de 30720 caracteres (31298) desde antes de esta tarea; por eso fallan 6 pruebas de `higiene-contexto`.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=2; resultado=lista; causa=ninguna

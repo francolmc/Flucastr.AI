@@ -1,42 +1,42 @@
 ---
 name: definir-proyecto
-description: "Define un proyecto nuevo (repo vacío o casi): hace hasta 5 preguntas cerradas, escribe `AGENTS.md` y `docs/proyecto.md`, deja la raíz lista y se detiene a esperar a la persona usuaria. Úsala si la carpeta no tiene `AGENTS.md` ni código."
+description: "Define a new project (an empty or nearly empty repository): asks up to 5 closed questions, writes `AGENTS.md` and `docs/proyecto.md`, prepares the root, and stops to wait for the user. Use when the folder has no `AGENTS.md` and no code."
 ---
 
-# Definir un proyecto nuevo
+# Define a New Project
 
-Un proyecto «nuevo» no tiene `AGENTS.md` y no tiene código: solo carpeta vacía, `README` o `.git`. Si ya hay código, dilo y usa `preparar-proyecto`.
+A “new” project has no `AGENTS.md` and no code: only an empty folder, `README`, or `.git`. If code already exists, say so and use `preparar-proyecto`.
 
-Trabajas en dos tiempos. No los mezcles.
+Work in two stages. Do not combine them.
 
-## Primer tiempo: preguntar (no escribas nada)
+## First stage: ask (write nothing)
 
-1. Lee lo que dijo la persona usuaria y lo que la carpeta ya tiene. No preguntes lo que el contexto ya responde.
-2. Haz hasta 5 preguntas cerradas, con 2 a 4 opciones cada una. La propuesta por defecto va primera y dice «(Recomendada)».
-3. La primera pregunta es siempre: «¿Es un repo o un workspace con varios repos?». Nunca decidas tú, aunque el contexto lo insinúe.
-4. Las demás salen solo de lo que falte: stack, quién usa el sistema, alcance del MVP, datos y acceso (p. ej. login o link por correo), dónde se despliega. Si el proyecto tiene interfaz, incluye «quién lo usa y cuál es su tarea frecuente» entre las preguntas, salvo que el contexto ya lo diga.
-5. Termina el turno esperando respuesta. Hasta entonces no creas archivos, ni `git init`, ni carpetas.
+1. Read what the user said and what is already in the folder. Do not ask what the context already answers.
+2. Ask up to 5 closed questions, each with 2 to 4 options. Put the recommended default first and label it “(Recomendada)”.
+3. The first question is always: “¿Es un repo o un workspace con varios repos?”. Never decide this yourself, even if context suggests an answer.
+4. Ask the remaining questions only about unknowns: stack, who uses the system, MVP scope, data and access (for example, login or email link), and deployment location. If the project has a UI, include “who uses it and what their frequent task is” among the questions, unless context already says so.
+5. End the turn and wait for the answers. Until then, create no files or folders, and do not run `git init`.
 
-## Segundo tiempo: escribir (con las respuestas)
+## Second stage: write (using the answers)
 
-Escribe solo esto, en la raíz:
+Write only these items at the root:
 
-- **`AGENTS.md`**: formato y límite (unas 40 líneas) de `preparar-proyecto`, sección 1. El comando `./verify` aparece marcado como pendiente: «(pendiente: lo crea el plan del esqueleto)». Las skills del kit se nombran en una sola línea, sin describirlas.
-- **`docs/proyecto.md`**: una página con estas secciones: Qué es, Para quién, MVP, Fuera de alcance, Decisiones (cada una con su porqué). En un workspace, añade «Repos» (carpeta y rol). Añade también «Despliegue» con sus cinco líneas (ver `preparar-proyecto`, sección 5); lo que no se sabe va como «pendiente», sin inventar valores.
-- **`cambios/`**: carpeta con un `.gitkeep`.
+- **`AGENTS.md`**: use the format and limit (about 40 lines) from section 1 of `preparar-proyecto`. Mark `./verify` as pending: “(pendiente: lo crea el plan del esqueleto)”. List the kit skills on one line without descriptions.
+- **`docs/proyecto.md`**: one page with these sections: Qué es, Para quién, MVP, Fuera de alcance, Decisiones (each with its reason). For a workspace, add “Repos” (folder and role). Also add “Despliegue” with its five lines (see section 5 of `preparar-proyecto`); unknown items are “pendiente”, without invented values.
+- **`cambios/`**: a folder with `.gitkeep`.
 
-No creas carpetas de repos hijos ni código: eso es el plan del esqueleto.
+Do not create child repository folders or code: those belong to the skeleton plan.
 
-**Si es un repo:** los planes llevarán `repos: [.]`.
+**For a repository:** plans use `repos: [.]`.
 
-**Si es un workspace** (raíz sin `.git` y hijos con `.git`; compruébalo con `find . -maxdepth 2 -name .git -not -path './.git'`): pregunta «¿Hacemos la raíz repo propio?» (la recomendada es «Sí»). Sin respuesta no hay `git init`; lo dices como pendiente. Con «Sí»: `git init` en la raíz y un `.gitignore` con `/<carpeta>/` por cada hijo con `.git`, más `.claude/settings.local.json`. Nunca haces commit.
+**For a workspace** (root without `.git` and child folders with `.git`; check using `find . -maxdepth 2 -name .git -not -path './.git'`): ask “¿Hacemos la raíz repo propio?” (recommended: “Sí”). Without an answer, do not run `git init`; state that it is pending. With “Sí”: run `git init` at the root and create `.gitignore` entries `/<folder>/` for each child with `.git`, plus `.claude/settings.local.json`. Never commit.
 
-## Cierre
+## Close
 
-Responde con:
+Respond with:
 
-1. La lista de archivos escritos, con ruta exacta.
-2. «Espero tu aprobación».
-3. El siguiente paso: si el proyecto tiene interfaz, `disenar-experiencia` antes del esqueleto de UI (deja `docs/experiencia.md` aprobado en la terminal); después, el plan del esqueleto (`./verify` con `preparar-proyecto`, con `repos:`). No lo escribes antes de la aprobación.
+1. The exact paths of files written.
+2. “Espero tu aprobación”.
+3. The next step: if the project has a UI, run `disenar-experiencia` before the UI skeleton (it leaves `docs/experiencia.md` approved in the terminal); then create the skeleton plan (`./verify` with `preparar-proyecto`, including `repos:`). Do not write that plan before approval.
 
-Luego te detienes.
+Then stop.

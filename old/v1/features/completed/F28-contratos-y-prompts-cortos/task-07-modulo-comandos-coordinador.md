@@ -1,6 +1,9 @@
 # task-07 — Crear la skill comandos-coordinador (copia, sin quitar nada del coordinador)
 repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Tercer módulo: la skill `comandos-coordinador` con lo que el `coordinador` usa pocas veces: la lista cerrada de comandos de `scripts/`, el aviso de archivo y contexto, el cierre de feature y el respaldo sin subagentes. Como en las tasks 03 y 05, solo se crea como copia y se enlaza con una mención que no hace crecer el archivo. Mover el texto es task-08.
 
@@ -14,7 +17,7 @@ Tercer módulo: la skill `comandos-coordinador` con lo que el `coordinador` usa 
 
 ## Decisiones ya tomadas
 - Front matter: `name: comandos-coordinador` y `description:` de 160 caracteres o menos (por ejemplo: «Comandos de scripts/ del coordinador (lista cerrada), aviso de archivo, cierre de feature y respaldo sin subagentes. Cárgala cuando toque alguno.»).
-- Cuerpo, con cuatro secciones copiadas tal cual: `## Comandos que puede correr`, `## Archivo y contexto`, `## Cierre de feature` (el texto de la celda de paso de la fila «Todas las tareas de la feature hecha», sin la parte que ya es de la tabla: pedir a Franco que confirme `hecha` y delegar `descomponer-feature`) y `## Respaldo sin subagentes`. Tope 5120 B.
+- Cuerpo, con cuatro secciones copiadas tal cual: `## Comandos que puede correr`, `## Archivo y contexto`, `## Cierre de feature` (el texto de la celda de paso de la fila «Todas las tareas de la feature hecha», sin la parte que ya es de la tabla: pedir a la persona usuaria que confirme `hecha` y delegar `descomponer-feature`) y `## Respaldo sin subagentes`. Tope 5120 B.
 - En el `coordinador` solo cambia la viñeta de `## Límites`, que pasa a: `Solo corres los comandos de la lista cerrada de ` + `comandos-coordinador` entre comillas invertidas + `, y solo a pedido explícito de Franco (salvo el cuarto).`. Las secciones y la fila siguen completas. El archivo no crece (tope de criterio 12800 B).
 - README: línea `│   ├── comandos-coordinador/` justo antes de `│   └── ejecutar-tarea/`.
 

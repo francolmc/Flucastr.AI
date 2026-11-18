@@ -1,8 +1,11 @@
 # task-05 — `coordinador`: `Evita leer:`, regla de mensajero y ausencia de `No leas:`
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-En la plantilla de encargo, `No leas:` pasa a `Evita leer:` (límite de contexto, no permiso duro). El `coordinador` no lee un archivo para pasar su contenido: pasa la ruta en `Lee:`. Ante `BLOQUEO:` con `motivo=lectura:` no delega la lectura: pregunta a Franco. Una prueba nueva exige que `No leas:` no vuelva al `coordinador`. El neto sobre el núcleo (6977 B, tope 7168) debe quedar por debajo de 7120 B, para dejar margen a `Disparó:` de F32.
+En la plantilla de encargo, `No leas:` pasa a `Evita leer:` (límite de contexto, no permiso duro). El `coordinador` no lee un archivo para pasar su contenido: pasa la ruta en `Lee:`. Ante `BLOQUEO:` con `motivo=lectura:` no delega la lectura: pregunta a la persona usuaria. Una prueba nueva exige que `No leas:` no vuelva al `coordinador`. El neto sobre el núcleo (6977 B, tope 7168) debe quedar por debajo de 7120 B, para dejar margen a `Disparó:` de F32.
 
 ## Contexto
 - Tocar: `agentes/coordinador.md`, `pruebas/comprobaciones/frases-por-archivo.mjs`, `pruebas/comprobaciones/lectura-extra.test.mjs`
@@ -27,7 +30,7 @@ Ninguna
 
 ## Alcance / Fuera de alcance
 Alcance: tres ediciones de texto en `coordinador.md`, una frase en el manifiesto y la prueba de ausencias.
-Fuera de alcance: `definitions/CONTRATOS.md` línea 17 (`No leas:` → `Evita leer:`) y `definitions/CONTEXTO.md` §2.2 y §5 (pendientes de puerta 1: los cambios en `definitions/` los decide Franco); `skills/revisar-proyecto-existente`; `Disparó:`; otros agentes; cualquier tope.
+Fuera de alcance: `definitions/CONTRATOS.md` línea 17 (`No leas:` → `Evita leer:`) y `definitions/CONTEXTO.md` §2.2 y §5 (pendientes de puerta 1: los cambios en `definitions/` los decide la persona usuaria); `skills/revisar-proyecto-existente`; `Disparó:`; otros agentes; cualquier tope.
 
 ## Pasos
 1. En `agentes/coordinador.md` reemplaza la cláusula `No leas:` de la línea 60 por la nueva.

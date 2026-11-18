@@ -1,6 +1,9 @@
 # task-02 — desinstalar.sh: quitar copias y exclusiones de skills en un proyecto
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `desinstalar.sh` debe entender el tipo de manifiesto nuevo `exclusion` y, con `--proyecto <ruta>`, quitar además del agente fijado las copias `.pi/skills/` y las líneas de exclusión de ese proyecto. Sin opciones sigue quitando todo lo registrado.
 
@@ -38,7 +41,7 @@ Fuera de alcance: `instalar.sh`, `instalar-remoto.sh`, borrar carpetas sin marca
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 T=$(mktemp -d); mkdir -p $T/home/.claude $T/p; git -C $T/p init -q; echo '*.log' >> $T/p/.git/info/exclude
 HOME=$T/home PI_CODING_AGENT_DIR=$T/home/pi bash instalar.sh --proyecto $T/p --skills-proyecto
 HOME=$T/home bash desinstalar.sh --simular --proyecto $T/p; ls $T/p/.pi/skills | wc -l
@@ -51,51 +54,51 @@ Esperado: `7` tras la simulación; después de quitar, `ls -A` solo `.git`, `exc
 
 ## Evidencia
 
-Verificación de la tarea, ejecutada tal cual con `bash -n desinstalar.sh` (OK) y con el guion `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/verif-t02.sh`. Ese guion usa HOME falso y proyectos temporales dentro del scratchpad; nunca toca `~/.pi` ni `~/.claude` reales. Salida completa, sin recortes (las rutas largas son del scratchpad):
+Verificación de la tarea, ejecutada tal cual con `bash -n desinstalar.sh` (OK) y con el guion `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/verif-t02.sh`. Ese guion usa HOME falso y proyectos temporales dentro del scratchpad; nunca toca `~/.pi` ni `~/.claude` reales. Salida completa, sin recortes (las rutas largas son del scratchpad):
 
 ```
-T=/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt
+T=/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt
 $ T=$(mktemp -d ...); mkdir -p $T/home/.claude $T/p; git -C $T/p init -q; echo '*.log' >> $T/p/.git/info/exclude
 $ HOME=$T/home PI_CODING_AGENT_DIR=$T/home/pi bash instalar.sh --proyecto $T/p --skills-proyecto
 exit instalar=0
 $ ls $T/p/.pi/skills | wc -l
        7
 $ HOME=$T/home bash desinstalar.sh --simular --proyecto $T/p
-SIMULACIÓN: quitaría el agente 'arquitecto' de: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.claude/settings.local.json
-  quitaría: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/crear-backlog
-  quitaría: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/definir-proyecto
-  quitaría: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/descomponer-feature
-  quitaría: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/disenar-arquitectura
-  quitaría: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/ejecutar-tarea
-  quitaría: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/generar-clonar
-  quitaría: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/revisar-proyecto-existente
-  quitaría exclusión: /.pi/skills/crear-backlog/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitaría exclusión: /.pi/skills/definir-proyecto/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitaría exclusión: /.pi/skills/descomponer-feature/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitaría exclusión: /.pi/skills/disenar-arquitectura/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitaría exclusión: /.pi/skills/ejecutar-tarea/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitaría exclusión: /.pi/skills/generar-clonar/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitaría exclusión: /.pi/skills/revisar-proyecto-existente/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+SIMULACIÓN: quitaría el agente 'arquitecto' de: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.claude/settings.local.json
+  quitaría: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/crear-backlog
+  quitaría: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/definir-proyecto
+  quitaría: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/descomponer-feature
+  quitaría: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/disenar-arquitectura
+  quitaría: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/ejecutar-tarea
+  quitaría: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/generar-clonar
+  quitaría: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/revisar-proyecto-existente
+  quitaría exclusión: /.pi/skills/crear-backlog/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitaría exclusión: /.pi/skills/definir-proyecto/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitaría exclusión: /.pi/skills/descomponer-feature/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitaría exclusión: /.pi/skills/disenar-arquitectura/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitaría exclusión: /.pi/skills/ejecutar-tarea/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitaría exclusión: /.pi/skills/generar-clonar/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitaría exclusión: /.pi/skills/revisar-proyecto-existente/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
   (las copias no se editan: si cambiaste algo dentro, se pierde)
 SIMULACIÓN: no se borra nada.
 $ ls $T/p/.pi/skills | wc -l
        7
 $ HOME=$T/home bash desinstalar.sh --proyecto $T/p; ls -A $T/p; cat $T/p/.git/info/exclude | grep -v '^#'; cut -f1 $T/home/.flucastr-ai/manifiesto.txt | sort | uniq -c
-  ajuste de proyecto (archivo-quitado): /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.claude/settings.local.json
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/crear-backlog
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/definir-proyecto
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/descomponer-feature
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/disenar-arquitectura
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/ejecutar-tarea
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/generar-clonar
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/revisar-proyecto-existente
-  quitada exclusión: /.pi/skills/crear-backlog/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitada exclusión: /.pi/skills/definir-proyecto/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitada exclusión: /.pi/skills/descomponer-feature/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitada exclusión: /.pi/skills/disenar-arquitectura/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitada exclusión: /.pi/skills/ejecutar-tarea/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitada exclusión: /.pi/skills/generar-clonar/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
-  quitada exclusión: /.pi/skills/revisar-proyecto-existente/ (/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  ajuste de proyecto (archivo-quitado): /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.claude/settings.local.json
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/crear-backlog
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/definir-proyecto
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/descomponer-feature
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/disenar-arquitectura
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/ejecutar-tarea
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/generar-clonar
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.pi/skills/revisar-proyecto-existente
+  quitada exclusión: /.pi/skills/crear-backlog/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitada exclusión: /.pi/skills/definir-proyecto/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitada exclusión: /.pi/skills/descomponer-feature/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitada exclusión: /.pi/skills/disenar-arquitectura/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitada exclusión: /.pi/skills/ejecutar-tarea/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitada exclusión: /.pi/skills/generar-clonar/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
+  quitada exclusión: /.pi/skills/revisar-proyecto-existente/ (/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p/.git/info/exclude)
   (las copias no se editan: si cambiaste algo dentro, se pierde)
 $ ls -A $T/p
 .git
@@ -108,34 +111,34 @@ $ cut -f1 $T/home/.flucastr-ai/manifiesto.txt | sort | uniq -c
   14 enlace
    1 modo
 $ HOME=$T/home bash desinstalar.sh --proyecto $T/p   (repetir)
-Este instalador no instaló nada en /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p.
+Este instalador no instaló nada en /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/p.
 $ HOME=$T/home bash desinstalar.sh; ls $T/home/.flucastr-ai
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/crear-backlog
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/definir-proyecto
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/descomponer-feature
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/disenar-arquitectura
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/ejecutar-tarea
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/generar-clonar
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/revisar-proyecto-existente
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/agents/arquitecto.md
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/agents/constructor.md
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/agents/coordinador.md
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/agents/planificador.md
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/crear-backlog
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/definir-proyecto
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/descomponer-feature
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/disenar-arquitectura
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/ejecutar-tarea
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/generar-clonar
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/revisar-proyecto-existente
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/agents/arquitecto.md
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.local/bin/pi-arquitecto
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/agents/constructor.md
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.local/bin/pi-constructor
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/agents/coordinador.md
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.local/bin/pi-coordinador
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/agents/planificador.md
-  quitado: /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.local/bin/pi-planificador
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/crear-backlog
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/definir-proyecto
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/descomponer-feature
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/disenar-arquitectura
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/ejecutar-tarea
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/generar-clonar
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/skills/revisar-proyecto-existente
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/agents/arquitecto.md
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/agents/constructor.md
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/agents/coordinador.md
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.claude/agents/planificador.md
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/crear-backlog
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/definir-proyecto
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/descomponer-feature
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/disenar-arquitectura
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/ejecutar-tarea
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/generar-clonar
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/skills/revisar-proyecto-existente
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/agents/arquitecto.md
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.local/bin/pi-arquitecto
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/agents/constructor.md
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.local/bin/pi-constructor
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/agents/coordinador.md
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.local/bin/pi-coordinador
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/pi/agents/planificador.md
+  quitado: /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/f17-t02-ZiMt/home/.local/bin/pi-planificador
 Listo. Reinicia Claude Code y Pi.
 ls: T/home/.flucastr-ai: No such file or directory
 $ bash desinstalar.sh -h
@@ -194,7 +197,7 @@ $ ls $Q/home/.claude/skills | wc -l; ls $Q/home/.claude/agents | wc -l; ls $Q/ho
        4
 
 == Suite rápida ==
-$ bash pruebas/rapida.sh   (salida completa en /private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-despues.txt)
+$ bash pruebas/rapida.sh   (salida completa en /private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-despues.txt)
 ℹ tests 220
 ℹ pass 220
 ℹ fail 0
@@ -209,7 +212,7 @@ Criterios de aceptación contra la evidencia:
 4. `--simular` no cambia nada: 46 archivos con hash igual antes y después. Cumplido.
 5. Proyecto sin nada registrado: `Este instalador no instaló nada en …` y salida 0. Cumplido.
 
-Suite rápida antes del cambio, en esta misma máquina (`bash pruebas/rapida.sh`, salida en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-antes.txt`):
+Suite rápida antes del cambio, en esta misma máquina (`bash pruebas/rapida.sh`, salida en `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-antes.txt`):
 ```
 ℹ tests 220
 ℹ pass 220
@@ -229,7 +232,7 @@ exit=0
   7. `--proyecto` con `skills-proyecto` ya no exige la línea `ajuste`: el aviso «no fijó ningún agente» se sustituye por «no instaló nada en …» (criterio 5).
 - Pruebas: `bash pruebas/rapida.sh` pasa 220/220 antes y después del cambio, en esta máquina. No hubo fallos que anotar. Los 7 fallos de la tarea anterior no se reprodujeron aquí.
 - Las ejecuciones de desarrollo previas a la verificación final (escenarios A, B, C, D y la comprobación literal) no cuentan en `intentos`; la final, con su salida completa, es la de *Evidencia*.
-- Revisión sugerida para Franco: *Evidencia* (salida completa y criterios) y el diff de `desinstalar.sh` (`git diff -- desinstalar.sh`). Sin commit, sin push.
+- Revisión sugerida para la persona usuaria: *Evidencia* (salida completa y criterios) y el diff de `desinstalar.sh` (`git diff -- desinstalar.sh`). Sin commit, sin push.
 
 Señal: la tarea estaba incompleta. Faltaban reglas de limpieza de carpetas vacías (`.claude`, `.pi/skills`, `.pi`), el tratamiento de una copia sin marca registrada y el de un proyecto que dejó de ser repo git (huecos 1 a 4).
 

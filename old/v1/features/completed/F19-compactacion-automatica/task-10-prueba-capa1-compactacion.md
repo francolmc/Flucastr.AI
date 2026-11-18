@@ -1,6 +1,9 @@
 # task-10 — Prueba Capa 1: instalar y desinstalar la compactación, de punta a punta
 repo: Flucastr.AI   depende_de: task-09   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Prueba determinista (sin modelo ni red) de `instalar.sh` y `desinstalar.sh` con la compactación: lo que se escribe en el `settings.json` de Pi y en el `settings.local.json` de un proyecto, el manifiesto, la simetría de instalar/desinstalar, el respeto a lo del usuario, `--simular` y la reinstalación. Todo en un HOME temporal; nunca toca `~/.claude`, `~/.pi` ni `~/.flucastr-ai` reales. Con controles negativos.
 
@@ -43,7 +46,7 @@ Fuera de alcance: `instalar.sh`, `desinstalar.sh`, `scripts/resolver.mjs` (si la
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 A=$(mktemp); ls -A ~/.flucastr-ai > "$A" 2>&1
 time node --test pruebas/capa1/compactacion.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 ls -A ~/.flucastr-ai 2>&1 | diff - "$A" && echo home-real-intacto
@@ -77,7 +80,7 @@ Medidas de tiempo de `node --test pruebas/capa1/compactacion.test.mjs` sin tuber
 
 Casos (los 9 de la prueba, salida de la última corrida: `✔ a` a `✔ f2`): a 409 ms, b 1125 ms, c 971 ms, d 256 ms, e1 295 ms, e2 345 ms, e3 352 ms, f1 611 ms, f2 276 ms.
 
-Rápida (HOME real, `bash pruebas/rapida.sh`, una sola corrida, salida en `/private/tmp/claude-501/-Users-franco-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-task10.txt`):
+Rápida (HOME real, `bash pruebas/rapida.sh`, una sola corrida, salida en `/private/tmp/claude-501/-Users-persona-Codes-flucastr-Flucastr-AI/26debbe9-769d-4d52-8367-7980c60021e5/scratchpad/rapida-task10.txt`):
 ```
 $ bash pruebas/rapida.sh > …/rapida-task10.txt 2>&1; echo exit=$?
 exit=1  (13 s de pared)
@@ -101,10 +104,10 @@ Criterios de aceptación:
 - Modo yolo: sin rama nueva ni `git switch`; sin commit.
 - Paso 1: lectura de `skills-proyecto.test.mjs` y de la salida de task-08/task-09. Mensajes reales que usa el archivo: `compactación fijada:`, `Pi no relee settings.json`, `OMITIDO (ya define compaction para openai/gpt-6.1-sol: se respeta)`, `AVISO: no se tocó`, `(simulación) compactación de Claude Code fijada`, `OMITIDO (el proyecto ya define autoCompactWindow: se respeta)`, `OMITIDO (modelos.json no declara la ventana de`.
 - Huecos menores resueltos (decisión conservadora):
-  1. Tope de llamadas: la tarea pide como máximo 10 llamadas a `instalar.sh`/`desinstalar.sh`, pero los casos a–f exigen 14 (a: 2, b: 4, c: 4, d: 1, e1–e3: 3). Mantuve los casos, porque quitar uno dejaría sin comprobar un criterio. Franco debe decidir si sube el tope o recorta casos.
+  1. Tope de llamadas: la tarea pide como máximo 10 llamadas a `instalar.sh`/`desinstalar.sh`, pero los casos a–f exigen 14 (a: 2, b: 4, c: 4, d: 1, e1–e3: 3). Mantuve los casos, porque quitar uno dejaría sin comprobar un criterio. la persona usuaria debe decidir si sube el tope o recorta casos.
   2. Restauración del HOME: tras desinstalar quedan directorios vacíos que crea el kit (`.claude/agents`, `.claude/skills`, `.local/bin`, `pi/agents`, `pi/skills`). No son de la compactación y el caso I3 de `instalacion.test.mjs` ya los excluye (`persistentes` filtra `tipo: 'directorio'`). En a y c la comparación tras desinstalar usa solo archivos y enlaces (`sinDirectorios`); en d, la simulación, la comparación es estricta. El kit deja esas carpetas: fuera de alcance, no se corrigió.
   3. `perdidas` no estaba definido en la tarea: recorre las hojas de `antes` y reporta la clave de nivel superior de cada hoja perdida o cambiada. Así `compaction.modelOverrides["openai/gpt-6.1-sol"]` del usuario cuenta como hoja, y el resultado real da `[]`.
-- Tiempo: el criterio «menos de 6 s» queda al límite (4,7 a 5,8 s sin tubería; una medida de 6,416 s con tubería). Si Franco quiere holgura, lo más directo es reducir llamadas (ver hueco 1).
-- Fallo fuera de alcance en la rápida: `pruebas/comprobaciones/registro.e2e.test.mjs:51`, «fallo duro del escenario imprime resumen, devuelve error y detiene la serie»: el marcador (`flucastr-scenario-<pid>` en `os.tmpdir()`) se añadió dos veces (2 !== 1). No lo investigué a fondo ni edité nada; solo corrí `rapida.sh` una vez, como se pidió. Está fuera de esta tarea; el coordinador o Franco deciden si requiere BLOQUEO.
+- Tiempo: el criterio «menos de 6 s» queda al límite (4,7 a 5,8 s sin tubería; una medida de 6,416 s con tubería). Si la persona usuaria quiere holgura, lo más directo es reducir llamadas (ver hueco 1).
+- Fallo fuera de alcance en la rápida: `pruebas/comprobaciones/registro.e2e.test.mjs:51`, «fallo duro del escenario imprime resumen, devuelve error y detiene la serie»: el marcador (`flucastr-scenario-<pid>` en `os.tmpdir()`) se añadió dos veces (2 !== 1). No lo investigué a fondo ni edité nada; solo corrí `rapida.sh` una vez, como se pidió. Está fuera de esta tarea; el coordinador o la persona usuaria deciden si requiere BLOQUEO.
 - Señal: la tarea estaba incompleta: el tope de 10 llamadas no cuadra con los casos a–f.
 - Registro: n=1; herramienta=claude-code; modo=yolo; intentos=1; verificacion=pasa; huecos=3; resultado=lista; causa=ninguna

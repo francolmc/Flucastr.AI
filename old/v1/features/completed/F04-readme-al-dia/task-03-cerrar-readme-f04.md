@@ -1,15 +1,18 @@
 # task-03 — Dejar el README coherente con el cierre de F04
 repo: Flucastr.AI   depende_de: task-01, task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`README.md` todavía dice, en la línea 5, «falta cerrar una feature real de punta a punta» y, al final de `## Flujo` (línea 91), «Pendiente: cerrar una feature real de punta a punta (`definitions/BACKLOG.md`, F04)». Tras task-01 (README fiel al kit) y task-02 (comprobación de su estructura, ya en `pruebas/rapida.sh`), F04 hizo lo que prometía su título. Esta tarea cambia solo esas dos frases y agrega una viñeta a la bitácora, con el texto exacto de *Decisiones ya tomadas*, sin afirmar nada que no esté verificado. Además deja, en *Notas*, una calibración de las cifras de «acotada» de `descomponer-feature` con lo observado en F01 a F04, solo como propuesta para Franco.
+`README.md` todavía dice, en la línea 5, «falta cerrar una feature real de punta a punta» y, al final de `## Flujo` (línea 91), «Pendiente: cerrar una feature real de punta a punta (`definitions/BACKLOG.md`, F04)». Tras task-01 (README fiel al kit) y task-02 (comprobación de su estructura, ya en `pruebas/rapida.sh`), F04 hizo lo que prometía su título. Esta tarea cambia solo esas dos frases y agrega una viñeta a la bitácora, con el texto exacto de *Decisiones ya tomadas*, sin afirmar nada que no esté verificado. Además deja, en *Notas*, una calibración de las cifras de «acotada» de `descomponer-feature` con lo observado en F01 a F04, solo como propuesta para la persona usuaria.
 
 ## Contexto
-- Repo: este, único repo (`/Users/franco/Codes/flucastr/Flucastr.AI`). Único archivo a tocar: `README.md` (101 líneas, leído). La calibración de *Notas* ya está escrita por el planificador; el constructor no la edita.
+- Repo: este, único repo (`/Users/persona/Codes/flucastr/Flucastr.AI`). Único archivo a tocar: `README.md` (101 líneas, leído). La calibración de *Notas* ya está escrita por el planificador; el constructor no la edita.
 - Texto actual (leído): línea 5 `> Estado: MVP en construcción (2026-10-29). Arquitecto, coordinador, planificador y constructor existen; falta cerrar una feature real de punta a punta.`; línea 91 termina en `Pendiente: cerrar una feature real de punta a punta (`definitions/BACKLOG.md`, F04).`; última viñeta de `## Bitácora` en la línea 101: `- 2026-10-29: existen coordinador, planificador y constructor; el README se actualiza a ese estado.`
-- Hechos verificados que sustentan el texto nuevo: en `definitions/BACKLOG.md` F01, F02 y F03 están `hecha`; las dos tareas de `features/F04-readme-al-dia/` (task-01 y task-02) están `hecha`; existen `pruebas/comprobaciones/readme-estructura.mjs` y `.test.mjs`; `bash pruebas/rapida.sh` termina con `ℹ fail 0` y `rapida: 16 archivos en 16 s (tope 30 s)` (ejecutado). F04 sigue `pendiente` en el backlog: su cierre lo hace Franco, por eso el texto no dice que F04 esté `hecha` ni que se haya completado una feature «de punta a punta».
+- Hechos verificados que sustentan el texto nuevo: en `definitions/BACKLOG.md` F01, F02 y F03 están `hecha`; las dos tareas de `features/F04-readme-al-dia/` (task-01 y task-02) están `hecha`; existen `pruebas/comprobaciones/readme-estructura.mjs` y `.test.mjs`; `bash pruebas/rapida.sh` termina con `ℹ fail 0` y `rapida: 16 archivos en 16 s (tope 30 s)` (ejecutado). F04 sigue `pendiente` en el backlog: su cierre lo hace la persona usuaria, por eso el texto no dice que F04 esté `hecha` ni que se haya completado una feature «de punta a punta».
 - La prueba `readme-estructura` solo mira el bloque de código de `## Estructura`; estas ediciones no lo tocan.
-- Convención: el README habla en primera persona de Franco («lo hago yo», «abro»). Las frases se copian tal cual.
+- Convención: el README habla en primera persona de la persona usuaria («lo hago yo», «abro»). Las frases se copian tal cual.
 
 ## Decisiones ya tomadas
 Texto exacto (una línea cada uno; sin cambiar nada más de la línea o párrafo salvo lo indicado):
@@ -27,7 +30,7 @@ Texto exacto (una línea cada uno; sin cambiar nada más de la línea o párrafo
 Alcance: las tres ediciones de arriba en `README.md`.
 
 Fuera de alcance:
-- `definitions/BACKLOG.md` y `definitions/STATUS.md` (los mueve Franco o el coordinador), y las tareas task-01 y task-02.
+- `definitions/BACKLOG.md` y `definitions/STATUS.md` (los mueve la persona usuaria o el coordinador), y las tareas task-01 y task-02.
 - La skill `descomponer-feature`: la calibración de *Notas* es propuesta, no se aplica.
 - El bloque de código de `## Estructura`, `pruebas/` y cualquier otro archivo.
 - Commit, push, PR, merge o despliegue.
@@ -47,7 +50,7 @@ Fuera de alcance:
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -c "falta cerrar" README.md
 sed -n 5p README.md
 grep -c "Pendiente: cerrar una feature real" README.md; grep -c "su cierre en .definitions/BACKLOG.md. lo hago yo" README.md
@@ -60,7 +63,7 @@ Salida esperada: `0`; la línea de la decisión 1; `0` y `1`; la viñeta de la d
 ## Evidencia
 Pasos ejecutados en `README.md` (tres ediciones con Edit): línea 5 sustituida por la decisión 1; frase final de `## Flujo` sustituida por la decisión 2; viñeta de la decisión 3 agregada al final de `## Bitácora`.
 
-Verificación (salida real, `cd /Users/franco/Codes/flucastr/Flucastr.AI`):
+Verificación (salida real, `cd /Users/persona/Codes/flucastr/Flucastr.AI`):
 ```
 $ grep -c "falta cerrar" README.md
 0
@@ -110,4 +113,4 @@ Observado leyendo las 17 tareas de F01 a F04 y sus *Notas*; los conteos de pasos
 - Huecos menores por tarea: 1 a 4, todos resueltos por el constructor sin escalar; en ninguna apareció la señal de tarea incompleta.
 - Desvíos: (a) F01 task-04 quedó `bloqueada` porque su prueba real dependía del estado de `definitions/BACKLOG.md` (borrador y 7 features), un documento fuera de la tarea; (b) F01 task-02 usó `PIPESTATUS`, que zsh no define, y F02 task-03 fijó «9 archivos» cuando eran 10: cifras y comandos de la verificación que se rompen por el entorno, no por el tamaño; (c) F03 necesitó task-06 después de task-05 porque la corrida real reveló un permiso faltante: ese descubrimiento no se prevé por tamaño; (d) F04 task-01 reintentó una edición por un texto distinto al del archivo (el árbol de `## Estructura`).
 - Lectura: lo que falló no fue el tamaño sino dos cosas: verificación que depende de un valor ajeno a la tarea (conteos, estado de otro documento, comandos de un shell) y huecos de convenciones menores.
-- Propuesta a Franco (no aplicada): (1) bajar «~5 archivos tocados» a «~3» en `skills/descomponer-feature/SKILL.md`, porque 3 fue el máximo real y 5 ya no protege nada; (2) dejar «hasta ~8 pasos» y «5 criterios» como están, el máximo observado (7 y 5) cabe; (3) agregar a la lista «Completa» una línea: «la verificación no fija conteos ni estados de otros documentos que la tarea no controla; si los necesita, los lee en vivo». No cambiar nada si prefieres esperar más features: con 17 tareas sin partir, el riesgo de dejar las cifras es bajo.
+- Propuesta a la persona usuaria (no aplicada): (1) bajar «~5 archivos tocados» a «~3» en `skills/descomponer-feature/SKILL.md`, porque 3 fue el máximo real y 5 ya no protege nada; (2) dejar «hasta ~8 pasos» y «5 criterios» como están, el máximo observado (7 y 5) cabe; (3) agregar a la lista «Completa» una línea: «la verificación no fija conteos ni estados de otros documentos que la tarea no controla; si los necesita, los lee en vivo». No cambiar nada si prefieres esperar más features: con 17 tareas sin partir, el riesgo de dejar las cifras es bajo.

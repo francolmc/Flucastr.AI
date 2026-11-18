@@ -1,6 +1,9 @@
 # task-03 — Coordinador y planificador: avisos de archivo y `completed/` fuera de lectura
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Los agentes aplican §10.4 y §10.5 de `definitions/WORKFLOW.md`: el `coordinador` y el `planificador` no entran en `features/completed/` al listar `features/`, y el `coordinador` avisa en «Espera a Franco» cuando una feature es archivable o cuando el contexto creció, sin ejecutar nunca `--aplicar`. Un validador determinista (regla 13 en `contrato-roles.mjs`) fija las frases clave.
 
@@ -10,12 +13,12 @@ Los agentes aplican §10.4 y §10.5 de `definitions/WORKFLOW.md`: el `coordinado
 - `instalar.sh` genera los agentes instalados desde `agentes/*.md`; no se toca.
 
 ## Decisiones ya tomadas
-- **Desviación de §10.5, decidida por el planificador y a confirmar por Franco:** `definitions/WORKFLOW.md` §10.5 dice que el `coordinador` «corre el chequeo», pero su `tools:` no incluye Bash y añadírselo ampliaría su permiso (puede ejecutar cualquier comando; hoy escribe solo `STATUS.md` y estados). Esta tarea **no** añade Bash. El `coordinador` escribe en «Espera a Franco» el comando que Franco corre (`node scripts/archivar.mjs`, o `node scripts/archivar.mjs --aplicar Fxx`) y puede razonar con la salida si Franco la pega en la conversación. Si Franco prefiere dar Bash al coordinador, es un cambio de `definitions/` (puerta 1) y de `tools:` aparte.
+- **Desviación de §10.5, decidida por el planificador y a confirmar por la persona usuaria:** `definitions/WORKFLOW.md` §10.5 dice que el `coordinador` «corre el chequeo», pero su `tools:` no incluye Bash y añadírselo ampliaría su permiso (puede ejecutar cualquier comando; hoy escribe solo `STATUS.md` y estados). Esta tarea **no** añade Bash. El `coordinador` escribe en «Espera a Franco» el comando que la persona usuaria corre (`node scripts/archivar.mjs`, o `node scripts/archivar.mjs --aplicar Fxx`) y puede razonar con la salida si la persona usuaria la pega en la conversación. Si la persona usuaria prefiere dar Bash al coordinador, es un cambio de `definitions/` (puerta 1) y de `tools:` aparte.
 - Texto exacto que se añade al `coordinador`:
   1. En «Qué lees para decidir», al final: «Al listar `features/` no entres en `features/completed/`: es archivo y no se lee salvo pedido explícito de Franco.»
-  2. En la fila de la tabla «Todas las tareas de la feature `hecha`», tras la confirmación de `hecha` de la feature por Franco, una línea más en «Espera a Franco»: «Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx` (lo corre Franco, después del PR y en su propio commit `chore/`).» No es escalación. Nunca ejecutas `--aplicar`; en yolo no escribes ese aviso.
-  3. Nueva sección «Archivo y contexto» (antes de «Bloqueos») con: antes de delegar `descomponer-feature` (puerta 3) añade a «Espera a Franco» la línea «Chequeo de contexto: `node scripts/archivar.mjs`» como recomendación, sin bloquear; el chequeo y `--aplicar` los corre Franco; en yolo no hay aviso ni archivo.
-- Texto exacto que se añade al `planificador`: en «Límites», un punto: «No entras en `features/completed/` (archivo): al listar `features/` lo omites. Compactar las filas `hecha` del backlog (una línea de «Por qué», hasta ~300 caracteres) lo haces solo si Franco lo pide, y queda para su aprobación (puerta 2).»
+  2. En la fila de la tabla «Todas las tareas de la feature `hecha`», tras la confirmación de `hecha` de la feature por la persona usuaria, una línea más en «Espera a Franco»: «Feature Fxx archivable: `node scripts/archivar.mjs --aplicar Fxx` (lo corre Franco, después del PR y en su propio commit `chore/`).» No es escalación. Nunca ejecutas `--aplicar`; en yolo no escribes ese aviso.
+  3. Nueva sección «Archivo y contexto» (antes de «Bloqueos») con: antes de delegar `descomponer-feature` (puerta 3) añade a «Espera a Franco» la línea «Chequeo de contexto: `node scripts/archivar.mjs`» como recomendación, sin bloquear; el chequeo y `--aplicar` los corre la persona usuaria; en yolo no hay aviso ni archivo.
+- Texto exacto que se añade al `planificador`: en «Límites», un punto: «No entras en `features/completed/` (archivo): al listar `features/` lo omites. Compactar las filas `hecha` del backlog (una línea de «Por qué», hasta ~300 caracteres) lo haces solo si la persona usuaria lo pide, y queda para su aprobación (puerta 2).»
 - Regla 13 en `contrato-roles.mjs`: `coordinador` debe contener las frases `node scripts/archivar.mjs --aplicar Fxx` y `features/completed/`; `planificador` debe contener `features/completed/`. Mensajes de error en español con el patrón de la regla 11: «El agente «X» debe contener la frase «…».»
 - Prueba: el fixture válido de `contrato-roles.test.mjs` incluye las frases en `coordinador` y `planificador`; tres controles negativos (el `coordinador` pierde `node scripts/archivar.mjs --aplicar Fxx`; el `coordinador` pierde `features/completed/`; el `planificador` pierde `features/completed/`) cuyo error menciona la frase quitada, con el estilo de `variantesF05`.
 
@@ -113,9 +116,9 @@ Criterios de aceptación:
 5. `bash pruebas/rapida.sh` pasa en 22 s (tope 30 s), código 0. Cumplido.
 
 ## Notas
-- Decisión de Franco (2026-10-30) aplicada: el coordinador no tiene Bash y no ejecuta `scripts/archivar.mjs`; el texto lo dice en «Archivo y contexto» y en la fila de «hecha».
+- Decisión de la persona usuaria (2026-10-30) aplicada: el coordinador no tiene Bash y no ejecuta `scripts/archivar.mjs`; el texto lo dice en «Archivo y contexto» y en la fila de «hecha».
 - Hueco menor 1: la fila de la tabla «Todas las tareas de la feature `hecha`» es una sola línea de tabla, así que la línea de «Feature Fxx archivable» va dentro de la celda, escrita como frase entre comillas «…», no como línea aparte. Mismo texto exacto.
 - Hueco menor 2: en «Archivo y contexto» escribí «Tú no tienes Bash» para dejarlo explícito, además de la prohibición de `--aplicar`.
-- Desviación respecto al paso 1 de la tarea: `grep -c "archivar.mjs" agentes/coordinador.md` devuelve 2, no «al menos 3». La tarea pedía tres piezas de texto; las piezas que nombran `archivar.mjs` son la fila de «hecha» (una línea) y «Archivo y contexto» (una línea): ambas están y cumplen la regla 13 y los criterios de aceptación. La cifra del paso 1 es el único resultado de la verificación que no se cumple literalmente; lo dejo a criterio de Franco.
+- Desviación respecto al paso 1 de la tarea: `grep -c "archivar.mjs" agentes/coordinador.md` devuelve 2, no «al menos 3». La tarea pedía tres piezas de texto; las piezas que nombran `archivar.mjs` son la fila de «hecha» (una línea) y «Archivo y contexto» (una línea): ambas están y cumplen la regla 13 y los criterios de aceptación. La cifra del paso 1 es el único resultado de la verificación que no se cumple literalmente; lo dejo a criterio de la persona usuaria.
 - `rapida.sh` deja la carpeta `pruebas/.temporales/capa1-…` («Entorno conservado») como efecto de la propia suite; no la he tocado.
 - No se ejecutó `--aplicar` sobre el repo real. No hay commit, push, PR, merge ni cambios en `definitions/`.

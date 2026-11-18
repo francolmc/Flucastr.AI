@@ -1,8 +1,11 @@
 # task-05 — Refinado previo: el planificador devuelve REFINAR y el coordinador lo tramita
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`definitions/WORKFLOW.md` §9.2 define un refinado previo a la puerta 3, solo cuando se requiere: el planificador puede devolver hasta 5 preguntas con recomendación en vez de descomponer, el coordinador las traslada a Franco y, con las respuestas, el planificador las guarda en `features/Fxx-nombre/refinado.md` y descompone. Esta tarea escribe esa regla en los tres textos que la ejecutan.
+`definitions/WORKFLOW.md` §9.2 define un refinado previo a la puerta 3, solo cuando se requiere: el planificador puede devolver hasta 5 preguntas con recomendación en vez de descomponer, el coordinador las traslada a la persona usuaria y, con las respuestas, el planificador las guarda en `features/Fxx-nombre/refinado.md` y descompone. Esta tarea escribe esa regla en los tres textos que la ejecutan.
 
 ## Contexto
 - Repo: este, único repo. Leídos: `agentes/planificador.md` (secciones `## Principios`, `## Límites`, `## Bloqueos`, `## Skills disponibles`, `## Cómo trabajas`; el paso 3 de «Cómo trabajas» dice «máximo cinco preguntas, agrupadas»), `skills/descomponer-feature/SKILL.md` (`## Pasos` 1 a 5, `## Plantilla`, `## Completa`, `## Acotada`, `## Al terminar`) y `agentes/coordinador.md` (tras task-04 tiene `## Ramas por feature`; esta tarea parte de ese estado).
@@ -12,9 +15,9 @@ repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
 ## Decisiones ya tomadas
 - Criterio verificable (copiar literal de WORKFLOW §9.2, en el skill): «El refinado se requiere si puedes formular al menos una pregunta de alcance con dos o más respuestas razonables que producirían listas de tareas distintas y esa pregunta no está resuelta en `BACKLOG.md`, `PROJECT.md` ni en un `refinado.md` existente; si no puedes formularla, se omite y descompones directamente.»
-- Nuevo paso 0 en `## Pasos` de `descomponer-feature`, titulado «Refinado (solo si se requiere)», antes del actual paso 1 (los demás pasos mantienen su número: el 0 no los renumera). Contenido: aplica el criterio; si no se requiere, sigue al paso 1; si se requiere y no hay `refinado.md` con las respuestas, no crees tareas y termina con la primera línea exacta `REFINAR: feature=Fxx; preguntas=<n>` seguida de hasta 5 preguntas numeradas, de más a menos importante, cada una con su opción recomendada; si el encargo trae las respuestas de Franco, escríbelas en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea; secciones por pregunta con la respuesta) y descompón; cada tarea cita `features/Fxx-nombre/refinado.md` en *Decisiones ya tomadas*.
+- Nuevo paso 0 en `## Pasos` de `descomponer-feature`, titulado «Refinado (solo si se requiere)», antes del actual paso 1 (los demás pasos mantienen su número: el 0 no los renumera). Contenido: aplica el criterio; si no se requiere, sigue al paso 1; si se requiere y no hay `refinado.md` con las respuestas, no crees tareas y termina con la primera línea exacta `REFINAR: feature=Fxx; preguntas=<n>` seguida de hasta 5 preguntas numeradas, de más a menos importante, cada una con su opción recomendada; si el encargo trae las respuestas de la persona usuaria, escríbelas en `features/Fxx-nombre/refinado.md` (un archivo de decisiones, no una tarea; secciones por pregunta con la respuesta) y descompón; cada tarea cita `features/Fxx-nombre/refinado.md` en *Decisiones ya tomadas*.
 - `agentes/planificador.md`: nueva sección `## Refinado` antes de `## Skills disponibles`, con el criterio en una frase, la línea `REFINAR: feature=Fxx; preguntas=<n>` y que no es un bloqueo ni una puerta; en `## Límites`, «Solo escribes `definitions/BACKLOG.md` y `features/**`» ya cubre `refinado.md`, no se cambia.
-- `agentes/coordinador.md`: nueva fila en la tabla de decisión: «El `planificador` responde con la primera línea `REFINAR: feature=Fxx; preguntas=<n>`» → «No es puerta ni bloqueo: registra las preguntas en «Espera a Franco» de `STATUS.md`, pregúntaselas a Franco en la conversación y te detienes. Con sus respuestas, vuelve a delegar al `planificador` (`descomponer-feature`) incluyendo las respuestas en el encargo». La fila no debe contener estados de tarea ajenos al sentido de la fila.
+- `agentes/coordinador.md`: nueva fila en la tabla de decisión: «El `planificador` responde con la primera línea `REFINAR: feature=Fxx; preguntas=<n>`» → «No es puerta ni bloqueo: registra las preguntas en «Espera a Franco» de `STATUS.md`, pregúntaselas a la persona usuaria en la conversación y te detienes. Con sus respuestas, vuelve a delegar al `planificador` (`descomponer-feature`) incluyendo las respuestas en el encargo». La fila no debe contener estados de tarea ajenos al sentido de la fila.
 - No hay conteo fijo de preguntas más allá del máximo 5 ya aprobado. Yolo no se menciona (es F06).
 
 ## Alcance / Fuera de alcance
@@ -46,7 +49,7 @@ Esperado: cada `grep -c` muestra un número mayor que 0 por archivo; las pruebas
 
 ## Evidencia
 
-Salida real, en `/Users/franco/Codes/flucastr/Flucastr.AI`:
+Salida real, en `/Users/persona/Codes/flucastr/Flucastr.AI`:
 
 ```
 $ grep -c -F 'REFINAR: feature=Fxx; preguntas=<n>' agentes/planificador.md skills/descomponer-feature/SKILL.md agentes/coordinador.md

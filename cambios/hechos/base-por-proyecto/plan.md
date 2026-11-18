@@ -6,14 +6,16 @@ ejecutor: constructor
 ---
 # Rama base de desarrollo por proyecto (develop, main u otra)
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 El principal y el constructor reconocen la rama donde el proyecto trabaja (p. ej. `develop`, con `main` solo para liberar) en vez de exigir siempre la rama principal del remoto; sin declararla, todo sigue igual que hoy.
 
 ## Supuestos
-- La base se declara una vez en el `AGENTS.md` del proyecto («Rama base: develop») y el principal la copia a `base:` en cada plan. Si Franco prefiere solo preguntarla en cada plan, se quita un paso.
+- La base se declara una vez en el `AGENTS.md` del proyecto («Rama base: develop») y el principal la copia a `base:` en cada plan. Si la persona usuaria prefiere solo preguntarla en cada plan, se quita un paso.
 - Sin `base:` en el plan vale lo de hoy: rama de `origin/HEAD`; sin remoto, `main` o `master`. Así los proyectos que trabajan sobre `main` no cambian.
 - `base:` es un nombre (vale para todas las carpetas de `repos:`) o un mapa `{carpeta: rama}` si en un workspace varían.
-- El PR de cada cambio apunta a su base. Liberar `develop` a `main` lo hace Franco a mano; el kit no lo toca.
+- El PR de cada cambio apunta a su base. Liberar `develop` a `main` lo hace la persona usuaria a mano; el kit no lo toca.
 
 ## Alcance
 `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, `skills/preparar-proyecto/SKILL.md`, `agentes/principal.md`, `agentes/constructor.md`, `AGENTS.md`, `verify` (bloque 8h).
@@ -24,7 +26,7 @@ Fuera de alcance: `instalar.sh`, resolver, `modelos.json`, `old/`, liberar a `ma
 - Texto único de la regla, para copiar igual en los tres lugares: «Rama base de una carpeta de `repos:`: la de `base:` del plan; sin `base:`, la de `git symbolic-ref --short refs/remotes/origin/HEAD`; sin remoto, `main` o `master`.»
 - Si el repo está en una rama distinta de la base y el plan no trae `base:`, el principal pregunta cerrado: «¿`<rama actual>` es tu rama base?» (sí: la anota en `AGENTS.md` del proyecto y en `base:`) o «es un cambio sin mergear» (esperar el PR/merge).
 - Mantener las frases «rama base» en constructor y ejecutar-plan: el bloque 8f de `verify` las busca.
-- Las copias de `~/.claude` y `~/.pi` se generan desde el repo: Franco reinstala tras el merge.
+- Las copias de `~/.claude` y `~/.pi` se generan desde el repo: la persona usuaria reinstala tras el merge.
 
 ## Escenarios
 - CUANDO el plan trae `base: develop` y el repo está en `develop`, limpio y al día ENTONCES el principal sigue sin preguntar y el constructor crea la rama desde `develop`.

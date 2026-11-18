@@ -1,6 +1,9 @@
 # task-06 — `instalar.sh` deja el lanzador `~/.flucastr-ai/entorno.mjs` y la puerta previa sigue funcionando
 repo: Flucastr.AI   depende_de: task-03, task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Los proyectos instalados no tienen `scripts/`: llegan al kit por `~/.flucastr-ai`. El instalador debe escribir un segundo lanzador para `entorno.mjs`, registrarlo en el manifiesto y `desinstalar.sh` debe quitarlo. El riesgo del diseño es que un módulo nuevo (`formato-requiere.mjs`) no sea alcanzable y caiga la puerta 3 de todos los proyectos: una prueba lo verifica.
 
@@ -23,7 +26,7 @@ Ninguna
 
 ## Alcance / Fuera de alcance
 Alcance: los tres archivos nombrados.
-Fuera de alcance: cambiar el lanzador de `validar-tarea`, `scripts/entorno.mjs`, la raíz (`raiz`), pruebas de `pruebas/capa1/`, el README (lo actualiza Franco al cerrar).
+Fuera de alcance: cambiar el lanzador de `validar-tarea`, `scripts/entorno.mjs`, la raíz (`raiz`), pruebas de `pruebas/capa1/`, el README (lo actualiza la persona usuaria al cerrar).
 
 ## Pasos
 1. En `instalar.sh`, después del bloque del lanzador de `validar-tarea` (antes del `fi` de la línea 473), escribe el lanzador de `entorno.mjs`, `chmod +x`, `registrar raiz` y un `echo`; actualiza el mensaje de simulación.

@@ -1,6 +1,9 @@
 # task-06 — README: requisitos e instalación con clon
 repo: Flucastr.AI   depende_de: task-05   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Los requisitos solo aparecen dentro de la instalación remota, y la apertura de `## Instalación` habla de «mi equipo principal» y del «PC de trabajo». Se agrega una sección `## Requisitos` antes de `## Instalación` y se reescribe la apertura y `### Con el repo clonado` para cualquier lector, sin cambiar comandos ni opciones.
 
@@ -16,7 +19,7 @@ Los requisitos solo aparecen dentro de la instalación remota, y la apertura de 
 ## Decisiones ya tomadas
 - Mismo estilo que task-02 (tuteo / tercera persona; sin «mi», «mis», «yo», «tengo»).
 - `## Requisitos` va justo antes de `## Instalación` y dice exactamente: (1) `bash`; (2) `node` (probado con v25.8.1; el kit no declara una versión mínima); (3) al menos una herramienta de agentes: Claude Code (`claude`, verificado con 2.1.308) o Pi (`pi`, verificado con 1.4.0); (4) `git` para el flujo de ramas por feature; (5) `curl` y `tar` solo si instalas sin clonar el repo; (6) un sistema tipo Unix (macOS; Windows no probado).
-- Apertura de `## Instalación`: «Hay dos caminos: con el repo clonado y sin clonar. Los dos terminan igual: agentes y skills instalados para Claude Code y Pi.» (sin equipos de Franco).
+- Apertura de `## Instalación`: «Hay dos caminos: con el repo clonado y sin clonar. Los dos terminan igual: agentes y skills instalados para Claude Code y Pi.» (sin equipos de la persona usuaria).
 - En `### Con el repo clonado` se conservan todos los comandos y viñetas; solo se reescriben los giros en primera persona o estilo personal («tú eliges el nivel», sin «mi»). Se agrega al principio de la subsección: «Primero valida con `bash instalar.sh --simular`.»
 
 ## Decisiones abiertas

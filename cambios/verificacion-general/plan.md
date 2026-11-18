@@ -9,17 +9,19 @@ tipo: codigo
 ---
 # Perfil de verificación rápida: convención y auditor para todos los proyectos
 
+> Referencias personales y de proyectos anonimizadas; se conservan las cifras y fechas.
+
 ## Objetivo
 Que el kit pueda **comprobar** si un proyecto cumple la verificación rápida (Nivel 1, Dockerfiles con caché, tiempos y diagnóstico en `verify`) y que `preparar-proyecto` lo pida desde el inicio. Evidencia: `docs/investigaciones/auditoria-verificacion-general/hallazgo.md`.
 
 ## Supuestos
-- El auditor es de solo lectura y offline: no corre Docker ni `verify`. Si Franco quiere que además mida tiempos reales, es otro plan.
+- El auditor es de solo lectura y offline: no corre Docker ni `verify`. Si la persona usuaria quiere que además mida tiempos reales, es otro plan.
 - Revisa Dockerfiles por texto (orden de `COPY` y de instalación); no entiende todos los lenguajes. Reconoce `npm ci`, `pnpm install`, `yarn install`, `pip install`; cualquier otro lo ignora.
 - La convención no obliga a un solo patrón de caché: pide la caché de paquetes y da el ejemplo de pnpm y npm.
 
 ## Alcance
 Puede cambiar: `scripts/auditar-verificacion.mjs` (nuevo), `scripts/fixtures-auditor/` (proyectos de prueba mínimos), `skills/preparar-proyecto/SKILL.md`, `README.md` (una viñeta) y `verify` (bloque 8r).
-Fuera: los proyectos DonFinancio, Byteria y DASH, `instalar.sh`, agentes, `modelos.json`.
+Fuera: los proyectos Proyecto.Finanzas, Proyecto.Plataforma y Proyecto.Panel, `instalar.sh`, agentes, `modelos.json`.
 
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque los cuatro sí de la prueba: reglas y salida definidas, fixtures propios, sin credenciales ni producción.

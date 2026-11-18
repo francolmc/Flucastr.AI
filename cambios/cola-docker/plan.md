@@ -8,13 +8,15 @@ tipo: codigo
 ---
 # Convención: un solo `verify` con Docker a la vez (cola con candado)
 
+> Referencias personales y de proyectos anonimizadas; se conservan las cifras y fechas.
+
 ## Objetivo
-Que `preparar-proyecto` pida a todo `verify` que use Docker tomar un candado compartido antes de construir, para que dos proyectos (o dos sesiones) no compitan por memoria y CPU. Evidencia: `docs/investigaciones/auditoria-tests-donfinancio/hallazgo.md` (PostgreSQL `unhealthy`, `P1017`, API `unhealthy` en DonFinancio y Byteria, con corridas de Docker intercaladas el 13-nov).
+Que `preparar-proyecto` pida a todo `verify` que use Docker tomar un candado compartido antes de construir, para que dos proyectos (o dos sesiones) no compitan por memoria y CPU. Evidencia: `docs/investigaciones/auditoria-tests-finanzas/hallazgo.md` (PostgreSQL `unhealthy`, `P1017`, API `unhealthy` en Proyecto.Finanzas y Proyecto.Plataforma, con corridas de Docker intercaladas el 13-nov).
 
 ## Supuestos
 - El candado es `/tmp/flucastr-docker.lock` con `flock` (util-linux, presente en este equipo). Si otro equipo no lo tiene, el `verify` avisa y sigue sin cola; no falla.
 - La causa (memoria y CPU compartidas) es una hipótesis con correlación, no probada. Si tras la cola siguen los cierres de PostgreSQL, se investiga el entorno aparte.
-- Cada proyecto aplica la convención en su propio plan (`cola-docker` en Byteria y en DonFinancio); este plan solo cambia el kit.
+- Cada proyecto aplica la convención en su propio plan (`cola-docker` en Proyecto.Plataforma y en Proyecto.Finanzas); este plan solo cambia el kit.
 
 ## Alcance
 Puede cambiar: `skills/preparar-proyecto/SKILL.md` (sección 2) y `verify` (bloque nuevo 8q).

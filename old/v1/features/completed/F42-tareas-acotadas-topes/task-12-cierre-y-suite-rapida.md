@@ -1,6 +1,9 @@
 # task-12 — Cierre de F42: README de pruebas y suite rápida en 0
 repo: Flucastr.AI   depende_de: task-10, task-11   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Registra la corrida del planificador en `pruebas/README.md` y comprueba que toda F42 deja la verificación rápida en verde, con los topes de bytes de skill y agentes respetados.
 
@@ -67,6 +70,6 @@ exit 0
 
 ## Notas
 - Hueco menor: el paso 2 pedía añadir la línea del planificador al README. Ya estaba en la línea 17 (`- Planificador (F42): \`bash pruebas/correr-planificador.sh {claude-code|pi}\`; solo con pedido de Franco; informe en \`pruebas/resultados/\`.`), así que no se duplicó. Decisión conservadora: no tocar `pruebas/README.md`; el grep da 1, como pide el criterio 3.
-- Nota fuera de alcance (no tocada): `pruebas/README.md` línea 5 dice «tope 30 s» para `rapida.sh`, pero el propio script reporta «tope 90 s». Queda para revisión de Franco.
+- Nota fuera de alcance (no tocada): `pruebas/README.md` línea 5 dice «tope 30 s» para `rapida.sh`, pero el propio script reporta «tope 90 s». Queda para revisión de la persona usuaria.
 - Primera pasada de verificación: al capturar el código de salida con `PIPESTATUS` tras `tail`, la salida quedó vacía; se repitió `rapida.sh` redirigiendo a un log en el scratchpad para obtener el `exit 0` real. Ambas pasadas dieron `fail 0`.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=1; resultado=lista; causa=ninguna

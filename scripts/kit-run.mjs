@@ -45,8 +45,8 @@ function leerArgs(argv) {
   const a = { plan: null, herramienta: "codex", raiz: RAIZ_KIT };
   for (let i = 0; i < argv.length; i++) {
     const x = argv[i];
-    if (x === "--herramienta") a.herramienta = argv[++i];
-    else if (x === "--raiz") a.raiz = resolve(argv[++i] ?? "");
+    if (x === "--herramienta" || x === "--tool") a.herramienta = argv[++i];
+    else if (x === "--raiz" || x === "--root") a.raiz = resolve(argv[++i] ?? "");
     else if (x.startsWith("--")) uso(`opción desconocida ${x}`);
     else if (a.plan === null) a.plan = x;
     else uso(`sobra el argumento ${x}`);
@@ -128,7 +128,7 @@ function main() {
         fallosVerificacion.add(causa);
         if (relanzamientos < MAX_RELANZAMIENTOS) {
           relanzamientos++;
-          prompt = promptConstructor(planRel, tramo, `La verificación falló (exit ${v.status}). Salida:\n${cola(v.stdout + v.stderr)}`);
+          prompt = promptConstructor(planRel, tramo, `Verification failed (exit ${v.status}). Output:\n${cola(v.stdout + v.stderr)}`);
           continue;
         }
         final = { pausa: true, motivo: "verify", msg: `verify no pasó tras ${relanzamientos + 1} corridas del constructor: ${cola(v.stdout + v.stderr)}` };
@@ -149,7 +149,7 @@ function main() {
       if (dv.veredicto === "PAUSA") { final = { pausa: true, motivo: "diseño", msg: `el revisor pide pausa: ${JSON.stringify(dv.defectos)}` }; break; }
       if (relanzamientos < MAX_RELANZAMIENTOS) {
         relanzamientos++;
-        prompt = promptConstructor(planRel, tramo, `La revisión devolvió estos defectos:\n${JSON.stringify(dv.defectos, null, 2)}`);
+        prompt = promptConstructor(planRel, tramo, `The review returned these defects:\n${JSON.stringify(dv.defectos, null, 2)}`);
         continue;
       }
       final = { pausa: true, motivo: "diseño", msg: `revisión devuelta tras ${relanzamientos + 1} corridas: ${JSON.stringify(dv.defectos)}` };

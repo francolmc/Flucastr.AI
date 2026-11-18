@@ -41,7 +41,7 @@ Esperado: cada `grep -c` muestra un número mayor que 0; las pruebas con `fail 0
 
 ## Evidencia
 
-Comando: `cd /Users/franco/Codes/flucastr/Flucastr.AI && grep -c -F 'Los agentes no hacen commit, push, PR, merge ni despliegue' README.md`
+Comando: `cd /Users/persona/Codes/flucastr/Flucastr.AI && grep -c -F 'Los agentes no hacen commit, push, PR, merge ni despliegue' README.md`
 ```
 1
 ```

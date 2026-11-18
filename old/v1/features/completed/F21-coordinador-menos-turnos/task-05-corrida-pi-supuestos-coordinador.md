@@ -1,8 +1,11 @@
 # task-05 — Corrida con modelo en Pi: llamadas en orden y `Read` con `limit: 3` en el `coordinador`
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`definitions/CONTEXTO.md` §2.4 y §4 (riesgo 5) dejan dos supuestos para F21: (a) Pi ejecuta en el orden indicado varias llamadas de un mismo turno; (b) `Read` con `limit` funciona en el `coordinador`. Segunda corrida (decidida por Franco, 2026-11-01): una sola invocación nueva con modelo, solo para el supuesto (a), con un prompt que fuerza dos `edit` dependientes entre sí. Sea cual sea el resultado, se acepta e informa tal cual. La meta de consumo (≤4 turnos por llamada a subagente, 0 KB de `definitions/`) NO se mide aquí: la corre Franco con `node scripts/consumo.mjs`.
+`definitions/CONTEXTO.md` §2.4 y §4 (riesgo 5) dejan dos supuestos para F21: (a) Pi ejecuta en el orden indicado varias llamadas de un mismo turno; (b) `Read` con `limit` funciona en el `coordinador`. Segunda corrida (decidida por la persona usuaria, 2026-11-01): una sola invocación nueva con modelo, solo para el supuesto (a), con un prompt que fuerza dos `edit` dependientes entre sí. Sea cual sea el resultado, se acepta e informa tal cual. La meta de consumo (≤4 turnos por llamada a subagente, 0 KB de `definitions/`) NO se mide aquí: la corre la persona usuaria con `node scripts/consumo.mjs`.
 
 ## Contexto
 - Primera corrida (informe `pruebas/resultados/2026-11-01-coordinador-menos-turnos-pi.md`, no se toca): supuesto (b) OK (`read` con `{"offset":1,"limit":3}`, sin error). Supuesto (a) no probado: el modelo (`gpt-6.1-sol`, ≈0,0199 USD) hizo un solo `edit` con `orden-1` y `orden-2` juntos.
@@ -17,7 +20,7 @@ repo: Flucastr.AI   depende_de: task-03   estado: hecha
 - Orden observable: el segundo `edit` solo puede aplicarse si el primero ya escribió `marca-1`; si Pi los ejecutara al revés o en paralelo, el segundo falla (`isError=true`) y `marca-2` no queda.
 - Veredicto, tres resultados:
   - **PROBADO**: hay exactamente dos `edit` sobre `definitions/STATUS.md` en el registro (inicio del primero antes del inicio del segundo), ambos con `isError=false`, y el archivo final contiene `marca-1` bajo `## Activo` y `marca-2` bajo `## Historial`.
-  - **REFUTADO**: hay dos `edit` y el segundo terminó con `isError=true` o `marca-2` no quedó (orden distinto o paralelo). El informe lo declara y recomienda a Franco quitar de `coordinador.md` la regla de agrupación; no se edita aquí.
+  - **REFUTADO**: hay dos `edit` y el segundo terminó con `isError=true` o `marca-2` no quedó (orden distinto o paralelo). El informe lo declara y recomienda a la persona usuaria quitar de `coordinador.md` la regla de agrupación; no se edita aquí.
   - **NO CONCLUYENTE**: el modelo no emitió dos `edit` (uno solo, o en turnos separados, o ninguno). Se informa como tal y NO se repite la corrida.
 - Además, en cualquier resultado: el canario aparece 0 veces en el registro y en el informe.
 - Informe nuevo: `pruebas/resultados/2026-11-01-coordinador-menos-turnos-pi-2.md` (sin sobrescribir el anterior; prompt, comandos sin secretos, modelo y costo derivado del registro, invocaciones, veredicto con el valor de cada condición, y la limitación: una corrida no prueba el comportamiento general). Tope ≤ 6 KB.
@@ -51,7 +54,7 @@ Fuera de alcance: editar `agentes/`, lanzadores, fixtures, comprobadores o el in
 ## Evidencia
 ```
 $ command -v pi-coordinador; echo EXIT=$?
-/Users/franco/.local/bin/pi-coordinador
+/Users/persona/.local/bin/pi-coordinador
 EXIT=0
 $ bash pruebas/fixtures/coordinador.sh "$T/fx"   (T=/var/folders/dm/9_88kbsd41150_nxzrxl4yw00000gn/T/tmp.bkoOkLowhd)
 STATUS inicial: "# Estado" / "## Activo" / "## Historial"
@@ -82,7 +85,7 @@ $ git status --short pruebas/resultados/2026-11-01-coordinador-menos-turnos-pi.m
 Informe nuevo: `pruebas/resultados/2026-11-01-coordinador-menos-turnos-pi-2.md`. Veredicto: **NO CONCLUYENTE** (ver Notas).
 
 ## Notas
-- Veredicto NO CONCLUYENTE, no PROBADO: el archivo final y el orden de los dos `edit` son correctos, pero cada `edit` salió en un mensaje del asistente distinto (turnos 1 y 2). La tarea clasifica «en turnos separados» como NO CONCLUYENTE, así que se aplicó esa regla. Decisión de Franco si quiere leerlo de otra forma. No se repitió la corrida.
+- Veredicto NO CONCLUYENTE, no PROBADO: el archivo final y el orden de los dos `edit` son correctos, pero cada `edit` salió en un mensaje del asistente distinto (turnos 1 y 2). La tarea clasifica «en turnos separados» como NO CONCLUYENTE, así que se aplicó esa regla. Decisión de la persona usuaria si quiere leerlo de otra forma. No se repitió la corrida.
 - Costo derivado del registro: ≈ 0,0328 USD (suma de `usage.cost.total` de 3 mensajes), orientativo.
 - Huecos menores: la verificación `node` estaba marcada como «no ejecutado, inferido»; se ejecutó tal cual y funcionó. El canario se escribió por error en el informe y se quitó antes de cerrar (queda 0 en informe y registro).
 - Huecos menores anotados: 2 (los dos de arriba: nota de `node` y canario escrito por error en el informe).

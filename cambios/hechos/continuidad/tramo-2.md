@@ -1,7 +1,7 @@
 ## Pasos
 
 ### Tramo 2 — Historia: el constructor continúa con límites
-Como Franco quiero que el constructor avance solo y deje una pausa retomable para recibir el trabajo completo con evidencia.
+Como persona usuaria quiero que el constructor avance solo y deje una pausa retomable para recibir el trabajo completo con evidencia.
 Dependencias: Tramo 1 — formato y condiciones del plan continuo.
 Contratos a conservar: alcance, aceptación, casillas en vivo, ausencia de commits y comportamiento de planes anteriores.
 Rutas susceptibles de cambio: `agentes/constructor.md`, `skills/ejecutar-plan/SKILL.md`; no mover ni archivar; ajustar `pruebas/contrato-constructor.mjs` solo para reflejar el contrato conservado.

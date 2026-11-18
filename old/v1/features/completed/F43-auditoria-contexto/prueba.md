@@ -11,7 +11,7 @@ Prueba real del caché del proveedor con el mismo prompt en dos lanzamientos seg
 | pi | 1 | 6080 | 0 | 0 | `PI_CACHE_RETENTION=long pi --model openai/gpt-6-luna --mode json --no-session -p "<prompt>"`; suma de 2 respuestas del modelo (una `toolUse` con la lectura, una `stop`), sin repetir por `responseId`: 3002 + 3078 |
 | pi | 2 | 3264 | 2816 | 0 | igual que corrida 1; suma de 2 respuestas: 3002 (`toolUse`, sin caché) + 262 input con 2816 `cacheRead` (`stop`) |
 
-Modelo y comando reales: `--model openai/gpt-6-luna` (flag de `pi --help`: `--model <pattern>`, formato `provider/id`). No se tocó `modelos.json` ni ningún archivo de configuración. Salidas JSON guardadas fuera del repo en `f43/pi-1.jsonl` y `f43/pi-2.jsonl` del directorio temporal de la sesión. El aviso `Invalid settings file /Users/franco/.pi/agent/settings.json` salió en ambas corridas; no se abrió ese archivo.
+Modelo y comando reales: `--model openai/gpt-6-luna` (flag de `pi --help`: `--model <pattern>`, formato `provider/id`). No se tocó `modelos.json` ni ningún archivo de configuración. Salidas JSON guardadas fuera del repo en `f43/pi-1.jsonl` y `f43/pi-2.jsonl` del directorio temporal de la sesión. El aviso `Invalid settings file /Users/persona/.pi/agent/settings.json` salió en ambas corridas; no se abrió ese archivo.
 
 Lanzamientos de Pi con modelo en esta relanzada: 2 (sin reintentos). Los `usage` de la corrida 1 y 2 son los de la API (no 0), a diferencia del error anterior con `gpt-5.5`.
 

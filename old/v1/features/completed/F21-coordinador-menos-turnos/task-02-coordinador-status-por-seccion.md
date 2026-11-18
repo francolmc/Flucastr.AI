@@ -1,12 +1,15 @@
 # task-02 — `coordinador`: `STATUS.md` solo en puertas y cambios de rol, con `Edit` por sección
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Reescribir `STATUS.md` completo fue el 28 % del costo del `coordinador` (52 turnos de 216, `definitions/CONTEXTO.md` §1). Esta tarea cambia las reglas de `agentes/coordinador.md` para que `STATUS.md` se escriba solo en puertas y cambios de rol, con `Edit` por sección, con ítems cortos, y para que las llamadas independientes se agrupen en un turno.
 
 ## Contexto
 - Leer `agentes/coordinador.md`: «Cómo avanzas» (paso 2, líneas 47-53), «Formato de `definitions/STATUS.md`» (líneas 120-131, incluye «Reescribe el archivo completo cada vez») y «Antes de entregar».
-- Diseño aprobado: `definitions/CONTEXTO.md` §2.4 y §8 punto 5 (`definitions/PENDIENTES.md` existe y ningún agente lo lee sin pedido de Franco).
+- Diseño aprobado: `definitions/CONTEXTO.md` §2.4 y §8 punto 5 (`definitions/PENDIENTES.md` existe y ningún agente lo lee sin pedido de la persona usuaria).
 - `pruebas/comprobaciones/coordinador-status.test.mjs` exige, dentro de «Cómo avanzas», un paso que contenga «Antes de delegar, escribe en `definitions/STATUS.md`» ANTES del paso que contiene «Delega.»; y prohíbe la cadena «CONTEXTO:».
 - Supuesto de §2.4 (Pi ejecuta en orden varias llamadas de un turno): lo verifica task-05; aquí solo se redacta la regla.
 - Tocar: `agentes/coordinador.md`.
@@ -14,7 +17,7 @@ Reescribir `STATUS.md` completo fue el 28 % del costo del `coordinador` (52 turn
 ## Decisiones ya tomadas
 - Se edita con `Edit` por tramos; el paso 2 de «Cómo avanzas» conserva «Antes de delegar, escribe en `definitions/STATUS.md`» (es la única escritura por delegación) y se le añade que es un `Edit` de la sección «Paso actual».
 - Frases literales (las comprobará task-04): `Reescribes \`STATUS.md\` solo en puertas y en cambios de rol`; `con \`Edit\` por sección, no con \`Write\` completo`; `cada ítem ≤150 caracteres`; `Agrupa en un mismo turno las llamadas independientes`.
-- Contenido permitido en `STATUS.md`: escalación, paso actual (una línea por tarea en curso), qué revisa Franco con ruta, bloqueos abiertos. Sin historia ni recordatorios de largo plazo (esos van a `definitions/PENDIENTES.md`, que no lees).
+- Contenido permitido en `STATUS.md`: escalación, paso actual (una línea por tarea en curso), qué revisa la persona usuaria con ruta, bloqueos abiertos. Sin historia ni recordatorios de largo plazo (esos van a `definitions/PENDIENTES.md`, que no lees).
 - El ejemplo de agrupación: el `Edit` de `STATUS.md` y el `Edit` del `estado` de la tarea, y varias lecturas de cabecera, en un mismo turno.
 - Se elimina la frase «Reescribe el archivo completo cada vez; no acumules historia» (la reemplazan las frases nuevas). La plantilla de secciones de `STATUS.md` queda igual.
 - Presupuesto: no más de ~500 bytes netos; `coordinador.md` ≤ 17 300 bytes al terminar.

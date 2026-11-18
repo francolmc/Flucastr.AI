@@ -1,6 +1,6 @@
 # F43: diseño de la auditoría de contexto (BORRADOR, puerta 1)
 
-Estado: borrador hasta aprobación de Franco. Origen: fila F43 y «Alcance de F43» de `BACKLOG.md` (confirmado); lo medido hoy está en `CONTEXTO.md` §1 y §5 y no se repite. **No se cambia ninguna regla, prompt, skill ni agente hasta tener datos.** Este documento no edita `WORKFLOW.md`, `AGENTS.md` ni `agentes/`.
+Estado: borrador hasta aprobación de la persona usuaria. Origen: fila F43 y «Alcance de F43» de `BACKLOG.md` (confirmado); lo medido hoy está en `CONTEXTO.md` §1 y §5 y no se repite. **No se cambia ninguna regla, prompt, skill ni agente hasta tener datos.** Este documento no edita `WORKFLOW.md`, `AGENTS.md` ni `agentes/`.
 
 ## 1. Qué se mide y cómo
 
@@ -38,17 +38,17 @@ Se hace **después** de la medición y solo sobre las 3 fuentes que más pesan y
 | 01 | **Medición:** `scripts/contexto-fuentes.mjs` + su prueba; corre sobre un log real y guarda la tabla en `features/F43-auditoria-contexto/medicion.md` | nada |
 | 02 | Análisis: top de fuentes, repetidas y no pedidas por el prompt del rol; lista corta en `analisis.md` | 01 |
 | 03 | Docs: qué mecanismo existe en Claude Code y en Pi (citas con fecha) en `mecanismos.md` | 02 (elige candidatos) |
-| 04 | Prueba real del mecanismo en cada herramienta, con campos de caché del log, en `prueba.md` | 03 y **Franco** (corre Pi/Claude real y puede costar créditos: debe autorizarla) |
+| 04 | Prueba real del mecanismo en cada herramienta, con campos de caché del log, en `prueba.md` | 03 y **la persona usuaria** (corre Pi/Claude real y puede costar créditos: debe autorizarla) |
 | 05 | Informe final con «vale la pena / no» y riesgo de desactualizado, en `informe.md` | 04 |
 
-**Decisión de Franco (puerta 1 aparte, tras 05):** caché sí/no. Si es «sí» o si la medición pide recortar prompts, sale como feature `producto` nueva (toca `agentes/planificador.md` y `skills/descomponer-feature/SKILL.md`, ya tocados por F42). Las tareas 01-03 no requieren decisión; 04 requiere autorización de gasto; 05 termina en su decisión.
+**Decisión de la persona usuaria (puerta 1 aparte, tras 05):** caché sí/no. Si es «sí» o si la medición pide recortar prompts, sale como feature `producto` nueva (toca `agentes/planificador.md` y `skills/descomponer-feature/SKILL.md`, ya tocados por F42). Las tareas 01-03 no requieren decisión; 04 requiere autorización de gasto; 05 termina en su decisión.
 
 ## 5. Nombres
 
 - Carpeta: `features/F43-auditoria-contexto/`
 - Rama: `chore/F43-auditoria-contexto` (sin cambio de comportamiento)
 
-## Decisiones para Franco
+## Decisiones para la persona usuaria
 
 - **A (recomendada):** aprobar este diseño y descomponer las 5 tareas; la 04 se autoriza al llegar.
 - **B:** solo tareas 01-02 ahora; decidir 03-05 con los datos.

@@ -1,8 +1,11 @@
 # task-01 — Crear LICENSE con el texto MIT
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-El repo no tiene licencia. Franco decidió la licencia MIT, con titular «Franco Morales» y año 2026. Esta tarea crea `LICENSE` en la raíz con el texto MIT estándar para que el README (tareas siguientes) pueda enlazarla.
+El repo no tiene licencia. la persona usuaria decidió la licencia MIT, con titular «Franco Morales» y año 2026. Esta tarea crea `LICENSE` en la raíz con el texto MIT estándar para que el README (tareas siguientes) pueda enlazarla.
 
 ## Contexto
 - Leer: `AGENTS.md`
@@ -13,7 +16,7 @@ El repo no tiene licencia. Franco decidió la licencia MIT, con titular «Franco
 - Requiere: ninguno
 
 ## Decisiones ya tomadas
-- Licencia MIT, titular `Franco Morales`, año `2026` (decisión de Franco, 2026-11-05).
+- Licencia MIT, titular `Franco Morales`, año `2026` (decisión de la persona usuaria, 2026-11-05).
 - Archivo `LICENSE` sin extensión, en la raíz, texto en inglés tal cual el estándar MIT, terminado en un salto de línea.
 
 ## Decisiones abiertas

@@ -1,8 +1,11 @@
 # task-07 — Paso de entorno del constructor en `ejecutar-tarea`, con manifiesto y tope
 repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-El constructor comprueba el entorno antes de tocar nada (decisión D1=A de Franco, 2026-11-02): si `entorno.mjs` informa una falta, deja la tarea `bloqueada` y avisa solo a Franco con `BLOQUEO: rol=franco`. El texto vive en la skill porque `agentes/constructor.md` está en 3008/3072 B y no se toca. La frase queda protegida por el manifiesto y la skill recibe un tope.
+El constructor comprueba el entorno antes de tocar nada (decisión D1=A de la persona usuaria, 2026-11-02): si `entorno.mjs` informa una falta, deja la tarea `bloqueada` y avisa solo a la persona usuaria con `BLOQUEO: rol=franco`. El texto vive en la skill porque `agentes/constructor.md` está en 3008/3072 B y no se toca. La frase queda protegida por el manifiesto y la skill recibe un tope.
 
 ## Contexto
 - Tocar: `skills/ejecutar-tarea/SKILL.md`, `pruebas/comprobaciones/frases-por-archivo.mjs`, `pruebas/comprobaciones/topes-bytes.test.mjs`

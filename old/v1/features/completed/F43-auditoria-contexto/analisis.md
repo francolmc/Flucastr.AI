@@ -1,19 +1,21 @@
 # analisis
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Fuente: `medicion.md` (task-01): tabla y Top 10. Prompts revisados con `grep -n` sobre `agentes/<rol>.md` (no se leyeron completos). Cifras en KB, tal como salen de la medición; ningún dato `n/d`.
 
 ## Top 10
 
 1. agentes/constructor.md (constructor): 861.3 KB totales, 311 veces
 2. agentes/planificador.md (planificador): 447 KB totales, 128 veces
-3. /Users/franco/Codes/flucastr/Flucastr.AI/definitions/BACKLOG.md (planificador): 303.1 KB totales, 34 veces
-4. /Users/franco/Codes/flucastr/Flucastr.AI/definitions/WORKFLOW.md (arquitecto): 232.5 KB totales, 13 veces
-5. /Users/franco/Codes/flucastr/Flucastr.AI/agentes/coordinador.md (constructor): 212 KB totales, 32 veces
-6. /Users/franco/Codes/flucastr/Flucastr.AI/definitions/WORKFLOW.md (constructor): 166.2 KB totales, 6 veces
+3. /Users/persona/Codes/flucastr/Flucastr.AI/definitions/BACKLOG.md (planificador): 303.1 KB totales, 34 veces
+4. /Users/persona/Codes/flucastr/Flucastr.AI/definitions/WORKFLOW.md (arquitecto): 232.5 KB totales, 13 veces
+5. /Users/persona/Codes/flucastr/Flucastr.AI/agentes/coordinador.md (constructor): 212 KB totales, 32 veces
+6. /Users/persona/Codes/flucastr/Flucastr.AI/definitions/WORKFLOW.md (constructor): 166.2 KB totales, 6 veces
 7. agentes/arquitecto.md (arquitecto): 161 KB totales, 46 veces
-8. /Users/franco/Codes/flucastr/Flucastr.AI/definitions/BACKLOG.md (coordinador): 142.6 KB totales, 36 veces
-9. /Users/franco/Codes/flucastr/Flucastr.AI/definitions/ARCHITECTURE.md (arquitecto): 136.3 KB totales, 13 veces
-10. /Users/franco/Codes/flucastr/Flucastr.AI/definitions/STATUS.md (coordinador): 112.4 KB totales, 56 veces
+8. /Users/persona/Codes/flucastr/Flucastr.AI/definitions/BACKLOG.md (coordinador): 142.6 KB totales, 36 veces
+9. /Users/persona/Codes/flucastr/Flucastr.AI/definitions/ARCHITECTURE.md (arquitecto): 136.3 KB totales, 13 veces
+10. /Users/persona/Codes/flucastr/Flucastr.AI/definitions/STATUS.md (coordinador): 112.4 KB totales, 56 veces
 
 ## Repetidas
 

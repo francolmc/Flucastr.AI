@@ -1,8 +1,11 @@
 # task-03 — `validarTarea` acepta el estado `cancelada` con su motivo
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`RE_SEGUNDA` de `formato-tarea.mjs` rechaza `estado: cancelada`, por lo que el validador de la puerta previa rechaza las tareas descartadas. Esta tarea agrega `cancelada` como estado válido y exige en *Notas* una línea `Cancelada: motivo=<motivo>` (decisión D2=A de Franco), sin exigir *Evidencia*.
+`RE_SEGUNDA` de `formato-tarea.mjs` rechaza `estado: cancelada`, por lo que el validador de la puerta previa rechaza las tareas descartadas. Esta tarea agrega `cancelada` como estado válido y exige en *Notas* una línea `Cancelada: motivo=<motivo>` (decisión D2=A de la persona usuaria), sin exigir *Evidencia*.
 
 ## Contexto
 - Tocar: `scripts/formato-tarea.mjs`, `pruebas/comprobaciones/formato-tarea.test.mjs`

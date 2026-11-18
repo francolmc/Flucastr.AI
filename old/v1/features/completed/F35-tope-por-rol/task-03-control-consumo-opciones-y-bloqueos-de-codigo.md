@@ -1,8 +1,11 @@
 # task-03 — control-consumo: opciones A/B coherentes con los topes por rol y bloqueos de código
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-La skill `control-consumo` ofrece, con `estado=excedido`, A) ampliar con `ampliado=N` y B) replantear con `arquitecto` o `planificador`. Con `arq` excedido, B suma otra ronda sobre un tope que A no sube: se anulan. Esta tarea (1) hace que A amplíe el tope de la causa con los sufijos de task-01, solo con el «sí» de Franco, y que B no se ofrezca cuando la causa es `arq` o `plan`; (2) añade la plantilla con los sufijos opcionales; (3) añade la regla que enruta un bloqueo de código o verificación (`rol=constructor; motivo=codigo:`) al `planificador` para una tarea de corrección y luego al `constructor`, no al `arquitecto`. El texto va aquí y no en `agentes/coordinador.md`, que está en 7168/7168 B.
+La skill `control-consumo` ofrece, con `estado=excedido`, A) ampliar con `ampliado=N` y B) replantear con `arquitecto` o `planificador`. Con `arq` excedido, B suma otra ronda sobre un tope que A no sube: se anulan. Esta tarea (1) hace que A amplíe el tope de la causa con los sufijos de task-01, solo con el «sí» de la persona usuaria, y que B no se ofrezca cuando la causa es `arq` o `plan`; (2) añade la plantilla con los sufijos opcionales; (3) añade la regla que enruta un bloqueo de código o verificación (`rol=constructor; motivo=codigo:`) al `planificador` para una tarea de corrección y luego al `constructor`, no al `arquitecto`. El texto va aquí y no en `agentes/coordinador.md`, que está en 7168/7168 B.
 
 ## Contexto
 - Tocar: `skills/control-consumo/SKILL.md`, `pruebas/comprobaciones/frases-por-archivo.mjs`

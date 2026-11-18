@@ -7,24 +7,26 @@ ejecutor: constructor
 ---
 # Codex: el principal espera al verify y menos permisos
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 En Codex, el principal espera hasta el final un `verify` largo en vez de devolver PAUSA, y las reglas `allow` del kit cubren Docker Compose, pnpm y las dos formas reales de lanzar `verify`. Evidencia: `docs/investigaciones/auditoria-codex-permisos-esperas/hallazgo.md`.
 
 ## Supuestos
-- Tope de espera del principal: 30 min en total, el mismo `background_terminal_max_timeout` de los lanzadores. Si Franco quiere otro, cambia una cifra en un paso.
-- Las reglas `allow` de `docker compose` son por subcomando (`build`, `up`, `run`, `ps`, `logs`, `stop`, `down`), no `docker compose` a secas. Si Franco prefiere abierto, se reduce a una regla.
+- Tope de espera del principal: 30 min en total, el mismo `background_terminal_max_timeout` de los lanzadores. Si la persona usuaria quiere otro, cambia una cifra en un paso.
+- Las reglas `allow` de `docker compose` son por subcomando (`build`, `up`, `run`, `ps`, `logs`, `stop`, `down`), no `docker compose` a secas. Si la persona usuaria prefiere abierto, se reduce a una regla.
 - `docker run`, `docker rm`, `docker volume` y `docker system prune` quedan sin regla: siguen pidiendo permiso.
 
 ## Alcance
 Puede cambiar: `agentes/principal.md`, `scripts/resolver.mjs` (solo la lista `PREFIJOS_ALLOW_CODEX` y su comentario), `verify` (paso 3f y un bloque nuevo 8l), `README.md` (líneas de reglas de Codex), `pruebas/kit-run/probar.mjs` (solo el caso V3).
-Fuera de alcance: `modelos.json`, `instalar.sh`, `agentes/constructor.md`, `skills/`, los proyectos Byteria y DonFinancio, sandbox y red de Codex.
+Fuera de alcance: `modelos.json`, `instalar.sh`, `agentes/constructor.md`, `skills/`, los proyectos Proyecto.Plataforma y Proyecto.Finanzas, sandbox y red de Codex.
 
 ## Decisiones ya tomadas
 - Resuelto: 2026-11-11 V3 de `pruebas/kit-run/probar.mjs` (línea ≈324) exigía esfuerzo `low`, pero el principal ya es `medium` (commit b6b8bea). Se corrige la prueba, no `modelos.json`: V3 debe comparar `rev.e` con el esfuerzo de `agentes.principal` leído de `modelos.json`, sin cifra fija.
 - Ejecutor: constructor, porque los cuatro sí de la prueba: requisitos cubiertos, archivos accesibles, comprobaciones con resultado esperado, sin credenciales ni producción.
 - Se mantiene la frase «una sola espera» en `principal.md`: `verify` 8k la exige.
 - Codex trata `VERIFY_RAPIDO=1 ./verify` como una sola cadena de `bash -lc` (así quedó en `~/.codex/rules/default.rules`), por eso se añaden las dos reglas literales de `/bin/bash -lc`. La regla `["VERIFY_RAPIDO=1","./verify"]` actual se conserva.
-- Las reglas solo rigen en un proyecto con `.codex/rules/flucastr.rules`; Byteria y DonFinancio no lo tienen. Reinstalar (`bash instalar.sh --proyecto <ruta>`) lo hace Franco después del merge: no está en este plan.
+- Las reglas solo rigen en un proyecto con `.codex/rules/flucastr.rules`; Proyecto.Plataforma y Proyecto.Finanzas no lo tienen. Reinstalar (`bash instalar.sh --proyecto <ruta>`) lo hace la persona usuaria después del merge: no está en este plan.
 
 ## Escenarios
 - CUANDO el principal revisa un tramo en Codex y `verify` tarda más que una llamada ENTONCES `principal.md` le ordena una sola `wait` con `cell_id` y `yield_time_ms: 300000`, repetida mientras siga «Script running», y esas esperas no cuentan en el presupuesto (A1)
@@ -70,7 +72,7 @@ Fuera de alcance: `modelos.json`, `instalar.sh`, `agentes/constructor.md`, `skil
 
 ## Evidencia
 $ ./verify
-(cola de la corrida final; log completo en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/e30a8052-f02f-4d43-b832-d773b4462714/scratchpad/verify-2.log`)
+(cola de la corrida final; log completo en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/e30a8052-f02f-4d43-b832-d773b4462714/scratchpad/verify-2.log`)
 ...
 pruebas del medidor: 19 de 19 ok
 ok 12: pruebas del medidor pasaron sobre los fixtures

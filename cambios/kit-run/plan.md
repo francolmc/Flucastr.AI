@@ -8,16 +8,18 @@ tramo: 2
 ---
 # `kit run`: un script orquesta al constructor y despierta al principal solo para revisar
 
-Aprobado por Franco el 2026-11-09. Se levanta la condición de esperar 5 cambios medidos: la medición queda para el piloto del tramo 2 (A4).
+> Referencias personales y de proyectos anonimizadas; se conservan las cifras y fechas.
+
+Aprobado por la persona usuaria el 2026-11-09. Se levanta la condición de esperar 5 cambios medidos: la medición queda para el piloto del tramo 2 (A4).
 
 ## Objetivo
-Un solo comando, igual en Claude Code, Codex y Pi, lanza al constructor sin interfaz, corre la verificación según el tipo del plan, relanza hasta 2 veces si falla y, solo al final, ejecuta al principal en un proceso nuevo, de solo lectura y con tope, con `plan.md` + diff + evidencia. Franco lee el veredicto. El modelo caro deja de esperar y de orquestar.
+Un solo comando, igual en Claude Code, Codex y Pi, lanza al constructor sin interfaz, corre la verificación según el tipo del plan, relanza hasta 2 veces si falla y, solo al final, ejecuta al principal en un proceso nuevo, de solo lectura y con tope, con `plan.md` + diff + evidencia. la persona usuaria lee el veredicto. El modelo caro deja de esperar y de orquestar.
 
 ## Supuestos
 - Se decide hacerlo si, tras `principal-sin-ejecutar`, el principal sigue gastando más que el constructor en sesiones de 5 cambios medidos (umbral sugerido: créditos del principal ÷ constructor > 3). Si ya baja de ahí, este plan se archiva sin ejecutar.
 - Evidencia que lo sostiene: en las sesiones de Codex del 8–9 nov, coordinar y esperar al constructor fue 35–39 % de los créditos de Sol y los sondeos otro 11 %. Dos investigaciones externas (Anthropic, Cognition) recomiendan revisar en un contexto nuevo y mover la orquestación a un script. Los datos de Cognition son internos, sin metodología publicada.
 - Los tres CLIs tienen modo sin interfaz (verificado en esta máquina): `claude -p` (con `--max-budget-usd`), `codex exec` (con `--output-schema`, `--json`, `--sandbox`; sin tope de turnos, lo controla el script) y `pi -p`. Si `--max-turns` no existe en Claude Code, el tope es el presupuesto.
-- La conversación interactiva con el principal queda para planificar y para las pausas; la revisión pasa a ser un veredicto leído. Si Franco quiere seguir revisando conversando, se mantiene el flujo actual.
+- La conversación interactiva con el principal queda para planificar y para las pausas; la revisión pasa a ser un veredicto leído. Si la persona usuaria quiere seguir revisando conversando, se mantiene el flujo actual.
 
 ## Alcance
 `scripts/kit-run.mjs` (nuevo), `instalar.sh` (un lanzador `kit-run`), `scripts/resolver.mjs` si hace falta un subcomando, `pruebas/kit-run/` (nuevo, con CLIs simulados), `verify` (un paso), `README.md`, `AGENTS.md`, `agentes/principal.md` (cómo pedir `kit run` en vez de lanzar al subagente).
@@ -132,14 +134,14 @@ exit 1 (ya no está ignorado)
 - La huella del árbol usa `git status`, `git diff HEAD` y el contenido de cada archivo listado; detecta cambios del revisor, pero no cambios en archivos ignorados por git.
 - Fallo relacionado corregido durante la prueba: ninguno; el arnés pasó a la primera.
 - Tramo 2 y 3 sin tocar.
-- Aviso antes del commit: `.gitignore` tiene `pruebas/*` con excepciones solo para `pruebas/uso/` y `pruebas/contrato-constructor.mjs`, así que `pruebas/kit-run/probar.mjs` sale como ignorado (`git check-ignore`). Falta `!pruebas/kit-run/` en `.gitignore`. Está fuera de *Alcance*, así que no lo cambié; lo decide Franco o el principal antes del commit.
+- Aviso antes del commit: `.gitignore` tiene `pruebas/*` con excepciones solo para `pruebas/uso/` y `pruebas/contrato-constructor.mjs`, así que `pruebas/kit-run/probar.mjs` sale como ignorado (`git check-ignore`). Falta `!pruebas/kit-run/` en `.gitignore`. Está fuera de *Alcance*, así que no lo cambié; lo decide la persona usuaria o el principal antes del commit.
 
 - Revisión del principal, tramo 1: defecto. `.gitignore` tiene `pruebas/*` y deja ignorado `pruebas/kit-run/` (línea 2; el arnés A1-A5 no llegaría al commit). Corregir: añadir `!pruebas/kit-run/` junto a las otras excepciones y confirmar con `git check-ignore pruebas/kit-run/probar.mjs` (sin salida). `.gitignore` entra en el Alcance solo para esta línea. Resto del tramo 1: arnés 10/10 y `./verify` OK.
 - Corrección del constructor (tramo 1): añadida `!pruebas/kit-run/` a `.gitignore` (tras `!pruebas/uso/`). Defecto reproducido antes: `git check-ignore` devolvía `.gitignore:2`; después no hay salida ni coincidencia. El aviso de la línea anterior queda resuelto. `./verify` pasa (exit 0). Aviso que no es fallo: el paso 10 de `./verify` omite las autopruebas del runner OpenSpec porque `pruebas/comparar-openspec/` no existe en este clon (está en `.gitignore`).
 - Pendientes del plan (`- [ ]`): 6, todos de los tramos 2 y 3, fuera de este encargo; no se tocaron.
 
-- Cierre tramo 1 (principal): APROBADO. `scripts/kit-run.mjs` (ciclo constructor → verify → ≤2 relanzamientos → revisor read-only con esquema), arnés `pruebas/kit-run/probar.mjs` 10/10, paso 13 de `verify`, `.gitignore` con `!pruebas/kit-run/`. A1, A2, A3, A5 cumplidas. Sigue el tramo 2 (piloto real con `codex exec`, gasta cuota): pendiente del sí de Franco.
-- Tramo 2 aprobado por Franco (2026-11-09, «si, vamos»), incluido el gasto de cuota de Codex. Este encargo al constructor cubre solo los dos primeros pasos (mapeo a `codex exec` y lanzador `kit-run` en `instalar.sh`), sin gasto. El piloto real (tercer paso) lo prepara el principal con un plan de documentos aparte y se corre después.
+- Cierre tramo 1 (principal): APROBADO. `scripts/kit-run.mjs` (ciclo constructor → verify → ≤2 relanzamientos → revisor read-only con esquema), arnés `pruebas/kit-run/probar.mjs` 10/10, paso 13 de `verify`, `.gitignore` con `!pruebas/kit-run/`. A1, A2, A3, A5 cumplidas. Sigue el tramo 2 (piloto real con `codex exec`, gasta cuota): pendiente del sí de la persona usuaria.
+- Tramo 2 aprobado por la persona usuaria (2026-11-09, «si, vamos»), incluido el gasto de cuota de Codex. Este encargo al constructor cubre solo los dos primeros pasos (mapeo a `codex exec` y lanzador `kit-run` en `instalar.sh`), sin gasto. El piloto real (tercer paso) lo prepara el principal con un plan de documentos aparte y se corre después.
 - Piloto (principal, 2026-11-10): primera corrida real con `codex exec` terminó en PAUSA sin hacer nada (0/1, ~0,09 créditos). Causa: `scripts/kit-run.mjs` línea 254 pone `estado: en curso` antes de lanzar al constructor, y la skill `ejecutar-plan` exige `aprobado` y se detiene. Los CLIs simulados no lo detectaron. Corregir: el script no cambia el estado antes de lanzar (lo pone el constructor); añadir caso al arnés con un constructor simulado que se niega si el estado no es `aprobado`. Tras el arreglo, repetir el piloto con `cambios/piloto-kit-run/plan.md` (ya en `aprobado`).
 
 ### Hallazgo del piloto A4 (2026-11-10)

@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 134 — Anonimizar justificación de Codex
 
 ## Pasos

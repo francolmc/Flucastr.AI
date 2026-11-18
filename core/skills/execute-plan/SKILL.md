@@ -1,54 +1,54 @@
 ---
 name: ejecutar-plan
-description: "Aplica un plan aprobado de `cambios/<nombre>/plan.md`: recorre los pasos, corrige dentro del alcance, corre `verify` y deja evidencia real. Úsala al construir."
+description: "Execute an approved plan in `cambios/<name>/plan.md`: follow its steps, fix issues within scope, run `verify`, and record real evidence. Use when building."
 ---
 
-# Ejecutar un plan
+# Execute a plan
 
-Entrada: la ruta del plan.
+Input: the plan path.
 
-## Antes de empezar
+## Before starting
 
-1. Lee el plan completo por tramos. Si `estado` no es `aprobado`, detente; no cambies nada.
-2. Si el encargo trae `Rama:`: para cada carpeta de `repos:` del frontmatter, y solo esas:
-   - Si no tiene `.git`, anótalo en *Notas* y sigue.
-   - Si `git -C <carpeta> branch --show-current` ya es la rama, sigue.
-   - Si existe (`git -C <carpeta> rev-parse --verify --quiet refs/heads/<rama>`), `PAUSA` con `motivo=acceso`.
-   - Comprueba la rama base (`base:`; si falta, `git symbolic-ref --short refs/remotes/origin/HEAD`; sin remoto, `main` o `master`) y que no haya cambios fuera de `cambios/<nombre>/` con `git status`/`git diff`. Si no cumple, `PAUSA` con `motivo=acceso`.
-   - Si cumple, crea únicamente la rama autorizada: `git -C <carpeta> switch -c <rama>` (en `.`, `git switch -c <rama>`).
-   - Si falta `repos:`, `PAUSA` con `motivo=ambiguo`.
-3. Cambia `estado: en curso`.
+1. Read the complete plan one tramo at a time. If `estado` is not `aprobado`, stop without changing anything.
+2. If the task includes `Rama:`, for each folder in the frontmatter's `repos:` and only those folders:
+   - If it has no `.git`, note that in *Notas* and continue.
+   - If `git -C <folder> branch --show-current` already returns the requested branch, continue.
+   - If the branch exists (`git -C <folder> rev-parse --verify --quiet refs/heads/<branch>`), return `PAUSA` with `motivo=acceso`.
+   - Check the base branch (`base:`; if absent, use `git symbolic-ref --short refs/remotes/origin/HEAD`; without a remote, use `main` or `master`) and confirm `git status`/`git diff` show no changes outside `cambios/<name>/`. Otherwise return `PAUSA` with `motivo=acceso`.
+   - If checks pass, create only the authorized branch: `git -C <folder> switch -c <branch>` (for `.`, use `git switch -c <branch>`).
+   - If `repos:` is missing, return `PAUSA` with `motivo=ambiguo`.
+3. Set `estado: en curso`.
 
-Git, estados y retorno: ver *Límites* y *Retorno* del constructor.
+For Git, states, and the return format, see the constructor's *Limits* and *Return* sections.
 
-Con `tipo: docs`, al terminar confirma con `git diff --name-only <base>` que solo cambiaron `*.md` o `docs/`; si cambió otra cosa, `PAUSA` con `motivo=alcance`.
+For `tipo: docs`, when finished confirm with `git diff --name-only <base>` that only `*.md` files or files under `docs/` changed; otherwise return `PAUSA` with `motivo=alcance`.
 
 ## Tramo
 
-Si el plan trae `tramo: <n>` en el frontmatter, ejecuta ese tramo. En el formato nuevo, `### Tramo N — Historia: ...` identifica una historia autocontenida: lee su usuario, dependencias, alcance, CUANDO/ENTONCES, criterios `A#`, TODO y *Handoff*. Usa el handoff para orientar la implementación y revisión; comprueba cada criterio `A#` mencionado y ejecuta solo sus pasos TODO. Las dependencias declaradas deben estar terminadas antes de comenzar; si no, detente y registra dónde retomar. En planes antiguos, sigue los pasos y aceptación declarados en su formato existente.
+If the plan frontmatter contains `tramo: <n>`, execute that tramo. In the new format, `### Tramo N — Historia: ...` identifies a self-contained story: read its user/value, dependencies, scope, CUANDO/ENTONCES, `A#` criteria, TODO items, and *Handoff*. Use the handoff to guide implementation and review; check every referenced `A#` criterion and execute only its TODO items. Declared dependencies must be complete before starting; otherwise stop and record where to resume. For older plans, follow their existing steps and acceptance criteria.
 
-Por defecto, una ejecución termina al cerrar el tramo activo; conserva este procedimiento para planes sin continuidad y los planes antiguos. Solo si el plan aprobado declara `continuidad: continua`, puedes seguir a los tramos aprobados siguientes de la misma historia en la misma ejecución. Lee cada archivo de tramo justo antes de usarlo; no avances a otra historia. Tras cada tramo añade en *Notas* un punto de control con archivos tocados, resumen del diff y comprobación; no hagas commit. Al cerrar la historia, detente para que el principal revise en contexto nuevo y usa `/compact` o una sesión nueva para esa revisión. Si el plan declara `Revisión: por tramo`, espera esa revisión antes de avanzar.
+By default, an execution ends when the active tramo is complete; keep this procedure for plans without continuity and older plans. Only when the approved plan declares `continuidad: continua` may you continue through approved tramos of the same story in one run. Read each tramo file just before using it; do not move on to another story. After each tramo, add a checkpoint to *Notas* with changed files, a diff summary, and the check result; do not commit. When the story is complete, stop for the principal to review in a fresh context and use `/compact` or a new session for that review. If the plan declares `Revisión: por tramo`, wait for that review before continuing.
 
-En continuidad, aplica las *Condiciones de parada* del plan. Si no hay duración previa registrada para la comprobación exacta en entorno equivalente, pausa antes de ejecutarla. Envuélvela con un límite de dos veces esa duración, por ejemplo `timeout <2x-segundos>s <comando>`; si vence, deja la casilla pendiente y registra la pausa. Tras el primer fallo por una causa, diagnostica y corrige solo dentro del alcance; si vuelve a fallar por la misma causa, pausa con lo hecho, lo que falta y el motivo. Pausa también si hace falta salir del alcance o una decisión de la persona usuaria. Las dudas menores dentro del alcance se registran bajo `Decisiones` y no interrumpen el avance. En continuidad, puedes actualizar `tramo:` al avanzar dentro de la misma historia y anotar esas decisiones menores en *Decisiones*; conserva `estado: en curso` al avanzar y cámbialo a `parcial` al pausar, deja una nota retomable con lo hecho, lo que falta y la causa. El principal revisa la nota y vuelve a aprobar antes de reanudar. No cambies `Alcance` ni `Aceptación`. En planes sin continuidad conserva el procedimiento y contenido del plan existente.
+In continuous mode, follow the plan's *Condiciones de parada*. If no prior duration is recorded for the exact check in an equivalent environment, pause before running it. Set a limit of twice that duration, for example `timeout <2x-segundos>s <comando>`; if it expires, leave the checkbox pending and record the pause. After the first failure for a cause, diagnose and fix only within scope; if the same cause returns, pause with completed work, remaining work, and reason. Also pause if work must leave scope or requires a user decision. Record minor in-scope decisions under `Decisiones` and continue. In continuous mode, you may update `tramo:` while advancing within the same story and record those minor decisions under `Decisiones`; keep `estado: en curso` while advancing and set it to `parcial` when pausing, with a resumable note describing progress, remaining work, and cause. The principal reviews the note and re-approves before resumption. Do not change `Alcance` or `Aceptación`. For plans without continuity, preserve their existing procedure and content.
 
-Su verificación es la línea `Verificación del tramo:`; si el tramo es el último del plan, corre además la *Verificación* completa. En un índice, lee `tramo-<n>.md` del tramo activo; para continuidad, abre después cada siguiente tramo de la misma historia que vayas a ejecutar. Sin `tramo:`, es un plan de un solo tramo. Al cerrar cada tramo registra el punto de control; al cerrar una historia deja el resumen para que el principal revise desde contexto nuevo. En planes sin continuidad, conserva la pausa entre invocaciones por tramo y usa `/compact` o una sesión nueva antes de continuar el plan.
+Use the `Verificación del tramo:` line for its check; if this is the plan's final tramo, also run the complete *Verificación*. For an index plan, read `tramo-<n>.md` for the active tramo; in continuous mode, then open each subsequent tramo of the same story you will execute. Without `tramo:`, the plan has one tramo. Record a checkpoint when each tramo ends; when a story ends, leave a summary for the principal to review in a fresh context. For plans without continuity, preserve the pause between tramo invocations and use `/compact` or a new session before continuing the plan.
 
-## Bucle de ejecución
+## Execution loop
 
-Para cada paso `- [ ]`, en orden:
+For each `- [ ]` step, in order:
 
-- Agrupa en una sola llamada las lecturas independientes del paso y lee cada archivo una vez.
-- Ritmo: lee el archivo que vas a cambiar; reproduce el estado de partida con un comando y anota su salida; cambia lo mínimo dentro de *Alcance* (nunca recortes, pospongas ni simplifiques lo pedido); vuelve a correr el mismo comando y compara con la salida anotada.
-- Verifica cada unidad coherente al terminarla con la `Comprobación rápida` del `AGENTS.md` (Nivel 1, sin Docker) si existe; si no, con `verify`. El `verify` con Docker queda para la *Verificación final* y para `Verificación del tramo:` (cada una con el nivel que declara).
-- En cuanto un paso esté completo y su comprobación pase, marca su `- [x]` y añade la evidencia en la sección *Evidencia* del plan, antes de empezar el paso siguiente. No esperes a terminar el tramo. Cambia únicamente las casillas de pasos, su evidencia, el frontmatter `estado` y las secciones *Evidencia* y *Notas*; nunca edites *Alcance* ni *Aceptación*.
-- Si el paso no tiene una comprobación explícita, déjalo sin marcar y añade en *Notas* una línea con el paso y la comprobación que falta; no inventes una ni lo declares completo. Si se interrumpe o queda incompleto, déjalo sin marcar y añade una línea con el punto exacto para retomar.
-- Cuenta pendientes con el bloque `bash pendientes-plan` (abajo), pasando la ruta del plan como `$1`. Registra la cuenta; un error de lectura no es cero. Con pendientes, sigues salvo bloqueo permitido.
-- Corrige fallos relacionados dentro del alcance y anótalos en *Notas*.
-- Salidas largas (build, `verify`, listados): muestra solo la cola y los errores; usa opciones silenciosas cuando existan.
-- Comandos largos (`verify`, builds): espéralos con una sola llamada (Claude Code, `timeout` máximo o `run_in_background` y esperar su aviso; Pi, el timeout de `bash`; Codex, `exec_command` en una celda `exec` y, cuando devuelva «Script running with cell ID N», una sola llamada `wait` con ese `cell_id` y `yield_time_ms: 300000`). Nunca bucles de `sleep`, `tail` ni consulta de estado.
-- Validar con navegador o contenedores: usa un script de comando fijo del repo (`./scripts/<nombre>.sh` o `./verify`) que haga todos los recorridos y capturas en una sola corrida. No encadenes `docker run` ni `compose run` sueltos.
+- Group independent reads for a step into one call and read each file once.
+- Workflow: read the file to change; capture its starting state with a command and record the output; make the smallest in-scope change (never omit, defer, or simplify requested work); rerun the same command and compare it with the recorded output.
+- After each coherent unit, run the `Comprobación rápida` from `AGENTS.md` (Level 1, no Docker) if present; otherwise use `verify`. Reserve Docker-based `verify` for *Verificación final* and `Verificación del tramo:` (each at its declared level).
+- As soon as a step is complete and its check passes, mark `- [x]` and add evidence to the plan's *Evidencia* section before starting the next step. Do not wait until the tramo ends. Change only step checkboxes, their evidence, frontmatter `estado`, and the *Evidencia* and *Notas* sections; never edit *Alcance* or *Aceptación*.
+- If a step has no explicit check, leave it unchecked and add a *Notas* line with the step and missing check; do not invent one or claim completion. If interrupted or incomplete, leave it unchecked and record the exact resumption point.
+- Count pending items with the `bash pendientes-plan` block below, passing the plan path as `$1`. Record the count; a read error is not zero. Continue with pending work unless an allowed blocker applies.
+- Fix related issues within scope and record them in *Notas*.
+- For long output (builds, `verify`, listings), show only the tail and errors; use quiet options when available.
+- Wait for long commands (`verify`, builds) with one call (Claude Code: maximum `timeout` or `run_in_background` and wait for its notice; Pi: `bash` timeout; Codex: `exec_command` in an `exec` cell and, if it returns “Script running with cell ID N”, make one `wait` call with that `cell_id` and `yield_time_ms: 300000`). Never poll with `sleep`, `tail`, or status loops.
+- For browser/container validation, use a fixed repository script (`./scripts/<name>.sh` or `./verify`) that runs all journeys and captures in one pass. Do not chain standalone `docker run` or `compose run` calls.
 
-### Contador canónico
+### Canonical counter
 
 ```bash pendientes-plan
 #!/usr/bin/env bash
@@ -59,35 +59,35 @@ awk '
 ' "$1"
 ```
 
-Cuenta solo casillas pendientes raíz, imprime `0` si no hay coincidencias y propaga errores de lectura.
+Count only root-level pending checkboxes, print `0` when there are no matches, and propagate read errors.
 
-## Verificación final
+## Final Verification
 
-Con los demás pasos hechos, ejecuta el comando de *Verificación* **tal cual** antes de marcar su paso específico. Los checks locales por unidad no consumen las tres corridas finales; no repitas una suite idéntica sin cambio o diagnóstico nuevo.
+After the other steps are complete, run the *Verificación* command **exactly as written** before checking off its specific step. Local unit checks do not count against the three final runs; do not repeat an identical suite without a change or new diagnosis.
 
-- Si pasa, registra salida real y marca el paso.
-- Si falla, busca la causa raíz en todo el alcance, corrige dentro de él y vuelve a correr.
-- **Tope:** 3 corridas finales. Si la misma causa persiste tras dos correcciones o la tercera corrida no pasa, devuelve `PAUSA` con `motivo=verify` y diagnóstico completo.
-- Concluye solo con requisitos de Aceptación satisfechos, verificación final verde y cero pasos pendientes. Las casillas son progreso declarado, no evidencia independiente.
+- If it passes, record the real output and check off the step.
+- If it fails, find the root cause within the full scope, fix it, and rerun.
+- **Limit:** 3 final runs. If the same cause persists after two fixes or the third run fails, return `PAUSA` with `motivo=verify` and a complete diagnosis.
+- Finish only when acceptance requirements are met, final verification passes, and no steps remain pending. Checkboxes report progress; they are not independent evidence.
 
-## Cuenta, contexto y pausa
+## Counting, context, and pausing
 
-- Si el harness avisa un corte inminente, persiste avance y siguiente acción en *Notas*; no declares COMPLETADO. Una interrupción deja `en curso`, no es PAUSA de producto. El principal reconstruye el estado y vuelve a aprobar antes de reanudar.
-- Pausa solo en estos casos:
-  - Un paso es ambiguo y varias lecturas cambian el resultado → `motivo=ambiguo`.
-  - La solución del plan no funciona (problema de diseño) → `motivo=diseño`.
-  - Hace falta trabajo fuera de *Alcance* o que cambia un comportamiento especificado → `motivo=alcance`.
-  - Falta una credencial, un acceso o una herramienta → `motivo=acceso`.
-  - `verify` no pasa en 3 corridas → `motivo=verify`.
-- Antes de una `PAUSA` con `motivo=ambiguo` o `motivo=acceso`, busca `Resuelto:` en *Decisiones ya tomadas* del plan. Lo que ya figura como `Resuelto:` no se vuelve a pedir: lo aplicas tal cual.
-- El formato de `PAUSA` (primera línea y, debajo, el problema con 2 o 3 opciones) está en *Retorno* del constructor.
+- If the harness warns that execution may be cut off, persist progress and the next action in *Notas*; do not report COMPLETADO. An interruption leaves `en curso`; it is not a product PAUSA. The principal reconstructs the state and re-approves before resuming.
+- Pause only in these cases:
+  - A step is ambiguous and different interpretations change the result → `motivo=ambiguo`.
+  - The plan's solution does not work (design issue) → `motivo=diseño`.
+  - Work outside *Alcance* is needed or specified behavior would change → `motivo=alcance`.
+  - A credential, access, or tool is missing → `motivo=acceso`.
+  - `verify` fails in 3 runs → `motivo=verify`.
+- Before a `PAUSA` with `motivo=ambiguo` or `motivo=acceso`, look for `Resuelto:` under the plan's *Decisiones ya tomadas*. Do not ask again about anything already marked `Resuelto:`; apply it as written.
+- The `PAUSA` format (first line, then the issue and 2 or 3 options) is in the constructor's *Return* section.
 
-No adivines: pausa. Deja lo hecho como está.
+Do not guess; pause. Leave completed work intact.
 
 ## Evidencia
 
-En *Evidencia* pega cada comando de verificación como `$ <comando>`, idéntico al del plan, con su salida **real** (la cola relevante, hasta unos 1,5 KB; nunca inventada) y una última línea `exit N` con el código real. Añade cada entrada inmediatamente al marcar el paso correspondiente.
-## Al terminar
+In *Evidencia*, include each verification command as `$ <comando>`, exactly as written in the plan, followed by its **real** output (the relevant tail, up to about 1.5 KB; never fabricated) and a final `exit N` line with the actual exit code. Add each entry immediately when checking off its corresponding step.
+## When Done
 
-- En *Notas*: decisiones menores que tomaste y fallos relacionados que corregiste.
-- Estados y primera línea de respuesta (`COMPLETADO` o `PAUSA`): ver *Límites* y *Retorno* del constructor.
+- In *Notas*, record minor decisions and related issues you fixed.
+- For states and the response's first line (`COMPLETADO` or `PAUSA`), see the constructor's *Limits* and *Return* sections.

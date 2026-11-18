@@ -6,6 +6,8 @@ ejecutor: principal
 ---
 # Lanzadores con esfuerzo
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Abrir un agente en ventana propia con `claude-<agente>` respeta el esfuerzo de `modelos.json`, igual que `pi-<agente>`.
 
@@ -63,5 +65,5 @@ Cambios: instalar.sh (generar_lanzador_claude + aviso de PATH), README.md, agent
 ## Notas
 - Ejecutó el principal. Cargó `ejecutar-plan` antes (en esta sesión).
 - Corrección de alcance: al probar `instalar.sh` en un HOME temporal vi que ya desinstala lo anterior antes de reinstalar. Los pasos 1 a 4 (regenerar lo marcado) se retiraron del plan y del código; mi diagnóstico previo era erróneo. `desinstalar.sh` ya borraba los lanzadores nuevos por manifiesto, sin cambios.
-- El esfuerzo real que verá Franco en ventana propia: `claude-constructor` con `--effort`, `pi-constructor` con sufijo; abrir con `--agent` directo o dentro de Pi no lo aplica.
+- El esfuerzo real que verá la persona usuaria en ventana propia: `claude-constructor` con `--effort`, `pi-constructor` con sufijo; abrir con `--agent` directo o dentro de Pi no lo aplica.
 - Sin probar con corrida real: que `--effort` en `claude --agent` se vea en la interfaz; se comprueba con `/effort status`.

@@ -53,7 +53,7 @@ Fuera de alcance: `## Flujo`, `## Instalación`, diagramas, reglas, bitácora, `
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 head -1 README.md; test -f assets/logo.svg && echo ok
 grep -n "^## " README.md | head -4
 grep -c "├── assets/" README.md
@@ -65,7 +65,7 @@ Salida esperada: la línea del logo y `ok`; `La idea` seguida de `Para qué exis
 
 ## Evidencia
 
-Comandos ejecutados desde `/Users/franco/Codes/flucastr/Flucastr.AI` (salida real):
+Comandos ejecutados desde `/Users/persona/Codes/flucastr/Flucastr.AI` (salida real):
 
 ```
 $ head -1 README.md; test -f assets/logo.svg && echo ok

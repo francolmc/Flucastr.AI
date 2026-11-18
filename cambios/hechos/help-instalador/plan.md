@@ -7,11 +7,13 @@ ejecutor: constructor
 ---
 # Ayuda completa del instalador
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Que `bash instalar.sh --help` permita elegir cómo instalar o migrar sin tener que leer el script, con todas las opciones reales, restricciones y ejemplos.
 
 ## Supuestos
-- El pedido se limita a mejorar la ayuda, su descubrimiento en README y sus pruebas; si Franco quiere nuevas opciones, cambia el alcance.
+- El pedido se limita a mejorar la ayuda, su descubrimiento en README y sus pruebas; si la persona usuaria quiere nuevas opciones, cambia el alcance.
 - Se conserva el procesamiento actual de argumentos, incluido su orden; si se quiere que help prevalezca sobre argumentos inválidos anteriores, requiere otra decisión.
 
 ## Alcance
@@ -43,7 +45,7 @@ Fuera de alcance: cambiar instalación, migración, validación de argumentos, m
 `./verify` — suite completa más regresiones de ayuda; usar HOME temporal para las pruebas nuevas, nunca la instalación real.
 
 ## Pasos
-- [x] Declarar `Rama base: main` en AGENTS.md; Franco la confirmó al aprobar el plan.
+- [x] Declarar `Rama base: main` en AGENTS.md; la persona usuaria la confirmó al aprobar el plan.
   - evidencia: `AGENTS.md` (declarada `main`).
 - [x] Añadir función de ayuda estática y reemplazar la extracción con sed; comprobar igualdad de `-h` y `--help`.
   - evidencia: `bash instalar.sh -h > /tmp/help-h.out && bash instalar.sh --help > /tmp/help-long.out && cmp /tmp/help-h.out /tmp/help-long.out` (exit 0).
@@ -85,7 +87,7 @@ exit 0
 ## Notas
 - Revisión del principal: encontró que el extractor de opciones podía aceptar cero opciones por escapes duplicados y que la prueba aislada sin Node/modelos solo estaba en evidencia manual. Corregido el bloque 2b: extrae dinámicamente opciones del parser, exige lista no vacía, incluye prueba negativa al quitar `--simular` e integra la copia aislada con PATH de bash/dirname/cat. La suite completa vuelve a pasar (`./verify`, exit 0).
 - Diagnóstico: `--help` usa `sed -n '2,3p' "$0"`; solo muestra dos comentarios y omite migración y explicaciones.
-- Franco aprobó el plan y confirmó `main` como rama base. Comprobación previa: rama `main`, sin cambios fuera de este plan; la declaración duradera de base se incluye en la ejecución para mantener limpia la base; `git fetch` correcto y `git rev-list --count HEAD..origin/main` = 0.
+- la persona usuaria aprobó el plan y confirmó `main` como rama base. Comprobación previa: rama `main`, sin cambios fuera de este plan; la declaración duradera de base se incluye en la ejecución para mantener limpia la base; `git fetch` correcto y `git rev-list --count HEAD..origin/main` = 0.
 - Verificación inicial: `./verify` terminó con código 0 y `VERIFY OK`.
 - No corregir validaciones ni combinaciones sorprendentes al documentarlas: describir el comportamiento actual. Si una prueba nueva revela otro fallo, registrarlo y devolver PAUSA si exige ampliar alcance.
 - La prueba aislada inicial con PATH limitado solo a bash y dirname falló porque la ayuda estática por heredoc necesita `cat`; se ajustará el PATH temporal para incluir también `cat`, sin añadir dependencia nueva.

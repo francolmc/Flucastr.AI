@@ -1,6 +1,9 @@
 # task-03 — instalar.sh: rehacer las skills de los proyectos registrados al reinstalar
 repo: Flucastr.AI   depende_de: task-01, task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Para que las skills del cliente no queden viejas respecto del kit, cada corrida de `instalar.sh` (y por tanto `instalar-remoto.sh --actualizar`, que la invoca con `--copiar`) debe volver a copiar las skills en los proyectos ya registrados con `skills-proyecto`, aunque no se pase `--proyecto`. Si la carpeta del proyecto ya no existe, se omite con aviso y se conserva el registro.
 
@@ -36,7 +39,7 @@ Fuera de alcance: `instalar-remoto.sh`, `desinstalar.sh`, pruebas (task-04), REA
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 T=$(mktemp -d); mkdir -p $T/home/.claude $T/p; git -C $T/p init -q
 export HOME=$T/home PI_CODING_AGENT_DIR=$T/home/pi
 bash instalar.sh --proyecto $T/p --skills-proyecto
@@ -150,11 +153,11 @@ Esta es la corrida final que cumple el criterio 5. Su salida completa está en `
   3. Antes de reinstalar cada proyecto registrado se imprime una línea en blanco y el encabezado `Skills de Pi en el proyecto registrado (<ruta>)`, igual que el bloque de `--skills-proyecto`.
   4. `PROYECTO` se cambia dentro del bucle y se restaura al salir; `ANTERIOR_PROYECTO` guarda el valor original.
   5. Sin proyectos registrados, el bloque no imprime nada: la salida y el manifiesto son idénticos a la línea base (comprobado).
-- **Decisión pendiente de Franco (no cambié el comportamiento):** con `--solo claude`, la limpieza previa de `desinstalar.sh` borra las copias de Pi de los proyectos registrados, y como la tarea dice no reinstalarlos con `--solo claude`, quedan sin copias y con el registro conservado. Es el mismo comportamiento que hoy tienen las skills globales de Pi con `--solo claude` (la limpieza no distingue `--solo`). Si Franco quiere que el proyecto quede intacto, hace falta cambiar `desinstalar.sh` o la lectura previa, y eso sale del alcance de esta tarea.
+- **Decisión pendiente de la persona usuaria (no cambié el comportamiento):** con `--solo claude`, la limpieza previa de `desinstalar.sh` borra las copias de Pi de los proyectos registrados, y como la tarea dice no reinstalarlos con `--solo claude`, quedan sin copias y con el registro conservado. Es el mismo comportamiento que hoy tienen las skills globales de Pi con `--solo claude` (la limpieza no distingue `--solo`). Si la persona usuaria quiere que el proyecto quede intacto, hace falta cambiar `desinstalar.sh` o la lectura previa, y eso sale del alcance de esta tarea.
 - **Criterio 2 literal:** `git status --porcelain` muestra `?? .claude/settings.local.json` porque `--proyecto` fija el agente en un archivo sin ignorar; eso ya pasaba con task-01. Si se quiere `git status` limpio, falta decidir si ese archivo se excluye en git (fuera de esta tarea).
 - **Criterio 5:** `pruebas/rapida.sh` con HOME falso vacío falla 7 pruebas que exigen el agente instalado en el HOME; HEAD falla las mismas. Pasa 220/220 con el kit instalado en ese HOME falso.
 - Error mío durante la verificación: la shell es zsh y `env $VAR` sin comillas no divide palabras, así que la primera pasada usó un HOME mal formado. Se descartó, se revisó que no se tocó nada real (`find ... -newer`) y se repitió la pasada completa con `env HOME="$H" ...`. Las salidas de *Evidencia* son de la pasada buena. En *Registro* cuenta como 2 intentos.
-- Revisión sugerida para Franco: *Evidencia* (criterios 2 y 5), el diff de `instalar.sh` (`git diff -- instalar.sh`, 45 líneas) y la decisión sobre `--solo claude`. Sin commit, sin push.
+- Revisión sugerida para la persona usuaria: *Evidencia* (criterios 2 y 5), el diff de `instalar.sh` (`git diff -- instalar.sh`, 45 líneas) y la decisión sobre `--solo claude`. Sin commit, sin push.
 
 Señal: la tarea estaba incompleta. No decía qué pasa con las copias de proyectos registrados bajo `--solo claude` (la limpieza previa las borra), y el criterio 2 no contaba con que `--proyecto` deja `.claude/settings.local.json` sin ignorar.
 

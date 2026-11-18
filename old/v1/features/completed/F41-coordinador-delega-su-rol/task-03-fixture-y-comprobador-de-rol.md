@@ -1,8 +1,11 @@
 # task-03 — Fixture y comprobador de la corrida de rol (marca → y edición de definición)
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Deja lista, sin modelo, la medición de los dos escenarios de F41: un fixture de repo (`pruebas/fixtures/rol.sh`) y un comprobador (`pruebas/comprobaciones/rol-resultado.mjs`) que lee el registro de una corrida del coordinador y dice si delegó o le pasó el trabajo a Franco. Patrón: F36 (`excedido.sh` y `excedido-resultado.mjs`).
+Deja lista, sin modelo, la medición de los dos escenarios de F41: un fixture de repo (`pruebas/fixtures/rol.sh`) y un comprobador (`pruebas/comprobaciones/rol-resultado.mjs`) que lee el registro de una corrida del coordinador y dice si delegó o le pasó el trabajo a la persona usuaria. Patrón: F36 (`excedido.sh` y `excedido-resultado.mjs`).
 
 ## Contexto
 - Tocar: `pruebas/fixtures/rol.sh`, `pruebas/comprobaciones/rol-resultado.mjs`, `pruebas/comprobaciones/rol-resultado.test.mjs`

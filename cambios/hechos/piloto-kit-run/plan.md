@@ -8,10 +8,12 @@ tipo: docs
 ---
 # Piloto de `kit run`: guía breve de uso
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 Plan de documentos chico, hecho para medir A4 de `cambios/kit-run/plan.md` con `codex exec` real.
 
 ## Supuestos
-- Rama base `feature/kit-run` (tiene el script sin mergear); si Franco prefiere esperar el merge, `base: main`.
+- Rama base `feature/kit-run` (tiene el script sin mergear); si la persona usuaria prefiere esperar el merge, `base: main`.
 - Solo documenta lo que el script ya hace; no cambia código.
 
 ## Alcance

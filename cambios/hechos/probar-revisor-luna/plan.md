@@ -9,6 +9,8 @@ tipo: codigo
 ---
 # Probar a Luna como revisor de `kit run` con defectos sembrados
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Decidir con datos si un revisor `gpt-6-luna` detecta lo mismo que `gpt-6.1-sol` a una fracción del costo (A4 medido: razón 6,6; `docs/investigaciones/a4-costo-revisor.md`). **No se crea ningún agente nuevo**: se compara el mismo rol (revisor) con dos modelos. Si Luna rinde, un plan posterior solo añadirá una opción de configuración (p. ej. `kit_run.revisor_agente` en `modelos.json`), no un agente.
 
@@ -71,7 +73,7 @@ Verificación del tramo: `./verify`.
 El coste de cada corrida se toma del **último** `token_count` con `info` (opción 1): `total_token_usage` es acumulado por sesión y el primer evento subestima una revisión de varias llamadas. Cada corrida se aísla por su rollout nuevo. Los casos c01–c12 ya hechos se conservan. Relanzar el paso 2 del tramo 1.
 
 ## Decisión del principal (2026-11-10, tras la PAUSA del tramo 2)
-Franco aprobó **≈8 créditos más, tope 10** (el gasto total ya supera el tope original de 20: ≈33 por dos procesos de Sol en paralelo). Reglas:
+la persona usuaria aprobó **≈8 créditos más, tope 10** (el gasto total ya supera el tope original de 20: ≈33 por dos procesos de Sol en paralelo). Reglas:
 1. **Nunca dos procesos de `medir.mjs` a la vez.** Un proceso, en primer plano o uno solo en segundo plano; esperar a que termine antes de lanzar otro. Antes de lanzar, comprobar con `pgrep -f medir.mjs` que no hay otro.
 2. **Deduplicar `resultados.jsonl` de S:** conservar una fila por caso (la primera). La detección es idéntica en ambas pasadas (DEVUELTO en c01–c06 y c11; APROBADO en c07–c10 y c12). Anotar que los **costos de esas filas no son fiables** (rollouts de dos procesos mezclados, de 0,27 a 2,0) y no usarlos para la regla.
 3. Correr **L1 y L2** sobre los 12 casos, una condición a la vez. Tope nuevo: (gasto actual de las filas conservadas + 10). Si el runner no lo permite, usar `--tope-creditos` con ese valor.

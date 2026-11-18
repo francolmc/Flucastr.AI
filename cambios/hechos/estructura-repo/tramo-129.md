@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 129 — Anonimizar skills/disenar-experiencia/SKILL.md
 
 ## Pasos
@@ -16,5 +18,5 @@ Verificación del tramo: `./verify` — nivel 3; además la comprobación espec�
 Handoff: registrar archivos, diff, comandos y resultados; detenerse para revisión.
 
 ## Evidencia
-- Paso 1: se sustituyeron las 3 menciones personales por copia según `anonimizacion.md`: la persona que trabaja en la terminal y la persona que aprueba el boceto. Se conserva que el boceto se presenta en la puerta 1 y debe ser aprobado por la persona usuaria. `$ cmp -s skills/disenar-experiencia/SKILL.md core/skills/design-experience/SKILL.md`: `exit 0`; `$ node tools/verify/core-compatibility.mjs`: `exit 0`; `$ node --test tools/verify/core-compatibility.test.mjs`: 6/6 pasaron, `exit 0`; búsqueda `rg` de `Franco` en ambos archivos: sin coincidencias, `exit 0`.
+- Paso 1: se sustituyeron las 3 menciones personales por copia según `anonimizacion.md`: la persona que trabaja en la terminal y la persona que aprueba el boceto. Se conserva que el boceto se presenta en la puerta 1 y debe ser aprobado por la persona usuaria. `$ cmp -s skills/disenar-experiencia/SKILL.md core/skills/design-experience/SKILL.md`: `exit 0`; `$ node tools/verify/core-compatibility.mjs`: `exit 0`; `$ node --test tools/verify/core-compatibility.test.mjs`: 6/6 pasaron, `exit 0`; búsqueda `rg` de `Persona` en ambos archivos: sin coincidencias, `exit 0`.
 - Paso 2: `$ timeout 95 bash cambios/estructura-repo/reproducir-linea-base.sh` terminó con `exit 0` en 41,9 s. Salida: `verify coincide salvo el mensaje exacto autorizado del escenario 9.` y `Simulaciones repetibles y verify coinciden con linea-base/; aplica solo la excepción exacta del escenario 9.`

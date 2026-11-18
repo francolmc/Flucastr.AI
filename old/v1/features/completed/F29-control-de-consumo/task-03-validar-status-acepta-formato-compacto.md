@@ -1,6 +1,9 @@
 # task-03 — validarStatus acepta el STATUS.md compacto
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 La prueba «definitions/STATUS.md real cumple el formato» usa `validarStatus` de `pruebas/comprobaciones/formato-flujo.mjs`, que exige el formato antiguo (`# Estado del flujo` y cinco secciones `##`). Cuando el `coordinador` pase a la plantilla compacta de una sola escritura, esa prueba fallaría. Esta tarea hace que `validarStatus` acepte también la plantilla compacta (reusando `validarStatusCompacto` de task-01) y conserve intacta la validación del formato antiguo.
 
@@ -10,7 +13,7 @@ La prueba «definitions/STATUS.md real cumple el formato» usa `validarStatus` d
 - `formato-flujo.mjs`: `validarStatus(texto)` (línea 114) exige `lineas[0] === '# Estado del flujo'`, secciones `##` exactas en orden y fecha en `Última actualización`. `SECCIONES_STATUS` y `seccionesStatus` son internos.
 - `formato-flujo.test.mjs`: `STATUS_VALIDO` es la muestra del formato antiguo; el último test lee el `definitions/STATUS.md` real.
 - Plantilla compacta: primera línea `# Estado` y siete líneas (`Escalación:`, `Paso actual:`, `Presupuesto:`, `Espera a Franco:`, `Bloqueos abiertos:`, `Retomar:`, `Actualizado:`); la valida `validarStatusCompacto` de `scripts/formato-presupuesto.mjs`.
-- `definitions/WORKFLOW.md` §4 sigue describiendo el formato antiguo y no se toca (decisión 4 = A de Franco).
+- `definitions/WORKFLOW.md` §4 sigue describiendo el formato antiguo y no se toca (decisión 4 = A de la persona usuaria).
 - Lee solo las *Notas* de task-02.
 
 ## Decisiones ya tomadas

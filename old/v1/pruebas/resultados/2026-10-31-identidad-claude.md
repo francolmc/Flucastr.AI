@@ -1,10 +1,12 @@
 # Identidad del `coordinador` en Claude Code (F18, task-07), 2026-10-31
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Corrida real con modelo: una sola (tope de costo de la tarea). Sin reintentos.
 
 ## Precondición
 
-Franco corrió `bash instalar.sh`. Comprobación sin modelo:
+la persona usuaria corrió `bash instalar.sh`. Comprobación sin modelo:
 
 ```
 $ node scripts/resolver.mjs agente-claude agentes/coordinador.md | diff - ~/.claude/agents/coordinador.md; echo "diff exit=$?"
@@ -28,4 +30,4 @@ diff exit=0
 
 ## Nota sobre la línea de identidad
 
-La línea fija el modelo **al instalar** (la toma de `modelos.json` en `instalar.sh`). Si Franco lanza con otro `--model`, la línea queda desactualizada. En Claude Code el modelo real también figura en el contexto de sistema; por eso el registro del modelo se compara aparte de la línea.
+La línea fija el modelo **al instalar** (la toma de `modelos.json` en `instalar.sh`). Si la persona usuaria lanza con otro `--model`, la línea queda desactualizada. En Claude Code el modelo real también figura en el contexto de sistema; por eso el registro del modelo se compara aparte de la línea.

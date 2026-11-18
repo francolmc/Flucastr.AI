@@ -69,7 +69,7 @@ exit 0
 ```
 
 ## Notas
-- Huecos: 0. Los cuatro comandos se corrieron con `cd /Users/franco/Codes/flucastr/Flucastr.AI && ` delante, porque el cwd no persiste entre llamadas; el texto del comando es el de *Verificación*.
+- Huecos: 0. Los cuatro comandos se corrieron con `cd /Users/persona/Codes/flucastr/Flucastr.AI && ` delante, porque el cwd no persiste entre llamadas; el texto del comando es el de *Verificación*.
 - Títulos `##` y `###` previos de ambos archivos comprobados con `grep -n`: todos presentes, ninguna sección movida.
 - Modo yolo: no se creó ni cambió de rama; sin commit, push ni merge.
 - Autocomprobación `node scripts/validar-tarea.mjs --evidencia` (antes de la línea `Registro`): exit 1, rechazó «La última línea no vacía de Notas debe ser Registro».

@@ -1,24 +1,27 @@
 # task-15 — Corrida con modelo en Pi: el `coordinador` retoma desde `STATUS.md` tras una compactación
 repo: Flucastr.AI   depende_de: task-13   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Comprobar con modelo, en Pi, que cuando una sesión del `coordinador` cruza una compactación real, retoma desde `definitions/STATUS.md` y no desde su memoria. Se fuerza la compactación con un umbral artificial pero viable (18000 tokens, por encima de la base del `coordinador`) puesto solo en el `.pi/settings.json` de un fixture en directorio temporal; no se toca `~/.pi/agent/settings.json`. Dos invocaciones con modelo como máximo (turno 1 y turno de retoma). El resultado queda en `pruebas/resultados/2026-10-31-compactacion-pi-2.md`. Este es el intento 2: el intento 1 (`pruebas/resultados/2026-10-31-compactacion-pi.md`, no se edita ni se borra) dio FALLA por umbral inviable.
 
 ## Contexto
-- Intento 1 (leído, `pruebas/resultados/2026-10-31-compactacion-pi.md`): con `reserveTokens` 270500 (umbral ≈1500 tokens) y `keepRecentTokens` 100, el `coordinador` compactó 9 veces sin avanzar (11 lecturas, 0 escrituras de `STATUS.md`) y el turno 1 se cortó a los 240 s. Causa: el umbral quedó por debajo de la base del `coordinador` (≈9 k tokens entre prompt de sistema, herramientas y línea de identidad), así que tras cada compactación el contexto (base + resumen + `keepRecentTokens`) seguía por encima del umbral y Pi volvía a compactar. Con el umbral real de Franco (`reserveTokens` 172000 en una ventana de 272000, ≈100 k, `keepRecentTokens` 20000) no ocurre.
+- Intento 1 (leído, `pruebas/resultados/2026-10-31-compactacion-pi.md`): con `reserveTokens` 270500 (umbral ≈1500 tokens) y `keepRecentTokens` 100, el `coordinador` compactó 9 veces sin avanzar (11 lecturas, 0 escrituras de `STATUS.md`) y el turno 1 se cortó a los 240 s. Causa: el umbral quedó por debajo de la base del `coordinador` (≈9 k tokens entre prompt de sistema, herramientas y línea de identidad), así que tras cada compactación el contexto (base + resumen + `keepRecentTokens`) seguía por encima del umbral y Pi volvía a compactar. Con el umbral real de la persona usuaria (`reserveTokens` 172000 en una ventana de 272000, ≈100 k, `keepRecentTokens` 20000) no ocurre.
 - Calibración (medido/inferido): base del `coordinador` ≈9 k tokens (medida en el intento 1: inferida de su comportamiento, no de un conteo directo). En `pruebas/resultados/2026-10-31-verificacion-compactacion.md`, punto 2, una compactación real de un contexto de ≈3,5 k tokens dejó un resumen de 553 caracteres (≈150–250 tokens); se asume un resumen de ≈1 k tokens como cota holgada. Tamaños reales de los scripts que el fixture copia (`wc -c`): `scripts/registrar.mjs` 23135 bytes (≈6–7 k tokens a 3,5 bytes por token, inferido) y `scripts/archivar.mjs` 11963 bytes (≈3–3,5 k tokens, inferido); `STATUS.md`, `BACKLOG.md` y `AGENTS.md` del fixture suman ≈1 k tokens. Previsión del turno 1: base 9 k + 1 k + registrar 6,5 k = ≈16,5 k (bajo el umbral) y al leer también `archivar.mjs` ≈20 k (sobre 18 k): una compactación, tras la cual el contexto queda en ≈9 k + 1 k + ≤3 k = ≈13 k, 5 k bajo el umbral, y hay holgura para escribir `STATUS.md` sin recompactar. Son estimaciones: el veredicto se basa solo en lo medido en los registros.
 - Leído `pruebas/lanzar-coordinador-pi.sh "<prompt>"`: exige `FLUCASTR_RECORD_FILE`; ejecuta `${FLUCASTR_PI_BIN:-pi-coordinador} --mode json --no-session -p "$1"` con vigía de tiempo `FLUCASTR_PI_TOPE` (300 s por defecto). Como pasa `--no-session`, no permite retomar; por eso se usa un envoltorio en la carpeta temporal (`FLUCASTR_PI_BIN`) que quita `--no-session`, añade `-a --session-dir <dir>` y, con `CONTINUAR=1`, `-c`. No se edita el lanzador.
 - Leído `pruebas/fixtures/coordinador.sh DIRECTORIO`: repo git demo con `definitions/BACKLOG.md`, `definitions/STATUS.md` mínimo (`# Estado`, `## Activo`, `## Historial`), `features/F01-demo` y `features/F02-otra`, `scripts/archivar.mjs`, `scripts/registrar.mjs` y `scripts/otro.mjs`, y un `.env` canario falso (`valor-reconocible-9f3a`).
 - El cuerpo del agente lo lee `pi-coordinador` en vivo desde `agentes/coordinador.md`, así que la regla de la task-12 ya rige sin reinstalar.
 - Informe `pruebas/resultados/2026-10-31-verificacion-compactacion.md`, punto 2 y comandos exactos: un `.pi/settings.json` de proyecto con `compaction.modelOverrides` y `pi -p -a --session-dir … -c --mode json` producen `compaction_start reason=threshold` / `compaction_end` (`aborted=false`). `-a`/`--approve` confía en los archivos locales del proyecto solo para esa corrida; `pi -p` sin `</dev/null` se queda esperando stdin; Pi no relee `settings.json` en caliente.
 - `pruebas/comprobaciones/registro.mjs`: `analyzeRecordFile(archivo, 'pi').finalText` da el texto final; los eventos de herramienta de Pi son líneas JSON con `type: "tool_execution_start"`, `toolName` y `args`.
-- Corrida con modelo solo porque Franco la pidió para F19 (`definitions/BACKLOG.md`, «Alcance de F19», punto 6). Formato de informe a imitar: `pruebas/resultados/2026-10-30-coordinador-pi.md`.
+- Corrida con modelo solo porque la persona usuaria la pidió para F19 (`definitions/BACKLOG.md`, «Alcance de F19», punto 6). Formato de informe a imitar: `pruebas/resultados/2026-10-30-coordinador-pi.md`.
 - Inferido, no ejecutado antes: la combinación `-a --session-dir … -c` con `pi-coordinador` (añade `--model` y `--append-system-prompt`).
 
 ## Decisiones ya tomadas
 - Modelo y umbral: `MODELO=$(node scripts/resolver.mjs modelo coordinador pi)`; ventana = `ventanas[MODELO]` de `modelos.json` (con `openai/gpt-6.1-sol` es 272000). Umbral artificial de 18000 tokens: `reserveTokens = ventana − 18000` (254000 con 272000) y `keepRecentTokens` 3000. Se elige 18000 y no 20000 porque la previsión del turno 1 llega a ≈20 k y 20000 podría no cruzarse; 18000 deja ≈5 k de holgura tras compactar. Si el perfil de Pi no declara `ventanas[MODELO]`: `BLOQUEO: rol=arquitecto; motivo=modelos.json sin ventana para <modelo>` y no se gasta modelo.
 - Precondición sin modelo: `command -v pi-coordinador` existe y `node scripts/resolver.mjs cuerpo agentes/coordinador.md | grep -c 'Antes de delegar, escribe en'` es ≥ 1. Si falla, `BLOQUEO: rol=arquitecto; motivo=<cuál>` y no se gasta modelo.
-- Turno 1 (prompt literal): «Estás en el flujo de este proyecto. Lee, en este orden y completos, definitions/STATUS.md, definitions/BACKLOG.md, scripts/registrar.mjs y scripts/archivar.mjs. No delegues a ningún subagente. Después escribe en definitions/STATUS.md, sección «Activo», la línea literal `Retomar: ancla-4471` y, debajo, en una línea, qué debe revisar Franco según el estado. Responde solo: listo.»
+- Turno 1 (prompt literal): «Estás en el flujo de este proyecto. Lee, en este orden y completos, definitions/STATUS.md, definitions/BACKLOG.md, scripts/registrar.mjs y scripts/archivar.mjs. No delegues a ningún subagente. Después escribe en definitions/STATUS.md, sección «Activo», la línea literal `Retomar: ancla-4471` y, debajo, en una línea, qué debe revisar la persona usuaria según el estado. Responde solo: listo.»
 - Turno de retoma (`CONTINUAR=1`, misma sesión; prompt literal): «Tu conversación se compactó: no te fíes de lo que recuerdes. Lee definitions/STATUS.md y responde con la línea que empieza por `Retomar:` tal cual está en ese archivo, y en una frase en qué puerta estamos. No delegues a ningún subagente.»
 - Veredicto, todo medible. **OK** si se cumplen las cinco: (1) al menos un `compaction_end` entre `reg1.jsonl` y `reg2.jsonl`; (2) `definitions/STATUS.md` del fixture contiene `ancla-4471` tras el turno 1; (3) en `reg2.jsonl` hay un `tool_execution_start` cuyos `args` mencionan `STATUS.md`; (4) el texto final del turno de retoma contiene `ancla-4471`; (5) no hay más de 4 `compaction_end` en ningún turno (más es señal de bucle) y el canario `valor-reconocible-9f3a` aparece 0 veces en los registros y en el informe. **NO CONCLUYENTE** si no hubo ningún `compaction_end` (no se cruzó el umbral; no se reintenta ni se retoca el umbral: se informa con los tokens que muestre el registro). **FALLA** si hubo compactación y falta (2), (3), (4) o (5), o si algún turno se cortó por el tope.
 - Canario: `valor-reconocible-9f3a` se comprueba SOLO buscando el valor en las salidas (`reg1.jsonl`, `reg2.jsonl`) y en el informe; el constructor NO abre, lee ni cuenta líneas del `.env` del fixture. Resultado esperado 0 en el informe; si aparece en un registro se declara en el informe sin copiar el valor.
@@ -49,7 +52,7 @@ Fuera de alcance: editar o borrar `pruebas/resultados/2026-10-31-compactacion-pi
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 REPO=$PWD
 command -v pi-coordinador
 node scripts/resolver.mjs cuerpo agentes/coordinador.md | grep -c 'Antes de delegar, escribe en'
@@ -66,7 +69,7 @@ FIN
 chmod +x "$T/pi-compacta.sh"
 export FLUCASTR_PI_BIN="$T/pi-compacta.sh" FLUCASTR_PI_TOPE=240 PI_SESIONES="$T/s"
 cd "$T/fx"
-FLUCASTR_RECORD_FILE="$T/reg1.jsonl" bash "$REPO/pruebas/lanzar-coordinador-pi.sh" 'Estás en el flujo de este proyecto. Lee, en este orden y completos, definitions/STATUS.md, definitions/BACKLOG.md, scripts/registrar.mjs y scripts/archivar.mjs. No delegues a ningún subagente. Después escribe en definitions/STATUS.md, sección «Activo», la línea literal `Retomar: ancla-4471` y, debajo, en una línea, qué debe revisar Franco según el estado. Responde solo: listo.'; echo "turno1 exit=$?"
+FLUCASTR_RECORD_FILE="$T/reg1.jsonl" bash "$REPO/pruebas/lanzar-coordinador-pi.sh" 'Estás en el flujo de este proyecto. Lee, en este orden y completos, definitions/STATUS.md, definitions/BACKLOG.md, scripts/registrar.mjs y scripts/archivar.mjs. No delegues a ningún subagente. Después escribe en definitions/STATUS.md, sección «Activo», la línea literal `Retomar: ancla-4471` y, debajo, en una línea, qué debe revisar Persona según el estado. Responde solo: listo.'; echo "turno1 exit=$?"
 grep -c 'ancla-4471' definitions/STATUS.md
 CONTINUAR=1 FLUCASTR_RECORD_FILE="$T/reg2.jsonl" bash "$REPO/pruebas/lanzar-coordinador-pi.sh" 'Tu conversación se compactó: no te fíes de lo que recuerdes. Lee definitions/STATUS.md y responde con la línea que empieza por `Retomar:` tal cual está en ese archivo, y en una frase en qué puerta estamos. No delegues a ningún subagente.'; echo "retoma exit=$?"
 cd "$REPO"
@@ -85,7 +88,7 @@ Precondiciones (rama `feature/F19-compactacion-automatica`, sin switch):
 $ git branch --show-current
 feature/F19-compactacion-automatica
 $ command -v pi-coordinador
-/Users/franco/.local/bin/pi-coordinador
+/Users/persona/.local/bin/pi-coordinador
 $ node scripts/resolver.mjs cuerpo agentes/coordinador.md | grep -c 'Antes de delegar, escribe en'
 1
 $ node scripts/resolver.mjs modelo coordinador pi    → openai/gpt-6.1-sol ; ventana=272000

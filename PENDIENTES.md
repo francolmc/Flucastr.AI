@@ -1,6 +1,6 @@
 # Pendientes de la v2
 
-> Lista de Franco. Los agentes no la leen salvo pedido explícito. Es de la v2 (ya en `main`); la lista de la v1 está en `old/v1/definitions/PENDIENTES.md`.
+> Lista de la v2 (ya en `main`); la lista de la v1 está en `old/v1/definitions/PENDIENTES.md`. Los agentes no la leen salvo pedido explícito.
 > Estado al 2026-11-05: la v2 es una **versión candidata**. Funciona en este repo; falta probarla en un proyecto real y ordenar el repo.
 
 ## Qué está probado
@@ -12,22 +12,22 @@
 
 ## Para dar la v2 por buena (en este orden)
 
-1. **Probarla en un proyecto real con web, API y base de datos** (Don Financio). Es lo que motivó el rediseño y lo único que este repo no ejercita.
+1. **Probarla en un proyecto real con web, API y base de datos** (proyecto financiero). Es lo que motivó el rediseño y lo único que este repo no ejercita.
    - Primer cambio: crear el `verify` del proyecto con `preparar-proyecto` (build limpio, arranque y primer recorrido real).
-   - Se considera superado si el proyecto llega a `verify` verde con solo las dos puertas de Franco, sin ampliaciones administrativas y sin abrir un plan por archivo.
+   - Se considera superado si el proyecto llega a `verify` verde con solo las dos puertas de la persona usuaria, sin ampliaciones administrativas y sin abrir un plan por archivo.
    - Revisar en el PC de trabajo la hipótesis de `express`: si `src/access-http.ts` lo importa sin que esté en el `package.json` del API (llega solo como dependencia de `@nestjs/platform-express`). No se pudo comprobar desde este equipo.
-   - Migrar Cleaner real (`/Users/franco/Codes/flucastr/Flucastr.Cleaner`) con `bash instalar.sh --migrar <ruta> --simular` y luego sin `--simular`; después la skill `migrar-proyecto`. Lo hace Franco: los agentes no escriben en ese repo. La prueba sobre una copia ya está hecha (ver `cambios/hechos/migrar-v1-v2/plan.md`). La migración también cubre workspaces (repos hijos) y el `.gitignore` (ver `cambios/hechos/migrar-workspaces/plan.md`).
+   - Migrar un proyecto real con `bash install.sh --migrate <ruta> --dry-run` y luego sin `--dry-run`; también se admiten `instalar.sh`, `--migrar` y `--simular`. Después usar la skill `migrar-proyecto`. Lo hace la persona usuaria: los agentes no escriben en ese repo. La prueba sobre una copia ya está hecha (ver `cambios/hechos/migrar-v1-v2/plan.md`). La migración también cubre workspaces (repos hijos) y el `.gitignore` (ver `cambios/hechos/migrar-workspaces/plan.md`).
 2. **Pi: probado en lo básico.** Una corrida real en Pi con un plan mínimo, con `skills: ejecutar-plan` e `inheritProjectContext: true`. `verify` comprueba que el constructor generado para Pi y para Claude Code trae `skills: ejecutar-plan`. Quedan pendientes:
    - Un plan de varios archivos en Pi.
    - El caso `PARCIAL` en Pi.
    - En Pi no hay reglas deny: rige solo el prompt.
    - No se sabe si `inheritProjectContext` hace algo.
-3. **Probar la instalación remota de la v2** en el PC de trabajo: el comando normal de `instalar-remoto.sh` desde `main` (no se ha corrido).
+3. **Probar la instalación remota de la v2** en el equipo de trabajo: el comando normal de `install-remote.sh` desde `main` (alias: `instalar-remoto.sh`; no se ha corrido).
 4. **Usarla en 2 o 3 proyectos reales** antes de retirar nada de la v1.
 5. **Ordenar el repo** (solo tras el punto 4):
    - Hecho: lo de la v1 se movió a `old/v1/` con `git mv` (no se borró): `legacy/`, `definitions/`, `features/`, `pruebas/`, `registro/`, los scripts de v1 (todo `scripts/` salvo `resolver.mjs`) y los reportes sueltos. El `README.md` es el nuevo de la v2. Los lanzadores de `validar-tarea.mjs` y `entorno.mjs` salieron de `instalar.sh`.
-   - Pendiente: borrar `old/` (solo tras el punto 4; decisión de Franco).
-   - Pendiente: `rm -rf pruebas/.temporales` (3,9 GB, ignorado por git; lo ejecuta Franco).
+   - Pendiente: borrar `old/` (solo tras el punto 4; decisión de la persona usuaria).
+   - Pendiente: `rm -rf pruebas/.temporales` (3,9 GB, ignorado por git; lo ejecuta la persona usuaria).
    - Hecho: `feature/kit-v2` ya está mergeada en `main`.
 
 ## Detalles menores
@@ -35,10 +35,10 @@
 - Pegar en `cambios/hechos/deny-endurecido/plan.md` la evidencia manual que quedó pendiente (la prueba con `claude -p` y las 12 reglas; el resultado ya se obtuvo en la revisión del 2026-11-05).
 - `AGENTS.md` apunta a `cambios/deny-endurecido/plan.md`; el plan está ahora en `cambios/hechos/deny-endurecido/`.
 - Los planes anteriores a `vocabulario-y-guias` quedaron con `estado: hecho`, un valor que la lista actual descarta. Son historia: no se tocan.
-- Algunos planes dicen «Probado por Franco» sobre pruebas que corrió el coordinador de la sesión de diseño.
-- Modo remoto de `verify` (`VERIFY_TARGET`, cambio `validar-despliegue`): probado con un servidor local (lectura, 500, escritura permitida, URL inválida). Falta la comprobación contra un despliegue real (la hace Franco) y cómo el recorrido de cada proyecto lee el correo en remoto (no hay Mailpit). Sin probar: «prepárame el despliegue» y la sección «Despliegue» en un proyecto real.
-- Codex (soporte experimental): `verify` prueba la generación del TOML, el esfuerzo (`max` → `xhigh`), instalar, reinstalar, `--simular`, desinstalar y las reglas con `codex execpolicy`, todo en HOME temporal. Sin probar: una sesión real de Codex con un plan y el constructor como subagente (`spawn constructor`), y si el lanzador `codex-constructor` responde con `gpt-6-luna` en la cuenta de Franco (solo se probó con un `codex` de prueba). Lo mismo para elegir el rol a mano.
-- Codex: `codex-<agente>` abre con el aviso «Running without the shared background server» (usa `-c`, que exige modo embedded). Franco lo probó: la sesión funciona, solo muestra el aviso. Alternativa si molesta: un perfil `$CODEX_HOME/<nombre>.config.toml` y `codex -p <nombre>` (sin probar).
+- Algunos planes atribuyen a la persona usuaria pruebas que corrió el coordinador de la sesión de diseño.
+- Modo remoto de `verify` (`VERIFY_TARGET`, cambio `validar-despliegue`): probado con un servidor local (lectura, 500, escritura permitida, URL inválida). Falta la comprobación contra un despliegue real (la hace la persona usuaria) y cómo el recorrido de cada proyecto lee el correo en remoto (no hay Mailpit). Sin probar: «prepárame el despliegue» y la sección «Despliegue» en un proyecto real.
+- Codex (soporte experimental): `verify` prueba la generación del TOML, el esfuerzo (`max` → `xhigh`), instalar, reinstalar, `--dry-run` (alias: `--simular`), desinstalar y las reglas con `codex execpolicy`, todo en HOME temporal. Sin probar: una sesión real de Codex con un plan y el constructor como subagente (`spawn constructor`), y si el lanzador `codex-constructor` responde con `gpt-6-luna` en la cuenta de la persona usuaria (solo se probó con un `codex` de prueba). Lo mismo para elegir el rol a mano.
+- Codex: `codex-<agente>` abre con el aviso «Running without the shared background server» (usa `-c`, que exige modo embedded). La persona usuaria lo probó: la sesión funciona, solo muestra el aviso. Alternativa si molesta: un perfil `$CODEX_HOME/<nombre>.config.toml` y `codex -p <nombre>` (sin probar).
 - Skill `definir-proyecto`: probada en una carpeta vacía (4 preguntas, no escribe antes de contestar; con respuestas escribe `AGENTS.md`, `docs/proyecto.md` y `cambios/` y se detiene). Falta usarla en un proyecto nuevo real.
 
 ## Límites conocidos de las reglas deny
@@ -48,7 +48,7 @@
 - Que los subagentes hereden las reglas viene de un resumen de la documentación, no de una lectura literal. Los `permissionMode` de subagentes podrían saltarlas: sin garantía.
 - El `bash -c` queda prohibido para los agentes (intencional); puede estorbar en algún flujo.
 - El archivo `.claude/settings.json` del proyecto es compartido y va a git.
-- Estas reglas bloquean también los commits que Franco haga a través de Claude en ese proyecto.
+- Estas reglas bloquean también los commits que la persona usuaria haga a través de Claude en ese proyecto.
 
 ## Ideas, sin urgencia (solo si aparece el dolor)
 
@@ -58,7 +58,7 @@
 - **Prueba automática de las reglas deny** con `claude -p` dentro de `verify`: hoy es manual porque cuesta tokens y requiere red.
 - **Un lugar para la «evidencia del principal»** en la plantilla del plan (hoy se agrega a mano antes de *Evidencia*).
 - **Declarar en el plan que dos cambios editan el mismo archivo** y deben correr en orden (hoy es una frase suelta).
-- **Escalón 5 de `verify`:** compara lo que `instalar.sh --simular` instala; no detecta cambios fuera de esas rutas, a propósito.
+- **Escalón 5 de `verify`:** compara lo que `install.sh --dry-run` instala (alias: `instalar.sh --simular`); no detecta cambios fuera de esas rutas, a propósito.
 - **Soporte de Codex:** hay soporte experimental (ver «Detalles menores»); lo que falta es probarlo en una sesión real.
 - **Fricciones sin resolver** de `friccion.md`: avisos duplicados al cerrar un subagente y documentación oficial que el lector web trunca.
-- Codex: tras reinstalar `--proyecto`, comprobar en una sesión real que `./verify`, `npm test` y `git fetch` ya no piden permiso, y si `VERIFY_RAPIDO=1 ./verify` (con variable de entorno) también pasa. Si no, indicar al constructor que use `./verify` sin variable.
+- Codex: tras reinstalar con `--project` (alias: `--proyecto`), comprobar en una sesión real que `./verify`, `npm test` y `git fetch` ya no piden permiso, y si `VERIFY_RAPIDO=1 ./verify` (con variable de entorno) también pasa. Si no, indicar al constructor que use `./verify` sin variable.

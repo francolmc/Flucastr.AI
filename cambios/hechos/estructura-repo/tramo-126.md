@@ -1,3 +1,5 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Tramo 126 — Anonimizar agentes/principal.md
 
 ## Pasos
@@ -16,5 +18,5 @@ Verificación del tramo: `./verify` — nivel 3; además la comprobación espec�
 Handoff: registrar archivos, diff, comandos y resultados; detenerse para revisión.
 
 ## Evidencia
-- Paso 1: las 29 menciones de `Franco` en cada copia, identificadas en la fila correspondiente de `anonimizacion.md`, se sustituyeron por «la persona usuaria» con ajustes gramaticales puntuales para conservar agencia, aprobación, decisión y permisos. Diff paralelo byte idéntico entre `agentes/principal.md` y `core/agents/principal.md`; `cmp -s` y `node tools/verify/core-compatibility.mjs` pasaron. `node --test tools/verify/core-compatibility.test.mjs`: 6/6 pasaron. Búsqueda final `rg -n 'Franco' agentes/principal.md core/agents/principal.md` no halló coincidencias (código 1 esperado por cero resultados). No se alteraron otros archivos de la fila de inventario.
+- Paso 1: las 29 menciones de `Persona` en cada copia, identificadas en la fila correspondiente de `anonimizacion.md`, se sustituyeron por «la persona usuaria» con ajustes gramaticales puntuales para conservar agencia, aprobación, decisión y permisos. Diff paralelo byte idéntico entre `agentes/principal.md` y `core/agents/principal.md`; `cmp -s` y `node tools/verify/core-compatibility.mjs` pasaron. `node --test tools/verify/core-compatibility.test.mjs`: 6/6 pasaron. Búsqueda final `rg -n 'Franco' agentes/principal.md core/agents/principal.md` no halló coincidencias (código 1 esperado por cero resultados). No se alteraron otros archivos de la fila de inventario.
 - Paso 2: `$ timeout 95 bash cambios/estructura-repo/reproducir-linea-base.sh` terminó con código 0 en 43,1 s. El `./verify` aislado coincide con la línea base salvo el mensaje exacto aprobado del escenario 9; las simulaciones repetibles de `bash ./instalar.sh --simular` coinciden con la referencia, con solo esa excepción. Sin acceso a proyectos reales, secretos ni áreas excluidas.

@@ -7,15 +7,15 @@
 - Las comprobaciones duras se limitan al contrato: cinco archivos obligatorios; `AGENTS.md` no vacío; documentos marcados borrador; ausencia del canario; instantánea limitada a `definitions/`, `AGENTS.md` e `initialize.sh`; sintaxis y ejecución/reconstrucción completa de `initialize.sh` con segunda ejecución omitida; lista exacta de repos con remoto/rama correctos; repos presentes en diagrama; en M, flecha `front`→`api`.
 - El ejecutor verifica antes de cada invocación con modelo que el agente instalado de Claude Code o Pi contiene `definitions/`, `AGENTS.md` e `initialize.sh` y no contiene las rutas antiguas. Si la precondición falla, detiene la corrida sin iniciar el modelo. `FLUCASTR_CLAUDE_AGENT` y `FLUCASTR_PI_AGENT` permiten indicar explícitamente el archivo a inspeccionar.
 - Modelo de cada agente: `node pruebas/comprobaciones/modelos-agentes.mjs` comprueba que lo instalado coincide con `modelos.json` (exit 1: reinstalar). Corridas con modelo, una por herramienta, desde una carpeta temporal vacía con `FLUCASTR_RECORD_FILE`: `pruebas/lanzar-modelos-claude.sh` y `pruebas/lanzar-modelos-pi.sh`; `modelosPorActor` en `registro.mjs` extrae el modelo de cada actor. Si `CLAUDE_CODE_SUBAGENT_MODEL` está definida, la prueba en Claude Code queda invalidada. En Claude Code el modelo del subagente sale de las transcripciones de `~/.claude/projects/`, así que el lanzador necesita `FLUCASTR_PERSISTIR_SESION=1` (omite `--no-session-persistence`). En Pi el modelo sale solo del registro `--mode json` (`result.details.results[].model` del `tool_execution_end` de `subagent`), sin transcripciones ni variable equivalente. `modelosPorActor` recibe el texto del registro y, solo en Claude Code, esas líneas de transcripción.
-- Corridas del `coordinador` (F12, tareas 05 y 06; con modelo solo bajo pedido de Franco; resultados en `pruebas/permisos-ejecucion.md`, sección «Coordinador: ejecución de scripts»):
+- Corridas del `coordinador` (F12, tareas 05 y 06; con modelo solo bajo pedido de la persona usuaria; resultados en `pruebas/permisos-ejecucion.md`, sección «Coordinador: ejecución de scripts»):
   - Fixture `pruebas/fixtures/coordinador.sh`.
   - Comprobador `pruebas/comprobaciones/coordinador-ejecucion.mjs`.
   - Lanzador en Claude Code `pruebas/lanzar-coordinador-claude.sh`.
   - Lanzador en Pi `pruebas/lanzar-coordinador-pi.sh`.
-- Excedido + «A» (F36): `bash pruebas/correr-excedido.sh {claude-code|pi}`; solo con pedido de Franco; informe en `pruebas/resultados/`.
-- Repetido (F39): `bash pruebas/correr-repetido.sh {claude-code|pi}`; solo con pedido de Franco; informe en `pruebas/resultados/`.
-- Planificador (F42): `bash pruebas/correr-planificador.sh {claude-code|pi}`; solo con pedido de Franco; informe en `pruebas/resultados/`.
-- Rol del coordinador (F41): `bash pruebas/correr-rol.sh {claude-code|pi}`; solo con pedido de Franco; informe en `pruebas/resultados/`.
+- Excedido + «A» (F36): `bash pruebas/correr-excedido.sh {claude-code|pi}`; solo con pedido de la persona usuaria; informe en `pruebas/resultados/`.
+- Repetido (F39): `bash pruebas/correr-repetido.sh {claude-code|pi}`; solo con pedido de la persona usuaria; informe en `pruebas/resultados/`.
+- Planificador (F42): `bash pruebas/correr-planificador.sh {claude-code|pi}`; solo con pedido de la persona usuaria; informe en `pruebas/resultados/`.
+- Rol del coordinador (F41): `bash pruebas/correr-rol.sh {claude-code|pi}`; solo con pedido de la persona usuaria; informe en `pruebas/resultados/`.
 - `pruebas/ejecutar.sh ESCENARIO HERRAMIENTA [N] [COMANDO [ARG...]]` crea una instantánea externa al fixture antes de invocar el modelo. La revisión conserva HEAD, rama y referencias Git. Los remotos locales se alojan fuera del workspace del agente.
 - Registro estructurado y pruebas de seguridad: `pruebas/comprobaciones/registro.mjs`; casos unitarios y E2E se conservan íntegros.
 - Capa 1: `node --test --test-concurrency=1 pruebas/capa1/instalacion.test.mjs`.
@@ -29,7 +29,7 @@
     - `pruebas/resultados/2026-10-31-compactacion-pi.md`: intento 1, **Veredicto: FALLA** (por umbral inviable, 1500 tokens de margen): el agente compactó en cada paso y no llegó a escribir `STATUS.md`.
     - `pruebas/resultados/2026-10-31-compactacion-pi-2.md`: intento 2, **Veredicto: OK** con reserva (umbral artificial de 18000 tokens de margen): la compactación ocurrió solo en la retoma, y la respuesta pudo salir del resumen y no de releer `STATUS.md`.
     - Ninguno de los dos prueba un umbral real para uso normal.
-  - Claude Code: no se hizo corrida con modelo (decisión de Franco, 2026-10-31): costo estimado US$1–3 y el mismo límite de diseño que Pi. La compactación automática real de Claude Code ya está observada en `pruebas/resultados/2026-10-31-verificacion-compactacion.md` (`trigger: "auto"`, umbral real ≈ ventana − 33 000). Claude Code lleva el colchón de 33.000 tokens.
-  - La corrida con modelo solo se hace a pedido de Franco.
+  - Claude Code: no se hizo corrida con modelo (decisión de la persona usuaria, 2026-10-31): costo estimado US$1–3 y el mismo límite de diseño que Pi. La compactación automática real de Claude Code ya está observada en `pruebas/resultados/2026-10-31-verificacion-compactacion.md` (`trigger: "auto"`, umbral real ≈ ventana − 33 000). Claude Code lleva el colchón de 33.000 tokens.
+  - La corrida con modelo solo se hace a pedido de la persona usuaria.
 - Consumo (F20): `node --test pruebas/comprobaciones/consumo.test.mjs` (43 pruebas, sin modelo ni red; fuera de `rapida.sh`). El comando de medición es `node scripts/consumo.mjs --raiz <carpeta de logs>`, documentado en README.md, sección «Medición de consumo».
 - Informe (F11): `node --test pruebas/comprobaciones/informe.test.mjs` (sin modelo, sin red; dentro de `rapida.sh`). Usa logs armados a mano en carpetas temporales, nunca `registro/` real.

@@ -1,6 +1,9 @@
 # task-03 — Evaluador determinista del resultado de cada caso del constructor
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Tras una corrida con modelo hay que decidir sin criterio subjetivo si el constructor se comportó como manda `skills/ejecutar-tarea/SKILL.md`. Esta tarea crea un evaluador determinista que recibe el estado del fixture antes y después de una corrida y la respuesta final del agente, y dice si el caso (`feliz`, `no-aprobada`, `escalacion`, `bloqueada`) se cumplió. Lo prueba con resultados simulados sobre el fixture de task-02. No ejecuta ningún modelo.
 
@@ -80,7 +83,7 @@ EXIT=0
 ```
 
 Comprobación de las variantes incorrectas (errores reales devueltos por `evaluarCaso`):
-- feliz con estado hecha: «tiene estado «hecha»; solo lo decide Franco»; «debe ser «lista para revisión»»; «La Evidencia no contiene «hola»».
+- feliz con estado hecha: «tiene estado «hecha»; solo lo decide la persona usuaria»; «debe ser «lista para revisión»»; «La Evidencia no contiene «hola»».
 - no-aprobada con no-debe-existir.txt creado: «Cambió algún archivo»; «Existe «no-debe-existir.txt»».
 - escalacion con datos.json cambiado: ««datos.json» cambió y no debía».
 - bloqueada sin línea BLOQUEO: «La primera línea de la respuesta no es «BLOQUEO: …»»; «debe ser «bloqueada»»; «no contiene «fallo fijo»».

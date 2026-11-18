@@ -33,7 +33,7 @@ Fuera de alcance: las demás skills y agentes, reportes breves de subagentes, `P
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -c "Lectura acotada" agentes/constructor.md skills/ejecutar-tarea/SKILL.md
 grep -c "edit\` en vez de reescribirlos enteros con \`write\`" agentes/constructor.md skills/ejecutar-tarea/SKILL.md
 node --test pruebas/comprobaciones/contrato-constructor.test.mjs pruebas/comprobaciones/contrato-roles.test.mjs
@@ -44,7 +44,7 @@ Esperado: `1` por archivo en ambos `grep`; `fail 0` (no ejecutado tras el cambio
 
 Rama confirmada antes de empezar (no hubo switch): `git branch --show-current` → `feature/F18-identidad-y-prompts-livianos`.
 
-Verificación de la tarea (`cd /Users/franco/Codes/flucastr/Flucastr.AI`):
+Verificación de la tarea (`cd /Users/persona/Codes/flucastr/Flucastr.AI`):
 
 ```
 $ grep -c "Lectura acotada" agentes/constructor.md skills/ejecutar-tarea/SKILL.md
@@ -81,7 +81,7 @@ Criterios de aceptación:
 
 Los dos archivos son los únicos de esta tarea; las 2 eliminaciones de `constructor.md` son las de task-03 (línea de `modelos.json` y su línea en blanco). Cumple.
 
-Verificación rápida (HOME real, `HOME=/Users/franco`, sin reinstalar nada):
+Verificación rápida (HOME real, `HOME=/Users/persona`, sin reinstalar nada):
 
 ```
 $ bash pruebas/rapida.sh

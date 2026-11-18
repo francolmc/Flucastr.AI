@@ -38,7 +38,7 @@ Fuera de alcance: cambiar el tope de 30 s; tocar `README.md`, `definitions/`, `i
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -c "test-concurrency" pruebas/rapida.sh
 for i in 1 2 3 4 5; do bash pruebas/rapida.sh > /tmp/rapida-$i.txt 2>&1; echo "corrida $i rc=$?"; grep -E "^ℹ (pass|fail)|^rapida:" /tmp/rapida-$i.txt; done
 git diff --stat -- pruebas

@@ -1,5 +1,7 @@
 # Por qué ayudan OpenSpec, ODD y otros flujos de agentes
 
+> Los nombres se anonimizaron; se conservan fechas y cifras.
+
 Investigación: 8 de noviembre de 2026 (UTC). Estado: investigación para conversar; **no es un plan de implementación ni una propuesta aprobada**.
 
 ## Pregunta y alcance
@@ -92,7 +94,7 @@ El worker recibe una referencia del tipo `Spec: odd/tasks/<feature>.md (read unt
 
 El padre conserva la interacción con el usuario, la coordinación y la revisión. El worker no redelega; recibe aceptación, contexto, skills, comandos y superficies de edición autorizadas. La spec referenciada prevalece sobre resúmenes del handoff. Un hallazgo no autoriza por sí mismo a ampliar el trabajo. [D4]
 
-La lección transferible es distinguir **«encontré algo»** de **«tengo permiso para arreglarlo»**. Las acciones Git de otros frameworks no se trasladan: en nuestro kit siguen siendo de Franco.
+La lección transferible es distinguir **«encontré algo»** de **«tengo permiso para arreglarlo»**. Las acciones Git de otros frameworks no se trasladan: en nuestro kit siguen siendo de la persona usuaria.
 
 ### 2.4 Verificación proporcionada al riesgo, no revisión infinita
 
@@ -113,7 +115,7 @@ Son observaciones y resultados publicados por el proyecto, no una demostración 
 | Enfoque | Diferencia concreta en las instrucciones revisadas | Qué tomar como idea | Coste o incompatibilidad |
 | --- | --- | --- | --- |
 | **GSD** | Revisión del plan antes de ejecutar y verificación hacia atrás desde el objetivo; requisitos → tareas → artefactos → conexiones → datos reales. | No basta con «existe el endpoint y existe la UI»: comprobar que están conectados y llevan datos reales. | Más artefactos y coordinación; sus umbrales de tamaño son heurísticas, no leyes. No copiar commits automáticos. |
-| **Superpowers** | Implementador fresco por tarea, revisión de cumplimiento y calidad tras cada tarea, revisión global final y ledger ligado al plan. | Separar autor de juez; reanudar solo el registro del plan correcto. | Más contextos, tokens y latencia. Su autonomía para dictar `Ruling` y seguir contradice nuestra reserva de decisiones de producto a Franco. |
+| **Superpowers** | Implementador fresco por tarea, revisión de cumplimiento y calidad tras cada tarea, revisión global final y ledger ligado al plan. | Separar autor de juez; reanudar solo el registro del plan correcto. | Más contextos, tokens y latencia. Su autonomía para dictar `Ruling` y seguir contradice nuestra reserva de decisiones de producto a la persona usuaria. |
 | **GitHub Spec Kit** | `analyze` compara spec, plan y tareas: ambigüedad, contradicciones, requisitos sin tarea y tareas sin requisito, bajo una constitución. | Detectar pérdida o invención de trabajo **antes** de entregarlo al ejecutor. | Una matriz consistente puede seguir describiendo una solución equivocada; varios documentos pueden divergir. El análisis es una operación explícita, no asumir que siempre ocurrió. |
 | **BMAD build actual** | Plan compacto con bloque de intención congelado tras aprobación, mapa de código y notas de implementación separadas. | El ejecutor puede registrar descubrimientos sin reescribir lo que el usuario aceptó; el resultado de revisar un mal plan no es solo «arreglar código». | No importar automáticamente su arquitectura completa de roles ni sus presupuestos orientativos de tokens. |
 | **Anthropic, agentes largos** | Trabajo incremental, contexto persistente entre sesiones y, en otro arnés, planner/generator/evaluator con comprobación en la app viva. | Progreso recuperable y aceptación que recorre el producto, no solo lee el diff. | Sus resultados con modelos potentes y ejecuciones costosas no demuestran que el mismo esquema sea óptimo para un constructor económico. |
@@ -164,7 +166,7 @@ La lección no es «TDD no sirve» ni «las skills no sirven»: es que **la prue
 
 Su artículo más reciente revisado explica que el arnés se simplificó al pasar de Opus 4.5 a 4.6; retiró sprints mientras mantuvo planner y evaluador. También registra cambios adicionales de prompting y ejemplos, por lo que no atribuyo toda diferencia al modelo. El valor del evaluador depende de qué parte del trabajo exceda lo que el generador hace bien por sí solo. [A2]
 
-No conviene copiar literalmente su planner que amplía ambiciosamente un pedido: nuestro alcance aprobado pertenece a Franco. Sí interesa su evaluación de la app en ejecución, que encontró funciones visuales sin interacción real.
+No conviene copiar literalmente su planner que amplía ambiciosamente un pedido: nuestro alcance aprobado pertenece a la persona usuaria. Sí interesa su evaluación de la app en ejecución, que encontró funciones visuales sin interacción real.
 
 ## 5. Contraste con nuestro kit: qué ya existe y qué merece conversación
 
@@ -189,7 +191,7 @@ Ideas para conversar, no cambios autorizados:
 
 La separación útil de responsabilidades sería conceptual, no una implementación acordada:
 
-- **Principal:** investiga, preserva el pedido, resuelve decisiones con Franco y entrega contrato verificable con mapa de código suficiente. No convierte el plan en una transcripción de toda su investigación.
+- **Principal:** investiga, preserva el pedido, resuelve decisiones con la persona usuaria y entrega contrato verificable con mapa de código suficiente. No convierte el plan en una transcripción de toda su investigación.
 - **Coordinación, si hace falta:** asigna unidades, controla dependencias, reúne evidencia y reconstruye estado. No vuelve a resumir el contrato ni decide un alcance nuevo. Para un cambio pequeño puede ser función del principal, no otro agente.
 - **Constructor:** elige detalles locales permitidos, implementa y prueba; no puede redefinir el resultado observable, omitir escenarios difíciles ni dar por resuelto un bloqueo de diseño.
 - **Aceptación:** contrasta diff y comportamiento contra los requisitos originales y la intención aprobada. La afirmación del constructor, una skill ejecutada o un test verde aislado no bastan.
@@ -205,7 +207,7 @@ No basta: testear por separado el selector y un objeto en memoria.
 
 La referencia por sí sola tampoco es una barrera determinista: el agente puede ignorarla. Los controles automatizables deben vivir en comprobaciones reales; la semántica restante requiere revisión. Esto no se arregla únicamente agregando MUST a otra instrucción.
 
-## 7. Síntesis para la conversación con Franco
+## 7. Síntesis para la conversación con la persona usuaria
 
 1. **OpenSpec no demuestra una capacidad mágica:** organiza y vuelve consultable lo que debe mantenerse estable mientras cambia el código.
 2. **ODD ofrece la lección más directa para el handoff:** el pedido no debe degradarse al pasar entre agentes, y las reglas esenciales deben estar donde de verdad se leen.

@@ -1,8 +1,10 @@
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 # Aislamiento para la línea base
 
 ## Comprobado durante el diagnóstico
 
-En este entorno `bwrap` permite crear un espacio de usuario y una raíz temporal. Se comprobó que `/home/franco` no existe dentro de una raíz mínima y que `/Users` puede estar vacío. Node no está en `/usr`: se ejecutó correctamente la versión 24.22.1 montando solo el ejecutable en `/runtime/node`, con `/usr` de solo lectura y sin montar el HOME. Esto prueba los montajes básicos, no prueba que `verify` completo pueda ejecutarse allí.
+En este entorno `bwrap` permite crear un espacio de usuario y una raíz temporal. Se comprobó que `/home/persona` no existe dentro de una raíz mínima y que `/Users` puede estar vacío. Node no está en `/usr`: se ejecutó correctamente la versión 24.22.1 montando solo el ejecutable en `/runtime/node`, con `/usr` de solo lectura y sin montar el HOME. Esto prueba los montajes básicos, no prueba que `verify` completo pueda ejecutarse allí.
 
 ## Diseño de ejecución del tramo 1
 
@@ -87,7 +89,7 @@ for source, target in [('sim-1.raw','sim-1.txt'), ('sim-2.raw','sim-2.txt'), ('v
     text = (stage/source).read_text(errors='replace').replace('/home/test', '<SANDBOX_HOME>')
     text = re.sub(r"/Users/[^\s\"',;()]+", '<PROJECT_PATH>', text)
     text = re.sub(r"/tmp/[^\s\"',;()]+", '<SANDBOX_TMP>', text)
-    text = re.sub(r'(?i)franco', '<PERSON>', text)
+    text = re.sub(r'(?i)persona', '<PERSON>', text)
     text = re.sub(r'\(\d+(?:\.\d+)?ms\)', '(<DURATION>ms)', text)
     text = re.sub(r'(duration_ms )\d+(?:\.\d+)?', r'\1<DURATION>', text)
     (stage/target).write_text(text)

@@ -4,17 +4,36 @@
 
 import assert from "node:assert/strict";
 import { appendFileSync, chmodSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 
 const RAIZ = fileURLToPath(new URL("../../", import.meta.url));
-const KIT_SKILL = "/home/franco/.agents/skills/ejecutar-plan/SKILL.md";
+const KIT_SKILL = join(homedir(), ".agents/skills/ejecutar-plan/SKILL.md");
 const LANZADOR = process.argv[2] || "codex-constructor";
 const TEMP = mkdtempSync(join(tmpdir(), "continuidad-real-"));
 const SALIDAS = [];
+
+function validarIdiomaAgente(texto, regla) {
+  assert.ok(texto.includes(regla), `la instrucción adaptable debe contener: ${regla}`);
+}
+
+const PRINCIPAL = readFileSync(join(RAIZ, "core/agents/principal.md"), "utf8");
+const CONSTRUCTOR = readFileSync(join(RAIZ, "core/agents/constructor.md"), "utf8");
+validarIdiomaAgente(PRINCIPAL, "Always respond in the language the user is currently using.");
+validarIdiomaAgente(PRINCIPAL, "switch languages whenever they do.");
+validarIdiomaAgente(PRINCIPAL, "Program output remains Spanish.");
+validarIdiomaAgente(CONSTRUCTOR, "Respond in the language the user is currently using.");
+validarIdiomaAgente(CONSTRUCTOR, "switch whenever they do.");
+validarIdiomaAgente(CONSTRUCTOR, "Messages emitted by commands remain Spanish.");
+assert.throws(
+  () => validarIdiomaAgente(PRINCIPAL.replace("Always respond in the language the user is currently using.", ""), "Always respond in the language the user is currently using."),
+  /la instrucción adaptable debe contener/,
+  "el protocolo de continuidad debe rechazar la eliminación de la regla de idioma",
+);
+console.log("ok contrato: ambos agentes adaptan el idioma y la mutación negativa se rechaza");
 
 function ejecutar(comando, args, opciones = {}) {
   const r = spawnSync(comando, args, { encoding: "utf8", maxBuffer: 8 * 1024 * 1024, ...opciones });

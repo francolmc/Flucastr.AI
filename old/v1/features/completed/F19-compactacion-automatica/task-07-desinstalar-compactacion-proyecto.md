@@ -36,7 +36,7 @@ Fuera de alcance: el bucle principal (task-06), `instalar.sh`, `scripts/resolver
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 bash -n desinstalar.sh
 T=$(mktemp -d); H="$T/h"; mkdir -p "$H/.flucastr-ai" "$T/p1/.claude" "$T/p2/.claude" "$T/vacio"
 printf '{"agent":"coordinador","autoCompactWindow":133000}\n' > "$T/p1/.claude/settings.local.json"

@@ -44,7 +44,7 @@ Fuera de alcance: la compactación de Claude Code y el cambio al reinstalar con 
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 bash -n instalar.sh
 T=$(mktemp -d); mkdir -p "$T/h/.claude" "$T/h/pi"
 export HOME_ORIG="$HOME"

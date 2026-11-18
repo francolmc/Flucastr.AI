@@ -1,13 +1,16 @@
 # task-01 — Actualizar el README al kit real
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 `README.md` quedó en el reinicio: dice que «faltan el coordinador, el planificador y el constructor», lista un solo agente y cuatro de las siete skills, y llama a `pruebas/` «arnés de pruebas del arquitecto» (inconsistencia 2 de `definitions/PROJECT.md`). Quien lo lee no sabe que el flujo ya existe ni cómo abrirlo. Esta tarea lo deja fiel al checkout actual, sin cambiar reglas ni definiciones.
 
-**Por qué esta feature para probar F04** (decisión del planificador, a aprobar por Franco): es pequeña (2 tareas, 1 archivo de producto y 2 de prueba), de un solo repo, útil para el kit y no toca `definitions/`; la tarea 01 ejercita la puerta 3 y 4 con un entregable de texto que Franco revisa con criterio propio, y la tarea 02 (`depende_de: task-01`) ejercita el constructor con código, pruebas, un control negativo y el orden de dependencia. Alternativas descartadas: ver *Notas del planificador* al final de la tarea 02.
+**Por qué esta feature para probar F04** (decisión del planificador, a aprobar por la persona usuaria): es pequeña (2 tareas, 1 archivo de producto y 2 de prueba), de un solo repo, útil para el kit y no toca `definitions/`; la tarea 01 ejercita la puerta 3 y 4 con un entregable de texto que la persona usuaria revisa con criterio propio, y la tarea 02 (`depende_de: task-01`) ejercita el constructor con código, pruebas, un control negativo y el orden de dependencia. Alternativas descartadas: ver *Notas del planificador* al final de la tarea 02.
 
 ## Contexto
-- Repo: este, único repo (`/Users/franco/Codes/flucastr/Flucastr.AI`). Archivo a tocar: `README.md` (92 líneas; leído). No se toca nada más.
+- Repo: este, único repo (`/Users/persona/Codes/flucastr/Flucastr.AI`). Archivo a tocar: `README.md` (92 líneas; leído). No se toca nada más.
 - Secciones actuales (leídas): línea 5 «Estado: MVP en construcción… faltan el coordinador, el planificador y el constructor»; `## Estructura` (líneas 30–50, bloque de código con el árbol); `## Instalación` (52–70); `## Pruebas` (72–79); `## Próximos pasos` (81–83); `## Bitácora` (89–92).
 - Realidad del checkout (leída con `ls`): `agentes/` tiene `arquitecto.md`, `constructor.md`, `coordinador.md`, `planificador.md`; `skills/` tiene `crear-backlog`, `definir-proyecto`, `descomponer-feature`, `disenar-arquitectura`, `ejecutar-tarea`, `generar-clonar`, `revisar-proyecto-existente`; existen `features/`, `definitions/`, `pruebas/`, `scripts/`, `modelos.json`, `instalar.sh`, `desinstalar.sh`, `initialize.sh`, `AGENTS.md`.
 - `instalar.sh` instala todos los `agentes/*.md` y `skills/*/` y genera un lanzador `pi-<agente>` por agente (líneas 60, 115, 172–188); su opción `--agente <nombre>` (línea 39) elige el agente predeterminado de `--proyecto`, con `arquitecto` por defecto (línea 21). El mensaje final de `instalar.sh` solo menciona al arquitecto: no se toca (fuera de alcance).
@@ -70,7 +73,7 @@ Fuera de alcance: `definitions/**`, `AGENTS.md`, `pruebas/README.md`, `instalar.
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 for a in agentes/*.md; do n=$(basename "$a"); grep -q "│   .*── $n" README.md || echo "FALTA agente $n"; done; for s in skills/*/; do n=$(basename "$s"); grep -q "│   .*── $n/" README.md || echo "FALTA skill $n"; done
 grep -oE "│   [├└]── [a-z-]+\.md" README.md | sed 's/.*── //' | while read -r n; do [ -f "agentes/$n" ] || echo "SOBRA agente $n"; done; grep -oE "│   [├└]── [a-z-]+/" README.md | sed 's/.*── //' | while read -r n; do [ -d "skills/$n" ] || echo "SOBRA skill $n"; done
 grep -nE "faltan el coordinador|tareas/|Próximos pasos" README.md

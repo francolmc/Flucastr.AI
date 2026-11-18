@@ -1,8 +1,10 @@
 # Corrida del `coordinador` en Claude Code (F12, task-05), 2026-10-30 (corrida con permisos)
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Lanzador: `pruebas/lanzar-coordinador-claude.sh "<prompt>"`, desde un fixture nuevo (`pruebas/fixtures/coordinador.sh`) por caso, con `FLUCASTR_RECORD_FILE` propio. Comprobador: `evaluar(registro, 'claude-code', caso)` de `pruebas/comprobaciones/coordinador-ejecucion.mjs`. Agente instalado verificado antes: `diff <(node scripts/resolver.mjs agente-claude agentes/coordinador.md) ~/.claude/agents/coordinador.md` vacío (EXIT=0).
 
-Los tres patrones `Bash(node scripts/registrar.mjs)`, `Bash(node scripts/archivar.mjs)` y `Bash(node scripts/archivar.mjs --aplicar F*)` se concedieron en `--allowedTools` del lanzador (decisión de Franco, opción a), no en `tools:` del agente. Ningún otro `Bash(...)` se concedió.
+Los tres patrones `Bash(node scripts/registrar.mjs)`, `Bash(node scripts/archivar.mjs)` y `Bash(node scripts/archivar.mjs --aplicar F*)` se concedieron en `--allowedTools` del lanzador (decisión de la persona usuaria, opción a), no en `tools:` del agente. Ningún otro `Bash(...)` se concedió.
 
 Una corrida por caso, sin reintentos. Además, un sondeo previo del caso `chequeo` en un fixture aparte: `node scripts/archivar.mjs` ejecutado y con salida (chequeo de contexto, solo lectura), `evaluar(…, 'chequeo')` ok.
 

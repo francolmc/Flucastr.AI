@@ -6,15 +6,17 @@ ejecutor: constructor
 ---
 # Esfuerzo de razonamiento por agente en modelos.json
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 El esfuerzo (qué tanto razona el modelo) se declara por agente en `modelos.json` y el resolver lo escribe en los agentes de Claude Code (`effort`) y de Pi (`thinking`), como ya hace con el modelo.
 
 ## Supuestos
-- Constructor `high` en ambas herramientas y principal `medium` (lo eligió Franco). Subir o bajar es editar una línea de `modelos.json`.
+- Constructor `high` en ambas herramientas y principal `medium` (lo eligió la persona usuaria). Subir o bajar es editar una línea de `modelos.json`.
 - Sin `esfuerzo` en un agente no se escribe nada: hereda el valor de la herramienta. Así una copia personal vieja de `modelos.json` sigue funcionando.
 - No se sube `version` de `modelos.json`; `comparar-modelos` avisa del campo nuevo con una línea.
 - Valores válidos comunes a las dos herramientas: `low`, `medium`, `high`, `xhigh`, `max`.
-- No se prueba con una corrida real si `claude --agent constructor` respeta `effort` del frontmatter (la documentación no lo aclara). Si no lo respeta, Franco usa `/effort`.
+- No se prueba con una corrida real si `claude --agent constructor` respeta `effort` del frontmatter (la documentación no lo aclara). Si no lo respeta, la persona usuaria usa `/effort`.
 
 ## Alcance
 `modelos.json`, `scripts/resolver.mjs`, `instalar.sh` (solo `generar_lanzador_pi`), `AGENTS.md`, `verify`.
@@ -23,8 +25,8 @@ Fuera de alcance: `agentes/*.md`, skills, `desinstalar.sh`, `~/.pi` y `~/.claude
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque pasa las 4 preguntas de la Prueba de ejecutabilidad: cada paso trae su comprobación, ninguno depende de algo que solo existe al ejecutar, los errores previstos están dichos y no toca credenciales ni despliegue.
 - Claude Code usa el campo `effort`; Pi usa `thinking`. Los agentes fuente no los declaran, igual que `model:`.
-- El lanzador `pi-<agente>` pasa el esfuerzo como sufijo del modelo (`modelo:esfuerzo`), que `pi --model` acepta. Los lanzadores ya instalados no se regeneran solos: Franco reinstala.
-- La variable `CLAUDE_CODE_EFFORT_LEVEL` manda sobre el frontmatter; en el equipo de Franco no está definida.
+- El lanzador `pi-<agente>` pasa el esfuerzo como sufijo del modelo (`modelo:esfuerzo`), que `pi --model` acepta. Los lanzadores ya instalados no se regeneran solos: la persona usuaria reinstala.
+- La variable `CLAUDE_CODE_EFFORT_LEVEL` manda sobre el frontmatter; en el equipo de la persona usuaria no está definida.
 
 ## Escenarios
 - CUANDO `modelos.json` trae `constructor.esfuerzo: "high"` ENTONCES `agente-claude` imprime `effort: high` y `agente-pi` imprime `thinking: high`.

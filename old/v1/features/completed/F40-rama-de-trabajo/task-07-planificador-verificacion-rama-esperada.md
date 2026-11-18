@@ -1,8 +1,11 @@
 # task-07 — El planificador pone `git branch --show-current` como primer comando de Verificación
 repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-`skills/descomponer-feature/SKILL.md` prohíbe en yolo que la *Verificación* dependa de la rama actual. Con la nueva regla (`definitions/WORKFLOW.md` §9.1, bullet «Comprobación»), la primera línea de *Verificación* de cada tarea es `git branch --show-current` con la rama esperada, y el planificador la deriva solo: prefijo de la fila de la feature en el backlog más la carpeta `Fxx-nombre` (decisión de Franco, 2026-11-04; el coordinador no la pasa). El constructor pega su salida en *Evidencia* con el mecanismo de F25.
+`skills/descomponer-feature/SKILL.md` prohíbe en yolo que la *Verificación* dependa de la rama actual. Con la nueva regla (`definitions/WORKFLOW.md` §9.1, bullet «Comprobación»), la primera línea de *Verificación* de cada tarea es `git branch --show-current` con la rama esperada, y el planificador la deriva solo: prefijo de la fila de la feature en el backlog más la carpeta `Fxx-nombre` (decisión de la persona usuaria, 2026-11-04; el coordinador no la pasa). El constructor pega su salida en *Evidencia* con el mecanismo de F25.
 
 ## Contexto
 - Tocar: `skills/descomponer-feature/SKILL.md`, `pruebas/comprobaciones/frases-por-archivo.mjs`

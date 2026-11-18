@@ -84,7 +84,7 @@ Código 0. `fail 0`.
 Comando: `bash pruebas/rapida.sh`
 Salida (completa):
 ```
-Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-JRL1OP
+Entorno conservado: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-JRL1OP
 ✔ I1: comprobación real (54.8505ms)
 ✔ I2: comprobación real (941.728417ms)
 ✔ I3: comprobación real (947.680083ms)

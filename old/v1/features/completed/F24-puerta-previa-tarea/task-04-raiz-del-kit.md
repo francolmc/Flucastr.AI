@@ -1,8 +1,11 @@
 # task-04 — Raíz del kit y lanzador fijo en la instalación
 repo: Flucastr.AI   depende_de: task-03   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Los proyectos instalados (como Flucastr.Cleaner) no tienen `scripts/`, así que el `coordinador` no puede llegar a `scripts/validar-tarea.mjs`. Decisión de Franco (2026-11-01): `instalar.sh` escribe, en modo repo y en modo descarga, `~/.flucastr-ai/raiz` (ruta de la raíz del kit) y un lanzador fijo `~/.flucastr-ai/validar-tarea.mjs`; `desinstalar.sh` los quita solo si el manifiesto los registra. El lanzador permite un permiso de `Bash` literal, sin `$(…)` (task-05). Esta tarea implementa eso y su prueba aislada.
+Los proyectos instalados (como Proyecto.Mantenimiento) no tienen `scripts/`, así que el `coordinador` no puede llegar a `scripts/validar-tarea.mjs`. Decisión de la persona usuaria (2026-11-01): `instalar.sh` escribe, en modo repo y en modo descarga, `~/.flucastr-ai/raiz` (ruta de la raíz del kit) y un lanzador fijo `~/.flucastr-ai/validar-tarea.mjs`; `desinstalar.sh` los quita solo si el manifiesto los registra. El lanzador permite un permiso de `Bash` literal, sin `$(…)` (task-05). Esta tarea implementa eso y su prueba aislada.
 
 ## Contexto
 - Leer: `definitions/ARCHITECTURE.md`, subsección «Raíz del kit y puerta previa de tarea (F24…)», viñetas `~/.flucastr-ai/raiz`, «Lanzador fijo» e «Invocación». De task-03 (`depende_de`), solo sus *Notas*.
@@ -18,7 +21,7 @@ Los proyectos instalados (como Flucastr.Cleaner) no tienen `scripts/`, así que 
 - Manifiesto: dos líneas `raiz<TAB>$ESTADO_DIR/raiz` y `raiz<TAB>$ESTADO_DIR/validar-tarea.mjs` (ruta del archivo), tras la línea `modo`. Se escriben tras el bloque «Quitando la instalación anterior».
 - `desinstalar.sh`: rama `raiz)` en la desinstalación completa; borra la ruta de la línea solo si es `$ESTADO_DIR/raiz` o `$ESTADO_DIR/validar-tarea.mjs` y es un archivo regular. Con `--simular` solo lo dice. El modo `--proyecto` no lo toca.
 - `--simular` en `instalar.sh` no escribe: dice «SIMULACIÓN: se escribirá $ESTADO_DIR/raiz y $ESTADO_DIR/validar-tarea.mjs».
-- No se copia `scripts/` a ningún proyecto (descartado por Franco).
+- No se copia `scripts/` a ningún proyecto (descartado por la persona usuaria).
 
 ## Decisiones abiertas
 Ninguna.

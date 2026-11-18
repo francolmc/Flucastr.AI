@@ -39,7 +39,7 @@ function entorno(nombre) {
   for (const p of [home, pi, tmp, join(home, '.claude')]) mkdirSync(p, { recursive: true });
   armarRepo(kit);
   const env = { ...process.env, HOME: home, PI_CODING_AGENT_DIR: pi, TMPDIR: tmp, TMP: tmp, TEMP: tmp };
-  delete env.FLUCASTR_MODELOS; // ni la variable del shell de Franco debe influir en la prueba
+  delete env.FLUCASTR_MODELOS; // ni la variable del shell de la persona usuaria debe influir en la prueba
   function ejecutar(cmd, args) {
     const r = spawnSync(cmd, args, { cwd: kit, env, encoding: 'utf8', timeout: 30000 });
     if (r.error || r.signal) throw new Error(`No se pudo ejecutar ${cmd}: ${r.error ?? r.signal}`);
@@ -138,7 +138,7 @@ test('a: copia y exclusión', () => {
   assert.ok(ex.includes('/.pi/skills/prueba/'), 'falta la exclusión de prueba');
   assert.ok(ex.includes('/.pi/skills/otra/'), 'falta la exclusión de otra');
   // git status: .pi no aparece. Real hoy: --proyecto fija el agente en .claude/settings.local.json, sin ignorar
-  // (task-03, Notas), y git lo muestra como carpeta «?? .claude/». Es el comportamiento conocido hasta que Franco decida.
+  // (task-03, Notas), y git lo muestra como carpeta «?? .claude/». Es el comportamiento conocido hasta que la persona usuaria decida.
   assert.deepEqual(gitStatus(p), ['?? .claude/'], 'git status: solo debía quedar el ajuste del agente (.claude/)');
   const m = manifiesto(e);
   assert.equal(m.filter((l) => l[0] === 'skills-proyecto' && l[1] === p).length, 1, 'skills-proyecto de p');

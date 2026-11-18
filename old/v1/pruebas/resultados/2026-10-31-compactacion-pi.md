@@ -45,4 +45,4 @@ Según la definición de la tarea: hubo compactación y falta (2), por lo tanto 
 
 ## Pruebas del repo
 
-`bash pruebas/rapida.sh` con el HOME real (`/Users/franco`): `tests 277`, `pass 277`, `fail 0`, `cancelled 0`; «rapida: 27 archivos en 17 s (tope 30 s)». La salida se vio por `tail -60`; el resumen global dice `fail 0`. No se comprobó por separado que `registro.e2e.test.mjs` aparezca en esa salida recortada, y el código de salida no se capturó por la tubería.
+`bash pruebas/rapida.sh` con el HOME real (`/Users/<usuario>`, ruta anonimizada): `tests 277`, `pass 277`, `fail 0`, `cancelled 0`; «rapida: 27 archivos en 17 s (tope 30 s)». La salida se vio por `tail -60`; el resumen global dice `fail 0`. No se comprobó por separado que `registro.e2e.test.mjs` aparezca en esa salida recortada, y el código de salida no se capturó por la tubería.

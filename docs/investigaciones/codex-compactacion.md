@@ -1,5 +1,7 @@
 # Compactación de contexto en Codex: qué ajuste funciona
 
+> Los nombres se anonimizaron; se conservan fechas y cifras.
+
 Origen: tramo 1 del cambio `cambios/contexto-y-esperas/plan.md`, 2026-11-09. Medido con `codex-cli 0.167.0` (modelo `gpt-6.1-sol` según el rollout, ventana de contexto 475000 tokens). Solo `codex exec`; no se probó una sesión interactiva. Las corridas usaron el `CODEX_HOME` real; no se leyó ni copió `auth.json`, y `~/.codex/config.toml` no se modificó.
 
 Tarea de prueba (igual en todas las corridas, carpeta temporal vacía en el scratchpad): cuatro comandos de shell cortos (`echo paso1` … `echo paso4`), una línea de salida por comando y respuesta final `fin`. Cada rollout se leyó solo en el archivo nuevo de esa corrida.
@@ -28,7 +30,7 @@ El umbral posterior al turno es un porcentaje de la ventana (10 % de 475000 ≈ 
 
 ### Por qué no sirve el `.codex/config.toml` de proyecto (corridas 4a y 4b)
 
-Control: un `.codex/config.toml` de proyecto con `model_reasoning_effort = "high"` no cambió la cabecera de la sesión, que dice `reasoning effort: low` tanto sin confianza explícita (control A, `rollout-2026-11-09T07-29-43-01a1bfdb-4ffc-7083-9f77-ba4466be77b8.jsonl`) como con la confianza dada por la línea de comandos (control B, `rollout-2026-11-09T07-29-49-01a1bfdb-6499-7283-bdaa-d33c33c25609.jsonl`; la atribución A/B es por orden de hora, el rollout no guarda el `-c`). Los dos rollouts de control están en `~/.codex/sessions/2026/11/09/`, con `reasoning_effort` `low`. Es decir, el archivo de proyecto no llegó a surtir efecto en esta prueba. No se marcó la carpeta como confiable en `~/.codex/config.toml` porque eso modifica la configuración real de Franco. Conclusión: el ajuste de compactación debe ir en la línea de comandos (`-c`), no en el `config.toml` de proyecto.
+Control: un `.codex/config.toml` de proyecto con `model_reasoning_effort = "high"` no cambió la cabecera de la sesión, que dice `reasoning effort: low` tanto sin confianza explícita (control A, `rollout-2026-11-09T07-29-43-01a1bfdb-4ffc-7083-9f77-ba4466be77b8.jsonl`) como con la confianza dada por la línea de comandos (control B, `rollout-2026-11-09T07-29-49-01a1bfdb-6499-7283-bdaa-d33c33c25609.jsonl`; la atribución A/B es por orden de hora, el rollout no guarda el `-c`). Los dos rollouts de control están en `~/.codex/sessions/2026/11/09/`, con `reasoning_effort` `low`. Es decir, el archivo de proyecto no llegó a surtir efecto en esta prueba. No se marcó la carpeta como confiable en `~/.codex/config.toml` porque eso modifica la configuración real de la persona usuaria. Conclusión: el ajuste de compactación debe ir en la línea de comandos (`-c`), no en el `config.toml` de proyecto.
 
 Nota: hubo una tercera sesión de control (`rollout-2026-11-09T07-29-54-01a1bfdb-7ab2-72d0-9191-5a45754bf8cd.jsonl`, con `-C` y la misma carpeta) que se lanzó sin anotar su cabecera; su rollout también dice `reasoning_effort` `low`. No cambia las conclusiones.
 

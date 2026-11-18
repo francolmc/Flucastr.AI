@@ -1,13 +1,16 @@
 # task-03 — Documentación de mecanismos de caché en Claude Code y Pi
 repo: Flucastr.AI   depende_de: task-02   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Para los candidatos de task-02, se documenta qué mecanismo existe en Claude Code y en Pi para no recargar contexto al lanzar un subagente (caché de prompt del proveedor, contexto propio del subagente, memoria o `CLAUDE.md`, sesiones y `subagent-artifacts`). Cada afirmación lleva cita con enlace o ruta y fecha. Lo que no se pueda verificar queda marcado como *supuesto*. No cambia ninguna regla.
 
 ## Contexto
 - Leer: `features/F43-auditoria-contexto/analisis.md`, `definitions/F43-AUDITORIA.md@25-8`
 - Tocar: `features/F43-auditoria-contexto/mecanismos.md`
-- Fuentes permitidas: documentación oficial de Anthropic (`https://docs.claude.com/en/docs/claude-code/sub-agents` y `https://docs.claude.com/en/docs/build-with-claude/prompt-caching`), de OpenAI (`https://platform.openai.com/docs/guides/prompt-caching`) y la documentación local de Pi en `/Users/franco/.pi/agent/install/releases/1.4.0/node_modules/@earendil-works/pi-coding-agent/docs` (*confirmado*: la carpeta existe; se consulta con `grep`, no se lee entera).
+- Fuentes permitidas: documentación oficial de Anthropic (`https://docs.claude.com/en/docs/claude-code/sub-agents` y `https://docs.claude.com/en/docs/build-with-claude/prompt-caching`), de OpenAI (`https://platform.openai.com/docs/guides/prompt-caching`) y la documentación local de Pi en `/Users/persona/.pi/agent/install/releases/1.4.0/node_modules/@earendil-works/pi-coding-agent/docs` (*confirmado*: la carpeta existe; se consulta con `grep`, no se lee entera).
 - Se baja cada página con `curl -sL <url>` a un archivo temporal fuera del repo y se busca con `grep -n`; no se pega la página entera.
 - De `depende_de:` leer solo las *Notas* de task-02.
 - Fuente: definitions/F43-AUDITORIA.md «3. Verificación de caché o resumen compartido»
@@ -75,7 +78,7 @@ Criterios de aceptación: 1 (rama) cumple, salida `chore/F43-auditoria-contexto`
 
 ## Notas
 
-- Entorno: `node ~/.flucastr-ai/entorno.mjs` salió con `ok`. Rama: el encargo trae `Rama: chore/F43-auditoria-contexto`, existe y es la actual; no se ejecutó ningún `git switch`. Sin commit. Se usó el modo yolo que pidió Franco en el encargo.
+- Entorno: `node ~/.flucastr-ai/entorno.mjs` salió con `ok`. Rama: el encargo trae `Rama: chore/F43-auditoria-contexto`, existe y es la actual; no se ejecutó ningún `git switch`. Sin commit. Se usó el modo yolo que pidió la persona usuaria en el encargo.
 - Huecos menores: (a) `subagent-artifacts` no aparece en las fuentes consultadas; queda como *supuesto* en CC y Pi. (b) La documentación local de Pi no describe subagentes; el mecanismo compartido entre subagentes de Pi queda como *supuesto*. (c) Los números de línea de Anthropic y OpenAI corresponden al texto extraído de las páginas, no a la página original; las citas textuales están en `mecanismos.md`. (d) «Para la prueba» no tenía fecha de consulta; añadí una frase de consulta 2026-11-05 para cumplir el criterio 4.
 - Verificación: se corrió dos veces completa. La primera pasada dio 15 en el último conteo; tras añadir la fecha de «Para la prueba», la segunda dio 16. `scripts/validar-tarea.mjs` falló una vez por falta de bloque de código en *Evidencia*, que corregí sin cambiar los resultados.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=4; resultado=lista; causa=ninguna

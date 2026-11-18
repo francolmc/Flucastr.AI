@@ -1,8 +1,11 @@
 # task-14 — Guía de higiene de contexto y compactación en el `README.md`
 repo: Flucastr.AI   depende_de: task-09   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Documentar en `README.md` lo que el kit deja puesto (compactación automática en Pi y Claude Code), con la tabla de mecanismos por herramienta, cómo cambiar el umbral, cómo comprobar el resultado tras instalar y las limitaciones. Es la guía para Franco, también desde el celular: no pide teclear comandos para que funcione.
+Documentar en `README.md` lo que el kit deja puesto (compactación automática en Pi y Claude Code), con la tabla de mecanismos por herramienta, cómo cambiar el umbral, cómo comprobar el resultado tras instalar y las limitaciones. Es la guía para la persona usuaria, también desde el celular: no pide teclear comandos para que funcione.
 
 ## Contexto
 - Leído `README.md` (16.139 caracteres): secciones `## La idea`, `## Para qué existe`, `## Reglas`, `## Documentación`, `## Cómo se usa`, `## Estructura`, `## Instalación` (con `### Con el repo clonado`, lista de viñetas sobre `instalar.sh`, `--proyecto`, `--skills-proyecto`), `## Pruebas`, `## Flujo`, `## Registro de eventos`, `## Archivo y rescate`, `## Bitácora`. La sección nueva va entre `## Flujo` y `## Registro de eventos`.
@@ -16,7 +19,7 @@ Documentar en `README.md` lo que el kit deja puesto (compactación automática e
   2. **Qué deja puesto el kit**: Pi, ajuste global en `~/.pi/agent/settings.json` (o `$PI_CODING_AGENT_DIR`): `compaction.modelOverrides["<proveedor>/<modelo>"].reserveTokens = ventana − compactar_en` (con ventana 272000 y `compactar_en` 100000, `172000`); Claude Code, solo con `--proyecto`: `autoCompactWindow = compactar_en + 33000` (`133000`) en `<proyecto>/.claude/settings.local.json`. Sin `--proyecto`, Claude Code no recibe ajuste.
   3. **Tabla de mecanismos** (Pi 1.4.0 y Claude Code 2.1.308), filas: compactación automática; dónde se configura; fórmula; rango y validación (Pi: enteros no negativos, un valor inválido en el modelo activo detiene a Pi; Claude Code: 100000–1000000, fuera de rango se ignora en silencio); cuándo se aplica (Pi: al abrir Pi de nuevo o con `/reload`; Claude Code: al abrir una sesión nueva); sesión nueva a mano (`/new` en Pi, `/clear` en Claude Code); compactar a mano (`/compact` en ambos); medir (Pi: pie del TUI, `/session`, `showCacheMissNotices: true`; Claude Code: `/context`, donde se ve `Autocompact buffer 33k`). Cada celda sin evidencia dice «no verificado»; Codex aparece como «pendiente».
   4. **Cambiar el umbral**: editar `compactar_en` (y `ventanas` si cambia el modelo) en `modelos.json` y correr `bash instalar.sh` (Pi se rehace solo). En Claude Code, un proyecto ya instalado conserva su valor: correr antes `bash desinstalar.sh --proyecto <ruta>`.
-  5. **Qué respeta**: nunca pisa lo que Franco ya definió (`compaction.enabled`, `compaction.reserveTokens`, un `modelOverrides` del mismo modelo, un `autoCompactWindow` del proyecto): lo omite y lo avisa con `OMITIDO`. Escribe con bloqueo `settings.json.lock` y escritura atómica; `bash instalar.sh --simular` muestra qué haría; `bash desinstalar.sh` quita solo lo suyo (si el valor sigue siendo el del kit).
+  5. **Qué respeta**: nunca pisa lo que la persona usuaria ya definió (`compaction.enabled`, `compaction.reserveTokens`, un `modelOverrides` del mismo modelo, un `autoCompactWindow` del proyecto): lo omite y lo avisa con `OMITIDO`. Escribe con bloqueo `settings.json.lock` y escritura atómica; `bash instalar.sh --simular` muestra qué haría; `bash desinstalar.sh` quita solo lo suyo (si el valor sigue siendo el del kit).
   6. **Después de instalar, comprobar** (tomado del informe): abrir Pi nuevo o `/reload`; `diff` de `~/.pi/agent/settings.json` contra la copia previa: solo debe aparecer `compaction.modelOverrides` para los modelos del kit.
   7. **Limitaciones**: en Pi el ajuste es global y compacta también cuando se usan esos modelos fuera del kit; compactar pierde razonamiento intermedio y salidas de subagentes no anotadas (por eso el `coordinador` escribe `STATUS.md` antes de delegar); un `modelos.json` personal antiguo (sin `compactar_en` ni `ventanas`) no instala nada, y `instalar-remoto.sh --actualizar` avisa «campo nuevo».
 - Una viñeta en `### Con el repo clonado` (lista de `instalar.sh`): `- Deja puesta la compactación automática en Pi y, con \`--proyecto\`, en Claude Code; ver [Higiene de contexto y compactación](#higiene-de-contexto-y-compactación).`
@@ -43,7 +46,7 @@ Fuera de alcance: `definitions/`, `pruebas/README.md` (task-16), el árbol de ag
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 grep -n "^## Higiene de contexto y compactación\|higiene-de-contexto-y-compactación" README.md
 for t in 'reserveTokens = ventana − compactar_en' 'autoCompactWindow = compactar_en + 33000' '172000' '133000' 'compaction.modelOverrides' '.claude/settings.local.json' '/reload' 'desinstalar.sh --proyecto'; do printf '%s: ' "$t"; grep -c -F -- "$t" README.md; done
 node --test pruebas/comprobaciones/readme-estructura.test.mjs 2>&1 | grep -E "^ℹ (pass|fail)"
@@ -101,7 +104,7 @@ Inspección de la tabla (`sed -n '/^| | Pi 1.4.0/,/^| Medir/p' README.md`):
 | Medir | Pie del TUI y `/session`; `showCacheMissNotices: true` | `/context`, donde aparece `Autocompact buffer 33k` |
 ```
 
-Verificación rápida con HOME real (`HOME=/Users/franco`, `bash pruebas/rapida.sh`, una pasada):
+Verificación rápida con HOME real (`HOME=/Users/persona`, `bash pruebas/rapida.sh`, una pasada):
 ```
 exit=0
 ℹ tests 277

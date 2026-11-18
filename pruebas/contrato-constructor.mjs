@@ -8,71 +8,94 @@ import { spawnSync } from 'node:child_process';
 const skill = readFileSync(new URL('../skills/ejecutar-plan/SKILL.md', import.meta.url), 'utf8');
 const constructor = readFileSync(new URL('../agentes/constructor.md', import.meta.url), 'utf8');
 const planificador = readFileSync(new URL('../skills/planificar-cambio/SKILL.md', import.meta.url), 'utf8');
-assert.match(skill, /En cuanto un paso esté completo y su comprobación pase, marca su `- \[x\]`[\s\S]*?antes de empezar el paso siguiente/,
+const principalCore = readFileSync(new URL('../core/agents/principal.md', import.meta.url), 'utf8');
+const constructorCore = readFileSync(new URL('../core/agents/constructor.md', import.meta.url), 'utf8');
+const reglasIdioma = [
+  [principalCore, 'Always respond in the language the user is currently using.', 'switch languages whenever they do.', 'Program output remains Spanish.'],
+  [constructorCore, 'Respond in the language the user is currently using.', 'switch whenever they do.', 'Messages emitted by commands remain Spanish.'],
+];
+function validarReglasIdioma(reglas) {
+  assert.ok(reglas[0].includes(reglas[1]), 'A6: falta la regla de respuesta en el idioma actual');
+  assert.ok(reglas[0].includes(reglas[2]), 'A6: falta la regla para cambiar de idioma');
+  assert.ok(reglas[0].includes(reglas[3]), 'A6: falta conservar la salida de programas en español');
+}
+for (const regla of reglasIdioma) validarReglasIdioma(regla);
+assert.throws(
+  () => validarReglasIdioma([principalCore.replace('Always respond in the language the user is currently using.', ''), ...reglasIdioma[0].slice(1)]),
+  error => error instanceof assert.AssertionError && error.message.includes('A6: falta la regla de respuesta'),
+  'A6: eliminar la regla del principal debe fallar',
+);
+assert.throws(
+  () => validarReglasIdioma([constructorCore.replace('Respond in the language the user is currently using.', ''), ...reglasIdioma[1].slice(1)]),
+  error => error instanceof assert.AssertionError && error.message.includes('A6: falta la regla de respuesta'),
+  'A6: eliminar la regla del constructor debe fallar',
+);
+console.log('ok A6: ambos agentes adaptan sus respuestas al idioma de la persona y las mutaciones negativas fallan');
+assert.match(skill, /As soon as a step is complete and its check passes, mark `- \[x\]`[\s\S]*?before starting the next step/,
   'A1: la casilla debe marcarse al completar y comprobar cada paso, antes del siguiente');
-assert.match(skill, /Si el paso no tiene una comprobación explícita, déjalo sin marcar[\s\S]*?Si se interrumpe o queda incompleto, déjalo sin marcar/,
+assert.match(skill, /If a step has no explicit check, leave it unchecked[\s\S]*?If interrupted or incomplete, leave it unchecked/,
   'A2: pasos sin comprobación o interrumpidos deben quedar pendientes con nota');
-assert.match(skill, /nunca edites \*Alcance\* ni \*Aceptación\*/,
+assert.match(skill, /never edit \*Alcance\* or \*Aceptación\*/,
   'A1: el constructor no modifica Alcance ni Aceptación');
-assert.match(constructor, /antes de empezar el paso siguiente; no acumules casillas para el final del tramo/,
+assert.match(constructor, /before starting the next step; do not accumulate checkboxes until the end of the tranche/,
   'A1: el contrato del constructor requiere avance visible por paso');
-assert.match(planificador, /una comprobación explícita y su resultado esperado[\s\S]*?`Verificación del tramo` es adicional y nunca sustituye la comprobación individual/,
+assert.match(planificador, /one explicit check, and its expected result[\s\S]*?`Verificación del tramo` is additional and never replaces an individual check/,
   'A2/A3: cada paso requiere comprobación propia aunque el tramo tenga verificación');
 assert.ok(
-  skill.includes('`### Tramo N — Historia: ...` identifica una historia autocontenida')
-    && skill.includes('criterios `A#`, TODO y *Handoff*'),
+  skill.includes('`### Tramo N — Historia: ...` identifies a self-contained story')
+    && skill.includes('`A#` criteria, TODO items, and *Handoff*'),
   'A4: el formato nuevo guía la ejecución por historia y handoff',
 );
 assert.ok(
-  skill.includes('En planes antiguos, sigue los pasos y aceptación declarados en su formato existente')
+  skill.includes('For older plans, follow their existing steps and acceptance criteria')
     && skill.includes('`tramo-<n>.md`'),
   'A4: los planes antiguos conservan sus pasos y archivo de tramo',
 );
 console.log('ok A4: contrato nuevo y compatibilidad con el contrato anterior');
 
 const continuidad = [
-  ['opt-in conserva la ejecución de un tramo por defecto', 'Por defecto, una ejecución termina al cerrar el tramo activo'],
-  ['continuidad se limita a la misma historia', 'no avances a otra historia'],
-  ['checkpoint por tramo y sin commits', 'punto de control con archivos tocados, resumen del diff y comprobación; no hagas commit'],
+  ['opt-in conserva la ejecución de un tramo por defecto', 'By default, an execution ends when the active tramo is complete'],
+  ['continuidad se limita a la misma historia', 'do not move on to another story'],
+  ['checkpoint por tramo y sin commits', 'checkpoint to *Notas* with changed files, a diff summary, and the check result; do not commit'],
   ['revisión al final o pausa entre tramos si el plan lo exige', '`Revisión: por tramo`'],
-  ['medición previa de la misma comprobación', 'duración previa registrada para la comprobación exacta en entorno equivalente'],
+  ['medición previa de la misma comprobación', 'prior duration is recorded for the exact check in an equivalent environment'],
   ['límite efectivo de dos veces la duración', 'timeout <2x-segundos>s <comando>'],
-  ['segunda falla por la misma causa pausa', 'vuelve a fallar por la misma causa, pausa'],
-  ['salida de alcance o decisión de la persona usuaria pausa', 'Pausa también si hace falta salir del alcance o una decisión de la persona usuaria'],
-  ['dudas menores se registran y siguen', 'dudas menores dentro del alcance se registran bajo `Decisiones` y no interrumpen el avance'],
-  ['la pausa deja una reanudación retomable', 'deja una nota retomable'],
+  ['segunda falla por la misma causa pausa', 'same cause returns, pause'],
+  ['salida de alcance o decisión de la persona usuaria pausa', 'Also pause if work must leave scope or requires a user decision'],
+  ['dudas menores se registran y siguen', 'Record minor in-scope decisions under `Decisiones` and continue'],
+  ['la pausa deja una reanudación retomable', 'a resumable note describing progress, remaining work, and cause'],
 ];
 for (const [label, phrase] of continuidad) {
   assert.ok(skill.includes(phrase), `A2: la skill debe cubrir ${label}`);
 }
-assert.ok(constructor.includes('continuidad: continua') && constructor.includes('no pases a otra historia'),
+assert.ok(constructor.includes('continuidad: continua') && constructor.includes('do not move to another story'),
   'A2: el constructor permite continuidad solo dentro de la historia aprobada');
-assert.ok(constructor.includes('punto de control con archivos tocados') && constructor.includes('No hagas commits entre tramos'),
+assert.ok(constructor.includes('checkpoint to *Notas* with files changed') && constructor.includes('Do not commit between tranches'),
   'A2: el constructor exige checkpoint y conserva la prohibición de commits');
-assert.ok(constructor.includes('falla dos veces por la misma causa') && constructor.includes('supera dos veces la duración medida'),
+assert.ok(constructor.includes('fails twice for the same cause') && constructor.includes('more than twice its measured duration'),
   'A2: el constructor detiene el avance en segunda falla o timeout');
-assert.ok(constructor.includes('también puedes actualizar `tramo:`') && constructor.includes('añadir dudas menores resueltas a *Decisiones*'),
+assert.ok(constructor.includes('may you also update `tramo:`') && constructor.includes('add minor resolved questions to *Decisiones*'),
   'A2: el constructor autoriza los cambios de tramo y decisiones necesarios, solo en continuidad');
-assert.ok(constructor.includes('al dejar `PAUSA`, pon `estado: parcial`') && constructor.includes('vuelve a aprobar el plan antes de reanudar'),
+assert.ok(constructor.includes('when using `PAUSA`, set `estado: parcial`') && constructor.includes('reapproves the plan before resumption'),
   'A2: la pausa queda parcial y la reanudación requiere aprobación del principal');
-assert.ok(skill.includes('cámbialo a `parcial` al pausar') && skill.includes('En planes sin continuidad conserva el procedimiento y contenido del plan existente'),
+assert.ok(skill.includes('set it to `parcial` when pausing') && skill.includes('For plans without continuity, preserve their existing procedure and content'),
   'A2: la skill alinea estados y conserva compatibilidad de planes antiguos');
-assert.ok(skill.includes('En planes antiguos, sigue los pasos y aceptación declarados en su formato existente'),
+assert.ok(skill.includes('For older plans, follow their existing steps and acceptance criteria'),
   'A2: los planes antiguos conservan el procedimiento existente');
 console.log(`ok A2: ${continuidad.length + 7} condiciones del modo continuo y compatibilidad verificadas`);
 
 const a5 = [
-  ['dependencias reales', 'dependencias reales', 'dependencias reales'],
-  ['dependencias externas y su motivo', 'Externa — <sistema, herramienta, requisito o contrato externo necesario y motivo>', 'incluidas dependencias externas a los tramos y su motivo'],
-  ['contratos a conservar', 'Contratos a conservar:', 'contratos a conservar'],
-  ['rutas susceptibles de cambio', 'Rutas susceptibles de cambio:', 'rutas susceptibles de cambio'],
-  ['ruta usada por prueba que puede moverse o archivarse y prueba a actualizar', 'indica si puede moverse o archivarse y qué prueba debe actualizarse', 'indique si puede moverse o archivarse y qué prueba debe actualizarse'],
-  ['ejemplo concreto del resultado esperado', 'Ejemplo concreto del resultado esperado:', 'ejemplo concreto del resultado esperado'],
+  ['dependencias reales', 'dependencias reales', 'real dependencies'],
+  ['dependencias externas y su motivo', 'Externa — <sistema, herramienta, requisito o contrato externo necesario y motivo>', 'including external dependencies beyond the tramos and their reasons'],
+  ['contratos a conservar', 'Contratos a conservar:', 'contracts to preserve'],
+  ['rutas susceptibles de cambio', 'Rutas susceptibles de cambio:', 'paths likely to change'],
+  ['ruta usada por prueba que puede moverse o archivarse y prueba a actualizar', 'indica si puede moverse o archivarse y qué prueba debe actualizarse', 'whether the path may move or be archived and which test must be updated'],
+  ['ejemplo concreto del resultado esperado', 'Ejemplo concreto del resultado esperado:', 'a concrete example of the expected result'],
 ];
 const templateStart = planificador.indexOf('```markdown\n', planificador.indexOf('## Pasos'));
 const templateEnd = planificador.indexOf('\n```', templateStart);
-const reviewStart = planificador.indexOf('## Antes de pedir la aprobación');
-const reviewEnd = planificador.indexOf('\nSi el constructor devuelve', reviewStart);
+const reviewStart = planificador.indexOf('## Before Requesting Approval');
+const reviewEnd = planificador.indexOf('\nIf the constructor returns', reviewStart);
 assert.ok(templateStart >= 0 && templateEnd > templateStart, 'A5: falta la plantilla de historia');
 assert.ok(reviewStart >= 0 && reviewEnd > reviewStart, 'A5: falta la revisión previa a aprobación');
 
@@ -80,9 +103,9 @@ function validarA5(text) {
   const start = text.indexOf('```markdown\n', text.indexOf('## Pasos'));
   const end = text.indexOf('\n```', start);
   const template = text.slice(start, end).toLowerCase();
-  const review = text.slice(text.indexOf('## Antes de pedir la aprobación'), text.indexOf('\nSi el constructor devuelve')).toLowerCase();
+  const review = text.slice(text.indexOf('## Before Requesting Approval'), text.indexOf('\nIf the constructor returns')).toLowerCase();
   assert.ok(template.includes('«no aplica»'), 'A5: la plantilla debe permitir «No aplica»');
-  assert.ok(review.includes('«no aplica»'), 'A5: la revisión previa debe permitir «No aplica»');
+  assert.ok(review.includes('“not applicable”'), 'A5: la revisión previa debe permitir «No aplica»');
   for (const [label, templatePhrase, reviewPhrase] of a5) {
     assert.ok(template.includes(templatePhrase.toLowerCase()), 'A5: falta en plantilla "' + label + '"');
     assert.ok(review.includes(reviewPhrase), 'A5: falta en revisión previa "' + label + '"');
@@ -105,7 +128,7 @@ for (const [label, templatePhrase, reviewPhrase] of a5) {
     error => error instanceof assert.AssertionError && error.message.includes('A5: falta en plantilla "' + label + '"'),
     'A5: quitar ' + label + ' de la plantilla debe fallar por ese requisito',
   );
-  const withoutReviewRequirement = quitarEnSeccion(planificador, '## Antes de pedir la aprobación', '\nSi el constructor devuelve', reviewPhrase);
+  const withoutReviewRequirement = quitarEnSeccion(planificador, '## Before Requesting Approval', '\nIf the constructor returns', reviewPhrase);
   assert.throws(
     () => validarA5(withoutReviewRequirement),
     error => error instanceof assert.AssertionError && error.message.includes('A5: falta en revisión previa "' + label + '"'),

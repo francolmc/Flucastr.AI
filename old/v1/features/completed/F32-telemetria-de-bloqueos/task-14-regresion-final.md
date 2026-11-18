@@ -1,6 +1,9 @@
 # task-14 — Regresión final de F32: validadores, topes, base ampliada y bordes
 repo: Flucastr.AI   depende_de: task-02, task-03, task-04, task-05, task-07, task-09, task-11, task-13   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Cierra F32: comprueba que los validadores responden igual que antes sobre las 49 tareas congeladas, amplía la base con las 10 tareas de F31 (59 en total), agrega los bordes de `Bloqueo:` y `cancelada`, y confirma que ningún tope subió y que la verificación rápida mantiene sus 7 fallos conocidos.
 
@@ -10,7 +13,7 @@ Cierra F32: comprueba que los validadores responden igual que antes sobre las 49
 - `regresion-validadores.test.mjs` (confirmado): `CARPETA_FEATURE = /^F(2[4-9]|3[03])-/` (línea 17); la base se regenera con `FLUCASTR_GENERAR_BASE=1`; `diferencias(base, actual)` compara solo las claves de la base; helper `tareaTerminada(notas, estado)` y bordes (a) a (d) desde la línea ≈ 77.
 - `pruebas/fixtures/regresion-f24-f29.json` (confirmado): hoy tiene 49 claves; F31 aporta 10 tareas `hecha` que cumplen la regla (`validar-tarea.mjs --fuente` da `OK: 10 tarea(s) válida(s)`), así que la base ampliada tiene 59.
 - No se agregan las tareas de F32: su estado cambia mientras se construyen y fijaría respuestas transitorias.
-- Base de `pruebas/rapida.sh` (confirmado por Franco y medido): `ℹ tests 598`, `ℹ pass 591`, `ℹ fail 7`; los 7 fallos conocidos no se arreglan aquí. F32 suma pruebas, así que `tests` y `pass` suben igual y `fail` sigue en 7; la rápida sale 1 y no se exige su línea de segundos.
+- Base de `pruebas/rapida.sh` (confirmado por la persona usuaria y medido): `ℹ tests 598`, `ℹ pass 591`, `ℹ fail 7`; los 7 fallos conocidos no se arreglan aquí. F32 suma pruebas, así que `tests` y `pass` suben igual y `fail` sigue en 7; la rápida sale 1 y no se exige su línea de segundos.
 - De las otras tareas lee solo las *Notas* de task-13.
 - Fuente: definitions/DIAGNOSTICO-BLOQUEOS.md «5. Pieza 3 — Telemetría que da pistas»
 

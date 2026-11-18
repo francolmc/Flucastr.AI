@@ -1,6 +1,9 @@
 # task-08 — Cierre de F40: topes de bytes y suite rápida en verde
 repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Última tarea de la feature: comprueba que ningún archivo con tope lo supera, que no quedan frases del comportamiento viejo de yolo y que `bash pruebas/rapida.sh` termina en 0 (tope de la suite 90 s). Es solo verificación; si algo falla, se corrige en el archivo de la tarea que lo causó.
 
@@ -15,7 +18,7 @@ repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
 ## Decisiones ya tomadas
 - No se editan archivos de producto en esta tarea; un fallo se informa con `BLOQUEO:` y la tarea causante.
-- La aceptación «corrida con modelo real de yolo en Claude Code» de `definitions/BACKLOG.md` (Alcance de F40) la hace Franco después de esta tarea.
+- La aceptación «corrida con modelo real de yolo en Claude Code» de `definitions/BACKLOG.md` (Alcance de F40) la hace la persona usuaria después de esta tarea.
 
 ## Decisiones abiertas
 Ninguna.

@@ -1,8 +1,11 @@
 # task-02 — Comando de verificación rápida (`pruebas/rapida.sh`)
 repo: Flucastr.AI   depende_de: task-01   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
-Hoy no hay una sola orden que Franco corra para confiar en un cambio: la suite completa tarda ~46 s, de los cuales ~32 s son `contrato.test.mjs` (fixtures Git de B/M/R que solo importan al tocar el contrato del arquitecto). Esta tarea crea `pruebas/rapida.sh`, que corre todo lo determinista salvo ese archivo y falla si pasa de 30 s, y la documenta en el README. Es la base sobre la que se añaden las demás comprobaciones de F01.
+Hoy no hay una sola orden que la persona usuaria corra para confiar en un cambio: la suite completa tarda ~46 s, de los cuales ~32 s son `contrato.test.mjs` (fixtures Git de B/M/R que solo importan al tocar el contrato del arquitecto). Esta tarea crea `pruebas/rapida.sh`, que corre todo lo determinista salvo ese archivo y falla si pasa de 30 s, y la documenta en el README. Es la base sobre la que se añaden las demás comprobaciones de F01.
 
 ## Contexto
 - Repo: este, único repo. Sin modelo ni red.
@@ -59,11 +62,11 @@ Fuera de alcance: modificar cualquier prueba existente, paralelizar, acelerar `c
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 bash pruebas/rapida.sh 2>&1 | grep -E "^(ℹ (tests|pass|fail)|rapida:)"; echo "rc=${PIPESTATUS[0]}"
 FLUCASTR_TOPE_RAPIDA=1 bash pruebas/rapida.sh 2>&1 | grep -E "^FALLA"; echo "rc=${PIPESTATUS[0]}"
 bash pruebas/rapida.sh 2>&1 | grep -c "contrato duro"
-(cd /tmp && bash /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/rapida.sh 2>&1 | grep -E "^rapida:")
+(cd /tmp && bash /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/rapida.sh 2>&1 | grep -E "^rapida:")
 grep -c "bash pruebas/rapida.sh\|pruebas/comprobaciones/\*.test.mjs pruebas/\*.test.mjs" pruebas/README.md
 ```
 Salida esperada: `ℹ tests 34`, `ℹ pass 34`, `ℹ fail 0`, `rapida: 7 archivos en N s (tope 30 s)` y `rc=0`; luego el mensaje de FALLA y `rc=1`; luego `0`; luego otra línea `rapida: 7 archivos …`; y por último `2`.
@@ -126,7 +129,7 @@ $ bash pruebas/rapida.sh 2>&1 | grep -c "contrato duro"
 
 Verificación 4 (desde otro directorio):
 ```
-$ (cd /tmp && bash /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/rapida.sh 2>&1 | grep -E "^rapida:")
+$ (cd /tmp && bash /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/rapida.sh 2>&1 | grep -E "^rapida:")
 rapida: 7 archivos en 14 s (tope 30 s)
 ```
 

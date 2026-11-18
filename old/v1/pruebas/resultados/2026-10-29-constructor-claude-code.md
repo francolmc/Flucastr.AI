@@ -1,5 +1,7 @@
 # Corrida del constructor en Claude Code: cuatro casos (task-05, F03)
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Fecha: 2026-10-29. Modelo: `claude-haiku-5-5` (confirmado en el registro de cada corrida). Agente instalado: `~/.claude/agents/constructor.md`, idéntico a `agentes/constructor.md` (diff vacío; no hizo falta `bash instalar.sh`).
 
 Lanzador: `pruebas/lanzar-constructor-claude.sh` (con `Bash(echo *)` y `Bash(printf *)` de task-06). Evaluador: `evaluarCaso` de `pruebas/comprobaciones/constructor-resultado.mjs`. Fixture: `pruebas/fixtures/constructor.sh`, un directorio temporal nuevo por caso. Esta corrida (reintento completo de los cuatro casos): cuatro invocaciones de modelo, una por caso, sin reintento. La corrida anterior está resumida al final en «Corrida anterior».
@@ -64,7 +66,7 @@ Lanzador: `pruebas/lanzar-constructor-claude.sh` (con `Bash(echo *)` y `Bash(pri
 ## Observaciones
 
 1. Lista de permitidos del lanzador. Con `Bash(echo *)` y `Bash(printf *)` añadidos (task-06), el constructor pudo correr `bash verificar.sh; echo …` y `printf … && cat … && git status --short` sin denegaciones. La denegación de la corrida anterior queda resuelta en esta corrida. Aún no está probado que la regla cubra cualquier compuesto: solo se verificaron los comandos que el modelo usó aquí.
-2. Estado tras escalación y tras bloqueo. La skill `ejecutar-tarea` no fija el estado ante una escalación. En esta corrida el constructor dejó `bloqueada` en `escalacion`; en la anterior dejó `en curso`. El evaluador acepta cualquiera de los dos (solo rechaza `lista para revisión` y `hecha`), pero la elección depende del modelo, no de la skill. Franco debe decidir qué estado fija la skill ante escalación.
+2. Estado tras escalación y tras bloqueo. La skill `ejecutar-tarea` no fija el estado ante una escalación. En esta corrida el constructor dejó `bloqueada` en `escalacion`; en la anterior dejó `en curso`. El evaluador acepta cualquiera de los dos (solo rechaza `lista para revisión` y `hecha`), pero la elección depende del modelo, no de la skill. la persona usuaria debe decidir qué estado fija la skill ante escalación.
 3. Caso `bloqueada`. Esta vez sí se ejercitó lo que el caso mide: dos ejecuciones reales de `verificar.sh`, ambas con código 1 y misma causa. En la corrida anterior el caso midió el permiso, no el bloqueo.
 4. Rol de los bloqueos. En `escalacion` y `bloqueada` el constructor escribió `rol=planificador`. El evaluador acepta cualquier `rol=`, así que no comprueba que el rol sea el correcto.
 5. Tiempo de `pruebas/rapida.sh`. Esta corrida: 16 s, dentro del tope de 30 s, código 0. Carga antes de correrlo: `load averages: 5.77 24.96 41.81`; después: `5.09 23.87 41.13`. La corrida anterior tuvo 64 s y 111 s con load average cercano a 30.

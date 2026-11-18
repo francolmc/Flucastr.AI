@@ -8,24 +8,26 @@ tipo: docs
 ---
 # Informe de avance del constructor
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-El principal informa de forma breve y fiel el avance del tramo activo cuando Franco consulta y cuando el constructor termina o se detiene.
+El principal informa de forma breve y fiel el avance del tramo activo cuando la persona usuaria consulta y cuando el constructor termina o se detiene.
 
 ## Supuestos
 - Las casillas se ejecutan en el orden del plan; si se completan fuera de orden, usar la evidencia con orden temporal y comunicar «desconocido» si no permite identificar el último paso.
-- El plazo es el declarado para el tramo; si no existe o no se conoce su inicio, indicarlo y no afirmar que venció. Si Franco establece otra regla, ajustar la comparación.
+- El plazo es el declarado para el tramo; si no existe o no se conoce su inicio, indicarlo y no afirmar que venció. Si la persona usuaria establece otra regla, ajustar la comparación.
 
 ## Alcance
 Modificar `agentes/principal.md` para incorporar el informe y resolver sus instrucciones contradictorias. Fuera de alcance: scripts nuevos, generación de capturas, cambios del constructor, `verify` y pruebas de aceptación existentes.
 
 ## Decisiones ya tomadas
 - El contrato de casillas en vivo ya existe en `agentes/constructor.md` y `skills/ejecutar-plan/SKILL.md`; `node pruebas/contrato-constructor.mjs` pasa y valida también registros reales previos, sin ejecutar de nuevo un modelo.
-- Ejecutor: constructor, porque los requisitos, archivos, comprobaciones y errores están definidos y no se necesitan credenciales ni producción; Franco pidió un plan.
+- Ejecutor: constructor, porque los requisitos, archivos, comprobaciones y errores están definidos y no se necesitan credenciales ni producción; la persona usuaria pidió un plan.
 - Un informe tiene hasta cuatro líneas, incluso con capturas o advertencia; agrupar campos en una línea cuando sea necesario. No sustituye la revisión ni su veredicto.
 - Comparar consultas consecutivas del mismo tramo y misma ejecución, conservando sus valores en el contexto de la conversación; si faltan datos previos, no inferir estancamiento.
 
 ## Escenarios
-- CUANDO Franco pregunta cómo va, o el constructor termina o se detiene ENTONCES el principal informa el tramo activo en hasta cuatro líneas (A1).
+- CUANDO la persona usuaria pregunta cómo va, o el constructor termina o se detiene ENTONCES el principal informa el tramo activo en hasta cuatro líneas (A1).
 - CUANDO existen capturas de verificación de un tramo de interfaz ENTONCES incluye su ruta sin generarlas ni solicitarlas (A2).
 - CUANDO dos consultas consecutivas posteriores al plazo coinciden en casillas y estado git ENTONCES comunica la coincidencia y propone leer el final de la sesión antes de interrumpir o relanzar (A3).
 - CUANDO faltan archivos o datos para el informe ENTONCES declara lo desconocido sin inventar progreso (A4).

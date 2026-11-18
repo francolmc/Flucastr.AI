@@ -1,6 +1,9 @@
 # task-05 — Prueba del resolver: compactación de Claude Code y `comparar-modelos`
 repo: Flucastr.AI   depende_de: task-04   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Fijar con una prueba determinista (sin modelo ni red) la variante de Claude Code de `fijar-compactacion` / `quitar-compactacion` (valor `compactar_en + 33000`, rango 100000–1000000, no pisar al usuario, convivencia con `fijar-agente`) y los avisos nuevos de `comparar-modelos`, con controles negativos. Entra en `rapida.sh` sin tocarla.
 
@@ -46,7 +49,7 @@ Fuera de alcance: `scripts/resolver.mjs` (si la prueba revela un defecto, nota o
 
 ## Verificación
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 time node --test pruebas/comprobaciones/resolver-compactacion-claude.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 R=$(mktemp); bash pruebas/rapida.sh > "$R" 2>&1; echo "rapida exit=$?"; tail -3 "$R"
 git status --short pruebas/comprobaciones/
@@ -58,7 +61,7 @@ Modo yolo: sin rama nueva ni `git switch`; trabajo en `feature/F19-compactacion-
 
 Sintaxis (`node --check pruebas/comprobaciones/resolver-compactacion-claude.test.mjs`): `CHECK_OK`.
 
-Verificación (salida real, HOME=/Users/franco):
+Verificación (salida real, HOME=/Users/la persona usuaria):
 ```
 $ time node --test pruebas/comprobaciones/resolver-compactacion-claude.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 ℹ tests 10

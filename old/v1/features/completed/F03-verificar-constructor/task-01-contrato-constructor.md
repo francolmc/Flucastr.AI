@@ -1,6 +1,9 @@
 # task-01 — Comprobación determinista del contrato del constructor
 repo: Flucastr.AI   depende_de: —   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 El comportamiento del constructor ante tarea no aprobada, escalación, bloqueo y estado final vive en dos textos (`agentes/constructor.md` y `skills/ejecutar-tarea/SKILL.md`) y nada impide que una edición lo rompa sin aviso. Esta tarea añade un validador sin modelo ni red que exige esas reglas en ambos textos, y una prueba que lo aplica a los archivos reales. Entra sola en `pruebas/rapida.sh` por su glob. No sustituye la corrida con modelo (task-05); evita que se rompa lo que esa corrida ya comprobó.
 
@@ -72,7 +75,7 @@ EXIT=0
 Orden 2: `bash pruebas/rapida.sh` (salida completa, código 0)
 
 ```
-Entorno conservado: /Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-Q6NetT
+Entorno conservado: /Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/capa1-Q6NetT
 ✔ I1: comprobación real (79.255625ms)
 ✔ I2: comprobación real (1062.791708ms)
 ✔ I3: comprobación real (1414.700458ms)
@@ -191,5 +194,5 @@ Criterios de aceptación:
 - Hueco menor 1: la tarea no dice cómo tratar el orden de la regla 5. Lo implementé como comprobación de que «Cambia `estado` a `en curso`» aparezca después de «no es `aprobada`» (campo `despuesDe`).
 - Hueco menor 2: la tarea pide un error por regla incumplida. Agrupo en ese error todas las frases que faltan de la regla, para no producir un error por frase.
 - Hueco menor 3: la variante negativa de cada regla borra todas sus frases a la vez (una variante por regla, como pide la tarea), no una frase suelta. Con `replace` solo se borra la primera ocurrencia; cada frase aparece una sola vez en los textos reales, así que no afecta.
-- Observación fuera de alcance (no tocada): la verificación rápida imprime «Entorno conservado: pruebas/.temporales/capa1-…», es decir, una prueba preexistente deja un directorio temporal dentro de `pruebas/.temporales/`. Lo anoto para Franco; no lo modifiqué.
+- Observación fuera de alcance (no tocada): la verificación rápida imprime «Entorno conservado: pruebas/.temporales/capa1-…», es decir, una prueba preexistente deja un directorio temporal dentro de `pruebas/.temporales/`. Lo anoto para la persona usuaria; no lo modifiqué.
 - No se escribió `hecha` ni se tocó `definitions/STATUS.md`. Sin commit, push, PR, merge ni despliegue.

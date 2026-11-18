@@ -1,5 +1,8 @@
 <p align="center"><img src="assets/logo.svg" alt="Logo de Flucastr.AI" width="64" height="64"></p>
 
+> Referencias personales anonimizadas; se conservan enlaces históricos.
+
+
 # Flucastr.AI
 
 Un kit de agentes de IA para construir productos con aprobación humana en cada paso, sobre Claude Code y Pi.
@@ -51,7 +54,7 @@ flowchart LR
     T --> P3{"Puerta 3<br/>cada tarea"}
     P3 --> C["Construir y verificar<br/>(constructor)"]
     C --> P4{"Puerta 4<br/>revisión"}
-    P4 --> F["Commit y PR<br/>(Franco)"]
+    P4 --> F["Commit y PR<br/>(persona usuaria)"]
 ```
 
 | Rol | Qué hace | Qué no hace |
@@ -303,6 +306,6 @@ El modelo que queda registrado es el que indica `modelos.json` al correr el scri
 
 ## Contribuir y licencia
 
-Proyecto personal de Franco Morales (`francolmc`). Las propuestas se envían como issue en <https://github.com/francolmc/Flucastr.AI/issues>. Antes de proponer un cambio, corre `bash pruebas/rapida.sh`.
+Proyecto de agentes reutilizable. Las propuestas se envían como issue en <https://github.com/francolmc/Flucastr.AI/issues>. Antes de proponer un cambio, corre `bash pruebas/rapida.sh`.
 
 Licencia MIT. El texto completo está en [LICENSE](LICENSE).

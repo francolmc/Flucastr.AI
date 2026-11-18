@@ -1,14 +1,16 @@
 # Sondeo: cómo hacer que Pi consuma menos tokens con el flujo del kit
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
 Fecha: 2026-10-31. Borrador. Solo lectura e investigación: no se tocó código, `definitions/` ni `STATUS.md`; no se abrieron `auth.json`, `models-store.json` ni sesiones. Un comando mío que rozaba `~/.pi/agent/models-store.json` fue bloqueado por el sistema y no se ejecutó; la ventana de contexto se leyó del catálogo incluido en el paquete (ver P2).
 
 Rutas abreviadas: `DOCS` = `~/.pi/agent/install/releases/1.4.0/node_modules/@earendil-works/pi-coding-agent/docs`; `DIST` = `.../pi-coding-agent/dist`; `PIAI` = `.../@earendil-works/pi-ai/dist`; `SUB` = `~/.pi/agent/npm/node_modules/pi-subagents`.
 
-Convención: CONFIRMADO = lo leí en un archivo (ruta); INFERIDO = cálculo mío sobre datos de Franco; NO VERIFICADO = sin evidencia local.
+Convención: CONFIRMADO = lo leí en un archivo (ruta); INFERIDO = cálculo mío sobre datos de la persona usuaria; NO VERIFICADO = sin evidencia local.
 
 ## 0. Conclusión corta
 
-1. El costo es contexto reenviado, no el prompt base ni la salida. Con los precios del catálogo (`cacheRead` 0,10 USD/M) y los datos de Franco: 31,2 M × 0,10 = 3,12 USD de los 4,15 USD (≈75 %, INFERIDO). El gasto crece con *turnos × tamaño medio del contexto*, así que la palanca es **mantener corto el contexto**, no ahorrar tokens de prompt.
+1. El costo es contexto reenviado, no el prompt base ni la salida. Con los precios del catálogo (`cacheRead` 0,10 USD/M) y los datos de la persona usuaria: 31,2 M × 0,10 = 3,12 USD de los 4,15 USD (≈75 %, INFERIDO). El gasto crece con *turnos × tamaño medio del contexto*, así que la palanca es **mantener corto el contexto**, no ahorrar tokens de prompt.
 2. La hipótesis «la caché expira en cada puerta» **no se sostiene con los datos**: en la sesión grande, los tokens que no son caché leída suman ≈0,3 M (31,5 − 31,2), que es justo el crecimiento del contexto (≈0,22 M) más la salida (241 × 270 ≈ 0,065 M). No cabe ninguna relectura completa a 130 k (INFERIDO). Queda sin medir en otras sesiones; se mide con `showCacheMissNotices` (P1).
 3. Palancas por impacto estimado: (a) sesión nueva por puerta/tarea, (b) compactación temprana por proyecto (≈100 k en vez de ≈255 k), (c) lecturas acotadas. Los subagentes y las skills no son el problema hoy.
 
@@ -31,11 +33,11 @@ Costo de un fallo, INFERIDO con precios del catálogo: reprocesar 130 k a 2,5 US
 | CONFIRMADO | NO VERIFICADO |
 |---|---|
 | Dispara con `contextTokens > contextWindow - reserveTokens`; `reserveTokens` 16384, `keepRecentTokens` 20000 por defecto (`DOCS/compaction.md`, `DOCS/settings.md`). | Si `models-store.json` o `~/.pi/agent/models.json` cambian la ventana de este modelo. |
-| Ventana de `gpt-6.1-sol` en el catálogo: **272.000** con proveedor `openai`; **500.000** con `openai-codex` (`PIAI/providers/data/openai.json` y `openai-codex.json`). El id `openai/gpt-6.1-sol` del kit (`modelos.json`) apunta al proveedor `openai`, es decir 272 k. Con el contexto final de 220 k de Franco, la compactación dispararía a 255.616 (272.000 − 16.384): por eso «nunca compactó». | Que Franco use realmente el proveedor `openai` y no `openai-codex`. Se comprueba con el porcentaje del pie de Pi o con `/session`. |
+| Ventana de `gpt-6.1-sol` en el catálogo: **272.000** con proveedor `openai`; **500.000** con `openai-codex` (`PIAI/providers/data/openai.json` y `openai-codex.json`). El id `openai/gpt-6.1-sol` del kit (`modelos.json`) apunta al proveedor `openai`, es decir 272 k. Con el contexto final de 220 k de la persona usuaria, la compactación dispararía a 255.616 (272.000 − 16.384): por eso «nunca compactó». | Que la persona usuaria use realmente el proveedor `openai` y no `openai-codex`. Se comprueba con el porcentaje del pie de Pi o con `/session`. |
 | El catálogo trae **tramo de precio** sobre 272.000 tokens: entrada 4, caché leída 0,20 (el doble) (`openai.json`). Con 272 k de ventana no se llega a ese tramo. | — |
 | Fórmula: `reserveTokens = ventana − umbral_deseado`. Para compactar a ≈100 k con ventana 272 k: **172000**. Con ventana 500 k: 400000. | — |
 | `compaction.modelOverrides` por `provider/modelId` exacto, distingue mayúsculas; cada valor cae por separado a la configuración ordinaria y luego al valor por defecto (`DOCS/compaction.md` «Per-model overrides»). Sirve para no afectar a otros modelos. | — |
-| **Por proyecto sí se puede:** `<proyecto>/.pi/settings.json` (`DOCS/compaction.md` «When It Triggers»; `DOCS/configuration.md`). Los objetos de usuario y proyecto se funden recursivamente antes de buscar el modelo. Requiere confianza de proyecto (`DOCS/security.md`: `.pi/settings.json` está protegido); `~/.pi/agent/trust.json` ya lista proyectos de Franco. | — |
+| **Por proyecto sí se puede:** `<proyecto>/.pi/settings.json` (`DOCS/compaction.md` «When It Triggers»; `DOCS/configuration.md`). Los objetos de usuario y proyecto se funden recursivamente antes de buscar el modelo. Requiere confianza de proyecto (`DOCS/security.md`: `.pi/settings.json` está protegido); `~/.pi/agent/trust.json` ya lista proyectos de la persona usuaria. | — |
 | La compactación resume una vez, deja `resumen + keepRecentTokens` y las peticiones de resumen no escriben caché (`DOCS/compaction.md`). El siguiente turno paga una escritura de caché del contexto nuevo (~30–40 k, ≈0,09 USD, INFERIDO). | Calidad del resumen para este flujo. El estado vive en archivos (`STATUS.md`, tareas), lo que reduce el riesgo; sin medir. |
 
 Configuración sugerida (proyecto o global; los valores son punto de partida, ESTIMACIÓN):
@@ -72,7 +74,7 @@ Impacto: despreciable (≈0,5 k tokens por turno × 0,10 USD/M ≈ 0,01 USD en 2
 
 | CONFIRMADO | NO VERIFICADO |
 |---|---|
-| `read`: tope 2000 líneas o 50 KB (lo primero que ocurra), con `offset` y `limit` (`DIST/core/tools/read.js`, `truncate.js`). 50 KB ≈ 12 k tokens por lectura (ESTIMACIÓN): explica saltos > 8 k. | Cómo reparte el modelo las lecturas en la sesión de Franco (no se abrió). |
+| `read`: tope 2000 líneas o 50 KB (lo primero que ocurra), con `offset` y `limit` (`DIST/core/tools/read.js`, `truncate.js`). 50 KB ≈ 12 k tokens por lectura (ESTIMACIÓN): explica saltos > 8 k. | Cómo reparte el modelo las lecturas en la sesión de la persona usuaria (no se abrió). |
 | `grep`: 100 coincidencias o 50 KB, líneas a 500 caracteres, parámetro `limit` (`DIST/core/tools/grep.js`). `bash`: últimas 2000 líneas o 50 KB, salida completa a archivo temporal. | — |
 | **Esos topes no son configurables:** `settings.md` y `settings-schema.js` no tienen claves de tamaño de lectura (búsqueda de `maxBytes`/`maxLines`/`toolOutput` sin resultados). Solo `images.*` limita imágenes. | — |
 | `codemode` (desactivado por defecto) deja al modelo filtrar resultados con un script y solo ve la salida (`max_output_tokens` 10000); `defaultTools: ["+codemode"]` lo activa (`DOCS/codemode.md`, `DOCS/settings.md`). | Si el modelo lo usa bien con este flujo; cambia el comportamiento de todos los agentes, riesgo alto. |
@@ -96,24 +98,24 @@ NO VERIFICADO: si `pi-agent-mode`, al devolver `systemPrompt` propio en `before_
 
 ## 4. Palancas ordenadas por impacto estimado
 
-Base: costo ∝ turnos × contexto medio. Datos de Franco: sesión de 29 turnos a 0,21 USD = 0,0072 USD/turno (contexto ≈25 k); sesión de 241 turnos a 4,15 USD = 0,0172 USD/turno (≈130 k): **2,4 veces más por turno**.
+Base: costo ∝ turnos × contexto medio. Datos de la persona usuaria: sesión de 29 turnos a 0,21 USD = 0,0072 USD/turno (contexto ≈25 k); sesión de 241 turnos a 4,15 USD = 0,0172 USD/turno (≈130 k): **2,4 veces más por turno**.
 
 | # | Palanca | Impacto (ESTIMACIÓN) | Quién | Esfuerzo | Riesgo |
 |---|---|---|---|---|---|
-| 1 | **Sesión nueva en cada puerta/tarea** (`/new`; el estado ya está en archivos). Partir 241 turnos en sesiones de ≈29 da ≈8 × 0,21 = 1,75 USD vs 4,15: **−55 %** | alto | Kit (README + coordinador sugiere) y Franco (hace `/new`) | bajo | bajo. Conflicto: en yolo la vigencia no sobrevive a una sesión nueva (`agentes/coordinador.md`, «Vigencia»; `WORKFLOW.md` §9.3): ahí se sugiere `/compact`, no `/new` |
-| 2 | **Compactar temprano** (`reserveTokens` 172000 con `modelOverrides` → dispara a ≈100 k): **−30 %** en sesiones largas | alto | Franco (global o `.pi/settings.json`); kit (documentar; instalar opcional) | bajo si es documentación; medio si `instalar.sh` escribe JSON (hay que fundir con el existente) | medio: pérdida de detalle en el resumen; depende de la ventana real (P2) |
+| 1 | **Sesión nueva en cada puerta/tarea** (`/new`; el estado ya está en archivos). Partir 241 turnos en sesiones de ≈29 da ≈8 × 0,21 = 1,75 USD vs 4,15: **−55 %** | alto | Kit (README + coordinador sugiere) y la persona usuaria (hace `/new`) | bajo | bajo. Conflicto: en yolo la vigencia no sobrevive a una sesión nueva (`agentes/coordinador.md`, «Vigencia»; `WORKFLOW.md` §9.3): ahí se sugiere `/compact`, no `/new` |
+| 2 | **Compactar temprano** (`reserveTokens` 172000 con `modelOverrides` → dispara a ≈100 k): **−30 %** en sesiones largas | alto | la persona usuaria (global o `.pi/settings.json`); kit (documentar; instalar opcional) | bajo si es documentación; medio si `instalar.sh` escribe JSON (hay que fundir con el existente) | medio: pérdida de detalle en el resumen; depende de la ventana real (P2) |
 | 3 | **Lecturas acotadas en los prompts**: `read` con `offset/limit`, `grep` con patrón estrecho y `limit`, `edit` en vez de `write` de archivos enteros, no releer lo ya leído. Reduce los saltos de 8–12 k | medio–bajo | Kit (`agentes/constructor.md`, skill `ejecutar-tarea`) | bajo | bajo–medio: puede perder contexto; verificar con los comprobadores de contrato |
-| 4 | Medir antes de decidir: `showCacheMissNotices: true` unos días y mirar fallos tras las puertas; `/session` | informa | Franco | muy bajo | ninguno |
-| 5 | `PI_CACHE_RETENTION=long` (TTL 30 min) y/o `promptCache` en `models.json` para activar calentamiento | bajo hoy: no hay fallos medidos (conclusión 2) | Franco | bajo | bajo; efecto en precio NO VERIFICADO |
+| 4 | Medir antes de decidir: `showCacheMissNotices: true` unos días y mirar fallos tras las puertas; `/session` | informa | la persona usuaria | muy bajo | ninguno |
+| 5 | `PI_CACHE_RETENTION=long` (TTL 30 min) y/o `promptCache` en `models.json` para activar calentamiento | bajo hoy: no hay fallos medidos (conclusión 2) | la persona usuaria | bajo | bajo; efecto en precio NO VERIFICADO |
 | 6 | Reportes breves y `outputMode: file-only` de subagentes | bajo hoy: los subagentes no aparecen en los saltos grandes | Kit | medio | medio (choca con contratos `BLOQUEO:`, `REFINAR:`, `CONFIRMAR:`, `Registro:`) |
-| 7 | `codemode` | incierto | Franco | bajo | alto (cambia el comportamiento de todos los agentes) |
+| 7 | `codemode` | incierto | la persona usuaria | bajo | alto (cambia el comportamiento de todos los agentes) |
 | 8 | Recortar coordinador / skills / base | ≈1–2 % | Kit | medio | medio |
 
 No ayuda, según los datos: bajar el razonamiento (la salida no cambió: 200 a 270 tokens por turno; la salida vale ≈0,65 USD de 4,15, INFERIDO).
 
 Medición recomendada de la base: arrancar `pi` con y sin `--no-extensions` / `--no-skills` y comparar los tokens del turno 1 en `/session`. Así se sabe cuánto suma `pi-subagents` sin suponerlo.
 
-## 5. Qué solo puede hacer Franco
+## 5. Qué solo puede hacer la persona usuaria
 
 - Escribir `compaction` en `~/.pi/agent/settings.json` (global) o confiar (`/trust`) en un proyecto con `.pi/settings.json`.
 - `showCacheMissNotices`, `cacheWarming`, `PI_CACHE_RETENTION`, `promptCache` en `models.json`.
@@ -132,9 +134,9 @@ Entra:
 
 Queda fuera hasta medir: reportes breves de subagentes, instalación de `.pi/settings.json`, `PI_CACHE_RETENTION`, `codemode`, recorte del coordinador.
 
-Criterio de éxito sugerido: repetir una sesión comparable y comparar USD por turno y contexto medio con el script de resumen de Franco (línea base: 0,0172 USD/turno a ≈130 k; 0,0072 USD/turno a ≈25 k).
+Criterio de éxito sugerido: repetir una sesión comparable y comparar USD por turno y contexto medio con el script de resumen de la persona usuaria (línea base: 0,0172 USD/turno a ≈130 k; 0,0072 USD/turno a ≈25 k).
 
-## 7. Preguntas abiertas para Franco
+## 7. Preguntas abiertas para la persona usuaria
 
 1. ¿El proveedor de `openai/gpt-6.1-sol` es `openai` (272 k) y no `openai-codex` (500 k)? Se ve en el pie de Pi.
 2. ¿Quieres probar `showCacheMissNotices: true` una semana antes de decidir sobre caché larga?

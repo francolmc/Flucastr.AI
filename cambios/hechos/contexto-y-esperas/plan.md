@@ -8,28 +8,30 @@ tramo: 3
 ---
 # Menos contexto y menos esperas en Codex; planes grandes en archivos
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Una sesión de Codex del kit no relee 120k+ tokens en cada llamada de espera: el contexto se compacta, el principal espera con pocas llamadas largas, y un plan grande se reparte en archivos por tramo con compactación al cerrar cada uno.
 
 ## Supuestos
-- Evidencia (sesión de Memory-AI del 2026-11-08): 224 llamadas, 27,8M de tokens, 9 puntos de cuota; contexto mediana 123k, máximo 192k, 0 compactaciones; 81 `wait_agent` (45 s), 27 `send_message` y 10 esperas más, más de la mitad de las llamadas.
+- Evidencia (sesión de Proyecto.Memoria del 2026-11-08): 224 llamadas, 27,8M de tokens, 9 puntos de cuota; contexto mediana 123k, máximo 192k, 0 compactaciones; 81 `wait_agent` (45 s), 27 `send_message` y 10 esperas más, más de la mitad de las llamadas.
 - La docs de Codex (resumen, no literal) listan `model_auto_compact_token_limit` y `model_post_turn_compact_threshold_percent` en `config.toml`, no en el TOML de un agente; no dicen si valen en `.codex/config.toml` ni el timeout de `wait_agent`. Por eso el tramo 1 lo prueba antes de tocar el instalador.
-- Un agente no puede invocar `/compact` (la docs no lo dice). Si Franco quiere compactación 100 % automática, depende de lo que pruebe el tramo 1.
-- Planes grandes: umbral «más de 3 tramos o más de ≈8 KB». Si Franco prefiere otro, cambia una cifra.
+- Un agente no puede invocar `/compact` (la docs no lo dice). Si la persona usuaria quiere compactación 100 % automática, depende de lo que pruebe el tramo 1.
+- Planes grandes: umbral «más de 3 tramos o más de ≈8 KB». Si la persona usuaria prefiere otro, cambia una cifra.
 
 ## Alcance
 Puede cambiar: `scripts/uso.mjs`, `pruebas/uso/`, `instalar.sh` (solo `generar_lanzador_codex` y lo que escriba ajustes de Codex), `scripts/resolver.mjs` (solo para leer `compactar_en`), `agentes/principal.md`, `agentes/constructor.md`, `skills/planificar-cambio/SKILL.md`, `skills/ejecutar-plan/SKILL.md`, `verify` (pasos nuevos y `TEXTOS_TRAMOS`), `docs/investigaciones/codex-compactacion.md` (nuevo), `AGENTS.md`.
-Fuera de alcance: `modelos.json`, `~/.codex/config.toml` real de Franco (solo se prueba con `CODEX_HOME` temporal), `old/`.
+Fuera de alcance: `modelos.json`, `~/.codex/config.toml` real de la persona usuaria (solo se prueba con `CODEX_HOME` temporal), `old/`.
 Prohibido leer `auth.json`, `.env`.
 
 ## Decisiones ya tomadas
 - Ejecutor: constructor, porque cada paso trae comando y resultado esperado y no toca credenciales ni despliegue.
-- Los lanzadores `codex-<agente>` ya usan `-c clave=valor`; si la prueba confirma que `-c model_auto_compact_token_limit=<compactar_en>` funciona, se usa eso (no se edita el `config.toml` global de Franco).
+- Los lanzadores `codex-<agente>` ya usan `-c clave=valor`; si la prueba confirma que `-c model_auto_compact_token_limit=<compactar_en>` funciona, se usa eso (no se edita el `config.toml` global de la persona usuaria).
 - Resuelto: 2026-11-09 (tramo 1, `docs/investigaciones/codex-compactacion.md`) `-c model_auto_compact_token_limit=<compactar_en>` compacta; `.codex/config.toml` de proyecto no surte efecto; `model_post_turn_compact_threshold_percent` solo compacta si el contexto pasa ese % de la ventana (no se usa). El ajuste va solo en el lanzador `codex-<agente>`.
 - El valor sale de `compactar_en` de `modelos.json` (hoy 100000); no se duplica.
 - Esperas: el principal espera al constructor con una sola espera larga y no pregunta estado con `send_message`; si el plan es pesado ofrece `codex-constructor` (ventana propia).
 - Plan en archivos: `plan.md` queda como índice corto; cada tramo grande vive en `tramo-N.md` en la misma carpeta, con sus pasos, `Verificación del tramo:` y su evidencia. El constructor lee `plan.md` y solo `tramo-<n>.md`.
-- Al cerrar cada tramo el principal deja en *Notas* del `plan.md` un resumen de 5 líneas (qué quedó, qué sigue) y pide a Franco compactar (`/compact`) o abrir sesión nueva con `Plan: <ruta>`.
+- Al cerrar cada tramo el principal deja en *Notas* del `plan.md` un resumen de 5 líneas (qué quedó, qué sigue) y pide a la persona usuaria compactar (`/compact`) o abrir sesión nueva con `Plan: <ruta>`.
 
 ## Escenarios
 - CUANDO se prueba Codex con un umbral de compactación bajo ENTONCES queda registrada la compactación y se sabe en qué configuración funciona (A1)
@@ -60,7 +62,7 @@ Prohibido leer `auth.json`, `.env`.
 ### Tramo 1: probar la compactación de Codex (entorno)
 Resultado: informe con evidencia de qué ajuste compacta en Codex 0.167.0 y cómo aplicarlo. Sin cambiar código. Toca solo `docs/investigaciones/codex-compactacion.md`.
 - [x] Crear una carpeta temporal vacía y correr `codex exec -c model_auto_compact_token_limit=3000` con una tarea de 4 comandos de shell cortos (≈2 min, gasto mínimo) (A1)
-  - evidencia: `codex exec --skip-git-repo-check -c model_auto_compact_token_limit=3000` en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/codex-prueba-1`, exit 0; rollout `rollout-2026-11-09T07-25-50-01a1bfd7-c122-7753-8c22-294db1bf8442.jsonl`
+  - evidencia: `codex exec --skip-git-repo-check -c model_auto_compact_token_limit=3000` en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/codex-prueba-1`, exit 0; rollout `rollout-2026-11-09T07-25-50-01a1bfd7-c122-7753-8c22-294db1bf8442.jsonl`
 - [x] Buscar en el rollout nuevo (`~/.codex/sessions/AAAA/MM/DD/`, solo ese archivo) un evento de compactación o una caída del contexto en `token_count` (A1)
   - evidencia: `python3 -I` sobre `rollout-2026-11-09T07-25-50-01a1bfd7-c122-7753-8c22-294db1bf8442.jsonl`: 4 eventos `compacted` (ordinales 21, 35, 49, 63), `last_input 0` tras cada uno (25, 39, 53, 67), exit 0
 - [x] Repetir con `-c model_post_turn_compact_threshold_percent=10` y anotar si compacta tras la respuesta final (A1)
@@ -104,7 +106,7 @@ Resultado: los textos del kit mandan esperar una vez y repartir planes grandes. 
 - [x] Agregar a `AGENTS.md` una línea sobre planes en archivos y compactación (A5)
   - evidencia: `AGENTS.md` línea 11 (viñeta «Ejecución por tramos»). `grep -n -e "tramo-N.md" -e "compact"` antes sin coincidencias en la línea nueva (solo la línea 11 original con «tramos»); después la línea 11 trae `tramo-N.md`, `/compact` y `compactar_en` (exit 0)
 - [x] Correr `./verify` completo (≈ varios min) y anotarlo en *Evidencia* (A6)
-  - evidencia: `./verify`, exit 0 (salida completa en `/tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/verify-final-1.out`; cola en *Evidencia*, «VERIFY OK»)
+  - evidencia: `./verify`, exit 0 (salida completa en `/tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/130cd7b4-aa17-47e9-9b0f-adb9d37e7121/scratchpad/verify-final-1.out`; cola en *Evidencia*, «VERIFY OK»)
 
 Verificación del tramo: `./verify` (A4–A6, A8).
 
@@ -194,9 +196,9 @@ exit 0
 - Base comprobada al escribir: `main` local al día con `origin/main` (incluye el PR #59).
 - El tramo 1 gasta algo de cuota de Codex (una tarea corta); es medida, no ejecución de producción.
 - Este plan va en un solo archivo porque la convención de `tramo-N.md` es lo que el propio plan crea.
-- Revisión tramo 2 (principal, 2026-11-09): `probar.mjs` 12/12 y `./verify` VERIFY OK; `uso.mjs --sesiones` sobre los logs reales de Memory-AI del 8 nov da esperas de 125/240, 76/169, 52/208 y 53/69 llamadas (coincide con el diagnóstico); lanzador con el umbral por una sola vía (`instalar.sh` + `compactar-codex`). Pendiente de Franco: reinstalar con `bash instalar.sh` para que `~/.local/bin/codex-*` lleve el umbral.
+- Revisión tramo 2 (principal, 2026-11-09): `probar.mjs` 12/12 y `./verify` VERIFY OK; `uso.mjs --sesiones` sobre los logs reales de Proyecto.Memoria del 8 nov da esperas de 125/240, 76/169, 52/208 y 53/69 llamadas (coincide con el diagnóstico); lanzador con el umbral por una sola vía (`instalar.sh` + `compactar-codex`). Pendiente de la persona usuaria: reinstalar con `bash instalar.sh` para que `~/.local/bin/codex-*` lleve el umbral.
 - Tramo 3 (constructor, 2026-11-09): los ocho pasos son textos del kit (`principal.md`, `constructor.md`, las dos skills, `AGENTS.md` y `verify`); no hubo decisiones de diseño ni cambios fuera de *Alcance*.
 - Tramo 3: al leer la skill `planificar-cambio` intenté un `bash -c` de prueba por error; la regla deny lo bloqueó, no se repitió y no forma parte del cambio.
 - Tramo 3: el paso 6 añadió 9 textos a `TEXTOS_TRAMOS`; el bloque 11 aislado da 21 copias negativas `rechazada`, no solo las 9 nuevas.
 - Tramo 3: `./verify` completo pasó en la primera corrida final (`VERIFY OK`), sin correcciones.
-- Pendiente de Franco: revisar el `git diff` del tramo 3 y la evidencia de *Evidencia*; luego el commit.
+- Pendiente de la persona usuaria: revisar el `git diff` del tramo 3 y la evidencia de *Evidencia*; luego el commit.

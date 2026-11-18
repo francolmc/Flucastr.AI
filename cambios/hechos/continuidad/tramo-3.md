@@ -1,7 +1,7 @@
 ## Pasos
 
 ### Tramo 3 — Historia: comprobar continuidad y parada
-Como Franco quiero evidencia de dos tramos y de una falla provocada para confiar en el flujo sin intervención.
+Como persona usuaria quiero evidencia de dos tramos y de una falla provocada para confiar en el flujo sin intervención.
 Dependencias: Tramo 2 — procedimiento continuo operativo; Externa — lanzador local `codex-constructor` disponible y autorizado para dos sesiones reales independientes.
 Contratos a conservar: `kit run` antiguo y sus pruebas; ninguna prueba simulada sustituye ejecución real.
 Rutas susceptibles de cambio: `scripts/kit-run.mjs`, `pruebas/kit-run/probar.mjs`, `pruebas/continuidad/`; no mover ni archivar; actualizar las expectativas de `kit run` solo cuando corresponda al modo continuo.

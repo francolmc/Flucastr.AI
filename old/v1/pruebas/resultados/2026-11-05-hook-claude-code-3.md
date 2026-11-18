@@ -39,7 +39,7 @@ El hook PostToolUse (`validar-tarea.mjs --hook`) lo marcó con `bloque-abierto`.
 
 No corregí el archivo, porque pediste dejarlo tal cual. Termina en `## Notas` seguido de un salto de línea.
 
-Ruta: `/Users/franco/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/subagente/features/F99-demo/task-01-x.md`
+Ruta: `/Users/persona/Codes/flucastr/Flucastr.AI/pruebas/.temporales/hook-claude-code/subagente/features/F99-demo/task-01-x.md`
 ````
 
 ## sin-hook — OK

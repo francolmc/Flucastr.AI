@@ -4,8 +4,10 @@ rama: feature/kit-v2
 ---
 # deny-endurecido
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
-El kit instala 12 reglas `permissions.deny` (las 7 actuales + 5 nuevas) para cerrar `git -C . commit` y `bash -c '…'`, que con las 7 dejaban pasar. Probado por Franco con Claude Code real: las 5 cierran ambos huecos sin bloquear `git status` ni `git log`.
+El kit instala 12 reglas `permissions.deny` (las 7 actuales + 5 nuevas) para cerrar `git -C . commit` y `bash -c '…'`, que con las 7 dejaban pasar. Probado por la persona usuaria con Claude Code real: las 5 cierran ambos huecos sin bloquear `git status` ni `git log`.
 
 ## Alcance
 `scripts/resolver.mjs` (solo la lista `REGLAS_DENY_CLAUDE`), `verify` (escalón 6), `AGENTS.md`, este plan. Fuera: `instalar.sh` y `desinstalar.sh` (ya agregan solo lo que falta y quitan solo lo registrado; no deberían cambiar), Pi, `legacy/`. Nada se prueba en el home real.

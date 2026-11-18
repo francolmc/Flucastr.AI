@@ -1,6 +1,9 @@
 # task-08 — Corrección: fixture como proyecto real (aprobado, con plantilla) y formato ajeno a los topes aparte
 repo: Flucastr.AI   depende_de: task-07   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Las corridas `-2.md` de task-10 dieron `Veredicto: FALLA` por dos causas ajenas a los topes, halladas sin gastar créditos (informes `-2.md` y `pruebas/.temporales/planificador-claude-code-28296/fixture/features/F01-demo/`). (1) Pi: el planificador no descompuso porque el `BACKLOG.md` del fixture dice «Estado del documento: borrador»; en la puerta 3 de un proyecto real está aprobado. (2) Claude Code: escribió 2 tareas con topes en regla (3 pasos, 1 archivo a leer) pero con 9 secciones (sin «## Decisiones abiertas») y «Tocar»/«Leer» con texto extra: el fixture no trae `definitions/WORKFLOW.md` §6 (plantilla de 10 secciones) ni dice que existe `validar-tarea`, y la plantilla de la skill lista solo 9 secciones (*inferido*; la skill no se toca aquí). Esta tarea hace el fixture fiel a un proyecto real y hace que el informe separe el formato de los topes, que es lo que F42 mide.
 
@@ -14,7 +17,7 @@ Las corridas `-2.md` de task-10 dieron `Veredicto: FALLA` por dos causas ajenas 
 
 ## Decisiones ya tomadas
 - Fixture (`planificador.sh`): (a) la última línea de `BACKLOG.md` pasa a `Estado del documento: aprobado`; (b) `PROJECT.md` lleva bajo el título la línea `> Estado: **aprobado** (2026-11-05).`; (c) `AGENTS.md` del fixture pasa a: `Proyecto de prueba del planificador; no tiene código real. Estado: aprobado (2026-11-05).` y tres viñetas: definición y backlog en `definitions/PROJECT.md` y `definitions/BACKLOG.md`; plantilla y topes de tarea en `definitions/WORKFLOW.md` §6; «Antes de entregar cada tarea, corre `node scripts/validar-tarea.mjs <ruta>` y corrige lo que rechace.»; (d) se crea `definitions/WORKFLOW.md` con `# Flujo de trabajo (extracto)`, una línea en blanco y la sección de `$REPO/definitions/WORKFLOW.md` que va de `## 6. ` hasta antes de `## 7. ` (con `awk '/^## 6\. /{p=1} p&&/^## 7\. /{exit} p'`). El texto de la feature, el prompt y la rama no cambian. El commit del fixture sigue incluyendo todo.
-- Comprobador (`planificador-resultado.mjs`): las líneas del validador se reparten en dos grupos. *Topes* (cambian el veredicto, entran en «Motivos»): las que empiezan con `«Pasos» debe tener`, `«Criterios de aceptación» debe tener`, `«Tocar» debe tener entre`, `«Leer» tiene`, `El contexto a leer mide`, `El rango de «Leer»`, `El archivo de Leer`, `Hay más de una línea «- Leer:»` y `La línea «Leer» tiene formato inválido`. *Formato ajeno a los topes* (el resto): se escriben en una sección nueva `Formato ajeno a los topes (aparte; no cambia el veredicto):` después de «Motivos», con `- ninguno` si no hay. Motivo de la decisión (evidencia): en la corrida de Claude Code el único rechazo era de plantilla (secciones, comillas de «Tocar») con topes cumplidos; contarlo como FALLA haría medir la skill de formato y no los topes. La sección queda visible en el informe para que Franco la vea.
+- Comprobador (`planificador-resultado.mjs`): las líneas del validador se reparten en dos grupos. *Topes* (cambian el veredicto, entran en «Motivos»): las que empiezan con `«Pasos» debe tener`, `«Criterios de aceptación» debe tener`, `«Tocar» debe tener entre`, `«Leer» tiene`, `El contexto a leer mide`, `El rango de «Leer»`, `El archivo de Leer`, `Hay más de una línea «- Leer:»` y `La línea «Leer» tiene formato inválido`. *Formato ajeno a los topes* (el resto): se escriben en una sección nueva `Formato ajeno a los topes (aparte; no cambia el veredicto):` después de «Motivos», con `- ninguno` si no hay. Motivo de la decisión (evidencia): en la corrida de Claude Code el único rechazo era de plantilla (secciones, comillas de «Tocar») con topes cumplidos; contarlo como FALLA haría medir la skill de formato y no los topes. La sección queda visible en el informe para que la persona usuaria la vea.
 - Comprobador, medición propia de «Tocar»: si la línea `- Tocar:` tiene más de 3 rutas entre comillas invertidas, motivo `«Tocar» lista N archivos; el tope es 3.`; la cifra `archivos a tocar N` se añade al final de cada línea de «Por tarea» (`; archivos a tocar N`). Esto cubre el caso en que el validador no llega a medir «Tocar» por su formato. Sin línea `- Tocar:`, N es 0 y no hay motivo.
 - Se mantiene todo lo demás: estado `borrador`, `Leer` obligatorio, avisos `AVISO:` como motivo y cambios fuera de `features/`.
 - No se tocan agentes, skills, topes, `correr-planificador.sh`, el lanzador ni `validar-tarea.mjs`.
@@ -24,7 +27,7 @@ Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: los cambios de fixture y comprobador de arriba y estas pruebas en `planificador-resultado.test.mjs` (el helper `tarea` gana los parámetros `tocar` y `sinAbiertas`; cada prueba usa el fixture real): (g) el fixture trae BACKLOG y PROJECT.md aprobados, sin «borrador» en ninguno de los dos, `definitions/WORKFLOW.md` con `## Decisiones abiertas`, y `AGENTS.md` con `validar-tarea.mjs`; (h) tarea con topes en regla pero sin «## Decisiones abiertas» y con «Tocar» sin comillas da `Veredicto: OK` y su informe contiene `Formato ajeno a los topes` y `Falta la sección`; (i) control negativo: «Tocar» con 4 rutas, una vez entre comillas y otra sin ellas, da FALLA las dos veces; (j) control negativo: 7 pasos y sin «Decisiones abiertas» da FALLA con el motivo de pasos en «Motivos» y la falta de la sección solo bajo `Formato ajeno a los topes`. Las pruebas existentes (a)–(f) siguen en verde; (a) comprueba además `- ninguno` bajo la sección nueva.
-Fuera de alcance: corridas reales (task-10), cambiar la skill para que liste «Decisiones abiertas» (queda como hallazgo para Franco), editar el lanzador, `correr-planificador.sh`, el commit.
+Fuera de alcance: corridas reales (task-10), cambiar la skill para que liste «Decisiones abiertas» (queda como hallazgo para la persona usuaria), editar el lanzador, `correr-planificador.sh`, el commit.
 
 ## Pasos
 1. Corre `git branch --show-current`.
@@ -70,7 +73,7 @@ exit 0
   1. «Tocar»: el criterio 3 y la prueba (i) exigen FALLA también sin comillas, así que se cuentan las rutas separadas por «, » con o sin comillas (desvío leve de *Decisiones ya tomadas*).
   2. Con comillas el validador ya marca el tope; la medición propia no lo repite.
   3. Los motivos de tope llevan delante el nombre de la tarea.
-- `planificador.sh` revisado antes de editar: 52 líneas, `bash -n` sin salida, corrida de prueba correcta. Permisos `-rw-r--r--` (los demás fixtures son ejecutables); se invoca con `bash`, no se cambió. Dato para Franco.
+- `planificador.sh` revisado antes de editar: 52 líneas, `bash -n` sin salida, corrida de prueba correcta. Permisos `-rw-r--r--` (los demás fixtures son ejecutables); se invoca con `bash`, no se cambió. Dato para la persona usuaria.
 - Primera pasada de la verificación: falló en dos aserciones mías, corregidas; la segunda pasa.
 - Sin tocar: `validar-tarea.mjs`, lanzador, skills, topes, `STATUS.md`. Sin corridas con modelo real. Sin commit.
 Registro: n=1; herramienta=claude-code; modo=yolo; intentos=2; verificacion=pasa; huecos=3; resultado=lista; causa=ninguna

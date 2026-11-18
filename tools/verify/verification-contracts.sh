@@ -1,9 +1,9 @@
-# 8m. niveles de verificación: planificar-cambio (reglas 11 y 13), preparar-proyecto y ejecutar-plan; una copia de planificar-cambio sin «Niveles de verificación» debe fallar
+# 8m. niveles de verificación: planificar-cambio (reglas 11 y 13), preparar-proyecto y ejecutar-plan; una copia de planificar-cambio sin «Verification levels» debe fallar
 textos_niveles() { # $1: raíz del kit
   local r=$1
-  grep -qF 'Niveles de verificación' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'Verification levels' "$r/skills/planificar-cambio/SKILL.md" || return 1
   grep -qF 'Comprobación rápida' "$r/skills/planificar-cambio/SKILL.md" || return 1
-  grep -qF 'Nivel 2' "$r/skills/planificar-cambio/SKILL.md" || return 1
+  grep -qF 'Level 2' "$r/skills/planificar-cambio/SKILL.md" || return 1
   grep -qF 'Sin esa línea' "$r/skills/preparar-proyecto/SKILL.md" || return 1
   grep -qF 'Comprobación rápida' "$r/skills/ejecutar-plan/SKILL.md" || return 1
 }
@@ -14,26 +14,26 @@ cp skills/planificar-cambio/SKILL.md "$niveles_neg/skills/planificar-cambio/SKIL
 cp skills/preparar-proyecto/SKILL.md "$niveles_neg/skills/preparar-proyecto/SKILL.md"
 cp skills/ejecutar-plan/SKILL.md "$niveles_neg/skills/ejecutar-plan/SKILL.md"
 textos_niveles "$niveles_neg" || fallo "8m: baseline positivo de la copia temporal falló"
-sed '/Niveles de verificación/d' skills/planificar-cambio/SKILL.md > "$niveles_neg/skills/planificar-cambio/SKILL.md"
-if textos_niveles "$niveles_neg"; then fallo "8m: una copia de planificar-cambio sin «Niveles de verificación» pasó la comprobación"; fi
-echo "ok 8m: niveles de verificación en planificar-cambio, «Sin esa línea» en preparar-proyecto y Comprobación rápida en ejecutar-plan; copia sin «Niveles de verificación» falla"
+sed '/Verification levels/d' skills/planificar-cambio/SKILL.md > "$niveles_neg/skills/planificar-cambio/SKILL.md"
+if textos_niveles "$niveles_neg"; then fallo "8m: una copia de planificar-cambio sin «Verification levels» pasó la comprobación"; fi
+echo "ok 8m: niveles de verificación en planificar-cambio, «Sin esa línea» en preparar-proyecto y Comprobación rápida en ejecutar-plan; copia sin «Verification levels» falla"
 
-# 8n. principal reanuda la espera: agentes/principal.md trae «vuelve a esperar en el mismo turno» en el paso 4; una copia sin esa frase debe fallar
+# 8n. principal reanuda la espera: agentes/principal.md trae «resume waiting in the same turn» en el paso 4; una copia sin esa frase debe fallar
 textos_reanuda() { # $1: raíz del kit
   local r=$1
-  grep -qF 'vuelve a esperar en el mismo turno' "$r/agentes/principal.md" || return 1
+  grep -qF 'resume waiting in the same turn' "$r/agentes/principal.md" || return 1
 }
-textos_reanuda . || fallo "8n: falta «vuelve a esperar en el mismo turno» en principal.md"
+textos_reanuda . || fallo "8n: falta «resume waiting in the same turn» en principal.md"
 reanuda_neg="$T8/reanuda_neg"
 mkdir -p "$reanuda_neg/agentes"
-sed 's/vuelve a esperar en el mismo turno/termina el turno/' agentes/principal.md > "$reanuda_neg/agentes/principal.md"
-if textos_reanuda "$reanuda_neg"; then fallo "8n: un principal sin «vuelve a esperar en el mismo turno» pasó la comprobación"; fi
-echo "ok 8n: principal con «vuelve a esperar en el mismo turno» en el paso 4; copia sin la frase falla"
+sed 's/resume waiting in the same turn/termina el turno/' agentes/principal.md > "$reanuda_neg/agentes/principal.md"
+if textos_reanuda "$reanuda_neg"; then fallo "8n: un principal sin «resume waiting in the same turn» pasó la comprobación"; fi
+echo "ok 8n: principal con «resume waiting in the same turn» en el paso 4; copia sin la frase falla"
 
-# 8o. experiencia antes del plan: disenar-experiencia trae sus cadenas (A1); planificar-cambio enlaza pantallas.md (A2); definir-proyecto y principal la nombran (A3); una copia sin «40 columnas» debe fallar (A4)
+# 8o. experiencia antes del plan: disenar-experiencia trae sus cadenas (A1); planificar-cambio enlaza pantallas.md (A2); definir-proyecto y principal la nombran (A3); una copia sin «40 columns» debe fallar (A4)
 textos_experiencia() { # $1: raíz del kit
   local r=$1 t
-  for t in 'docs/experiencia.md' 'pantallas.md' 'ASCII' '40 columnas' 'vacío' 'error'; do
+  for t in 'docs/experiencia.md' 'pantallas.md' 'ASCII' '40 columns' 'empty' 'error'; do
     grep -qF -- "$t" "$r/skills/disenar-experiencia/SKILL.md" || return 1
   done
   grep -qF 'disenar-experiencia' "$r/skills/planificar-cambio/SKILL.md" || return 1
@@ -49,7 +49,7 @@ cp skills/planificar-cambio/SKILL.md "$exp_neg/skills/planificar-cambio/"
 cp skills/definir-proyecto/SKILL.md "$exp_neg/skills/definir-proyecto/"
 cp agentes/principal.md "$exp_neg/agentes/"
 textos_experiencia "$exp_neg" || fallo "8o: baseline positivo de la copia temporal falló"
-sed '/40 columnas/d' skills/disenar-experiencia/SKILL.md > "$exp_neg/skills/disenar-experiencia/SKILL.md"
-if textos_experiencia "$exp_neg"; then fallo "8o: una copia de disenar-experiencia sin «40 columnas» pasó la comprobación"; fi
-echo "ok 8o: disenar-experiencia con sus cadenas, enlazada en planificar-cambio, definir-proyecto y principal; copia sin «40 columnas» falla"
+sed '/40 columns/d' skills/disenar-experiencia/SKILL.md > "$exp_neg/skills/disenar-experiencia/SKILL.md"
+if textos_experiencia "$exp_neg"; then fallo "8o: una copia de disenar-experiencia sin «40 columns» pasó la comprobación"; fi
+echo "ok 8o: disenar-experiencia con sus cadenas, enlazada en planificar-cambio, definir-proyecto y principal; copia sin «40 columns» falla"
 

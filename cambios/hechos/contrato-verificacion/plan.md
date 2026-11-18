@@ -8,6 +8,8 @@ tipo: docs
 ---
 # Contrato de verificación por capacidades
 
+> Los nombres personales y de proyectos se anonimizaron; se conservan fechas y cifras.
+
 ## Objetivo
 Que el kit pida la verificación por **capacidades** y no por herramientas: cada proyecto declara en su `AGENTS.md` el comando de cada una y el kit no nombra pnpm, jest ni playwright. Lo específico de Node/pnpm queda en una receta aparte. Evidencia del estado actual: `cambios/contrato-verificacion/hallazgo.md`.
 
@@ -21,7 +23,7 @@ Que el kit pida la verificación por **capacidades** y no por herramientas: cada
 
 ## Alcance
 Puede cambiar: `nucleo/contrato/verificacion.md` (nuevo), `nucleo/recetas/node-pnpm.md` (nuevo), `skills/preparar-proyecto/SKILL.md`, `agentes/principal.md` (solo la línea «Mejora sugerida» del paso 5), `README.md` (una viñeta, solo si ya describe la verificación).
-Fuera: `instalar.sh`, los proyectos de Franco, `planificar-cambio`, `ejecutar-plan`, `modelos.json`, `verify` del kit, `skills/preparar-proyecto/referencia.md`, recetas de otros stacks.
+Fuera: `instalar.sh`, los proyectos de la persona usuaria, `planificar-cambio`, `ejecutar-plan`, `modelos.json`, `verify` del kit, `skills/preparar-proyecto/referencia.md`, recetas de otros stacks.
 
 ## Aceptación
 | # | Criterio | Cómo se comprueba | Esperado |
@@ -96,7 +98,7 @@ ok 8t: principal con la definición de cambio pequeño, riesgo alto y Mejora sug
 VERIFY OK
 exit 0
 
-(La salida completa de `./verify` quedó en /tmp/claude-1000/-home-franco-Codes-flucastr-Flucastr-AI/a842dec1-7b9d-422e-bc07-f171156179c8/scratchpad/verify-1.log.)
+(La salida completa de `./verify` quedó en /tmp/claude-1000/-home-persona-Codes-flucastr-Flucastr-AI/a842dec1-7b9d-422e-bc07-f171156179c8/scratchpad/verify-1.log.)
 
 ## Notas
 - Riesgo de conflicto con `cambios/verificacion-general` y `cambios/proceso-rapido` (ambos borrador, tocan `preparar-proyecto`): aprobar este primero o rebasar el otro después.

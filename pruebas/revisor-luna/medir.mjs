@@ -58,10 +58,10 @@ const ESQUEMA_VEREDICTO = {
 
 function promptRevisor(planRel, diff) {
   return [
-    `Revisa el plan ${planRel} contra el diff que sigue. Solo lees; no escribes nada.`,
-    "Devuelve SOLO un JSON que cumpla este esquema, sin texto alrededor:",
+    `Review plan ${planRel} against the diff below. Read only; do not write anything.`,
+    "Return ONLY JSON that conforms to this schema, with no surrounding text:",
     JSON.stringify(ESQUEMA_VEREDICTO),
-    "veredicto APROBADO si lo pedido en Aceptación está hecho; DEVUELTO con defectos (archivo, línea, criterio) si no; PAUSA si falta algo que no se puede decidir.",
+    "Use veredicto APROBADO if the Aceptación requirements are met; DEVUELTO with defects (archivo, linea, criterio) otherwise; PAUSA if something missing cannot be decided.",
     "",
     "--- diff ---",
     diff,

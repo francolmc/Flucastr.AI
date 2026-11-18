@@ -45,7 +45,7 @@ Fuera de alcance: `desinstalar.sh` (task-02), reinstalar proyectos registrados (
 ## Verificación
 Todo con `HOME` falso y un proyecto temporal; no se usa el HOME real.
 ```
-cd /Users/franco/Codes/flucastr/Flucastr.AI
+cd /Users/persona/Codes/flucastr/Flucastr.AI
 T=$(mktemp -d); mkdir -p $T/home/.claude $T/p; git -C $T/p init -q
 HOME=$T/home PI_CODING_AGENT_DIR=$T/home/pi bash instalar.sh --simular --proyecto $T/p --skills-proyecto; ls -A $T/p
 HOME=$T/home PI_CODING_AGENT_DIR=$T/home/pi bash instalar.sh --proyecto $T/p --skills-proyecto

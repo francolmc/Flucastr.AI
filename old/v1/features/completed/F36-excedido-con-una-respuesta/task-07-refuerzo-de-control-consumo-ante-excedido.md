@@ -1,6 +1,9 @@
 # task-07 — Refuerzo de control-consumo ante excedido
 repo: Flucastr.AI   depende_de: task-06   estado: hecha
 
+> Los nombres personales y de proyectos de este documento histórico fueron anonimizados.
+
+
 ## Descripción
 Reduce en `skills/control-consumo/SKILL.md` las tres fallas observadas en Claude Code (claude-sonnet-5-5) sin que ninguna llegara a la regla de la letra: (1) no escribió la Escalación («me falta información para decidir el paso siguiente»); (2) dijo que Bash estaba negado, probablemente por usar otra forma del comando de chequeo; (3) escribió un ítem de 183 caracteres (tope 150) y su validador rechazó `STATUS.md`. El texto debe servir igual a Pi y a Claude Code.
 
@@ -27,7 +30,7 @@ Ninguna.
 
 ## Alcance / Fuera de alcance
 Alcance: los tres archivos de *Contexto*.
-Fuera de alcance: `agentes/`, `definitions/`, `scripts/`, los lanzadores, otras skills, y lanzar modelos. Si las pruebas de task-06 muestran que Bash fue denegado incluso con la forma exacta, eso es un hallazgo de permisos del lanzador para Franco: se anota en *Notas*, no se corrige aquí.
+Fuera de alcance: `agentes/`, `definitions/`, `scripts/`, los lanzadores, otras skills, y lanzar modelos. Si las pruebas de task-06 muestran que Bash fue denegado incluso con la forma exacta, eso es un hallazgo de permisos del lanzador para la persona usuaria: se anota en *Notas*, no se corrige aquí.
 
 ## Pasos
 1. Edita los pasos 3 y 5 de la skill según *Decisiones*; mide `wc -c`.
