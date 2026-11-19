@@ -46,27 +46,30 @@ const quick = { tool_name: "Bash", tool_input: { command: "node verificacion/rap
 test("Claude autoriza solo el comando declarado cuando los scripts siguen limpios en HEAD", t => {
   const raiz = proyecto(t);
   assert.equal(decision(raiz, quick), "allow");
-  assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command: "node verificacion/rapida.mjs --extra" } }), "ask");
-  assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command: "node -e 'process.exit(0)'" } }), "ask");
-  assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command: "npm run test" } }), "ask");
+  assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command: "node verificacion/rapida.mjs --extra" } }), "normal");
+  assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command: "node -e 'process.exit(0)'" } }), "normal");
+  assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command: "npm run test" } }), "normal");
+  for (const command of ["grep -n x AGENTS.md | head -5", "git branch", "wc -l AGENTS.md"]) {
+    assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command } }), "normal", command);
+  }
 });
 
-test("Claude pide aprobación si verify o el script rápido está modificado, preparado o ausente", t => {
+test("Claude no autoriza el comando declarado si verify o el script rápido está modificado, preparado o ausente", t => {
   const raiz = proyecto(t);
   writeFileSync(join(raiz, "verificacion/rapida.mjs"), "console.log('cambio');\n");
-  assert.equal(decision(raiz, quick), "ask");
+  assert.equal(decision(raiz, quick), "normal");
   git(raiz, "add", "verificacion/rapida.mjs");
-  assert.equal(decision(raiz, quick), "ask");
+  assert.equal(decision(raiz, quick), "normal");
   // El árbol vuelve al contenido de HEAD, pero el índice conserva otro contenido.
   writeFileSync(join(raiz, "verificacion/rapida.mjs"), "console.log('ok');\n");
-  assert.equal(decision(raiz, quick), "ask");
+  assert.equal(decision(raiz, quick), "normal");
   git(raiz, "reset", "-q", "HEAD", "--", "verificacion/rapida.mjs");
   git(raiz, "checkout", "--", "verificacion/rapida.mjs");
   writeFileSync(join(raiz, "verify"), "#!/bin/sh\necho changed\n");
-  assert.equal(decision(raiz, quick), "ask");
+  assert.equal(decision(raiz, quick), "normal");
   git(raiz, "checkout", "--", "verify");
   rmSync(join(raiz, "verificacion/rapida.mjs"));
-  assert.equal(decision(raiz, quick), "ask");
+  assert.equal(decision(raiz, quick), "normal");
 });
 
 test("un ejecutable local sin extensión queda protegido frente a cambios", t => {
@@ -80,13 +83,13 @@ test("un ejecutable local sin extensión queda protegido frente a cambios", t =>
   const comando = { tool_name: "Bash", tool_input: { command: "./scripts/check" } };
   assert.equal(decision(raiz, comando), "allow");
   writeFileSync(join(raiz, "scripts/check"), "#!/bin/sh\necho editado\n");
-  assert.equal(decision(raiz, comando), "ask");
+  assert.equal(decision(raiz, comando), "normal");
 });
 
-test("acciones directas protegidas de Bash siguen pidiendo aprobación; Read, Grep y Glob no pasan por el hook", t => {
+test("acciones protegidas de Bash se deniegan; Read, Grep y Glob no pasan por el hook", t => {
   const raiz = proyecto(t);
-  for (const command of ["git commit -m test", "git push", "git merge main", "gh pr create", "vercel deploy", "cat .env"]) {
-    assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command } }), "ask", command);
+  for (const command of ["git commit -m test", "git push", "git merge main", "gh pr create", "vercel deploy", "cat .env", "git status && git commit -m x"]) {
+    assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command } }), "deny", command);
   }
   // `.env` lo protegen las reglas deny y el sandbox, no este hook.
   assert.equal(decision(raiz, { tool_name: "Read", tool_input: { file_path: ".env" } }), "normal");
@@ -152,8 +155,8 @@ test("instala hooks sin pisar entradas ajenas, es idempotente y kit run exige es
   const revisor = join(raiz, "revisor.sh");
   const log = join(tmpdir(), `permisos-roles-${Date.now()}.log`);
   t.after(() => rmSync(log, { force: true }));
-  writeFileSync(builder, "#!/bin/sh\nprintf 'builder:%s\\n' \"$PWD\" >> \"$POLITICA_LOG\"\nprintf 'DONE: plan=plan.md; segment=1; verify=pasa\\n'\n");
-  writeFileSync(revisor, "#!/bin/sh\nprintf 'revisor:%s\\n' \"$PWD\" >> \"$POLITICA_LOG\"\nprintf '{\"veredicto\":\"APPROVED\",\"defectos\":[]}\\n'\n");
+  writeFileSync(builder, "#!/bin/sh\ncat >/dev/null\nprintf 'builder:%s\\n' \"$PWD\" >> \"$POLITICA_LOG\"\nprintf 'DONE: plan=plan.md; segment=1; verify=pasa\\n'\n");
+  writeFileSync(revisor, "#!/bin/sh\ncat >/dev/null\nprintf 'revisor:%s\\n' \"$PWD\" >> \"$POLITICA_LOG\"\nprintf '{\"veredicto\":\"APPROVED\",\"defectos\":[]}\\n'\n");
   chmodSync(builder, 0o755);
   chmodSync(revisor, 0o755);
   const ejecucion = spawnSync(process.execPath, [KIT_RUN, "plan.md", "--tool", "claude", "--root", raiz], {

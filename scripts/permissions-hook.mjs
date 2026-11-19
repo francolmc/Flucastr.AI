@@ -248,7 +248,9 @@ function decidir(raiz, entrada) {
     const cmd = input.command;
     if (typeof cmd !== "string") return respuesta("ask", "comando no identificable");
     if (comandoSeguro(raiz, cmd)) return respuesta("allow", "comando declarado y scripts verificados contra HEAD");
-    return respuesta("ask", "comando no autorizado de forma segura; requiere aprobación");
+    if (accionProtegida(cmd)) return respuesta("deny", "acción protegida: la hace la persona usuaria");
+    // Sin decisión: los demás comandos siguen el permiso normal de Claude Code.
+    return;
   }
   // Read, Grep y Glob no pasan por este hook: `.env` lo protegen las reglas deny y el sandbox.
   // Sin decisión, Claude Code aplica su permiso normal.
