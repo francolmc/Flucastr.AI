@@ -10,12 +10,12 @@ Input: the plan path.
 ## Before starting
 
 1. Read the complete plan one segment at a time. If `status` is not `approved`, stop without changing anything.
-2. If the task includes `Branch:`, for each folder in the frontmatter's `repos:` and only those folders:
+2. If the task includes `Branch:`, for each folder in the frontmatter's `repos:` and only those folders. Run every `git` command with `<folder>` as the command's working directory (for `.`, the root); never use `git -C` or `git -c`, which are blocked:
    - If it has no `.git`, note that in *Notes* and continue.
-   - If `git -C <folder> branch --show-current` already returns the requested branch, continue.
-   - If the branch exists (`git -C <folder> rev-parse --verify --quiet refs/heads/<branch>`), return `PAUSED` with `motivo=access`.
+   - If `git branch --show-current` in `<folder>` already returns the requested branch, continue.
+   - If the branch exists (`git rev-parse --verify --quiet refs/heads/<branch>` in `<folder>`), return `PAUSED` with `motivo=access`.
    - Check the base branch (`base:`; if absent, use `git symbolic-ref --short refs/remotes/origin/HEAD`; without a remote, use `main` or `master`) and confirm `git status`/`git diff` show no changes outside `changes/<name>/`. Otherwise return `PAUSED` with `motivo=access`.
-   - If checks pass, create only the authorized branch: `git -C <folder> switch -c <branch>` (for `.`, use `git switch -c <branch>`).
+   - If checks pass, create only the authorized branch: `git switch -c <branch>` in `<folder>`.
    - If `repos:` is missing, return `PAUSED` with `motivo=ambiguous`.
 3. Set `status: in progress`.
 

@@ -59,3 +59,25 @@ test("install.sh entrega AGENTS.md al generador y reinstala sin duplicar ni ensa
   assert.equal(segundo, primero);
   assert.deepEqual(patronesAllow(segundo), [["ls"]]);
 });
+
+test("Codex explica en la justificación cómo ejecutar Git sin -C/-c, y git commit sigue prohibido", async (t) => {
+  const dir = await directorioTemporal(t);
+  const agents = path.join(dir, "AGENTS.md");
+  const reglas = path.join(dir, "flucastr.rules");
+  await writeFile(agents, "Comprobación rápida: `npm test`\n");
+  execFileSync(process.execPath, [resolver, "fijar-deny", "codex", reglas, agents], { encoding: "utf8" });
+  const contenido = await readFile(reglas, "utf8");
+  const bloque = (patron) => contenido
+    .split(/\n(?=prefix_rule\()/)
+    .find((b) => b.includes(`pattern = ${JSON.stringify(patron)},`));
+  const bloqueGitC = bloque(["git", "-C"]);
+  const bloqueGitc = bloque(["git", "-c"]);
+  const bloqueCommit = bloque(["git", "commit"]);
+  assert.ok(bloqueGitC && bloqueGitc && bloqueCommit);
+  assert.match(bloqueGitC, /decision = "forbidden"/);
+  assert.match(bloqueGitC, /justification = "Git con -C\/-c está bloqueado: ejecuta git con el repo como directorio de trabajo del comando \(workdir\) y sin -C\/-c\./);
+  assert.match(bloqueGitc, /decision = "forbidden"/);
+  assert.match(bloqueGitc, /justification = "Git con -C\/-c está bloqueado: ejecuta git con el repo como directorio de trabajo del comando \(workdir\) y sin -C\/-c\./);
+  assert.match(bloqueCommit, /decision = "forbidden"/);
+  assert.match(bloqueCommit, /justification = "Lo hace el mantenedor: flucastr-ai no hace commit, push, merge ni PR\."/);
+});
