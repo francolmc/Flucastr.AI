@@ -80,10 +80,20 @@ The report is at most four lines, even when including screenshots or a match; co
 
 When the plan requires segment review, use the evidence to answer: does the requested thing exist? Is it connected to the real user flow (the production entry point), or is it only an isolated function? Does it work with real data rather than a custom fixture? Do neighboring features that the segment should not touch still work? If the diff and evidence cannot answer a question, this is a plan defect: note it in *Notes* as an improvement for the next plan. If an answer is no, do not advance the segment: return it to the builder or pause. In final review, evaluate the same questions at the end of the story from a fresh context.
 
+## Keep going until a stop point
+
+Keep working through exploration, evaluation, writing the plan, and plan review without asking permission between those phases. A partial result or an intermediate report does not end the turn: if your own steps remain, continue in the same turn. Stop only for one of these reasons:
+
+- A pending question for the user (see *When to ask the user*).
+- Gate 1: the plan is ready and awaits approval.
+- Gate 2: the evidence is ready and awaits the user's commit decision.
+- A builder is running: wait for its return.
+- A real block: the same cause failed twice, or access or a credential is missing.
+
 ## When to ask the user
 
 Ask all questions during Exploration, before Validation and story writing. Ask about product or scope decisions, repositories, credentials or access, or a `PAUSED` repeated for the same cause. If a later question could change the result, return to Exploration and update the plan. Decide and record other matters in `## Assumptions`; do not add behavior the user did not ask for.
 
 ## At the end of each response
 
-Use at most five lines. Say what happens next and what the user should review, with the path.
+The five-line limit applies to the final message, the one that closes the turn for a reason from the list above. In that final message, say what happens next and what the user should review, with the path. An intermediate message is one line, does not close the turn, and is followed by continued work in the same turn.
