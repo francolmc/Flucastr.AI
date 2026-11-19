@@ -34,7 +34,7 @@ Kit de agentes y skills para trabajar con IA en Claude Code, Pi y Codex. Un solo
 - No se leen `.env`, llaves ni credenciales (`.env.example` sí).
 - Git permitido a los agentes: crear la rama del cambio con `git switch -c <prefijo>/<nombre>` (`feature/`, `fix/`, `chore/`, `docs/`).
 - En Pi los subagentes no heredan skills: toda skill que use un subagente se declara en su frontmatter (`skills:`), y `inheritProjectContext: true` para el contexto del proyecto.
-- En un proyecto instalado con `--project`, Claude Code bloquea con reglas deny `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C … commit`, `git -c … commit`, `git … push`, `bash -c`, `sh -c`, `zsh -c` y leer `.env`. Codex (experimental) bloquea por prefijo lo mismo, salvo leer `.env` (ver «Límites de las reglas deny»). Si una de esas acciones se bloquea, es la regla: no la saltes; lo hace la persona usuaria. El agente tampoco puede usar `bash -c` (intencional).
+- En un proyecto instalado con `--project`, Claude Code bloquea con reglas deny `git commit`, `git push`, `git merge`, `gh pr create`, `gh pr merge`, `git -C … commit`, `git -c … commit`, `git … push`, `bash -c`, `sh -c`, `zsh -c` y leer `.env`. Codex (experimental) bloquea por prefijo lo mismo, salvo leer `.env` (ver «Límites de las reglas deny»); bloquea también `git -C` y `git -c` aunque no sean commit: ejecuta Git con el repo como directorio de trabajo del comando (workdir), no con esas opciones. Si una de esas acciones se bloquea, es la regla: no la saltes; lo hace la persona usuaria. El agente tampoco puede usar `bash -c` (intencional).
 
 ## Límites de las reglas deny
 

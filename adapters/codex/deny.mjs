@@ -18,7 +18,17 @@ const PREFIJOS_DENY_CODEX = [
   ["sh", "-c"],
   ["zsh", "-c"],
 ];
+const JUSTIFICACION_CODEX = "Lo hace el mantenedor: flucastr-ai no hace commit, push, merge ni PR.";
+// Git con -C/-c queda bloqueado aunque no sea commit: el mensaje dice cómo seguir sin usarlo.
+const JUSTIFICACION_GIT_OPCIONES_CODEX =
+  "Git con -C/-c está bloqueado: ejecuta git con el repo como directorio de trabajo del comando (workdir) y sin -C/-c. Commit, push, merge y PR los hace el mantenedor.";
 const MARCA_CODEX = "# flucastr-ai:generado - no editar; se regenera con install.sh";
+
+function justificacionCodex(prefijo) {
+  return prefijo[0] === "git" && (prefijo[1] === "-C" || prefijo[1] === "-c")
+    ? JUSTIFICACION_GIT_OPCIONES_CODEX
+    : JUSTIFICACION_CODEX;
+}
 
 function comandosCapacidad(agentsPath) {
   if (!agentsPath || !existsSync(agentsPath)) return [];
@@ -50,7 +60,7 @@ function reglasCodex(agentsPath) {
       `prefix_rule(\n` +
       `    pattern = ${JSON.stringify(p)},\n` +
       `    decision = "forbidden",\n` +
-      `    justification = "Lo hace el mantenedor: flucastr-ai no hace commit, push, merge ni PR.",\n` +
+      `    justification = ${JSON.stringify(justificacionCodex(p))},\n` +
       `    match = [${JSON.stringify([...p, "x"])}],\n` +
       `)\n`
   );

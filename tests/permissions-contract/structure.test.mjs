@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -42,4 +42,25 @@ test("las reglas allow no contienen intérpretes ni comodines ajenos a lo genera
   }
   assert.ok(todas.some(r => r.decision === "forbidden" && JSON.stringify(r.pattern) === JSON.stringify(["bash", "-c"])));
   assert.ok(todas.some(r => r.decision === "forbidden" && JSON.stringify(r.pattern) === JSON.stringify(["git", "commit"])));
+});
+
+// Una instrucción que use git -C o git -c (con espacio o ruta después) está prohibida en core/;
+// solo la advertencia del skill puede nombrarlos, porque ahí no van seguidos de espacio ni de ruta.
+const INSTRUCCION_GIT_OPCION = /git -[Cc](\s|<)/;
+const instruccionesGitOpcion = (texto) => texto.split("\n").filter(linea => INSTRUCCION_GIT_OPCION.test(linea));
+function markdownBajo(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap(entrada => {
+    const ruta = join(dir, entrada.name);
+    if (entrada.isDirectory()) return markdownBajo(ruta);
+    return entrada.name.endsWith(".md") ? [ruta] : [];
+  });
+}
+
+test("ningún Markdown de core/ instruye git -C ni git -c; solo la advertencia del skill los nombra", () => {
+  assert.deepEqual(instruccionesGitOpcion("Ejecuta `git -C <folder> status`\nnada\n"), ["Ejecuta `git -C <folder> status`"]);
+  assert.deepEqual(instruccionesGitOpcion("never use `git -C` or `git -c`, which are blocked:"), []);
+  const infractores = markdownBajo(join(KIT, "core")).flatMap(archivo =>
+    instruccionesGitOpcion(readFileSync(archivo, "utf8")).map(linea => `${archivo}: ${linea}`));
+  assert.deepEqual(infractores, []);
+  assert.match(readFileSync(join(KIT, "core/skills/execute-plan/SKILL.md"), "utf8"), /never use `git -C` or `git -c`, which are blocked/);
 });
