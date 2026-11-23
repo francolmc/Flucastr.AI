@@ -1,6 +1,6 @@
 # Flucastr.AI
 
-Kit de agentes y skills para trabajar con IA en Claude Code, Pi y Codex. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en `main`** (candidata: falta probarla en proyectos reales, ver `TODO.md`). La v1 está en `old/v1/` (movida, no borrada) y en el tag `kit-v1`; no se ejecuta (README, «La v1»).
+Kit de agentes y skills para trabajar con IA en Claude Code, Pi y Codex. Un solo repo (remoto: `francolmc/Flucastr.AI`). **Versión 2 en `main`** (en uso real en Don Financio, Byteria, Andes y otros proyectos; pendientes por confirmar en `TODO.md`). La v1 está en `old/v1/` (movida, no borrada) y en el tag `kit-v1`; no se ejecuta (README, «La v1»).
 
 ## Cómo funciona (v2)
 
