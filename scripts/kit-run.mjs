@@ -27,10 +27,11 @@ import { fingerprintTree } from "../tools/run/tree-fingerprint.mjs";
 import { ESQUEMA_VEREDICTO, validarVeredicto } from "../tools/run/verdict.mjs";
 import { claveFalloVerificacion, cola, promptBuilder, promptRevisor } from "../tools/run/prompts.mjs";
 import { crearResolutoresPerfil } from "../tools/run/profiles.mjs";
+import { medir, registrar } from "../tools/run/registro.mjs";
 import { crearComando } from "../tools/run/commands.mjs";
 
 const RAIZ_KIT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const { resolverAgente, resolverRevisorKit, etiquetaRevisor, comprobarPoliticaClaude } = crearResolutoresPerfil(RAIZ_KIT);
+const { resolverAgente, resolverRevisorKit, etiquetaRevisor, etiquetaBuilder, comprobarPoliticaClaude } = crearResolutoresPerfil(RAIZ_KIT);
 const comando = crearComando({ resolverAgente, resolverRevisorKit });
 const MAX_RELANZAMIENTOS = 2;
 const HERRAMIENTAS = ["codex", "claude", "pi"];
@@ -81,11 +82,12 @@ function main() {
   const veredictoOut = (linea) => console.log(linea);
 
   // Preflight: si el mapeo no se puede resolver (p. ej. models.json sin el agente o un nivel inválido), sale antes de tocar el plan.
-  let revisor;
+  let revisor, builderModelo;
   try {
     comando("BUILDER", a.herramienta, raiz, "");
     comando("REVIEWER", a.herramienta, raiz, "");
     revisor = etiquetaRevisor(a.herramienta);
+    builderModelo = etiquetaBuilder(a.herramienta);
   } catch (e) {
     uso(e.message);
   }
@@ -98,13 +100,24 @@ function main() {
   let fallosVerificacion = new Set();
   let prompt = promptBuilder(planRel, tramo, null);
   let final = null;
+  // Intento en curso: se completa a medida que corre el builder, la verificación y el revisor.
+  let intento = null;
+  // El registro va junto al plan (changes/<nombre>/runs.jsonl). registrar nunca lanza.
+  const rutaRegistro = join(dirname(planPath), "runs.jsonl");
+  const volcarIntento = () => { if (intento !== null) { registrar(rutaRegistro, intento); intento = null; } };
 
   try {
     for (;;) {
+      volcarIntento();
+      // Relanzamientos previos a este intento: el intento que relanza deja 0 y el siguiente 1.
+      intento = { plan: planRel, tramo: tramo ? Number(tramo) : null, fecha: new Date().toISOString(), herramienta: a.herramienta, builder_modelo: builderModelo, builder_ms: null, verify_ms: null, revisor_ms: null, resultado: null, motivo_relanzamiento: null, relanzamientos, huella_inicio: fingerprintTree(raiz), huella_fin: null };
       // El builder (execute-plan, paso 3) pone «in progress» al empezar; cada corrida, relanzamientos incluidos, arranca con «approved».
       fijarEstado(planPath, "approved");
       console.error(`kit-run: builder (corrida ${relanzamientos + 1})`);
-      const c = correr(comando("BUILDER", a.herramienta, raiz), prompt, raiz, false, topeMs("BUILDER"));
+      const cm = medir(() => correr(comando("BUILDER", a.herramienta, raiz), prompt, raiz, false, topeMs("BUILDER")));
+      const c = cm.valor;
+      intento.builder_ms = cm.ms;
+      intento.huella_fin = fingerprintTree(raiz);
       const primera = c.stdout.trim().split("\n")[0] ?? "";
       if (c.error || c.status !== 0) { final = { pausa: true, motivo: "access", msg: `el builder falló (${c.error ?? `exit ${c.status}`}): ${cola(c.stderr)}` }; break; }
       if (primera.startsWith("PAUSED")) {
@@ -116,10 +129,14 @@ function main() {
 
       console.error("kit-run: verificación");
       // Verificación: el comando del plan (sección ## Verification) en la raíz; KIT_RUN_VERIFY lo reemplaza por un ejecutable.
-      const v = process.env.KIT_RUN_VERIFY
+      const vm = medir(() => process.env.KIT_RUN_VERIFY
         ? correr({ exe: process.env.KIT_RUN_VERIFY, args: [] }, null, raiz, false, topeMs("VERIFY"))
-        : correr({ exe: verificacion }, null, raiz, true, topeMs("VERIFY"));
+        : correr({ exe: verificacion }, null, raiz, true, topeMs("VERIFY")));
+      const v = vm.valor;
+      intento.verify_ms = vm.ms;
       if (v.status !== 0 || v.error) {
+        intento.resultado = "devuelto";
+        intento.motivo_relanzamiento = "verify";
         const causa = claveFalloVerificacion(v);
         if (continuidad && fallosVerificacion.has(causa)) {
           final = { pausa: true, motivo: "verify", msg: `la verificación repitió la misma causa: ${cola(v.stdout + v.stderr)}` };
@@ -138,15 +155,19 @@ function main() {
       console.error("kit-run: revisión (solo lectura)");
       const diff = correr({ exe: "git", args: ["diff", "HEAD"] }, null, raiz).stdout;
       const antes = fingerprintTree(raiz);
-      const r = correr(comando("REVIEWER", a.herramienta, raiz, schemaPath), promptRevisor(planRel, diff.slice(0, 60000), ESQUEMA_VEREDICTO), raiz, false, topeMs("REVIEWER"));
+      const rm = medir(() => correr(comando("REVIEWER", a.herramienta, raiz, schemaPath), promptRevisor(planRel, diff.slice(0, 60000), ESQUEMA_VEREDICTO), raiz, false, topeMs("REVIEWER")));
+      const r = rm.valor;
+      intento.revisor_ms = rm.ms;
       const despues = fingerprintTree(raiz);
       if (antes !== despues) { final = { pausa: true, motivo: "access", msg: "el revisor modificó el árbol de trabajo; se rechaza su veredicto" }; break; }
       if (r.error || r.status !== 0) { final = { pausa: true, motivo: "access", msg: `el revisor falló (${r.error ?? `exit ${r.status}`})` }; break; }
       const val = validarVeredicto(r.stdout);
       if (!val.ok) { final = { pausa: true, motivo: "verify", msg: `veredicto del revisor inválido (${val.error}): ${cola(r.stdout)}` }; break; }
       const dv = val.datos;
-      if (dv.veredicto === "APPROVED") { final = { aprobado: true }; break; }
+      if (dv.veredicto === "APPROVED") { intento.resultado = "DONE"; final = { aprobado: true }; break; }
       if (dv.veredicto === "PAUSED") { final = { pausa: true, motivo: "design", msg: `el revisor pide pausa: ${JSON.stringify(dv.defectos)}` }; break; }
+      intento.resultado = "devuelto";
+      intento.motivo_relanzamiento = "revisor";
       if (relanzamientos < MAX_RELANZAMIENTOS) {
         relanzamientos++;
         prompt = promptBuilder(planRel, tramo, `The review returned these defects:\n${JSON.stringify(dv.defectos, null, 2)}`);
@@ -159,6 +180,8 @@ function main() {
     rmSync(dir, { recursive: true, force: true });
   }
 
+  // El último intento no se relanza: su resultado es DONE si se aprobó, o PAUSED en otro caso.
+  if (intento !== null) { intento.resultado = final.aprobado ? "DONE" : "PAUSED"; volcarIntento(); }
   const { hechos, total } = progreso(planPath);
   if (final.aprobado) {
     fijarEstado(planPath, "done");

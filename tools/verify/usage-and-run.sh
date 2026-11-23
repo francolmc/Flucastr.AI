@@ -8,3 +8,8 @@ paso 13 "kit run: arnés con builder, verify y revisor simulados"
 node tests/kit-run/run.mjs || fallo "13: pruebas de kit run (scripts/kit-run.mjs) no pasaron"
 echo "ok 13: pruebas de kit run pasaron con los CLIs simulados"
 
+# 14. informe de corridas: scripts/runs-report.mjs sobre fixtures con cifras conocidas (A6 a A9; A10 la cubre este paso)
+paso 14 "informe de corridas: pruebas de scripts/runs-report.mjs sobre fixtures"
+node tests/runs-report/run.mjs || fallo "14: pruebas del informe de corridas (scripts/runs-report.mjs) no pasaron"
+echo "ok 14: pruebas del informe pasaron sobre los fixtures"
+

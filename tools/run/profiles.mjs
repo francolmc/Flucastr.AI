@@ -24,6 +24,13 @@ function crearResolutoresPerfil(raizKit) {
     return esfuerzo ? `${modelo}:${esfuerzo}` : modelo;
   }
 
+  // Rastro del builder para el registro de intentos: modelo:esfuerzo del agente builder en esa herramienta.
+  function etiquetaBuilder(herramienta) {
+    const r = spawnSync(process.execPath, [join(raizKit, "scripts", "resolver.mjs"), "modelo-esfuerzo", "builder", HERRAMIENTA_RESOLVER[herramienta]], { encoding: "utf8" });
+    if (r.status !== 0) throw new Error(`resolver modelo-esfuerzo builder ${herramienta} falló: ${r.stderr.trim()}`);
+    return r.stdout.trim();
+  }
+
   // Claude debe recibir el mismo hook del proyecto tanto en el builder como en el revisor.
   // Ambos procesos arrancan con cwd=raiz, por lo que Claude carga esta configuración de proyecto.
   function comprobarPoliticaClaude(raiz) {
@@ -33,7 +40,7 @@ function crearResolutoresPerfil(raizKit) {
     }
   }
 
-  return { resolverAgente, resolverRevisorKit, etiquetaRevisor, comprobarPoliticaClaude };
+  return { resolverAgente, resolverRevisorKit, etiquetaRevisor, etiquetaBuilder, comprobarPoliticaClaude };
 }
 
 export { crearResolutoresPerfil };

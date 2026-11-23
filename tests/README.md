@@ -29,5 +29,6 @@ Para filtrar un flujo: `node --test --test-name-pattern=uso tests/acceptance/` (
 | `tests/builder-contract.mjs` | `node tests/builder-contract.mjs` | Lee skills y contratos vigentes; crea casos temporales. | Suite real llamada por el flujo de aceptación. |
 | `tests/kit-run/run.mjs` | `node tests/kit-run/run.mjs` | Repositorios temporales, datos de plan sintéticos y ejecutables falsos. | Suite real llamada por el flujo de aceptación; mantiene junto el arnés y sus referencias. |
 | `tests/usage/run.mjs` | `node tests/usage/run.mjs` | Fixtures sintéticos de las fuentes de uso en `tests/usage/fixtures/`; se consumen desde esa carpeta y no se copian. | Suite real llamada por el flujo de aceptación; sus fixtures y modos de sensibilidad comparten esta ruta. |
+| `tests/runs-report/run.mjs` | `node tests/runs-report/run.mjs` | Fixtures de `changes/` en `tests/runs-report/fixtures/` (vacío, relanzamientos, corrupto, devoluciones manuales); se ejecutan con `--raiz` y no se copian. | Paso 14 de `./verify`; `--cli <ruta>` sirve para la comprobación de sensibilidad del caso corrupto. |
 
 Los archivos de `tests/acceptance/` son envoltorios de los tres flujos, no suites adicionales: cada uno ejecuta la suite de `tests/` que le corresponde. Por eso el comando de aceptación descubre exactamente tres pruebas y no ejecuta los flujos dos veces.

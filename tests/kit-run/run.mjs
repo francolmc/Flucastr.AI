@@ -78,7 +78,8 @@ console.log("DONE: plan=changes/prueba/plan.md; segment=1; verify=pasa");
   // Verificación: falla si FAKE_VERIFY_FALLA=1.
   "verify.mjs": `${CABECERA}${REGISTRO}
 anotar("verify");
-if (process.env.FAKE_VERIFY_FALLA === "1") { console.log("verify: fallo simulado"); process.exit(1); }
+const n = readFileSync(process.env.KR_LOG, "utf8").split("\\n").filter(l => l.includes('"rol":"verify"')).length;
+if (process.env.FAKE_VERIFY_FALLA === "1" || n <= Number(process.env.FAKE_VERIFY_FALLA_HASTA || 0)) { console.log("verify: fallo simulado"); process.exit(1); }
 console.log("verify: ok");
 `,
   // codex falso (en el PATH, sin KIT_RUN_BUILDER/REVIEWER): registra argumentos y el esquema del --output-schema.
@@ -137,13 +138,17 @@ function git(raiz, ...a) {
 
 // Repo temporal con el plan commiteado. Corre kit-run con los falsos y devuelve la salida y el registro.
 // codex: true no fija KIT_RUN_BUILDER ni KIT_RUN_REVIEWER; el script llama a `codex` del PATH (el falso).
-function correr(nombre, { plan = PLAN, env = {}, codex = false, kit = KIT, opciones = raiz => ["--root", raiz] } = {}) {
+// git: false deja el directorio sin repo (sin huellas). antes(raiz) corre tras el commit, antes de kit run.
+function correr(nombre, { plan = PLAN, env = {}, codex = false, git: conGit = true, antes = null, kit = KIT, opciones = raiz => ["--root", raiz] } = {}) {
   const raiz = join(dir, nombre);
   mkdirSync(join(raiz, "changes/prueba"), { recursive: true });
   writeFileSync(join(raiz, PLAN_REL), plan);
-  git(raiz, "init", "-q");
-  git(raiz, "add", "-A");
-  git(raiz, "commit", "-q", "-m", "base");
+  if (conGit) {
+    git(raiz, "init", "-q");
+    git(raiz, "add", "-A");
+    git(raiz, "commit", "-q", "-m", "base");
+  }
+  if (antes) antes(raiz);
   const log = join(dir, `${nombre}.log`);
   writeFileSync(log, "");
   const entorno = {
@@ -151,6 +156,7 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false, kit = KIT, opcio
     KIT_RUN_VERIFY: exe("verify.mjs"),
     KR_LOG: log,
     FAKE_VERIFY_FALLA: "0",
+    FAKE_VERIFY_FALLA_HASTA: "0",
     FAKE_REVIEWER_ESCRIBE_SIEMPRE: "0",
     FAKE_DEVUELVE_HASTA: "0",
     FAKE_VEREDICTO: "",
@@ -464,6 +470,87 @@ caso("V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>", () => {
   const rev = modeloYEsfuerzo(r.registro.find(x => x.rol === "reviewer").args);
   assert.ok(r.plan.includes(`- kit run: revisión APPROVED`), r.plan);
   assert.ok(r.plan.includes(`revisor=${rev.m}:${rev.e}`), r.plan);
+});
+
+// Registro de intentos (changes/prueba/runs.jsonl): una línea por intento, sin cambiar la decisión de kit run.
+const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin"];
+function leerRuns(raiz) {
+  const ruta = join(raiz, "changes/prueba/runs.jsonl");
+  return existsSync(ruta) ? readFileSync(ruta, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l)) : null;
+}
+
+// R1: una corrida aprobada deja 1 línea con los 13 campos y duraciones enteras ≥ 0.
+caso("R1 registro: una corrida aprobada deja 1 línea con los 13 campos y duraciones enteras ≥ 0", () => {
+  const r = correr("r1");
+  assert.equal(r.status, 0, r.stderr);
+  const runs = leerRuns(r.raiz);
+  assert.equal(runs.length, 1, `líneas: ${runs?.length}`);
+  const x = runs[0];
+  assert.deepEqual(Object.keys(x).sort(), [...CAMPOS_REGISTRO].sort());
+  assert.equal(x.plan, PLAN_REL);
+  assert.equal(x.tramo, 1);
+  assert.match(x.fecha, /^\d{4}-\d{2}-\d{2}T/);
+  assert.equal(x.herramienta, "codex");
+  assert.match(x.builder_modelo, /^[^:\s]+:[^:\s]+$/);
+  for (const k of ["builder_ms", "verify_ms", "revisor_ms"]) assert.ok(Number.isInteger(x[k]) && x[k] >= 0, `${k}=${x[k]}`);
+  assert.equal(x.resultado, "DONE");
+  assert.equal(x.motivo_relanzamiento, null);
+  assert.equal(x.relanzamientos, 0);
+  assert.equal(typeof x.huella_inicio, "string");
+  assert.equal(typeof x.huella_fin, "string");
+});
+
+// R2: verify rojo y luego verde: 2 líneas (devuelto/verify, DONE con relanzamientos 1).
+caso("R2 verify rojo y luego verde: 2 líneas devuelto/verify y DONE con relanzamientos 1", () => {
+  const r = correr("r2", { env: { FAKE_VERIFY_FALLA_HASTA: "1" } });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /^DONE:/);
+  const runs = leerRuns(r.raiz);
+  assert.equal(runs.length, 2, `líneas: ${runs?.length}`);
+  assert.equal(runs[0].resultado, "devuelto");
+  assert.equal(runs[0].motivo_relanzamiento, "verify");
+  assert.equal(runs[0].relanzamientos, 0);
+  assert.equal(runs[1].resultado, "DONE");
+  assert.equal(runs[1].motivo_relanzamiento, null);
+  assert.equal(runs[1].relanzamientos, 1);
+});
+
+// R3: el revisor devuelve una vez: la línea devuelta lleva motivo_relanzamiento revisor.
+caso("R3 revisor RETURNED: la línea devuelta lleva motivo_relanzamiento revisor", () => {
+  const r = correr("r3", { env: { FAKE_DEVUELVE_HASTA: "1" } });
+  assert.equal(r.status, 0, r.stderr);
+  const runs = leerRuns(r.raiz);
+  assert.equal(runs.length, 2, `líneas: ${runs?.length}`);
+  assert.equal(runs[0].resultado, "devuelto");
+  assert.equal(runs[0].motivo_relanzamiento, "revisor");
+  assert.equal(runs[1].resultado, "DONE");
+  assert.equal(runs[1].relanzamientos, 1);
+});
+
+// R4: registro no escribible (directorio con ese nombre): mismo código y misma salida DONE, con aviso por stderr.
+caso("R4 registro no escribible: mismo código y salida, con aviso por stderr", () => {
+  const ref = correr("r4-ref");
+  assert.equal(ref.status, 0, ref.stderr);
+  const r = correr("r4", { antes: raiz => mkdirSync(join(raiz, "changes/prueba/runs.jsonl")) });
+  assert.equal(r.status, ref.status, r.stderr);
+  assert.equal(r.stdout, ref.stdout);
+  assert.equal(r.estado, ref.estado);
+  assert.match(r.stderr, /kit-run: no se pudo escribir el registro/);
+});
+
+// R5: huellas null sin git; cadenas distintas con git cuando el builder cambió archivos.
+caso("R5 huellas: null sin git; cadenas distintas cuando el builder cambió archivos", () => {
+  const sinGit = correr("r5-sin-git", { git: false });
+  assert.equal(sinGit.status, 0, sinGit.stderr);
+  const x = leerRuns(sinGit.raiz)[0];
+  assert.equal(x.huella_inicio, null);
+  assert.equal(x.huella_fin, null);
+  const conGit = correr("r5-con-git");
+  assert.equal(conGit.status, 0, conGit.stderr);
+  const y = leerRuns(conGit.raiz)[0];
+  assert.equal(typeof y.huella_inicio, "string");
+  assert.equal(typeof y.huella_fin, "string");
+  assert.notEqual(y.huella_inicio, y.huella_fin);
 });
 
 let fallos = 0;
