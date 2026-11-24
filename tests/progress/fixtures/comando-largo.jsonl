@@ -1,0 +1,3 @@
+{"t":"2026-11-23T11:58:00.000Z","seg":2,"tipo":"paso_iniciado","o":"inferido","texto":"Crear scripts/kit-status.mjs"}
+{"t":"2026-11-23T11:59:20.000Z","seg":2,"tipo":"archivo_editado","o":"automatico","archivo":"tools/progress/estado.mjs"}
+{"t":"2026-11-23T11:59:22.000Z","seg":2,"tipo":"comando_iniciado","o":"automatico","id":"c2","cmd":"node tests/progress/run.mjs"}

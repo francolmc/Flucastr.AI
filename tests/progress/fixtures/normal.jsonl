@@ -1,0 +1,7 @@
+{"t":"2026-11-23T11:58:00.000Z","seg":2,"tipo":"paso_iniciado","o":"inferido","texto":"Crear scripts/kit-status.mjs"}
+{"t":"2026-11-23T11:58:10.000Z","seg":2,"tipo":"archivo_editado","o":"automatico","archivo":"tools/progress/estado.mjs"}
+{"t":"2026-11-23T11:58:20.000Z","seg":2,"tipo":"comando_iniciado","o":"automatico","id":"c1","cmd":"node tests/progress/run.mjs"}
+{"t":"2026-11-23T11:58:25.000Z","seg":2,"tipo":"comando_terminado","o":"automatico","id":"c1","exit":0,"ms":5000}
+{"t":"2026-11-23T11:58:40.000Z","seg":2,"tipo":"fingerprint_cambió","o":"automatico","id":"h0"}
+{"t":"2026-11-23T11:59:30.000Z","seg":2,"tipo":"fingerprint_cambió","o":"automatico","id":"h1"}
+{"t":"2026-11-23T11:59:46.000Z","seg":2,"tipo":"archivo_editado","o":"automatico","archivo":"scripts/kit-status.mjs"}

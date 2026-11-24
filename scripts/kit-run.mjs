@@ -16,7 +16,7 @@
 // revisor de kit_run.reviewer (sin esa clave, el de planner). Cada corrida tiene tope de tiempo:
 // builder 45 min, revisor 15 min, verify 30 min; KIT_RUN_TOPE_MS lo fija en ms para todas (pruebas).
 
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -29,8 +29,14 @@ import { claveFalloVerificacion, cola, promptBuilder, promptRevisor } from "../t
 import { crearResolutoresPerfil } from "../tools/run/profiles.mjs";
 import { medir, registrar } from "../tools/run/registro.mjs";
 import { crearComando } from "../tools/run/commands.mjs";
+import { anexar, evento, leerEventos } from "../tools/progress/eventos.mjs";
+import { escribirResumen } from "../tools/progress/resumen.mjs";
+import { casillasDelPlan } from "./progress-watch.mjs";
 
 const RAIZ_KIT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const VIGILANTE = join(RAIZ_KIT, "scripts", "progress-watch.mjs");
+// KIT_PROGRESO=0 desactiva la señal, el resumen y el evento de corte; las decisiones no cambian.
+const PROGRESO = process.env.KIT_PROGRESO !== "0";
 const { resolverAgente, resolverRevisorKit, etiquetaRevisor, etiquetaBuilder, comprobarPoliticaClaude } = crearResolutoresPerfil(RAIZ_KIT);
 const comando = crearComando({ resolverAgente, resolverRevisorKit });
 const MAX_RELANZAMIENTOS = 2;
@@ -55,6 +61,37 @@ function leerArgs(argv) {
   if (!a.plan) uso("falta el plan");
   if (!HERRAMIENTAS.includes(a.herramienta)) uso(`herramienta «${a.herramienta}» no existe`);
   return a;
+}
+
+// Señal de progreso: el vigilante corre en proceso aparte mientras el builder trabaja. Todo es best effort:
+// si falla, avisa por stderr y kit run decide igual.
+function argsVigilante(planPath, herramienta, raiz, desde) {
+  return [VIGILANTE, "--plan", planPath, "--herramienta", herramienta, "--raiz", raiz, "--desde", String(desde)];
+}
+
+function lanzarVigilante(planPath, herramienta, raiz, desde) {
+  if (!PROGRESO) return null;
+  const hijo = spawn(process.execPath, argsVigilante(planPath, herramienta, raiz, desde), { stdio: ["ignore", "ignore", "inherit"] });
+  // El evento 'error' llega fuera del bucle síncrono de kit run; se escucha para que no tumbe el proceso.
+  hijo.on("error", () => {});
+  if (hijo.pid === undefined) console.error("progreso: no se pudo lanzar el vigilante; kit run sigue sin señal");
+  return hijo;
+}
+
+// Un corte por tope lo marca el mensaje de correr («superó el tope de N ms»); no cambia el retorno.
+const porTope = (r) => /superó el tope/.test(String(r?.error ?? ""));
+
+// Última captura síncrona, antes del resumen. Así no compite con el vigilante asíncrono, ya detenido.
+function cerrarProgreso({ planPath, herramienta, raiz, desde, resultado, motivo, corte, nombre }) {
+  if (!PROGRESO) return;
+  try {
+    const r = spawnSync(process.execPath, [...argsVigilante(planPath, herramienta, raiz, desde), "--una-vez"], { stdio: ["ignore", "ignore", "inherit"] });
+    if (r.error || r.status !== 0) console.error(`progreso: la captura final falló (${r.error?.message ?? `exit ${r.status}`})`);
+    const eventos = leerEventos(join(dirname(planPath), "progress.jsonl")).eventos;
+    escribirResumen(join(dirname(planPath), "progress-resumen.md"), eventos, { resultado, motivo, corte, casillas: casillasDelPlan(planPath).casillas, nombre });
+  } catch (e) {
+    console.error(`progreso: no se pudo cerrar la señal (${e.message})`);
+  }
 }
 
 function main() {
@@ -105,6 +142,11 @@ function main() {
   // El registro va junto al plan (changes/<nombre>/runs.jsonl). registrar nunca lanza.
   const rutaRegistro = join(dirname(planPath), "runs.jsonl");
   const volcarIntento = () => { if (intento !== null) { registrar(rutaRegistro, intento); intento = null; } };
+  // Señal de progreso: el log va junto al plan; bloqueo «corte por tope» lo escribe kit run (origen kitrun).
+  const rutaProgreso = join(dirname(planPath), "progress.jsonl");
+  const bloqueoCorte = () => { if (PROGRESO) anexar(rutaProgreso, evento("bloqueo", { seg: tramo ?? null, o: "kitrun", texto: "corte por tope" })); };
+  let corte = false;
+  let inicioPrimera = null;
 
   try {
     for (;;) {
@@ -114,8 +156,13 @@ function main() {
       // El builder (execute-plan, paso 3) pone «in progress» al empezar; cada corrida, relanzamientos incluidos, arranca con «approved».
       fijarEstado(planPath, "approved");
       console.error(`kit-run: builder (corrida ${relanzamientos + 1})`);
+      const inicioRun = Date.now();
+      if (inicioPrimera === null) inicioPrimera = inicioRun;
+      const vigilante = lanzarVigilante(planPath, a.herramienta, raiz, inicioRun);
       const cm = medir(() => correr(comando("BUILDER", a.herramienta, raiz), prompt, raiz, false, topeMs("BUILDER")));
+      vigilante?.kill("SIGTERM");
       const c = cm.valor;
+      if (porTope(c)) { corte = true; bloqueoCorte(); }
       intento.builder_ms = cm.ms;
       intento.huella_fin = fingerprintTree(raiz);
       const primera = c.stdout.trim().split("\n")[0] ?? "";
@@ -133,6 +180,7 @@ function main() {
         ? correr({ exe: process.env.KIT_RUN_VERIFY, args: [] }, null, raiz, false, topeMs("VERIFY"))
         : correr({ exe: verificacion }, null, raiz, true, topeMs("VERIFY")));
       const v = vm.valor;
+      if (porTope(v)) { corte = true; bloqueoCorte(); }
       intento.verify_ms = vm.ms;
       if (v.status !== 0 || v.error) {
         intento.resultado = "devuelto";
@@ -157,6 +205,7 @@ function main() {
       const antes = fingerprintTree(raiz);
       const rm = medir(() => correr(comando("REVIEWER", a.herramienta, raiz, schemaPath), promptRevisor(planRel, diff.slice(0, 60000), ESQUEMA_VEREDICTO), raiz, false, topeMs("REVIEWER")));
       const r = rm.valor;
+      if (porTope(r)) { corte = true; bloqueoCorte(); }
       intento.revisor_ms = rm.ms;
       const despues = fingerprintTree(raiz);
       if (antes !== despues) { final = { pausa: true, motivo: "access", msg: "el revisor modificó el árbol de trabajo; se rechaza su veredicto" }; break; }
@@ -183,6 +232,7 @@ function main() {
   // El último intento no se relanza: su resultado es DONE si se aprobó, o PAUSED en otro caso.
   if (intento !== null) { intento.resultado = final.aprobado ? "DONE" : "PAUSED"; volcarIntento(); }
   const { hechos, total } = progreso(planPath);
+  cerrarProgreso({ planPath, herramienta: a.herramienta, raiz, desde: inicioPrimera ?? Date.now(), resultado: final.aprobado ? "DONE" : "PAUSED", motivo: final.motivo, corte: corte && !final.aprobado, nombre: planRel });
   if (final.aprobado) {
     fijarEstado(planPath, "done");
     anotarNotas(planPath, `revisión APPROVED tras ${relanzamientos + 1} corrida(s) del builder; verify pasó; revisor=${revisor}.`);

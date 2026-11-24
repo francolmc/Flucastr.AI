@@ -1,6 +1,8 @@
 .claude/settings.local.json
 pruebas/*
 tests/.tmp/
+changes/*/progress.jsonl
+changes/*/progress-resumen.md
 
 .codex/
 .claude/
