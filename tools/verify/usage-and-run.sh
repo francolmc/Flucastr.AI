@@ -23,3 +23,13 @@ paso 16 "kit-check: pruebas de scripts/kit-check.mjs sobre fixtures sintéticos"
 node tests/kit-check/run.mjs || fallo "16: pruebas de kit-check (scripts/kit-check.mjs) no pasaron"
 echo "ok 16: pruebas de kit-check pasaron sobre los fixtures"
 
+# 17. kit-scope: scripts/kit-scope.mjs sobre fixtures de alcance y cambios (A1 de la historia de kit-scope-close)
+paso 17 "kit-scope: pruebas de scripts/kit-scope.mjs sobre fixtures"
+node tests/kit-scope/run.mjs || fallo "17: pruebas de kit-scope (scripts/kit-scope.mjs) no pasaron"
+echo "ok 17: pruebas de kit-scope pasaron sobre los fixtures"
+
+# 18. kit-close: scripts/kit-close.mjs sobre fixtures cerrados y no verificables (A1 de la historia de kit-scope-close)
+paso 18 "kit-close: pruebas de scripts/kit-close.mjs sobre fixtures"
+node tests/kit-close/run.mjs || fallo "18: pruebas de kit-close (scripts/kit-close.mjs) no pasaron"
+echo "ok 18: pruebas de kit-close pasaron sobre los fixtures"
+
