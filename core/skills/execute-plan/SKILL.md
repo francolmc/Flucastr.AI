@@ -83,6 +83,7 @@ After the other steps are complete, run the *Verification* command **exactly as 
   - `verify` fails in 3 runs → `motivo=verify`.
 - Before a `PAUSED` with `motivo=ambiguous` or `motivo=access`, look for `Resuelto:` under the plan's *Decisions already taken*. Do not ask again about anything already marked `Resuelto:`; apply it as written.
 - The `PAUSED` format (first line, then the issue and 2 or 3 options) is in the builder's *Return* section.
+- On a blocker, run `node scripts/kit-nota.mjs <plan> blocked "<cause>"` once before returning; use `doing "<step>"` only if the user approves it after the measurement.
 
 Do not guess; pause. Leave completed work intact.
 
