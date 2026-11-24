@@ -18,3 +18,8 @@ paso 15 "progreso en vivo: pruebas de eventos, estado, kit-status y kit-nota sob
 node tests/progress/run.mjs || fallo "15: pruebas del progreso en vivo (tools/progress, scripts/kit-status.mjs, scripts/kit-nota.mjs) no pasaron"
 echo "ok 15: pruebas del progreso en vivo pasaron sobre los fixtures"
 
+# 16. kit-check: scripts/kit-check.mjs sobre fixtures sintéticos de criterios A# (A1 a A6; A7 es este paso)
+paso 16 "kit-check: pruebas de scripts/kit-check.mjs sobre fixtures sintéticos"
+node tests/kit-check/run.mjs || fallo "16: pruebas de kit-check (scripts/kit-check.mjs) no pasaron"
+echo "ok 16: pruebas de kit-check pasaron sobre los fixtures"
+

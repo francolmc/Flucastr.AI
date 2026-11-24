@@ -12,7 +12,7 @@ const SCRIPT = fileURLToPath(import.meta.url);
 const COMMAND = `node ${shellQuote(SCRIPT)} decision --project `;
 const HOOK_MARKER = COMMAND;
 const CAPACIDADES = /^(?:[-*]\s*)?(?:\*\*)?(?:Comprobación rápida|Servicio|Aceptación)(?:\*\*)?:\s*(.*)$/i;
-const META = /[\n\r;|&<>`$()\\'"?*\[\]{}!~]/;
+export const META = /[\n\r;|&<>`$()\\'"?*\[\]{}!~]/;
 const SCRIPT_EXT = /\.(?:mjs|cjs|js|sh|py)$/i;
 
 function respuesta(decision, reason) {
@@ -116,7 +116,7 @@ function comandoSeguro(raiz, comando) {
   return sinCambiosEnHead(raiz, [...new Set(protegidas)]);
 }
 
-function accionProtegida(comando) {
+export function accionProtegida(comando) {
   const palabras = comando.toLowerCase().split(/\s+/).map(p => p.replace(/^['"]|['"]$/g, ""));
   if (palabras.some(esSecreto)) return true;
   const git = palabras.indexOf("git");
@@ -256,7 +256,8 @@ function decidir(raiz, entrada) {
   // Sin decisión, Claude Code aplica su permiso normal.
 }
 
-try {
+// Solo corre como script: importar el módulo (accionProtegida, META) no ejecuta main.
+if (resolve(process.argv[1] ?? "") === SCRIPT) try {
   const [accion, ...args] = process.argv.slice(2);
   if (accion === "instalar" && args.length === 1) instalar(resolve(args[0]));
   else if (accion === "quitar" && args.length === 1) quitar(resolve(args[0]));
