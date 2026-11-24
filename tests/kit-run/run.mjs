@@ -186,7 +186,7 @@ function caso(nombre, fn) { casos.push({ nombre, fn }); }
 
 function resultadoComparable(r) {
   const normalizar = valor => JSON.parse(JSON.stringify(valor).replaceAll(r.raiz, "<raiz>")
-    .replace(/\/tmp\/kit-run-[^"\\ ]+\.json/g, "<esquema>"));
+    .replace(/[^"\\ ]*\/kit-run-[^"\\ ]+\.json/g, "<esquema>"));
   return normalizar({ status: r.status, stdout: r.stdout, stderr: r.stderr, estado: r.estado, registro: r.registro });
 }
 
