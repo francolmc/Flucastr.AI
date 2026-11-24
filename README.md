@@ -26,6 +26,7 @@ Kit de agentes y skills para Claude Code, Pi y Codex. Esta es la versión 2.
 - Instalar: `bash install.sh`.
 - Simular la instalación: `bash install.sh --dry-run`.
 - Verificar: `./verify`.
+- Comprobar los criterios A# de un plan sin modelo: `node scripts/kit-check.mjs <plan> [--segment N] [--timeout <seg>] [--revisado A#,...]`. Imprime una tabla `A# | estado | comando ejecutado | motivo/cola` y sale con 0 (todo pasa), 1 (algún falla), 3 (bloqueado o no automatizable sin revisar) o 2 (uso o plan mal formado). Formatos soportados y excluidos en `tests/README.md`.
 - Ejecutar el builder Pi en una ventana propia: `pi-builder`.
 
 Para más detalle, consulta la [guía de uso](docs/guide.md#qué-es).
