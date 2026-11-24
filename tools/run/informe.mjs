@@ -5,7 +5,7 @@ import { join } from "node:path";
 // Lectura estricta: cada línea no vacía debe ser un objeto JSON válido con campos de tipo esperado; las corruptas se reportan, no se ignoran.
 
 export const FASES = ["builder_ms", "verify_ms", "revisor_ms"];
-export const MOTIVOS = ["verify", "revisor"];
+export const MOTIVOS = ["verify", "revisor", "puerta"];
 export const CATEGORIAS = ["defecto", "omision", "verify", "otro"];
 
 const LINEA_DEVUELTO = /^- Devuelto: (defecto|omision|verify|otro)\b/;
@@ -32,7 +32,7 @@ function validarRegistro(obj) {
   for (const f of FASES) {
     if (obj[f] !== null && !esNumeroNoNegativo(obj[f])) return `${f} debe ser un número no negativo o null`;
   }
-  if (obj.motivo_relanzamiento !== null && !MOTIVOS.includes(obj.motivo_relanzamiento)) return "motivo_relanzamiento debe ser verify, revisor o null";
+  if (obj.motivo_relanzamiento !== null && !MOTIVOS.includes(obj.motivo_relanzamiento)) return "motivo_relanzamiento debe ser verify, revisor, puerta o null";
   return null;
 }
 

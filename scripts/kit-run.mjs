@@ -26,11 +26,12 @@ import { correr, topeMs } from "../tools/run/process.mjs";
 import { fingerprintTree } from "../tools/run/tree-fingerprint.mjs";
 import { ESQUEMA_VEREDICTO, validarVeredicto } from "../tools/run/verdict.mjs";
 import { claveFalloVerificacion, cola, promptBuilder, promptRevisor } from "../tools/run/prompts.mjs";
+import { ejecutarPuerta, herramientasFaltantes, textoParaBuilder, textoParaRevisor } from "../tools/run/puerta.mjs";
 import { crearResolutoresPerfil } from "../tools/run/profiles.mjs";
 import { medir, registrar } from "../tools/run/registro.mjs";
 import { crearComando } from "../tools/run/commands.mjs";
 import { anexar, evento, leerEventos } from "../tools/progress/eventos.mjs";
-import { escribirResumen } from "../tools/progress/resumen.mjs";
+import { escribirResumen, generarResumen } from "../tools/progress/resumen.mjs";
 import { casillasDelPlan } from "./progress-watch.mjs";
 
 const RAIZ_KIT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -94,6 +95,21 @@ function cerrarProgreso({ planPath, herramienta, raiz, desde, resultado, motivo,
   }
 }
 
+// Resumen de progreso para un relanzamiento: se guarda en progress-resumen.md y su texto (truncado) va al builder.
+// Best effort: si falla, el relanzamiento sigue sin resumen.
+function resumenParaRelanzar(planPath) {
+  if (!PROGRESO) return "";
+  try {
+    const eventos = leerEventos(join(dirname(planPath), "progress.jsonl")).eventos;
+    const plan = { resultado: null, motivo: null, corte: false, casillas: casillasDelPlan(planPath).casillas };
+    const texto = generarResumen(eventos, plan);
+    escribirResumen(join(dirname(planPath), "progress-resumen.md"), eventos, plan);
+    return `\n\nProgress summary:\n${texto.slice(0, 3000)}`;
+  } catch {
+    return "";
+  }
+}
+
 function main() {
   const a = leerArgs(process.argv.slice(2));
   if (a.herramienta !== "codex" && !(process.env.KIT_RUN_BUILDER && process.env.KIT_RUN_REVIEWER)) {
@@ -128,6 +144,9 @@ function main() {
   } catch (e) {
     uso(e.message);
   }
+  // Puerta mecánica: sin las tres herramientas no hay forma de comprobar el resultado; sale antes de tocar el plan.
+  const faltan = herramientasFaltantes();
+  if (faltan.length) uso(`faltan herramientas de la puerta mecánica en scripts/: ${faltan.join(", ")}`);
 
   const dir = mkdtempSync(join(tmpdir(), "kit-run-"));
   const schemaPath = join(dir, "veredicto.schema.json");
@@ -152,7 +171,7 @@ function main() {
     for (;;) {
       volcarIntento();
       // Relanzamientos previos a este intento: el intento que relanza deja 0 y el siguiente 1.
-      intento = { plan: planRel, tramo: tramo ? Number(tramo) : null, fecha: new Date().toISOString(), herramienta: a.herramienta, builder_modelo: builderModelo, builder_ms: null, verify_ms: null, revisor_ms: null, resultado: null, motivo_relanzamiento: null, relanzamientos, huella_inicio: fingerprintTree(raiz), huella_fin: null };
+      intento = { plan: planRel, tramo: tramo ? Number(tramo) : null, fecha: new Date().toISOString(), herramienta: a.herramienta, builder_modelo: builderModelo, builder_ms: null, verify_ms: null, revisor_ms: null, resultado: null, motivo_relanzamiento: null, relanzamientos, huella_inicio: fingerprintTree(raiz), huella_fin: null, puerta: null, puerta_ms: null };
       // El builder (execute-plan, paso 3) pone «in progress» al empezar; cada corrida, relanzamientos incluidos, arranca con «approved».
       fijarEstado(planPath, "approved");
       console.error(`kit-run: builder (corrida ${relanzamientos + 1})`);
@@ -193,17 +212,35 @@ function main() {
         fallosVerificacion.add(causa);
         if (relanzamientos < MAX_RELANZAMIENTOS) {
           relanzamientos++;
-          prompt = promptBuilder(planRel, tramo, `Verification failed (exit ${v.status}). Output:\n${cola(v.stdout + v.stderr)}`);
+          prompt = promptBuilder(planRel, tramo, `Verification failed (exit ${v.status}). Output:\n${cola(v.stdout + v.stderr)}${resumenParaRelanzar(planPath)}`);
           continue;
         }
         final = { pausa: true, motivo: "verify", msg: `verify no pasó tras ${relanzamientos + 1} corridas del builder: ${cola(v.stdout + v.stderr)}` };
         break;
       }
 
+      // Puerta mecánica: si bloquea, no hay revisor; el builder recibe la lista exacta y el mismo contador de relanzamientos.
+      console.error("kit-run: puerta mecánica");
+      const pm = medir(() => ejecutarPuerta({ planPath, raiz, tramo }));
+      const puerta = pm.valor;
+      intento.puerta = puerta.estado;
+      intento.puerta_ms = pm.ms;
+      if (puerta.bloquea) {
+        intento.resultado = "devuelto";
+        intento.motivo_relanzamiento = "puerta";
+        if (relanzamientos < MAX_RELANZAMIENTOS) {
+          relanzamientos++;
+          prompt = promptBuilder(planRel, tramo, `${textoParaBuilder(puerta)}${resumenParaRelanzar(planPath)}`);
+          continue;
+        }
+        final = { pausa: true, motivo: puerta.motivo, msg: `la puerta mecánica no pasó tras ${relanzamientos + 1} corridas del builder: ${puerta.lista.join("; ")}` };
+        break;
+      }
+
       console.error("kit-run: revisión (solo lectura)");
       const diff = correr({ exe: "git", args: ["diff", "HEAD"] }, null, raiz).stdout;
       const antes = fingerprintTree(raiz);
-      const rm = medir(() => correr(comando("REVIEWER", a.herramienta, raiz, schemaPath), promptRevisor(planRel, diff.slice(0, 60000), ESQUEMA_VEREDICTO), raiz, false, topeMs("REVIEWER")));
+      const rm = medir(() => correr(comando("REVIEWER", a.herramienta, raiz, schemaPath), promptRevisor(planRel, diff.slice(0, 60000), ESQUEMA_VEREDICTO, textoParaRevisor(puerta)), raiz, false, topeMs("REVIEWER")));
       const r = rm.valor;
       if (porTope(r)) { corte = true; bloqueoCorte(); }
       intento.revisor_ms = rm.ms;
@@ -219,7 +256,7 @@ function main() {
       intento.motivo_relanzamiento = "revisor";
       if (relanzamientos < MAX_RELANZAMIENTOS) {
         relanzamientos++;
-        prompt = promptBuilder(planRel, tramo, `The review returned these defects:\n${JSON.stringify(dv.defectos, null, 2)}`);
+        prompt = promptBuilder(planRel, tramo, `The review returned these defects:\n${JSON.stringify(dv.defectos, null, 2)}${resumenParaRelanzar(planPath)}`);
         continue;
       }
       final = { pausa: true, motivo: "design", msg: `revisión devuelta tras ${relanzamientos + 1} corridas: ${JSON.stringify(dv.defectos)}` };

@@ -668,7 +668,7 @@ import { join } from "node:path";
 const planPath = join(process.cwd(), "changes/prueba/plan.md");
 const espera = Number(process.env.FAKE_BUILDER_ESPERA_MS || 0);
 if (espera > 0) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, espera);
-writeFileSync(planPath, readFileSync(planPath, "utf8").replace(/^status: .*$/m, "status: in progress"));
+writeFileSync(planPath, readFileSync(planPath, "utf8").replace(/^status: .*$/m, "status: done"));
 writeFileSync(join(process.cwd(), "creado.txt"), "hecho");
 console.log("DONE: plan=changes/prueba/plan.md; segment=1; verify=pasa");
 `,
@@ -696,6 +696,9 @@ segment: 1
 ---
 # Prueba de kit run con vigilante
 
+## Scope
+- creado.txt
+
 ## Acceptance
 | ID | Resultado |
 | --- |
@@ -707,6 +710,15 @@ segment: 1
 ## Steps
 ### Segment 1 — Story: prueba
 - [x] crear creado.txt
+  Check: \`test -f creado.txt\`
+
+## Evidence
+A1, crear creado.txt:
+$ test -f creado.txt
+exit 0
+
+## Notes
+- Fixture de prueba.
 `;
 
 function kitRun(nombre, { env = {}, argsKit = null } = {}) {

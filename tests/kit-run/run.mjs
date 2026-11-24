@@ -5,15 +5,17 @@
 // Sin red, sin CLIs reales, sin escribir fuera de un temporal que se borra al salir.
 
 import assert from "node:assert/strict";
-import { appendFileSync, chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { promptRevisor } from "../../tools/run/prompts.mjs";
 import { ESQUEMA_VEREDICTO } from "../../tools/run/verdict.mjs";
+import { ejecutarPuerta, filasCheck, herramientasFaltantes, textoParaBuilder, textoParaRevisor } from "../../tools/run/puerta.mjs";
 
 const KIT = fileURLToPath(new URL("../../scripts/kit-run.mjs", import.meta.url));
+const KIT_RAIZ = fileURLToPath(new URL("../../", import.meta.url));
 const PLAN_REL = "changes/prueba/plan.md";
 const PLAN = `---
 status: approved
@@ -25,17 +27,24 @@ segment: 1
 ---
 # Prueba de kit run
 
-## Acceptance
-| ID | Resultado |
-| --- |
-| A1 | creado.txt existe |
+## Scope
+- \`creado.txt\`
+- \`segundo.txt\`
+
+## Steps
+### Segment 1 — Story: prueba
+Acceptance:
+- A1: creado.txt existe; check with \`node -e "process.exit(require('fs').existsSync('creado.txt')?0:1)"\`; expect exit 0.
+TODO:
+- [x] crear creado.txt. Check: \`node -e "process.exit(require('fs').existsSync('creado.txt')?0:1)"\`; expect exit 0.
 
 ## Verification
 \`./verify\`
 
-## Steps
-### Segment 1 — Story: prueba
-- [x] crear creado.txt
+## Evidence
+A1:
+$ node -e "process.exit(require('fs').existsSync('creado.txt')?0:1)"
+exit 0
 `;
 const PLAN_CONTINUA = PLAN.replace("segment: 1\n", "segment: 1\ncontinuity: continuous\n")
   .replace("- [x] crear creado.txt", "- [ ] crear primero.txt\n- [ ] crear segundo.txt");
@@ -62,8 +71,13 @@ if (estado !== "approved") {
   console.log("PAUSED: plan=changes/prueba/plan.md; segment=1; motivo=ambiguous; hecho=0/1; siguiente=arrancar con el plan aprobado; no_intentado=el plan llegó con status " + estado);
   process.exit(0);
 }
-writeFileSync(planPath, readFileSync(planPath, "utf8").replace(/^status: .*$/m, "status: in progress"));
-writeFileSync(join(process.cwd(), "creado.txt"), "hecho\\n");
+// Como execute-plan: al terminar con verify pasado deja status done (kit-close espera done con DONE).
+writeFileSync(planPath, readFileSync(planPath, "utf8").replace(/^status: .*$/m, "status: done"));
+// FAKE_BUILDER_SIN_ARCHIVO=1: nunca crea creado.txt; FAKE_BUILDER_SIN_ARCHIVO_HASTA=n: no lo crea en las n primeras corridas.
+const corridas = readFileSync(process.env.KR_LOG, "utf8").split("\\n").filter(l => l.includes('"rol":"builder"')).length;
+const sinArchivo = process.env.FAKE_BUILDER_SIN_ARCHIVO === "1" || corridas <= Number(process.env.FAKE_BUILDER_SIN_ARCHIVO_HASTA || 0);
+if (!sinArchivo) writeFileSync(join(process.cwd(), "creado.txt"), "hecho\\n");
+if (process.env.FAKE_BUILDER_FUERA === "1") writeFileSync(join(process.cwd(), "extra.txt"), "fuera de Scope\\n");
 if (readFileSync(planPath, "utf8").includes("continuity: continuous")) {
   let plan = readFileSync(planPath, "utf8").replace("- [ ] crear primero.txt", "- [x] crear primero.txt")
     .replace("- [ ] crear segundo.txt", "- [x] crear segundo.txt")
@@ -96,6 +110,9 @@ if (rev) {
 } else if (process.env.FAKE_CODEX_CUELGA === "1") {
   setTimeout(() => {}, 60000);
 } else {
+  // Como execute-plan: deja el plan en done antes de devolver DONE (la puerta lo exige con DONE).
+  const planPath = join(process.cwd(), "changes/prueba/plan.md");
+  writeFileSync(planPath, leer(planPath, "utf8").replace(/^status: .*$/m, "status: done"));
   writeFileSync(join(process.cwd(), "creado.txt"), "hecho\\n");
   console.log("DONE: plan=changes/prueba/plan.md; segment=1; verify=pasa");
 }
@@ -144,7 +161,7 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false, git: conGit = tr
   mkdirSync(join(raiz, "changes/prueba"), { recursive: true });
   writeFileSync(join(raiz, PLAN_REL), plan);
   if (conGit) {
-    git(raiz, "init", "-q");
+    git(raiz, "init", "-q", "-b", "main");
     git(raiz, "add", "-A");
     git(raiz, "commit", "-q", "-m", "base");
   }
@@ -161,6 +178,9 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false, git: conGit = tr
     FAKE_DEVUELVE_HASTA: "0",
     FAKE_VEREDICTO: "",
     FAKE_CODEX_CUELGA: "0",
+    FAKE_BUILDER_SIN_ARCHIVO: "0",
+    FAKE_BUILDER_SIN_ARCHIVO_HASTA: "0",
+    FAKE_BUILDER_FUERA: "0",
     ...env,
   };
   delete entorno.KIT_RUN_TOPE_MS;
@@ -473,14 +493,14 @@ caso("V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>", () => {
 });
 
 // Registro de intentos (changes/prueba/runs.jsonl): una línea por intento, sin cambiar la decisión de kit run.
-const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin"];
+const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "puerta", "puerta_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin"];
 function leerRuns(raiz) {
   const ruta = join(raiz, "changes/prueba/runs.jsonl");
   return existsSync(ruta) ? readFileSync(ruta, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l)) : null;
 }
 
-// R1: una corrida aprobada deja 1 línea con los 13 campos y duraciones enteras ≥ 0.
-caso("R1 registro: una corrida aprobada deja 1 línea con los 13 campos y duraciones enteras ≥ 0", () => {
+// R1: una corrida aprobada deja 1 línea con los 15 campos (incluidos puerta y puerta_ms) y duraciones enteras ≥ 0.
+caso("R1 registro: una corrida aprobada deja 1 línea con los 15 campos y duraciones enteras ≥ 0", () => {
   const r = correr("r1");
   assert.equal(r.status, 0, r.stderr);
   const runs = leerRuns(r.raiz);
@@ -492,7 +512,8 @@ caso("R1 registro: una corrida aprobada deja 1 línea con los 13 campos y duraci
   assert.match(x.fecha, /^\d{4}-\d{2}-\d{2}T/);
   assert.equal(x.herramienta, "codex");
   assert.match(x.builder_modelo, /^[^:\s]+:[^:\s]+$/);
-  for (const k of ["builder_ms", "verify_ms", "revisor_ms"]) assert.ok(Number.isInteger(x[k]) && x[k] >= 0, `${k}=${x[k]}`);
+  for (const k of ["builder_ms", "verify_ms", "revisor_ms", "puerta_ms"]) assert.ok(Number.isInteger(x[k]) && x[k] >= 0, `${k}=${x[k]}`);
+  assert.equal(x.puerta, "pasa");
   assert.equal(x.resultado, "DONE");
   assert.equal(x.motivo_relanzamiento, null);
   assert.equal(x.relanzamientos, 0);
@@ -551,6 +572,224 @@ caso("R5 huellas: null sin git; cadenas distintas cuando el builder cambió arch
   assert.equal(typeof y.huella_inicio, "string");
   assert.equal(typeof y.huella_fin, "string");
   assert.notEqual(y.huella_inicio, y.huella_fin);
+});
+
+// Puerta mecánica (tools/run/puerta.mjs) con herramientas falsas inyectadas por dirHerramientas.
+function herramientasFalsas(respuestas) {
+  const d = mkdtempSync(join(tmpdir(), "kit-run-puerta-"));
+  for (const [nombre, r] of Object.entries(respuestas)) {
+    writeFileSync(join(d, nombre), `process.stdout.write(${JSON.stringify(r.stdout ?? "")});\nprocess.stderr.write(${JSON.stringify(r.stderr ?? "")});\nprocess.exit(${r.code ?? 0});\n`);
+  }
+  return d;
+}
+function conHerramientas(respuestas, fn) {
+  const d = herramientasFalsas(respuestas);
+  try {
+    return fn(d);
+  } finally {
+    rmSync(d, { recursive: true, force: true });
+  }
+}
+function puertaCon(respuestas) {
+  return conHerramientas(respuestas, dirHerramientas => ejecutarPuerta({ planPath: PLAN_REL, raiz: tmpdir(), dirHerramientas }));
+}
+const OK = { code: 0, stdout: "", stderr: "" };
+const SCOPE_OK = { code: 0, stdout: JSON.stringify({ filas: [{ nivel: "ok", elemento: "src/a.js", mensaje: "dentro de Scope" }] }), stderr: "" };
+const CLOSE_OK = { code: 0, stdout: JSON.stringify({ filas: [] }), stderr: "" };
+
+caso("puerta-faltante: sin una herramienta es no verificable y no bloquea", () => {
+  conHerramientas({ "kit-check.mjs": OK }, dirHerramientas => {
+    const p = ejecutarPuerta({ planPath: PLAN_REL, raiz: tmpdir(), dirHerramientas });
+    assert.equal(p.estado, "no_verificable");
+    assert.equal(p.bloquea, false);
+    assert.deepEqual(p.noAutomatizables, ["faltan: kit-scope.mjs, kit-close.mjs"]);
+  });
+  assert.deepEqual(herramientasFaltantes(), []);
+});
+
+caso("puerta-verde: las tres herramientas pasan sin lista", () => {
+  const p = puertaCon({
+    "kit-check.mjs": { code: 0, stdout: "A1 | ok | npm test | 12 pruebas\n", stderr: "" },
+    "kit-scope.mjs": SCOPE_OK,
+    "kit-close.mjs": CLOSE_OK,
+  });
+  assert.equal(p.estado, "pasa");
+  assert.equal(p.bloquea, false);
+  assert.equal(p.motivo, null);
+  assert.deepEqual(p.lista, []);
+  assert.deepEqual(p.codigos, { "kit-check.mjs": 0, "kit-scope.mjs": 0, "kit-close.mjs": 0 });
+});
+
+caso("puerta-roja: falla de Scope y de verificación con lista exacta y motivo scope", () => {
+  const p = puertaCon({
+    "kit-check.mjs": { code: 1, stdout: "A1 | falla | npm test | exit 1 | motivo: boom\n", stderr: "" },
+    "kit-scope.mjs": { code: 1, stdout: JSON.stringify({ filas: [{ nivel: "error", elemento: "src/x.js", mensaje: "fuera de Scope" }] }), stderr: "" },
+    "kit-close.mjs": CLOSE_OK,
+  });
+  assert.equal(p.estado, "falla");
+  assert.equal(p.bloquea, true);
+  assert.equal(p.motivo, "scope");
+  assert.deepEqual(p.lista, ["A1: motivo: boom", "fuera de alcance: src/x.js"]);
+  const texto = textoParaBuilder(p);
+  assert.match(texto, /^La puerta mecánica \(kit-check, kit-scope, kit-close\) no pasó\./);
+  assert.match(texto, /^- A1: motivo: boom$/m);
+  assert.match(texto, /^- fuera de alcance: src\/x\.js$/m);
+});
+
+caso("puerta-roja-verify: solo kit-check falla y el motivo es verify", () => {
+  const p = puertaCon({
+    "kit-check.mjs": { code: 1, stdout: "A3 | falla | npm test | motivo: x\n", stderr: "" },
+    "kit-scope.mjs": SCOPE_OK,
+    "kit-close.mjs": CLOSE_OK,
+  });
+  assert.equal(p.bloquea, true);
+  assert.equal(p.motivo, "verify");
+  assert.deepEqual(p.lista, ["A3: motivo: x"]);
+});
+
+caso("puerta-no-verificable: bloqueado no bloquea y va al revisor como no automatizable", () => {
+  const p = puertaCon({
+    "kit-check.mjs": { code: 3, stdout: "A2 | bloqueado | npm test | sin cola\n", stderr: "" },
+    "kit-scope.mjs": SCOPE_OK,
+    "kit-close.mjs": CLOSE_OK,
+  });
+  assert.equal(p.estado, "no_verificable");
+  assert.equal(p.bloquea, false);
+  assert.deepEqual(p.lista, []);
+  assert.deepEqual(p.noAutomatizables, ["A2: bloqueado"]);
+  const texto = textoParaRevisor(p);
+  assert.match(texto, /^Puerta mecánica: no_verificable\./);
+  assert.match(texto, /^No automatizable \(revísalo tú\):$/m);
+  assert.match(texto, /^- A2: bloqueado$/m);
+  assert.match(texto, /Enfócate en diseño, riesgos y lo no automatizable\.$/);
+});
+
+caso("puerta-sin-detalle: salida 1 sin filas bloquea y lo dice", () => {
+  const p = puertaCon({
+    "kit-check.mjs": { code: 1, stdout: "", stderr: "" },
+    "kit-scope.mjs": SCOPE_OK,
+    "kit-close.mjs": CLOSE_OK,
+  });
+  assert.equal(p.bloquea, true);
+  assert.equal(p.motivo, "verify");
+  assert.deepEqual(p.lista, ["kit-check.mjs: salió con 1 sin detalle"]);
+});
+
+caso("puerta-salida-2: uso o plan mal formado no bloquea y se nombra", () => {
+  const p = puertaCon({
+    "kit-check.mjs": SCOPE_OK,
+    "kit-scope.mjs": { code: 2, stdout: "", stderr: "kit-scope: falta el plan\n" },
+    "kit-close.mjs": CLOSE_OK,
+  });
+  assert.equal(p.bloquea, false);
+  assert.equal(p.estado, "no_verificable");
+  assert.deepEqual(p.noAutomatizables, ["kit-scope.mjs: salió con 2 (kit-scope: falta el plan)"]);
+});
+
+caso("A5 promptRevisor con el resultado de la puerta lo incluye; sin él no cambia", () => {
+  const p = puertaCon({
+    "kit-check.mjs": { code: 3, stdout: "A2 | bloqueado | npm test | sin cola\n", stderr: "" },
+    "kit-scope.mjs": SCOPE_OK,
+    "kit-close.mjs": CLOSE_OK,
+  });
+  const diff = "diff de prueba";
+  const sin = promptRevisor(PLAN_REL, diff, ESQUEMA_VEREDICTO);
+  const con = promptRevisor(PLAN_REL, diff, ESQUEMA_VEREDICTO, textoParaRevisor(p));
+  assert.equal(sin, promptRevisor(PLAN_REL, diff, ESQUEMA_VEREDICTO, undefined));
+  assert.ok(con.includes(textoParaRevisor(p)));
+  assert.ok(con.indexOf("Puerta mecánica:") < con.indexOf("--- diff ---"));
+  assert.ok(!sin.includes("Puerta mecánica:"));
+});
+
+caso("filasCheck: el detalle va tras el último separador", () => {
+  assert.deepEqual(filasCheck("A1 | falla | npm run x | a | b\nnada\n"), [{ id: "A1", estado: "falla", detalle: "b" }]);
+});
+
+// Puerta mecánica dentro de kit run: herramientas reales de scripts/ sobre el repo temporal.
+caso("puerta-preflight: sin una herramienta de la puerta el kit sale con 2 antes de tocar el plan", () => {
+  const copia = join(dir, "kit-sin-kit-close");
+  mkdirSync(copia);
+  cpSync(join(KIT_RAIZ, "scripts"), join(copia, "scripts"), { recursive: true });
+  cpSync(join(KIT_RAIZ, "tools"), join(copia, "tools"), { recursive: true });
+  cpSync(join(KIT_RAIZ, "adapters"), join(copia, "adapters"), { recursive: true });
+  cpSync(join(KIT_RAIZ, "models.json"), join(copia, "models.json"));
+  rmSync(join(copia, "scripts", "kit-close.mjs"));
+  const r = correr("puerta-preflight", { kit: join(copia, "scripts", "kit-run.mjs") });
+  assert.equal(r.status, 2, r.stdout + r.stderr);
+  assert.match(r.stderr, /faltan herramientas de la puerta mecánica en scripts\/: kit-close\.mjs/);
+  assert.equal(r.cuenta("builder"), 0);
+  assert.equal(r.estado, "approved");
+});
+
+caso("puerta-verde-revisor: con la puerta en verde el revisor recibe su resultado", () => {
+  const r = correr("puerta-verde-revisor");
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(r.cuenta("builder"), 1);
+  assert.equal(r.cuenta("reviewer"), 1);
+  const rev = r.registro.find(x => x.rol === "reviewer");
+  assert.match(rev.entrada, /Puerta mecánica: pasa\./);
+  assert.equal(r.estado, "done");
+});
+
+caso("puerta-roja-relanza: A# en rojo no llega al revisor y el builder recibe la lista exacta y el resumen", () => {
+  const r = correr("puerta-roja-relanza", { env: { FAKE_BUILDER_SIN_ARCHIVO_HASTA: "1" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const builders = r.registro.filter(x => x.rol === "builder");
+  assert.equal(builders.length, 2);
+  assert.equal(r.cuenta("reviewer"), 1);
+  const posicionSegundo = r.registro.indexOf(builders[1]);
+  const posicionRevisor = r.registro.findIndex(x => x.rol === "reviewer");
+  assert.ok(posicionRevisor > posicionSegundo, "el revisor solo se llama tras la segunda corrida verde");
+  assert.match(builders[1].entrada, /La puerta mecánica \(kit-check, kit-scope, kit-close\) no pasó\./);
+  assert.match(builders[1].entrada, /^- A1: /m);
+  assert.match(builders[1].entrada, /Progress summary:/);
+  const runs = leerRuns(r.raiz);
+  assert.equal(runs[0].puerta, "falla");
+  assert.equal(runs[0].resultado, "devuelto");
+  assert.equal(runs[0].motivo_relanzamiento, "puerta");
+  assert.equal(runs.at(-1).puerta, "pasa");
+});
+
+caso("puerta-fuera-de-alcance: un archivo fuera de Scope bloquea sin revisor y agota con motivo scope", () => {
+  const r = correr("puerta-fuera-de-alcance", { env: { FAKE_BUILDER_FUERA: "1" } });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.match(r.stdout, /motivo=scope/);
+  assert.equal(r.cuenta("builder"), 3);
+  assert.equal(r.cuenta("reviewer"), 0);
+  assert.equal(r.estado, "partial");
+});
+
+caso("puerta-tercer-fallo: la tercera corrida con la puerta en rojo pausa con exit 1 y sin revisor", () => {
+  const r = correr("puerta-tercer-fallo", { env: { FAKE_BUILDER_SIN_ARCHIVO: "1" } });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.match(r.stdout, /motivo=verify/);
+  assert.equal(r.cuenta("builder"), 3);
+  assert.equal(r.cuenta("reviewer"), 0);
+  assert.equal(r.estado, "partial");
+});
+
+caso("runs-report-puerta: el informe acepta el motivo puerta y los campos nuevos", () => {
+  const r = correr("runs-report-puerta", { env: { FAKE_BUILDER_SIN_ARCHIVO_HASTA: "1" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const rep = spawnSync(process.execPath, [join(KIT_RAIZ, "scripts", "runs-report.mjs"), "--raiz", r.raiz], { encoding: "utf8" });
+  assert.equal(rep.status, 0, rep.stdout + rep.stderr);
+});
+
+// M2: quitar la compuerta de la puerta hace que la roja no relance; puerta-roja-relanza debe fallar.
+caso("M2 mutación sensible: sin la compuerta de la puerta la roja-relanza falla", () => {
+  const mutado = join(KIT_RAIZ, "scripts", ".kit-run-sin-puerta.mjs");
+  const original = readFileSync(KIT, "utf8");
+  const guardia = "if (puerta.bloquea) {";
+  assert.equal(original.split(guardia).length - 1, 1, "la mutación debe encontrar una sola guarda de la puerta");
+  writeFileSync(mutado, original.replace(guardia, "if (false && puerta.bloquea) {"));
+  try {
+    const r = correr("m2", { env: { FAKE_BUILDER_SIN_ARCHIVO_HASTA: "1" }, kit: mutado });
+    assert.throws(() => {
+      assert.equal(r.cuenta("builder"), 2, "contrato puerta-roja-relanza: la puerta roja relanza al builder");
+    }, /la puerta roja relanza al builder/);
+  } finally {
+    rmSync(mutado, { force: true });
+  }
 });
 
 let fallos = 0;
