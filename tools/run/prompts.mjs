@@ -14,12 +14,14 @@ function claveFalloVerificacion(v) {
   return `${v.status ?? "sin-codigo"}:${(v.stdout + v.stderr).trim().replace(/\s+/g, " ")}`;
 }
 
-function promptRevisor(planRel, diff, esquema) {
+// `puertaTexto` (opcional, de textoParaRevisor): sin él, el prompt es idéntico al de antes.
+function promptRevisor(planRel, diff, esquema, puertaTexto) {
   return [
     `Review plan ${planRel} against the diff below. Read only; do not write anything.`,
     "Return ONLY JSON that conforms to this schema, with no surrounding text:",
     JSON.stringify(esquema),
     "Use veredicto APPROVED if the Aceptación requirements are met; RETURNED with defects (archivo, linea, criterio) otherwise; PAUSED if something missing cannot be decided.",
+    ...(puertaTexto ? ["", puertaTexto] : []),
     "",
     "--- diff ---",
     diff,
