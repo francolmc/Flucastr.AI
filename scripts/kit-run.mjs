@@ -22,7 +22,8 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { anotarNotas, comandoVerificacion, fijarEstado, frontmatter, progreso } from "../tools/run/plan.mjs";
-import { correr, topeMs } from "../tools/run/process.mjs";
+import { correr, correrVigilado, topeMs } from "../tools/run/process.mjs";
+import { MINUTO, configuracion, evaluarPegado } from "../tools/run/pegado.mjs";
 import { fingerprintTree } from "../tools/run/tree-fingerprint.mjs";
 import { ESQUEMA_VEREDICTO, validarVeredicto } from "../tools/run/verdict.mjs";
 import { claveFalloVerificacion, cola, promptBuilder, promptRevisor } from "../tools/run/prompts.mjs";
@@ -38,6 +39,19 @@ const RAIZ_KIT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const VIGILANTE = join(RAIZ_KIT, "scripts", "progress-watch.mjs");
 // KIT_PROGRESO=0 desactiva la señal, el resumen y el evento de corte; las decisiones no cambian.
 const PROGRESO = process.env.KIT_PROGRESO !== "0";
+// Detector de builder pegado (KIT_RUN_PEGADO: 0 apagado, observar por defecto, cortar). Ver docs/kit-run.md.
+const PEGADO = configuracionPegado(process.env);
+
+// KIT_RUN_PEGADO_ARRANQUE_MS y KIT_RUN_PEGADO_MIN_REP_MS solo para pruebas (como KIT_RUN_TOPE_MS):
+// sin ellas, las pruebas de corte tardarían los 5 min del arranque. Los valores por defecto no cambian.
+function configuracionPegado(env) {
+  const base = configuracion(env);
+  const fijo = (valor, defecto) => {
+    const n = Number(valor);
+    return valor !== undefined && valor !== "" && Number.isFinite(n) && n > 0 ? Math.round(n) : defecto;
+  };
+  return { ...base, arranqueMs: fijo(env.KIT_RUN_PEGADO_ARRANQUE_MS, base.arranqueMs), minRepMs: fijo(env.KIT_RUN_PEGADO_MIN_REP_MS, base.minRepMs) };
+}
 const { resolverAgente, resolverRevisorKit, etiquetaRevisor, etiquetaBuilder, comprobarPoliticaClaude } = crearResolutoresPerfil(RAIZ_KIT);
 const comando = crearComando({ resolverAgente, resolverRevisorKit });
 const MAX_RELANZAMIENTOS = 2;
@@ -110,7 +124,15 @@ function resumenParaRelanzar(planPath) {
   }
 }
 
-function main() {
+// Versión asíncrona de medir: el builder corre con correrVigilado (puede cortarse por pegado o por tope).
+async function medirAsync(fn) {
+  const inicio = process.hrtime.bigint();
+  const valor = await fn();
+  const ms = Number((process.hrtime.bigint() - inicio) / 1000000n);
+  return { valor, ms };
+}
+
+async function main() {
   const a = leerArgs(process.argv.slice(2));
   if (a.herramienta !== "codex" && !(process.env.KIT_RUN_BUILDER && process.env.KIT_RUN_REVIEWER)) {
     uso(`herramienta «${a.herramienta}» aún sin mapear (tramo 3); define KIT_RUN_BUILDER y KIT_RUN_REVIEWER`);
@@ -178,12 +200,36 @@ function main() {
       const inicioRun = Date.now();
       if (inicioPrimera === null) inicioPrimera = inicioRun;
       const vigilante = lanzarVigilante(planPath, a.herramienta, raiz, inicioRun);
-      const cm = medir(() => correr(comando("BUILDER", a.herramienta, raiz), prompt, raiz, false, topeMs("BUILDER")));
+      // Pegado: sin escrituras ni eventos de avance durante el umbral, el builder se corta (cortar) o se registra (observar).
+      let pegadoCorte = null;
+      const vigilarPegado = () => {
+        const r = evaluarPegado(leerEventos(rutaProgreso).eventos, { ahora: Date.now(), inicioMs: inicioRun, config: PEGADO, declarados: PEGADO.largos });
+        if (r.estado !== "pegado") return { cortar: false };
+        if (PEGADO.modo === "cortar") {
+          pegadoCorte = r;
+          if (PROGRESO) anexar(rutaProgreso, evento("bloqueo", { seg: tramo ?? null, o: "kitrun", texto: `pegado: ${r.patron}` }));
+          return { cortar: true, motivo: r.patron };
+        }
+        if (intento !== null && intento.pegado === undefined) {
+          intento.pegado = { modo: PEGADO.modo, patron: r.patron, detalle: r.detalle, minuto: Math.round((Date.now() - inicioRun) / MINUTO) };
+          if (PROGRESO) anexar(rutaProgreso, evento("bloqueo", { seg: tramo ?? null, o: "kitrun", texto: `pegado (observado): ${r.patron}` }));
+        }
+        return { cortar: false };
+      };
+      const cm = await medirAsync(() => correrVigilado(comando("BUILDER", a.herramienta, raiz), prompt, raiz, {
+        tope: topeMs("BUILDER"),
+        intervaloMs: PEGADO.intervaloMs,
+        vigilar: PEGADO.modo === "apagado" ? null : vigilarPegado,
+      }));
       vigilante?.kill("SIGTERM");
       const c = cm.valor;
       if (porTope(c)) { corte = true; bloqueoCorte(); }
       intento.builder_ms = cm.ms;
       intento.huella_fin = fingerprintTree(raiz);
+      if (pegadoCorte !== null && /^cortado: /.test(String(c.error ?? ""))) {
+        final = { pausa: true, motivo: "access", msg: `builder pegado (${pegadoCorte.patron}): ${pegadoCorte.detalle}`, pegado: pegadoCorte };
+        break;
+      }
       const primera = c.stdout.trim().split("\n")[0] ?? "";
       if (c.error || c.status !== 0) { final = { pausa: true, motivo: "access", msg: `el builder falló (${c.error ?? `exit ${c.status}`}): ${cola(c.stderr)}` }; break; }
       if (primera.startsWith("PAUSED")) {
@@ -270,6 +316,11 @@ function main() {
   if (intento !== null) { intento.resultado = final.aprobado ? "DONE" : "PAUSED"; volcarIntento(); }
   const { hechos, total } = progreso(planPath);
   cerrarProgreso({ planPath, herramienta: a.herramienta, raiz, desde: inicioPrimera ?? Date.now(), resultado: final.aprobado ? "DONE" : "PAUSED", motivo: final.motivo, corte: corte && !final.aprobado, nombre: planRel });
+  // Corte por pegado: nota con lo hecho, la primera casilla pendiente y la causa. Las casillas no se tocan.
+  if (final.pegado) {
+    const pendiente = casillasDelPlan(planPath).casillas.find((c) => !c.marcada)?.texto ?? "ninguna";
+    anotarNotas(planPath, `builder pegado (${final.pegado.patron}); hecho=${hechos}/${total}; falta=${pendiente}; causa=${final.pegado.detalle}. No se relanzó; revisar el plan antes de reanudar.`);
+  }
   if (final.aprobado) {
     fijarEstado(planPath, "done");
     anotarNotas(planPath, `revisión APPROVED tras ${relanzamientos + 1} corrida(s) del builder; verify pasó; revisor=${revisor}.`);
@@ -282,4 +333,4 @@ function main() {
   process.exit(1);
 }
 
-main();
+await main();
