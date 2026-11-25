@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawnSyncSeguro } from '../../tools/spawn/sync-seguro.mjs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const script = path.join(root, 'scripts/review-plan.mjs');
 const fixture = (name) => path.join(root, 'tests/review-plan/fixtures', name);
-const run = (file) => spawnSync(process.execPath, [script, file], { encoding: 'utf8' });
+const run = (file) => spawnSyncSeguro(process.execPath, [script, file], { encoding: 'utf8' });
 const temporary = async (callback) => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'review-plan-'));
   try { await callback(dir); } finally { await rm(dir, { recursive: true, force: true }); }
@@ -120,7 +120,7 @@ test('legacy scenarios and global acceptance remain valid', async () => temporar
 }));
 
 test('CLI errors use exit 2 and write to stderr', async () => {
-  const noArgument = spawnSync(process.execPath, [script], { encoding: 'utf8' });
+  const noArgument = spawnSyncSeguro(process.execPath, [script], { encoding: 'utf8' });
   assert.equal(noArgument.status, 2);
   assert.equal(noArgument.stdout, '');
   assert.match(noArgument.stderr, /archivo Markdown/);

@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { fileURLToPath } from "node:url";
 import { promptRevisor } from "../../tools/run/prompts.mjs";
 import { ESQUEMA_VEREDICTO } from "../../tools/run/verdict.mjs";
@@ -148,7 +148,7 @@ for (const [nombre, cuerpo] of Object.entries(FALSOS)) {
 const exe = (n) => join(bin, n);
 
 function git(raiz, ...a) {
-  const r = spawnSync("git", ["-c", "user.name=prueba", "-c", "user.email=prueba@example.com", ...a], { cwd: raiz, encoding: "utf8" });
+  const r = spawnSyncSeguro("git", ["-c", "user.name=prueba", "-c", "user.email=prueba@example.com", ...a], { cwd: raiz, encoding: "utf8" });
   if (r.status !== 0) throw new Error(`git ${a.join(" ")}: ${r.stderr}`);
   return r.stdout;
 }
@@ -194,7 +194,7 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false, git: conGit = tr
     entorno.KIT_RUN_REVIEWER = exe("revisor.mjs");
   }
   if (env.KIT_RUN_TOPE_MS) entorno.KIT_RUN_TOPE_MS = env.KIT_RUN_TOPE_MS;
-  const r = spawnSync(process.execPath, [kit, PLAN_REL, ...opciones(raiz)], { encoding: "utf8", env: entorno });
+  const r = spawnSyncSeguro(process.execPath, [kit, PLAN_REL, ...opciones(raiz)], { encoding: "utf8", env: entorno });
   const registro = readFileSync(log, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l));
   const cuenta = (rol) => registro.filter(x => x.rol === rol).length;
   const estado = readFileSync(join(raiz, PLAN_REL), "utf8").match(/^status: (.*)$/m)[1];
@@ -221,7 +221,7 @@ caso("las opciones en inglés conservan el recorrido y las mezclas con mayúscul
 
 caso("las opciones en español se rechazan con código 2", () => {
   for (const opcion of ["--herramienta", "--raiz"]) {
-    const r = spawnSync(process.execPath, [KIT, PLAN_REL, opcion, "codex"], { cwd: dir, encoding: "utf8" });
+    const r = spawnSyncSeguro(process.execPath, [KIT, PLAN_REL, opcion, "codex"], { cwd: dir, encoding: "utf8" });
     assert.equal(r.status, 2, `${opcion} ya no debe aceptarse`);
     assert.match(r.stderr, /opción desconocida/);
   }
@@ -229,7 +229,7 @@ caso("las opciones en español se rechazan con código 2", () => {
 
 caso("las opciones en inglés conservan los errores con argumentos ausentes", () => {
   for (const opcion of ["--tool", "--root"]) {
-    const r = spawnSync(process.execPath, [KIT, PLAN_REL, opcion], { cwd: dir, encoding: "utf8" });
+    const r = spawnSyncSeguro(process.execPath, [KIT, PLAN_REL, opcion], { cwd: dir, encoding: "utf8" });
     assert.notEqual(r.status, 0);
   }
 });
@@ -771,7 +771,7 @@ caso("puerta-tercer-fallo: la tercera corrida con la puerta en rojo pausa con ex
 caso("runs-report-puerta: el informe acepta el motivo puerta y los campos nuevos", () => {
   const r = correr("runs-report-puerta", { env: { FAKE_BUILDER_SIN_ARCHIVO_HASTA: "1" } });
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  const rep = spawnSync(process.execPath, [join(KIT_RAIZ, "scripts", "runs-report.mjs"), "--raiz", r.raiz], { encoding: "utf8" });
+  const rep = spawnSyncSeguro(process.execPath, [join(KIT_RAIZ, "scripts", "runs-report.mjs"), "--raiz", r.raiz], { encoding: "utf8" });
   assert.equal(rep.status, 0, rep.stdout + rep.stderr);
 });
 

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { spawnSyncSeguro } from '../../tools/spawn/sync-seguro.mjs';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -15,7 +16,7 @@ function git(dir, args) {
 }
 
 function runDiagnose(dir) {
-  const result = spawnSync(process.execPath, [diagnoseScript, dir, '--json'], { encoding: 'utf8' });
+  const result = spawnSyncSeguro(process.execPath, [diagnoseScript, dir, '--json'], { encoding: 'utf8' });
   assert.equal(result.error, undefined, `diagnose no inició: ${result.error}`);
   assert.equal(result.status, 0, result.stderr);
   return result.stdout.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line)).find((item) => item.tipo === 'resultado');

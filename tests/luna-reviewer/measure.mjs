@@ -10,7 +10,7 @@
 // --autoprueba usa un codex falso al frente del PATH y un directorio temporal: no gasta ni toca resultados.jsonl.
 // Código de salida: 0 bien; 1 autoprueba fallida; 2 uso.
 
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -190,7 +190,7 @@ function correrCaso(caso, nombre, cond, tarifas, env, home, schemaPath) {
   const planRel = `tests/luna-reviewer/casos/${caso.id}/plan.md`;
   const diff = readFileSync(join(caso.dir, "diff.patch"), "utf8").slice(0, DIFF_MAX);
   const antes = new Set(listarRollouts(join(home, "sessions")));
-  const r = spawnSync("codex", [
+  const r = spawnSyncSeguro("codex", [
     "exec", "--sandbox", "read-only", "-m", cond.modelo, "-c", `model_reasoning_effort="${cond.effort}"`,
     "-C", RAIZ, "--output-schema", schemaPath, "-",
   ], {

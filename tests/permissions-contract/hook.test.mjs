@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { test } from "node:test";
+import { execFileSyncSeguro, spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { chmodSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -31,7 +32,7 @@ function proyecto(t) {
 }
 
 function decision(raiz, entrada) {
-  const r = spawnSync(process.execPath, [HOOK, "decision", "--project", raiz], {
+  const r = spawnSyncSeguro(process.execPath, [HOOK, "decision", "--project", raiz], {
     cwd: raiz,
     input: JSON.stringify(entrada),
     encoding: "utf8",
@@ -106,7 +107,7 @@ test("instala hooks sin pisar entradas ajenas, es idempotente y kit run exige es
   const settings = join(raiz, ".claude/settings.local.json");
   mkdirSync(join(raiz, ".claude"), { recursive: true });
   writeFileSync(settings, JSON.stringify({ theme: "dark", permissions: { allow: ["Bash(*)"] }, hooks: { PreToolUse: [{ matcher: "Bash", hooks: [{ type: "command", command: "echo ajeno" }] }] } }));
-  const instalar = () => execFileSync(process.execPath, [HOOK, "instalar", raiz], { encoding: "utf8", timeout: 10000 }).trim();
+  const instalar = () => execFileSyncSeguro(process.execPath, [HOOK, "instalar", raiz], { encoding: "utf8", timeout: 10000 }).trim();
   const firstInstall = instalar();
   assert.equal(firstInstall, "fijado");
   assert.equal(instalar(), "ya-estaba");
@@ -117,7 +118,7 @@ test("instala hooks sin pisar entradas ajenas, es idempotente y kit run exige es
   assert.equal(config.hooks.PreToolUse[0].hooks[0].command, "echo ajeno");
   assert.equal(config.hooks.PreToolUse[1].matcher, "Bash");
   assert.equal(config.hooks.PreToolUse[1].hooks[0].onFailure, "block");
-  const falloHook = spawnSync(process.execPath, [HOOK, "decision", "--project", raiz], { input: "{", encoding: "utf8" });
+  const falloHook = spawnSyncSeguro(process.execPath, [HOOK, "decision", "--project", raiz], { input: "{", encoding: "utf8" });
   assert.equal(falloHook.status, 1);
 
   // Una instalación antigua con dos matchers del kit (Bash y Read|Grep|Glob) no cuenta como instalada:
@@ -129,7 +130,7 @@ test("instala hooks sin pisar entradas ajenas, es idempotente y kit run exige es
     hooks: [...kitBash.hooks, { type: "command", command: "echo vecino" }],
   }, kitLectura];
   writeFileSync(settings, JSON.stringify(config));
-  assert.equal(execFileSync(process.execPath, [HOOK, "comprobar", raiz], { encoding: "utf8" }).trim(), "ausente");
+  assert.equal(execFileSyncSeguro(process.execPath, [HOOK, "comprobar", raiz], { encoding: "utf8" }).trim(), "ausente");
   assert.equal(instalar(), "fijado");
   const reparado = JSON.parse(readFileSync(settings, "utf8"));
   assert.equal(reparado.hooks.PreToolUse.length, 3);
@@ -140,11 +141,11 @@ test("instala hooks sin pisar entradas ajenas, es idempotente y kit run exige es
 
   const env = { ...process.env, KIT_RUN_BUILDER: "/bin/true", KIT_RUN_REVIEWER: "/bin/true" };
   rmSync(settings);
-  const ausente = spawnSync(process.execPath, [KIT_RUN, "no-existe.md", "--tool", "claude", "--root", raiz], { encoding: "utf8", env, timeout: 10000 });
+  const ausente = spawnSyncSeguro(process.execPath, [KIT_RUN, "no-existe.md", "--tool", "claude", "--root", raiz], { encoding: "utf8", env, timeout: 10000 });
   assert.equal(ausente.status, 2);
   assert.match(ausente.stderr, /no tiene instalada la política conservadora/);
   instalar();
-  const presente = spawnSync(process.execPath, [KIT_RUN, "no-existe.md", "--tool", "claude", "--root", raiz], { encoding: "utf8", env, timeout: 10000 });
+  const presente = spawnSyncSeguro(process.execPath, [KIT_RUN, "no-existe.md", "--tool", "claude", "--root", raiz], { encoding: "utf8", env, timeout: 10000 });
   assert.equal(presente.status, 2);
   assert.match(presente.stderr, /no existe el plan/);
   assert.doesNotMatch(presente.stderr, /política conservadora/);
@@ -159,7 +160,7 @@ test("instala hooks sin pisar entradas ajenas, es idempotente y kit run exige es
   writeFileSync(revisor, "#!/bin/sh\ncat >/dev/null\nprintf 'revisor:%s\\n' \"$PWD\" >> \"$POLITICA_LOG\"\nprintf '{\"veredicto\":\"APPROVED\",\"defectos\":[]}\\n'\n");
   chmodSync(builder, 0o755);
   chmodSync(revisor, 0o755);
-  const ejecucion = spawnSync(process.execPath, [KIT_RUN, "plan.md", "--tool", "claude", "--root", raiz], {
+  const ejecucion = spawnSyncSeguro(process.execPath, [KIT_RUN, "plan.md", "--tool", "claude", "--root", raiz], {
     encoding: "utf8",
     env: { ...env, KIT_RUN_BUILDER: builder, KIT_RUN_REVIEWER: revisor, KIT_RUN_VERIFY: "/bin/true", POLITICA_LOG: log },
     timeout: 10000,
@@ -185,7 +186,7 @@ test("auditar enumera reglas allow amplias previas por archivo y avisa si no hay
   ];
   for (const [ruta, contenido] of configs) writeFileSync(ruta, JSON.stringify(contenido, null, 2) + "\n");
   const originales = configs.map(([ruta]) => readFileSync(ruta, "utf8"));
-  const resultado = JSON.parse(execFileSync(process.execPath, [HOOK, "auditar", raiz], {
+  const resultado = JSON.parse(execFileSyncSeguro(process.execPath, [HOOK, "auditar", raiz], {
     encoding: "utf8",
     env: { ...process.env, HOME: home },
     timeout: 10000,

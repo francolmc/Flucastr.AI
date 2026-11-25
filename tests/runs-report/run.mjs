@@ -4,7 +4,7 @@
 // --cli sirve solo para la comprobación de sensibilidad (una copia que ignora las líneas corruptas debe fallar el caso corrupto).
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -25,7 +25,7 @@ for (let i = 0; i < argv.length; i++) {
 }
 
 function correr(args) {
-  const r = spawnSync(process.execPath, [cli, ...args], { encoding: "utf8" });
+  const r = spawnSyncSeguro(process.execPath, [cli, ...args], { encoding: "utf8" });
   return { status: r.status, out: r.stdout ?? "", err: r.stderr ?? "" };
 }
 

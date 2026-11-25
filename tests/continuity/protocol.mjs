@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { appendFileSync, chmodSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 
@@ -36,7 +36,7 @@ assert.throws(
 console.log("ok contrato: ambos agentes adaptan el idioma y la mutación negativa se rechaza");
 
 function ejecutar(comando, args, opciones = {}) {
-  const r = spawnSync(comando, args, { encoding: "utf8", maxBuffer: 8 * 1024 * 1024, ...opciones });
+  const r = spawnSyncSeguro(comando, args, { encoding: "utf8", maxBuffer: 8 * 1024 * 1024, ...opciones });
   if (r.error) throw new Error(`${comando} ${args.join(" ")}: ${r.error.message}`);
   return r;
 }

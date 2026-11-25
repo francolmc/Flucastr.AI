@@ -1,6 +1,7 @@
-import { execFile, spawnSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { spawnSyncSeguro } from "../spawn/sync-seguro.mjs";
 
 // Comando externo sin lanzar excepciones: devuelve su salida (vacía si falla) y deja el error en el log.
 export function cmd(bin, args) {
@@ -28,8 +29,8 @@ export function diagnose(dir, ev, directorioDiagnosticos) {
   const id = ev.Actor?.ID ?? ev.id;
   if (!id || !/^[A-Za-z0-9._-]+$/.test(id)) return;
   const attrs = ev.Actor?.Attributes ?? {};
-  const logs = spawnSync("docker", ["logs", "--tail", "80", id], { encoding: "utf8" });
-  const insp = spawnSync("docker", ["inspect", id], { encoding: "utf8" });
+  const logs = spawnSyncSeguro("docker", ["logs", "--tail", "80", id], { encoding: "utf8" });
+  const insp = spawnSyncSeguro("docker", ["inspect", id], { encoding: "utf8" });
   const cuerpo = [
     `# ${ev.status ?? ev.Action} ${new Date(Number(ev.time) * 1000).toISOString()} ${attrs.name ?? ""}`,
     "## docker logs --tail 80",

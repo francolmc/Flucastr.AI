@@ -2,7 +2,7 @@
 // Cada caso corre scripts/kit-scope.mjs con --json y compara filas y código de salida.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSyncSeguro, execFileSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -40,7 +40,7 @@ ${evidencia}
 `;
 
 const git = (dir, args) =>
-  execFileSync("git", ["-C", dir, "-c", "user.name=prueba", "-c", "user.email=prueba@example.com", "-c", "commit.gpgsign=false", ...args], {
+  execFileSyncSeguro("git", ["-C", dir, "-c", "user.name=prueba", "-c", "user.email=prueba@example.com", "-c", "commit.gpgsign=false", ...args], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -75,7 +75,7 @@ function repo(scope, enRama, { planEnBase = plan(scope), confirmar = true } = {}
 }
 
 function correr(dir, args = [], plan_ = PLAN_REL) {
-  const r = spawnSync(process.execPath, [KIT, plan_, ...args], { cwd: dir, encoding: "utf8" });
+  const r = spawnSyncSeguro(process.execPath, [KIT, plan_, ...args], { cwd: dir, encoding: "utf8" });
   return { codigo: r.status, salida: r.stdout, error: r.stderr };
 }
 

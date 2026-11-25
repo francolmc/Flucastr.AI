@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -28,7 +28,7 @@ test("las reglas allow no contienen intérpretes ni comodines ajenos a lo genera
     "Acceptance: `node verificacion/aceptacion.mjs`",
     "Diagnóstico: `bash -c diagnose`",
   ].join("\n") + "\n");
-  execFileSync(process.execPath, [RESOLVER, "fijar-deny", "codex", archivo, agents], { encoding: "utf8" });
+  execFileSyncSeguro(process.execPath, [RESOLVER, "fijar-deny", "codex", archivo, agents], { encoding: "utf8" });
   const texto = readFileSync(archivo, "utf8");
   assert.ok(texto.startsWith(MARCA));
   const todas = reglas(texto);

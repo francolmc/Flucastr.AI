@@ -4,7 +4,7 @@
 // Uso: node tests/kit-close/run.mjs
 import { after, describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSyncSeguro, execFileSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -75,7 +75,7 @@ function escribirPlan(texto, tramos = {}) {
 }
 
 function cli(planPath, args = []) {
-  const r = spawnSync(process.execPath, [CLI, planPath, ...args], { encoding: "utf8" });
+  const r = spawnSyncSeguro(process.execPath, [CLI, planPath, ...args], { encoding: "utf8" });
   return { codigo: r.status, salida: r.stdout, error: r.stderr };
 }
 
@@ -85,7 +85,7 @@ function hay(informe, nivel, re) {
 
 // Conteo de pendientes que da el awk canónico sobre plan.md y los tramos indicados.
 function awkPendientes(planPath, tramosPaths) {
-  const salida = execFileSync("awk", ['/^- \\[ \\]/ {n++} END {print n+0}', planPath, ...tramosPaths], {
+  const salida = execFileSyncSeguro("awk", ['/^- \\[ \\]/ {n++} END {print n+0}', planPath, ...tramosPaths], {
     encoding: "utf8",
   });
   return Number(salida.trim());
@@ -372,7 +372,7 @@ describe("formato: etiqueta antes de $ y plan v1 sin status:", () => {
 
 describe("CLI: uso y códigos de salida", () => {
   test("--help sale con 0", () => {
-    const r = spawnSync(process.execPath, [CLI, "--help"], { encoding: "utf8" });
+    const r = spawnSyncSeguro(process.execPath, [CLI, "--help"], { encoding: "utf8" });
     assert.equal(r.status, 0);
   });
 

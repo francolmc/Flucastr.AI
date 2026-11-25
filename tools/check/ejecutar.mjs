@@ -75,6 +75,7 @@ export function ejecutarFila(fila, { timeoutMs = TIMEOUT_POR_OMISION } = {}) {
     cwd: fila.cwd ?? process.cwd(),
     shell: false,
     encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
     timeout: timeoutMs,
     maxBuffer: 16 * 1024 * 1024,
   });

@@ -4,14 +4,14 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { fileURLToPath } from "node:url";
 
 const SUITE = fileURLToPath(new URL("../builder-contract.mjs", import.meta.url));
 const RAIZ = fileURLToPath(new URL("../..", import.meta.url));
 
 test("builder-contract: la suite del contrato del builder pasa", () => {
-  const r = spawnSync(process.execPath, [SUITE], { cwd: RAIZ, encoding: "utf8", timeout: 300000 });
+  const r = spawnSyncSeguro(process.execPath, [SUITE], { cwd: RAIZ, encoding: "utf8", timeout: 300000 });
   const salida = `${r.stdout ?? ""}${r.stderr ?? ""}`.split("\n");
   const cola = salida.slice(-40).join("\n");
   assert.equal(

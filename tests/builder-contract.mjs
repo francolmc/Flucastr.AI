@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawnSyncSeguro } from '../tools/spawn/sync-seguro.mjs';
 
 const skill = readFileSync(new URL('../core/skills/execute-plan/SKILL.md', import.meta.url), 'utf8');
 const builder = readFileSync(new URL('../core/agents/builder.md', import.meta.url), 'utf8');
@@ -212,7 +212,7 @@ try {
   function run(script, file) {
     const scriptPath = join(dir, 'pendientes.sh');
     writeFileSync(scriptPath, script);
-    return spawnSync('bash', ['-e', scriptPath, file], { encoding: 'utf8' });
+    return spawnSyncSeguro('bash', ['-e', scriptPath, file], { encoding: 'utf8' });
   }
   function evaluateCases(items, script = block) {
     if (!Array.isArray(items) || items.length === 0) throw new Error('lista de casos vacía');

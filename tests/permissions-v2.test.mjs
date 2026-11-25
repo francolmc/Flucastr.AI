@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSyncSeguro, spawnSyncSeguro } from "../tools/spawn/sync-seguro.mjs";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -26,11 +26,11 @@ writeFileSync(agente, "Comprobación rápida: `./verify`\n");
 test.after(() => rmSync(temporal, { recursive: true, force: true }));
 
 function resolver(...args) {
-  return execFileSync(process.execPath, [RESOLVER, ...args], { encoding: "utf8" }).trim();
+  return execFileSyncSeguro(process.execPath, [RESOLVER, ...args], { encoding: "utf8" }).trim();
 }
 
 function evalCodex(args) {
-  const r = spawnSync("codex", ["execpolicy", "check", "--rules", manifest, ...args], { encoding: "utf8" });
+  const r = spawnSyncSeguro("codex", ["execpolicy","check", "--rules", manifest, ...args], { encoding: "utf8" });
   if (r.error?.code === "ENOENT") return { decision: "no probado", motivo: "codex no está instalado" };
   if (r.status !== 0) return { decision: "no probado", motivo: `execpolicy check exit ${r.status}: ${(r.stderr || r.stdout).trim()}` };
   let resultado;
@@ -84,7 +84,7 @@ test("instalar, reinstalar y desinstalar Claude preserva valores sandbox ajenos"
   writeFileSync(archivo, JSON.stringify(original));
   const env = { ...process.env, HOME: home, PI_CODING_AGENT_DIR: join(home, ".pi", "agent") };
   const instalar = () => {
-    const r = spawnSync("bash", [INSTALL, "--only", "claude", "--project", raiz], { encoding: "utf8", env, cwd: KIT, timeout: 30000 });
+    const r = spawnSyncSeguro("bash", [INSTALL, "--only", "claude", "--project", raiz], { encoding: "utf8", env, cwd: KIT, timeout: 30000 });
     assert.equal(r.status, 0, `install.sh falló: ${r.stderr}\n${r.stdout}`);
     assert.match(r.stdout + r.stderr, /reglas deny|sandbox/i);
   };
@@ -97,14 +97,14 @@ test("instalar, reinstalar y desinstalar Claude preserva valores sandbox ajenos"
   assert.equal(primero.sandbox.allowUnsandboxedCommands, false);
   instalar();
   assert.equal(readFileSync(archivo, "utf8"), instalado, "la reinstalación debe ser idempotente");
-  const quitar = spawnSync("bash", [UNINSTALL, "--project", raiz], { encoding: "utf8", env, cwd: KIT, timeout: 30000 });
+  const quitar = spawnSyncSeguro("bash", [UNINSTALL,"--project", raiz], { encoding: "utf8", env, cwd: KIT, timeout: 30000 });
   assert.equal(quitar.status, 0, `uninstall.sh falló: ${quitar.stderr}\n${quitar.stdout}`);
   assert.deepEqual(JSON.parse(readFileSync(archivo, "utf8")), original);
   console.log("Integración instalar/reinstalar/desinstalar en HOME y proyecto ficticios: sandbox y deny del kit retirados; ajustes propios conservados.");
 });
 
 test("Codex evalúa reglas directas y registra el límite de lectura de archivos", t => {
-  const version = spawnSync("codex", ["--version"], { encoding: "utf8" });
+  const version = spawnSyncSeguro("codex", ["--version"], { encoding: "utf8" });
   if (version.error?.code === "ENOENT" || version.status !== 0) {
     t.skip("Codex no está disponible");
     return;
