@@ -27,7 +27,7 @@ Respond in the language the user is currently using. Detect it from their latest
 - Do not call other agents or ask questions: if you cannot proceed, use `PAUSED`.
 - Read in chunks (`offset`, `limit`); rereading relevant material after edits or recovery is allowed; edit files with `edit`.
 - Long output: see *Execution Loop* in `execute-plan`.
-- Long commands (`verify`, builds): wait using one call (Claude Code: maximum `timeout` or `run_in_background` and wait for its notice; Pi: `bash` timeout; Codex: `exec_command` in an `exec` cell and, if it returns “Script running with cell ID N”, one `wait` call with that `cell_id` and `yield_time_ms: 300000`). Never loop with `sleep`, `tail`, or status polling.
+- Long commands (`verify`, builds): wait using one call (Claude Code: maximum `timeout` or `run_in_background` and wait for its notice; Pi: `bash` timeout; Codex: `exec_command` in an `exec` cell and, if it returns “Script running with cell ID N”, one `wait` call with that `cell_id` and `yield_time_ms: 300000`; if it returns a `session_id`, make one `write_stdin` call with empty `chars` and `yield_time_ms: 1800000`, and repeat only while the command still runs, never every few seconds). Never loop with `sleep`, `tail`, or status polling.
 
 ## Return
 

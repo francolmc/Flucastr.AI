@@ -1,0 +1,5 @@
+{"timestamp":"2026-11-25T10:00:00.000Z","type":"session_meta","payload":{"id":"write-stdin-1","cwd":"/home/test/Codes/proyecto-e"}}
+{"timestamp":"2026-11-25T10:00:01.000Z","type":"turn_context","payload":{"model":"gpt-write-stdin-fixture"}}
+{"timestamp":"2026-11-25T10:01:00.000Z","type":"response_item","payload":{"type":"function_call","name":"write_stdin","arguments":"{\"session_id\":93980,\"chars\":\"\",\"yield_time_ms\":1800000}","call_id":"w1"}}
+{"timestamp":"2026-11-25T10:02:00.000Z","type":"response_item","payload":{"type":"custom_tool_call","name":"exec","input":"const r1 = await tools.write_stdin({session_id:93980,chars:\"\",yield_time_ms:1000,max_output_tokens:4000});\nconst r2 = await tools.write_stdin({session_id:93980,chars:\"\",yield_time_ms:1000,max_output_tokens:4000});\ntext(r2);","call_id":"x1"}}
+{"timestamp":"2026-11-25T10:03:00.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":3000,"cached_input_tokens":500,"output_tokens":200,"total_tokens":3200},"last_token_usage":{"input_tokens":3000,"cached_input_tokens":500,"output_tokens":200,"total_tokens":3200}}}}

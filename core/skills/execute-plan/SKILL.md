@@ -45,7 +45,7 @@ For each `- [ ]` step, in order:
 - Count pending items with the `bash pendientes-plan` block below, passing the plan path as `$1`. Record the count; a read error is not zero. Continue with pending work unless an allowed blocker applies.
 - Fix related issues within scope and record them in *Notes*.
 - For long output (builds, `verify`, listings), show only the tail and errors; use quiet options when available.
-- Wait for long commands (`verify`, builds) with one call (Claude Code: maximum `timeout` or `run_in_background` and wait for its notice; Pi: `bash` timeout; Codex: `exec_command` in an `exec` cell and, if it returns “Script running with cell ID N”, make one `wait` call with that `cell_id` and `yield_time_ms: 300000`). Never poll with `sleep`, `tail`, or status loops.
+- Wait for long commands (`verify`, builds) with one call (Claude Code: maximum `timeout` or `run_in_background` and wait for its notice; Pi: `bash` timeout; Codex: `exec_command` in an `exec` cell and, if it returns “Script running with cell ID N”, make one `wait` call with that `cell_id` and `yield_time_ms: 300000`; if it returns a `session_id`, make one `write_stdin` call with empty `chars` and `yield_time_ms: 1800000`, and repeat only while the command still runs, never every few seconds). Never poll with `sleep`, `tail`, or status loops.
 - For browser/container validation, use a fixed repository script (`./scripts/<name>.sh` or `./verify`) that runs all journeys and captures in one pass. Do not chain standalone `docker run` or `compose run` calls.
 
 ### Canonical counter
