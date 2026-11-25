@@ -217,3 +217,56 @@ test('two or more tranches without continuity warn once; declared continuity or 
   await writeFile(file, '## Steps\n1. [Tramo 1](tramo-1.md)\n2. [Tramo 2](tramo-2.md)\n');
   assert.match(run(file).stdout, /plan\.md:\d+: el plan tiene 2 tramos sin «continuity: continuous»/);
 }));
+
+test('A2 valid new segment has no warnings', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'valido.md');
+  await writeFile(file, newStoryPlan());
+  const result = run(file);
+  assert.equal(result.status, 0, result.stdout);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, '', 'una historia nueva no imprime la nota de formato anterior');
+}));
+
+test('A2 new segment without A# criteria warns', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'sin-a.md');
+  await writeFile(file, newStoryPlan().replace(/Acceptance:\n- A1:[^\n]*\n/, ''));
+  const result = run(file);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /sin-a\.md:\d+: historia nueva: falta al menos un criterio A#/);
+}));
+
+test('A2 new segment without quick check warns', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'sin-check.md');
+  await writeFile(file, newStoryPlan().replace(/Segment verification:[^\n]*\n/, ''));
+  const result = run(file);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /sin-check\.md:\d+: historia nueva: falta Segment verification:/);
+}));
+
+test('A2 mixed units between two A# with disjoint product files warn', async () => {
+  const result = run(fixture('segment-mixed.md'));
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stdout, /segment-mixed\.md:7: historia nueva: A1 y A2 mezcla unidades/);
+});
+
+test('A2 uncovered A#, missing level and service markers at level 1 warn', async () => temporary(async (dir) => {
+  const uncovered = path.join(dir, 'sin-cobertura.md');
+  await writeFile(uncovered, newStoryPlan().replace('covers A1', 'covers A9'));
+  assert.match(run(uncovered).stdout, /sin-cobertura\.md:\d+: historia nueva: A1 no tiene Segment verification/);
+  const docker = path.join(dir, 'docker.md');
+  await writeFile(docker, newStoryPlan().replace('node --test tests/feature.test.mjs', 'docker compose up'));
+  assert.match(run(docker).stdout, /docker\.md:\d+: nivel 1 con marca de servicio «docker»/);
+  const sinLevel = path.join(dir, 'sin-level.md');
+  await writeFile(sinLevel, newStoryPlan().replace('— level 1; ', '— '));
+  assert.match(run(sinLevel).stdout, /sin-level\.md:\d+: Segment verification: falta level/);
+}));
+
+test('A3 old format prints one stderr note, keeps stdout empty and exits 0 when clean', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'antiguo.md');
+  await writeFile(file, '## Steps\n- [ ] Editar `src/a.js`. Check: `node --check src/a.js`\n');
+  const result = run(file);
+  assert.equal(result.status, 0, result.stdout);
+  assert.equal(result.stdout, '');
+  assert.match(result.stderr, /^nota: formato anterior/);
+  assert.equal(result.stderr.trim().split('\n').length, 1, 'la nota ocupa una sola línea');
+}));
