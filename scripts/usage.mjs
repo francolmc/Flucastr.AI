@@ -13,7 +13,9 @@
 // Tarifas por defecto: scripts/rates.json (créditos por millón de tokens). Sin tarifa del modelo, creditos es null.
 // --since por defecto: hace 7 días. Sin --json imprime tablas de texto.
 // --sessions: diagnóstico por sesión de Claude Code, Codex y Pi (llamadas, esperas, contexto mediana y máximo, compactaciones,
-// créditos, sondeos, ediciones_fuera y corridas_verify). Sondeos: llamadas de shell con sleep, tail o watch. Claude Code no mide créditos ni sondeos (null).
+// créditos, sondeos, write_stdin, ediciones_fuera y corridas_verify). Sondeos: llamadas de shell con sleep, tail o watch; sondeos no cuenta write_stdin.
+// write_stdin: en Codex, llamadas write_stdin directas y ocurrencias de tools.write_stdin( dentro de exec (aproximación). Claude Code y Pi no lo miden (null).
+// Claude Code no mide créditos ni sondeos (null).
 // ediciones_fuera: escrituras del planner a rutas que no son changes/, AGENTS.md ni docs/proyecto.md. corridas_verify: llamadas a ./verify o npm run verify.
 // En Claude Code solo cuenta la sesión principal (un .jsonl por sesión); sus subagentes no suman en su fila.
 // --threshold (por defecto 70): si la cuota semanal o la ventana de 5 horas de Codex de la última sesión llega a ese %, aparece un aviso.
@@ -31,7 +33,7 @@ import { crearFormateadores } from "../tools/usage/report.mjs";
 const HERRAMIENTAS = ["claude", "codex", "pi"];
 const NOMBRES = { claude: "Claude Code", codex: "Codex", pi: "Pi" };
 const COLUMNAS = ["herramienta", "fecha", "proyecto", "modelo", "rol", "sesiones", "llamadas", "entrada", "cache_leida", "cache_escrita", "salida"];
-const COLUMNAS_SESIONES = ["herramienta", "fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones", "creditos", "sondeos", "ediciones_fuera", "corridas_verify"];
+const COLUMNAS_SESIONES = ["herramienta", "fecha", "proyecto", "sesion", "modelo", "llamadas", "esperas", "contexto_mediana", "contexto_max", "compactaciones", "creditos", "sondeos", "write_stdin", "ediciones_fuera", "corridas_verify"];
 const { imprimirSesiones, imprimirTexto } = crearFormateadores({ columnas: COLUMNAS, columnasSesiones: COLUMNAS_SESIONES });
 
 function fallar(mensaje, codigo = 1) {
@@ -48,7 +50,7 @@ function ayuda() {
   --claude-dir <dir>            carpeta de proyectos de Claude Code (por defecto ~/.claude/projects)
   --codex-dir <dir>             carpeta de Codex (por defecto ~/.codex; se leen sus sessions/)
   --pi-dir <dir>                carpeta de sesiones de Pi (por defecto ~/.pi/agent/sessions)
-  --sessions                    diagnóstico por sesión de Claude Code, Codex y Pi: esperas, contexto y compactaciones (los subagentes de Claude Code no suman en su sesión)
+  --sessions                    diagnóstico por sesión de Claude Code, Codex y Pi: esperas, write_stdin (solo Codex), contexto y compactaciones (los subagentes de Claude Code no suman en su sesión)
   --threshold <n>                  aviso si la cuota semanal o la ventana de 5 horas de Codex llega a n % (por defecto 70)
   --rates <archivo>           tarifas en créditos por millón de tokens (por defecto scripts/rates.json)`);
 }

@@ -175,8 +175,8 @@ prueba("A6b", "Calibración: la sesión que baja queda fuera también sin la cru
 // send_message, sleep, wait_agent) y contexto 20000, 50000, 80000, 30000, 45000: mediana 45000, máximo 80000, y una caída
 // del 40 % o más (80000 a 30000) = 1 compactación. La otra sesión no tiene esperas: 0, con contexto 10000 y 12000.
 const SESIONES_ESPERADAS = [
-  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, sondeos: 1, creditos: null, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1, ediciones_fuera: 0, corridas_verify: 0 },
-  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0, ediciones_fuera: 0, corridas_verify: 0 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T12-00-00-sesion-con-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 5, esperas: 5, sondeos: 1, creditos: null, contexto_mediana: 45000, contexto_max: 80000, compactaciones: 1, write_stdin: 0, ediciones_fuera: 0, corridas_verify: 0 },
+  { herramienta: "codex", fecha: "2026-11-08", proyecto: "proyecto-d", sesion: "rollout-2026-11-08T15-00-00-sesion-sin-esperas.jsonl", modelo: "gpt-sesiones-fixture", llamadas: 2, esperas: 0, sondeos: 0, creditos: null, contexto_mediana: 11000, contexto_max: 12000, compactaciones: 0, write_stdin: 0, ediciones_fuera: 0, corridas_verify: 0 },
 ];
 
 prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactación por caída del 40 %; sin esperas da 0", () => {
@@ -186,6 +186,30 @@ prueba("A3s", "Sesiones de Codex: esperas, contexto mediana y máximo, compactac
   assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
   assert.match(texto.stdout, /esperas\s+contexto_mediana\s+contexto_max\s+compactaciones/);
   assert.equal(correr(["--sessions", "--tool", "otra"]).status, 2, "--sessions con una herramienta desconocida debe salir con código 2");
+});
+
+// write_stdin (fixtures/codex-write-stdin): la sesión con una llamada directa y dos dentro de exec cuenta 3; la otra, 0.
+// Claude Code y Pi no traen la clave; su columna en la tabla sale como «-».
+const WRITE_STDIN_ESPERADO = {
+  "rollout-2026-11-25T10-00-00-con-write-stdin.jsonl": 3,
+  "rollout-2026-11-25T11-00-00-sin-write-stdin.jsonl": 0,
+};
+
+prueba("A5w", "write_stdin de Codex: 3 (directa y dentro de exec) y 0; Claude y Pi no traen la clave y la tabla muestra «-»", () => {
+  const codex = medir(["--tool", "codex", "--codex-dir", join(fixtures, "codex-write-stdin"), "--sessions"]).json;
+  assert.deepStrictEqual(Object.fromEntries(codex.sesiones.map((s) => [s.sesion, s.write_stdin])), WRITE_STDIN_ESPERADO);
+  const claude = medir(["--tool", "claude", "--claude-dir", join(fixtures, "claude-sesiones"), "--sessions"]).json;
+  const pi = medir(["--tool", "pi", "--pi-dir", join(fixtures, "pi-sesiones"), "--sessions"]).json;
+  for (const s of [...claude.sesiones, ...pi.sesiones]) assert.ok(!("write_stdin" in s), `${s.herramienta} no debe traer write_stdin`);
+  for (const [herr, dir] of [["pi", "--pi-dir"], ["claude", "--claude-dir"]]) {
+    const texto = correr([...base(), "--tool", herr, dir, join(fixtures, herr === "pi" ? "pi-sesiones" : "claude-sesiones"), "--sessions"]);
+    assert.equal(texto.status, 0, `exit ${texto.status}: ${texto.stderr}`);
+    const [cabecera, ...filas] = texto.stdout.trim().split("\n").map((l) => l.trim().split(/\s+/));
+    const i = cabecera.indexOf("write_stdin");
+    assert.ok(i > 0, `la cabecera de ${herr} debe tener write_stdin`);
+    assert.ok(filas.length > 0, `${herr} debe tener filas`);
+    for (const f of filas) assert.equal(f[i], "-", `${herr}: write_stdin debe ser «-»`);
+  }
 });
 
 // Diagnóstico por sesión de Claude Code y de Pi (fixtures claude-sesiones y pi-sesiones). La sesión con esperas tiene 3 esperas

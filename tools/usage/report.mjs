@@ -12,7 +12,7 @@ export function crearFormateadores({ columnas, columnasSesiones }) {
     } else {
       const celdas = sesiones.map((s) => ({
         ...s, contexto_mediana: s.contexto_mediana ?? "-", contexto_max: s.contexto_max ?? "-",
-        creditos: s.creditos ?? "-", sondeos: s.sondeos ?? "-",
+        creditos: s.creditos ?? "-", sondeos: s.sondeos ?? "-", write_stdin: s.write_stdin ?? "-",
       }));
       for (const linea of tabla(columnasSesiones, celdas)) console.log(linea);
     }

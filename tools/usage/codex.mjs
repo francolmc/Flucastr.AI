@@ -3,6 +3,13 @@ import { leerJsonl, listarJsonl, reciente } from "./jsonl.mjs";
 
 const MUESTRA_MINIMA = 5;
 const ESPERAS = new Set(["wait_agent", "wait", "sleep", "send_message"]);
+// Un write_stdin puede venir como llamada directa o como `tools.write_stdin(` dentro del JS de un `exec`.
+const LLAMADA_WRITE_STDIN = /tools\.write_stdin\(/g;
+
+// Cuenta las ocurrencias de `tools.write_stdin(` en un texto (aproximación: un bucle cuenta una vez por línea de llamada).
+function contarWriteStdin(texto) {
+  return (texto.match(LLAMADA_WRITE_STDIN) ?? []).length;
+}
 
 // Milisegundos de un timestamp ISO, o null si no es válido.
 function msDeTs(ts) {
@@ -41,6 +48,7 @@ export function crearProcesadorCodex({
       let llamadas = 0;
       let esperas = 0;
       let sondeos = 0;
+      let writeStdin = 0;
       let ediciones = 0;
       let verifys = 0;
       const contextos = [];
@@ -59,6 +67,10 @@ export function crearProcesadorCodex({
           if (obj.type === "turn_context" && typeof p.model === "string") modelo = p.model;
           if (obj.type === "response_item" && p.type === "function_call" && ESPERAS.has(p.name)) esperas++;
           if (obj.type === "response_item" && p.type === "function_call" && esSondeo(p.name, p.arguments)) sondeos++;
+          if (obj.type === "response_item" && p.type === "function_call" && p.name === "write_stdin") writeStdin++;
+          if (obj.type === "response_item" && p.type === "custom_tool_call" && p.name === "exec" && typeof p.input === "string") {
+            writeStdin += contarWriteStdin(p.input);
+          }
           // Ediciones fuera de lo permitido: apply_patch y escrituras de shell (cat >, tee, open(…, "w") y write_text).
           if (obj.type === "response_item" && (p.type === "custom_tool_call" || p.type === "function_call") && p.name === "apply_patch") {
             ediciones += rutasDeParche(textoDePatch(p)).filter((r) => !esPermitida(r)).length;
@@ -97,6 +109,7 @@ export function crearProcesadorCodex({
         llamadas,
         esperas,
         sondeos,
+        writeStdin,
         ediciones,
         verifys,
         contextos,
@@ -139,7 +152,7 @@ export function crearProcesadorCodex({
         } : null;
         ctx.sesiones.push({
           herramienta: "codex", fecha: s.fecha, proyecto: s.proyecto, sesion: basename(s.ruta), modelo: s.modelo,
-          llamadas: s.llamadas, esperas: s.esperas, sondeos: s.sondeos, ediciones_fuera: s.ediciones, corridas_verify: s.verifys,
+          llamadas: s.llamadas, esperas: s.esperas, sondeos: s.sondeos, write_stdin: s.writeStdin, ediciones_fuera: s.ediciones, corridas_verify: s.verifys,
           creditos: creditosSesion(ctx.tarifas, s.modelo, t),
           ...estadisticasContexto(s.contextos),
         });
