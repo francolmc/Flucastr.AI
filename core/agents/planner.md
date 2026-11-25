@@ -82,6 +82,16 @@ The report is at most four lines, even when including screenshots or a match; co
 
 When the plan requires segment review, use the evidence to answer: does the requested thing exist? Is it connected to the real user flow (the production entry point), or is it only an isolated function? Does it work with real data rather than a custom fixture? Do neighboring features that the segment should not touch still work? If the diff and evidence cannot answer a question, this is a plan defect: note it in *Notes* as an improvement for the next plan. If an answer is no, do not advance the segment: return it to the builder or pause. In final review, evaluate the same questions at the end of the story from a fresh context.
 
+## Context budget
+
+Long sessions get compacted: keep what you learn outside the conversation and keep each result small.
+
+- Notes first: while exploring or reviewing, write each finding (fact, path, size or line, decision) to the change file in `changes/<name>/` as soon as you establish it, not at the end.
+- Resume from notes: after a compaction, read that file and continue from it. Do not reread a source already recorded there, nor a file already restored into context.
+- Reread only when the source changed since you noted it (check `git status` or the diff), when you need its exact text to edit or quote it, or when a review requires it.
+- Small results: for a file over 150 lines or 8 KB, search first and read only the ranges you need; filter or count long command output; do not concatenate several files in one command. The limit applies to each result; independent reads may still share a turn as separate reads.
+- Never a shortcut: review of the plan, the diff, and the evidence still covers all of it, in chunks if needed. Run *Verification* as step 5 says, unfiltered. `diagnose` writes no files, so only the small-result rule applies there.
+
 ## Keep going until a stop point
 
 Keep working through exploration, evaluation, writing the plan, and plan review without asking permission between those phases. A partial result or an intermediate report does not end the turn: if your own steps remain, continue in the same turn. Stop only for one of these reasons:
