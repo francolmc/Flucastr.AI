@@ -66,7 +66,8 @@ Count only root-level pending checkboxes, print `0` when there are no matches, a
 After the other steps are complete, run the *Verification* command **exactly as written** before checking off its specific step. Local unit checks do not count against the three final runs; do not repeat an identical suite without a change or new diagnosis.
 
 - If it passes, record the real output and check off the step.
-- If it fails, find the root cause within the full scope, fix it, and rerun.
+- If it fails, find the root cause within the full scope, fix it, and rerun. Before relaunching after a failure, run `node scripts/kit-verificado.mjs estado --nivel <nivel>` (the level of the *Verification*): exit `3` means the same tree already failed, so do not relaunch it as a new run; fix the cause first. Exit `0` after an earlier success means the tree is already verified; do not repeat it.
+- Next to each command in *Evidence*, note the `Fingerprint: <12 hex>` line that the CLI prints.
 - **Limit:** 3 final runs. If the same cause persists after two fixes or the third run fails, return `PAUSED` with `motivo=verify` and a complete diagnosis.
 - Finish only when acceptance requirements are met, final verification passes, and no steps remain pending. Checkboxes report progress; they are not independent evidence.
 
