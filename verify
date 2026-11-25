@@ -81,4 +81,8 @@ source tools/verify/small-change-contract.sh
 paso 20 "verificación ya hecha: scripts/kit-verificado.mjs y su huella (tests/ya-verificado)"
 node --test tests/ya-verificado/ya-verificado.test.mjs || fallo "20: pruebas de la verificación ya hecha no pasaron"
 
+# 21. builder pegado en kit run: detector puro y casos de integración (changes/kit-run-pegado, segmento 3)
+paso 21 "builder pegado en kit run: detector y casos D1–D5 (tests/kit-run/pegado.test.mjs)"
+node --test tests/kit-run/pegado.test.mjs || fallo "21: pruebas del builder pegado no pasaron"
+
 echo "VERIFY OK"

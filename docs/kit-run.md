@@ -55,6 +55,36 @@ Hay un **solo contador de relanzamientos** (máximo dos en total), compartido po
 
 El builder dispone de hasta 45 minutos por corrida, la verificación y la puerta 30 minutos y la revisión 15 minutos. `KIT_RUN_TOPE_MS` reemplaza esos topes por un valor común en milisegundos.
 
+## Builder pegado
+
+Mientras el builder trabaja, `kit run` lee `changes/<nombre>/progress.jsonl` cada `KIT_RUN_PEGADO_INTERVALO_MS` (30 s por defecto) y decide si el builder parece **pegado**. El detector es una función pura (`tools/run/pegado.mjs`) que solo usa esa señal; no mide CPU ni red.
+
+«Avance» es un evento `fingerprint_cambió`, `casilla_marcada`, `archivo_editado` o `paso_iniciado`. Un comando está abierto si tiene `comando_iniciado` sin `comando_terminado` con el mismo `id`.
+
+Patrones (no se evalúan los primeros 5 min de la corrida; ese arranque no se configura salvo por la variable de prueba indicada abajo):
+
+- `sin_avance`: no hay avance durante `KIT_RUN_PEGADO_SIN_AVANCE_MS` (20 min por defecto).
+- `comando_repetido`: el mismo comando normalizado (espacios y números colapsados) se repite `KIT_RUN_PEGADO_REPETIDOS` veces seguidas (6) sin avance, durante al menos 5 min.
+- `sondeos`: `KIT_RUN_PEGADO_SONDEOS` sondeos seguidos (10) sin avance, durante al menos 5 min. Un sondeo es `sleep`, `tail`, `watch`, `write_stdin` o `cat *.log`.
+
+Esperas legítimas, que no se cuentan como pegado:
+
+- Un comando declarado largo en curso: cualquier comando que contenga `verify`, y los que liste `KIT_RUN_PEGADO_LARGOS` (separados por coma). Se exime hasta 30 min desde su inicio; pasado ese tope vuelve a contar.
+- Los primeros 5 min de la corrida no se evalúan.
+- Sin ningún `comando_iniciado` en el log, el estado es «no verificable» y no corta.
+
+Modos (`KIT_RUN_PEGADO`):
+
+- `observar` (predeterminado; cualquier valor distinto de `0` y `cortar`): no interrumpe. Si detecta un patrón, añade `intento.pegado = {modo, patron, detalle, minuto}` a `runs.jsonl` y un evento `bloqueo` «pegado (observado): <patron>» a `progress.jsonl`.
+- `cortar`: además de lo anterior, mata al builder (SIGTERM al grupo de procesos y SIGKILL a los 10 s) y deja la corrida en `PAUSED motivo=access`, con estado `partial`. No relanza. Escribe una nota en `## Notes` del plan: `kit run: builder pegado (<patron>); hecho=<h>/<t>; falta=<primera casilla pendiente>; causa=<detalle>. No se relanzó; revisar el plan antes de reanudar.`. No marca ni desmarca casillas.
+- `0`: apaga el detector. No se evalúa nada y no hay registro ni bloqueo.
+
+Otras variables: `KIT_RUN_PEGADO_SIN_AVANCE_MS`, `KIT_RUN_PEGADO_REPETIDOS`, `KIT_RUN_PEGADO_SONDEOS` y `KIT_RUN_PEGADO_INTERVALO_MS` reemplazan los umbrales anteriores (valores positivos; si no, se usa el predeterminado). `KIT_PROGRESO=0` deja la señal no verificable.
+
+Dos variables existen solo para las pruebas de `tests/kit-run/run.mjs`, como `KIT_RUN_TOPE_MS`: `KIT_RUN_PEGADO_ARRANQUE_MS` (periodo sin evaluar, 5 min por defecto) y `KIT_RUN_PEGADO_MIN_REP_MS` (mínimo de tiempo sin avance para repetidos y sondeos, 5 min por defecto). Permiten que D2 y D4 corran en segundos.
+
+Calibración: los umbrales son los predeterminados de planeación y no hay mediciones reales de corridas que los respalden todavía. Antes de usar `cortar` por defecto conviene revisar `runs.jsonl` de varias corridas y ver cuántos `pegado` se marcaron sobre trabajo real.
+
 ## Registro de intentos
 
 Cada intento agrega una línea a `changes/<nombre>/runs.jsonl`. Dos campos describen la puerta:

@@ -89,6 +89,42 @@ if (readFileSync(planPath, "utf8").includes("continuity: continuous")) {
 }
 console.log("DONE: plan=changes/prueba/plan.md; segment=1; verify=pasa");
 `,
+  // Builder con progreso falso (casos D1–D5): escribe eventos en changes/prueba/progress.jsonl según FAKE_PEGADO_ESCENARIO
+  // (progreso: avance continuo; sondeos: sleep 1 repetidos sin avance; verify: ./verify en curso sin escribir) durante
+  // FAKE_PEGADO_SEGUNDOS, y luego deja DONE como builder.mjs. Si lo corta kit run, muere antes de llegar al final.
+  "builder-pegado.mjs": `${CABECERA}${REGISTRO}
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+const planPath = join(process.cwd(), "changes/prueba/plan.md");
+const progresoPath = join(process.cwd(), "changes/prueba/progress.jsonl");
+const estado = readFileSync(planPath, "utf8").match(/^status: (.*)$/m)[1];
+anotar("builder", { estado });
+const emitir = (tipo, campos) => appendFileSync(progresoPath, JSON.stringify({ t: new Date().toISOString(), seg: null, tipo, o: "automatico", ...campos }) + "\\n");
+const dormir = (ms) => new Promise(resolver => setTimeout(resolver, ms));
+const escenario = process.env.FAKE_PEGADO_ESCENARIO || "progreso";
+const hasta = Date.now() + Number(process.env.FAKE_PEGADO_SEGUNDOS || 4) * 1000;
+if (escenario === "progreso") {
+  emitir("paso_iniciado", {});
+  for (let n = 1; Date.now() < hasta; n++) {
+    emitir("archivo_editado", { archivo: "trabajo" + n + ".txt" });
+    await dormir(100);
+  }
+} else if (escenario === "sondeos") {
+  for (let n = 1; Date.now() < hasta; n++) {
+    emitir("comando_iniciado", { id: String(n), cmd: "sleep 1" });
+    await dormir(100);
+    emitir("comando_terminado", { id: String(n), exit: 0 });
+    await dormir(50);
+  }
+} else if (escenario === "verify") {
+  emitir("comando_iniciado", { id: "v", cmd: "./verify" });
+  await dormir(Math.max(0, hasta - Date.now()));
+  emitir("comando_terminado", { id: "v", exit: 0 });
+}
+writeFileSync(planPath, readFileSync(planPath, "utf8").replace(/^status: .*$/m, "status: done"));
+writeFileSync(join(process.cwd(), "creado.txt"), "hecho\\n");
+console.log("DONE: plan=changes/prueba/plan.md; segment=1; verify=pasa");
+`,
   // Verificación: falla si FAKE_VERIFY_FALLA=1.
   "verify.mjs": `${CABECERA}${REGISTRO}
 anotar("verify");
@@ -156,7 +192,7 @@ function git(raiz, ...a) {
 // Repo temporal con el plan commiteado. Corre kit-run con los falsos y devuelve la salida y el registro.
 // codex: true no fija KIT_RUN_BUILDER ni KIT_RUN_REVIEWER; el script llama a `codex` del PATH (el falso).
 // git: false deja el directorio sin repo (sin huellas). antes(raiz) corre tras el commit, antes de kit run.
-function correr(nombre, { plan = PLAN, env = {}, codex = false, git: conGit = true, antes = null, kit = KIT, opciones = raiz => ["--root", raiz] } = {}) {
+function correr(nombre, { plan = PLAN, env = {}, codex = false, git: conGit = true, antes = null, kit = KIT, builder = "builder.mjs", opciones = raiz => ["--root", raiz] } = {}) {
   const raiz = join(dir, nombre);
   mkdirSync(join(raiz, "changes/prueba"), { recursive: true });
   writeFileSync(join(raiz, PLAN_REL), plan);
@@ -184,13 +220,17 @@ function correr(nombre, { plan = PLAN, env = {}, codex = false, git: conGit = tr
     ...env,
   };
   delete entorno.KIT_RUN_TOPE_MS;
+  // Pegado y progreso: nada del entorno de quien corre la prueba; solo lo que pase el caso en env.
+  for (const clave of Object.keys(entorno)) {
+    if ((/^KIT_RUN_PEGADO/.test(clave) || clave === "KIT_PROGRESO") && !(clave in env)) delete entorno[clave];
+  }
   if (!env.FLUCASTR_MODELOS) delete entorno.FLUCASTR_MODELOS;
   if (codex) {
     delete entorno.KIT_RUN_BUILDER;
     delete entorno.KIT_RUN_REVIEWER;
     entorno.PATH = `${bin}${delimiter}${process.env.PATH}`;
   } else {
-    entorno.KIT_RUN_BUILDER = exe("builder.mjs");
+    entorno.KIT_RUN_BUILDER = exe(builder);
     entorno.KIT_RUN_REVIEWER = exe("revisor.mjs");
   }
   if (env.KIT_RUN_TOPE_MS) entorno.KIT_RUN_TOPE_MS = env.KIT_RUN_TOPE_MS;
@@ -773,6 +813,80 @@ caso("runs-report-puerta: el informe acepta el motivo puerta y los campos nuevos
   assert.equal(r.status, 0, r.stdout + r.stderr);
   const rep = spawnSyncSeguro(process.execPath, [join(KIT_RAIZ, "scripts", "runs-report.mjs"), "--raiz", r.raiz], { encoding: "utf8" });
   assert.equal(rep.status, 0, rep.stdout + rep.stderr);
+});
+
+// Builder pegado (changes/kit-run-pegado, segmento 3). Umbrales cortos solo para pruebas: arranque 1 s, mínimo de
+// repetición 1 s, sin avance 2 s, 4 sondeos, intervalo 200 ms. El builder falso (builder-pegado.mjs) escribe su
+// propia señal en changes/prueba/progress.jsonl.
+const PEGADO_RAPIDO = {
+  KIT_RUN_PEGADO_ARRANQUE_MS: "1000",
+  KIT_RUN_PEGADO_MIN_REP_MS: "1000",
+  KIT_RUN_PEGADO_SIN_AVANCE_MS: "2000",
+  KIT_RUN_PEGADO_SONDEOS: "4",
+  KIT_RUN_PEGADO_INTERVALO_MS: "200",
+};
+function leerProgreso(raiz) {
+  const ruta = join(raiz, "changes/prueba/progress.jsonl");
+  return existsSync(ruta) ? readFileSync(ruta, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l)) : [];
+}
+const bloqueosPegado = (raiz) => leerProgreso(raiz).filter(e => e.tipo === "bloqueo" && /pegado/.test(e.texto ?? ""));
+const casillas = (texto) => texto.split("\n").filter(l => /^- \[[ x]\]/.test(l));
+
+// D1 (A9): progreso normal no corta, aunque el modo sea cortar.
+caso("D1 progreso normal: con avance cada 100 ms no hay corte aunque el modo sea cortar", () => {
+  const r = correr("d1", { builder: "builder-pegado.mjs", env: { ...PEGADO_RAPIDO, KIT_RUN_PEGADO: "cortar", FAKE_PEGADO_ESCENARIO: "progreso", FAKE_PEGADO_SEGUNDOS: "4" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /^DONE: /);
+  assert.equal(r.cuenta("builder"), 1, "un solo intento: no hay corte ni relanzamiento");
+  assert.equal(bloqueosPegado(r.raiz).length, 0, "ningún bloqueo por pegado");
+  assert.equal(leerRuns(r.raiz).at(-1).pegado, undefined);
+});
+
+// D2 (A10): builder en bucle de sondeos sin cambios con cortar: PAUSED motivo=access, partial, sin relanzar,
+// nota «kit run: builder pegado», casillas iguales antes y después.
+caso("D2 cortar: bucle de sondeos sin avance deja PAUSED motivo=access, partial, nota y casillas intactas", () => {
+  const plan = PLAN_CONTINUA;
+  const r = correr("d2", { plan, builder: "builder-pegado.mjs", env: { ...PEGADO_RAPIDO, KIT_RUN_PEGADO: "cortar", FAKE_PEGADO_ESCENARIO: "sondeos", FAKE_PEGADO_SEGUNDOS: "20" } });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.match(r.stdout, /^PAUSED: plan=changes\/prueba\/plan\.md; segment=1; motivo=access;/);
+  assert.match(r.stdout, /builder pegado \(sondeos\)/);
+  assert.equal(r.cuenta("builder"), 1, "el corte no relanza");
+  assert.equal(r.estado, "partial");
+  assert.match(r.plan, /^- kit run: builder pegado \(sondeos\); hecho=0\/2; falta=crear primero\.txt; causa=/m);
+  assert.deepEqual(casillas(r.plan), casillas(plan), "las casillas no cambian");
+  assert.equal(existsSync(join(r.raiz, "creado.txt")), false, "el builder se cortó antes de terminar");
+  assert.ok(bloqueosPegado(r.raiz).some(e => e.texto === "pegado: sondeos"), "el corte queda en progress.jsonl");
+});
+
+// D3 (A11): observar no corta; registra el patrón en runs.jsonl y un bloqueo «pegado (observado)».
+caso("D3 observar: el bucle de sondeos no corta y queda registrado en runs.jsonl y progress.jsonl", () => {
+  const r = correr("d3", { builder: "builder-pegado.mjs", env: { ...PEGADO_RAPIDO, KIT_RUN_PEGADO: "observar", FAKE_PEGADO_ESCENARIO: "sondeos", FAKE_PEGADO_SEGUNDOS: "4" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /^DONE: /);
+  assert.equal(r.cuenta("builder"), 1, "observar no relanza ni corta");
+  const pegado = leerRuns(r.raiz).at(-1).pegado;
+  assert.ok(pegado, "runs.jsonl registra el pegado");
+  assert.equal(pegado.modo, "observar");
+  assert.equal(pegado.patron, "sondeos");
+  assert.ok(bloqueosPegado(r.raiz).some(e => e.texto === "pegado (observado): sondeos"), "bloqueo observado en progress.jsonl");
+});
+
+// D4 (A12): un comando declarado largo (./verify) en curso sin escribir no se corta, aunque pase el umbral.
+caso("D4 comando declarado largo: ./verify en curso sin escribir no se corta", () => {
+  const r = correr("d4", { builder: "builder-pegado.mjs", env: { ...PEGADO_RAPIDO, KIT_RUN_PEGADO: "cortar", FAKE_PEGADO_ESCENARIO: "verify", FAKE_PEGADO_SEGUNDOS: "5" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /^DONE: /);
+  assert.equal(r.cuenta("builder"), 1);
+  assert.equal(bloqueosPegado(r.raiz).length, 0, "la espera legítima no deja bloqueo");
+});
+
+// D5 (A13): KIT_RUN_PEGADO=0 no evalúa nada: aun con el bucle de sondeos no hay registro ni bloqueo.
+caso("D5 KIT_RUN_PEGADO=0: no se evalúa nada aunque haya bucle de sondeos", () => {
+  const r = correr("d5", { builder: "builder-pegado.mjs", env: { ...PEGADO_RAPIDO, KIT_RUN_PEGADO: "0", FAKE_PEGADO_ESCENARIO: "sondeos", FAKE_PEGADO_SEGUNDOS: "4" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /^DONE: /);
+  assert.equal(leerRuns(r.raiz).at(-1).pegado, undefined, "sin campo pegado en runs.jsonl");
+  assert.equal(bloqueosPegado(r.raiz).length, 0, "sin bloqueo por pegado");
 });
 
 // M2: quitar la compuerta de la puerta hace que la roja no relance; puerta-roja-relanza debe fallar.
