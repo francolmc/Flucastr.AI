@@ -13,7 +13,11 @@ The kit asks for capability-based verification, not tool-based verification. Eac
 
 ## Fingerprint
 
-For each `repos:` folder: `{ git status --porcelain -- . ':(exclude,top)changes/**'; git diff HEAD -- . ':(exclude,top)changes/**'; } | sha256sum | cut -c1-12`. `changes/` is excluded from the repository root so editing plans does not invalidate the evidence; other changes still affect the fingerprint. If there is no `HEAD`, preserve the existing behavior: the fingerprint uses only `git status`.
+For each `repos:` folder, sha256 truncated to 12 hex over, in this order: `git status --porcelain -uall -- . ':(exclude,top)changes/**'`; `git diff HEAD -- . ':(exclude,top)changes/**'` (only if `HEAD` exists); and, for each untracked file not ignored by git (`git ls-files --others --exclude-standard -- . ':(exclude,top)changes/**'`, sorted by path), its path, its type and the sha256 of its content. Symbolic links hash their target (`readlink`) and are not followed. Files that are not regular files or links (devices, sockets, FIFOs) are skipped for content. A regular file that cannot be read makes the fingerprint `null`. `changes/` is excluded from the repository root so editing plans does not invalidate the evidence; other changes, including new untracked files, still affect the fingerprint. The builder never commits, so its new files are always untracked and must count. Reference implementation: `core/skills/diagnose/fingerprint.mjs`; independent check: `tests/diagnosis-suggests/fingerprint-reference.mjs`.
+
+## Verificación ya hecha
+
+`./verify` (full run, without `VERIFY_TARGET`) runs `node scripts/kit-verificado.mjs iniciar` at the start, which removes `pruebas/.temporales/resultado.json`, and at exit writes the result with `cerrar` only if the fingerprint at exit equals the one at start. `estado --nivel <rapida|servicio|aceptacion>` exits 0 (`ya verificado`) only if the file is valid, `ok` is `true`, `fallo` is `ninguno`, the level is at least the requested one and the fingerprint equals the current one. Exit 3 means the same tree already failed: do not relaunch it, fix it first. Exit 1 means verify again (with `motivo=`). Exit 2 is a usage error. A failure is never recorded as success.
 
 ## resultado.json
 

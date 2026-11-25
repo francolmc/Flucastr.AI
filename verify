@@ -6,9 +6,31 @@ cd "$(dirname "$0")"
 unset CODEX_HOME
 
 fallo() { echo "FALLO: $*" >&2; exit 1; }
-paso() { echo "== $1. $2 =="; }
+paso() {
+  if [ -n "${VERIFY_FASE_ARCHIVO:-}" ]; then printf '%s' "$1" > "$VERIFY_FASE_ARCHIVO"; fi
+  echo "== $1. $2 =="
+}
 
 command -v node >/dev/null 2>&1 || fallo "falta node en el PATH"
+
+# Verificación ya hecha (scripts/kit-verificado.mjs): la corrida completa borra resultado.json al inicio y lo registra al
+# final solo si el árbol no cambió y la huella de cierre coincide con la de inicio. Con VERIFY_TARGET no se registra nada.
+# El cuerpo corre en un proceso hijo: los scripts sourced fijan sus propios trap EXIT y el registro no depende de ellos.
+if [ -z "${VERIFY_TARGET:-}" ] && [ -z "${VERIFY_HIJO:-}" ]; then
+  mkdir -p pruebas/.temporales
+  rm -f pruebas/.temporales/fase-verify.txt
+  HUELLA_INICIO="$(node scripts/kit-verificado.mjs iniciar | sed -n 's/^Fingerprint: //p')" || HUELLA_INICIO=""
+  codigo=0
+  VERIFY_HIJO=1 VERIFY_FASE_ARCHIVO=pruebas/.temporales/fase-verify.txt bash "$PWD/verify" "$@" || codigo=$?
+  if [ -n "$HUELLA_INICIO" ]; then
+    fase="$(cat pruebas/.temporales/fase-verify.txt 2>/dev/null || true)"
+    [ -n "$fase" ] || fase="inicio"
+    ok=true; fallo_tipo=ninguno
+    if [ "$codigo" -ne 0 ]; then ok=false; fallo_tipo=prueba; fi
+    node scripts/kit-verificado.mjs cerrar --nivel aceptacion --fase "$fase" --ok "$ok" --fallo "$fallo_tipo" --huella-inicio "$HUELLA_INICIO" >&2 || true
+  fi
+  exit "$codigo"
+fi
 
 source tools/verify/snapshot.sh
 
@@ -54,5 +76,9 @@ source tools/verify/usage-and-run.sh
 source tools/verify/docker-observer.sh
 
 source tools/verify/small-change-contract.sh
+
+# 20. verificación ya hecha: la utilidad compara huella y nivel, y la huella cubre archivos sin seguimiento (tests/ya-verificado)
+paso 20 "verificación ya hecha: scripts/kit-verificado.mjs y su huella (tests/ya-verificado)"
+node --test tests/ya-verificado/ya-verificado.test.mjs || fallo "20: pruebas de la verificación ya hecha no pasaron"
 
 echo "VERIFY OK"

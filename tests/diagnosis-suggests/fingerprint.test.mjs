@@ -50,7 +50,7 @@ function guardarResultado(dir, value) {
 }
 
 test('the contract and diagnostic exclude tracked edits and new files under changes/', () => temporaryRepo((dir) => {
-  assert.match(contrato, /status --porcelain -- \. '\:\(exclude,top\)changes\/\*\*'/);
+  assert.match(contrato, /status --porcelain -uall -- \. '\:\(exclude,top\)changes\/\*\*'/);
   assert.match(contrato, /diff HEAD -- \. '\:\(exclude,top\)changes\/\*\*'/);
   const baseline = fingerprint(dir);
   guardarResultado(dir, baseline);
@@ -66,16 +66,18 @@ test('the contract and diagnostic exclude tracked edits and new files under chan
   assert.equal(runDiagnose(dir).fingerprintStatus, 'obsoleta', 'un cambio de producto rastreado invalida el fingerprint');
 }));
 
-test('a repository without HEAD keeps the status-only fingerprint behavior', () => temporaryRepo((dir) => {
+test('a repository without HEAD hashes untracked product files and ignores changes/', () => temporaryRepo((dir) => {
   const baseline = fingerprint(dir);
   guardarResultado(dir, baseline);
   assert.equal(runDiagnose(dir).fingerprintStatus, 'vigente');
   writeFileSync(path.join(dir, 'changes/demo/plan.md'), '## Editado sin HEAD\n');
-  assert.equal(runDiagnose(dir).fingerprintStatus, 'vigente');
+  assert.equal(runDiagnose(dir).fingerprintStatus, 'vigente', 'sin HEAD, un cambio en changes/ no invalida el fingerprint');
   writeFileSync(path.join(dir, 'src/app.js'), 'export const value = 3;\n');
-  assert.equal(runDiagnose(dir).fingerprintStatus, 'vigente', 'sin HEAD se conserva el fingerprint basado solo en status');
+  assert.equal(runDiagnose(dir).fingerprintStatus, 'obsoleta', 'sin HEAD, el contenido de un archivo sin seguimiento fuera de changes/ cuenta');
+  guardarResultado(dir, fingerprint(dir));
+  assert.equal(runDiagnose(dir).fingerprintStatus, 'vigente');
   writeFileSync(path.join(dir, 'otro.js'), 'export const other = true;\n');
-  assert.equal(runDiagnose(dir).fingerprintStatus, 'obsoleta', 'un cambio en status sí altera el fingerprint sin HEAD');
+  assert.equal(runDiagnose(dir).fingerprintStatus, 'obsoleta', 'un archivo nuevo sin HEAD altera el fingerprint');
 }, { commit: false }));
 
 test('a resultado.json written with the legacy key is still read', () => temporaryRepo((dir) => {

@@ -86,3 +86,28 @@ sed 's/session_id/sesion/g' core/agents/planner.md > "$wstdin_sin_session/core/a
 if textos_wstdin "$wstdin_sin_session"; then fallo "8p: una receta sin «session_id» pasó la comprobación"; fi
 echo "ok 8p: receta de write_stdin con «session_id» y «1800000» en execute-plan y builder, «session_id» en planner; copias sin «1800000» o sin «session_id» fallan"
 
+# 8u. verificación ya hecha: execute-plan trae «kit-verificado.mjs estado» y «Fingerprint: <12 hex>», y planner.md trae «kit-verificado.mjs estado»; copias sin esas cadenas deben fallar
+textos_proceso_rapido() { # $1: raíz del kit
+  local r=$1
+  grep -qF 'kit-verificado.mjs estado' "$r/core/skills/execute-plan/SKILL.md" || return 1
+  grep -qF 'Fingerprint: <12 hex>' "$r/core/skills/execute-plan/SKILL.md" || return 1
+  grep -qF 'kit-verificado.mjs estado' "$r/core/agents/planner.md" || return 1
+}
+textos_proceso_rapido . || fallo "8u: falta la regla de kit-verificado en execute-plan o planner"
+rapido_neg_estado="$T8/rapido_neg_estado"
+mkdir -p "$rapido_neg_estado/core/skills/execute-plan" "$rapido_neg_estado/core/agents"
+sed 's/kit-verificado.mjs estado/comprobacion previa/' core/skills/execute-plan/SKILL.md > "$rapido_neg_estado/core/skills/execute-plan/SKILL.md"
+cp core/agents/planner.md "$rapido_neg_estado/core/agents/"
+if textos_proceso_rapido "$rapido_neg_estado"; then fallo "8u: execute-plan sin «kit-verificado.mjs estado» pasó la comprobación"; fi
+rapido_neg_huella="$T8/rapido_neg_huella"
+mkdir -p "$rapido_neg_huella/core/skills/execute-plan" "$rapido_neg_huella/core/agents"
+sed 's/Fingerprint: <12 hex>/huella corta/' core/skills/execute-plan/SKILL.md > "$rapido_neg_huella/core/skills/execute-plan/SKILL.md"
+cp core/agents/planner.md "$rapido_neg_huella/core/agents/"
+if textos_proceso_rapido "$rapido_neg_huella"; then fallo "8u: execute-plan sin «Fingerprint: <12 hex>» pasó la comprobación"; fi
+rapido_neg_planner="$T8/rapido_neg_planner"
+mkdir -p "$rapido_neg_planner/core/skills/execute-plan" "$rapido_neg_planner/core/agents"
+cp core/skills/execute-plan/SKILL.md "$rapido_neg_planner/core/skills/execute-plan/"
+sed 's/kit-verificado.mjs estado/comprobacion previa/' core/agents/planner.md > "$rapido_neg_planner/core/agents/planner.md"
+if textos_proceso_rapido "$rapido_neg_planner"; then fallo "8u: planner sin «kit-verificado.mjs estado» pasó la comprobación"; fi
+echo "ok 8u: execute-plan con «kit-verificado.mjs estado» y «Fingerprint: <12 hex>», planner con «kit-verificado.mjs estado»; copias sin esas cadenas fallan"
+
