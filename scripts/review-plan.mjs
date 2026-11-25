@@ -10,13 +10,23 @@ Los pasos deben nombrar una ruta y una comprobación (comando entre acentos grav
 o «Check:»). Las pantallas se detectan con «pantalla(s):» o con los nombres
 de F13: acceso, saldo inicial y resumen. Las capas explícitas son interfaz/UI/web,
 API y datos/base de datos. Son heurísticas textuales, no un análisis semántico.
-En historias «### Segment N — Story:» también comprueba los campos de la plantilla.
-Los planes antiguos sin ese encabezado mantienen las comprobaciones anteriores.
+En historias «### Segment N — Story:» también comprueba los campos de la plantilla y
+Segment verification: que cubra cada A# de su tramo, que tenga comando y level,
+que level 2 solo esté en el último tramo de la historia, que level 3 solo esté en el
+último tramo del plan, que level 1 no use marcas de servicio (docker, compose,
+VERIFY_RAPIDO, ./verify, playwright, e2e, psql, redis, localhost) y que dos A# no
+mezclen unidades (archivos de producto disjuntos en sus TODO).
+Los planes antiguos sin ese encabezado mantienen las comprobaciones anteriores y
+añaden una nota «nota: formato anterior» en stderr (salida 0 si no hay avisos).
 Con dos o más tramos en ## Steps y sin «continuity: continuous», avisa una vez.
+Falsos positivos conocidos: A# que no comparten archivo por diseño (documentación
+frente a código), archivos raíz sin «/» que no se ven, «level» en prosa dentro de la
+línea de verificación. Revisar un tramo suelto lo trata como último del plan.
 El límite de tamaño es 8192 bytes UTF-8 por archivo de plan/tramo.`;
 
 const productPath = (value) => !/\.md\b/i.test(value) && !/(^|\/)(test|tests|pruebas|spec|specs)(\/|$)/i.test(value);
 const routeTokens = (text) => [...text.matchAll(/(?:^|[\s`(])((?:\.?\/?[\w@.-]+\/)+[\w@.-]*\/?)(?=$|[\s`,;)])/gm)].map((m) => m[1]);
+const SERVICE_MARKERS = /docker|compose|VERIFY_RAPIDO|\.\/verify|playwright|e2e|psql|redis|localhost/i;
 
 function analyze(source, file) {
   const lines = source.split(/\r?\n/);
@@ -25,6 +35,7 @@ function analyze(source, file) {
   if (Buffer.byteLength(source, 'utf8') > 8192) warn(1, 'el plan supera 8192 bytes');
 
   const isNewStory = (line) => /^###\s+Segment\s+\d+\s+[—–-]\s*Story\s*:/i.test(line.trim());
+  const storyTitle = (line) => line.match(/Story\s*:\s*(.*)$/i)?.[1].trim() ?? '';
   const hasNewFormat = lines.some(isNewStory) || lines.some((line) => /^\s*(?:WHEN\b|TODO\s*:)/i.test(line));
   const stepsHeader = lines.findIndex((line) => /^##\s+Steps\s*$/i.test(line.trim()));
   if (stepsHeader < 0) {
@@ -52,7 +63,7 @@ function analyze(source, file) {
     for (let n = 0; n < trancheHeads.length; n++) chunks.push({ start: trancheHeads[n], end: trancheHeads[n + 1] ?? stepsEnd });
   } else chunks.push({ start: stepsHeader, end: stepsEnd });
 
-  for (const chunk of chunks) {
+  for (const [index, chunk] of chunks.entries()) {
     const relevant = lines.slice(chunk.start, chunk.end);
     const chunkText = relevant.join('\n');
     const chunkLine = chunk.start + 1;
@@ -81,6 +92,54 @@ function analyze(source, file) {
       if (criteria.length === 0) warn(chunkLine, 'historia nueva: falta al menos un criterio A#');
       for (const criterion of behaviorCriteria) if (!criteria.includes(criterion)) warn(chunkLine, `historia nueva: ${criterion} no tiene criterio de aceptación`);
       for (const criterion of todoCriteria) if (!criteria.includes(criterion)) warn(chunkLine, `historia nueva: ${criterion} en TODO no tiene criterio de aceptación`);
+
+      const verificationLine = relevant.find((line) => /^Segment\s+verification\s*:/i.test(line.trim()));
+      if (verificationLine) {
+        const at = chunk.start + relevant.indexOf(verificationLine) + 1;
+        const command = verificationLine.match(/`([^`]+)`/)?.[1].trim();
+        const level = verificationLine.match(/\b(?:level|nivel)\s+(\d+)\b/i)?.[1];
+        const coverage = verificationLine.match(/\b(?:covers|cubre)\b(.*)$/i)?.[1] ?? '';
+        const covered = (coverage.match(/\bA\d+\b/gi) ?? []).map((criterion) => criterion.toUpperCase());
+        if (!command) warn(at, 'Segment verification: falta el comando entre acentos graves');
+        if (level === undefined) warn(at, 'Segment verification: falta level (1, 2 o 3)');
+        if (covered.length === 0) warn(at, 'Segment verification: no cubre ningún A#');
+        for (const criterion of criteria) {
+          if (!covered.includes(criterion)) warn(at, `historia nueva: ${criterion} no tiene Segment verification`);
+        }
+        if (level !== undefined) {
+          const number = Number(level);
+          const nextChunk = chunks[index + 1];
+          const lastOfStory = !nextChunk || !storyHeads.includes(nextChunk.start) || storyTitle(lines[nextChunk.start]) !== storyTitle(lines[chunk.start]);
+          const lastOfPlan = index === chunks.length - 1;
+          if (number === 2 && !lastOfStory) warn(at, 'nivel 2 solo en el último tramo de la historia');
+          else if (number === 3 && !lastOfPlan) warn(at, 'nivel 3 solo en el último tramo del plan');
+          else if (![1, 2, 3].includes(number)) warn(at, `nivel ${level} no existe (use 1, 2 o 3)`);
+          const marker = command?.match(SERVICE_MARKERS)?.[0];
+          if (number === 1 && marker) warn(at, `nivel 1 con marca de servicio «${marker}»; usa un comando de host`);
+        }
+      }
+
+      const filesByCriterion = new Map();
+      for (const line of relevant) {
+        if (!/^\s*-\s*\[[ xX]\]/.test(line)) continue;
+        const work = line.split(/\bCheck\s*:/i)[0];
+        const files = routeTokens(work).filter((path) => !path.endsWith('/') && productPath(path));
+        for (const criterion of [...work.matchAll(/\bA(\d+)\b/g)].map((match) => `A${match[1]}`)) {
+          const set = filesByCriterion.get(criterion) ?? new Set();
+          for (const file of files) set.add(file);
+          filesByCriterion.set(criterion, set);
+        }
+      }
+      const withFiles = [...filesByCriterion].filter(([, set]) => set.size > 0);
+      for (let i = 0; i < withFiles.length; i++) {
+        for (let j = i + 1; j < withFiles.length; j++) {
+          const [first, firstFiles] = withFiles[i];
+          const [second, secondFiles] = withFiles[j];
+          if (![...firstFiles].some((file) => secondFiles.has(file))) {
+            warn(chunkLine, `historia nueva: ${first} y ${second} mezcla unidades: sus TODO tocan archivos de producto disjuntos`);
+          }
+        }
+      }
     }
     const fileDecl = relevant.findIndex((line) => /(?:^|\s)(?:[-*]\s*)?Files\s*:/i.test(line));
     if (fileDecl >= 0) {
@@ -146,6 +205,9 @@ if (process.argv.length !== 3) {
 const file = process.argv[2];
 try {
   const source = await readFile(file, 'utf8');
+  if (!/^\s*###\s+Segment\s+\d+\s+[—–-]\s*Story\s*:/im.test(source)) {
+    console.error('nota: formato anterior; las comprobaciones de tramos verificables (Segment verification, level, mezcla de unidades) no se aplican.');
+  }
   const warnings = analyze(source, file);
   if (warnings.length) {
     console.log(warnings.join('\n'));
