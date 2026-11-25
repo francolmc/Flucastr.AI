@@ -16,6 +16,7 @@ echo "ok 8r A1-A3: el informe del fixture coincide con README.txt (medianas, má
 mkdir -p "$T8R/kit con espacios/scripts" "$T8R/kit con espacios/tools"
 cp scripts/observe.mjs "$T8R/kit con espacios/scripts/"
 cp -R tools/observe "$T8R/kit con espacios/tools/"
+cp -R tools/spawn "$T8R/kit con espacios/tools/"
 cp -R "$FIX/datos" "$T8R/datos con espacios"
 comparar_observador() {
   local codigo_es codigo_en

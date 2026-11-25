@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawnSyncSeguro } from '../spawn/sync-seguro.mjs';
 import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -12,7 +12,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 function temporaryRepo(callback, { commit = true } = {}) {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'diagnostico-fingerprint-modulo-'));
-  const git = (args) => spawnSync('git', ['-C', dir, ...args], { encoding: 'utf8' });
+  const git = (args) => spawnSyncSeguro('git', ['-C', dir, ...args], { encoding: 'utf8' });
   try {
     assert.equal(git(['init', '-q']).status, 0);
     writeFileSync(path.join(dir, '.gitignore'), 'resultado.json\n');
@@ -36,7 +36,7 @@ function temporaryRepo(callback, { commit = true } = {}) {
 
 test('fingerprint module import has no output or diagnostic execution', () => {
   const moduleUrl = new URL('../../core/skills/diagnose/fingerprint.mjs', import.meta.url).href;
-  const result = spawnSync(process.execPath, ['--input-type=module', '-e', 'await import(process.argv[1])', moduleUrl], { encoding: 'utf8' });
+  const result = spawnSyncSeguro(process.execPath, ['--input-type=module', '-e', 'await import(process.argv[1])', moduleUrl], { encoding: 'utf8' });
   assert.equal(result.error, undefined, `module import did not start: ${result.error}`);
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stdout, '');

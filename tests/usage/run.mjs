@@ -5,7 +5,7 @@
 // por defecto prueban el medidor del repo y los fixtures de esta carpeta.
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -41,7 +41,7 @@ const esperado = (herr) => ordenar(ESPERADO.filter((f) => f.herramienta === herr
 const tmp = mkdtempSync(join(tmpdir(), "probar-uso-"));
 
 function correr(args) {
-  const r = spawnSync(process.execPath, [script, ...args], { encoding: "utf8" });
+  const r = spawnSyncSeguro(process.execPath, [script, ...args], { encoding: "utf8" });
   if (r.error) throw r.error;
   return r;
 }
@@ -71,7 +71,7 @@ prueba("idioma", "Opciones en inglés, rechazo de las formas en español y error
   cpSync(fixtures, datos, { recursive: true });
   const dirs = ["--claude-dir", join(datos, "claude"), "--codex-dir", join(datos, "codex"), "--pi-dir", join(datos, "pi")];
   const ejecutar = (entrada, args) => {
-    const r = spawnSync(process.execPath, [join(copia, "scripts", entrada), ...dirs, ...args], { encoding: "utf8", env: { ...process.env, HOME: join(tmp, "home aislado") } });
+    const r = spawnSyncSeguro(process.execPath, [join(copia, "scripts", entrada), ...dirs, ...args], { encoding: "utf8", env: { ...process.env, HOME: join(tmp, "home aislado") } });
     if (r.error) throw r.error;
     return { status: r.status, stdout: r.stdout, stderr: r.stderr };
   };

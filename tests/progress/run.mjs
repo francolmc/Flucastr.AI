@@ -6,7 +6,8 @@ import assert from "node:assert/strict";
 import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { fileURLToPath } from "node:url";
 import { anexar, evento, leerEventos, redactar, truncar, LIMITE_COMANDO, LIMITE_TEXTO } from "../../tools/progress/eventos.mjs";
 import { calcularEstado } from "../../tools/progress/estado.mjs";
@@ -146,7 +147,7 @@ function proyecto(nombre, fixture) {
 function kit(args, env = {}) {
   const base = { ...process.env };
   for (const k of ["KIT_PROGRESO_UMBRAL", "KIT_PROGRESO_INTERVALO", "KIT_PROGRESO_CICLOS"]) delete base[k];
-  return spawnSync(process.execPath, [KIT_STATUS, ...args], {
+  return spawnSyncSeguro(process.execPath, [KIT_STATUS, ...args], {
     encoding: "utf8",
     timeout: 20000,
     env: { ...base, KIT_PROGRESO_AHORA: AHORA_ISO, ...env },
@@ -227,11 +228,11 @@ caso("A7 kit-nota anexa líneas válidas y deja intactas las anteriores byte a b
   const plan = proyecto("nota", "normal.jsonl");
   const log = join(dirname(plan), "progress.jsonl");
   const antes = readFileSync(log, "utf8");
-  const bloqueo = spawnSync(process.execPath, [KIT_NOTA, plan, "blocked", "falla con token=abc123def456 en el paso"], { encoding: "utf8" });
+  const bloqueo = spawnSyncSeguro(process.execPath, [KIT_NOTA, plan, "blocked", "falla con token=abc123def456 en el paso"], { encoding: "utf8" });
   assert.equal(bloqueo.status, 0, bloqueo.stderr);
-  const nota = spawnSync(process.execPath, [KIT_NOTA, plan, "doing", "Crear kit-status"], { encoding: "utf8" });
+  const nota = spawnSyncSeguro(process.execPath, [KIT_NOTA, plan, "doing", "Crear kit-status"], { encoding: "utf8" });
   assert.equal(nota.status, 0, nota.stderr);
-  const invalida = spawnSync(process.execPath, [KIT_NOTA, plan, "otra", "x"], { encoding: "utf8" });
+  const invalida = spawnSyncSeguro(process.execPath, [KIT_NOTA, plan, "otra", "x"], { encoding: "utf8" });
   assert.equal(invalida.status, 2);
   const despues = readFileSync(log, "utf8");
   assert.ok(despues.startsWith(antes), "las líneas anteriores cambiaron");
@@ -288,7 +289,7 @@ function hookProyecto(nombre, planes = [{ carpeta: "tarea", status: "approved", 
 // Ejecuta el hook con un payload (objeto o texto crudo).
 function hook(payload) {
   const input = typeof payload === "string" ? payload : JSON.stringify(payload);
-  return spawnSync(process.execPath, [HOOK], { input, encoding: "utf8", timeout: 10000 });
+  return spawnSyncSeguro(process.execPath, [HOOK], { input, encoding: "utf8", timeout: 10000 });
 }
 
 const logDe = (raiz, carpeta = "tarea") => join(raiz, "changes", carpeta, "progress.jsonl");
@@ -359,18 +360,18 @@ caso("A3 el hook redacta comandos con secretos y registra solo el nombre de un .
 // A4: instalar es idempotente, conserva el hook de permisos y quitar deja el estado inicial
 caso("A4 instalar dos veces deja una entrada por evento, conserva el hook de permisos y quitar deja el estado inicial", () => {
   const raiz = hookProyecto("a4");
-  const permisos = spawnSync(process.execPath, [HOOK_PERMISOS, "instalar", raiz], { encoding: "utf8" });
+  const permisos = spawnSyncSeguro(process.execPath, [HOOK_PERMISOS, "instalar", raiz], { encoding: "utf8" });
   assert.equal(permisos.status, 0, permisos.stderr);
   const ajustes = join(raiz, ".claude", "settings.local.json");
   const inicial = JSON.parse(readFileSync(ajustes, "utf8"));
-  const bash = (accion) => spawnSync("bash", [INSTALA_HOOK, accion, raiz], { encoding: "utf8" });
+  const bash = (accion) => spawnSyncSeguro("bash", [INSTALA_HOOK, accion, raiz], { encoding: "utf8" });
   assert.equal(bash("instalar").status, 0);
   assert.equal(bash("instalar").status, 0);
   assert.equal(bash("comprobar").stdout, "instalado\n");
   const con = JSON.parse(readFileSync(ajustes, "utf8"));
   assert.equal(con.hooks.PreToolUse.filter((e) => JSON.stringify(e).includes("progress-hook.mjs")).length, 1);
   assert.equal(con.hooks.PostToolUse.filter((e) => JSON.stringify(e).includes("progress-hook.mjs")).length, 1);
-  assert.equal(spawnSync(process.execPath, [HOOK_PERMISOS, "comprobar", raiz], { encoding: "utf8" }).stdout, "instalado\n");
+  assert.equal(spawnSyncSeguro(process.execPath, [HOOK_PERMISOS, "comprobar", raiz], { encoding: "utf8" }).stdout, "instalado\n");
   assert.equal(bash("quitar").status, 0);
   assert.deepEqual(JSON.parse(readFileSync(ajustes, "utf8")), inicial);
   assert.equal(bash("comprobar").stdout, "ausente\n");
@@ -583,11 +584,11 @@ caso("S5-A1 escribirResumen escribe el archivo y devuelve false sin lanzar ante 
 function repoTemporal(nombre) {
   const raiz = join(dir, nombre);
   mkdirSync(raiz, { recursive: true });
-  const git = (...args) => spawnSync("git", args, { cwd: raiz, encoding: "utf8" });
+  const git = (...args) => spawnSyncSeguro("git", args, { cwd: raiz, encoding: "utf8" });
   git("init", "-q");
   writeFileSync(join(raiz, "README.md"), "base\n");
-  const vacio = spawnSync("git", ["hash-object", "-t", "tree", "-w", "--stdin"], { cwd: raiz, encoding: "utf8", input: "" }).stdout.trim();
-  const commit = spawnSync("git", ["-c", "user.name=prueba", "-c", "user.email=prueba@example.invalid", "commit-tree", vacio, "-m", "base"], { cwd: raiz, encoding: "utf8" }).stdout.trim();
+  const vacio = spawnSyncSeguro("git", ["hash-object", "-t", "tree", "-w", "--stdin"], { cwd: raiz, encoding: "utf8", input: "" }).stdout.trim();
+  const commit = spawnSyncSeguro("git", ["-c", "user.name=prueba", "-c", "user.email=prueba@example.invalid", "commit-tree", vacio, "-m", "base"], { cwd: raiz, encoding: "utf8" }).stdout.trim();
   git("update-ref", "HEAD", commit);
   git("add", "README.md");
   return raiz;
@@ -742,7 +743,7 @@ function kitRun(nombre, { env = {}, argsKit = null } = {}) {
     ...env,
   };
   const args = argsKit ?? ["changes/prueba/plan.md", "--root", raiz];
-  const r = spawnSync(process.execPath, [KIT_RUN, ...args], { encoding: "utf8", env: entorno, timeout: 60000 });
+  const r = spawnSyncSeguro(process.execPath, [KIT_RUN, ...args], { encoding: "utf8", env: entorno, timeout: 60000 });
   return {
     status: r.status,
     error: r.error,

@@ -23,7 +23,7 @@ export function recorrer(dir, base, saltar, visita) {
 // null si la carpeta no es la raíz de un repo o git no responde.
 export function fingerprintCurrent(carpeta) {
   try {
-    const opts = { stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 256 * 1024 * 1024 };
+    const opts = { stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 256 * 1024 * 1024 };
     const env = { ...process.env, GIT_OPTIONAL_LOCKS: '0' };
     const paths = ['--', '.', ':(exclude,top)changes/**'];
     const top = execFileSync('git', ['-C', carpeta, 'rev-parse', '--show-toplevel'], opts).toString().trim();

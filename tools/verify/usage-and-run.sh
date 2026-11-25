@@ -33,3 +33,12 @@ paso 18 "kit-close: pruebas de scripts/kit-close.mjs sobre fixtures"
 node tests/kit-close/run.mjs || fallo "18: pruebas de kit-close (scripts/kit-close.mjs) no pasaron"
 echo "ok 18: pruebas de kit-close pasaron sobre los fixtures"
 
+
+# 19. spawn-seguro: escaneo estático de spawnSync/execFileSync/execSync con stdin pipe (A10, A11, A12 de la historia de spawn-seguro)
+paso 19 "spawn-seguro: escaneo estático de llamadas síncronas con stdin pipe (tests/spawn-seguro/estatico.mjs)"
+node tests/spawn-seguro/estatico.mjs || fallo "19: el repo tiene una llamada síncrona con stdin que puede ser pipe (A10)"
+if node tests/spawn-seguro/estatico.mjs --fixture-mala; then rc=0; else rc=$?; fi
+[ "$rc" -eq 1 ] || fallo "19: la fixture mala debía salir con 1 y salió con $rc (A11)"
+if node tests/spawn-seguro/estatico.mjs --vacio; then rc=0; else rc=$?; fi
+[ "$rc" -eq 1 ] || fallo "19: el escaneo sin llamadas debía salir con 1 y salió con $rc (A12)"
+echo "ok 19: escaneo de stdin pasó sobre el repo y falló como se esperaba en las dos fixtures"

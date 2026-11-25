@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../spawn/sync-seguro.mjs";
 
 const TOPE_MS = { BUILDER: 45 * 60 * 1000, REVIEWER: 15 * 60 * 1000, VERIFY: 30 * 60 * 1000 };
 
@@ -9,7 +9,7 @@ function topeMs(rol) {
 
 // tope: milisegundos; si se supera, spawnSync mata el proceso y error dice que superó el tope.
 function correr(cmd, prompt, cwd, shell = false, tope = undefined) {
-  const r = spawnSync(cmd.exe, cmd.args ?? [], {
+  const r = spawnSyncSeguro(cmd.exe,cmd.args ?? [], {
     cwd,
     input: prompt ?? "",
     encoding: "utf8",

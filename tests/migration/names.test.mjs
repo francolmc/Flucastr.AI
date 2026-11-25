@@ -5,7 +5,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -55,7 +55,7 @@ function proyectoViejo() {
 }
 
 function correr(args) {
-  return spawnSync("bash", [INSTALAR, "--migrate-names", ...args], { cwd: RAIZ, encoding: "utf8", timeout: 120000 });
+  return spawnSyncSeguro("bash", [INSTALAR, "--migrate-names", ...args], { cwd: RAIZ, encoding: "utf8", timeout: 120000 });
 }
 
 function instantanea(dir) {
@@ -126,7 +126,7 @@ test("migrar-nombres: aplica el renombre, es idempotente y no reescribe changes/
 test("migrar-nombres: no se combina con --agent ni con --migrate", () => {
   const p = proyectoViejo();
   try {
-    const conAgente = spawnSync("bash", [INSTALAR, "--migrate-names", p, "--agent", "planner"], { cwd: RAIZ, encoding: "utf8" });
+    const conAgente = spawnSyncSeguro("bash", [INSTALAR, "--migrate-names", p, "--agent", "planner"], { cwd: RAIZ, encoding: "utf8" });
     assert.equal(conAgente.status, 1);
     assert.match(conAgente.stderr, /no se combina/);
     assert.ok(existsSync(join(p, "cambios")), "un rechazo no debe mover nada");

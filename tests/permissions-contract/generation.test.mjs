@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -30,7 +30,7 @@ test("Codex elimina permisos amplios y omite capacidades de script o ambiguas", 
     "Comprobación rápida: `npm test && cat .env`",
   ].join("\n"));
 
-  const ejecutar = (...args) => execFileSync(process.execPath, [resolver, ...args], { encoding: "utf8" }).trim();
+  const ejecutar = (...args) => execFileSyncSeguro(process.execPath, [resolver, ...args], { encoding: "utf8" }).trim();
   assert.equal(ejecutar("fijar-deny", "codex", reglas, agents), "fijado");
   const contenido = await readFile(reglas, "utf8");
   assert.match(contenido, /pattern = \["ls"\]/);
@@ -49,7 +49,7 @@ test("install.sh entrega AGENTS.md al generador y reinstala sin duplicar ni ensa
   await mkdir(proyecto, { recursive: true });
   await writeFile(path.join(proyecto, "AGENTS.md"), "Comprobación rápida: `./verify`\nServicio: `docker compose up`\n");
   const env = { ...process.env, HOME: home, CODEX_HOME: codexHome, PATH: process.env.PATH };
-  const ejecutar = () => execFileSync("bash", [instalar, "--only", "codex", "--project", proyecto], { cwd: raiz, env, encoding: "utf8" });
+  const ejecutar = () => execFileSyncSeguro("bash", [instalar,"--only", "codex", "--project", proyecto], { cwd: raiz, env, encoding: "utf8" });
 
   ejecutar();
   const reglasPath = path.join(proyecto, ".codex/rules/flucastr.rules");
@@ -65,7 +65,7 @@ test("Codex explica en la justificación cómo ejecutar Git sin -C/-c, y git com
   const agents = path.join(dir, "AGENTS.md");
   const reglas = path.join(dir, "flucastr.rules");
   await writeFile(agents, "Comprobación rápida: `npm test`\n");
-  execFileSync(process.execPath, [resolver, "fijar-deny", "codex", reglas, agents], { encoding: "utf8" });
+  execFileSyncSeguro(process.execPath, [resolver, "fijar-deny", "codex", reglas, agents], { encoding: "utf8" });
   const contenido = await readFile(reglas, "utf8");
   const bloque = (patron) => contenido
     .split(/\n(?=prefix_rule\()/)

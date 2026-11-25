@@ -2,7 +2,7 @@
 // Cada caso corre el CLI sobre un fixture sintético y compara código de salida y filas de la tabla.
 // Uso: node tests/kit-check/run.mjs [--caso=verde|rojo|bloqueado|ambiguo|malformada|verify-verde|typecheck]
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { existsSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,7 +13,7 @@ const FIX = join(AQUI, "fixtures");
 const TESTIGO = join(FIX, "testigo-operador.txt");
 
 function correr(plan, extra = []) {
-  const r = spawnSync(process.execPath, [CLI, join(FIX, plan), ...extra], {
+  const r = spawnSyncSeguro(process.execPath, [CLI, join(FIX, plan), ...extra], {
     encoding: "utf8",
     timeout: 120_000,
     maxBuffer: 16 * 1024 * 1024,
