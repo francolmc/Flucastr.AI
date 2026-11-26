@@ -1,0 +1,1 @@
+PAUSED: plan=changes/prueba/plan.md; motivo=verify; hecho=1/2; siguiente=completar «Paso dos»; no_intentado=verify no pasó (exit 1)

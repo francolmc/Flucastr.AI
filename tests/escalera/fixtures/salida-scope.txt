@@ -1,0 +1,1 @@
+PAUSED: plan=changes/prueba/plan.md; motivo=scope; hecho=1/2; siguiente=revisar el alcance; no_intentado=la tarea pide otro archivo

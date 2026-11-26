@@ -316,12 +316,13 @@ caso("A1 ciclo completo: done, builder una vez, revisor en solo lectura", () => 
 });
 
 // A2: tope de relanzamientos. Verify siempre falla: 3 corridas del builder, partial.
-caso("A2 verify que siempre falla: 3 corridas del builder y partial", () => {
+caso("A2 verify que siempre falla: 2 corridas del builder, la segunda falla pide consejo y partial", () => {
   const r = correr("a2", { env: { FAKE_VERIFY_FALLA: "1" } });
   assert.equal(r.status, 1);
   assert.match(r.stdout, /^PAUSED: plan=changes\/prueba\/plan\.md; segment=1; motivo=verify;/);
-  assert.equal(r.cuenta("builder"), 3, "1 + 2 relanzamientos");
-  assert.equal(r.cuenta("verify"), 3);
+  assert.equal(r.cuenta("builder"), 2, "1 + 1 relanzamiento (paso 1); la segunda falla pausa pidiendo consejo");
+  assert.equal(r.cuenta("verify"), 2);
+  assert.match(r.plan, /paso 2: escribe «Consejo \(tramo 1\): …» y vuelve a lanzar/);
   assert.equal(r.cuenta("reviewer"), 0, "sin verify verde no hay revisión");
   assert.equal(r.estado, "partial");
   const prompts = r.registro.filter(x => x.rol === "builder").map(x => x.entrada);
@@ -361,12 +362,12 @@ caso("M1 mutación sensible: quitar la parada por causa repetida es rechazado", 
   writeFileSync(mutado, original.replace(guardia, "if (false && continuidad && fallosVerificacion.has(causa)) {"));
   try {
     const r = correr("m1", { plan: PLAN_CONTINUA, env: { FAKE_VERIFY_FALLA: "1" }, kit: mutado });
-    assert.equal(r.cuenta("builder"), 3, "la mutación deja pasar el reintento que el contrato prohíbe");
-    assert.equal(r.cuenta("verify"), 3);
+    // Con la guarda quitada, la segunda falla idéntica no se detiene por causa repetida: pasa al aviso de consejo.
+    assert.equal(r.cuenta("builder"), 2);
+    assert.equal(r.cuenta("verify"), 2);
     assert.doesNotMatch(r.plan, /PAUSED \(verify\): la verificación repitió la misma causa/);
     assert.throws(() => {
-      assert.equal(r.cuenta("builder"), 2, "contrato A8: segunda causa idéntica debe detener");
-      assert.match(r.plan, /PAUSED \(verify\): la verificación repitió la misma causa/);
+      assert.match(r.plan, /PAUSED \(verify\): la verificación repitió la misma causa/, "contrato A8: segunda causa idéntica debe detener");
     }, /segunda causa idéntica debe detener/);
   } finally {
     rmSync(mutado, { force: true });
@@ -398,11 +399,11 @@ caso("A3c RETURNED una vez: vuelve al builder con los defectos y aprueba", () =>
   assert.ok(correccion.includes("The review returned these defects:\n" + JSON.stringify([{ archivo: "creado.txt", linea: 1, criterio: "A1", descripcion: "falta el contenido esperado" }], null, 2)));
   assert.equal(r.estado, "done");
 });
-caso("A3d RETURNED siempre: cupo de 2 agotado, partial sin más corridas", () => {
+caso("A3d RETURNED siempre: la segunda devolución pide consejo, partial sin más corridas", () => {
   const r = correr("a3d", { env: { FAKE_DEVUELVE_HASTA: "99" } });
   assert.equal(r.status, 1);
-  assert.equal(r.cuenta("builder"), 3);
-  assert.equal(r.cuenta("reviewer"), 3);
+  assert.equal(r.cuenta("builder"), 2);
+  assert.equal(r.cuenta("reviewer"), 2);
   assert.equal(r.estado, "partial");
 });
 
@@ -445,22 +446,22 @@ caso("C1 mapeo codex: builder en workspace-write, revisor en read-only con esque
   assert.equal(r.estado, "done");
 });
 
-// C2 (tope de tiempo externo): un builder que no termina se corta; sin relanzar y deja partial.
-caso("C2 tope de tiempo: el builder que no termina se corta, partial sin relanzar", () => {
+// C2 (tope de tiempo externo): un builder que no termina se corta; el tope es infraestructura y se repite con el mismo modelo (escalera, paso 0); al tercer corte pausa access.
+caso("C2 tope de tiempo: el builder que no termina se repite y al tercer corte pausa access", () => {
   const r = correr("c2", { codex: true, env: { FAKE_CODEX_CUELGA: "1", KIT_RUN_TOPE_MS: "500" } });
   assert.equal(r.status, 1, r.stdout + r.stderr);
   assert.match(r.stdout, /^PAUSED: plan=changes\/prueba\/plan\.md; segment=1; motivo=access;/);
   assert.match(r.stdout, /superó el tope de 500 ms/);
-  assert.equal(r.cuenta("builder"), 1, "el tope no relanza");
+  assert.equal(r.cuenta("builder"), 3, "el tope es infra: 1 + 2 relanzamientos");
   assert.equal(r.estado, "partial");
 });
 
 // A6: el builder falso ve «approved» al arrancar en las 3 corridas (verify falla siempre).
-caso("A6 el builder ve approved al arrancar en las 3 corridas", () => {
+caso("A6 el builder ve approved al arrancar en las 2 corridas", () => {
   const r = correr("a6", { env: { FAKE_VERIFY_FALLA: "1" } });
-  assert.equal(r.cuenta("builder"), 3, r.stdout);
+  assert.equal(r.cuenta("builder"), 2, r.stdout);
   const estados = r.registro.filter(x => x.rol === "builder").map(x => x.estado);
-  assert.deepEqual(estados, ["approved", "approved", "approved"], r.stdout);
+  assert.deepEqual(estados, ["approved", "approved"], r.stdout);
 });
 
 // Uso: un plan que no está aprobado no se toca.
@@ -533,14 +534,14 @@ caso("V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>", () => {
 });
 
 // Registro de intentos (changes/prueba/runs.jsonl): una línea por intento, sin cambiar la decisión de kit run.
-const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "puerta", "puerta_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin"];
+const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "puerta", "puerta_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin", "clase", "paso", "resuelto_por"];
 function leerRuns(raiz) {
   const ruta = join(raiz, "changes/prueba/runs.jsonl");
   return existsSync(ruta) ? readFileSync(ruta, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l)) : null;
 }
 
-// R1: una corrida aprobada deja 1 línea con los 15 campos (incluidos puerta y puerta_ms) y duraciones enteras ≥ 0.
-caso("R1 registro: una corrida aprobada deja 1 línea con los 15 campos y duraciones enteras ≥ 0", () => {
+// R1: una corrida aprobada deja 1 línea con los 18 campos (incluidos puerta, puerta_ms, clase, paso y resuelto_por) y duraciones enteras ≥ 0.
+caso("R1 registro: una corrida aprobada deja 1 línea con los 18 campos y duraciones enteras ≥ 0", () => {
   const r = correr("r1");
   assert.equal(r.status, 0, r.stderr);
   const runs = leerRuns(r.raiz);
@@ -557,6 +558,9 @@ caso("R1 registro: una corrida aprobada deja 1 línea con los 15 campos y duraci
   assert.equal(x.resultado, "DONE");
   assert.equal(x.motivo_relanzamiento, null);
   assert.equal(x.relanzamientos, 0);
+  assert.equal(x.clase, null);
+  assert.equal(x.paso, 0);
+  assert.equal(x.resuelto_por, 0);
   assert.equal(typeof x.huella_inicio, "string");
   assert.equal(typeof x.huella_fin, "string");
 });
@@ -790,20 +794,20 @@ caso("puerta-roja-relanza: A# en rojo no llega al revisor y el builder recibe la
   assert.equal(runs.at(-1).puerta, "pasa");
 });
 
-caso("puerta-fuera-de-alcance: un archivo fuera de Scope bloquea sin revisor y agota con motivo scope", () => {
+caso("puerta-fuera-de-alcance: un archivo fuera de Scope bloquea sin revisor y la segunda falla pide consejo con motivo scope", () => {
   const r = correr("puerta-fuera-de-alcance", { env: { FAKE_BUILDER_FUERA: "1" } });
   assert.equal(r.status, 1, r.stdout + r.stderr);
   assert.match(r.stdout, /motivo=scope/);
-  assert.equal(r.cuenta("builder"), 3);
+  assert.equal(r.cuenta("builder"), 2);
   assert.equal(r.cuenta("reviewer"), 0);
   assert.equal(r.estado, "partial");
 });
 
-caso("puerta-tercer-fallo: la tercera corrida con la puerta en rojo pausa con exit 1 y sin revisor", () => {
+caso("puerta-tercer-fallo: la segunda corrida con la puerta en rojo pide consejo con exit 1 y sin revisor", () => {
   const r = correr("puerta-tercer-fallo", { env: { FAKE_BUILDER_SIN_ARCHIVO: "1" } });
   assert.equal(r.status, 1, r.stdout + r.stderr);
   assert.match(r.stdout, /motivo=verify/);
-  assert.equal(r.cuenta("builder"), 3);
+  assert.equal(r.cuenta("builder"), 2);
   assert.equal(r.cuenta("reviewer"), 0);
   assert.equal(r.estado, "partial");
 });

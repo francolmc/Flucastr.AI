@@ -51,7 +51,7 @@ Do not read `builder.md` or the `execute-plan` skill, except with `executor: pla
 - On DONE: brief report; review `git diff` on *Scope*, *Evidence*, *Notes*; mark each Acceptance row. High risk: `node scripts/kit-verificado.mjs estado --nivel <level>`; exit 0 with the `Fingerprint:` in *Evidence*: cite it; exit 1 or 3: run *Verification* once. Low risk: do not rerun. Environment failure: two diagnostics at most, then tell the user.
 - Defect: do not fix it, even one line. In *Notes*: `Devuelto: <defecto|omision|verify|otro> — tramo <N> — <file:line, A#: detail>`; set `approved` and relaunch, at most 2 times; then leave it `partial` and tell the user.
 - Verdict: `APPROVED`, `RETURNED`, or `PAUSED`; write it and stop (calls: 6 docs, 15 code, waits excluded). **Gate 2:** the user reviews evidence and decides the commit.
-- On PAUSED: pick its option or fix the cause, set `approved`, relaunch. Never run `docker system prune`.
+- On PAUSED or crash: follow the ladder in `paused-and-interrupted.md`. Never run `docker system prune`.
 
 ## Per-segment review
 

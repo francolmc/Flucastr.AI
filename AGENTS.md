@@ -9,6 +9,7 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 - Aceptación: `node --test tests/acceptance/*.test.mjs` corre un archivo por flujo (`builder-contract`, `kit-run`, `uso`); filtro por flujo con `--test-name-pattern=<flujo>`. Los envoltorios están en `tests/acceptance/` y no cambian las suites que envuelven.
 - Comando `verify`: `./verify`; qué comprueba, en `README.md` («Verificación»). Modo remoto: `VERIFY_TARGET=<url> ./verify`, solo lectura salvo `VERIFY_PERMITIR_ESCRITURA=1`.
 - Rama base: `main`. Liberar a `main` lo hace la persona usuaria a mano.
+- Si el builder no termina: escalera de recuperación (`kit run`; con subagentes, `scripts/kit-escalera.mjs`). Subir de nivel y el relevo del planner exigen el sí de la persona.
 - Estructura: agentes en `core/agents/` (`planner`, `builder`), skills en `core/skills/`, referencias del planner en `core/references/planner/`, contrato de verificación en `core/contracts/`, lo propio de un stack en `core/recipes/`, adaptadores por herramienta en `adapters/`, modelos, esfuerzo y ventanas en `models.json`.
 - Traspaso: `changes/<nombre>/plan.md`; avance en `changes/<nombre>/notes.md`; cerrados en `changes/done/`.
 

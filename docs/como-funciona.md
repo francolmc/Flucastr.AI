@@ -53,3 +53,15 @@ Lo de la v1 está en `old/v1/` (`legacy/`, `definitions/`, `features/`, `pruebas
 - Desinstalación: quita solo la entrada del kit; con `--keep-settings` (`uninstall.sh`) conserva el archivo de ajustes.
 - Sin probar en sesión real: el hook de Claude Code y el de Codex, y cuánto baja el contexto tras compactar. Las pruebas ejecutan el script y el instalador con `HOME` temporal. Pi no tiene hook: su planner recibe la regla de `notes.md` desde `core/agents/planner.md`.
 
+## Escalera de recuperación con subagentes
+
+`node scripts/kit-escalera.mjs <plan.md> (--salida <archivo> | --resuelto) [--paso 3|4] [--herramienta claude|pi|codex] [--tokens entrada,caché,salida] [--raiz <dir>]` aplica al planner la misma escalera que `kit run`. `--salida` lleva el retorno del subagente (`DONE` o `PAUSED`) o el texto del error; sin `DONE` ni `PAUSED` cuenta como proceso muerto. Imprime `clase=…; accion=…; paso=…` y agrega el intento a `changes/<nombre>/runs.jsonl`. No lanza modelos. Sale con 0 con acción y con 2 por uso.
+
+- Paso 0: la infraestructura (thrashing, `invalid_request`, tope) relanza mientras queden dos relanzamientos por tramo.
+- Paso 1: la primera falla de tarea relanza con handoff cronológico.
+- Paso 2: la segunda falla pide un consejo (`Consejo (tramo N): …` en el plan), sin registro; con el consejo escrito, la misma salida relanza una vez más.
+- Paso 3: agotada la escalera, se propone el nivel superior del builder; corre solo con el sí de la persona (`--paso 3`), una vez tras una falla de tarea. Si termina `DONE`, se cierra con `--resuelto --paso 3`.
+- Paso 4: si el paso 3 falla por tarea, imprime la nota con créditos estimados (`scripts/rates.json`; «sin tarifa» si no hay tarifa) y la pregunta de relevo. Si el relevo termina `DONE`, se cierra con `--resuelto --paso 4`.
+- Entorno, plan, decisión e infraestructura devuelven a la persona con diagnóstico y nunca mencionan relevo.
+- `--resuelto` registra la línea `DONE` con `resuelto_por` (el paso mayor del tramo) y cierra el tramo. Con `--paso 3` o `--paso 4` atribuye la solución a ese paso, con las mismas condiciones que el paso correspondiente.
+
