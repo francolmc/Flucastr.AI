@@ -40,6 +40,7 @@ import { crearResolucionModelos } from "../tools/model-resolution/models.mjs";
 import { anexar, evento, leerEventos } from "../tools/progress/eventos.mjs";
 import { escribirResumen, generarResumen } from "../tools/progress/resumen.mjs";
 import { casillasDelPlan } from "./progress-watch.mjs";
+import { barrer } from "../tools/temporales/barrido.mjs";
 
 const RAIZ_KIT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const VIGILANTE = join(RAIZ_KIT, "scripts", "progress-watch.mjs");
@@ -174,6 +175,7 @@ async function medirAsync(fn) {
 
 async function main() {
   const a = leerArgs(process.argv.slice(2));
+  barrer(tmpdir());
   if (a.herramienta !== "codex" && !(process.env.KIT_RUN_BUILDER && process.env.KIT_RUN_REVIEWER)) {
     uso(`herramienta «${a.herramienta}» aún sin mapear (tramo 3); define KIT_RUN_BUILDER y KIT_RUN_REVIEWER`);
   }

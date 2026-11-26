@@ -13,23 +13,11 @@ paso() {
 
 command -v node >/dev/null 2>&1 || fallo "falta node en el PATH"
 
-# Verificación ya hecha (scripts/kit-verificado.mjs): la corrida completa borra resultado.json al inicio y lo registra al
-# final solo si el árbol no cambió y la huella de cierre coincide con la de inicio. Con VERIFY_TARGET no se registra nada.
-# El cuerpo corre en un proceso hijo: los scripts sourced fijan sus propios trap EXIT y el registro no depende de ellos.
-if [ -z "${VERIFY_TARGET:-}" ] && [ -z "${VERIFY_HIJO:-}" ]; then
-  mkdir -p pruebas/.temporales
-  rm -f pruebas/.temporales/fase-verify.txt
-  HUELLA_INICIO="$(node scripts/kit-verificado.mjs iniciar | sed -n 's/^Fingerprint: //p')" || HUELLA_INICIO=""
-  codigo=0
-  VERIFY_HIJO=1 VERIFY_FASE_ARCHIVO=pruebas/.temporales/fase-verify.txt bash "$PWD/verify" "$@" || codigo=$?
-  if [ -n "$HUELLA_INICIO" ]; then
-    fase="$(cat pruebas/.temporales/fase-verify.txt 2>/dev/null || true)"
-    [ -n "$fase" ] || fase="inicio"
-    ok=true; fallo_tipo=ninguno
-    if [ "$codigo" -ne 0 ]; then ok=false; fallo_tipo=prueba; fi
-    node scripts/kit-verificado.mjs cerrar --nivel aceptacion --fase "$fase" --ok "$ok" --fallo "$fallo_tipo" --huella-inicio "$HUELLA_INICIO" >&2 || true
-  fi
-  exit "$codigo"
+# Dueño del temporal de la corrida, de sus traps y del registro de verificación ya hecha (scripts/kit-verificado.mjs):
+# tools/verify/envoltorio.sh corre este mismo archivo como cuerpo, con VERIFY_HIJO=1. Los scripts sourced fijan sus
+# propios trap EXIT dentro del cuerpo, que es un proceso hijo; el envoltorio no depende de ellos.
+if [ -z "${VERIFY_HIJO:-}" ]; then
+  exec bash tools/verify/envoltorio.sh "$PWD/verify" "$@"
 fi
 
 source tools/verify/snapshot.sh
@@ -92,5 +80,9 @@ node --test tests/compaction/*.test.mjs || fallo "22: pruebas de compactación n
 # 23. piso de contexto y hook tras compactar: tamaños de SKILL.md, planner.md y AGENTS.md; punteros e instalación del hook (changes/piso-planner, historia D)
 paso 23 "piso de contexto y hook tras compactar: tests/context-size/*.test.mjs y tests/after-compact/*.test.mjs"
 node --test tests/context-size/*.test.mjs tests/after-compact/*.test.mjs || fallo "23: pruebas de tamaños y del hook tras compactar no pasaron"
+
+# 24. temporales: barrido de viejos, temporal único por corrida y espacio libre (changes/higiene-verify, historia «verify limpio y breve»)
+paso 24 "temporales: tests/temporales/*.test.mjs (barrido, envoltorio, espacio libre)"
+node --test tests/temporales/*.test.mjs || fallo "24: pruebas de temporales no pasaron"
 
 echo "VERIFY OK"

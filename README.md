@@ -64,3 +64,10 @@ Para más detalle, consulta la [guía de uso](docs/guide.md#qué-es).
 - Desinstalación: quita solo la entrada del kit; con `--keep-settings` conserva el archivo de ajustes.
 - Sin probar en sesión real: el hook de Claude Code y el de Codex. Las pruebas ejecutan el script y el instalador con `HOME` temporal.
 - Paso 23 de `./verify`: `node --test tests/context-size/*.test.mjs tests/after-compact/*.test.mjs`. Comprueba que `SKILL.md` pese 6144 bytes o menos, `core/agents/planner.md` 8192 o menos y `AGENTS.md` 6144 o menos, que las referencias nombradas existan, y que el hook se instale, se quite y apunte bien.
+
+## Verify: temporales y salida
+
+- `./verify` usa un temporal propio por corrida bajo `${TMPDIR:-/tmp}` y lo borra al salir, también con Ctrl+C. Antes limpia los `flucastr-verify.*` de más de 120 minutos y sale con error si hay menos de 500 MB libres (`VERIFY_MIN_LIBRE_MB` lo cambia).
+- En verde imprime como mucho 5 líneas y termina con `VERIFY OK`. En rojo imprime el paso que falló y su cola, y termina con `VERIFY FALLO: paso <id>`.
+- El detalle completo queda en `pruebas/.temporales/verify.log`, que se sobrescribe en cada corrida.
+- Detalle y límites en `docs/implementacion.md`, sección «Temporales y salida de `./verify`».
