@@ -1,0 +1,1 @@
+PAUSED: plan=changes/prueba/plan.md; motivo=ambiguous; hecho=1/2; siguiente=elegir la opción; no_intentado=dos lecturas del criterio

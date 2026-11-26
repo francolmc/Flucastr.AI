@@ -1,0 +1,15 @@
+{
+  "levels": ["low", "medium", "high"],
+  "default_level": "medium",
+  "default_profile": { "codex": "codex-prueba" },
+  "profiles": {
+    "codex-prueba": {
+      "tool": "codex",
+      "models": { "low": "gpt-6-luna", "medium": "gpt-6-sol", "high": "gpt-6-astra" }
+    }
+  },
+  "agents": {
+    "builder": { "level": "medium" },
+    "planner": { "level": "low" }
+  }
+}

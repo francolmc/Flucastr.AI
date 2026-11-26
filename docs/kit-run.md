@@ -16,7 +16,7 @@ La herramienta predeterminada es `codex`. La opción `--root <dir>` permite señ
 kit run <plan>
  │  preflight: ¿existen kit-check, kit-scope, kit-close? ── no ─▶ salida 2 (avisa cuál falta)
  ▼
-┌──▶ builder ─────────── falla / PAUSED / retorno inválido ─────────────▶ PAUSED (access|motivo del builder)
+┌──▶ builder ─────────── falla / PAUSED / retorno inválido ─────────────▶ escalera (abajo)
 │     │ DONE
 │     ▼
 │   verify (comando del plan) ── rojo ──┐
@@ -36,7 +36,7 @@ kit run <plan>
 │     └─ RETURNED ─▶ ¿relanzamientos<2? │
 │                    sí ──────────────┐ │
 └─────────────────────────────────────┴─┘
-                     no / tercer fallo ─▶ PAUSED (exit 1; motivo scope|verify|design)
+                     no / escalera agotada ─▶ PAUSED (exit 1; motivo scope|verify|design)
 Contador de relanzamientos: UNO solo, compartido por verify, puerta y revisor.
 ```
 
@@ -44,16 +44,37 @@ Pasos:
 
 1. Antes de tocar el plan, comprueba que existan `kit-check.mjs`, `kit-scope.mjs` y `kit-close.mjs` en `scripts/`. Si falta alguno, sale con código 2 y nombra cuál falta.
 2. Ejecuta el plan con el builder.
-3. Corre el comando de la sección `Verificación` del plan (o `./verify` si no se indicó uno). Si falla, vuelve a ejecutar el builder con la salida de la verificación.
+3. Corre el comando de la sección `Verificación` del plan (o `./verify` si no se indicó uno). Si falla, la escalera decide (ver «Escalera de recuperación» más abajo).
 4. Con la verificación aprobada, corre la **puerta mecánica** (`tools/run/puerta.mjs`), que ejecuta en este orden `kit-check` (con `--segment N` en planes segmentados), `kit-scope --json` y `kit-close --resultado DONE --json`. Las tres corren siempre, para que la lista de faltantes llegue completa en un solo relanzamiento:
    - Bloquea si alguna herramienta sale con 1: un criterio A# en rojo, un archivo fuera de `Scope`, una casilla sin evidencia o una omisión probable. En ese caso no hay revisor. El builder se relanza con la lista exacta de lo que falta y con el resumen de progreso.
    - No bloquea si una herramienta sale con 3 (no verificable) o 2 (uso o plan sin tabla de A#). Esos casos viajan al revisor como ítems no automatizables.
    - Si la puerta pasa, el revisor recibe su resultado para enfocarse en diseño, riesgos y lo que no se pudo automatizar.
 5. Con la puerta aprobada, un proceso nuevo revisa el diff en modo de solo lectura. Si devuelve defectos, el builder se relanza con esos defectos y el flujo vuelve a verificación.
 
-Hay un **solo contador de relanzamientos** (máximo dos en total), compartido por fallos de verificación, bloqueos de la puerta y devoluciones del revisor. Al agotarlo, la corrida pausa. El motivo de la pausa por la puerta es `scope` si hubo un archivo fuera de `Scope`, y `verify` en los demás casos.
+Hay un **solo contador de relanzamientos** (máximo dos en total), compartido por fallos de verificación, bloqueos de la puerta y devoluciones del revisor. Al agotarlo, la corrida pausa. El motivo de la pausa por la puerta es `scope` si hubo un archivo fuera de `Scope`, y `verify` en los demás casos. Las fallas de infraestructura del builder también consumen ese contador, sin avanzar la escalera; el paso 3 de la escalera cuenta como un relanzamiento más y solo se hace con tu sí.
 
 El builder dispone de hasta 45 minutos por corrida, la verificación y la puerta 30 minutos y la revisión 15 minutos. `KIT_RUN_TOPE_MS` reemplaza esos topes por un valor común en milisegundos.
+
+## Escalera de recuperación
+
+Cuando el builder no termina, `kit run` clasifica la falla (campo `clase` de `runs.jsonl`) y toma la salida más barata que funcione. El planner sigue el mismo orden en `core/references/planner/paused-and-interrupted.md`; en el flujo por subagente lo aplica `node "<kit-root>/scripts/kit-escalera.mjs" <plan> --salida <archivo> --herramienta <claude|pi|codex> --raiz <proyecto>`.
+
+| Clase | Qué es | Acción |
+|---|---|---|
+| `infra` | el proceso murió (thrashing, `invalid_request`, corte por tope del builder o del revisor) | relanza con el mismo modelo mientras haya cupo; no avanza el paso |
+| `entorno` | espacio, Docker, permisos, navegador, límite de uso, red, corte por tope de la verificación | pausa con diagnóstico; no relanza ni ofrece relevo |
+| `plan` | alcance o plan que el builder no resuelve solo | pausa con diagnóstico; no relanza ni ofrece relevo |
+| `decision` | `ambiguous` o `design` del builder o del revisor | pausa; la persona deja la decisión escrita como `Resuelto:` |
+| `tarea` | defecto de verificación, puerta mecánica o revisión | pasos 1 a 4 |
+
+Pasos para `tarea`:
+
+1. Primera falla: relanza con un handoff (último error, archivos cambiados y estado de las casillas).
+2. Segunda falla: pide consejo. El planner escribe `Consejo (tramo N): …` en *Notes* (hasta 500 tokens, 2000 caracteres) y `kit run` relanza con ese consejo. Es el segundo relanzamiento.
+3. Escalera agotada (dos relanzamientos y al menos una falla de tarea): subir el nivel del builder un tramo solo con tu sí en cada caso. Claude Code lo hace con el parámetro `model` del subagente, solo en ese lanzamiento; Codex usa `kit run --paso 3`; en Pi no hay mecanismo de un solo lanzamiento (`kit run` solo mapea Codex), así que es tu decisión. Si falla por tarea, no se repite.
+4. Relevo al planner, solo tras un paso 3 que falló por tarea y con tu sí: la pregunta muestra el costo estimado con `--tokens entrada,caché,salida`. Sin respuesta explícita no se ejecuta. Si el relevo termina DONE, se cierra con `--resuelto --paso 4`.
+
+`--resuelto` (con `--paso 3` o `--paso 4` si el DONE viene de esos pasos) cierra el tramo tras la revisión. La escalera no cambia los motivos de `PAUSED` ni el límite de dos relanzamientos.
 
 ## Builder pegado
 
@@ -91,6 +112,10 @@ Cada intento agrega una línea a `changes/<nombre>/runs.jsonl`. Dos campos descr
 
 - `puerta`: `pasa`, `falla`, `no_verificable`, o `null` si la puerta no llegó a correr.
 - `puerta_ms`: duración de la puerta en milisegundos.
+- `clase`: la clase de la falla (`infra`, `entorno`, `plan`, `decision` o `tarea`); null si el intento no falló.
+- `paso`: el paso de la escalera en que corrió el intento (0 al empezar, 1 a 4 en los relanzamientos).
+- `resuelto_por`: el paso que cerró el tramo; `kit run` lo escribe en su línea DONE y, en el flujo por subagente, `--resuelto` lo escribe. Null mientras no cierre.
+- `builder_modelo`: el modelo con que corrió el builder.
 
 Un relanzamiento causado por la puerta deja `motivo_relanzamiento: "puerta"`. El registro solo mide; no cambia la decisión. `node scripts/runs-report.mjs` agrega estos campos junto con los demás.
 
