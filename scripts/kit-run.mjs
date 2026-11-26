@@ -425,10 +425,12 @@ async function main() {
       console.error("kit-run: revisión (solo lectura)");
       const diff = correr({ exe: "git", args: ["diff", "HEAD"] }, null, raiz).stdout;
       const antes = fingerprintTree(raiz);
+      // decisions.md junto al plan (solo si existe): el revisor lo cita por ID.
+      const decisionesRel = existsSync(join(dirname(planPath), "decisions.md")) ? join(dirname(planRel), "decisions.md") : undefined;
       // Revisor en solo lectura. Si muere por infraestructura se repite solo el revisor, con el mismo modelo y el contador compartido (D3); no se relanza al builder.
       const revisar = () => {
         for (;;) {
-          const rm = medir(() => correr(comando("REVIEWER", a.herramienta, raiz, schemaPath), promptRevisor(planRel, diff.slice(0, 60000), ESQUEMA_VEREDICTO, textoParaRevisor(puerta)), raiz, false, topeMs("REVIEWER")));
+          const rm = medir(() => correr(comando("REVIEWER", a.herramienta, raiz, schemaPath), promptRevisor(planRel, diff.slice(0, 60000), ESQUEMA_VEREDICTO, textoParaRevisor(puerta), decisionesRel), raiz, false, topeMs("REVIEWER")));
           const r = rm.valor;
           if (porTope(r)) { corte = true; bloqueoCorte(); }
           intento.revisor_ms = rm.ms;

@@ -64,7 +64,7 @@ Cuando el builder no termina, `kit run` clasifica la falla (campo `clase` de `ru
 | `infra` | el proceso murió (thrashing, `invalid_request`, corte por tope del builder o del revisor) | relanza con el mismo modelo mientras haya cupo; no avanza el paso |
 | `entorno` | espacio, Docker, permisos, navegador, límite de uso, red, corte por tope de la verificación | pausa con diagnóstico; no relanza ni ofrece relevo |
 | `plan` | alcance o plan que el builder no resuelve solo | pausa con diagnóstico; no relanza ni ofrece relevo |
-| `decision` | `ambiguous` o `design` del builder o del revisor | pausa; la persona deja la decisión escrita como `Resuelto:` |
+| `decision` | `ambiguous` o `design` del builder o del revisor | pausa; la persona deja la decisión como fila en `decisions.md` (sin ese archivo, como `Resuelto:`) |
 | `tarea` | defecto de verificación, puerta mecánica o revisión | pasos 1 a 4 |
 
 Pasos para `tarea`:

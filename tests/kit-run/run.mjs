@@ -749,6 +749,29 @@ caso("A5 promptRevisor con el resultado de la puerta lo incluye; sin él no camb
   assert.ok(!sin.includes("Puerta mecánica:"));
 });
 
+// A6: la línea de decisiones solo aparece con el argumento o con decisions.md junto al plan.
+const LINEA_DECISIONES = 'Decisions: changes/prueba/decisions.md. Read it; do not reopen active rows; a diff that contradicts one is a defect; cite its ID in criterio, e.g. "A# (D-NN)".';
+caso("A6 promptRevisor con decisiones: la línea va tras el veredicto; sin ella es idéntico", () => {
+  const diff = "diff de prueba";
+  const sin = promptRevisor(PLAN_REL, diff, ESQUEMA_VEREDICTO);
+  assert.equal(sin, promptRevisor(PLAN_REL, diff, ESQUEMA_VEREDICTO, undefined, undefined));
+  const con = promptRevisor(PLAN_REL, diff, ESQUEMA_VEREDICTO, undefined, "changes/prueba/decisions.md");
+  assert.ok(con.includes(LINEA_DECISIONES));
+  assert.ok(con.indexOf("Use veredicto APPROVED") < con.indexOf(LINEA_DECISIONES));
+  assert.ok(con.indexOf(LINEA_DECISIONES) < con.indexOf("--- diff ---"));
+  assert.equal(con.replace(`${LINEA_DECISIONES}\n`, ""), sin);
+  assert.ok(!sin.includes("Decisions:"));
+});
+
+caso("A6 kit run pasa decisions.md al revisor solo si el archivo existe", () => {
+  const con = correr("a6-con", { antes: raiz => writeFileSync(join(raiz, "changes/prueba/decisions.md"), "# Decisiones\n") });
+  assert.equal(con.status, 0, con.stderr);
+  assert.ok(con.registro.find(x => x.rol === "reviewer").entrada.includes(LINEA_DECISIONES));
+  const sin = correr("a6-sin");
+  assert.equal(sin.status, 0, sin.stderr);
+  assert.ok(!sin.registro.find(x => x.rol === "reviewer").entrada.includes("Decisions:"));
+});
+
 caso("filasCheck: el detalle va tras el último separador", () => {
   assert.deepEqual(filasCheck("A1 | falla | npm run x | a | b\nnada\n"), [{ id: "A1", estado: "falla", detalle: "b" }]);
 });

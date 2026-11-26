@@ -105,6 +105,7 @@ function punteros(cwd) {
   const lineas = ["After compaction: resume from these pointers instead of rereading the whole change."];
 
   lineas.push(elegido.tieneNotas ? `Notes: ${base}/notes.md` : "Notes: none");
+  if (esArchivo(join(elegido.dir, "decisions.md"))) lineas.push(`Decisions: ${base}/decisions.md`);
 
   const estado = elegido.fm.status;
   lineas.push(`Plan: ${base}/plan.md${ESTADOS.has(estado) ? ` (status: ${estado})` : ""}`);

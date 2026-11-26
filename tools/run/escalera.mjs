@@ -7,7 +7,7 @@ const QUE_HACER = {
   infra: "el proceso murió por infraestructura y se agotaron las repeticiones con el mismo modelo; revisar memoria, contexto o tiempo del proceso y volver a correr kit run",
   entorno: "corregir el entorno (espacio, Docker, permisos, navegador, límite de uso o red) y volver a correr kit run; no se gastó ninguna corrida extra",
   plan: "revisar el alcance o el plan con la persona antes de volver a correr kit run; el builder no lo puede resolver solo",
-  decision: "tomar la decisión que pide el builder o el revisor, dejarla escrita en el plan con Resuelto: y volver a correr kit run",
+  decision: "tomar la decisión que pide el builder o el revisor, dejarla como fila en decisions.md (sin ese archivo, en el plan con Resuelto:) y volver a correr kit run",
   tarea: "revisar el defecto de verificación, puerta mecánica o revisión que devolvió el intento",
 };
 

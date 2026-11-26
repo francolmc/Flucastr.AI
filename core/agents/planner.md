@@ -48,7 +48,7 @@ Do not read `builder.md` or the `execute-plan` skill, except with `executor: pla
 - How: subagent by default; for heavy plans or 3+ segments also offer the `claude-builder`/`pi-builder`/`codex-builder` window; the user chooses.
 - Waiting: one long wait; never poll or message it. User writes: answer in one line and resume waiting in the same turn.
 - Returns: `DONE: plan=<path>; segment=<n>; verify=pasa` and 5 lines at most, or `PAUSED: …; motivo=<ambiguous|design|scope|access|verify>; hecho=<n>/<total>; siguiente=<step>; no_intentado=<reason>` and problem with options (plan `partial`). Interrupted: stays `in progress`.
-- On DONE: brief report; review `git diff` on *Scope*, *Evidence*, *Notes*; mark each Acceptance row. High risk: `node scripts/kit-verificado.mjs estado --nivel <level>`; exit 0 with the `Fingerprint:` in *Evidence*: cite it; exit 1 or 3: run *Verification* once. Low risk: do not rerun. Environment failure: two diagnostics at most, then tell the user.
+- On DONE: brief report; review `git diff` on *Scope*, *Evidence*, *Notes*; mark each Acceptance row, citing `D-NN`. High risk: `node scripts/kit-verificado.mjs estado --nivel <level>`; exit 0 with the `Fingerprint:` in *Evidence*: cite it; exit 1 or 3: run *Verification* once. Low risk: do not rerun. Environment failure: two diagnostics at most, then tell the user.
 - Defect: do not fix it, even one line. In *Notes*: `Devuelto: <defecto|omision|verify|otro> — tramo <N> — <file:line, A#: detail>`; set `approved` and relaunch, at most 2 times; then leave it `partial` and tell the user.
 - Verdict: `APPROVED`, `RETURNED`, or `PAUSED`; write it and stop (calls: 6 docs, 15 code, waits excluded). **Gate 2:** the user reviews evidence and decides the commit.
 - On PAUSED or crash: follow the ladder in `paused-and-interrupted.md`. Never run `docker system prune`.
@@ -63,7 +63,7 @@ In `<kit-root>/core/references/planner/`: `progress-report.md` ("how is it going
 
 ## Context
 
-- Write each finding to `changes/<name>/notes.md` as you get it, with a `## Next action` heading kept current. After compaction resume from it; reread a source only if it changed, you must quote or edit it, or a review requires it.
+- Keep `changes/<name>/notes.md` (≤15 lines, `## Next action`) current; decisions to `decisions.md`, findings to `<topic>.md`. After compaction resume there; reread only changed sources, or to quote, edit, or review.
 - Files over 150 lines or 8 KB: search, then read ranges. Filter or count long output; one file per command. Reviews of plan, diff, and evidence still cover everything; run *Verification* unfiltered.
 - Delegate inventories and long explorations to a read-only subagent (user-requested). It changes no product file, writes detail to `changes/<name>/<topic>.md`, and returns at most 1,500 tokens.
 

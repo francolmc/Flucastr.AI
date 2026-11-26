@@ -174,4 +174,28 @@ describe("after-compact: punteros tras compactar", () => {
     assert.equal(r.status, 0);
     assert.equal(r.stdout, "");
   });
+
+  test("con decisions.md imprime su puntero justo tras el de notas, sin su contenido", () => {
+    const dir = temporal();
+    escribir(join(dir, "changes", "demo", "plan.md"), planDe({ segment: "2" }));
+    escribir(join(dir, "changes", "demo", "notes.md"), NOTES);
+    escribir(join(dir, "changes", "demo", "decisions.md"), "| D-01 | SECRETO-DECISION-456 |\n");
+    const r = correr(dir, { source: "compact", cwd: dir });
+    assert.equal(r.status, 0);
+    const lineas = r.stdout.split("\n");
+    const iNotas = lineas.indexOf("Notes: changes/demo/notes.md");
+    assert.ok(iNotas >= 0, r.stdout);
+    assert.equal(lineas[iNotas + 1], "Decisions: changes/demo/decisions.md", r.stdout);
+    assert.ok(!r.stdout.includes("SECRETO-DECISION-456"), "salió contenido de decisions.md");
+  });
+
+  test("sin decisions.md no imprime la línea Decisions", () => {
+    const dir = temporal();
+    escribir(join(dir, "changes", "demo", "plan.md"), planDe({ segment: "2" }));
+    escribir(join(dir, "changes", "demo", "notes.md"), NOTES);
+    const r = correr(dir, { source: "compact", cwd: dir });
+    assert.equal(r.status, 0);
+    assert.ok(!r.stdout.includes("Decisions:"), r.stdout);
+    assert.ok(r.stdout.includes("Notes: changes/demo/notes.md"), r.stdout);
+  });
 });

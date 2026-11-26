@@ -63,6 +63,8 @@ End the file with these sections, written by the builder:
 ## Notes
 ```
 
+Also write `changes/<name>/decisions.md` (one row per resolved decision) and `notes.md` (`references/records.md`). The plan cites decisions by ID and never restates them.
+
 ## Segment rules
 
 - **Verifiable segments:** each covers declared A#, has one level 1 `Segment verification:` (exact command, expected exit) and a `Handoff:` with an example. One functional unit, at most three product files; split only for another checkable A#. Level 2 only ends a story; Level 3 only ends the plan.
@@ -78,6 +80,7 @@ Read only what applies:
 - `references/rules.md`: before writing a plan: scope, `base:`, executor test, assumptions, durations, states.
 - `references/segments.md`: two or more segments, `tramo-N.md`, `/compact`, `Resuelto:`.
 - `references/verification.md`: choosing Verification levels (`Comprobación rápida`, Level 2), `type: docs`, risk.
+- `references/records.md`: before writing `decisions.md` or `notes.md`.
 - Screens or UI flow: load `design-experience`; approve `pantallas.md` first.
 
 ## Before Requesting Approval

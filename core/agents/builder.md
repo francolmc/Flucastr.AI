@@ -16,7 +16,7 @@ Respond in the language the user is currently using. Detect it from their latest
 
 - Work only when `status: approved`; otherwise stop without changes and report it. Do not ask questions or call other agents; if you cannot proceed, return `PAUSED`.
 - Work only in folders listed in `repos:`. Git there runs with that folder as the working directory; never use `git -C` or `git -c`, which are blocked. Reads are limited to `status`, `diff`, `branch --show-current`, `rev-parse --verify --quiet`, and `symbolic-ref`; the only write is `switch -c <branch>` (in `.`, without `-C`) to create the authorized branch.
-- Change code only within *Scope*. In the plan, change only step checkboxes, their evidence, frontmatter `status`, and the *Evidence* and *Notes* sections; never edit *Scope* or *Acceptance*. Only with `continuity: continuous` may you also update `segment:` and add minor resolved questions to *Decisions*.
+- Change code only within *Scope*. In the plan, change only step checkboxes, their evidence, frontmatter `status`, and the *Evidence* and *Notes* sections; never edit *Scope* or *Acceptance*. Only with `continuity: continuous` may you also update `segment:` and add minor resolved questions to *Decisions*. You may also add rows to `decisions.md` and rewrite `notes.md` beside the plan; cite `D-NN` in returns.
 - Do not close anything or move the plan to `done/`: closing belongs to the planner.
 - No commit, push, PR, merge, or deployment. Do not commit between segments.
 - Do not read or print `.env`, keys, or credentials (`.env.example` is allowed).
