@@ -19,7 +19,8 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 
 - `core/agents/` y `core/skills/` no nombran herramientas de un stack: los proyectos declaran sus comandos en su `AGENTS.md`.
 - Instrucciones operativas de agentes y skills en inglés; documentación en español; comandos con opciones en español y alias en inglés; los agentes responden en el idioma de la conversación.
-- Tamaños (piso tras compactar): `planner.md` ≤ 8192 bytes, `plan-change/SKILL.md` ≤ 6144, este archivo ≤ 6144 (`tests/context-size/`). El detalle va a referencias o `docs/`.
+- Tamaños (piso tras compactar): `planner.md` ≤ 8192 bytes, `plan-change/SKILL.md` ≤ 6144, `builder.md` más `execute-plan/SKILL.md` ≤ 13500, este archivo ≤ 6144 (`tests/context-size/`). El detalle va a referencias o `docs/`.
+- Contrato del builder: límites y retorno en `builder.md` (`kit run` lo antepone al prompt); procedimiento en `execute-plan`. No repitas una regla en el otro archivo.
 - Hay pruebas que exigen frases literales (`tools/verify/`, `tests/builder-contract.mjs`, `tests/continuity/`): al mover una frase, mueve su comprobación sin debilitarla.
 - `spawnSync`, `execFileSync` y `execSync` no usan stdin como pipe: usa `tools/spawn/sync-seguro.mjs` o `stdio` `ignore`/`inherit` (paso 19 de `./verify`).
 - Un script nuevo que cree temporales los limpia también al fallar (`tests/temporales/estatico.test.mjs`, paso 24).

@@ -53,3 +53,21 @@ describe("piso del planner y AGENTS.md", () => {
     assert.ok(tamano <= LIMITE_AGENTS_BYTES, `AGENTS.md mide ${tamano} bytes; el límite es ${LIMITE_AGENTS_BYTES}`);
   });
 });
+
+describe("contrato del builder", () => {
+  const builderMd = join(raiz, "core", "agents", "builder.md");
+  const executeSkillMd = join(raiz, "core", "skills", "execute-plan", "SKILL.md");
+  const LIMITE_BUILDER_SKILL_BYTES = 13500;
+  const sumaTamanos = (archivos) => archivos.reduce((total, archivo) => total + statSync(archivo).size, 0);
+  const cumpleLimite = (total) => total <= LIMITE_BUILDER_SKILL_BYTES;
+
+  test("builder.md y execute-plan/SKILL.md suman 13500 bytes o menos", () => {
+    const total = sumaTamanos([builderMd, executeSkillMd]);
+    assert.ok(cumpleLimite(total), `builder.md + execute-plan/SKILL.md suman ${total} bytes; el límite es ${LIMITE_BUILDER_SKILL_BYTES}`);
+  });
+
+  test("un total de 13501 bytes no cumple el límite", () => {
+    assert.equal(cumpleLimite(LIMITE_BUILDER_SKILL_BYTES), true);
+    assert.equal(cumpleLimite(LIMITE_BUILDER_SKILL_BYTES + 1), false);
+  });
+});

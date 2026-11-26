@@ -62,13 +62,11 @@ cp core/agents/builder.md "$idioma_neg/core/agents/builder.md"
 if textos_idioma "$idioma_neg"; then fallo "8m: un planner sin la regla de idioma adaptable pasó la comprobación"; fi
 echo "ok 8m: ambos agentes declaran adaptación al idioma y salida española; copia sin la regla falla"
 
-# 8p. receta de write_stdin en Codex: execute-plan y builder.md traen «1800000» y «session_id», y codex-waits.md trae «session_id»; copias sin «1800000» o sin «session_id» deben fallar
+# 8p. receta de write_stdin en Codex: execute-plan trae «1800000» y «session_id», y codex-waits.md trae «session_id»; copias sin «1800000» o sin «session_id» deben fallar
 textos_wstdin() { # $1: raíz del kit
   local r=$1
   grep -qF '1800000' "$r/core/skills/execute-plan/SKILL.md" || return 1
   grep -qF 'session_id' "$r/core/skills/execute-plan/SKILL.md" || return 1
-  grep -qF '1800000' "$r/core/agents/builder.md" || return 1
-  grep -qF 'session_id' "$r/core/agents/builder.md" || return 1
   grep -qF 'session_id' "$r/core/references/planner/codex-waits.md" || return 1
 }
 textos_wstdin . || fallo "8p: falta la receta de write_stdin (session_id y 1800000) en execute-plan, builder o codex-waits.md"

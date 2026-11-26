@@ -20,6 +20,7 @@ textos_clave() { # $1: raíz del kit
   grep -q 'with `<folder>` as the command.s working directory' "$r/core/skills/execute-plan/SKILL.md" || return 1
   grep -q -- '-maxdepth 2' "$r/core/skills/prepare-project/SKILL.md" || return 1
   if grep -q 'git -C <' "$r/core/skills/execute-plan/SKILL.md"; then return 1; fi
+  if grep -q 'git -C <' "$r/core/agents/builder.md"; then return 1; fi
   grep -q 'Never decide “single repository or multi-repository workspace”' "$r/core/agents/planner.md" || return 1
   grep -q 'REPOS.md' "$r/core/skills/migrate-project/SKILL.md" || return 1
   grep -q 'Descartado' "$r/core/skills/migrate-project/SKILL.md" || return 1

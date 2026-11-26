@@ -1,9 +1,9 @@
-// Pruebas de kit-scope contra repos git temporales (segmento 2, A1–A5). Sin red; cada repo vive en $TMPDIR y se borra al salir.
+// Pruebas de kit-scope contra repos git temporales (A1–A6). Sin red; cada repo vive en $TMPDIR y se borra al salir.
 // Cada caso corre scripts/kit-scope.mjs con --json y compara filas y código de salida.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { spawnSyncSeguro, execFileSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -221,4 +221,107 @@ test("A5: Scope vacío o sin rutas da no_verificable y exit 3", () => {
 test("A5: plan inexistente sale con 2 (uso)", () => {
   const dir = repo("`src/a.mjs`", d => escribir(d, "src/a.mjs", "cambio\n"));
   assert.equal(correr(dir, [], "changes/no/plan.md").codigo, 2);
+});
+
+// --- A6: aviso de proporción pruebas/producto (nunca cambia el código) ---
+
+const lineas = (n, prefijo = "l") => Array.from({ length: n }, (_, i) => `${prefijo}${i}`).join("\n") + "\n";
+const SCOPE_PAR = "`src/nuevo.mjs`, `tests/nuevo.test.mjs`";
+const avisoProporcion = filas => filas.find(f => f.nivel === "aviso" && f.mensaje.startsWith("pruebas/producto"));
+
+test("A6: razón 3.25 con 130 líneas de prueba avisa y sale con 0", () => {
+  const dir = repo(SCOPE_PAR, d => {
+    escribir(d, "src/nuevo.mjs", lineas(40));
+    escribir(d, "tests/nuevo.test.mjs", lineas(130));
+  }, { confirmar: false });
+  const r = informe(dir);
+  assert.equal(r.codigo, 0, r.crudo.salida);
+  assert.deepEqual(errores(r.filas), []);
+  assert.equal(
+    avisoProporcion(r.filas)?.mensaje,
+    "pruebas/producto 3.25 (130 líneas de prueba, 40 de producto): supera 3.0; revisa que sean proporcionales",
+  );
+});
+
+test("A6: razón exactamente 3.0 no avisa", () => {
+  const dir = repo(SCOPE_PAR, d => {
+    escribir(d, "src/nuevo.mjs", lineas(40));
+    escribir(d, "tests/nuevo.test.mjs", lineas(120));
+  }, { confirmar: false });
+  const r = informe(dir);
+  assert.equal(r.codigo, 0, r.crudo.salida);
+  assert.equal(avisoProporcion(r.filas), undefined);
+});
+
+test("A6: con 99 líneas de prueba no avisa aunque la razón supere 3.0", () => {
+  const dir = repo(SCOPE_PAR, d => {
+    escribir(d, "src/nuevo.mjs", lineas(20));
+    escribir(d, "tests/nuevo.test.mjs", lineas(99));
+  }, { confirmar: false });
+  const r = informe(dir);
+  assert.equal(r.codigo, 0, r.crudo.salida);
+  assert.equal(avisoProporcion(r.filas), undefined);
+});
+
+test("A6: sin líneas de producto no avisa", () => {
+  const dir = repo("`tests/nuevo.test.mjs`", d => escribir(d, "tests/nuevo.test.mjs", lineas(150)), { confirmar: false });
+  const r = informe(dir);
+  assert.equal(r.codigo, 0, r.crudo.salida);
+  assert.equal(avisoProporcion(r.filas), undefined);
+});
+
+test("A6: cambios confirmados en la rama cuentan igual que los sin confirmar", () => {
+  const dir = repo(SCOPE_PAR, d => {
+    escribir(d, "src/nuevo.mjs", lineas(40));
+    escribir(d, "tests/nuevo.test.mjs", lineas(130));
+  });
+  const r = informe(dir);
+  assert.equal(r.codigo, 0, r.crudo.salida);
+  assert.match(avisoProporcion(r.filas)?.mensaje ?? "", /^pruebas\/producto 3\.25 \(130 líneas de prueba, 40 de producto\)/);
+});
+
+test("A6: borradas cuentan como producto y sin confirmar se suman a las confirmadas", () => {
+  // src/a.mjs pasa de «x» a 40 líneas sin confirmar: 1 borrada y 40 añadidas = 41 de producto.
+  const dir = repo("`src/a.mjs`, `tests/nuevo.test.mjs`", d => {
+    escribir(d, "src/a.mjs", lineas(40));
+    escribir(d, "tests/nuevo.test.mjs", lineas(130));
+  }, { confirmar: false });
+  const r = informe(dir);
+  assert.equal(r.codigo, 0, r.crudo.salida);
+  assert.match(avisoProporcion(r.filas)?.mensaje ?? "", /^pruebas\/producto 3\.17 \(130 líneas de prueba, 41 de producto\)/);
+});
+
+test("A6: un enlace simbólico no se sigue ni cuenta", () => {
+  const destino = mkdtempSync(join(tmpdir(), "kit-scope-destino-"));
+  temporales.push(destino);
+  writeFileSync(join(destino, "grande.txt"), lineas(500));
+  const dir = repo(SCOPE_PAR, d => {
+    escribir(d, "src/nuevo.mjs", lineas(40));
+    mkdirSync(join(d, "tests"), { recursive: true });
+    symlinkSync(join(destino, "grande.txt"), join(d, "tests/nuevo.test.mjs"));
+  }, { confirmar: false });
+  const r = informe(dir);
+  assert.equal(avisoProporcion(r.filas), undefined, r.crudo.salida);
+});
+
+test("A6: un archivo prohibido no se cuenta, así no tapa el aviso", () => {
+  const dir = repo(SCOPE_PAR, d => {
+    escribir(d, "src/nuevo.mjs", lineas(40));
+    escribir(d, "tests/nuevo.test.mjs", lineas(130));
+    escribir(d, ".env", lineas(500, "CLAVE="));
+  }, { confirmar: false });
+  const r = informe(dir);
+  assert.equal(r.codigo, 1);
+  assert.equal(hallar(r.filas, ".env")?.nivel, "error");
+  assert.match(avisoProporcion(r.filas)?.mensaje ?? "", /^pruebas\/producto 3\.25 /);
+});
+
+test("A6: un archivo binario no se cuenta", () => {
+  const dir = repo(SCOPE_PAR, d => {
+    escribir(d, "src/nuevo.mjs", lineas(40));
+    escribir(d, "tests/nuevo.test.mjs", "\0binario\n".repeat(300));
+  }, { confirmar: false });
+  const r = informe(dir);
+  assert.equal(r.codigo, 0, r.crudo.salida);
+  assert.equal(avisoProporcion(r.filas), undefined);
 });

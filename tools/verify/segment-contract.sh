@@ -13,17 +13,14 @@ TEXTOS_TRAMOS=(
   'core/agents/builder.md|DONE: plan=<path>; segment=<n>; verify=pasa'
   'core/agents/planner.md|Per-segment review'
   'core/agents/planner.md|segment: <n>'
-  'core/agents/builder.md|segment: <n>'
   'core/agents/builder.md|segment=<n>'
   'core/agents/planner.md|one long wait'
   'core/references/planner/codex-waits.md|send_message'
-  'core/agents/builder.md|Long output'
-  'core/agents/builder.md|tramo-<n>.md'
   'core/skills/plan-change/SKILL.md|tramo-N.md'
   'core/skills/plan-change/SKILL.md|/compact'
   'core/skills/execute-plan/SKILL.md|tramo-<n>.md'
   'core/skills/execute-plan/SKILL.md|/compact'
-  'core/skills/execute-plan/SKILL.md|For long output'
+  'core/skills/execute-plan/SKILL.md|Long output (builds'
 )
 textos_tramos() { # $1: raíz del kit; nombra cada texto que falta y devuelve 1 si falta alguno
   local r=$1 par f t rc=0

@@ -9,7 +9,7 @@ textos_contrato() { # $1: raíz del kit
   grep -qF 'git diff' "$r/core/agents/planner.md" || return 1
   grep -qF 'Read and follow the `execute-plan` skill' "$r/core/agents/builder.md" || return 1
   grep -qF 'status`, `diff`, `branch --show-current`, `rev-parse --verify --quiet`, and `symbolic-ref' "$r/core/agents/builder.md" || return 1
-  grep -qF 'rereading relevant material after edits or recovery' "$r/core/agents/builder.md" || return 1
+  grep -qF 'rereading relevant material after edits or recovery' "$r/core/skills/execute-plan/SKILL.md" || return 1
   if grep -qF "grep -c '^- \[ \]'" "$r/core/agents/builder.md"; then return 1; fi
   if grep -qF 'no releas lo ya leído' "$r/core/agents/builder.md" || grep -qF 'Git permitido, solo en las carpetas de `repos:`' "$r/core/agents/builder.md"; then return 1; fi
 }
