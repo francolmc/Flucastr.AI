@@ -17,7 +17,7 @@ Classify before acting. Class names are the ones `kit run` writes to `runs.jsonl
 ### Step 0: infra, entorno, plan, decision
 
 - `infra` repeats with the same model while attempts remain. It counts against the two-relaunch limit and does not advance the step.
-- `entorno`, `plan` and `decision` return to the person with a one-line diagnosis in *Notes*, with no relaunch from the ladder. The person fixes the environment, the scope, or the decision (writes it as `Resuelto:` in the plan), and relaunches.
+- `entorno`, `plan` and `decision` return to the person with a one-line diagnosis in *Notes*, with no relaunch from the ladder. The person fixes the environment, the scope, or the decision (a row in `changes/<name>/decisions.md`; without that file, `Resuelto:` in the plan), and relaunches.
 
 ### Step 1: first task failure
 
@@ -43,3 +43,4 @@ Only after a step 3 that failed by task. The planner takes the remaining work. A
 - After a deadline interruption, clean up only Docker resources belonging to this project's `verify`; never run `docker system prune`, which would remove resources from other projects.
 - After `PAUSED` or interruption, do not trust checkboxes: reconstruct state with `git status` and `git diff --stat` in each `repos:` folder and record it in *Notes* before relaunching.
 - Do not edit `models.json` to change the level.
+- Before relaunching or asking about an `ambiguous` or `access` pause, search `changes/<name>/decisions.md`: if an `active` row answers it, relaunch citing its ID and do not ask again; a changed answer is a new row that supersedes the old one.

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { checkDecisions } from '../tools/check/decisiones.mjs';
 
 const HELP = `Uso: node scripts/review-plan.mjs <plan.md>
 
@@ -22,7 +24,9 @@ Con dos o más tramos en ## Steps y sin «continuity: continuous», avisa una ve
 Falsos positivos conocidos: A# que no comparten archivo por diseño (documentación
 frente a código), archivos raíz sin «/» que no se ven, «level» en prosa dentro de la
 línea de verificación. Revisar un tramo suelto lo trata como último del plan.
-El límite de tamaño es 8192 bytes UTF-8 por archivo de plan/tramo.`;
+El límite de tamaño es 8192 bytes UTF-8 por archivo de plan/tramo.
+Si hay decisions.md junto al plan, también revisa las decisiones citadas (IDs D-NN;
+avisos «decisiones:»; formato en records.md). Sin decisions.md solo avisa si el plan cita un ID.`;
 
 const productPath = (value) => !/\.md\b/i.test(value) && !/(^|\/)(test|tests|pruebas|spec|specs)(\/|$)/i.test(value);
 const routeTokens = (text) => [...text.matchAll(/(?:^|[\s`(])((?:\.?\/?[\w@.-]+\/)+[\w@.-]*\/?)(?=$|[\s`,;)])/gm)].map((m) => m[1]);
@@ -209,6 +213,12 @@ try {
     console.error('nota: formato anterior; las comprobaciones de tramos verificables (Segment verification, level, mezcla de unidades) no se aplican.');
   }
   const warnings = analyze(source, file);
+  const registryFile = path.join(path.dirname(file), 'decisions.md');
+  const registry = await readFile(registryFile, 'utf8').catch((error) => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  warnings.push(...checkDecisions(source, file, registry, registryFile));
   if (warnings.length) {
     console.log(warnings.join('\n'));
     process.exitCode = 1;

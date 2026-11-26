@@ -29,7 +29,7 @@ By default, an execution ends when the active segment is complete. Only with `co
 
 In continuous mode, a check that fails twice for the same cause pauses (`motivo=verify`): after the first failure, diagnose and fix only within scope; if the same cause returns, pause with completed work, remaining work, and reason. Also pause if work must leave scope or requires a user decision. If no prior duration is recorded for the exact check in an equivalent environment, pause before running it with `motivo=verify`. Limit the check to twice that duration, for example `timeout <2x-segundos>s <comando>`; if it expires, leave the checkbox pending and pause with `motivo=verify`. A check that takes more than twice its measured duration also pauses with `motivo=verify`. Record minor in-scope decisions under `Decisions` and continue; you may update `segment:` while advancing within the same story. Advance only if verification passes, the work stays in Scope, and no user decision is needed. Keep `status: in progress` while advancing; when using `PAUSED`, set `status: partial`, with a resumable note describing progress, remaining work, and cause. The planner reviews the note and reapproves the plan before resumption.
 
-Use the `Segment verification:` line for its check; if this is the plan's final segment, also run the complete *Verification*. Without `segment:`, the plan has one segment. When a segment ends, record its checkpoint; when a story ends, leave a summary for the planner.
+Use the `Segment verification:` line for its check; if this is the plan's final segment, also run the complete *Verification*. Without `segment:`, the plan has one segment. When a story ends, leave a summary for the planner.
 
 ## Execution loop
 
@@ -42,6 +42,7 @@ For each `- [ ]` step, in order:
 - If a step has no explicit check, leave it unchecked and add a *Notes* line naming the step and the missing check; do not invent one or claim completion. If interrupted or incomplete, leave it unchecked and record the exact resumption point in *Notes*.
 - Count pending items with the `bash pendientes-plan` block below, passing the plan path as `$1`; record the count. A read error is not zero. Continue with pending work unless an allowed blocker applies.
 - Fix related issues within scope and record them in *Notes*; record minor decisions there too (with continuity, under *Decisions*).
+- With `decisions.md`, add decisions as new rows there instead; rewrite `notes.md` (its headings, ≤15 lines) per segment and before pausing.
 - Long output (builds, `verify`, listings): show only the tail and errors; use quiet options when available.
 - Wait for long commands (`verify`, builds) with one call. Claude Code: maximum `timeout` or `run_in_background`, then wait for its notice. Pi: `bash` timeout. Codex: `exec_command` in an `exec` cell; if it returns “Script running with cell ID N”, make one `wait` call with that `cell_id` and `yield_time_ms: 300000`; if it returns a `session_id`, make one `write_stdin` call with empty `chars` and `yield_time_ms: 1800000`, repeating only while the command still runs, never every few seconds. Never loop with `sleep`, `tail`, or status polling.
 - For browser or container validation, use a fixed repository script (`./scripts/<name>.sh` or `./verify`) that runs all journeys and captures in one pass; do not chain standalone `docker run` or `compose run` calls.
@@ -82,7 +83,7 @@ After the other steps are complete, run the *Verification* command **exactly as 
 - If the harness warns that execution may be cut off, persist progress and the next action in *Notes*; do not report `DONE`. The state stays `in progress` (it is not a product `PAUSED`); the planner reconstructs it and reapproves before resuming.
 - If a historical or foreign test fails, diagnose and fix it within *Scope* before reporting; do not report it as a plan failure until that diagnosis is recorded.
 - Pause only for these motives: `ambiguous` (a step is ambiguous and interpretations change the result); `design` (the plan's solution does not work); `scope` (work outside *Scope* is needed or specified behavior would change); `access` (a credential, access, or tool is missing); `verify` (in continuous mode, a check fails twice for the same cause; outside it, `verify` fails in 3 runs of *Verification*).
-- Before a `PAUSED` with `motivo=ambiguous` or `motivo=access`, look for `Resuelto:` under *Decisions already taken*; apply it as written and do not ask again.
+- Before a `PAUSED` with `motivo=ambiguous` or `motivo=access`, search `decisions.md` (without it, `Resuelto:` under *Decisions already taken*); apply it if `active`; do not ask again.
 - On a blocker, run `node scripts/kit-nota.mjs <plan> blocked "<cause>"` once before returning; use `doing "<step>"` only if the person already approved it after the measurement; never ask for that approval.
 - Do not guess; pause. Leave completed work intact.
 

@@ -38,10 +38,10 @@ Options considered, benefits, cost and risk, and the recommended option. For cle
 List each assumption on its own line and state what changes if the user corrects it. If there are no assumptions, write “None”.
 
 ## Decisions already taken
-Confirmed decisions and their reasons, one per line. Include `Executor: <who>, because <answer from the executability test>`.
+Confirmed decisions and their reasons, one per line. Include `Executor: <who>, because <answer from the executability test>`. Bullets cite IDs from `decisions.md` (`references/records.md`); the `Executor:` line is exempt.
 
 ## Decisions
-Minor questions resolved during execution, one per line with the reason. Product or scope decisions remain with the user.
+Minor questions resolved during execution, one per line with the reason. Bullets cite IDs from `decisions.md` (`references/records.md`). Product or scope decisions remain with the user.
 
 ## Validation
 What the user confirmed and when. Do not introduce new questions here: if a decision that changes the outcome still needs confirmation, return to Exploration. Without explicit approval, the plan remains a draft.
@@ -53,7 +53,7 @@ Product folders and files the builder may change. Use one branch for the entire 
 `<command>` — the command that defines “done”. It must run from a clean start and fail if anything fails.
 
 ## Stop conditions
-In continuous mode, continue if the check passes, the next step remains within Scope, and no user decision is needed. Stop with a note describing completed work, remaining work, and the reason if the same cause fails twice, work must leave Scope, a user decision is missing, or a check takes more than twice its measured duration. Record minor in-scope questions under `## Decisions` and continue.
+In continuous mode, continue if the check passes, the next step remains within Scope, and no user decision is needed. Stop with a note describing completed work, remaining work, and the reason if the same cause fails twice, work must leave Scope, a user decision is missing, or a check takes more than twice its measured duration. Record minor in-scope questions as new rows in `decisions.md` (without that file, under `## Decisions`) and continue.
 
 ## Steps
 
@@ -74,7 +74,7 @@ Acceptance:
 TODO:
 - [ ] <action on file/path> (A1). Check: `<command or signal>`; expect <result>.
 Segment verification: `<command>` — level <1|2|3>; exit 0; covers A1.
-Handoff: <minimal context, closed decisions, relevant paths, and how to resume the planner-builder iteration>.
+Handoff: <minimal context, closed decision IDs, relevant paths, and how to resume the planner-builder iteration>.
 ```
 
 To enable continuity, set `continuity: continuous` in the frontmatter; if omitted, the plan keeps one-segment-at-a-time execution. In continuous mode, a story may include several small, ordered segments: each segment has its own scope, criteria, steps, and verification, and the builder executes them in sequence until the story is complete or a stop condition applies. Group them under the same user outcome and list no more than three product files per segment. Also declare `Revisión: fin de historia` or `Revisión: por tramo`; the latter is optional even for high-risk work, but when declared it blocks progress until review. Record a baseline measurement for each check command: exact command, observed duration, and environment. If no measurement exists yet, the builder stops before running that check and leaves a note to measure it. Each segment records a checkpoint with changed files, a diff summary, and the check result; when the story ends, suggest one commit for the user to make, without creating it.

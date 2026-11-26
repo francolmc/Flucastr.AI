@@ -84,6 +84,26 @@ assert.ok(skill.includes('For older plans, follow their existing steps and accep
   'A2: los planes antiguos conservan el procedimiento existente');
 console.log(`ok A2: ${continuidad.length + 7} condiciones del modo continuo y compatibilidad verificadas`);
 
+const decisionesA5 = [
+  ['skill: buscar decisions.md', skill, "search `decisions.md` (without it, `Resuelto:`"],
+  ['skill: nuevas filas', skill, 'add decisions as new rows there instead'],
+  ['skill: aplicar solo activas', skill, 'apply it if `active`'],
+  ['builder: filas de decisions.md', builder, 'You may also add rows to `decisions.md`'],
+  ['builder: citar IDs en retornos', builder, 'cite `D-NN` in returns'],
+];
+function validarDecisionesA5(texto, frase, etiqueta) {
+  assert.ok(texto.includes(frase), `A5: falta ${etiqueta}: ${frase}`);
+}
+for (const [etiqueta, texto, frase] of decisionesA5) {
+  validarDecisionesA5(texto, frase, etiqueta);
+  assert.throws(
+    () => validarDecisionesA5(texto.replace(frase, ''), frase, etiqueta),
+    error => error instanceof assert.AssertionError && error.message.includes(frase),
+    `A5: quitar "${frase}" debe fallar`,
+  );
+}
+console.log(`ok A5: ${decisionesA5.length} frases de decisions.md presentes y mutaciones detectadas`);
+
 const etiquetasRetorno = [
   ['DONE line', 'DONE: plan=<path>; segment=<n>; verify=pasa'],
   ['DONE labels', '`cambios:`'],
