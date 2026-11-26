@@ -31,4 +31,26 @@ Kit de agentes y skills para Claude Code, Pi y Codex. Esta es la versión 2.
 - Revisar el cierre mecánico de un plan: `node scripts/kit-close.mjs <plan> [--resultado DONE|PAUSED] [--json]`. Sin modelo y solo de lectura: revisa casillas pendientes, evidencia por paso, cobertura de A#, estado del frontmatter y la nota de reanudación. Sale con 0 (sin errores), 1 (hay errores), 3 (no verificable: sin `--resultado` del builder o formato sin parsear) o 2 (uso o plan inexistente). Sin `--resultado` no puede comprobar la coherencia con el resultado del builder; en ese caso marca «no verificable».
 - Ejecutar el builder Pi en una ventana propia: `pi-builder`.
 
+## Ventanas de compactación
+
+Valores previstos por agente y herramienta, con la ventana de Pi fijada en 272000. Son referencia; el comando `ventanas` muestra los valores reales de cada equipo:
+
+| Agente | Claude Code (ventana / disparo) | Codex (disparo) | Pi con ventana 272000 (disparo) |
+|---|---|---|---|
+| planner | 300000 / 267000 | 200000 | 180000 |
+| builder | 200000 / 167000 | 150000 | 180000 |
+| revisor | 300000 / 267000 (hereda el proyecto) | 200000 | 180000 |
+
+- Regla: `ventana >= piso medido + 33000 + margen de al menos 100000` en Claude Code, porque su disparo es ventana − 33000. En Codex y Pi se compara el disparo: disparo − piso ≥ 100000. Con el piso del planner (102971), Claude necesita una ventana de al menos 235971.
+- Celdas bajo el margen con ese piso: Codex planner (97029) y revisor (97029), y Pi planner (77029) y revisor (77029). Salen como AVISO. Claude planner (164029) cumple. El builder tiene «piso sin medir» y no avisa.
+
+- Ver la ventana efectiva por proyecto, herramienta y agente: `node scripts/resolver.mjs ventanas [proyecto…]`. Suma los proyectos de `~/.flucastr-ai/manifiesto.txt`. Es solo lectura y muestra las columnas proyecto, herramienta, agente, vía, ventana, disparo, origen, piso y estado. Sale con 0 (sin avisos), 1 (hay avisos) o 2 (uso, por ejemplo una opción desconocida).
+- Disparo: en Claude Code, ventana − 33000; en Codex, la ventana; en Pi, ventana − reserva. Si disparo − piso es menor que `work_margin` (100000), la fila sale como AVISO.
+- Claude Code, precedencia: `CLAUDE_CODE_AUTO_COMPACT_WINDOW` (entorno o bloque `env`) > `--autocompact` del lanzador `claude-<agente>` > ajustes por archivo, en orden local > proyecto > usuario. Dentro de cada archivo, `modelSettings.<modelo>.autoCompactWindow` gana a `autoCompactWindow`, y un archivo sin valor cede al siguiente. El modelo es el de `models.json` para ese agente.
+- Filas de Claude Code: `claude-<agente>` solo aparece si el lanzador tiene `--autocompact`; `sesión` muestra la ventana que aplican el entorno y los ajustes (sin valor: `sin fijar`). El builder es subagente y toma la menor entre su frontmatter y la ventana efectiva del planner. El revisor hereda la ventana efectiva del planner.
+- Avisos: variable de entorno de compactación, `modelSettings`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, planner o revisor sin fijar, y margen corto.
+- Piso: el medido de la propia herramienta; si no existe, el del mismo agente en otra herramienta, marcado «prestado» (el revisor usa el del planner). El builder muestra «piso sin medir» y no avisa.
+- Codex y Pi: solo se leen los ajustes globales (`CODEX_HOME/config.toml` y `PI_CODING_AGENT_DIR/settings.json`). No se leen los ajustes de proyecto de Codex ni de Pi.
+- El comando imprime solo las claves de compactación, nunca otros valores de los ajustes. Los lanzadores y los ajustes los escribe `install.sh`; tras reinstalar, `ventanas` muestra lo instalado.
+
 Para más detalle, consulta la [guía de uso](docs/guide.md#qué-es).

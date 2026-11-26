@@ -63,18 +63,18 @@ prueba_codex() (
   grep -qxF "[model_auto_compact_token_limit=$umbral]" <<<"$salida" || { echo "FALLO: codex-builder no pasa model_auto_compact_token_limit=$umbral" >&2; exit 1; }
   [ "$(grep -c model_auto_compact_token_limit "$H/.local/bin/codex-builder")" = 1 ] || { echo "FALLO: codex-builder no trae exactamente 1 umbral de compactación" >&2; exit 1; }
   M2="$tmp/m-sin-compactar.json"; H3="$tmp/home3"; mkdir -p "$H3/.codex"
-  node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); delete m.compact_at; for (const p of Object.values(m.profiles)) delete p.compact_at; fs.writeFileSync(process.argv[2], JSON.stringify(m))' "$M" "$M2" || exit 1
+  node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); delete m.compact_at; for (const p of Object.values(m.profiles)) delete p.compact_at; for (const a of Object.values(m.agents||{})) delete a.compact_at; if (m.kit_run && m.kit_run.reviewer) delete m.kit_run.reviewer.compact_at; fs.writeFileSync(process.argv[2], JSON.stringify(m))' "$M" "$M2" || exit 1
   ( unset CODEX_HOME PI_CODING_AGENT_DIR; export HOME="$H3" FLUCASTR_MODELOS="$M2"; PATH="$F:$PATH" bash install.sh --only codex --copy ) >"$tmp/log3" 2>&1 || { cat "$tmp/log3" >&2; echo "FALLO: instalar con modelos sin compact_at falló" >&2; exit 1; }
   [ -f "$H3/.local/bin/codex-builder" ] || { echo "FALLO: sin compact_at no se generó codex-builder" >&2; exit 1; }
   if grep -q model_auto_compact_token_limit "$H3/.local/bin/codex-builder"; then echo "FALLO: sin compact_at el lanzador trae umbral de compactación" >&2; exit 1; fi
   echo "ok 3f: compact_at de models.json va en codex-builder una sola vez (reinstalar no duplica); sin compact_at no aparece"
 
   # (1c) por agente: planner compacta con agents.planner.compact_at; builder con el general. Ambos lanzadores traen la espera larga de comandos.
-  esp_p=$(node -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.agents.planner.compact_at ?? ""))' "$M") || exit 1
-  esp_c=$(node -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.compact_at ?? ""))' "$M") || exit 1
+  esp_p=$(node -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.agents.planner.compact_at.codex ?? ""))' "$M") || exit 1
+  esp_c=$(node -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.agents.builder.compact_at.codex ?? ""))' "$M") || exit 1
   umbral_p=$(FLUCASTR_MODELOS="$M" node scripts/resolver.mjs compactar-codex planner) || exit 1
   [ -n "$esp_p" ] && [ "$umbral_p" = "$esp_p" ] || { echo "FALLO: compactar-codex planner salió «$umbral_p», models.json dice «$esp_p»" >&2; exit 1; }
-  [ "$umbral" = "$esp_c" ] || { echo "FALLO: compactar-codex builder salió «$umbral», el general de models.json es «$esp_c»" >&2; exit 1; }
+  [ "$umbral" = "$esp_c" ] || { echo "FALLO: compactar-codex builder salió «$umbral», agents.builder.compact_at.codex de models.json es «$esp_c»" >&2; exit 1; }
   salida_p=$(PATH="$F:$PATH" HOME="$H" "$H/.local/bin/codex-planner" extra) || { echo "FALLO: codex-planner falló con el codex de prueba" >&2; exit 1; }
   grep -qxF "[model_auto_compact_token_limit=$esp_p]" <<<"$salida_p" || { echo "FALLO: codex-planner no pasa model_auto_compact_token_limit=$esp_p" >&2; exit 1; }
   for s in "$salida" "$salida_p"; do

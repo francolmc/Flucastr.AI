@@ -1,11 +1,15 @@
 {
   "version": 2,
-  "_readme": "Fuente única de verdad de los modelos. Los agentes declaran level (high, medium, low), nunca un modelo. Resolución: level = agents[agente].level o default_level; perfil = agents[agente].profile si es de la misma herramienta, si no default_profile[tool]; modelo = profiles[perfil].models[level], y si falta se prueba el orden de fallback. effort = agents[agente].effort; si falta no se escribe nada y la herramienta usa el suyo; debe estar en efforts. En Codex, max se escribe como xhigh. kit_run.reviewer usa la misma resolución que un agente (level y effort); sin esa clave, el revisor de kit run es el agente planner. compact_at = tokens de contexto a los que compacta la herramienta. windows = ventana de contexto por modelo: Pi fija reserveTokens = windows − compact_at; Claude Code fija autoCompactWindow = compact_at + 33000.",
+  "_readme": "Fuente única de verdad de los modelos. Los agentes declaran level (high, medium, low), nunca un modelo. Resolución: level = agents[agente].level o default_level; perfil = agents[agente].profile si es de la misma herramienta, si no default_profile[tool]; modelo = profiles[perfil].models[level], y si falta se prueba el orden de fallback. effort = agents[agente].effort; si falta no se escribe nada y la herramienta usa el suyo; debe estar en efforts. En Codex, max se escribe como xhigh. kit_run.reviewer usa la misma resolución que un agente (level y effort); sin esa clave, el revisor de kit run es el agente planner. compact_at = tokens de contexto a los que compacta la herramienta, por agente y herramienta: agents[agente].compact_at = { claude-code, codex } (un número vale para todas; sin valor propio se usa el del perfil). compaction.floors = piso medido de contexto por agente y herramienta; compaction.work_margin = margen de trabajo mínimo. Regla: disparo − piso >= work_margin, con disparo = compact_at en Codex y ventana − compact_reserve del perfil en Pi (así ventana >= piso + 33000 + margen de trabajo de al menos 100000); hoy Codex y Pi no la cumplen para planner y el comando ventanas lo avisa. windows = ventana de contexto por modelo. Claude Code fija autoCompactWindow = compact_at + 33000 y Pi fija reserveTokens = ventana − compact_reserve.",
 
   "levels": ["high", "medium", "low"],
   "efforts": ["low", "medium", "high", "xhigh", "max"],
   "default_level": "medium",
-  "compact_at": 100000,
+
+  "compaction": {
+    "work_margin": 100000,
+    "floors": { "claude-code": { "planner": 102971 } }
+  },
 
   "fallback": {
     "high": ["medium", "low"],
@@ -17,6 +21,7 @@
     "pi-openai": {
       "tool": "pi",
       "provider": "openai",
+      "compact_reserve": 92000,
       "models": {
         "high": "openai/gpt-6.1-sol",
         "medium": "openai/gpt-6.1-terra",
@@ -25,6 +30,7 @@
       "windows": {
         "openai/gpt-6-astra": 272000,
         "openai/gpt-6.1-sol": 272000,
+        "openai/gpt-6.1-terra": 272000,
         "openai/gpt-6-luna": 272000
       }
     },
@@ -55,11 +61,11 @@
   },
 
   "agents": {
-    "planner": { "level": "medium", "effort": "medium", "compact_at": 60000 },
-    "builder": { "level": "low", "effort": "high" }
+    "planner": { "level": "medium", "effort": "medium", "compact_at": { "claude-code": 267000, "codex": 200000 } },
+    "builder": { "level": "low", "effort": "high", "compact_at": { "claude-code": 167000, "codex": 150000 } }
   },
 
   "kit_run": {
-    "reviewer": { "level": "medium", "effort": "low" }
+    "reviewer": { "level": "medium", "effort": "low", "compact_at": { "claude-code": 267000, "codex": 200000 } }
   }
 }

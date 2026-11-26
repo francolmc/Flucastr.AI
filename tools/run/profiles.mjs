@@ -9,6 +9,13 @@ function crearResolutoresPerfil(raizKit) {
     return r.stdout.trim();
   }
 
+  // Umbral de compactación de Codex del agente (compactar-codex de resolver.mjs): "" si no hay uno válido.
+  function resolverCompactacion(agente) {
+    const r = spawnSyncSeguro(process.execPath,[join(raizKit, "scripts", "resolver.mjs"), "compactar-codex", agente], { encoding: "utf8" });
+    if (r.status !== 0) throw new Error(`resolver compactar-codex ${agente} falló: ${r.stderr.trim()}`);
+    return r.stdout.trim();
+  }
+
   // Modelo y esfuerzo del revisor de kit run (resolver.mjs reviewer): kit_run.reviewer de models.json, o el de planner.
   function resolverRevisorKit(herramienta) {
     const r = spawnSyncSeguro(process.execPath,[join(raizKit, "scripts", "resolver.mjs"), "reviewer", herramienta], { encoding: "utf8" });
@@ -40,7 +47,7 @@ function crearResolutoresPerfil(raizKit) {
     }
   }
 
-  return { resolverAgente, resolverRevisorKit, etiquetaRevisor, etiquetaBuilder, comprobarPoliticaClaude };
+  return { resolverAgente, resolverCompactacion, resolverRevisorKit, etiquetaRevisor, etiquetaBuilder, comprobarPoliticaClaude };
 }
 
 export { crearResolutoresPerfil };

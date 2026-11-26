@@ -299,6 +299,26 @@ if [ -f "$MANIFIESTO" ]; then
   done < "$MANIFIESTO"
 fi
 
+# Compactación de Claude Code de proyectos registrados (sin --project): líneas modo<TAB>raíz, leídas antes de
+# uninstall.sh. "completo" si el proyecto tiene registro de Claude (crea el campo si falta); "solo" si solo tiene
+# Codex o skills (solo actualiza el valor que escribió el kit). Se refresca tras instalar Claude Code.
+REFRESCO_COMPACTACION_CLAUDE=""
+if [ -f "$MANIFIESTO" ]; then
+  while IFS=$'\t' read -r p_tipo p_ruta p_extra; do
+    [ -n "${p_ruta:-}" ] || continue
+    case "$p_tipo" in
+      compactacion|ajuste|deny|sandbox-claude)
+        case "$p_ruta" in */.claude/*) REFRESCO_COMPACTACION_CLAUDE+="completo"$'\t'"${p_ruta%/.claude/*}"$'\n' ;; esac ;;
+      hook)
+        if [ "${p_extra:-}" = claude ]; then
+          case "$p_ruta" in */.claude/*) REFRESCO_COMPACTACION_CLAUDE+="completo"$'\t'"${p_ruta%/.claude/*}"$'\n' ;; esac
+        fi ;;
+      codex-reglas) REFRESCO_COMPACTACION_CLAUDE+="solo"$'\t'"${p_ruta%/.codex/rules/flucastr.rules}"$'\n' ;;
+      skills-proyecto) REFRESCO_COMPACTACION_CLAUDE+="solo"$'\t'"$p_ruta"$'\n' ;;
+    esac
+  done < "$MANIFIESTO"
+fi
+
 # Quita primero lo instalado antes, para que no queden restos de skills o agentes borrados del repo.
 # Los ajustes de proyectos se conservan: se pasan tal cual al registro nuevo.
 if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
@@ -346,6 +366,7 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
     instalar_hook_permisos_claude
     # v2: sin hook del validador de tareas (era de v1; ver legacy/v1/).
   fi
+  refrescar_compactacion_claude_registrada
 else
   echo "Claude Code: no encontrado, se omite."
   if [ -n "$PROYECTO" ]; then echo "  (--project necesita Claude Code; no se fijó el agente)"; fi

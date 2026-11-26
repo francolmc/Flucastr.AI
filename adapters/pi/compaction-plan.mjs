@@ -3,6 +3,29 @@ import { esEntero, esObjeto, tiene } from "../../tools/resolver/object.mjs";
 // Defecto de reserveTokens en Pi: un umbral que dé menos que esto es peor que el defecto.
 const RESERVA_MINIMA_PI = 16384;
 
+// reserveTokens que el kit escribía antes de la ventana por modelo. Un override exactamente así es del kit y se reemplaza.
+const RESERVA_KIT_ANTIGUA = 172000;
+
+function esReservaKitAntigua(valor) {
+  if (!esObjeto(valor)) return false;
+  const claves = Object.keys(valor);
+  return claves.length === 1 && claves[0] === "reserveTokens" && valor.reserveTokens === RESERVA_KIT_ANTIGUA;
+}
+
+// Reserva de Pi para un modelo, o null si no se puede fijar. Con compact_reserve del perfil, es ese valor
+// (debe ser ≥ RESERVA_MINIMA_PI y menor que la ventana); sin él, ventana − compact_at (cálculo anterior).
+function reservaPi(perfil, c, modelo) {
+  const ventana = perfil.windows[modelo];
+  if (perfil.compact_reserve !== undefined) {
+    const r = perfil.compact_reserve;
+    return esEntero(r) && r >= RESERVA_MINIMA_PI && r < ventana ? r : null;
+  }
+  const compactar = perfil.compact_at ?? c.compact_at;
+  if (!esEntero(compactar)) return null;
+  const reserve = ventana - compactar;
+  return reserve < RESERVA_MINIMA_PI ? null : reserve;
+}
+
 // Modelos de Pi de todos los perfiles con herramienta "pi", sin repetidos, en orden del archivo. Valor: su perfil.
 export function candidatosPi(c) {
   const vistos = new Map();
@@ -31,7 +54,8 @@ export function planFijarPi(ajustes, candidatos, c, creado) {
   const lineas = [];
   const cambios = [];
   for (const [modelo, perfil] of candidatos) {
-    if (tiene(overrides, modelo)) {
+    const reemplazable = tiene(overrides, modelo) && esReservaKitAntigua(overrides[modelo]);
+    if (tiene(overrides, modelo) && !reemplazable) {
       lineas.push(`omitido-usuario:${modelo}`);
       continue;
     }
@@ -39,16 +63,12 @@ export function planFijarPi(ajustes, candidatos, c, creado) {
       lineas.push(`omitido-ventana:${modelo}`);
       continue;
     }
-    const compactar = perfil.compact_at ?? c.compact_at;
-    if (!esEntero(compactar)) {
+    const reserve = reservaPi(perfil, c, modelo);
+    if (reserve === null) {
       lineas.push(`omitido-umbral:${modelo}`);
       continue;
     }
-    const reserve = perfil.windows[modelo] - compactar;
-    if (reserve < RESERVA_MINIMA_PI) {
-      lineas.push(`omitido-umbral:${modelo}`);
-      continue;
-    }
+    if (reemplazable) lineas.push(`reemplazado ${RESERVA_KIT_ANTIGUA} en ${modelo}`);
     lineas.push(`fijado:${modelo}=${reserve}${sufijo}`);
     cambios.push([modelo, reserve]);
   }

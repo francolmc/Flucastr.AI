@@ -22,10 +22,12 @@ enlazar() { # origen destino
   echo "  enlazado: $destino"
 }
 
-# Si el destino es un enlace a este repo (instalación manual anterior), lo quita para poder generar el archivo.
-# Devuelve 0 si lo liberó (o lo liberaría, en simulación) y 1 si no era un enlace nuestro.
+# Libera el destino para regenerarlo. Devuelve 0 si lo liberó (o lo liberaría, en simulación) y 1 si no es nuestro:
+# - un enlace a este repo (instalación manual anterior) se quita;
+# - un archivo regular con una línea que empieza por la marca del kit se quita y se regenera (A3).
+# Un archivo sin marca o un enlace a otro lugar devuelve 1: nunca se escribe a través de un enlace.
 liberar() { # destino
-  local destino="$1"
+  local destino="$1" primera=""
   if [ -L "$destino" ]; then
     case "$(readlink "$destino")" in
       "$RAIZ"/*)
@@ -34,6 +36,12 @@ liberar() { # destino
         return 0
         ;;
     esac
+    return 1
+  fi
+  if [ -f "$destino" ] && ! [ -L "$destino" ] && grep -q "^# flucastr-ai:generado" "$destino"; then
+    echo "  reemplazando archivo generado anterior: $destino"
+    if [ "$SIMULAR" = 0 ]; then rm "$destino"; fi
+    return 0
   fi
   return 1
 }
