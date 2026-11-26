@@ -7,6 +7,7 @@ import { existsSync, lstatSync, readFileSync, writeFileSync, mkdirSync, statSync
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
+import { evaluar } from "./hook-decidir.mjs";
 
 const SCRIPT = fileURLToPath(import.meta.url);
 const COMMAND = `node ${shellQuote(SCRIPT)} decision --project `;
@@ -130,7 +131,7 @@ export function accionProtegida(comando) {
   return false;
 }
 
-function esSecreto(ruta) {
+export function esSecreto(ruta) {
   return /(^|\/)(?:\.env(?:\..*)?|[^/]*(?:id_rsa|id_ed25519|\.pem|\.key|credentials?)(?:$|\/)|\.ssh(?:\/|$)|\.aws(?:\/|$))/i.test(ruta ?? "");
 }
 
@@ -248,12 +249,27 @@ function decidir(raiz, entrada) {
     const cmd = input.command;
     if (typeof cmd !== "string") return respuesta("ask", "comando no identificable");
     if (comandoSeguro(raiz, cmd)) return respuesta("allow", "comando declarado y scripts verificados contra HEAD");
-    if (accionProtegida(cmd)) return respuesta("deny", "acción protegida: la hace la persona usuaria");
+    const decision = decisionAnalizada(cmd);
+    if (decision === "deny") return respuesta("deny", "acción protegida: la hace la persona usuaria");
+    if (decision === "ask") return respuesta("ask", "el hook no pudo comprobar este comando: confírmalo");
     // Sin decisión: los demás comandos siguen el permiso normal de Claude Code.
     return;
   }
   // Read, Grep y Glob no pasan por este hook: `.env` lo protegen las reglas deny y el sandbox.
   // Sin decisión, Claude Code aplica su permiso normal.
+}
+
+// Si el analizador falla, nunca se deja pasar: deny si la línea es textual protegida, si no ask.
+function decisionAnalizada(cmd) {
+  try {
+    return evaluar(cmd, { textual: accionProtegida, secreto: esSecreto });
+  } catch {
+    try {
+      return accionProtegida(cmd) ? "deny" : "ask";
+    } catch {
+      return "deny";
+    }
+  }
 }
 
 // Solo corre como script: importar el módulo (accionProtegida, META) no ejecuta main.

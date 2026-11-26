@@ -174,7 +174,7 @@ flowchart LR
 
 ### `./verify` del kit
 
-Es el script de la raíz; sus pasos viven en `tools/verify/*.sh`. Comprueba coherencia de `models.json`, ayuda e instalación (`--dry-run` no escribe nada), resolución de modelos para las tres herramientas, skills completas, permisos por proyecto, migración, workspaces, contratos del planner/builder, lanzadores (incluido Codex), pruebas de uso y de `kit run`, observador de Docker y el contrato del cambio pequeño. Termina con `VERIFY OK`. Estas pruebas son deterministas: no miden la fiabilidad del modelo.
+Es el script de la raíz; sus pasos viven en `tools/verify/*.sh`. Comprueba coherencia de `models.json`, ayuda e instalación (`--dry-run` no escribe nada), resolución de modelos para las tres herramientas, skills completas, permisos por proyecto, el hook de permisos (`tests/permissions-contract/hook*.test.mjs`: analizador, decisión y conexión), migración, workspaces, contratos del planner/builder, lanzadores (incluido Codex), pruebas de uso y de `kit run`, observador de Docker y el contrato del cambio pequeño. Termina con `VERIFY OK`. Estas pruebas son deterministas: no miden la fiabilidad del modelo.
 
 `VERIFY_TARGET=<url> ./verify` corre solo el recorrido contra un despliegue (solo lectura salvo `VERIFY_PERMITIR_ESCRITURA=1`).
 
@@ -237,7 +237,7 @@ Opciones: `--copy`, `--only claude|pi|codex`, `--agent`, `--project-skills`, `--
 
 Detalle en `docs/reglas-deny.md`.
 
-- **Claude Code:** reglas `deny` (commit, push, merge, `gh pr create/merge`, `git -C/-c … commit`, `bash -c`, `sh -c`, `zsh -c`, leer `.env`), un **hook solo para Bash** (`scripts/permissions-hook.mjs`) y sandbox con restricciones de lectura (`.env`, `~/.ssh`, `~/.aws`, llaves). El hook permite el comando declarado, niega las acciones protegidas y deja el resto al permiso normal.
+- **Claude Code:** reglas `deny` (commit, push, merge, `gh pr create/merge`, `git -C/-c … commit`, `bash -c`, `sh -c`, `zsh -c`, leer `.env`), un **hook solo para Bash** (`scripts/permissions-hook.mjs`, con el analizador `scripts/hook-shell.mjs` y la decisión en `scripts/hook-decidir.mjs`) y sandbox con restricciones de lectura (`.env`, `~/.ssh`, `~/.aws`, llaves). El hook responde `allow`, `deny`, `ask` o nada: deniega las acciones protegidas (sin `rm`), incluso encadenadas o sustituidas; `rm` fuera de `pruebas/.temporales` solo se deniega como primer comando; pregunta cuando no puede analizar el comando; y deja el resto al permiso normal.
 - **Codex:** reglas `prefix_rule` en `.codex/rules/flucastr.rules`, más restrictivas y experimentales; no cubren leer `.env`.
 - **Pi:** sin equivalente; rige solo el prompt del agente.
 ```mermaid
