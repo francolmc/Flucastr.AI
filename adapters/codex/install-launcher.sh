@@ -5,7 +5,7 @@ generar_lanzador_codex() { # archivo del agente
   modelo="$(node "$RESOLVER" modelo "$nombre" codex)"
   esfuerzo="$(node "$RESOLVER" effort "$nombre" codex)"
   compactar="$(node "$RESOLVER" compactar-codex "$nombre")"
-  if [ -e "$destino" ] || [ -L "$destino" ]; then
+  if ! liberar "$destino" && { [ -e "$destino" ] || [ -L "$destino" ]; }; then
     echo "  OMITIDO (ya existe): $destino"
     return
   fi

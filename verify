@@ -85,4 +85,8 @@ node --test tests/ya-verificado/ya-verificado.test.mjs || fallo "20: pruebas de 
 paso 21 "builder pegado en kit run: detector y casos D1–D5 (tests/kit-run/pegado.test.mjs)"
 node --test tests/kit-run/pegado.test.mjs || fallo "21: pruebas del builder pegado no pasaron"
 
+# 22. pruebas de compactación por agente: ventana, lanzadores, Codex, Pi y comprobación de ventanas (changes/ventana-por-agente, historia A)
+paso 22 "pruebas de compactación por agente: tests/compaction/*.test.mjs (ventanas incluidas)"
+node --test tests/compaction/*.test.mjs || fallo "22: pruebas de compactación no pasaron"
+
 echo "VERIFY OK"

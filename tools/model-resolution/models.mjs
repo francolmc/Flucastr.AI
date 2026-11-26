@@ -84,18 +84,36 @@ export function crearResolucionModelos(raiz) {
     return { modelo: modeloDe(c, propio, "kit_run.reviewer", herramienta), effort: esfuerzoEn(c, propio, "kit_run.reviewer") };
   }
 
-  // Umbral de compactación de Codex del agente (agents[agente].compact_at ?? perfil.compact_at ?? compact_at),
-  // o "" si no hay uno válido. Lo usa el lanzador codex-<agente> con -c model_auto_compact_token_limit=<valor>.
-  function compactarCodex(agente) {
-    const c = leerConfig();
+  // Un valor de compact_at vale para una herramienta si es un entero (todas) o un objeto con esa herramienta como clave.
+  function valorDeHerramienta(v, herramienta) {
+    if (esEntero(v)) return v;
+    if (esObjeto(v) && esEntero(v[herramienta])) return v[herramienta];
+    return undefined;
+  }
+
+  // Umbral de compactación de una herramienta para un agente, en este orden: valor propio del agente
+  // (agents[agente].compact_at), compact_at del perfil y compact_at general. El revisor de kit run usa
+  // kit_run.reviewer y, sin valor, el de planner. Devuelve un entero o undefined.
+  function compactarEn(c, agente, herramienta) {
     const perfiles = c.profiles ?? {};
-    const propio = (c.agents ?? {})[agente] ?? {};
+    const reviewer = agente === "reviewer";
+    const propio = (reviewer ? c.kit_run?.reviewer : (c.agents ?? {})[agente]) ?? {};
+    const planner = reviewer ? ((c.agents ?? {}).planner ?? {}) : {};
     let perfilId = propio.profile;
-    if (!perfilId || perfiles[perfilId]?.tool !== "codex") {
-      perfilId = (c.default_profile ?? {}).codex;
+    if (!perfilId || perfiles[perfilId]?.tool !== herramienta) {
+      perfilId = (c.default_profile ?? {})[herramienta];
     }
-    const compactar = propio.compact_at ?? (perfiles[perfilId] ?? {}).compact_at ?? c.compact_at;
-    return esEntero(compactar) ? String(compactar) : "";
+    return valorDeHerramienta(propio.compact_at, herramienta)
+      ?? valorDeHerramienta(planner.compact_at, herramienta)
+      ?? valorDeHerramienta((perfiles[perfilId] ?? {}).compact_at, herramienta)
+      ?? valorDeHerramienta(c.compact_at, herramienta);
+  }
+
+  // Umbral de compactación de Codex del agente, o "" si no hay uno válido. Lo usa el lanzador codex-<agente>
+  // con -c model_auto_compact_token_limit=<valor>.
+  function compactarCodex(agente) {
+    const valor = compactarEn(leerConfig(), agente, "codex");
+    return valor === undefined ? "" : String(valor);
   }
 
   // Codex (model_reasoning_effort) no tiene 'max': ahí se escribe 'xhigh'. Las demás herramientas usan el valor tal cual.
@@ -111,6 +129,7 @@ export function crearResolucionModelos(raiz) {
     esfuerzoEn,
     resolverEsfuerzo,
     resolverRevisor,
+    compactarEn,
     compactarCodex,
     esfuerzoDe,
   };

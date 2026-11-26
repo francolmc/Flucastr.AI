@@ -6,6 +6,7 @@ export function generarAgenteMarkdown({
   herramienta,
   cabecera,
   cuerpo,
+  ventana,
   resolverModelo,
   resolverEsfuerzo,
   lineaIdentidad,
@@ -26,6 +27,8 @@ export function generarAgenteMarkdown({
   const esfuerzo = resolverEsfuerzo(agente);
   // Claude Code lleva 'effort'; Pi lleva 'thinking'. Sin esfuerzo no se escribe ninguna de las dos.
   const lineaEsfuerzo = !esfuerzo ? "" : herramienta === "pi" ? `thinking: ${esfuerzo}\n` : `effort: ${esfuerzo}\n`;
+  // autoCompactWindow solo en Claude Code y solo si viene una ventana (el agente es menor que el planner).
+  const lineaVentana = ventana === undefined || herramienta === "pi" ? "" : `autoCompactWindow: ${ventana}\n`;
   const cabeceraSalida = herramienta === "pi" ? adaptarCabeceraPi(cabecera) : cabecera;
-  return `---\n${cabeceraSalida}\n${lineaEsfuerzo}model: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con install.sh\n---\n${lineaIdentidad(herramienta, agente)}\n${cuerpo}`;
+  return `---\n${cabeceraSalida}\n${lineaEsfuerzo}${lineaVentana}model: ${modelo}\n# flucastr-ai:generado - no editar; se regenera con install.sh\n---\n${lineaIdentidad(herramienta, agente)}\n${cuerpo}`;
 }

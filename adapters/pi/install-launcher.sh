@@ -3,7 +3,7 @@ generar_lanzador_pi() { # archivo del agente
   nombre="$(basename "$archivo" .md)"
   destino="$BIN_DIR/pi-$nombre"
   modelo="$(node "$RESOLVER" modelo "$nombre" pi)"
-  if [ -e "$destino" ] || [ -L "$destino" ]; then
+  if ! liberar "$destino" && { [ -e "$destino" ] || [ -L "$destino" ]; }; then
     echo "  OMITIDO (ya existe): $destino"
     return
   fi

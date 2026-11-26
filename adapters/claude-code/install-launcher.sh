@@ -1,9 +1,10 @@
 generar_lanzador_claude() { # archivo del agente
-  local archivo="$1" nombre destino esfuerzo
+  local archivo="$1" nombre destino esfuerzo ventana
   nombre="$(basename "$archivo" .md)"
   destino="$BIN_DIR/claude-$nombre"
   esfuerzo="$(node "$RESOLVER" effort "$nombre")"
-  if [ -e "$destino" ] || [ -L "$destino" ]; then
+  ventana="$(node "$RESOLVER" ventana-claude "$nombre")"
+  if ! liberar "$destino" && { [ -e "$destino" ] || [ -L "$destino" ]; }; then
     echo "  OMITIDO (ya existe): $destino"
     return
   fi
@@ -12,6 +13,7 @@ generar_lanzador_claude() { # archivo del agente
     local exportar="" bandera=""
     if [ "$MODO" = descarga ]; then exportar="export FLUCASTR_MODELOS=\"$MODELOS\""$'\n'; fi
     if [ -n "$esfuerzo" ]; then bandera=" --effort $esfuerzo"; fi
+    if [ -n "$ventana" ]; then bandera="$bandera --autocompact $ventana"; fi
     cat > "$destino" <<EOF
 #!/usr/bin/env bash
 # flucastr-ai:generado - lo crea install.sh y lo borra uninstall.sh

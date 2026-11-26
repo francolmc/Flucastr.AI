@@ -1,6 +1,6 @@
 generar_lanzador_kit_run() {
   local destino="$BIN_DIR/kit-run"
-  if [ -e "$destino" ] || [ -L "$destino" ]; then
+  if ! liberar "$destino" && { [ -e "$destino" ] || [ -L "$destino" ]; }; then
     echo "  OMITIDO (ya existe): $destino"
     return
   fi

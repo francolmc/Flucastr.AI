@@ -52,8 +52,8 @@ function configuracionPegado(env) {
   };
   return { ...base, arranqueMs: fijo(env.KIT_RUN_PEGADO_ARRANQUE_MS, base.arranqueMs), minRepMs: fijo(env.KIT_RUN_PEGADO_MIN_REP_MS, base.minRepMs) };
 }
-const { resolverAgente, resolverRevisorKit, etiquetaRevisor, etiquetaBuilder, comprobarPoliticaClaude } = crearResolutoresPerfil(RAIZ_KIT);
-const comando = crearComando({ resolverAgente, resolverRevisorKit });
+const { resolverAgente, resolverCompactacion, resolverRevisorKit, etiquetaRevisor, etiquetaBuilder, comprobarPoliticaClaude } = crearResolutoresPerfil(RAIZ_KIT);
+const comando = crearComando({ resolverAgente, resolverRevisorKit, resolverCompactacion });
 const MAX_RELANZAMIENTOS = 2;
 const HERRAMIENTAS = ["codex", "claude", "pi"];
 

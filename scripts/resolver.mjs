@@ -13,7 +13,7 @@
 //   node scripts/resolver.mjs comparar-modelos <personal.json> <publicado.json>  imprime las diferencias que merecen aviso (nada si no hay)
 //   node scripts/resolver.mjs fijar-compactacion pi <settings.json> [--dry-run]  pone compaction.modelOverrides de Pi (no pisa lo del usuario)
 //   node scripts/resolver.mjs quitar-compactacion pi <settings.json> <modelo> <reserve> [creado]  deshace lo anterior, solo si el valor es ese
-//   node scripts/resolver.mjs fijar-compactacion claude <settings.json> [--dry-run]  pone autoCompactWindow (Claude Code) en los ajustes del proyecto
+//   node scripts/resolver.mjs fijar-compactacion claude <settings.json> [--registrado <valor>]... [--solo-actualizar] [--dry-run]  pone autoCompactWindow (Claude Code); actualiza el que escribió el kit (registrado o 133000)
 //   node scripts/resolver.mjs quitar-compactacion claude <settings.json> <valor>  deshace lo anterior, solo si el valor es ese
 //   node scripts/resolver.mjs fijar-hook claude <settings.local.json> [--dry-run]  agrega el hook PostToolUse del validador (no pisa lo ajeno)
 //   node scripts/resolver.mjs quitar-hook claude <settings.local.json>  deshace lo anterior, solo la entrada exacta del validador
@@ -26,14 +26,17 @@
 //   effort <agente> codex: igual, solo el esfuerzo traducido para Codex
 //   instrucciones-codex <archivo.md>: imprime las instrucciones del agente como cadena JSON (válida como valor TOML en codex -c)
 //   reviewer <herramienta>: dos líneas, modelo y esfuerzo del revisor de kit run (kit_run.reviewer; sin esa clave, el de planner). Esfuerzo traducido para codex.
+//   ventanas [proyecto…]: lista la ventana efectiva por proyecto, herramienta y agente (solo lectura); suma los proyectos del manifiesto. Sale 1 si hay avisos, 0 si no
 //   compactar-codex <agente>: imprime el umbral de compactación de Codex del agente (compact_at), o nada si no hay uno válido
+//   ventana-claude <agente>: imprime la ventana de Claude Code del agente (compact_at de claude-code + 33000; --autocompact), o nada si no hay una válida (100000–1000000)
 //
 // Archivo de modelos: la variable FLUCASTR_MODELOS (si existe y no está vacía) indica el models.json a leer;
 // si no, se lee el models.json del repo. Lo usa install.sh --copy con el models.json personal.
 
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { homedir } from "node:os";
 import { fallar } from "../tools/resolver/errors.mjs";
 import { esObjeto, tiene } from "../tools/resolver/object.mjs";
 import { ajustesDeObjeto, leerAjustes, leerAjustesOpcional, leerJson } from "../tools/resolver/json-settings.mjs";
@@ -41,9 +44,10 @@ import { escribirAtomico } from "../tools/resolver/atomic-write.mjs";
 import { conBloqueo } from "../adapters/pi/file-lock.mjs";
 import { crearResolucionModelos } from "../tools/model-resolution/models.mjs";
 import { valorCabecera } from "../tools/resolver/agent-header.mjs";
+import { calcularVentanas, formatearVentanas, proyectosDelManifiesto } from "../tools/resolver/windows.mjs";
 import { bashPlano } from "../adapters/pi/agent-tools.mjs";
 import { fijarCompactacionPi, quitarCompactacionPi } from "../adapters/pi/compaction.mjs";
-import { fijarCompactacionClaude, quitarCompactacionClaude } from "../adapters/claude-code/compaction.mjs";
+import { analizarFijarClaude, fijarCompactacionClaude, quitarCompactacionClaude } from "../adapters/claude-code/compaction.mjs";
 import { fijarHookClaude, quitarHookClaude } from "../adapters/claude-code/hook.mjs";
 import { fijarDenyClaude, quitarDenyClaude } from "../adapters/claude-code/deny.mjs"; import { comprobarNombreDenyClaude, fijarSandboxClaude } from "../adapters/claude-code/sandbox.mjs";
 import { fijarDenyCodex, quitarDenyCodex } from "../adapters/codex/deny.mjs";
@@ -60,9 +64,26 @@ const {
   esfuerzoEn,
   resolverEsfuerzo,
   resolverRevisor,
+  compactarEn,
   compactarCodex,
   esfuerzoDe,
 } = crearResolucionModelos(raiz);
+
+// Ventana de Claude Code de un agente: su compact_at de claude-code + 33000 (autoCompactWindow y --autocompact).
+// undefined si no hay umbral o si la ventana cae fuera de 100000–1000000.
+function ventanaClaude(agente) {
+  const valor = compactarEn(leerConfig(), agente, "claude-code");
+  if (valor === undefined) return undefined;
+  const ventana = valor + 33000;
+  return ventana >= 100000 && ventana <= 1000000 ? ventana : undefined;
+}
+
+// autoCompactWindow del frontmatter de un agente: solo si su ventana es menor que la del planner (el planner no lo escribe).
+function ventanaAutoCompact(agente) {
+  const propia = ventanaClaude(agente);
+  const planner = ventanaClaude("planner");
+  return propia !== undefined && planner !== undefined && propia < planner ? propia : undefined;
+}
 
 
 
@@ -845,6 +866,9 @@ if (orden === "modelo" && args.length === 2) {
 
 
 
+} else if (orden === "ventana-claude" && args.length === 1) {
+  const ventana = ventanaClaude(args[0]);
+  if (ventana !== undefined) process.stdout.write(`${ventana}\n`);
 } else if ((orden === "agente-claude" || orden === "agente-pi") && args.length === 1) {
   const archivo = args[0]; const agente = basename(archivo, ".md");
   const { cabecera, cuerpo } = partir(archivo);
@@ -855,6 +879,7 @@ if (orden === "modelo" && args.length === 2) {
     herramienta,
     cabecera,
     cuerpo,
+    ventana: herramienta === "claude-code" ? ventanaAutoCompact(agente) : undefined,
     resolverModelo,
     resolverEsfuerzo,
     lineaIdentidad,
@@ -966,8 +991,8 @@ if (orden === "modelo" && args.length === 2) {
 
 
 
-} else if (orden === "fijar-compactacion" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--dry-run"))) {
-  fijarCompactacionClaude(args[1], args.length === 3, leerConfig);
+} else if (orden === "fijar-compactacion" && args[0] === "claude" && args.length >= 2 && analizarFijarClaude(args.slice(2)) !== undefined) {
+  fijarCompactacionClaude(args[1], args.slice(2), leerConfig, compactarEn);
 } else if (orden === "quitar-compactacion" && args[0] === "claude" && args.length === 3 && /^\d+$/.test(args[2])) {
   quitarCompactacionClaude(args[1], args[2]);
 } else if (orden === "fijar-hook" && args[0] === "claude" && (args.length === 2 || (args.length === 3 && args[2] === "--dry-run"))) {
@@ -996,6 +1021,17 @@ if (orden === "modelo" && args.length === 2) {
   fijarCompactacionPi(args[1], args.length === 3, leerConfig);
 } else if (orden === "quitar-compactacion" && args[0] === "pi" && (args.length === 4 || (args.length === 5 && args[4] === "creado")) && /^\d+$/.test(args[3])) {
   quitarCompactacionPi(args[1], args[2], Number(args[3]), args.length === 5);
+} else if (orden === "ventanas" && args.some((a) => a.startsWith("-"))) {
+  console.error("uso: resolver.mjs ventanas [proyecto…]; sin opciones");
+  process.exitCode = 2;
+} else if (orden === "ventanas") {
+  const home = process.env.HOME || homedir();
+  const manifiesto = join(home, ".flucastr-ai", "manifiesto.txt");
+  const delManifiesto = existsSync(manifiesto) ? proyectosDelManifiesto(readFileSync(manifiesto, "utf8")) : [];
+  const proyectos = [...new Set([...args.map((a) => resolve(a)), ...delManifiesto])];
+  const resultado = calcularVentanas({ deps: { config: leerConfig(), modeloDe, compactarEn }, home, env: process.env, proyectos });
+  process.stdout.write(formatearVentanas(resultado));
+  process.exitCode = resultado.avisos.length > 0 ? 1 : 0;
 } else {
-  fallar("uso: resolver.mjs modelo <agente> <herramienta> | effort <agente> [codex] | reviewer <herramienta> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--dry-run] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--dry-run] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--dry-run] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--dry-run] | quitar-deny claude <settings.json> <regla> | fijar-sandbox claude <settings.json> [--dry-run] | quitar-sandbox claude <settings.json> <clave> <valor-json> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--dry-run] | quitar-deny codex <rules>");
+  fallar("uso: resolver.mjs ventanas [proyecto…] | modelo <agente> <herramienta> | effort <agente> [codex] | reviewer <herramienta> | modelo-esfuerzo <agente> <herramienta> | agente-claude <archivo> | agente-pi <archivo> | cuerpo <archivo> | fijar-agente <json> <agente> [--sobrescribir] | quitar-agente <json> <agente> | comparar-modelos <personal> <publicado> | fijar-compactacion pi <settings.json> [--dry-run] | quitar-compactacion pi <settings.json> <modelo> <reserve> [creado] | fijar-compactacion claude <settings.json> [--registrado <valor>]... [--solo-actualizar] [--dry-run] | quitar-compactacion claude <settings.json> <valor> | fijar-hook claude <settings.local.json> [--dry-run] | quitar-hook claude <settings.local.json> | fijar-deny claude <settings.json> [--dry-run] | quitar-deny claude <settings.json> <regla> | fijar-sandbox claude <settings.json> [--dry-run] | quitar-sandbox claude <settings.json> <clave> <valor-json> | agente-codex <archivo> | instrucciones-codex <archivo> | fijar-deny codex <rules> [--dry-run] | quitar-deny codex <rules>");
 }
