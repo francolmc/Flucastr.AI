@@ -128,6 +128,25 @@ if [ -n "$PROYECTO" ]; then
           fi
         fi
         ;;
+      hook-compact)
+        # hook de compactación de este proyecto (A10): solo la entrada del kit en su archivo, según la herramienta registrada
+        archivo_hook=""
+        case "${extra:-}" in
+          claude) archivo_hook="$PROYECTO/.claude/settings.local.json" ;;
+          codex) archivo_hook="$PROYECTO/.codex/hooks.json" ;;
+        esac
+        if [ -n "$archivo_hook" ] && [ "$ruta" = "$archivo_hook" ]; then
+          quitar=1
+          hallados=$((hallados + 1))
+          if [ "$SIMULAR" = 1 ]; then
+            decir "SIMULACIÓN: quitaría el hook de compactación de: $ruta"
+          else
+            resultado="$(node "$RAIZ/adapters/shared/compact-hook.mjs" quitar "${extra:-}" "$PROYECTO" < /dev/null)" || resultado="error"
+            decir "  hook de compactación ($resultado): $ruta"
+            rmdir "$(dirname "$ruta")" 2>/dev/null || true # solo si quedó vacía
+          fi
+        fi
+        ;;
       codex-reglas)
         # reglas deny de Codex de este proyecto: solo ese archivo, y solo si lleva la marca del kit
         if [ "$ruta" = "$PROYECTO/.codex/rules/flucastr.rules" ]; then

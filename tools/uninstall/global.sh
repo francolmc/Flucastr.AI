@@ -81,6 +81,24 @@ while IFS=$'\t' read -r tipo ruta extra; do
         rmdir "$(dirname "$ruta")" 2>/dev/null || true # .claude del proyecto, solo si quedó vacía
       fi
       ;;
+    hook-compact)
+      # hook de compactación de un proyecto (Claude Code o Codex), salvo --keep-settings (A10)
+      if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi
+      proyecto_hook=""
+      case "${extra:-}" in
+        claude) proyecto_hook="${ruta%/.claude/settings.local.json}" ;;
+        codex) proyecto_hook="${ruta%/.codex/hooks.json}" ;;
+      esac
+      if [ -z "$proyecto_hook" ] || [ "$proyecto_hook" = "$ruta" ]; then
+        decir "  omitido (hook de compactación desconocido): $ruta"
+      elif [ "$SIMULAR" = 1 ]; then
+        decir "  quitaría el hook de compactación de: $ruta"
+      else
+        resultado="$(node "$RAIZ/adapters/shared/compact-hook.mjs" quitar "${extra:-}" "$proyecto_hook" < /dev/null)" || resultado="error"
+        decir "  hook de compactación ($resultado): $ruta"
+        rmdir "$(dirname "$ruta")" 2>/dev/null || true # .claude o .codex del proyecto, solo si quedó vacía
+      fi
+      ;;
     codex-reglas)
       # reglas deny de Codex de un proyecto (.codex/rules/flucastr.rules), salvo --keep-settings
       if [ "$CONSERVAR_AJUSTES" = 1 ]; then continue; fi

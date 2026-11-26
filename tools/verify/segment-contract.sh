@@ -16,7 +16,7 @@ TEXTOS_TRAMOS=(
   'core/agents/builder.md|segment: <n>'
   'core/agents/builder.md|segment=<n>'
   'core/agents/planner.md|one long wait'
-  'core/agents/planner.md|send_message'
+  'core/references/planner/codex-waits.md|send_message'
   'core/agents/builder.md|Long output'
   'core/agents/builder.md|tramo-<n>.md'
   'core/skills/plan-change/SKILL.md|tramo-N.md'
@@ -35,7 +35,7 @@ textos_tramos() { # $1: raíz del kit; nombra cada texto que falta y devuelve 1 
 }
 copiar_tramos() { # $1: destino; copia los cuatro archivos con su ruta relativa
   local f
-  for f in core/skills/plan-change/SKILL.md core/skills/execute-plan/SKILL.md core/agents/planner.md core/agents/builder.md; do
+  for f in core/skills/plan-change/SKILL.md core/skills/execute-plan/SKILL.md core/agents/planner.md core/agents/builder.md core/references/planner/codex-waits.md; do
     mkdir -p "$1/$(dirname "$f")"; cp "$f" "$1/$f"
   done
 }
