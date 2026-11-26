@@ -201,3 +201,16 @@ test("auditar enumera reglas allow amplias previas por archivo y avisa si no hay
   assert.ok(resultado.hallazgos.some(h => h.tipo === "allow-sin-hook"));
   assert.deepEqual(configs.map(([ruta]) => readFileSync(ruta, "utf8")), originales);
 });
+
+test("el hook real aplica el analizador: texto inerte pasa, sustitución se deniega, comilla sin cerrar pide confirmación", t => {
+  const raiz = proyecto(t);
+  const casos = [
+    ["cat > notas.md <<'EOF'\ngit push\nEOF", "normal"],
+    ["echo \"$(git push)\"", "deny"],
+    ["echo \"sin cerrar", "ask"],
+    ["node verificacion/rapida.mjs", "allow"],
+  ];
+  for (const [command, esperada] of casos) {
+    assert.equal(decision(raiz, { tool_name: "Bash", tool_input: { command } }), esperada, command);
+  }
+});

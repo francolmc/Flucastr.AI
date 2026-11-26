@@ -85,4 +85,8 @@ node --test tests/context-size/*.test.mjs tests/after-compact/*.test.mjs || fall
 paso 24 "temporales: tests/temporales/*.test.mjs (barrido, envoltorio, espacio libre)"
 node --test tests/temporales/*.test.mjs || fallo "24: pruebas de temporales no pasaron"
 
+# 25. hook de permisos: analizador de shell, decisión y conexión en vivo (changes/hook-parser, segmento 3)
+paso 25 "hook de permisos: tests/permissions-contract/hook*.test.mjs (analizador, decisión y conexión)"
+node --test tests/permissions-contract/hook.test.mjs tests/permissions-contract/hook-shell.test.mjs tests/permissions-contract/hook-decision.test.mjs || fallo "25: pruebas del hook de permisos no pasaron"
+
 echo "VERIFY OK"

@@ -13,6 +13,7 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 - Si el builder no termina: escalera de recuperación (`kit run`; con subagentes, `scripts/kit-escalera.mjs`). Subir de nivel y el relevo del planner exigen el sí de la persona.
 - Estructura: agentes en `core/agents/` (`planner`, `builder`), skills en `core/skills/`, referencias del planner en `core/references/planner/`, contrato de verificación en `core/contracts/`, lo propio de un stack en `core/recipes/`, adaptadores por herramienta en `adapters/`, modelos, esfuerzo y ventanas en `models.json`.
 - Traspaso: `changes/<nombre>/plan.md`; avance en `changes/<nombre>/notes.md`; cerrados en `changes/done/`.
+- Hook de permisos (Claude Code): `scripts/permissions-hook.mjs` conecta `hook-shell.mjs` (analiza) y `hook-decidir.mjs` (decide); solo levanta un bloqueo textual si toda la línea es inerte. Corre desde la carpeta del kit, también sin commit: conecta cambios ya probados. Límites: `docs/reglas-deny.md`.
 
 ## Invariantes
 
