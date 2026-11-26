@@ -8,6 +8,7 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 
 - Aceptación: `node --test tests/acceptance/*.test.mjs` corre un archivo por flujo (`builder-contract`, `kit-run`, `uso`); filtro por flujo con `--test-name-pattern=<flujo>`. Los envoltorios están en `tests/acceptance/` y no cambian las suites que envuelven.
 - Comando `verify`: `./verify`; qué comprueba, en `README.md` («Verificación»). Modo remoto: `VERIFY_TARGET=<url> ./verify`, solo lectura salvo `VERIFY_PERMITIR_ESCRITURA=1`.
+- Salida de `./verify`: solo un resumen (en rojo, la cola del paso que falló); detalle en `pruebas/.temporales/verify.log`: lee su cola o filtra. Cada corrida usa un temporal propio que se borra al salir (`docs/implementacion.md`).
 - Rama base: `main`. Liberar a `main` lo hace la persona usuaria a mano.
 - Si el builder no termina: escalera de recuperación (`kit run`; con subagentes, `scripts/kit-escalera.mjs`). Subir de nivel y el relevo del planner exigen el sí de la persona.
 - Estructura: agentes en `core/agents/` (`planner`, `builder`), skills en `core/skills/`, referencias del planner en `core/references/planner/`, contrato de verificación en `core/contracts/`, lo propio de un stack en `core/recipes/`, adaptadores por herramienta en `adapters/`, modelos, esfuerzo y ventanas en `models.json`.
@@ -20,6 +21,7 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 - Tamaños (piso tras compactar): `planner.md` ≤ 8192 bytes, `plan-change/SKILL.md` ≤ 6144, este archivo ≤ 6144 (`tests/context-size/`). El detalle va a referencias o `docs/`.
 - Hay pruebas que exigen frases literales (`tools/verify/`, `tests/builder-contract.mjs`, `tests/continuity/`): al mover una frase, mueve su comprobación sin debilitarla.
 - `spawnSync`, `execFileSync` y `execSync` no usan stdin como pipe: usa `tools/spawn/sync-seguro.mjs` o `stdio` `ignore`/`inherit` (paso 19 de `./verify`).
+- Un script nuevo que cree temporales los limpia también al fallar (`tests/temporales/estatico.test.mjs`, paso 24).
 - Antes de pedir aprobación de un plan: `node scripts/review-plan.mjs <plan>`.
 - Skills: `core/skills/*/SKILL.md` con `name` igual a la carpeta; en Pi, las de un subagente se declaran en su frontmatter con `inheritProjectContext: true`.
 
@@ -37,4 +39,4 @@ Las reglas deny de Claude Code son una barrera, no una frontera: cubren `git -C/
 
 Lo de la v1 está en `old/v1/` (`legacy/`, `definitions/`, `features/`, `pruebas/`, `registro/`, los scripts de la v1, el README viejo y los reportes sueltos). Borrar `old/` viene después de usar la v2 en 2 o 3 proyectos reales; es decisión de la persona usuaria.
 
-`old/v1/registro/` no se lee salvo pedido explícito de la persona usuaria. `pruebas/.temporales/` (3,9 GB, ignorado por git) no se borra ni se mueve sin pedido.
+`old/v1/registro/` no se lee salvo pedido explícito de la persona usuaria. `pruebas/.temporales/` (ignorado por git) no se borra ni se mueve sin pedido.

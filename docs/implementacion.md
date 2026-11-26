@@ -178,6 +178,17 @@ Es el script de la raíz; sus pasos viven en `tools/verify/*.sh`. Comprueba cohe
 
 `VERIFY_TARGET=<url> ./verify` corre solo el recorrido contra un despliegue (solo lectura salvo `VERIFY_PERMITIR_ESCRITURA=1`).
 
+#### Temporales y salida de `./verify`
+
+- Un solo temporal por corrida: `tools/verify/envoltorio.sh` crea `flucastr-verify.XXXXXX` bajo `${TMPDIR:-/tmp}`, lo exporta como `TMPDIR` a todos los pasos y lo borra con `trap` al salir, también con INT (130) y TERM (143). Varios pasos ponen su propio `trap EXIT`: corren como hijo del envoltorio y sus temporales caen dentro de ese `TMPDIR`, así que el envoltorio los limpia igual. El envoltorio es el único dueño del temporal de la corrida.
+- Barrido: antes de crear nada, el envoltorio y `kit run` borran los `flucastr-verify.*` que sean directorios reales de más de 120 minutos bajo esa misma base y del mismo uid que quien ejecuta; los de otro dueño se dejan. No siguen enlaces y no tocan archivos ni otros nombres.
+- Espacio libre: si la base tiene menos de 500 MB (`VERIFY_MIN_LIBRE_MB` lo cambia), `./verify` sale con 1 y `FALLO: sin espacio libre…` sin correr pasos.
+- Salida: en verde imprime como mucho 5 líneas: `verify: <n> pasos; detalle en pruebas/.temporales/verify.log`, el registro de `kit-verificado` (`resultado registrado: …` o `no se registra: motivo=…`, como mucho 3 líneas) y `VERIFY OK`. En rojo imprime el encabezado `== <id>. …` del paso fallido, su cola (≤ 30 líneas y ≤ 3000 bytes), el registro (≤ 3 líneas) y `VERIFY FALLO: paso <id> (exit <n>); detalle en <log>`; en total ≤ 40 líneas y ≤ 4096 bytes. Sin encabezado de paso, imprime la cola del log, el registro y `VERIFY FALLO: sin paso`. El registro se añade al final del log después de imprimir, así la cola no lo repite.
+- Log: `pruebas/.temporales/verify.log` tiene toda la salida de la corrida. Se trunca al iniciar y no se borra al salir. Es la única ruta de detalle.
+- Con `VERIFY_TARGET` corre igual y no registra nada en `kit-verificado`.
+- Paso 24 de `./verify`: `node --test tests/temporales/*.test.mjs` (barrido, envoltorio y espacio libre). `estatico.test.mjs` escanea `verify`, `install*.sh`, `uninstall.sh`, `tools/`, `scripts/`, `tests/`, `adapters/` y `core/` (`.sh`, `.mjs`, `.js`, `.cjs`) y falla si un `mktemp`/`mkdtemp` no tiene limpieza: `mktemp` sin variable o sin `trap … EXIT` con su variable (fuera de `tools/verify/`), `-p` o plantilla `/…`, `mkdtemp` sin `rm` o sin `finally`/`after`, o `/tmp/` literal. Las excepciones van con motivo en el propio archivo; una excepción que ya no coincide falla. Es una heurística textual, no un parser.
+- Límite conocido: la prueba estática no ve creaciones hechas con variables construidas en otra línea ni con rutas calculadas; el envoltorio y la prueba de barrido sí cubren lo que sí se ejecuta.
+
 ### Pruebas (`tests/`)
 
 Índice en `tests/README.md`. Los tres flujos de aceptación se corren con `node --test tests/acceptance/*.test.mjs` (`builder-contract`, `kit-run`, `uso`). Hay además suites de diagnóstico, permisos, migración, revisión de planes y continuidad.
