@@ -35,10 +35,10 @@ assert.match(skill, /As soon as a step is complete and its check passes, mark `-
   'A1: la casilla debe marcarse al completar y comprobar cada paso, antes del siguiente');
 assert.match(skill, /If a step has no explicit check, leave it unchecked[\s\S]*?If interrupted or incomplete, leave it unchecked/,
   'A2: pasos sin comprobación o interrumpidos deben quedar pendientes con nota');
-assert.match(skill, /never edit \*Scope\* or \*Acceptance\*/,
+assert.match(builder, /never edit \*Scope\* or \*Acceptance\*/,
   'A1: el builder no modifica Scope ni Acceptance');
-assert.match(builder, /before starting the next step; do not accumulate checkboxes until the end of the segment/,
-  'A1: el contrato del builder requiere avance visible por paso');
+assert.match(skill, /before starting the next step; do not accumulate checkboxes until the end of the segment/,
+  'A1: la skill requiere avance visible por paso');
 assert.match(planificador, /one explicit check, and its expected result[\s\S]*?`Segment verification:` is additional and never replaces an individual check/,
   'A2/A3: cada paso requiere comprobación propia aunque el tramo tenga verificación');
 assert.ok(
@@ -56,7 +56,7 @@ console.log('ok A4: contrato nuevo y compatibilidad con el contrato anterior');
 const continuidad = [
   ['opt-in keeps one-segment execution by default', 'By default, an execution ends when the active segment is complete'],
   ['continuity is limited to the same story', 'do not move on to another story'],
-  ['checkpoint per segment and no commits', 'checkpoint to *Notes* with changed files, a diff summary, and the check result; do not commit'],
+  ['checkpoint per segment', 'checkpoint to *Notes* with files changed, a diff summary, and the check result'],
   ['final or per-segment review when the plan requires it', '`Revisión: por tramo`'],
   ['prior measurement of the same check', 'prior duration is recorded for the exact check in an equivalent environment'],
   ['effective limit of twice the duration', 'timeout <2x-segundos>s <comando>'],
@@ -68,21 +68,67 @@ const continuidad = [
 for (const [label, phrase] of continuidad) {
   assert.ok(skill.includes(phrase), `A2: la skill debe cubrir ${label}`);
 }
-assert.ok(builder.includes('continuity: continuous') && builder.includes('do not move to another story'),
+assert.ok(builder.includes('continuity: continuous') && skill.includes('do not move on to another story'),
   'A2: el builder permite continuidad solo dentro de la historia aprobada');
-assert.ok(builder.includes('checkpoint to *Notes* with files changed') && builder.includes('Do not commit between segments'),
-  'A2: el builder exige checkpoint y conserva la prohibición de commits');
-assert.ok(builder.includes('fails twice for the same cause') && builder.includes('more than twice its measured duration'),
-  'A2: el builder detiene el avance en segunda falla o timeout');
+assert.ok(skill.includes('checkpoint to *Notes* with files changed') && builder.includes('Do not commit between segments'),
+  'A2: la skill exige checkpoint y el builder conserva la prohibición de commits');
+assert.ok(skill.includes('fails twice for the same cause') && skill.includes('more than twice its measured duration'),
+  'A2: la skill detiene el avance en segunda falla o timeout');
 assert.ok(builder.includes('may you also update `segment:`') && builder.includes('add minor resolved questions to *Decisions*'),
   'A2: el builder autoriza los cambios de tramo y decisiones necesarios, solo en continuidad');
-assert.ok(builder.includes('when using `PAUSED`, set `status: partial`') && builder.includes('reapproves the plan before resumption'),
+assert.ok(skill.includes('when using `PAUSED`, set `status: partial`') && skill.includes('reapproves the plan before resumption'),
   'A2: la pausa queda parcial y la reanudación requiere aprobación del planner');
-assert.ok(skill.includes('set it to `partial` when pausing') && skill.includes('For plans without continuity, preserve their existing procedure and content'),
+assert.ok(skill.includes('when using `PAUSED`, set `status: partial`') && skill.includes('For plans without continuity, preserve their existing procedure and content'),
   'A2: la skill alinea estados y conserva compatibilidad de planes antiguos');
 assert.ok(skill.includes('For older plans, follow their existing steps and acceptance criteria'),
   'A2: los planes antiguos conservan el procedimiento existente');
 console.log(`ok A2: ${continuidad.length + 7} condiciones del modo continuo y compatibilidad verificadas`);
+
+const etiquetasRetorno = [
+  ['DONE line', 'DONE: plan=<path>; segment=<n>; verify=pasa'],
+  ['DONE labels', '`cambios:`'],
+  ['DONE evidence label', '`evidencia:`'],
+  ['DONE decisions label', '`decisiones:`'],
+  ['DONE review label', '`revisar:`'],
+  ['PAUSED line', 'PAUSED: plan=<path>; segment=<n>; motivo=<ambiguous|design|scope|access|verify>; hecho=<n>/<total>; siguiente=<exact step>; no_intentado=<reason>'],
+  ['PAUSED problem label', '`problema:`'],
+  ['PAUSED options label', '`opciones:`'],
+  ['PAUSED resume label', '`retomar:`'],
+  ['recommended option', '(recommended)'],
+  ['five-line limit', 'at most five lines in total'],
+];
+for (const [label, frase] of etiquetasRetorno) {
+  assert.ok(builder.includes(frase), `A5: el retorno del builder debe incluir ${label}`);
+}
+console.log(`ok A5: ${etiquetasRetorno.length} etiquetas de retorno y límite de cinco líneas en builder.md`);
+
+const proporcionales = [
+  "Test only what you created or modified and its direct dependents: for each A#, the happy path and that criterion's edges.",
+  'At most one regression test per bug.',
+  'Every test exercises the real product; a fixture may feed it but never replaces or rewrites what is under test.',
+  "While building, run only the tests related to the diff (import graph or the runner's related-tests option; otherwise the test files covering the changed paths). The final gate runs the full suite.",
+  'This never narrows a declared command: Check, Segment verification:, and Verification run exactly as written.',
+];
+function validarPruebasProporcionales(text) {
+  const start = text.indexOf('## Proportional tests');
+  assert.ok(start >= 0, 'A2: la skill debe tener la sección ## Proportional tests');
+  const end = text.indexOf('\n## ', start + 1);
+  const section = text.slice(start, end === -1 ? undefined : end);
+  for (const frase of proporcionales) {
+    assert.ok(section.includes(frase), `A2: falta en Proportional tests la regla: ${frase}`);
+  }
+}
+validarPruebasProporcionales(skill);
+for (const frase of proporcionales) {
+  const mutada = skill.replace(frase, '');
+  assert.notEqual(mutada, skill, `A2: no se encontró la regla para mutar: ${frase}`);
+  assert.throws(
+    () => validarPruebasProporcionales(mutada),
+    error => error instanceof assert.AssertionError && error.message.includes(frase),
+    `A2: quitar la regla "${frase}" debe fallar`,
+  );
+}
+console.log(`ok A2 pruebas proporcionales: ${proporcionales.length} reglas y ${proporcionales.length} mutaciones negativas detectadas`);
 
 const a5 = [
   ['real dependencies', 'identify the real dependencies', 'real dependencies'],

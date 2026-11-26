@@ -9,11 +9,13 @@
 //   1  hay errores (fuera de Scope, excluida, prohibida o plan alterado)
 //   3  no verificable: base inexistente, sin git, Scope sin rutas o sin versión previa del plan
 //   2  uso o plan inexistente (no ejecuta nada)
+// Aviso «pruebas/producto» si hay 100 o más líneas de prueba y la razón supera 3.0 (no cambia el código).
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { basename, dirname, relative, resolve, sep } from "node:path";
-import { cambiosDelRepo, primeraBase, versionEnBase } from "../tools/check/cambios.mjs";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { cambiosDelRepo, lineasDelRepo, lineasSinSeguimiento, primeraBase, versionEnBase } from "../tools/check/cambios.mjs";
 import { clasificarRuta, coincide, parsearAlcance, protegido } from "../tools/check/alcance.mjs";
+import { avisoProporcion, contar } from "../tools/check/proporcion.mjs";
 import { crearInforme, tabla } from "../tools/check/informe.mjs";
 
 const USO = "Uso: node scripts/kit-scope.mjs <plan> [--base <rama>] [--json] [--help]\n";
@@ -125,6 +127,21 @@ export function analizar({ planAbs, raizProyecto, baseOpcion }) {
     const tocada = exacta ? cambiados.has(inc.ruta) : [...cambiados].some(c => coincide(inc.ruta, c));
     if (!tocada) filas.push({ nivel: "aviso", elemento: inc.ruta, mensaje: "posible omisión: no se tocó" });
   }
+
+  // Proporción: lectura sin efectos. Sin seguimiento solo se leen rutas dentro de Scope (nunca secretos ni enlaces).
+  const entradas = [];
+  for (const r of cambiosPorRepo) {
+    for (const e of lineasDelRepo(r.top, r.mergeBase)) {
+      entradas.push({ ruta: aRelativa(raizProyecto, join(r.top, e.ruta)), añadidas: e.añadidas, borradas: e.borradas });
+    }
+    for (const rel of r.sinSeguimiento) {
+      const ruta = aRelativa(raizProyecto, join(r.top, rel));
+      if (clasificarRuta(ruta, alcance) !== "dentro") continue;
+      entradas.push({ ruta, añadidas: lineasSinSeguimiento(r.top, rel), borradas: 0 });
+    }
+  }
+  const aviso = avisoProporcion(contar(entradas));
+  if (aviso) filas.push(aviso);
 
   return crearInforme(filas);
 }

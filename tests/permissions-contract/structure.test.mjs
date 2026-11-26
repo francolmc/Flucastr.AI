@@ -56,11 +56,11 @@ function markdownBajo(dir) {
   });
 }
 
-test("ningún Markdown de core/ instruye git -C ni git -c; solo la advertencia del skill los nombra", () => {
+test("ningún Markdown de core/ instruye git -C ni git -c; solo la advertencia del builder los nombra", () => {
   assert.deepEqual(instruccionesGitOpcion("Ejecuta `git -C <folder> status`\nnada\n"), ["Ejecuta `git -C <folder> status`"]);
   assert.deepEqual(instruccionesGitOpcion("never use `git -C` or `git -c`, which are blocked:"), []);
   const infractores = markdownBajo(join(KIT, "core")).flatMap(archivo =>
     instruccionesGitOpcion(readFileSync(archivo, "utf8")).map(linea => `${archivo}: ${linea}`));
   assert.deepEqual(infractores, []);
-  assert.match(readFileSync(join(KIT, "core/skills/execute-plan/SKILL.md"), "utf8"), /never use `git -C` or `git -c`, which are blocked/);
+  assert.match(readFileSync(join(KIT, "core/agents/builder.md"), "utf8"), /never use `git -C` or `git -c`, which are blocked/);
 });

@@ -1,13 +1,24 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
 const COLA = 1500;
+const CONTRATO_BUILDER = fileURLToPath(new URL("../../core/agents/builder.md", import.meta.url));
 
 function cola(t) {
   return t.length > COLA ? `…${t.slice(-COLA)}` : t;
 }
 
+// Cuerpo de core/agents/builder.md sin su cabecera (el bloque inicial entre `---`). Falla si falta el archivo.
+function contratoBuilder() {
+  return readFileSync(CONTRATO_BUILDER, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+}
+
+// Cada invocación (también un relanzamiento) lleva el contrato completo delante de la línea de ejecución.
 function promptBuilder(planRel, tramo, ajuste) {
   const t = tramo ? ` (segment: ${tramo})` : "";
   const base = `Execute plan ${planRel}${t} using the execute-plan skill. Respond with the return line.`;
-  return ajuste ? `${base}\n\nFix before continuing:\n${ajuste}` : base;
+  const cuerpo = ajuste ? `${base}\n\nFix before continuing:\n${ajuste}` : base;
+  return `Builder contract:\n${contratoBuilder()}\n\n---\n${cuerpo}`;
 }
 
 function claveFalloVerificacion(v) {

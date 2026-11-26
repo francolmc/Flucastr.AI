@@ -307,7 +307,9 @@ caso("A1 ciclo completo: done, builder una vez, revisor en solo lectura", () => 
   assert.equal(r.cuenta("reviewer"), 1);
   const rev = r.registro.find(x => x.rol === "reviewer");
   assert.ok(rev.args.includes("read-only") && rev.args.includes("--output-schema"), `argumentos del revisor: ${rev.args}`);
-  assert.equal(r.registro.find(x => x.rol === "builder").entrada, `Execute plan ${PLAN_REL} (segment: 1) using the execute-plan skill. Respond with the return line.`);
+  // A1: el prompt exacto antepone el contrato (core/agents/builder.md sin su cabecera) a la línea de ejecución.
+  const contrato = readFileSync(new URL("../../core/agents/builder.md", import.meta.url), "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+  assert.equal(r.registro.find(x => x.rol === "builder").entrada, `Builder contract:\n${contrato}\n\n---\nExecute plan ${PLAN_REL} (segment: 1) using the execute-plan skill. Respond with the return line.`);
   comprobarPromptRevisor(rev.entrada);
   assert.ok(rev.entrada.includes(JSON.stringify(ESQUEMA_VEREDICTO)) && rev.entrada.includes(`Review plan ${PLAN_REL}`));
   assert.ok(rev.entrada.includes("--- diff ---\n"));
@@ -328,6 +330,8 @@ caso("A2 verify que siempre falla: 2 corridas del builder, la segunda falla pide
   const prompts = r.registro.filter(x => x.rol === "builder").map(x => x.entrada);
   assert.ok(!prompts[0].includes("Verification failed"));
   for (const prompt of prompts.slice(1)) assert.ok(prompt.includes("Verification failed (exit 1). Output:\nverify: fallo simulado"));
+  // A1 también al relanzar: cada prompt lleva el contrato delante.
+  for (const prompt of prompts) assert.ok(prompt.startsWith("Builder contract:\n# Builder\n"), "el relanzamiento también lleva el contrato");
 });
 
 // Continuidad: el builder cierra todos los tramos y kit run revisa solo al final.
