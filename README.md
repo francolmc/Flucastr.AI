@@ -54,3 +54,13 @@ Valores previstos por agente y herramienta, con la ventana de Pi fijada en 27200
 - El comando imprime solo las claves de compactación, nunca otros valores de los ajustes. Los lanzadores y los ajustes los escribe `install.sh`; tras reinstalar, `ventanas` muestra lo instalado.
 
 Para más detalle, consulta la [guía de uso](docs/guide.md#qué-es).
+
+## Hook tras compactar y piso del planner
+
+- Instalación: `bash install.sh --project <proyecto>` instala en el proyecto un hook `SessionStart` con matcher `compact`. En Claude Code va en `.claude/settings.local.json`; en Codex, en `.codex/hooks.json`. Los proyectos ya instalados repiten ese comando.
+- Qué hace: tras compactar, `scripts/after-compact.mjs` imprime hasta 20 líneas con dónde están las notas, el plan, el tramo y la última cabecera de próxima acción (`## Next action` o `## Próxima acción`) del cambio activo. Solo lee, nunca imprime contenido de archivos y siempre sale con 0.
+- Codex: la primera vez pide aprobar el hook de `.codex/hooks.json`. Hasta entonces no corre.
+- Pi: no recibe hook. Su planner sigue la misma regla de `notes.md` desde `core/agents/planner.md`.
+- Desinstalación: quita solo la entrada del kit; con `--keep-settings` conserva el archivo de ajustes.
+- Sin probar en sesión real: el hook de Claude Code y el de Codex. Las pruebas ejecutan el script y el instalador con `HOME` temporal.
+- Paso 23 de `./verify`: `node --test tests/context-size/*.test.mjs tests/after-compact/*.test.mjs`. Comprueba que `SKILL.md` pese 6144 bytes o menos, `core/agents/planner.md` 8192 o menos y `AGENTS.md` 6144 o menos, que las referencias nombradas existan, y que el hook se instale, se quite y apunte bien.

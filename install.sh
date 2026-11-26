@@ -265,6 +265,9 @@ source "$RAIZ/adapters/claude-code/install-compaction.sh"
 
 source "$RAIZ/adapters/claude-code/install-permission-hook.sh"
 
+# Hook de compactación (SessionStart matcher compact) de Claude Code y Codex en el proyecto; solo con --project.
+source "$RAIZ/tools/install/compact-hook.sh"
+
 source "$RAIZ/adapters/claude-code/install-task-hook.sh"
 
 # Reglas deny del proyecto en Claude Code (<proyecto>/.claude/settings.json, compartido: va a git). Solo agrega las que faltan;
@@ -329,6 +332,7 @@ if [ "$SIMULAR" = 0 ] && [ -f "$MANIFIESTO" ]; then
   grep -E "^deny$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^sandbox-claude$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   grep -E "^codex-reglas$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
+  grep -E "^hook-compact$(printf '\t')" "$MANIFIESTO" >> "$NUEVO" || true
   bash "$RAIZ/uninstall.sh" --quiet --keep-settings
 fi
 
@@ -364,6 +368,7 @@ if [ "$INSTALAR_CLAUDE" = 1 ]; then
     instalar_sandbox_claude
     instalar_compactacion_claude
     instalar_hook_permisos_claude
+    instalar_hook_compact claude
     # v2: sin hook del validador de tareas (era de v1; ver legacy/v1/).
   fi
   refrescar_compactacion_claude_registrada
@@ -405,6 +410,7 @@ if [ "$INSTALAR_CODEX" = 1 ]; then
   if [ -n "$PROYECTO" ]; then
     echo "Proyecto ($PROYECTO), Codex"
     instalar_deny_codex
+    instalar_hook_compact codex
   else
     refrescar_reglas_codex_registradas
   fi

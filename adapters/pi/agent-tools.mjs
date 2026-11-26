@@ -1,6 +1,8 @@
 // Pi no puede hacer cumplir patrones de Bash: en `tools:` cada `Bash(...)` pasa a `Bash`, una sola vez.
-// Solo toca la línea `tools:`; el resto de la cabecera queda igual.
-export function bashPlano(cabecera) {
+// Pi tampoco entiende `disallowedTools:` (clave de Claude Code): se quita de la cabecera.
+// Lo demás de la cabecera queda igual.
+export function bashPlano(cabeceraClaude) {
+  const cabecera = cabeceraClaude.replace(/^disallowedTools:.*(\r?\n|$)/gm, "");
   return cabecera.replace(/^tools:[ \t]*(.*)$/m, (_linea, valor) => {
     const partes = [];
     let prof = 0;

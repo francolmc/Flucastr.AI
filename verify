@@ -89,4 +89,8 @@ node --test tests/kit-run/pegado.test.mjs || fallo "21: pruebas del builder pega
 paso 22 "pruebas de compactación por agente: tests/compaction/*.test.mjs (ventanas incluidas)"
 node --test tests/compaction/*.test.mjs || fallo "22: pruebas de compactación no pasaron"
 
+# 23. piso de contexto y hook tras compactar: tamaños de SKILL.md, planner.md y AGENTS.md; punteros e instalación del hook (changes/piso-planner, historia D)
+paso 23 "piso de contexto y hook tras compactar: tests/context-size/*.test.mjs y tests/after-compact/*.test.mjs"
+node --test tests/context-size/*.test.mjs tests/after-compact/*.test.mjs || fallo "23: pruebas de tamaños y del hook tras compactar no pasaron"
+
 echo "VERIFY OK"
