@@ -1,8 +1,8 @@
-# 8t. small change: planner trae la definición («small change», «without a plan», «30 diff lines», «Clasificación:», «When uncertain, use the builder»), «high risk» y «Mejora sugerida»; el documento de prácticas tiene ≥8 «Nivel»; una copia sin «small change» debe fallar (A1, A2, A4, A6)
+# 8t. small change: planner trae la definición («small change», «without a plan», «120 diff lines», «Clasificación:», «When uncertain, use the builder»), «high risk» y «Mejora sugerida»; el documento de prácticas tiene ≥8 «Nivel»; una copia sin «small change» debe fallar (A1, A2, A4, A6)
 paso 8t "small change: definición, riesgo y prácticas por tecnología"
 textos_pequeno() { # $1: raíz del kit
   local r=$1 t
-  for t in 'small change' 'without a plan' '30 diff lines' 'Clasificación:' 'When uncertain, use the builder' 'high risk' 'Mejora sugerida'; do
+  for t in 'small change' 'without a plan' '120 diff lines' 'Clasificación:' 'When uncertain, use the builder' 'high risk' 'Mejora sugerida'; do
     grep -qF -- "$t" "$r/core/agents/planner.md" || return 1
   done
   grep -qF 'risk' "$r/core/skills/plan-change/SKILL.md" || return 1

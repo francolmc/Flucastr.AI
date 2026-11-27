@@ -6,7 +6,7 @@ The kit asks for capability-based verification, not tool-based verification. Eac
 
 ## Capabilities
 
-- **Quick** (`Comprobación rápida:`): seconds, on the host, with no services running. Corresponds to Level 1 in `plan-change`.
+- **Quick** (`Comprobación rápida:`): under 60 seconds, on the host, with no services running; `prepare-project` always declares it and the builder runs it when each segment closes. Corresponds to Level 1 in `plan-change`.
 - **Service** (`Servicio:`): logic against real dependencies (database, queue, email), without a UI. Corresponds to Level 2.
 - **Acceptance** (`Acceptance:`): one file per flow, filterable by name. It does not stop at the first failure; it summarizes all failures at the end. Corresponds to Level 3.
 - **Evidence** (`Evidencia:`): where the run writes `resultado.json`.

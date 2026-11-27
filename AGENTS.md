@@ -10,7 +10,7 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 - Comando `verify`: `./verify`; qué comprueba, en `README.md` («Verificación»). Modo remoto: `VERIFY_TARGET=<url> ./verify`, solo lectura salvo `VERIFY_PERMITIR_ESCRITURA=1`.
 - Salida de `./verify`: solo un resumen (en rojo, la cola del paso que falló); detalle en `pruebas/.temporales/verify.log`: lee su cola o filtra. Cada corrida usa un temporal propio que se borra al salir (`docs/implementacion.md`).
 - Rama base: `main`. Liberar a `main` lo hace la persona usuaria a mano.
-- Ritmo: plan ≤ 8 KB y 3 tramos (salvo `Excepción de tamaño:`), una revisión final, `./verify` una vez (segundo fallo: pausa) y `kit run` por defecto solo en Codex.
+- Ritmo: plan ≤ 8 KB y 3 tramos (salvo `Excepción de tamaño:`), corto por defecto (`format: 2`), una revisión final, `./verify` una vez (segundo fallo: pausa) y `kit run` por defecto solo en Codex.
 - Si el builder no termina: escalera de recuperación (`kit run`; con subagentes, `scripts/kit-escalera.mjs`). Subir de nivel y el relevo del planner exigen el sí de la persona.
 - Estructura: agentes en `core/agents/` (`planner`, `builder`), skills en `core/skills/`, referencias del planner en `core/references/planner/`, contrato de verificación en `core/contracts/`, lo propio de un stack en `core/recipes/`, adaptadores por herramienta en `adapters/`, modelos, esfuerzo y ventanas en `models.json`.
 - Traspaso: `changes/<nombre>/plan.md`; decisiones por ID en `decisions.md` y avance (≤ 15 líneas) en `notes.md`, junto al plan; cerrados en `changes/done/`.
@@ -21,7 +21,7 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 
 - `core/agents/` y `core/skills/` no nombran herramientas de un stack: los proyectos declaran sus comandos en su `AGENTS.md`.
 - Instrucciones operativas de agentes y skills en inglés; documentación en español; comandos con opciones en español y alias en inglés; los agentes responden en el idioma de la conversación.
-- Tamaños (piso tras compactar): `planner.md` ≤ 8192 bytes, `plan-change/SKILL.md` ≤ 6144, `builder.md` más `execute-plan/SKILL.md` ≤ 13500, este archivo ≤ 6144 (`tests/context-size/`). El detalle va a referencias o `docs/`.
+- Tamaños (piso tras compactar): `planner.md` ≤ 8192 bytes, `plan-change/SKILL.md` ≤ 6144 y su `template.md` ≤ 3072, `builder.md` más `execute-plan/SKILL.md` ≤ 13500, este archivo ≤ 6144 (`tests/context-size/`). El detalle va a referencias o `docs/`.
 - Contrato del builder: límites y retorno en `builder.md` (`kit run` lo antepone al prompt); procedimiento en `execute-plan`. No repitas una regla en el otro archivo.
 - Hay pruebas que exigen frases literales (`tools/verify/`, `tests/builder-contract.mjs`, `tests/continuity/`): al mover una frase, mueve su comprobación sin debilitarla.
 - `spawnSync`, `execFileSync` y `execSync` no usan stdin como pipe: usa `tools/spawn/sync-seguro.mjs` o `stdio` `ignore`/`inherit` (paso 19 de `./verify`).

@@ -16,8 +16,15 @@ const agentsMd = join(raiz, "AGENTS.md");
 const LIMITE_SKILL_BYTES = 6144;
 const LIMITE_PLANNER_BYTES = 8192;
 const LIMITE_AGENTS_BYTES = 6144;
+const LIMITE_TEMPLATE_BYTES = 3072;
+const templateMd = join(skillDir, "references", "template.md");
 
 describe("skill plan-change", () => {
+  test("references/template.md pesa 3072 bytes o menos", () => {
+    const tamano = statSync(templateMd).size;
+    assert.ok(tamano <= LIMITE_TEMPLATE_BYTES, `template.md mide ${tamano} bytes; el límite es ${LIMITE_TEMPLATE_BYTES}`);
+  });
+
   test("SKILL.md pesa 6144 bytes o menos", () => {
     const tamano = statSync(skillMd).size;
     assert.ok(tamano <= LIMITE_SKILL_BYTES, `SKILL.md mide ${tamano} bytes; el límite es ${LIMITE_SKILL_BYTES}`);

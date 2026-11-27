@@ -10,12 +10,12 @@ Dos agentes y dos puertas humanas:
 - **`builder`** (nivel bajo, esfuerzo `high`): aplica el plan aprobado, corre `verify` y deja la evidencia.
 - **Puerta 1**: la persona usuaria aprueba `changes/<nombre>/plan.md` antes de construir.
 - **Puerta 2**: la persona usuaria revisa la evidencia antes de dar algo por hecho.
-- **Cambio pequeño** (`core/agents/planner.md`, seis condiciones: una intención, un repo, hasta 2 archivos y 30 líneas, sin funcionalidad nueva ni áreas sensibles, con comprobación previa): el planner lo edita en línea, sin plan ni builder. Todo lo demás va por plan.
+- **Cambio pequeño** (`core/agents/planner.md`, seis condiciones: una intención, un repo, hasta 2 archivos de producto y 120 líneas de diff (pruebas aparte, con tope de 150), funcionalidad nueva solo con una prueba que pase en la Comprobación rápida, sin áreas sensibles, con comprobación previa): el planner lo edita en línea, sin plan ni builder. Todo lo demás va por plan.
 - Cada plan aprobado debe incluir `## Aceptación`, con escenarios trazables a resultados, comprobaciones y resultados esperados; puede usar revisión manual explicada cuando no haya oráculo automático.
 
 El único traspaso entre agentes es `changes/<nombre>/plan.md`. Los niveles se traducen a modelos en `models.json`.
 
-Un cambio largo se parte en tramos pequeños (`### Segment N`). Por defecto, el builder ejecuta un tramo y espera la revisión del planner; un plan puede declarar `continuity: continuous` para que complete la historia aprobada de punta a punta. El plan fija condiciones de parada y mide antes la duración de cada comprobación limitante. Si la medida falta, el builder se detiene antes de esa comprobación. Al completar la historia, el planner revisa en contexto nuevo; si es de riesgo alto, el plan puede exigir revisión por tramo, que detecta defectos antes a costa de más pausas. Cada tramo deja un punto de control con archivos tocados, resumen del diff y comprobación; sugiere un commit al final de la historia, que el mantenedor hace manualmente.
+Un cambio largo se parte en tramos pequeños (`### Segment N`). Por defecto, el builder ejecuta un tramo y espera la revisión del planner; un plan puede declarar `continuity: continuous` para que complete la historia aprobada de punta a punta. El plan fija condiciones de parada. Cada comprobación tiene un tope sin medida previa (3 min la Comprobación rápida, 10 min la verificación de niveles 2 y 3) y, con medida previa, el doble de esa duración; el builder anota la duración real. Al cerrar cada tramo corre la Comprobación rápida. Al completar la historia, el planner revisa en contexto nuevo; si es de riesgo alto, el plan puede exigir revisión por tramo, que detecta defectos antes a costa de más pausas. Cada tramo deja un punto de control con archivos tocados, resumen del diff y comprobación; sugiere un commit al final de la historia, que el mantenedor hace manualmente.
 
 «Hecho» significa que `./verify` pasa desde cero.
 
@@ -52,7 +52,7 @@ Para desinstalar: `bash uninstall.sh`.
 
 Comprueba que `models.json` coincide con los agentes, que la sintaxis de instalar y desinstalar es válida, que los modelos se resuelven para Claude, Pi y Codex, que las skills están completas, que `install.sh --dry-run` no escribe nada, las reglas deny del proyecto, y pruebas deterministas aisladas del contrato (incluido el contador de pasos y una mutación de sensibilidad). Estas pruebas no miden la fiabilidad del modelo; el protocolo futuro está en `docs/evaluaciones/constructor.md`.
 
-- Niveles de verificación (`plan-change`, regla 13): **Nivel 1** `Comprobación rápida` (línea de `AGENTS.md`; host, sin Docker, segundos), **Nivel 2** `VERIFY_RAPIDO=1 ./verify` (Docker con caché), **Nivel 3** `./verify` sin caché (aceptación final).
+- Niveles de verificación (`plan-change`, regla 13): **Nivel 1** `Comprobación rápida` (línea de `AGENTS.md`; host, sin Docker, menos de 60 s), **Nivel 2** `VERIFY_RAPIDO=1 ./verify` (Docker con caché), **Nivel 3** `./verify` sin caché (aceptación final).
 - Contrato de verificación por capacidades (qué declara cada proyecto en su `AGENTS.md`): `core/contracts/verification.md`.
 - Experiencia antes del plan (`design-experience`): si el cambio toca pantallas, el planner deja un boceto ASCII (hasta 40 columnas) en `changes/<nombre>/pantallas.md` y lo pega en la terminal para tu aprobación en la puerta 1.
 - Observador de Docker (solo lectura, datos en `~/.flucastr-ai/observador/`, nada sale del equipo): `node scripts/observe.mjs start` lo arranca en segundo plano, `status` y `stop` lo controlan, y `report` (`[--since AAAA-MM-DD]`) muestra medianas y caché de builds, pico de memoria por contenedor, OOM y unhealthy, y los proyectos que se solaparon.

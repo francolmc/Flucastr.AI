@@ -312,3 +312,38 @@ try {
 } finally {
   rmSync(dir, { recursive: true, force: true });
 }
+
+// plan-corto: A3 topes sin parada previa a medir, A4 cambio pequeño con 120 líneas, A5 Comprobación rápida por tramo.
+const condicion4 = '4. No data or schema, migrations, access/identity/security, money or financial calculations, API contracts, routes or user flows, concurrency, dependencies or lockfiles, Dockerfile/compose/`verify`, or deployment.';
+function exigirA4(texto) {
+  assert.ok(texto.includes(condicion4), 'A4: la condición 4 del cambio pequeño debe quedar literal');
+  assert.ok(texto.includes('120 diff lines') && texto.includes('tests excluded, capped at 150'), 'A4: el cambio pequeño admite 120 diff lines y pruebas con tope propio');
+  assert.ok(texto.includes('new behavior only if a test covers it and passes in `Comprobación rápida`'), 'A4: el comportamiento nuevo exige una prueba que pase en la Comprobación rápida');
+  assert.ok(texto.includes('**Gate 2:**'), 'A4: Gate 2 se mantiene');
+}
+exigirA4(plannerCore);
+assert.throws(() => exigirA4(plannerCore.replace(condicion4, '4. Otra cosa.')), error => error instanceof assert.AssertionError && error.message.includes('A4: la condición 4'));
+assert.throws(() => exigirA4(plannerCore.replace('120 diff lines', '30 diff lines')), error => error instanceof assert.AssertionError && error.message.includes('A4: el cambio pequeño'));
+console.log('ok A4: condición 4 literal, 120 diff lines y Gate 2; 2 mutaciones negativas detectadas');
+
+const topes = 'cap it at 3 minutes (Comprobación rápida, level 1) or 10 minutes (Verification, levels 2–3) and record the real duration';
+const sinParada = 'pause before running it with `motivo=verify`';
+function exigirA3(texto) {
+  assert.ok(texto.includes(topes), 'A3: sin duración previa el tope es 3 o 10 minutos y se anota la real');
+  assert.ok(!texto.includes(sinParada), 'A3: no debe haber parada antes de medir');
+  assert.ok(texto.includes('prior duration is recorded for the exact check in an equivalent environment') && texto.includes('timeout <2x-segundos>s <comando>'), 'A3: con duración previa sigue el doble');
+}
+exigirA3(skill);
+assert.throws(() => exigirA3(skill.replace(topes, 'cap it')), error => error instanceof assert.AssertionError && error.message.includes('A3: sin duración'));
+assert.throws(() => exigirA3(`${skill}\n${sinParada}`), error => error instanceof assert.AssertionError && error.message.includes('A3: no debe haber parada'));
+
+const cierreTramo = "at each segment's close, run the `Comprobación rápida`";
+function exigirA5(texto) {
+  assert.ok(texto.includes(cierreTramo), 'A5: el builder corre la Comprobación rápida al cerrar cada tramo');
+  assert.ok(texto.includes('Siempre se agrega. Sin esa línea el plan usa `verify`.') && texto.includes('menos de 60 s'), 'A5: prepare-project agrega siempre la línea, con menos de 60 s');
+}
+const prepare = readFileSync(new URL('../core/skills/prepare-project/SKILL.md', import.meta.url), 'utf8');
+exigirA5(skill + prepare);
+assert.throws(() => exigirA5(skill.replace(cierreTramo, '') + prepare), error => error instanceof assert.AssertionError && error.message.includes('A5: el builder'));
+assert.throws(() => exigirA5(skill + prepare.replace('Siempre se agrega. ', '')), error => error instanceof assert.AssertionError && error.message.includes('A5: prepare-project'));
+console.log('ok A3: topes de 3 y 10 minutos sin parada previa; ok A5: Comprobación rápida al cerrar tramo y prepare-project siempre la agrega; mutaciones negativas detectadas');

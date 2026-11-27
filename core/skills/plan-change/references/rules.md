@@ -14,6 +14,8 @@ When closing the change, the planner moves the folder to `changes/done/` **witho
 
 ## Rules for a Good Plan
 
+With `format: 2`, these rules stay mandatory; the automatic review only enforces what `template.md` marks as required.
+
 1. **Scope by path, not by file.** If the builder finds a related defect within scope, it fixes it; it should not have to stop for that reason.
 2. **One verification command** tests the final outcome, not each piece. If the project does not yet have `verify`, the first plan creates it (`prepare-project`).
 3. **Atomic steps**: one line, one action, one explicit check, and its expected result, aiming for about 20 words. Put the check on a subline when it does not fit clearly in the step. `Segment verification:` is additional and never replaces an individual check. Do not sacrifice clarity to meet the target. Split a step with multiple requirements. There is no step limit (40 is valid); order the steps and make each checkable. Avoid full code except signatures or contracts that must be preserved.

@@ -27,7 +27,7 @@ If the plan frontmatter contains `segment: <n>`, execute that segment. In the ne
 
 By default, an execution ends when the active segment is complete. Only with `continuity: continuous` may you continue through approved segments of the same story in one run; do not move on to another story. After each segment, add a checkpoint to *Notes* with files changed, a diff summary, and the check result. When the story (without continuity, the segment) is complete, stop for the planner's review in a fresh context: `/compact` or a new session. If the plan declares `Revisión: por tramo`, wait for that review before continuing. For plans without continuity, preserve their existing procedure and content.
 
-In continuous mode, a check that fails twice for the same cause pauses (`motivo=verify`): after the first failure, diagnose and fix only within scope; if the same cause returns, pause with completed work, remaining work, and reason. Also pause if work must leave scope or requires a user decision. If no prior duration is recorded for the exact check in an equivalent environment, pause before running it with `motivo=verify`. Limit the check to twice that duration, for example `timeout <2x-segundos>s <comando>`; if it expires, leave the checkbox pending and pause with `motivo=verify`. A check that takes more than twice its measured duration also pauses with `motivo=verify`. Record minor in-scope decisions under `Decisions` and continue; you may update `segment:` while advancing within the same story. Advance only if verification passes, the work stays in Scope, and no user decision is needed. Keep `status: in progress` while advancing; when using `PAUSED`, set `status: partial`, with a resumable note describing progress, remaining work, and cause. The planner reviews the note and reapproves the plan before resumption.
+In continuous mode, a check that fails twice for the same cause pauses (`motivo=verify`): after the first failure, diagnose and fix only within scope; if the same cause returns, pause with completed work, remaining work, and reason. Also pause if work must leave scope or requires a user decision. If no prior duration is recorded for the exact check in an equivalent environment, cap it at 3 minutes (Comprobación rápida, level 1) or 10 minutes (Verification, levels 2–3) and record the real duration. With one, limit the check to twice it, for example `timeout <2x-segundos>s <comando>`; if it expires, leave the checkbox pending and pause with `motivo=verify`. A check that takes more than twice its measured duration also pauses with `motivo=verify`. Record minor in-scope decisions under `Decisions` and continue; you may update `segment:` while advancing within the same story. Advance only if verification passes, the work stays in Scope, and no user decision is needed. Keep `status: in progress` while advancing; when using `PAUSED`, set `status: partial`, with a resumable note describing progress, remaining work, and cause. The planner reviews the note and reapproves the plan before resumption.
 
 Use the `Segment verification:` line for its check; if this is the plan's final segment, also run the complete *Verification*. Without `segment:`, the plan has one segment. When a story ends, leave a summary for the planner.
 
@@ -37,7 +37,7 @@ For each `- [ ]` step, in order:
 
 - Group independent reads for a step into one call and read each file once; read in chunks (`offset`, `limit`); rereading relevant material after edits or recovery is allowed. Edit files with `edit`.
 - Workflow: read the file to change; capture its starting state with a command and record the output; make the smallest in-scope change (never omit, defer, or simplify requested work); rerun the same command and compare it with the recorded output.
-- After each coherent unit, run the `Comprobación rápida` from `AGENTS.md` (Level 1, no Docker) if present; otherwise the step's check. Run the full *Verification* once, at the end, and `Segment verification:` at its declared level.
+- After each coherent unit and at each segment's close, run the `Comprobación rápida` from `AGENTS.md` (Level 1, no Docker) if present; otherwise the step's check. Run the full *Verification* once, at the end, and `Segment verification:` at its declared level.
 - As soon as a step is complete and its check passes, mark `- [x]` and add its evidence to *Evidence* before starting the next step; do not accumulate checkboxes until the end of the segment. Never mark a step whose check failed.
 - If a step has no explicit check, leave it unchecked and add a *Notes* line naming the step and the missing check; do not invent one or claim completion. If interrupted or incomplete, leave it unchecked and record the exact resumption point in *Notes*.
 - Count pending items with the `bash pendientes-plan` block below, passing the plan path as `$1`; record the count. A read error is not zero. Continue with pending work unless an allowed blocker applies.
@@ -57,8 +57,6 @@ awk '
   END { print n+0 }
 ' "$1"
 ```
-
-Count only root-level pending checkboxes, print `0` when there are no matches, and propagate read errors.
 
 ## Proportional tests
 
@@ -89,4 +87,4 @@ After the other steps are complete, run the *Verification* command **exactly as 
 
 ## Evidence
 
-In *Evidence*, include each verification command as `$ <comando>`, exactly as written in the plan, followed by its **real** output (the relevant tail, up to about 1.5 KB; never fabricated) and a final `exit N` line with the actual exit code. Add each entry immediately when checking off its step.
+In *Evidence*, include each verification command as `$ <comando>`, exactly as written in the plan, followed by its **real** output (the relevant tail, up to about 1.5 KB; never fabricated) and a final `exit N` line with the actual exit code.
