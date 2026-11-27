@@ -55,6 +55,11 @@
 - El archivo `.claude/settings.json` del proyecto es compartido y va a git.
 - Estas reglas bloquean también los commits que la persona usuaria haga a través de Claude en ese proyecto.
 
+## Banco de pruebas del builder (`evals/builder/`)
+
+- La línea base del 2026-11-27 no sirve para decidir un A/B (`changes/done/evals-builder/linea-base.md`, D-43). Límites y defectos en `evals/builder/README.md`, sección 6.
+- Pendiente para otro cambio: reconstruir el plan del tramo con todas sus secciones y documentos citados; leer el `repos:` real de la fuente; correr `calibrar` dentro del sandbox de Codex o marcar sus tramos; comprobar los archivos previos de P1-02.
+
 ## Ideas, sin urgencia (solo si aparece el dolor)
 
 - **Medir de verdad** el costo y la calidad del constructor en Haiku contra un modelo de nivel medio. Hoy solo hay casos sueltos; subirlo de nivel es una línea en `models.json`.

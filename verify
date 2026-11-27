@@ -89,4 +89,8 @@ node --test tests/temporales/*.test.mjs || fallo "24: pruebas de temporales no p
 paso 25 "hook de permisos: tests/permissions-contract/hook*.test.mjs (analizador, decisión y conexión)"
 node --test tests/permissions-contract/hook.test.mjs tests/permissions-contract/hook-shell.test.mjs tests/permissions-contract/hook-decision.test.mjs || fallo "25: pruebas del hook de permisos no pasaron"
 
+# 26. banco del builder: calibración, variantes, corrida, métricas y comparación sin Codex ni red (changes/evals-builder, tramo 10)
+paso 26 "banco del builder: tests/evals-builder/*.test.mjs"
+node --test tests/evals-builder/*.test.mjs || fallo "26: pruebas del banco del builder no pasaron"
+
 echo "VERIFY OK"

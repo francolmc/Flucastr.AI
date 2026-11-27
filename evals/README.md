@@ -23,3 +23,7 @@ La autoprueba usa un ejecutable `codex` falso, fixtures y resultados temporales,
 ## Piloto de arquitectura de cambios
 
 El [piloto offline](arquitectura-cambios/README.md) contiene cuatro casos y tres presentaciones de contexto para una comparación futura con modelos pequeños. Su autoprueba valida los oráculos y controles sintéticos, pero no ejecuta modelos ni mide qué formato funciona mejor.
+
+## Banco del builder
+
+El [banco del builder](builder/README.md) calibra un corpus de tramos históricos, corre una variante con semilla fija y compara dos corridas pareadas. Sus pruebas (`tests/evals-builder/`) no llaman a Codex ni a la red y forman parte de `./verify`.

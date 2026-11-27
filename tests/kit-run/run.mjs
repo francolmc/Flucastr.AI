@@ -538,14 +538,14 @@ caso("V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>", () => {
 });
 
 // Registro de intentos (changes/prueba/runs.jsonl): una línea por intento, sin cambiar la decisión de kit run.
-const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "puerta", "puerta_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin", "clase", "paso", "resuelto_por"];
+const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "puerta", "puerta_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin", "clase", "paso", "resuelto_por", "senal"];
 function leerRuns(raiz) {
   const ruta = join(raiz, "changes/prueba/runs.jsonl");
   return existsSync(ruta) ? readFileSync(ruta, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l)) : null;
 }
 
-// R1: una corrida aprobada deja 1 línea con los 18 campos (incluidos puerta, puerta_ms, clase, paso y resuelto_por) y duraciones enteras ≥ 0.
-caso("R1 registro: una corrida aprobada deja 1 línea con los 18 campos y duraciones enteras ≥ 0", () => {
+// R1: una corrida aprobada deja 1 línea con los 19 campos (incluidos puerta, puerta_ms, clase, paso y resuelto_por) y duraciones enteras ≥ 0.
+caso("R1 registro: una corrida aprobada deja 1 línea con los 19 campos y duraciones enteras ≥ 0", () => {
   const r = correr("r1");
   assert.equal(r.status, 0, r.stderr);
   const runs = leerRuns(r.raiz);

@@ -113,6 +113,7 @@ Cada intento agrega una línea a `changes/<nombre>/runs.jsonl`. Dos campos descr
 - `puerta`: `pasa`, `falla`, `no_verificable`, o `null` si la puerta no llegó a correr.
 - `puerta_ms`: duración de la puerta en milisegundos.
 - `clase`: la clase de la falla (`infra`, `entorno`, `plan`, `decision` o `tarea`); null si el intento no falló.
+- `senal`: la señal concreta que llevó a esa clase (p. ej. `thrashing` para el builder que muere por autocompactación, `puerta` o `RETURNED` para una falla de tarea); null si el intento no falló.
 - `paso`: el paso de la escalera en que corrió el intento (0 al empezar, 1 a 4 en los relanzamientos).
 - `resuelto_por`: el paso que cerró el tramo; `kit run` lo escribe en su línea DONE y, en el flujo por subagente, `--resuelto` lo escribe. Null mientras no cierre.
 - `builder_modelo`: el modelo con que corrió el builder.
