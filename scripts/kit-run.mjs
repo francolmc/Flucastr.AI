@@ -273,7 +273,7 @@ async function main() {
   let intento = null;
   const volcarIntento = () => { if (intento !== null) { registrar(rutaRegistro, intento); intento = null; } };
   // Intento nuevo: clase null, paso en curso (0 al empezar; un relanzamiento por infraestructura no lo avanza) y resuelto_por null hasta una línea DONE.
-  const nuevoIntento = () => ({ plan: planRel, tramo: tramo ? Number(tramo) : null, fecha: new Date().toISOString(), herramienta: a.herramienta, builder_modelo: builderModelo, builder_ms: null, verify_ms: null, revisor_ms: null, resultado: null, motivo_relanzamiento: null, relanzamientos, huella_inicio: fingerprintTree(raiz), huella_fin: null, puerta: null, puerta_ms: null, clase: null, paso: pasoActual, resuelto_por: null });
+  const nuevoIntento = () => ({ plan: planRel, tramo: tramo ? Number(tramo) : null, fecha: new Date().toISOString(), herramienta: a.herramienta, builder_modelo: builderModelo, builder_ms: null, verify_ms: null, revisor_ms: null, resultado: null, motivo_relanzamiento: null, relanzamientos, huella_inicio: fingerprintTree(raiz), huella_fin: null, puerta: null, puerta_ms: null, clase: null, senal: null, paso: pasoActual, resuelto_por: null });
   // Falla de tarea (verificación, puerta o revisor): la primera relanza con handoff (paso 1); la segunda deja `final`
   // pidiendo consejo; sin cupo se agota. Devuelve true si relanza.
   const fallaTarea = ({ cuerpo, motivoRelanzamiento, motivo, msg, senal }) => {
@@ -357,6 +357,7 @@ async function main() {
         // Proceso muerto: infra se repite con el mismo modelo mientras queden cupos; entorno devuelve a la persona.
         const cl = clasificar({ origen: "builder", status: c.status, error: c.error, salida: ultimasLineas(c.stderr), retorno: primera });
         intento.clase = cl.clase;
+        intento.senal = cl.senal;
         if (decidir({ clase: cl.clase, usados: relanzamientos, limite: MAX_RELANZAMIENTOS }).accion === "relanzar") {
           intento.resultado = "devuelto";
           intento.motivo_relanzamiento = "infra";
@@ -370,6 +371,7 @@ async function main() {
         const m = primera.match(/motivo=([a-zé]+)/);
         const cl = clasificar({ origen: "builder", status: 0, retorno: primera });
         intento.clase = cl.clase;
+        intento.senal = cl.senal;
         // PAUSED motivo=verify del builder es una falla de tarea: entra en la escalera (paso 1, consejo, agotada).
         if (cl.clase === "tarea") {
           if (fallaTarea({ cuerpo: `Builder paused (motivo=verify): ${primera}`, motivoRelanzamiento: "verify", motivo: "verify", msg: primera, senal: cl.senal })) continue;
@@ -396,6 +398,7 @@ async function main() {
         // Verificación con entorno no verificable (disco, Docker, tope, etc.): pausa sin relanzar; una tarea sigue el relanzamiento de siempre.
         const cl = clasificar({ origen: "verify", status: v.status, error: v.error, salida: ultimasLineas(v.stdout + v.stderr) });
         intento.clase = cl.clase;
+        intento.senal = cl.senal;
         if (cl.clase !== "tarea") {
           final = { pausa: true, motivo: "verify", msg: `la verificación no es verificable (${cl.senal}): ${cola(v.stdout + v.stderr)}`, clase: cl.clase, senal: cl.senal };
           break;
@@ -418,6 +421,7 @@ async function main() {
       intento.puerta_ms = pm.ms;
       if (puerta.bloquea) {
         intento.clase = "tarea";
+        intento.senal = "puerta";
         if (fallaTarea({ cuerpo: textoParaBuilder(puerta), motivoRelanzamiento: "puerta", motivo: puerta.motivo, msg: `la puerta mecánica no pasó tras ${relanzamientos + 1} corridas del builder: ${puerta.lista.join("; ")}`, senal: "puerta" })) continue;
         break;
       }
@@ -438,6 +442,7 @@ async function main() {
           if (!r.error && r.status === 0) return { r, modificado: false };
           const cl = clasificar({ origen: "revisor", status: r.status, error: r.error, salida: ultimasLineas(r.stderr) });
           intento.clase = cl.clase;
+          intento.senal = cl.senal;
           if (decidir({ clase: cl.clase, usados: relanzamientos, limite: MAX_RELANZAMIENTOS }).accion !== "relanzar") return { r, modificado: false, clase: cl.clase, senal: cl.senal };
           intento.resultado = "devuelto";
           intento.motivo_relanzamiento = "infra";
@@ -456,6 +461,7 @@ async function main() {
       if (dv.veredicto === "APPROVED") { intento.resultado = "DONE"; final = { aprobado: true }; break; }
       if (dv.veredicto === "PAUSED") { final = { pausa: true, motivo: "design", msg: `el revisor pide pausa: ${JSON.stringify(dv.defectos)}`, clase: "decision", senal: "motivo=design" }; break; }
       intento.clase = "tarea";
+      intento.senal = "RETURNED";
       if (fallaTarea({ cuerpo: `The review returned these defects:\n${JSON.stringify(dv.defectos, null, 2)}`, motivoRelanzamiento: "revisor", motivo: "design", msg: `revisión devuelta tras ${relanzamientos + 1} corridas: ${JSON.stringify(dv.defectos)}`, senal: "RETURNED" })) continue;
       break;
     }
@@ -467,6 +473,7 @@ async function main() {
   if (intento !== null) {
     intento.resultado = final.aprobado ? "DONE" : "PAUSED";
     intento.clase = final.aprobado ? null : (final.clase ?? null);
+    intento.senal = final.aprobado ? null : (final.senal ?? null);
     intento.resuelto_por = final.aprobado ? intento.paso : null;
     volcarIntento();
   }

@@ -14,6 +14,7 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 - Estructura: agentes en `core/agents/` (`planner`, `builder`), skills en `core/skills/`, referencias del planner en `core/references/planner/`, contrato de verificación en `core/contracts/`, lo propio de un stack en `core/recipes/`, adaptadores por herramienta en `adapters/`, modelos, esfuerzo y ventanas en `models.json`.
 - Traspaso: `changes/<nombre>/plan.md`; decisiones por ID en `decisions.md` y avance (≤ 15 líneas) en `notes.md`, junto al plan; cerrados en `changes/done/`.
 - Hook de permisos (Claude Code): `scripts/permissions-hook.mjs` conecta `hook-shell.mjs` (analiza) y `hook-decidir.mjs` (decide); solo levanta un bloqueo textual si toda la línea es inerte. Corre desde la carpeta del kit, también sin commit: conecta cambios ya probados. Límites: `docs/reglas-deny.md`.
+- Banco del builder: `evals/builder/` (uso en su `README.md`) mide `kit run` sobre tramos históricos. Aún no sirve para decidir un A/B: el plan reconstruido pierde contexto y `repos:`, y `calibrar` no ve el sandbox de Codex (`changes/done/evals-builder/linea-base.md`).
 
 ## Invariantes
 
