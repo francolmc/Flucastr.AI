@@ -95,7 +95,7 @@ El planner **no cierra el turno tras un avance parcial**: solo se detiene por un
 
 ### Cambio pequeño
 
-El planner edita sin plan ni builder solo si se cumplen las seis condiciones: una intención; un repo, hasta 2 archivos de producto y 30 líneas; corrección, texto, estilo o configuración no sensible; sin tocar datos, seguridad, dinero, contratos, rutas, dependencias, Docker/`verify` ni despliegue; comprobación ejecutable escrita antes; y que no hayas pedido plan. Ante la duda, va por builder. Puedes vetarlo diciendo «por plan».
+El planner edita sin plan ni builder solo si se cumplen las seis condiciones: una intención; un repo, hasta 2 archivos de producto y 120 líneas de diff (pruebas aparte, con tope de 150); corrección, texto, estilo o configuración no sensible, o funcionalidad nueva solo con una prueba que pase en la Comprobación rápida; sin tocar datos, seguridad, dinero, contratos, rutas, dependencias, Docker/`verify` ni despliegue; comprobación ejecutable escrita antes; y que no hayas pedido plan. Ante la duda, va por builder. Puedes vetarlo diciendo «por plan».
 
 ### Qué bloquea y qué no
 
@@ -126,7 +126,7 @@ Reglas notables: alcance por ruta y no por archivo; una sola verificación final
 
 ### Tramos y continuidad
 
-Un cambio largo se parte en tramos (`### Segment N`), a veces en archivos `tramo-N.md` con un `plan.md` índice. Por defecto el builder hace **un tramo** y espera la revisión. Con `continuity: continuous` completa las historias aprobadas de punta a punta, con condiciones de parada (mismo fallo dos veces, salir del alcance, falta una decisión tuya, o una comprobación que tarda más del doble de lo medido) y un punto de control por tramo. Evidencia de uso real: `docs/evaluaciones/tramos.md`.
+Un cambio largo se parte en tramos (`### Segment N`), a veces en archivos `tramo-N.md` con un `plan.md` índice. Por defecto el builder hace **un tramo** y espera la revisión. Con `continuity: continuous` completa las historias aprobadas de punta a punta, con condiciones de parada (mismo fallo dos veces, salir del alcance, falta una decisión tuya, o una comprobación que tarda más del doble de lo medido o de su tope sin medida, 3 o 10 min) y un punto de control por tramo. Evidencia de uso real: `docs/evaluaciones/tramos.md`.
 
 ### Retorno del builder
 
@@ -155,7 +155,7 @@ Si preguntas «¿cómo va?», el planner responde en hasta cuatro líneas con la
 
 `core/contracts/verification.md`: el kit pide capacidades, no herramientas. Cada proyecto declara en su `AGENTS.md` un comando por capacidad:
 
-- **Rápida** (`Comprobación rápida:`): segundos, en el host, sin servicios. Nivel 1.
+- **Rápida** (`Comprobación rápida:`): menos de 60 s, en el host, sin servicios. Nivel 1; el builder la corre al cerrar cada tramo.
 - **Servicio** (`Servicio:`): lógica contra dependencias reales. Nivel 2.
 - **Aceptación** (`Acceptance:`): un archivo por flujo, filtrable; no corta en el primer fallo. Nivel 3.
 - **Evidencia** (`Evidencia:`): dónde se escribe `resultado.json` (con `fingerprint`, `level`, `fase`, `ok`, `fallo`).
@@ -164,7 +164,7 @@ La *fingerprint* es un hash de `git status` y `git diff` de cada repo del plan, 
 
 ```mermaid
 flowchart LR
-    N1["Nivel 1<br/>Comprobación rápida<br/>segundos, host"] --> N2["Nivel 2<br/>VERIFY_RAPIDO=1 ./verify<br/>Docker con caché"] --> N3["Nivel 3<br/>./verify sin caché<br/>aceptación final"]
+    N1["Nivel 1<br/>Comprobación rápida<br/>menos de 60 s, host"] --> N2["Nivel 2<br/>VERIFY_RAPIDO=1 ./verify<br/>Docker con caché"] --> N3["Nivel 3<br/>./verify sin caché<br/>aceptación final"]
     N3 --> R[(resultado.json<br/>+ fingerprint)]
 ```
 

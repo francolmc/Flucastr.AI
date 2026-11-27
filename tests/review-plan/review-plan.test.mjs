@@ -300,3 +300,92 @@ test('A4 an exception with a reason also cancels the 8192-byte warning; without 
   await writeFile(file, `${grande}\nExcepción de tamaño:\n`);
   assert.match(run(file).stdout, /plan\.md:1:.*8192 bytes/);
 }));
+
+// D-02: con «format: 2» una historia corta solo exige lo mínimo; sin la marca nada cambia.
+const shortPlan = (criterion, { header = '---\nformat: 2\n---\n' } = {}) => `${header}# Plan corto
+
+## Goal
+Guardar el cambio.
+
+## Scope
+\`src/a.js\`.
+
+## Steps
+### Segment 1 — Story: save the change
+Files: \`src/a.js\`
+WHEN I save the change THEN it is available when I come back (A1).
+Acceptance:
+${criterion}
+TODO:
+- [ ] Update \`src/a.js\` (A1). Check: \`node --check src/a.js\`; exit 0.
+Segment verification: \`node --test tests/feature.test.mjs\` — level 1; exit 0; covers A1.
+`;
+
+test('D-02 format 2 short plan with an executable criterion has no warnings and no As, Dependencies or Handoff', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'plan.md');
+  await writeFile(file, shortPlan('- A1: the change is saved; check `node --test tests/feature.test.mjs`; expect exit 0.'));
+  const result = run(file);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.equal(result.stdout, '');
+}));
+
+test('D-02 format 2 criterion without executable command warns; manual review is accepted', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'plan.md');
+  await writeFile(file, shortPlan('- A1: the change is saved; check that it can be read back.'));
+  const warned = run(file);
+  assert.equal(warned.status, 1, warned.stderr);
+  assert.match(warned.stdout, /plan\.md:\d+: historia nueva: A1 sin comando entre acentos graves y resultado esperado/);
+  await writeFile(file, shortPlan('- A1: the change is saved; revisión manual: leer el archivo.'));
+  const accepted = run(file);
+  assert.equal(accepted.status, 0, accepted.stdout + accepted.stderr);
+}));
+
+test('D-02 without the format 2 mark nothing changes: a complete story passes and a short one keeps the old fields', async () => temporary(async (dir) => {
+  const complete = path.join(dir, 'plan.md');
+  await writeFile(complete, newStoryPlan());
+  const passed = run(complete);
+  assert.equal(passed.status, 0, passed.stdout + passed.stderr);
+  await writeFile(complete, shortPlan('- A1: the change is saved; check `node --test tests/feature.test.mjs`; expect exit 0.', { header: '' }));
+  const old = run(complete);
+  assert.equal(old.status, 1, old.stderr);
+  assert.match(old.stdout, /historia nueva: falta story «As/);
+}));
+
+test('D-02 a tramo-N.md inherits format 2 from its sibling plan.md', async () => temporary(async (dir) => {
+  const tramo = path.join(dir, 'tramo-1.md');
+  await writeFile(tramo, shortPlan('- A1: the change is saved; check `node --test tests/feature.test.mjs`; expect exit 0.', { header: '' }).replace('# Plan corto', '# Tramo 1'));
+  const alone = run(tramo);
+  assert.equal(alone.status, 1, alone.stderr);
+  await writeFile(path.join(dir, 'plan.md'), '---\nformat: 2\n---\n# Plan\n');
+  const inherited = run(tramo);
+  assert.equal(inherited.status, 0, inherited.stdout + inherited.stderr);
+}));
+
+test('D-06 format 2 accepts any backticked command with an expected result, without checking the binary', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'plan.md');
+  for (const command of ['npx vitest run', 'uv run pytest', 'dotnet test', 'test -f src/a.js', 'rg -q save src/a.js', 'grep -q save src/a.js', './gradlew test', 'mvn test', 'php artisan test', 'flutter test', './x.sh']) {
+    await writeFile(file, shortPlan(`- A1: the change is saved; check \`${command}\`; expect exit 0.`));
+    const result = run(file);
+    assert.equal(result.status, 0, `${command}: ${result.stdout}${result.stderr}`);
+  }
+}));
+
+test('D-02 format 2 accepts the command on an indented continuation line of the same A#', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'plan.md');
+  await writeFile(file, shortPlan('- A1: the change is saved; check:\n  `node --check src/a.js`; expect exit 0.'));
+  const result = run(file);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+}));
+
+test('D-06 format 2 needs a backticked command and an expected result; a bare name or a missing result warns', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'plan.md');
+  for (const criterion of [
+    '- A1: the change is saved; check src/test.js; expect exit 0.',
+    '- A1: the change is saved; check `src/test.js`.',
+  ]) {
+    await writeFile(file, shortPlan(criterion));
+    const result = run(file);
+    assert.equal(result.status, 1, `${criterion}: ${result.stdout}${result.stderr}`);
+    assert.match(result.stdout, /historia nueva: A1 sin comando entre acentos graves y resultado esperado/);
+  }
+}));

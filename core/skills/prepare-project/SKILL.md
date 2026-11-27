@@ -22,7 +22,7 @@ Include only information an agent cannot infer by reading the code:
 - Instalar: `...`
 - Correr en local: `...`
 - **Verificar todo desde cero: `./verify`**
-- Comprobación rápida: `...` (segundos, en el host, sin servicios). Sin esa línea el plan usa `verify`.
+- Comprobación rápida: `...` (typecheck, lint y pruebas relacionadas; menos de 60 s, en el host, sin servicios). Siempre se agrega. Sin esa línea el plan usa `verify`.
 - Servicio: `...` (opcional)
 - Acceptance: `...` (opcional)
 - Evidencia: `...` (opcional; dónde escribe `resultado.json`)
@@ -35,7 +35,7 @@ Include only information an agent cannot infer by reading the code:
 
 Declare each of the four verification capabilities on its own line (full contract in `core/contracts/verification.md`):
 
-- **Rápida** (`Comprobación rápida:`): segundos, en el host, sin servicios.
+- **Rápida** (`Comprobación rápida:`): menos de 60 s, en el host, sin servicios; el builder la corre al cerrar cada tramo.
 - **Servicio** (`Servicio:`): la lógica contra dependencias reales, sin interfaz.
 - **Acceptance** (`Acceptance:`): un archivo por flujo, filtrable por nombre; resume todos los fallos al final.
 - **Evidence** (`Evidencia:`): dónde escribe `resultado.json`.

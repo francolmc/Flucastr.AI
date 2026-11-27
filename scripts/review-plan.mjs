@@ -24,6 +24,9 @@ Con dos o más tramos en ## Steps y sin «continuity: continuous», avisa una ve
 Falsos positivos conocidos: A# que no comparten archivo por diseño (documentación
 frente a código), archivos raíz sin «/» que no se ven, «level» en prosa dentro de la
 línea de verificación. Revisar un tramo suelto lo trata como último del plan.
+Con «format: 2» en el frontmatter (o en el plan.md vecino de un tramo-N.md), cada historia
+solo exige Files, Segment verification, TODO y A# con un comando entre acentos graves y un resultado esperado («expect», «espera» o «esperado»), o «revisión manual»; no valida el binario;
+Goal, Scope, Verification y Steps siguen siendo del plan. Sin la marca no cambia nada.
 El límite de tamaño es 8192 bytes UTF-8 por archivo de plan/tramo y el máximo son
 3 tramos por plan. Una línea «Excepción de tamaño: <razón>» con razón no vacía anula
 ambos avisos; sin razón, no cuenta.
@@ -33,8 +36,23 @@ avisos «decisiones:»; formato en records.md). Sin decisions.md solo avisa si e
 const productPath = (value) => !/\.md\b/i.test(value) && !/(^|\/)(test|tests|pruebas|spec|specs)(\/|$)/i.test(value);
 const routeTokens = (text) => [...text.matchAll(/(?:^|[\s`(])((?:\.?\/?[\w@.-]+\/)+[\w@.-]*\/?)(?=$|[\s`,;)])/gm)].map((m) => m[1]);
 const SERVICE_MARKERS = /docker|compose|VERIFY_RAPIDO|\.\/verify|playwright|e2e|psql|redis|localhost/i;
+const COMMAND_RE = /^(?:node|npm|pnpm|yarn|bun|deno|bash|sh|git|curl|wget|python(?:3)?|pytest|vitest|playwright|docker|make|cargo|go|tsc|eslint|prettier)\b|^\.\/(?:verify|scripts\/\S+|node_modules\/\.bin\/\S+)/i;
+const frontmatterFormat = (source) => {
+  const lines = source.split(/\r?\n/);
+  if (lines[0]?.trim() !== '---') return null;
+  const end = lines.findIndex((line, index) => index > 0 && line.trim() === '---');
+  if (end < 0) return null;
+  return lines.slice(1, end).find((line) => /^format\s*:/.test(line.trim()))?.split(':')[1].trim() ?? null;
+};
+// «format: 2» en el frontmatter; un tramo-N.md hereda la marca de su plan.md vecino.
+const formatoCorto = async (file, source) => {
+  if (frontmatterFormat(source) === '2') return true;
+  if (!/^tramo-\d+\.md$/i.test(path.basename(file))) return false;
+  const plan = await readFile(path.join(path.dirname(file), 'plan.md'), 'utf8').catch(() => '');
+  return frontmatterFormat(plan) === '2';
+};
 
-function analyze(source, file) {
+function analyze(source, file, corto = false) {
   const lines = source.split(/\r?\n/);
   const warnings = [];
   const warn = (line, message) => warnings.push(`${file}:${line}: ${message}`);
@@ -82,7 +100,7 @@ function analyze(source, file) {
     const newStory = storyHeads.includes(chunk.start);
     if (newStory) {
       const field = (pattern) => relevant.some((line) => pattern.test(line.trim()));
-      const requiredFields = [
+      const requiredFields = corto ? [[/^Files\s*:/i, 'Files:'], [/^Segment\s+verification\s*:/i, 'Segment verification:']] : [
         [/^As\s+.+\bI want\b.+\bso that\b.+[.]?$/i, 'story «As … I want … so that …»'],
         [/\bDependencies\s*:/i, 'Dependencies:'],
         [/^Files\s*:/i, 'Files:'],
@@ -102,6 +120,20 @@ function analyze(source, file) {
       const behaviorCriteria = [...chunkText.matchAll(/\bWHEN\b[\s\S]*?\bTHEN\b[^\n]*?\b(A\d+)\b/gim)].map((match) => match[1]);
       const todoCriteria = [...chunkText.matchAll(/^\s*-\s*\[[ xX]\].*?\b(A\d+)\b/gim)].map((match) => match[1]);
       if (criteria.length === 0) warn(chunkLine, 'historia nueva: falta al menos un criterio A#');
+      if (corto) {
+        relevant.forEach((line, offset) => {
+          const criterion = line.match(/^\s*(?:[-*]\s*)?(?:Acceptance\s+)?(A\d+)\s*:/i)?.[1];
+          if (!criterion) return;
+          // El comando puede estar en líneas sangradas que siguen al mismo A# (sin otro A# ni casilla).
+          const bloque = [line];
+          for (let i = offset + 1; i < relevant.length && /^\s+\S/.test(relevant[i]) && !/^\s*(?:[-*]\s*)?(?:Acceptance\s+)?A\d+\s*:|^\s*-\s*\[/i.test(relevant[i]); i++) bloque.push(relevant[i]);
+          const texto = bloque.join('\n');
+          // D-06: sin validar el binario; basta un comando entre acentos graves y un resultado esperado.
+          const comando = [...texto.matchAll(/`([^`]+)`/g)].some((match) => match[1].trim() !== '');
+          const resultado = /\b(?:expect|espera|esperado)\b/i.test(texto);
+          if (!(comando && resultado) && !/revisi[oó]n\s+manual/i.test(texto)) warn(chunk.start + offset + 1, `historia nueva: ${criterion} sin comando entre acentos graves y resultado esperado; indica ambos o «revisión manual»`);
+        });
+      }
       for (const criterion of behaviorCriteria) if (!criteria.includes(criterion)) warn(chunkLine, `historia nueva: ${criterion} no tiene criterio de aceptación`);
       for (const criterion of todoCriteria) if (!criteria.includes(criterion)) warn(chunkLine, `historia nueva: ${criterion} en TODO no tiene criterio de aceptación`);
 
@@ -198,8 +230,7 @@ function analyze(source, file) {
       const step = lines.slice(start, end).join('\n');
       if (!routeTokens(step).some((path) => !path.endsWith('/'))) warn(start + 1, 'el paso no nombra una ruta de archivo');
       const commands = [...step.matchAll(/`([^`]+)`/g)].map((match) => match[1].trim());
-      const hasCommand = commands.some((value) => /^(?:node|npm|pnpm|yarn|bun|deno|bash|sh|git|curl|wget|python(?:3)?|pytest|vitest|playwright|docker|make|cargo|go|tsc|eslint|prettier)\b/i.test(value)
-        || /^\.\/(?:verify|scripts\/\S+|node_modules\/\.bin\/\S+)/i.test(value));
+      const hasCommand = commands.some((value) => COMMAND_RE.test(value));
       if (!hasCommand && !/\bCheck\s*:/i.test(step)) warn(start + 1, 'el paso no indica cómo se comprueba');
     }
   }
@@ -220,7 +251,7 @@ try {
   if (!/^\s*###\s+Segment\s+\d+\s+[—–-]\s*Story\s*:/im.test(source)) {
     console.error('nota: formato anterior; las comprobaciones de tramos verificables (Segment verification, level, mezcla de unidades) no se aplican.');
   }
-  const warnings = analyze(source, file);
+  const warnings = analyze(source, file, await formatoCorto(file, source));
   const registryFile = path.join(path.dirname(file), 'decisions.md');
   const registry = await readFile(registryFile, 'utf8').catch((error) => {
     if (error.code === 'ENOENT') return null;
