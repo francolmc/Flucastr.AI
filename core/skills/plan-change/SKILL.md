@@ -72,6 +72,13 @@ Also write `changes/<name>/decisions.md` (one row per resolved decision) and `no
 - `executor:` is `builder` unless the user explicitly asks you to execute; apply the executability test.
 - `repos:` is required (`[.]` for one repository). Statuses: `draft`, `approved`, `in progress`, `done`, `partial`.
 
+## Short Plans by Default
+
+- At most 8 KB and 3 segments per plan; `review-plan` enforces both. Beyond that, split the work into two plans. Only a line `Excepción de tamaño: <reason>` with a non-empty reason lifts the limit.
+- Two changes in one request: ask the user their order before writing.
+- Explore for 10 minutes at most. Anything still unknown goes under `## Exploration` as a named gap, not further research.
+- Verify only what you touch and its direct dependents: for each A#, the happy path and that criterion's edges.
+
 ## References
 
 Read only what applies:
