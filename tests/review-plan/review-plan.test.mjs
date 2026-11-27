@@ -270,3 +270,33 @@ test('A3 old format prints one stderr note, keeps stdout empty and exits 0 when 
   assert.match(result.stderr, /^nota: formato anterior/);
   assert.equal(result.stderr.trim().split('\n').length, 1, 'la nota ocupa una sola línea');
 }));
+
+const tranches = (count) => `continuity: continuous\n## Steps\n${Array.from({ length: count }, (_, index) => `### Segment ${index + 1}\nFiles: \`src/${index}.js\`\n- [ ] Editar \`src/${index}.js\`. Check: \`node --check src/${index}.js\`\n`).join('')}`;
+
+test('A4 four tranches warn and three do not; Excepción de tamaño with a reason cancels the warning', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'plan.md');
+  await writeFile(file, tranches(3));
+  assert.equal(run(file).status, 0);
+  await writeFile(file, tranches(4));
+  const cuatro = run(file);
+  assert.equal(cuatro.status, 1);
+  assert.match(cuatro.stdout, /plan\.md:\d+: el plan tiene 4 tramos \(máximo 3\)/);
+  await writeFile(file, `${tranches(4)}Excepción de tamaño: plan de migración por diseño\n`);
+  assert.equal(run(file).status, 0);
+  await writeFile(file, `${tranches(4)}Excepción de tamaño:\n`);
+  assert.equal(run(file).status, 1, 'una excepción sin razón no cuenta');
+  await writeFile(file, `${tranches(4)}Excepción de tamaño:   \n`);
+  assert.equal(run(file).status, 1, 'una excepción con solo espacios no cuenta');
+}));
+
+test('A4 an exception with a reason also cancels the 8192-byte warning; without one it still warns', async () => temporary(async (dir) => {
+  const file = path.join(dir, 'plan.md');
+  const valid = `## Steps\n- [ ] Editar \`src/a.js\`. Check: \`node --check src/a.js\`\n`;
+  const grande = valid + ' '.repeat(8193 - Buffer.byteLength(valid));
+  await writeFile(file, grande);
+  assert.equal(run(file).status, 1);
+  await writeFile(file, `${grande}\nExcepción de tamaño: la lista de pruebas es larga\n`);
+  assert.equal(run(file).status, 0);
+  await writeFile(file, `${grande}\nExcepción de tamaño:\n`);
+  assert.match(run(file).stdout, /plan\.md:1:.*8192 bytes/);
+}));

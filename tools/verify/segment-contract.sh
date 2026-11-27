@@ -11,7 +11,7 @@ TEXTOS_TRAMOS=(
   'core/skills/execute-plan/SKILL.md|rerun the same command and compare'
   'core/skills/execute-plan/SKILL.md|Resuelto:'
   'core/agents/builder.md|DONE: plan=<path>; segment=<n>; verify=pasa'
-  'core/agents/planner.md|Per-segment review'
+  'core/agents/planner.md|Final review'
   'core/agents/planner.md|segment: <n>'
   'core/agents/builder.md|segment=<n>'
   'core/agents/planner.md|one long wait'

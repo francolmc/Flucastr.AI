@@ -24,7 +24,9 @@ Con dos o más tramos en ## Steps y sin «continuity: continuous», avisa una ve
 Falsos positivos conocidos: A# que no comparten archivo por diseño (documentación
 frente a código), archivos raíz sin «/» que no se ven, «level» en prosa dentro de la
 línea de verificación. Revisar un tramo suelto lo trata como último del plan.
-El límite de tamaño es 8192 bytes UTF-8 por archivo de plan/tramo.
+El límite de tamaño es 8192 bytes UTF-8 por archivo de plan/tramo y el máximo son
+3 tramos por plan. Una línea «Excepción de tamaño: <razón>» con razón no vacía anula
+ambos avisos; sin razón, no cuenta.
 Si hay decisions.md junto al plan, también revisa las decisiones citadas (IDs D-NN;
 avisos «decisiones:»; formato en records.md). Sin decisions.md solo avisa si el plan cita un ID.`;
 
@@ -36,7 +38,10 @@ function analyze(source, file) {
   const lines = source.split(/\r?\n/);
   const warnings = [];
   const warn = (line, message) => warnings.push(`${file}:${line}: ${message}`);
-  if (Buffer.byteLength(source, 'utf8') > 8192) warn(1, 'el plan supera 8192 bytes');
+  const hasException = lines.some((line) => /^\s*Excepción de tamaño\s*:\s*\S/i.test(line));
+  if (!hasException && Buffer.byteLength(source, 'utf8') > 8192) {
+    warn(1, 'el plan supera 8192 bytes; parte el cambio o declara «Excepción de tamaño: <razón>»');
+  }
 
   const isNewStory = (line) => /^###\s+Segment\s+\d+\s+[—–-]\s*Story\s*:/i.test(line.trim());
   const storyTitle = (line) => line.match(/Story\s*:\s*(.*)$/i)?.[1].trim() ?? '';
@@ -60,6 +65,9 @@ function analyze(source, file) {
   const hasContinuity = lines.some((line) => /^\s*continuity\s*:\s*continuous\b/i.test(line));
   const linkedTramos = new Set(lines.slice(stepsHeader + 1, stepsEnd).flatMap((line) => line.match(/tramo-\d+\.md/g) ?? []));
   const tramoCount = Math.max(trancheHeads.length, linkedTramos.size);
+  if (tramoCount > 3 && !hasException) {
+    warn(stepsHeader + 1, `el plan tiene ${tramoCount} tramos (máximo 3); parte el cambio o declara «Excepción de tamaño: <razón>»`);
+  }
   if (tramoCount >= 2 && !hasContinuity) {
     warn((trancheHeads[0] ?? stepsHeader) + 1, `el plan tiene ${tramoCount} tramos sin «continuity: continuous»; si son de una misma historia, declárala (heurística)`);
   }

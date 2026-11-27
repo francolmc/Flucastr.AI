@@ -5,7 +5,7 @@ textos_contrato() { # $1: raíz del kit
   grep -qF 'awk' "$r/core/skills/execute-plan/SKILL.md" || return 1
   grep -qF 'siguiente=' "$r/core/agents/builder.md" || return 1
   grep -qF 'no_intentado=' "$r/core/agents/builder.md" || return 1
-  grep -qF '3 runs' "$r/core/skills/execute-plan/SKILL.md" || return 1
+  grep -qF '2 runs' "$r/core/skills/execute-plan/SKILL.md" || return 1
   grep -qF 'git diff' "$r/core/agents/planner.md" || return 1
   grep -qF 'Read and follow the `execute-plan` skill' "$r/core/agents/builder.md" || return 1
   grep -qF 'status`, `diff`, `branch --show-current`, `rev-parse --verify --quiet`, and `symbolic-ref' "$r/core/agents/builder.md" || return 1
