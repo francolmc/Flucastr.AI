@@ -3,7 +3,7 @@
 // Cada aviso tiene su caso: si se quita la regla, el caso falla.
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -38,7 +38,7 @@ function ventanas(args, env = {}) {
   for (const k of ["FLUCASTR_MODELOS", "CLAUDE_CODE_AUTO_COMPACT_WINDOW", "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE", "PI_CODING_AGENT_DIR", "CODEX_HOME"]) {
     delete base[k];
   }
-  const r = spawnSync(process.execPath, [resolver, "ventanas", ...args], {
+  const r = spawnSyncSeguro(process.execPath, [resolver, "ventanas", ...args], {
     cwd: raiz,
     env: { ...base, ...env },
     stdio: ["ignore", "pipe", "pipe"],

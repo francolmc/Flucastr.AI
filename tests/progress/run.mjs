@@ -3,7 +3,7 @@
 // Sin red, sin CLIs reales. Escribe solo en un directorio temporal que se borra al salir.
 
 import assert from "node:assert/strict";
-import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
+import { chmodSync, closeSync, copyFileSync, mkdirSync, mkdtempSync, openSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { spawn } from "node:child_process";
@@ -632,20 +632,25 @@ function planVigilado(nombre) {
 
 caso("A2 progress-watch imprime líneas de estado, registra la casilla marcada y sale 0 con SIGTERM sin escribir en stdout", async () => {
   const p = planVigilado("a2");
-  const hijo = spawn(process.execPath, [VIGILANTE, "--plan", p.plan, "--herramienta", "none", "--raiz", p.raiz], {
-    env: { ...process.env, KIT_PROGRESO_INTERVALO: "1" },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  let out = "";
-  let err = "";
-  hijo.stdout.on("data", (d) => { out += d; });
-  hijo.stderr.on("data", (d) => { err += d; });
+  const outPath = join(dirname(p.plan), "stdout.txt");
+  const errPath = join(dirname(p.plan), "stderr.txt");
+  const outFd = openSync(outPath, "w");
+  const errFd = openSync(errPath, "w");
+  let hijo;
+  try {
+    hijo = spawn(process.execPath, [VIGILANTE, "--plan", p.plan, "--herramienta", "none", "--raiz", p.raiz], {
+      env: { ...process.env, KIT_PROGRESO_INTERVALO: "1" },
+      stdio: ["ignore", outFd, errFd],
+    });
+  } finally { closeSync(outFd); closeSync(errFd); }
   const cierre = new Promise((r) => hijo.on("close", (codigo) => r(codigo)));
   await esperar(300);
   writeFileSync(p.tramo, "- [x] primero\n- [ ] segundo\n");
   await esperar(2300);
   hijo.kill("SIGTERM");
   const codigo = await cierre;
+  const out = readFileSync(outPath, "utf8");
+  const err = readFileSync(errPath, "utf8");
   const lineas = err.split("\n").filter((l) => l.startsWith("[progreso] "));
   assert.ok(lineas.length >= 2, `esperaba ≥ 2 líneas de estado, hubo ${lineas.length}: ${err}`);
   for (const l of lineas) {

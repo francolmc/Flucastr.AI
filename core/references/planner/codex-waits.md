@@ -2,3 +2,11 @@
 
    - While plan checkboxes or `git status` change, the builder is progressing; interrupt only after its declared deadline, and read the end of its session before relaunching to learn why it stopped. Wait once for a long interval; do not query status with `send_message`, since each call rereads context. In Codex, use `wait_agent` with `timeout_ms: 3600000`. Never loop with `sleep`, `tail`, or status polling. If the user writes while the builder is active, answer in one line and resume waiting in the same turn; do not end the turn while its return is pending.
      - In Codex, run *Verification* directly with `exec_command` (no `bash -lc` and no `> log`). If it returns “Script running with cell ID N”, call `wait` once with that `cell_id` and `yield_time_ms: 300000`; repeat only while it still says “Script running”. These waits do not count toward the call budget. If `exec_command` returns a `session_id`, make one `write_stdin` call with empty `chars` and `yield_time_ms: 1800000`; repeat only while the command still runs, never every few seconds. Do not poll with `tail` or repeated short `write_stdin` calls. Do not return `PAUSED` while `verify` is still running; use it only if verification fails or 30 minutes total have elapsed.
+
+## Pi
+
+Add `FLUCASTR-LAUNCH: plan=<relative plan>; segment=<n>; desde=<epoch-ms>` as its own line in the builder task, using one `Date.now()` value. Then run `node scripts/kit-await.mjs <plan> --desde <same value> --tramo <n>`. Repeat that wait only after `EN_CURSO`; the builder extension records `DONE`, `PAUSED`, `INVALIDO`, or an interruption Pi actually observed. A timeout alone is not an interruption.
+
+## Claude Code subagents
+
+Install/check Claude's `SubagentStop` hook before launching a Claude builder. Capture one `Date.now()` value before launch and include `FLUCASTR-LAUNCH: plan=<relative plan>; segment=<n>; desde=<epoch-ms>` as its own task line. Run `node scripts/kit-await.mjs <plan> --desde <same value> --tramo <n>` after launch; repeat only after `EN_CURSO`. The hook records the builder's validated return.

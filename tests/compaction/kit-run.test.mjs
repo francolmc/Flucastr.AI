@@ -3,7 +3,7 @@
 // KIT_RUN_<ROL> no cambia. Usa models.json en copias temporales y el resolver real; no toca el HOME real.
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -51,7 +51,7 @@ async function cargar(modelos, sobre = {}) {
 
 // Valor de compactar-codex para un agente con el resolver real (la misma fuente que usa kit run).
 function compactarCodexReal(agente, modelos) {
-  const r = spawnSync("node", [RESOLVER, "compactar-codex", agente], {
+  const r = spawnSyncSeguro("node", [RESOLVER, "compactar-codex", agente], {
     cwd: raiz,
     env: { ...process.env, FLUCASTR_MODELOS: modelos },
     stdio: ["ignore", "pipe", "pipe"],

@@ -1,0 +1,13 @@
+import { spawnSync } from "node:child_process";
+import { openSync, closeSync, readFileSync, mkdtempSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+const r = spawnSync("bash", ["-c", "echo child-ok; echo err-ok >&2"], { stdio: ["ignore", "pipe", "pipe"] });
+console.log("pipe status", r.status, "stdout", JSON.stringify(String(r.stdout)), "stderr", JSON.stringify(String(r.stderr)));
+const d = mkdtempSync(join(tmpdir(), "probe-"));
+const fo = openSync(join(d, "o"), "w");
+const fe = openSync(join(d, "e"), "w");
+const f = spawnSync("bash", ["-c", "echo child-ok; echo err-ok >&2"], { stdio: ["ignore", fo, fe] });
+closeSync(fo);
+closeSync(fe);
+console.log("file status", f.status, "stdout", JSON.stringify(readFileSync(join(d, "o"), "utf8")), "stderr", JSON.stringify(readFileSync(join(d, "e"), "utf8")));

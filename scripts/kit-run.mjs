@@ -37,6 +37,7 @@ import { crearComando } from "../tools/run/commands.mjs";
 import { conNivelSuperior, nivelSuperiorDe } from "../tools/run/nivel.mjs";
 import { leerTokens, notaPaso4 } from "../tools/run/estimar.mjs";
 import { crearResolucionModelos } from "../tools/model-resolution/models.mjs";
+import { registrarTermino } from "../tools/run/termination.mjs";
 import { anexar, evento, leerEventos } from "../tools/progress/eventos.mjs";
 import { escribirResumen, generarResumen } from "../tools/progress/resumen.mjs";
 import { casillasDelPlan } from "./progress-watch.mjs";
@@ -470,14 +471,21 @@ async function main() {
   }
 
   // El último intento no se relanza: su resultado es DONE si se aprobó, o PAUSED en otro caso.
+  const { hechos, total } = progreso(planPath);
   if (intento !== null) {
     intento.resultado = final.aprobado ? "DONE" : "PAUSED";
     intento.clase = final.aprobado ? null : (final.clase ?? null);
     intento.senal = final.aprobado ? null : (final.senal ?? null);
     intento.resuelto_por = final.aprobado ? intento.paso : null;
-    volcarIntento();
+    const siguiente = casillasDelPlan(planPath).casillas.find((c) => !c.marcada)?.texto ?? "ninguna";
+    registrarTermino(rutaRegistro, intento, intento.resultado, {
+      motivo: final.aprobado ? undefined : final.motivo,
+      hecho: `${hechos}/${total}`,
+      siguiente: final.aprobado ? undefined : siguiente,
+      no_intentado: final.aprobado ? undefined : final.msg,
+    });
+    intento = null;
   }
-  const { hechos, total } = progreso(planPath);
   cerrarProgreso({ planPath, herramienta: a.herramienta, raiz, desde: inicioPrimera ?? Date.now(), resultado: final.aprobado ? "DONE" : "PAUSED", motivo: final.motivo, corte: corte && !final.aprobado, nombre: planRel });
   // Corte por pegado: nota con lo hecho, la primera casilla pendiente y la causa. Las casillas no se tocan.
   if (final.pegado) {

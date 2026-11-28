@@ -4,7 +4,7 @@
 // Directorios temporales; no toca el proyecto ni el HOME reales.
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -55,7 +55,7 @@ function proyectoCon(contenido) {
 }
 
 function resolver(args, modelos = modelosCon()) {
-  return spawnSync("node", [RESOLVER, ...args], {
+  return spawnSyncSeguro("node", [RESOLVER, ...args], {
     cwd: raiz,
     env: entorno({ FLUCASTR_MODELOS: modelos }),
     stdio: ["ignore", "pipe", "pipe"],
@@ -177,7 +177,7 @@ function instalador({ proyecto, nuevo = "", manifiesto, simular = 0, resolverRut
   const manifiestoArchivo = join(dir, "manifiesto.txt");
   writeFileSync(nuevoArchivo, nuevo);
   if (manifiesto !== undefined) writeFileSync(manifiestoArchivo, manifiesto);
-  const r = spawnSync("bash", [driver(), ...args], {
+  const r = spawnSyncSeguro("bash", [driver(), ...args], {
     cwd: raiz,
     env: entorno({
       PROYECTO: proyecto,

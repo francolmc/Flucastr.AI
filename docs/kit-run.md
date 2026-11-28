@@ -125,3 +125,50 @@ Un relanzamiento causado por la puerta deja `motivo_relanzamiento: "puerta"`. El
 La primera línea informa `DONE` si la puerta pasa y el revisor aprueba; el plan queda en estado `done`.
 
 Si el ciclo no puede terminar, informa `PAUSED`; el plan queda en estado `partial`. El proceso devuelve código 0 para `done`, 1 para `partial` y 2 si el uso es incorrecto, el plan no está aprobado o falta una de las herramientas de la puerta.
+
+## Esperar el término del builder
+
+`kit-await` observa el registro sin controlar el proceso. Captura una marca epoch en milisegundos (`Date.now()`) antes de lanzar el builder y conserva ese valor para todas las esperas del mismo lanzamiento:
+
+```bash
+node scripts/kit-await.mjs changes/mi-cambio/plan.md --desde <epoch-ms> --tramo 1 --hasta 570 --raiz <proyecto>
+```
+
+Omite `--tramo` para tomar el tramo del plan; sin tramo declarado se correlaciona con `null`. Captura `desde` antes del lanzamiento y pásalo al esperar; si omites `--desde`, el comando captura la hora actual al iniciarse. Hay una sola corrida activa por plan. La selección exige ruta normalizada, tramo y fecha de término estrictamente posterior a `--desde`; más de un término coincidente devuelve INVALIDO. Consulta cada 5 segundos y espera 570 segundos por defecto. `--hasta` y `--limite` aceptan el límite en segundos. Ajusta también el timeout de la herramienta que ejecuta la espera; un límite mayor en el script no modifica el de la herramienta.
+
+| Resultado | Salida | Acción |
+|---|---|---|
+| DONE | 0 | Revisar la entrega |
+| PAUSED, INVALIDO, INTERRUMPIDO | 1 | Leer el resultado y resolver la causa |
+| Uso incorrecto | 2 | Corregir los argumentos |
+| EN_CURSO | 3 | Repetir la espera con la misma marca |
+| PEGADO | 4 | Revisar la señal de progreso |
+
+Solo EN_CURSO permite repetir automáticamente la espera. PEGADO reutiliza el detector de progreso y no interrumpe procesos. Ausencia de registro, falta de progreso o vencimiento de la espera no demuestran una interrupción: sin observación suficiente, el resultado sigue siendo EN_CURSO.
+
+### Instalación por herramienta
+
+En Codex se conserva `kit run` como ruta predeterminada; este escribe `terminacion` únicamente en el intento final, después de la puerta y la revisión. Si se elige un builder subagente de Codex, se usa la marca previa al lanzamiento y `kit-await` igual que con Claude Code.
+
+Para Claude Code, instala y comprueba el hook de término en el proyecto antes de lanzar un builder subagente; captura una marca `desde` antes del lanzamiento y usa `kit-await` después:
+
+```bash
+bash adapters/claude-code/install-subagent-stop-hook.sh instalar <proyecto>
+bash adapters/claude-code/install-subagent-stop-hook.sh comprobar <proyecto>
+```
+
+`quitar` retira solo su entrada y conserva los ajustes ajenos. El hook atiende a `builder`: un retorno válido se registra; uno inválido pide corrección con salida 2 y, si se repite con `stop_hook_active`, registra INVALIDO. Sin un plan inequívoco informa error sin atribuirlo a otro plan. SubagentStop no demuestra por sí solo una muerte abrupta sin retorno observable.
+
+En Pi, el instalador de agentes (`adapters/pi/install-agent.sh`) añade la extensión de término al perfil builder generado; el manifiesto existente permite retirarla junto al agente. Incluye como línea propia en la tarea:
+
+```text
+FLUCASTR-LAUNCH: plan=changes/mi-cambio/plan.md; segment=1; desde=<epoch-ms>
+```
+
+La extensión correlaciona el retorno y registra INTERRUMPIDO solo al observar `agent_settled.aborted`. Las pruebas locales usan un proveedor faux; el uso real de Pi sigue no verificado hasta disponer de datos de lanzamientos reales.
+
+### Compatibilidad del registro
+
+Cada intento conserva sus campos históricos y `fecha` como inicio. Solo el final añade `terminacion.fecha` (fecha UTC de escritura) y `terminacion.resultado`; los detalles opcionales incluyen `hecho`, `motivo`, `siguiente` y `no_intentado`. En un DONE puede conservarse `hecho`, por ejemplo `1/1`. Los consumidores anteriores pueden ignorar `terminacion`. Los registros históricos sin ese objeto siguen siendo legibles, pero no acreditan un término para `kit-await`.
+
+El procedimiento de revisión manual y sus diez lanzamientos pendientes están en `changes/P01-runtime-lanzamiento/evidencia-real.md`.
