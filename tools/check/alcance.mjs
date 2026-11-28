@@ -4,7 +4,7 @@
 //
 // Reglas (contrato en changes/kit-scope-close/tramo-1.md):
 // - Sección `## Scope` o `## Alcance` hasta el siguiente `## `. Sin ella o sin rutas: no_verificable.
-// - Rutas: tokens entre acentos graves con `/` o extensión conocida y sin espacios. `./x` se normaliza a `x`.
+// - Rutas: tokens entre acentos graves con `/` o extensión conocida y sin espacios. Raíz sin extensión: `./x` en una lista explícita o exclusión.
 // - Anotaciones entre paréntesis se ignoran; `(solo …)` o `(líneas …)` cuentan la ruta completa y dejan aviso «parcial».
 // - Formas: `dir/` = prefijo; `dir/**` o `*.ext` = glob; resto = archivo exacto.
 // - Exclusión: desde la palabra clave (`Fuera`, `No tocar`, `No modificar`, `Out of scope`, `Excluded`) hasta fin de línea.
@@ -31,22 +31,24 @@ function seccion(texto) {
 }
 
 // Normaliza un candidato a ruta. Devuelve { ruta } | { ignorar: true } | { error: motivo }.
-function candidato(bruto) {
+function candidato(bruto, raizExplicita = false) {
   const t = bruto.trim();
   if (!t || /\s/.test(t)) return { ignorar: true };
   const ruta = t.replace(/^\.\//, "");
   if (ruta.startsWith("/")) return { error: `ruta absoluta: ${t}` };
   if (ruta.includes("..")) return { error: `ruta con «..»: ${t}` };
   if (/[{}!]/.test(ruta)) return { error: `patrón con llaves o «!» no soportado: ${t}` };
-  if (ruta.includes("/") || EXTENSIONES.test(ruta)) return { ruta };
+  if ((raizExplicita && t.startsWith("./")) || ruta.includes("/") || EXTENSIONES.test(ruta)) return { ruta };
   return { ignorar: true };
 }
 
 // Tokens entre acentos graves de un fragmento de línea, con su anotación posterior.
-function tokensGraves(fragmento) {
+function tokensGraves(fragmento, exclusion = false) {
   return [...fragmento.matchAll(/`([^`]+)`/g)].map(m => {
+    const prefijo = fragmento.slice(0, m.index);
+    const raizExplicita = exclusion || /^\s*(?:[-*]\s*)?(?:`[^`]+`\s*,\s*)*$/.test(prefijo);
     const resto = fragmento.slice(m.index + m[0].length);
-    return { texto: m[1], parcial: /^\s*\((solo|líneas)/i.test(resto) };
+    return { texto: m[1], raizExplicita, parcial: /^\s*\((solo|líneas)/i.test(resto) };
   });
 }
 
@@ -117,7 +119,7 @@ export function parsearAlcance(texto, { segmento, tramos = [] } = {}) {
   let error = null;
 
   const registrar = (token, lista, origen) => {
-    const c = candidato(token.texto);
+    const c = candidato(token.texto, token.raizExplicita);
     if (c.error) {
       error ??= c.error;
       return;
@@ -128,11 +130,13 @@ export function parsearAlcance(texto, { segmento, tramos = [] } = {}) {
   };
 
   for (const linea of cuerpo) {
+    // Una exclusión cubre el resto de la línea, incluso tras punto y coma.
+    // Las autorizaciones independientes deben escribirse en otra línea.
     const corte = linea.search(RE_EXCLUSION);
     const antes = corte < 0 ? linea : linea.slice(0, corte);
     const despues = corte < 0 ? "" : linea.slice(corte);
     tokensGraves(antes).forEach(t => registrar(t, incluidas, "plan"));
-    tokensGraves(despues).forEach(t => registrar(t, excluidas, "plan"));
+    tokensGraves(despues, true).forEach(t => registrar(t, excluidas, "plan"));
   }
   if (error) return sinVerificar(error);
 

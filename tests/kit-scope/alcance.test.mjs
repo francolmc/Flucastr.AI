@@ -21,7 +21,7 @@ test("A1: el ejemplo del contrato da incluidas, excluida y clasificación correc
   assert.equal(clasificarRuta("z.txt", a), "fuera");
 });
 
-test("A1: ruta exacta, carpeta, glob y ./ normalizado", () => {
+test("A1: ruta exacta, carpeta, glob y ruta raíz ./ normalizada", () => {
   const a = parsearAlcance(plan("`src/x.mjs`, `docs/`, `tests/kit/**`, `*.md`, `./sub/z.mjs`, `./verify`"));
   assert.equal(a.estado, "ok");
   assert.equal(clasificarRuta("src/x.mjs", a), "dentro");
@@ -31,7 +31,26 @@ test("A1: ruta exacta, carpeta, glob y ./ normalizado", () => {
   assert.equal(clasificarRuta("README.md", a), "dentro");
   assert.equal(clasificarRuta("docs/a.md", a), "dentro");
   assert.equal(clasificarRuta("sub/z.mjs", a), "dentro");
-  assert.ok(!a.incluidas.some(i => i.ruta === "verify" || i.ruta === "./verify"), "./verify no es ruta");
+  assert.equal(clasificarRuta("verify", a), "dentro");
+});
+
+test("A4: ./verify se incluye o excluye como ruta raíz explícita", () => {
+  const incluida = parsearAlcance(plan("`./verify`, `tests/kit-scope/alcance.test.mjs`"));
+  assert.equal(incluida.estado, "ok");
+  assert.equal(clasificarRuta("verify", incluida), "dentro");
+
+  const excluida = parsearAlcance(plan("`tests/**`. Fuera: `./verify`."));
+  assert.equal(excluida.estado, "ok");
+  assert.equal(clasificarRuta("verify", excluida), "excluida");
+});
+
+test("Scope: la exclusión se extiende hasta fin de línea tras punto y coma", () => {
+  const a = parsearAlcance(plan("Incluir `a/` y `c/`. No tocar `a/`; `b/`.\n- `./verify`"));
+  assert.equal(a.estado, "ok");
+  assert.equal(clasificarRuta("a/x.mjs", a), "excluida");
+  assert.equal(clasificarRuta("b/x.mjs", a), "excluida");
+  assert.equal(clasificarRuta("c/x.mjs", a), "dentro");
+  assert.equal(clasificarRuta("verify", a), "dentro");
 });
 
 test("A1: la exclusión más específica gana y el empate excluye", () => {
@@ -52,10 +71,14 @@ test("A2: sin sección Scope da no_verificable, nunca ok", () => {
   assert.equal(r.motivo, "sin Scope");
 });
 
-test("A2: sección sin rutas da no_verificable", () => {
+test("A2: prosa y comandos no explícitos como rutas dan no_verificable", () => {
   const r = parsearAlcance(plan("Solo prosa, sin rutas. Ver `./verify` y `npm test`."));
   assert.equal(r.estado, "no_verificable");
   assert.equal(r.motivo, "Scope sin rutas");
+  const mixta = parsearAlcance(plan("`src/a.mjs`\nVer `./verify`."));
+  assert.equal(clasificarRuta("verify", mixta), "fuera");
+  const mismaLinea = parsearAlcance(plan("`src/a.mjs` y consultar `./verify`."));
+  assert.equal(clasificarRuta("verify", mismaLinea), "fuera");
 });
 
 test("A2: si la exclusión cubre todo lo incluido, no_verificable", () => {
