@@ -7,4 +7,4 @@
 - La persona aprobó la evidencia en Puerta 2.
 
 ## Next action
-- La persona hace el commit; carpeta conservada por prohibición de tocar `changes/done/`.
+- La persona autorizó archivar el cambio; queda pendiente confirmar el movimiento en un commit.
