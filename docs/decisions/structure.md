@@ -1,27 +1,15 @@
 # Decisión de estructura del repositorio
 
-## Estructura implementada
+## Estructura actual
 
-La estructura nueva está implementada en `core/` (agentes, contratos, recetas y skills), `adapters/` (Claude Code, Codex, Pi y componentes compartidos), `tools/` (instalación, resolución de modelos, observación, ejecución, uso, verificación y desinstalación), `evals/` y `tests/`. La documentación vigente permanece en `docs/`; esta decisión vive en `docs/decisions/`. Las entradas públicas de la raíz, entre ellas `install.sh`, `install-remote.sh`, `uninstall.sh` y `verify`, siguen en sus rutas actuales.
+El kit mantiene sus instrucciones compartidas en `core/agents/`, `core/skills/` y `core/contracts/`; integra herramientas en `adapters/`; y organiza implementación y comprobaciones en `tools/`, `scripts/` y `tests/`. Los estudios están en `evals/`, y la documentación vigente y sus decisiones en `docs/`.
 
-## Copias de compatibilidad
+Las entradas públicas de la raíz incluyen `install.sh`, `install-remote.sh`, `uninstall.sh` y `verify`. `scripts/usage.mjs` conserva la entrada `node scripts/usage.mjs` y coordina operaciones e informes alojados en `tools/usage/`.
 
-Las rutas nuevas de `core/` y las rutas heredadas que consumen las instalaciones se mantienen como archivos regulares, sin enlaces simbólicos. El inventario completo de pares está en `tools/core-compatibility.json`: incluye los contratos y agentes en `core/` frente a `nucleo/` y `agentes/`, las skills de `core/skills/` frente a `skills/`, y la receta `core/recipes/node-pnpm.md` frente a `nucleo/recetas/node-pnpm.md`.
+## Mapa de destino
 
-`node tools/verify/core-compatibility.mjs` valida que las rutas sean seguras y existan como archivos regulares, y compara contenido y permisos ejecutables. `./verify` incorpora ese control en la fase de coherencia estructural (`tools/verify/models.sh`). Así se conservan las rutas que esperan los instaladores y usuarios mientras el contenido equivalente también está disponible bajo `core/`.
+El árbol propuesto, el estado actual por carpeta y el prompt que implementará cada parte están en [Estructura objetivo del kit](estructura-objetivo.md). Ese mapa describe trabajo futuro: no implica que las carpetas objetivo se hayan creado ni que se trasladen archivos en esta decisión.
 
-## Rutas heredadas e históricos
+## Evolución
 
-`agentes/`, `skills/`, `nucleo/`, `scripts/`, `pruebas/` y `cambios/` son rutas implementadas que se conservan por compatibilidad con instrucciones, comandos, pruebas y planes existentes. `scripts/usage.mjs` mantiene la entrada `node scripts/usage.mjs` y coordina la interfaz CLI con las responsabilidades extraídas a `tools/usage/`.
-
-`old/` y `cambios/hechos/` son rutas históricas existentes y permanecen en su sitio. No se trasladan ni editan como parte de esta decisión; `old/v1/` también forma parte del contrato de migración de proyectos. `changes/HISTORY.md` y `archive/README.md` ya existen como índices de orientación, y `changes/` y `archive/` contienen esos índices. Esto no traslada el registro de cambios cerrados desde `cambios/hechos/` ni el árbol histórico desde `old/`: una migración o archivo completo bajo esos destinos sigue siendo una propuesta descrita en `cambios/estructura-repo/estructura-destino.md`.
-
-## Tamaño de módulos
-
-La guía para módulos nuevos es mantener cada archivo enfocado y, cuando sea práctico, dentro de 300 líneas. `install-remote.sh` tiene 322 líneas y es una excepción justificada: se distribuye y ejecuta como un único bootstrap antes de descargar y extraer el árbol `tools/`; extraer una dependencia a ese árbol impediría que la entrada remota funcionara en ese momento. Su justificación y comprobaciones están registradas en `cambios/estructura-repo/tramo-100.md`.
-
-`scripts/usage.mjs` tiene 318 líneas y conserva la entrada CLI pública, el análisis de argumentos y la coordinación del comando; las operaciones y el formato de informes ya están separados bajo `tools/usage/`. Mantener ese envoltorio en su ruta evita cambiar el comando consumido por usuarios e instaladores. La extracción restante o un cambio de entrada requiere un tramo posterior que preserve y compruebe ese contrato.
-
-## Alcance de la decisión
-
-Esta estructura distingue entre rutas existentes y la función que cumplen: los índices en `changes/` y `archive/` son rutas disponibles, pero no indican que se haya migrado el contenido histórico. Cualquier traslado futuro debe actualizar en el mismo cambio los consumidores y las verificaciones de compatibilidad, y dejar intactos los históricos protegidos.
+Los módulos nuevos deben mantener una responsabilidad clara y, cuando sea práctico, quedar dentro de 300 líneas. Al mover una entrada o separar un módulo, actualizar en el mismo cambio sus consumidores y pruebas, y conservar las rutas públicas hasta que su migración esté implementada y verificada.

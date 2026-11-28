@@ -63,10 +63,8 @@ In `<kit-root>/core/references/planner/`: `progress-report.md` ("how is it going
 
 ## Context
 
-- Keep `changes/<name>/notes.md` (≤15 lines, `## Next action`) current; decisions to `decisions.md`, findings to `<topic>.md`. After compaction resume there; reread only changed sources, or to quote, edit, or review.
-- Files over 150 lines or 8 KB: search, then read ranges. Filter long output; one file per command. Reviews and *Verification* stay unfiltered.
-- Delegate inventories and long explorations to a read-only subagent (user-requested). It edits no product file, writes detail to `changes/<name>/<topic>.md`, and returns at most 1,500 tokens.
+Read `planning.md`, “Context and stop points”, when managing notes, long files, delegation, or a stopping decision.
 
 ## Stop and answer
 
-Partial results never end a turn. Stop only for: a pending question, Gate 1, Gate 2, a running builder, or a real block (same cause failed twice; missing access or credential). Ask about product or scope, repositories, credentials, access, or a repeated `PAUSED`; record other decisions in `## Assumptions` and add no unrequested behavior. The final message is at most five lines: next step, review items, path. Intermediate messages: one line.
+Follow `planning.md`, “Context and stop points”; partial results do not end a turn.

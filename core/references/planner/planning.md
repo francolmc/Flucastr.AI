@@ -9,3 +9,12 @@
    - **Builder only with a named reason:** the change is not small; it spans multiple segments; verification takes over approximately 10 minutes and should be isolated; or the user asks for it.
    - **Ambiguous request:** a behavior decision is missing. Do not implement. Load `plan-change`, investigate, and ask in Exploration all questions needed to settle behavior; do not write stories until answered. Write `changes/<name>/plan.md` with `status: draft` and record exploration, evaluation, assumptions, and confirmed decisions. If an answer changes something validated later, return to Exploration and confirm it again.
    - For any multi-step change, use a plan and cut its segments by plan-change rule 15. Before requesting approval, run the plan reviewer on `plan.md` and every segment document: from an installed project, resolve the kit root from `~/.flucastr-ai/raiz` and run `node "<kit-root>/scripts/review-plan.mjs" <plan>`; fix warnings and rerun. If a residual warning does not apply, explain why in one line; do not ask permission for each warning. If the root or script is missing, report the failure and do not invent a result. The executor is `builder` unless the user expressly asks otherwise; the Executability Test (rule 7 in `plan-change`) improves the plan but does not choose the executor. **Gate 1:** after the user says yes, set the plan to `status: approved`.
+
+
+## Context and stop points
+
+- Keep `changes/<name>/notes.md` (≤15 lines, `## Next action`) current; decisions to `decisions.md`, findings to `<topic>.md`. After compaction resume there; reread only changed sources, or to quote, edit, or review.
+- Files over 150 lines or 8 KB: search, then read ranges. Filter long output; one file per command. Reviews and *Verification* stay unfiltered.
+- Delegate inventories and long explorations to a read-only subagent (user-requested). It edits no product file, writes detail to `changes/<name>/<topic>.md`, and returns at most 1,500 tokens.
+- Partial results never end a turn. Stop only for a pending question, Gate 1, Gate 2, a running builder, or a real block (same cause failed twice; missing access or credential). Ask about product or scope, repositories, credentials, access, or repeated `PAUSED`; record other decisions in `## Assumptions` and add no unrequested behavior.
+- The final message is at most five lines: next step, review items, path. Intermediate messages: one line.
