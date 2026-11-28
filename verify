@@ -93,4 +93,8 @@ node --test tests/permissions-contract/hook.test.mjs tests/permissions-contract/
 paso 26 "banco del builder: tests/evals-builder/*.test.mjs"
 node --test tests/evals-builder/*.test.mjs || fallo "26: pruebas del banco del builder no pasaron"
 
+# 27. coherencia de contratos centrales: copias literales de alcance, estados y retorno (changes/P02-core-contracts, segmento 2)
+paso 27 "coherencia de contratos centrales: tests/contracts/*.test.mjs"
+node --test tests/contracts/*.test.mjs || fallo "27: pruebas de coherencia de contratos no pasaron"
+
 echo "VERIFY OK"
