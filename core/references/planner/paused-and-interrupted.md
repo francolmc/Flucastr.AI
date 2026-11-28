@@ -17,7 +17,7 @@ Classify before acting. Class names are the ones `kit run` writes to `runs.jsonl
 ### Step 0: infra, entorno, plan, decision
 
 - `infra` repeats with the same model while attempts remain. It counts against the two-relaunch limit and does not advance the step.
-- `entorno`, `plan` and `decision` return to the person with a one-line diagnosis in *Notes*, with no relaunch from the ladder. The person fixes the environment, the scope, or the decision (a row in `changes/<name>/decisions.md`; without that file, `Resuelto:` in the plan), and relaunches.
+- `entorno`, `plan` and `decision` return to the person with a one-line diagnosis in *Notes* and a closed question naming the concrete action; none relaunches from the ladder automatically. For `plan`, correct the exact `Scope`, segment, or `A#` in `changes/`, show the change in at most five lines, and ask for an explicit yes to relaunch; after that yes, set `status: approved` and relaunch. For `entorno`, ask whether the person will fix the named environment issue; for `decision`, present the unresolved choices and ask which decision to record in `changes/<name>/decisions.md` (without that file, `Resuelto:` in the plan). Relaunch only after that action is confirmed and the plan is approved.
 
 ### Step 1: first task failure
 
@@ -29,11 +29,11 @@ The run stops and asks for advice. The planner writes one line `Consejo (tramo N
 
 ### Step 3: higher level (needs a yes)
 
-When the ladder is exhausted (two relaunches used and at least one task failure), the builder may run one level higher, one relaunch more. Ask for the person's explicit yes, every time. Claude Code raises the level through the subagent's `model` parameter, for that launch only. Codex uses `kit run --paso 3`. Pi has no single-launch mechanism (`kit run` maps only Codex): present it to the person as a decision. A step 3 that fails by task closes the ladder.
+After two relaunches are used, including any counted `infra` relaunches, continue here when at least one failure was `tarea` (including `RETURNED`): the builder may run one level higher, one relaunch more. Ask one closed question offering this step or `partial`; require the person's explicit yes every time. Do not offer step 3 when two relaunches are not used or there was no task failure. Claude Code raises the level through the subagent's `model` parameter, for that launch only. Codex uses `kit run --paso 3`. Pi has no single-launch mechanism (`kit run` maps only Codex): describe that limit and offer `partial` unless the person can explicitly authorize an applicable way to launch step 3. A step 3 that fails by task closes the ladder and makes step 4 eligible.
 
 ### Step 4: relief to the planner (needs a yes)
 
-Only after a step 3 that failed by task. The planner takes the remaining work. Ask one closed question with the estimate from `--tokens entrada,caché,salida` (builder and planner, labeled as estimate; «sin tarifa» when there is no rate). Without an explicit answer, nothing runs. If the relief finishes DONE, close with `--resuelto --paso 4`.
+Only after a step 3 that failed by task. The planner takes the remaining work. Ask one closed question offering step 4 with the estimate from `--tokens entrada,caché,salida` (builder and planner, labeled as estimate; «sin tarifa» when there is no rate), or `partial`. Do not offer step 4 before that failure. Without an explicit yes to step 4, nothing runs. If the relief finishes DONE, close with `--resuelto --paso 4`.
 
 `infra`, `entorno`, `plan` and `decision` never get relief.
 

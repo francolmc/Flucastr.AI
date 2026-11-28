@@ -37,16 +37,16 @@ describe("referencia de la escalera (A9)", () => {
 
   test("el relevo exige respuesta explícita con estimación", () => {
     assert.ok(REFERENCIA.includes("--tokens"));
-    assert.ok(REFERENCIA.includes("Without an explicit answer, nothing runs."));
+    assert.ok(REFERENCIA.includes("Without an explicit yes to step 4, nothing runs."));
     assert.ok(REFERENCIA.includes("estimate"));
   });
 
   test("el paso 3 exige el sí cada vez y el nivel se sube según la herramienta", () => {
-    assert.ok(REFERENCIA.includes("explicit yes, every time"));
+    assert.ok(REFERENCIA.includes("require the person's explicit yes every time"));
     assert.ok(REFERENCIA.includes("`model`"));
     assert.ok(REFERENCIA.includes("Codex uses `kit run --paso 3`"));
     assert.ok(REFERENCIA.includes("Pi has no single-launch mechanism"));
-    assert.ok(REFERENCIA.includes("present it to the person as a decision"));
+    assert.ok(REFERENCIA.includes("describe that limit and offer `partial` unless the person can explicitly authorize an applicable way to launch step 3"));
   });
 
   test("el consejo tiene el límite de 500 tokens y 2000 caracteres", () => {
