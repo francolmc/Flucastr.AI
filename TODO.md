@@ -38,7 +38,6 @@
 ## Detalles menores
 
 - Pegar en `changes/done/deny-endurecido/plan.md` la evidencia manual que quedó pendiente (la prueba con `claude -p` y las 12 reglas; el resultado ya se obtuvo en la revisión del 2026-11-05).
-- `AGENTS.md` apunta a `cambios/deny-endurecido/plan.md`; el plan está ahora en `changes/done/deny-endurecido/`.
 - Los planes anteriores a `vocabulario-y-guias` quedaron con `estado: hecho`, un valor que la lista actual descarta. Son historia: no se tocan.
 - Algunos planes atribuyen a la persona usuaria pruebas que corrió el coordinador de la sesión de diseño.
 - Modo remoto de `verify` (`VERIFY_TARGET`, cambio `validar-despliegue`): probado con un servidor local (lectura, 500, escritura permitida, URL inválida). Falta la comprobación contra un despliegue real (la hace la persona usuaria) y cómo el recorrido de cada proyecto lee el correo en remoto (no hay Mailpit). Sin probar: «prepárame el despliegue» y la sección «Despliegue» en un proyecto real. *(por confirmar con Franco)*

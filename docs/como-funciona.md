@@ -37,6 +37,12 @@
 - Medidor de costos (solo lectura): `node scripts/usage.mjs` da tokens por día, proyecto y modelo de Claude Code, Codex y Pi, y la cuota semanal de Codex; con `--sessions` da créditos estimados (`scripts/rates.json`), sondeos y `write_stdin` (solo Codex) por sesión. Informe en `docs/evaluaciones/costos.md`.
 - Espera en Codex: si `exec_command` devuelve un `session_id`, una sola llamada `write_stdin` con `chars` vacío y `yield_time_ms: 1800000` (cada `write_stdin` a una terminal fuera del sandbox pide permiso); protegido por el bloque 8p de `verify` (`core/skills/execute-plan/SKILL.md`, `core/agents/builder.md`, `core/agents/planner.md`). El después se mide con `write_stdin` de `--sessions` (`docs/evaluaciones/costos.md`).
 
+## Autodesarrollo del kit
+
+- Reinstalar el kit solo entre prompts, cuando el prompt actual haya terminado.
+- La persona usuaria crea el tag `harness-base` para identificar una base conocida del harness.
+- Si un prompt degrada al planner, volver al tag `harness-base` antes de iniciar otro prompt.
+
 ## Lo de la v1
 
 Lo de la v1 está en `old/v1/` (`legacy/`, `definitions/`, `features/`, `pruebas/`, `registro/`, los scripts de la v1, el README viejo y los reportes sueltos). Borrar `old/` viene después de usar la v2 en 2 o 3 proyectos reales; es decisión de la persona usuaria.

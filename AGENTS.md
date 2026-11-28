@@ -39,8 +39,6 @@ El detalle por tema está en `docs/como-funciona.md`: lee solo la entrada del te
 
 ## Límites de las reglas deny
 
-Las reglas deny de Claude Code son una barrera, no una frontera: cubren `git -C/-c … commit` y `bash -c`/`sh -c`/`zsh -c`, pero no `sudo`, `env <cmd>` ni leer `.env` desde un script; el kit configura restricciones de sandbox, aún sin prueba de lectura Bash ni precedencia ante allow global. Codex no bloquea `.env` y Pi no tiene equivalente. Detalle, con lo probado y lo no probado: `docs/reglas-deny.md`.
+Las deny: barrera, no frontera. Cobertura y límites para Claude Code, Codex y Pi: `docs/reglas-deny.md`.
 
-Lo de la v1 está en `old/v1/` (`legacy/`, `definitions/`, `features/`, `pruebas/`, `registro/`, los scripts de la v1, el README viejo y los reportes sueltos). Borrar `old/` viene después de usar la v2 en 2 o 3 proyectos reales; es decisión de la persona usuaria.
-
-`old/v1/registro/` no se lee salvo pedido explícito de la persona usuaria. `pruebas/.temporales/` (ignorado por git) no se borra ni se mueve sin pedido.
+v1 sigue en `old/v1/`; borrar `old/` requiere uso en 2 o 3 proyectos y decisión de la persona. No leer `old/v1/registro/` ni borrar/mover `pruebas/.temporales/` sin pedido explícito.
