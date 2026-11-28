@@ -3,7 +3,7 @@
 // HOME temporal y models.json temporal; no toca el HOME real.
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -30,7 +30,7 @@ function correr(args, env = {}, cwd = raiz) {
   for (const k of ["FLUCASTR_MODELOS", "CLAUDE_CODE_AUTO_COMPACT_WINDOW", "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE", "PI_CODING_AGENT_DIR"]) {
     delete base[k];
   }
-  return spawnSync(args[0], args.slice(1), {
+  return spawnSyncSeguro(args[0], args.slice(1), {
     cwd,
     env: { ...base, ...env },
     stdio: ["ignore", "pipe", "pipe"],

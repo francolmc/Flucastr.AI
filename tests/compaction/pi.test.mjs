@@ -3,7 +3,7 @@
 // y simulación sin escritura. Vía scripts/resolver.mjs fijar-compactacion pi. Directorios temporales; no toca el HOME ni el proyecto reales.
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -55,7 +55,7 @@ function settingsCon(contenido) {
 }
 
 function resolver(args, modelos = modelosCon()) {
-  return spawnSync("node", [RESOLVER, ...args], {
+  return spawnSyncSeguro("node", [RESOLVER, ...args], {
     cwd: raiz,
     env: entorno({ FLUCASTR_MODELOS: modelos }),
     stdio: ["ignore", "pipe", "pipe"],

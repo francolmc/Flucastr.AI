@@ -10,6 +10,7 @@ generar_agente_pi() { # archivo del agente (lo lee el paquete de subagentes de P
   if [ "$SIMULAR" = 0 ]; then
     mkdir -p "$PI_DIR/agents"
     node "$RESOLVER" agente-pi "$archivo" > "$destino"
+    node "$RAIZ/adapters/pi/install-termination.mjs" "$destino" "$RAIZ/adapters/pi/termination.mjs"
     registrar archivo "$destino"
   fi
   echo "  agente generado: $destino (modelo: $modelo)"

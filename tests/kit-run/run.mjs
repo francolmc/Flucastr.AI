@@ -537,15 +537,15 @@ caso("V5 la nota del plan lleva revisor=<modelo>:<esfuerzo>", () => {
   assert.ok(r.plan.includes(`revisor=${rev.m}:${rev.e}`), r.plan);
 });
 
-// Registro de intentos (changes/prueba/runs.jsonl): una línea por intento, sin cambiar la decisión de kit run.
-const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "puerta", "puerta_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin", "clase", "paso", "resuelto_por", "senal"];
+// Registro de intentos (changes/prueba/runs.jsonl): una línea por intento; solo el intento final tiene terminacion.
+const CAMPOS_REGISTRO = ["plan", "tramo", "fecha", "herramienta", "builder_modelo", "builder_ms", "verify_ms", "puerta", "puerta_ms", "revisor_ms", "resultado", "motivo_relanzamiento", "relanzamientos", "huella_inicio", "huella_fin", "clase", "paso", "resuelto_por", "senal", "terminacion"];
 function leerRuns(raiz) {
   const ruta = join(raiz, "changes/prueba/runs.jsonl");
   return existsSync(ruta) ? readFileSync(ruta, "utf8").split("\n").filter(Boolean).map(l => JSON.parse(l)) : null;
 }
 
-// R1: una corrida aprobada deja 1 línea con los 19 campos (incluidos puerta, puerta_ms, clase, paso y resuelto_por) y duraciones enteras ≥ 0.
-caso("R1 registro: una corrida aprobada deja 1 línea con los 19 campos y duraciones enteras ≥ 0", () => {
+// R1: una corrida aprobada deja 1 línea con los campos del intento y su fecha de término.
+caso("R1 registro: una corrida aprobada deja 1 línea con término y duraciones enteras ≥ 0", () => {
   const r = correr("r1");
   assert.equal(r.status, 0, r.stderr);
   const runs = leerRuns(r.raiz);
@@ -565,6 +565,8 @@ caso("R1 registro: una corrida aprobada deja 1 línea con los 19 campos y duraci
   assert.equal(x.clase, null);
   assert.equal(x.paso, 0);
   assert.equal(x.resuelto_por, 0);
+  assert.deepEqual(x.terminacion, { fecha: x.terminacion.fecha, resultado: "DONE", hecho: "1/1" });
+  assert.match(x.terminacion.fecha, /^\d{4}-\d{2}-\d{2}T/);
   assert.equal(typeof x.huella_inicio, "string");
   assert.equal(typeof x.huella_fin, "string");
 });
@@ -577,9 +579,11 @@ caso("R2 verify rojo y luego verde: 2 líneas devuelto/verify y DONE con relanza
   const runs = leerRuns(r.raiz);
   assert.equal(runs.length, 2, `líneas: ${runs?.length}`);
   assert.equal(runs[0].resultado, "devuelto");
+  assert.equal(runs[0].terminacion, undefined, "un intento relanzado no se marca como final");
   assert.equal(runs[0].motivo_relanzamiento, "verify");
   assert.equal(runs[0].relanzamientos, 0);
   assert.equal(runs[1].resultado, "DONE");
+  assert.equal(runs[1].terminacion.resultado, "DONE");
   assert.equal(runs[1].motivo_relanzamiento, null);
   assert.equal(runs[1].relanzamientos, 1);
 });

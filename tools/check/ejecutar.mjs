@@ -1,6 +1,6 @@
 // Ejecuta una fila de criterio A# sin shell, bajo la política del hook de permisos (segmento 2).
 // Estados fijos: pasa | falla | no-automatizable | bloqueado.
-import { spawnSync } from "node:child_process";
+import { spawnSyncSeguro } from "../spawn/sync-seguro.mjs";
 import { accionProtegida, META } from "../../scripts/permissions-hook.mjs";
 import { redactar, truncar } from "../progress/eventos.mjs";
 
@@ -71,7 +71,7 @@ export function ejecutarFila(fila, { timeoutMs = TIMEOUT_POR_OMISION } = {}) {
   }
   if (tokens.length === 0) return { ...base, estado: "no-automatizable", motivo: "sin comando" };
 
-  const r = spawnSync(tokens[0], tokens.slice(1), {
+  const r = spawnSyncSeguro(tokens[0], tokens.slice(1), {
     cwd: fila.cwd ?? process.cwd(),
     shell: false,
     encoding: "utf8",

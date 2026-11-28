@@ -2,13 +2,13 @@
 // changes/higiene-verify/tramo-1.md. Trabaja solo en una base temporal propia (nunca en el /tmp real).
 
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { existsSync, lstatSync, lutimesSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { barrer } from "../../tools/temporales/barrido.mjs";
+import { spawnSyncSeguro } from "../../tools/spawn/sync-seguro.mjs";
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const CLI = join(RAIZ, "tools", "temporales", "barrido.mjs");
@@ -99,7 +99,7 @@ describe("CLI del barrido", () => {
     mkdirSync(join(base, "flucastr-verify.dddddd"));
     envejecer(join(base, "flucastr-verify.dddddd"), 3 * HORA);
 
-    const r = spawnSync(process.execPath, [CLI, base], { stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" });
+    const r = spawnSyncSeguro(process.execPath, [CLI, base], { stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" });
 
     assert.equal(r.status, 0, r.stderr);
     assert.equal(existsSync(join(base, "flucastr-verify.dddddd")), false);
@@ -112,7 +112,7 @@ describe("CLI del barrido", () => {
     envejecer(join(base, "flucastr-verify.aaaaaa"), 3 * HORA);
     mkdirSync(join(base, "flucastr-verify.recien"));
 
-    const r = spawnSync(
+    const r = spawnSyncSeguro(
       process.execPath,
       [KIT_RUN, "no-existe.md", "--tool", "codex", "--root", raiz],
       { env: { ...process.env, TMPDIR: base }, stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" },

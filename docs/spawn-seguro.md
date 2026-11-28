@@ -1,0 +1,11 @@
+# Captura de subprocesos
+
+`tools/spawn/sync-seguro.mjs` prueba una vez por proceso si Node captura dos marcas distintas por stdout y stderr mediante pipes. Si ambas llegan completas, usa `spawnSync` o `execFileSync` de Node, con su comportamiento nativo. Si falta una o el hijo falla, usa `tools/spawn/mediador.py` para leer los pipes reales del proceso hijo y guardar la salida de forma temporal. La prueba usa stdin cerrado y no inspecciona la salida del comando de trabajo.
+
+El mediador requiere Python 3.9 o posterior (esta máquina: 3.14.4; se puede señalar otro intérprete con `FLUCASTR_PYTHON`). Si no está disponible cuando los pipes de Node fallan, el helper devuelve el error de lanzamiento; nunca presenta una salida vacía como éxito. En POSIX (Linux comprobado, macOS no comprobado) el mediador conserva cwd, env, shell, argv0, uid, gid, umask, input, modos stdio y captura por bytes. Windows no está comprobado; si Node no supera la sonda, la ruta Python puede no admitir sus pipes y semántica de procesos.
+
+La ruta sync mantiene el `maxBuffer` total de Node: limita durante lectura de stdout y stderr combinados, conserva hasta el límite más un byte diagnóstico, envía `killSignal` al superar y descarta todo lo posterior. Timeout envía su señal y espera a que el hijo cierre, incluido un manejador que termine después; reporta `ETIMEDOUT`. Archivos privados y descriptores se limpian tras éxito y errores. La diferencia observable permitida de acumulación es como máximo un byte en el caso mediado; Node puede acumular el chunk recibido antes de detectar el exceso.
+
+`tools/run/process.mjs` aplica la misma sonda para el camino async. Si Node pierde pipes, un supervisor Python conserva salida en archivos mientras ejecuta la vigilancia. El supervisor reenvía SIGTERM y el llamador conserva SIGKILL al grupo a los 10 segundos. La API async no tenía `maxBuffer`; su salida en disco sigue sin límite configurado y el resultado completo se carga al resolver. No se atribuye a esa ruta un límite de memoria que no existía.
+
+Las pruebas `tests/spawn-seguro/run.mjs` fuerzan también el mediador desde el entorno principal y cubren límites, timeout, salida mixta, señales, errores y limpieza. La aceptación completa valida los consumidores reales.
