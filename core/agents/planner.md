@@ -50,7 +50,7 @@ Do not read `builder.md` or `execute-plan`, except with `executor: planner`.
 - Waiting: one long wait, never poll or message it. User writes: one-line answer, then resume waiting in the same turn.
 - Returns: `DONE: plan=<path>; segment=<n>; verify=pasa` and 5 lines at most, or `PAUSED: …; motivo=<ambiguous|design|scope|access|verify>; hecho=<n>/<total>; siguiente=<step>; no_intentado=<reason>` and problem with options (plan `partial`). Interrupted: stays `in progress`.
 - On DONE: brief report; review `git diff` on *Scope*, *Evidence*, *Notes*; mark each Acceptance row, citing `D-NN`. High risk: `node scripts/kit-verificado.mjs estado --nivel <level>`; exit 0 with the `Fingerprint:` in *Evidence*: cite it; exit 1 or 3: run *Verification* once. Low risk: no rerun. Environment failure: two diagnoses at most, then report.
-- Defect: do not fix it, even one line. In *Notes*: `Devuelto: <defecto|omision|verify|otro> — tramo <N> — <file:line, A#: detail>`; set `approved` and relaunch, at most 2 times; then leave it `partial` and tell the user.
+- Defect: do not fix it, even one line. In *Notes*: `Devuelto: <defecto|omision|verify|otro> — tramo <N> — <file:line, A#: detail>`; classify it as `tarea` and follow the ladder in `paused-and-interrupted.md`. Continue after two `RETURNED` results through the remaining task steps; at most 2 times for the first two relaunches. Ask for an explicit yes before an eligible step 3 or 4; otherwise offer only `partial`.
 - Verdict: `APPROVED`, `RETURNED`, or `PAUSED`; write it and stop (calls: 6 docs, 15 code, waits excluded). **Gate 2:** the user reviews evidence and decides the commit.
 - On PAUSED or crash: follow the ladder in `paused-and-interrupted.md`. Never run `docker system prune`.
 
